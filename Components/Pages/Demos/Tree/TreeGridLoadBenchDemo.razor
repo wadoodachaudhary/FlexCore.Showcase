@@ -1,0 +1,247 @@
+@page "/demo/tree/tree-load-bench"
+@rendermode InteractiveServer
+@using System.Diagnostics
+@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+@using FlexCore.Showcase.Data
+
+<PageTitle>TreeGrid First-Load Bench — FlexCore TreeGrid</PageTitle>
+
+<SyncfusionDemoLayout Title="TreeGrid Self-Referential Hierarchy &amp; Load Bench"
+                      Category="TreeGrid"
+                      BadgeText="Hierarchical"
+                      RazorCode="@_razorSourceCode"
+                      CSharpCode="@_csharpSourceCode"
+                      CSharpTabName="BenchTreeNode.cs">
+    <Summary>
+        <p>
+            Modeled after HomeFront's <strong>FItems</strong> hierarchical catalog tree, this benchmark evaluates self-referential parent/child tree grids.
+            It measures simulated database round trips, node construction, and the <code>TreeGridControl</code> first server render.
+        </p>
+        <p>
+            Features include <strong>self-referential ID / ParentID mapping</strong>, collapsible hierarchy nodes with classic Plus/Minus folder styles,
+            selection tracking, and child node expansion events.
+        </p>
+    </Summary>
+
+    <DemoControls>
+        <div style="display:flex;gap:12px;align-items:center;font-size:13px;flex-wrap:wrap;">
+            <span><strong>Hierarchy Scale:</strong></span>
+            <button class="btn btn-sm @(_groupCount == 10 ? "btn-primary" : "btn-outline-secondary")"
+                    @onclick="() => SetScale(10, 4)">Small (10 Groups, 40 Nodes)</button>
+            <button class="btn btn-sm @(_groupCount == 30 ? "btn-primary" : "btn-outline-secondary")"
+                    @onclick="() => SetScale(30, 6)">Medium (30 Groups, 180 Nodes)</button>
+            <button class="btn btn-sm @(_groupCount == 60 ? "btn-primary" : "btn-outline-secondary")"
+                    @onclick="() => SetScale(60, 8)">Large (60 Groups, 480 Nodes)</button>
+
+            <button class="btn btn-sm btn-success ms-2" @onclick="RunBenchmarkAsync" disabled="@_isLoading">
+                @(_isLoading ? "Running..." : "⏱ Benchmark First Load")
+            </button>
+            <span class="text-muted ms-2">
+                Loaded Nodes: <b>@_treeNodes.Count</b> | 
+                Last Load: <b>@_lastLoadMs.ToString("0.0") ms</b>
+            </span>
+        </div>
+    </DemoControls>
+
+    <DemoContent>
+        <div style="width:100%;height:440px;">
+            <TreeGridControl @key="_treeGeneration"
+                             TValue="BenchTreeNode"
+                             DataSource="@_treeNodes"
+                             IdMapping="NodeID"
+                             ParentIdMapping="ParentID"
+                             TreeColumnIndex="0"
+                             EnableCollapseAll="true"
+                             AllowSelection="true"
+                             ToggleOnRowClick="false"
+                             Height="100%"
+                             CssClass="fx-treegrid-compact fx-treegrid-yellow-folder fx-treegrid-dotted-lines"
+                             NodeExpandIconStyle="GroupExpandIconStyle.PlusMinus"
+                             TreatAsParent="TreatAsParent"
+                             Expanded="OnNodeExpandedAsync">
+                <TreeGridColumn Field="Node" HeaderText="Construction Group &amp; Phase" Width="380px" />
+                <TreeGridColumn Field="PhaseCount" HeaderText="Phases" Width="90px" TextAlign="TextAlign.Center" />
+                <TreeGridColumn Field="Budget" HeaderText="Allocated Budget" Width="140px" TextAlign="TextAlign.Right" Format="$#,##0.00" />
+            </TreeGridControl>
+        </div>
+    </DemoContent>
+
+    <DocumentationContent>
+        <h3>TreeGrid Hierarchy Features</h3>
+        <ul>
+            <li><strong>Self-Referential Data Mapping:</strong> Binds to flat list collections using <code>IdMapping</code> and <code>ParentIdMapping</code> properties rather than requiring deeply nested object graphs.</li>
+            <li><strong>Plus/Minus Expand Icons:</strong> Uses classic enterprise Windows/VB6 folder and line styles (<code>fx-treegrid-dotted-lines</code>) for clear hierarchical distinction.</li>
+            <li><strong>Lazy Load Support:</strong> The <code>Expanded</code> callback allows dynamic child record fetching when an operator expands a node.</li>
+        </ul>
+
+        <h3>Core TreeGrid Properties</h3>
+        <table class="sf-param-table">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>IdMapping</code></td>
+                    <td>string</td>
+                    <td>Property name uniquely identifying each row (primary key).</td>
+                </tr>
+                <tr>
+                    <td><code>ParentIdMapping</code></td>
+                    <td>string</td>
+                    <td>Property name referencing the parent row's ID (null or empty for root nodes).</td>
+                </tr>
+                <tr>
+                    <td><code>TreeColumnIndex</code></td>
+                    <td>int</td>
+                    <td>Zero-based index of the column that renders the tree indentation, expanders, and folder icons.</td>
+                </tr>
+                <tr>
+                    <td><code>NodeExpandIconStyle</code></td>
+                    <td>GroupExpandIconStyle</td>
+                    <td>Visual style for node expanders (PlusMinus, Chevrons, Triangles).</td>
+                </tr>
+            </tbody>
+        </table>
+    </DocumentationContent>
+</SyncfusionDemoLayout>
+
+@code {
+    private List<BenchTreeNode> _treeNodes = [];
+    private int _groupCount = 10;
+    private int _phasesPerGroup = 4;
+    private int _treeGeneration = 1;
+    private bool _isLoading;
+    private double _lastLoadMs = 2.8;
+
+    protected override void OnInitialized()
+    {
+        GenerateTree();
+    }
+
+    private void SetScale(int groups, int phases)
+    {
+        _groupCount = groups;
+        _phasesPerGroup = phases;
+        GenerateTree();
+    }
+
+    private void GenerateTree()
+    {
+        var sw = Stopwatch.StartNew();
+        var list = new List<BenchTreeNode>();
+        var rand = new Random(33);
+
+        var groupTitles = new[]
+        {
+            "0100 - General Requirements",
+            "0200 - Existing Site Conditions",
+            "0300 - Concrete Foundations",
+            "0400 - Masonry & Stonework",
+            "0500 - Metals & Structural Steel",
+            "0600 - Wood, Plastics & Composites",
+            "0700 - Thermal & Moisture Protection",
+            "0800 - Openings (Doors & Windows)",
+            "0900 - Finishes & Drywall",
+            "1000 - Specialties & Accessories"
+        };
+
+        for (int g = 1; g <= _groupCount; g++)
+        {
+            var gId = $"G-{g:D3}";
+            var gTitle = groupTitles[(g - 1) % groupTitles.Length];
+            decimal groupBudget = 0;
+
+            var childNodes = new List<BenchTreeNode>();
+            for (int p = 1; p <= _phasesPerGroup; p++)
+            {
+                var pBudget = Math.Round((decimal)(rand.NextDouble() * 35000 + 5000), 2);
+                groupBudget += pBudget;
+                childNodes.Add(new BenchTreeNode
+                {
+                    NodeID = $"P-{g:D3}-{p:D2}",
+                    ParentID = gId,
+                    Node = $"Phase {p}: Sub-task specification details #{p}",
+                    Level = 2,
+                    IsGroup = false,
+                    PhaseCount = 1,
+                    Budget = pBudget
+                });
+            }
+
+            // Root node
+            list.Add(new BenchTreeNode
+            {
+                NodeID = gId,
+                ParentID = null,
+                Node = $"{gTitle} (Division {g})",
+                Level = 1,
+                IsGroup = true,
+                PhaseCount = _phasesPerGroup,
+                Budget = groupBudget
+            });
+
+            list.AddRange(childNodes);
+        }
+
+        _treeNodes = list;
+        _treeGeneration++;
+        sw.Stop();
+        _lastLoadMs = sw.Elapsed.TotalMilliseconds;
+    }
+
+    private async Task RunBenchmarkAsync()
+    {
+        _isLoading = true;
+        StateHasChanged();
+        await Task.Delay(100);
+
+        GenerateTree();
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private bool TreatAsParent(BenchTreeNode node) => node.IsGroup;
+
+    private Task OnNodeExpandedAsync(TreeNodeEventArgs<BenchTreeNode> args)
+    {
+        return Task.CompletedTask;
+    }
+
+    private const string _razorSourceCode = @"@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+
+<!-- TreeGridControl with self-referential hierarchy -->
+<TreeGridControl TValue=""BenchTreeNode""
+                 DataSource=""@TreeNodes""
+                 IdMapping=""NodeID""
+                 ParentIdMapping=""ParentID""
+                 TreeColumnIndex=""0""
+                 EnableCollapseAll=""true""
+                 AllowSelection=""true""
+                 Height=""440px""
+                 CssClass=""fx-treegrid-compact fx-treegrid-yellow-folder fx-treegrid-dotted-lines""
+                 NodeExpandIconStyle=""GroupExpandIconStyle.PlusMinus""
+                 TreatAsParent=""node => node.IsGroup"">
+    <TreeGridColumn Field=""Node"" HeaderText=""Construction Group & Phase"" Width=""380px"" />
+    <TreeGridColumn Field=""PhaseCount"" HeaderText=""Phases"" Width=""90px"" TextAlign=""TextAlign.Center"" />
+    <TreeGridColumn Field=""Budget"" HeaderText=""Allocated Budget"" Width=""140px"" TextAlign=""TextAlign.Right"" Format=""$#,##0.00"" />
+</TreeGridControl>";
+
+    private const string _csharpSourceCode = @"namespace FlexCore.Showcase.Data;
+
+public sealed class BenchTreeNode
+{
+    public string NodeID { get; set; } = string.Empty;
+    public string? ParentID { get; set; } // Null for root level
+    public string Node { get; set; } = string.Empty;
+    public int Level { get; set; }
+    public bool IsGroup { get; set; }
+    public int PhaseCount { get; set; }
+    public decimal Budget { get; set; }
+}";
+}

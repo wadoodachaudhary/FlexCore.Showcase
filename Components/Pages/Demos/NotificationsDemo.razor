@@ -1,0 +1,29 @@
+@page "/demo/notifications"
+@inject NotificationService Notifications
+
+<PageTitle>Notifications — FlexCore</PageTitle>
+
+<h1>NotificationService</h1>
+<p>Toast-style notifications with auto-dismiss. Uses FlexCore's <code>NotificationService</code> + <code>NotificationDisplayControl</code>.</p>
+
+<div class="demo-frame demo-buttons">
+    <ButtonControl CssClass="btn-primary" OnClick="@(() => Notifications.Info("Just so you know — file uploaded."))">Info</ButtonControl>
+    <ButtonControl CssClass="btn-success" OnClick="@(() => Notifications.Success("Saved!"))">Success</ButtonControl>
+    <ButtonControl CssClass="btn-warning" OnClick="@(() => Notifications.Warning("This will be deprecated soon."))">Warning</ButtonControl>
+    <ButtonControl CssClass="btn-danger" OnClick="@(() => Notifications.Error("Couldn't connect to server."))">Error</ButtonControl>
+</div>
+
+<NotificationDisplayControl />
+
+<h2>Markup</h2>
+<pre><code>@@inject NotificationService Notifications
+
+&lt;ButtonControl CssClass="btn-primary"
+    OnClick="@@(() =&gt; Notifications.Info("Message"))"&gt;Info&lt;/ButtonControl&gt;
+
+&lt;!-- Place once near root layout --&gt;
+&lt;NotificationDisplayControl /&gt;</code></pre>
+
+<h2>Service registration</h2>
+<pre><code>// Program.cs
+builder.Services.AddScoped&lt;NotificationService&gt;();</code></pre>

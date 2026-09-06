@@ -1,0 +1,78 @@
+@page "/demo/grid/vendor-prices"
+
+@using FlexCore.Showcase.Data
+
+<PageTitle>Grid — Vendor Prices — FlexCore</PageTitle>
+
+<h1>Grid — Vendor Price List</h1>
+<p>
+    A grid modeled after <code>FVendorPriceList</code>, pre-grouped by vendor.
+    Drop the <strong>Vendor</strong> column from the group panel to flatten it,
+    or drag another header in to nest.
+</p>
+
+<div class="demo-frame">
+    <GridControl TValue="VendorPrice"
+                 DataSource="@_rows"
+                 AllowSelection="true"
+                 AllowSorting="true"
+                 AllowFiltering="true"
+                 AllowGrouping="true"
+                 AllowResizing="true"
+                 AllowColumnReorder="true"
+                 EnableHover="true"
+                 ShowSearchBar="true"
+                 Height="520px"
+                 GroupColumns="@_groupColumns"
+                 ShowGroupCount="true"
+                 AggregateRows="_aggregates">
+        <GridColumnsBase>
+            <GridColumn Field="@nameof(VendorPrice.Vendor)"        HeaderText="Vendor"        Width="200px" />
+            <GridColumn Field="@nameof(VendorPrice.Item)"          HeaderText="Item"          Width="240px" />
+            <GridColumn Field="@nameof(VendorPrice.UOM)"           HeaderText="UOM"           Width="80px" />
+            <GridColumn Field="@nameof(VendorPrice.Price)"         HeaderText="Price"         Width="120px"
+                        Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+            <GridColumn Field="@nameof(VendorPrice.EffectiveDate)" HeaderText="Effective"     Width="120px"
+                        Type="ColumnType.Date" Format="d" />
+            <GridColumn Field="@nameof(VendorPrice.Notes)"         HeaderText="Notes"         Width="220px" />
+        </GridColumnsBase>
+    </GridControl>
+</div>
+
+<h2>Things to try</h2>
+<ul>
+    <li>Click a vendor group row to collapse / expand it.</li>
+    <li>Drag <strong>Vendor</strong> out of the group panel — the grid flattens.</li>
+    <li>Drag <strong>UOM</strong> into the group panel to nest under vendor.</li>
+    <li>Filter <strong>Notes</strong> for "Bulk" to see only discounted lines.</li>
+</ul>
+
+<h2>Other Grid Demos</h2>
+<ul>
+    <li><a href="/demo/grid">Basic Grid</a></li>
+    <li><a href="/demo/grid/reordering">Reordering Grid</a></li>
+    <li><a href="/demo/grid/assembly">Assembly</a></li>
+    <li><a href="/demo/grid/items">Items Catalog</a></li>
+</ul>
+
+@code {
+    private List<VendorPrice> _rows = DemoData.GenerateVendorPriceList(8);
+
+    private List<string> _groupColumns = new() { nameof(VendorPrice.Vendor) };
+
+    private List<AggregateRow> _aggregates = new()
+    {
+        new AggregateRow
+        {
+            ShowInGroupCaption = true,
+            ShowInGroupFooter = true,
+            Columns = new()
+            {
+                new AggregateColumn { Field = nameof(VendorPrice.Price), Type = AggregateType.Average, Format = "C2",
+                    GroupCaptionTemplate = "avg {value}", GroupFooterTemplate = "Avg {value}" },
+                new AggregateColumn { Field = nameof(VendorPrice.Price), Type = AggregateType.Count,
+                    GroupCaptionTemplate = "({value} items)", GroupFooterTemplate = "{value} items" },
+            }
+        }
+    };
+}

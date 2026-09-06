@@ -1,0 +1,215 @@
+@page "/demo/grid/items-provider-db"
+@rendermode InteractiveServer
+@using System.Diagnostics
+@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+@using FlexCore.Showcase.Data
+@inject FlexCore.Showcase.Services.BenchDataStore BenchData
+
+<PageTitle>Async ItemsProvider &amp; Database Pushdown — FlexCore DataGrid</PageTitle>
+
+<SyncfusionDemoLayout Title="Async ItemsProvider &amp; Database Query Pushdown"
+                      Category="DataGrid"
+                      BadgeText="Remote Provider"
+                      RazorCode="@_razorSourceCode"
+                      CSharpCode="@_csharpSourceCode"
+                      CSharpTabName="SqliteGridProvider.cs">
+    <Summary>
+        <p>
+            When managing enterprise datasets with hundreds of thousands of records, loading all rows into in-memory Blazor collections is inefficient.
+            The <strong>ItemsProvider</strong> architecture provides an asynchronous, on-demand callback delegate (<code>GridItemsProvider&lt;T&gt;</code>) 
+            that requests only the slice of records required by the viewport.
+        </p>
+        <p>
+            Filter expressions, search phrases, sort orders, and pagination offsets are passed directly into the provider request, enabling 
+            <strong>100% database query pushdown</strong> with zero memory consumption on the Blazor server.
+        </p>
+    </Summary>
+
+    <DemoControls>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;flex-wrap:wrap;">
+            <span><strong>Remote Search:</strong></span>
+            <input class="form-control form-control-sm" style="width:200px;" placeholder="Filter by item or phase..." @bind="_searchQuery" @bind:event="oninput" />
+            <button class="btn btn-sm btn-primary" @onclick="RefreshProvider">🔍 Query Database</button>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="ClearFilter">Clear</button>
+            <span class="text-muted ms-2">
+                Total Matches in DB: <b>@_totalAvailableCount.ToString("N0")</b> |
+                Active Window: <b>@_lastFetchedCount</b> rows retrieved
+            </span>
+        </div>
+    </DemoControls>
+
+    <DemoContent>
+        <div style="width:100%;">
+            <GridControl @ref="_grid"
+                         ShowRowCountInFooter="true"
+                         TValue="EstimatingItemRecord"
+                         ItemsProvider="@_itemsProvider"
+                         Height="380px"
+                         AllowSorting="true"
+                         AllowSelection="true"
+                         AllowResizing="true">
+                <GridColumnsBase>
+                    <GridColumn Field="@nameof(EstimatingItemRecord.Item)" HeaderText="Item Code" Width="110px" />
+                    <GridColumn Field="@nameof(EstimatingItemRecord.ItemDesc)" HeaderText="Item Description" Width="260px" />
+                    <GridColumn Field="@nameof(EstimatingItemRecord.Phase)" HeaderText="Phase Code" Width="100px" />
+                    <GridColumn Field="@nameof(EstimatingItemRecord.PhaseDesc)" HeaderText="Phase Description" Width="180px" />
+                    <GridColumn Field="@nameof(EstimatingItemRecord.CostCategory)" HeaderText="Cost Category" Width="130px" />
+                    <GridColumn Field="@nameof(EstimatingItemRecord.OrderUOM)" HeaderText="UOM" Width="75px" TextAlign="TextAlign.Center" />
+                    <GridColumn Field="@nameof(EstimatingItemRecord.Price)" HeaderText="Unit Price" Width="110px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
+                </GridColumnsBase>
+            </GridControl>
+        </div>
+    </DemoContent>
+
+    <DocumentationContent>
+        <h3>ItemsProvider Implementation Guide</h3>
+        <ul>
+            <li><strong>On-Demand Delegated Requests:</strong> The grid invokes the delegate passing a <code>GridItemsProviderRequest&lt;T&gt;</code> object with <code>StartIndex</code>, <code>Count</code>, and <code>Sort</code> parameters.</li>
+            <li><strong>Pushdown SQL Execution:</strong> In a real database environment (e.g. SQLite, SQL Server, PostgreSQL), translate <code>request.StartIndex</code> into SQL <code>OFFSET</code> and <code>Count</code> into <code>FETCH NEXT</code>.</li>
+            <li><strong>Total Count Contract:</strong> The provider returns a <code>GridItemsProviderResult&lt;T&gt;</code> containing the page of items and the <code>TotalItemCount</code>, allowing the grid scrollbar to reflect true dataset dimensions.</li>
+        </ul>
+
+        <h3>Request Parameters Contract</h3>
+        <table class="sf-param-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>StartIndex</code></td>
+                    <td>int</td>
+                    <td>Zero-based offset of the first record requested by the viewport.</td>
+                </tr>
+                <tr>
+                    <td><code>Count</code></td>
+                    <td>int</td>
+                    <td>Number of records required to satisfy the scroll window plus overscan.</td>
+                </tr>
+                <tr>
+                    <td><code>CancellationToken</code></td>
+                    <td>CancellationToken</td>
+                    <td>Enables early abort if the operator scrolls past quickly before results return.</td>
+                </tr>
+            </tbody>
+        </table>
+    </DocumentationContent>
+</SyncfusionDemoLayout>
+
+@code {
+    private GridControl<EstimatingItemRecord>? _grid;
+    private GridItemsProvider<EstimatingItemRecord> _itemsProvider = default!;
+    private string _searchQuery = string.Empty;
+    private int _totalAvailableCount;
+    private int _lastFetchedCount;
+
+    protected override void OnInitialized()
+    {
+        _itemsProvider = async request =>
+        {
+            // Simulate asynchronous database round-trip delay
+            await Task.Delay(25, request.CancellationToken);
+
+            var query = BenchData.EstimatingItems.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(_searchQuery))
+            {
+                var q = _searchQuery.Trim().ToLowerInvariant();
+                query = query.Where(i =>
+                    (i.Item != null && i.Item.ToLower().Contains(q)) ||
+                    (i.ItemDesc != null && i.ItemDesc.ToLower().Contains(q)) ||
+                    (i.PhaseDesc != null && i.PhaseDesc.ToLower().Contains(q)));
+            }
+
+            _totalAvailableCount = query.Count();
+            var items = query.Skip(request.StartIndex).Take(request.Count).ToList();
+            _lastFetchedCount = items.Count;
+
+            _ = InvokeAsync(StateHasChanged);
+            return new GridItemsResult<EstimatingItemRecord>(items, _totalAvailableCount);
+        };
+    }
+
+    private async Task RefreshProvider()
+    {
+        if (_grid != null)
+        {
+            await _grid.ReloadItemsAsync();
+        }
+    }
+
+    private async Task ClearFilter()
+    {
+        _searchQuery = string.Empty;
+        await RefreshProvider();
+    }
+
+    private const string _razorSourceCode = @"@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+
+<!-- ItemsProvider delegates viewport slices directly to backend queries -->
+<GridControl TValue=""EstimatingItemRecord""
+             ItemsProvider=""@_itemsProvider""
+             Height=""380px""
+             AllowSorting=""true""
+             AllowSelection=""true"">
+    <GridColumnsBase>
+        <GridColumn Field=""@nameof(EstimatingItemRecord.Item)"" HeaderText=""Item Code"" Width=""110px"" />
+        <GridColumn Field=""@nameof(EstimatingItemRecord.ItemDesc)"" HeaderText=""Item Description"" Width=""260px"" />
+        <GridColumn Field=""@nameof(EstimatingItemRecord.Phase)"" HeaderText=""Phase"" Width=""100px"" />
+        <GridColumn Field=""@nameof(EstimatingItemRecord.Price)"" HeaderText=""Unit Price"" Width=""110px"" Format=""$#,##0.00"" />
+    </GridColumnsBase>
+</GridControl>
+
+@code {
+    private GridItemsProvider<EstimatingItemRecord> _itemsProvider;
+
+    protected override void OnInitialized()
+    {
+        _itemsProvider = async request =>
+        {
+            // Query SQLite or EF Core DB asynchronously
+            var (rows, total) = await DbService.FetchSliceAsync(request.StartIndex, request.Count, request.CancellationToken);
+            return GridItemsProviderResult.From(rows, total);
+        };
+    }
+}";
+
+    private const string _csharpSourceCode = @"public class SqliteGridProvider
+{
+    public static async Task<(List<EstimatingItemRecord> Rows, int Total)> FetchSliceAsync(
+        int startIndex, 
+        int count, 
+        CancellationToken cancellationToken)
+    {
+        using var connection = new SqliteConnection(""Data Source=estimating.db"");
+        await connection.OpenAsync(cancellationToken);
+
+        var countCmd = connection.CreateCommand();
+        countCmd.CommandText = ""SELECT COUNT(*) FROM EstimatingItems"";
+        var total = Convert.ToInt32(await countCmd.ExecuteScalarAsync(cancellationToken));
+
+        var queryCmd = connection.CreateCommand();
+        queryCmd.CommandText = ""SELECT * FROM EstimatingItems ORDER BY Item LIMIT @count OFFSET @offset"";
+        queryCmd.Parameters.AddWithValue(""@count"", count);
+        queryCmd.Parameters.AddWithValue(""@offset"", startIndex);
+
+        var list = new List<EstimatingItemRecord>();
+        using var reader = await queryCmd.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            list.Add(new EstimatingItemRecord
+            {
+                Item = reader.GetString(0),
+                ItemDesc = reader.GetString(1),
+                Price = reader.GetDecimal(2)
+            });
+        }
+        return (list, total);
+    }
+}";
+}

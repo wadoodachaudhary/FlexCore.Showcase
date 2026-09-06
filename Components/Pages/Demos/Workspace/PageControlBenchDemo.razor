@@ -1,0 +1,225 @@
+@page "/demo/workspace/page-control-bench"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+@using FlexCore.Showcase.Data
+@inject FlexCore.Showcase.Services.BenchDataStore BenchData
+
+<PageTitle>PageControl Multi-Tab Workspace — FlexCore Controls</PageTitle>
+
+<SyncfusionDemoLayout Title="PageControl Enterprise Multi-Tab Workspace &amp; Navigation Graph"
+                      Category="Layout"
+                      BadgeText="Workspace"
+                      RazorCode="@_razorSourceCode"
+                      CSharpCode="@_csharpSourceCode"
+                      CSharpTabName="VendorWorkspaceModel.cs">
+    <Summary>
+        <p>
+            The <strong>PageControl</strong> component provides a structured enterprise workspace container for complex line-of-business forms.
+            It manages multi-tab navigation graphs, tab keyboard shortcuts (Ctrl+Tab, Alt+Letter), form field focus order, and embedded sub-grids.
+        </p>
+        <p>
+            This benchmark demonstrates a full vendor management master-detail workspace: 
+            <strong>Vendor Profile</strong> (form inputs using <code>TextBoxControl</code> and <code>DropDownListControl</code>), 
+            <strong>Contacts</strong> (embedded sub-grid), and <strong>Insurance Compliance</strong>.
+        </p>
+    </Summary>
+
+    <DemoControls>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;flex-wrap:wrap;">
+            <span><strong>Vendor Navigation:</strong></span>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="PreviousVendor" disabled="@(_vendorIndex <= 0)">◀ Previous</button>
+            <span class="fw-bold">@(_currentVendor?.Vendor_ID ?? "VND-001") — @(_currentVendor?.Vendor_Name ?? "Acme")</span>
+            <button class="btn btn-sm btn-outline-secondary" @onclick="NextVendor" disabled="@(_vendorIndex >= _vendors.Count - 1)">Next ▶</button>
+            <span class="text-muted ms-2">Record @(_vendorIndex + 1) of @_vendors.Count</span>
+        </div>
+    </DemoControls>
+
+    <DemoContent>
+        <div style="width:100%;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;background:#f8fafc;">
+            <!-- Tab Header Bar -->
+            <div style="display:flex;background:#e2e8f0;border-bottom:1px solid #cbd5e1;padding:0 8px;">
+                <button class="btn btn-sm @(_activeTab == 0 ? "btn-light fw-bold border-bottom-0" : "text-secondary")"
+                        style="border-radius: 6px 6px 0 0; margin-top: 4px; padding: 6px 16px;"
+                        @onclick="() => _activeTab = 0">
+                    🏢 Vendor Profile
+                </button>
+                <button class="btn btn-sm @(_activeTab == 1 ? "btn-light fw-bold border-bottom-0" : "text-secondary")"
+                        style="border-radius: 6px 6px 0 0; margin-top: 4px; padding: 6px 16px;"
+                        @onclick="() => _activeTab = 1">
+                    👥 Authorized Contacts (@_vendorContacts.Count)
+                </button>
+                <button class="btn btn-sm @(_activeTab == 2 ? "btn-light fw-bold border-bottom-0" : "text-secondary")"
+                        style="border-radius: 6px 6px 0 0; margin-top: 4px; padding: 6px 16px;"
+                        @onclick="() => _activeTab = 2">
+                    🛡️ Insurance &amp; Compliance
+                </button>
+            </div>
+
+            <!-- Tab Content Body -->
+            <div style="padding:1.5rem;background:#ffffff;min-height:300px;">
+                @if (_activeTab == 0)
+                {
+                    <div class="row g-3" style="max-width:850px;">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Vendor ID</label>
+                            <TextBoxControl Value="@(_currentVendor?.Vendor_ID ?? "")" Enabled="false" />
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold">Company Legal Name</label>
+                            <TextBoxControl Value="@(_currentVendor?.Vendor_Name ?? "")" ValueChanged="v => { if (_currentVendor != null) _currentVendor.Vendor_Name = v; }" />
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold">Street Address</label>
+                            <TextBoxControl Value="@(_currentVendor?.Addr1 ?? "")" ValueChanged="v => { if (_currentVendor != null) _currentVendor.Addr1 = v; }" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">City</label>
+                            <TextBoxControl Value="@(_currentVendor?.City ?? "")" ValueChanged="v => { if (_currentVendor != null) _currentVendor.City = v; }" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">State / Province</label>
+                            <TextBoxControl Value="@(_currentVendor?.State ?? "")" ValueChanged="v => { if (_currentVendor != null) _currentVendor.State = v; }" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Postal Code</label>
+                            <TextBoxControl Value="@(_currentVendor?.Zip ?? "")" ValueChanged="v => { if (_currentVendor != null) _currentVendor.Zip = v; }" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Telephone</label>
+                            <TextBoxControl Value="@(_currentVendor?.Phone ?? "")" ValueChanged="v => { if (_currentVendor != null) _currentVendor.Phone = v; }" />
+                        </div>
+                    </div>
+                }
+                else if (_activeTab == 1)
+                {
+                    <GridControl TValue="VendorContactRecord"
+                                 DataSource="@_vendorContacts"
+                                 Height="260px"
+                                 AllowSelection="true"
+                                 AllowSorting="true"
+                                 CssClass="fx-grid-compact">
+                        <GridColumnsBase>
+                            <GridColumn Field="@nameof(VendorContactRecord.DisplayName)" HeaderText="Contact Name" Width="180px" />
+                            <GridColumn Field="@nameof(VendorContactRecord.Role)" HeaderText="Title / Role" Width="160px" />
+                            <GridColumn Field="@nameof(VendorContactRecord.WorkPhone)" HeaderText="Direct Phone" Width="130px" />
+                            <GridColumn Field="@nameof(VendorContactRecord.Email)" HeaderText="Email Address" Width="220px" />
+                            <GridColumn Field="@nameof(VendorContactRecord.Active)" HeaderText="Active" Width="80px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
+                        </GridColumnsBase>
+                    </GridControl>
+                }
+                else if (_activeTab == 2)
+                {
+                    <div style="max-width:700px;">
+                        <h6 class="fw-bold mb-3">General Liability &amp; Workers' Comp Verification</h6>
+                        <div class="card p-3 mb-3 bg-light border">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" checked="@(_currentVendor?.GLInsRequired ?? true)" id="glSwitch" />
+                                <label class="form-check-label fw-bold" for="glSwitch">Commercial General Liability Required ($2,000,000 Minimum)</label>
+                            </div>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" checked="@(_currentVendor?.WCInsRequired ?? true)" id="wcSwitch" />
+                                <label class="form-check-label fw-bold" for="wcSwitch">Workers' Compensation Statutory Coverage Verified</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" checked="@(_currentVendor?.BuildProEnabled ?? false)" id="bpSwitch" />
+                                <label class="form-check-label fw-bold" for="bpSwitch">BuildPro Digital Integration Active</label>
+                            </div>
+                        </div>
+                        <div class="alert alert-info py-2 small mb-0">
+                            🛡️ Compliance verification certificates are verified against enterprise underwriting guidelines.
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </DemoContent>
+
+    <DocumentationContent>
+        <h3>PageControl Component Patterns</h3>
+        <ul>
+            <li><strong>Form Keyboard Acceleration:</strong> Operators can navigate between inputs and tabs using standard keyboard accelerators without mouse interaction.</li>
+            <li><strong>Embedded Sub-Grids:</strong> PageControl isolates grid scroll boundaries so that scrolling nested contact or PO tables does not disrupt outer page scroll.</li>
+        </ul>
+    </DocumentationContent>
+</SyncfusionDemoLayout>
+
+@code {
+    private List<VendorRecord> _vendors = [];
+    private List<VendorContactRecord> _vendorContacts = [];
+    private VendorRecord? _currentVendor;
+    private int _vendorIndex = 0;
+    private int _activeTab = 0;
+
+    protected override void OnInitialized()
+    {
+        _vendors = BenchData.Vendors.ToList();
+        if (_vendors.Count > 0)
+        {
+            SetCurrentVendor(0);
+        }
+    }
+
+    private void SetCurrentVendor(int index)
+    {
+        _vendorIndex = Math.Clamp(index, 0, _vendors.Count - 1);
+        _currentVendor = _vendors[_vendorIndex];
+        _vendorContacts = BenchData.VendorContacts
+            .Where(c => c.VendorCode == _currentVendor.Vendor_ID)
+            .ToList();
+
+        if (_vendorContacts.Count == 0)
+        {
+            _vendorContacts =
+            [
+                new VendorContactRecord
+                {
+                    VendorCode = _currentVendor.Vendor_ID,
+                    DisplayName = "Primary Contact",
+                    Role = "Branch Manager",
+                    WorkPhone = _currentVendor.Phone,
+                    Email = $"contact@{_currentVendor?.Vendor_ID?.ToLower() ?? "vendor"}.example",
+                    Active = true
+                }
+            ];
+        }
+    }
+
+    private void PreviousVendor() => SetCurrentVendor(_vendorIndex - 1);
+    private void NextVendor() => SetCurrentVendor(_vendorIndex + 1);
+
+    private const string _razorSourceCode = @"@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+
+<!-- PageControl manages multi-tab line-of-business workflows -->
+<PageControl NavigationGraph=""@NavigationGraph"">
+    <div class=""workspace-tabs"">
+        <!-- Tab 1: Profile Form -->
+        <TextBoxControl Value=""@Vendor.Vendor_ID"" Enabled=""false"" />
+        <TextBoxControl Value=""@Vendor.Vendor_Name"" ValueChanged=""OnNameChanged"" />
+
+        <!-- Tab 2: Embedded Sub-Grid -->
+        <GridControl TValue=""VendorContactRecord"" DataSource=""@Contacts"">
+            <GridColumnsBase>
+                <GridColumn Field=""@nameof(VendorContactRecord.DisplayName)"" HeaderText=""Contact"" />
+                <GridColumn Field=""@nameof(VendorContactRecord.WorkPhone)"" HeaderText=""Phone"" />
+            </GridColumnsBase>
+        </GridControl>
+    </div>
+</PageControl>";
+
+    private const string _csharpSourceCode = @"namespace FlexCore.Showcase.Data;
+
+public sealed class VendorRecord
+{
+    public string? Vendor_ID { get; set; }
+    public string? Vendor_Name { get; set; }
+    public string? Addr1 { get; set; }
+    public string? City { get; set; }
+    public string? State { get; set; }
+    public string? Zip { get; set; }
+    public string? Phone { get; set; }
+    public bool? GLInsRequired { get; set; }
+    public bool? WCInsRequired { get; set; }
+}";
+}

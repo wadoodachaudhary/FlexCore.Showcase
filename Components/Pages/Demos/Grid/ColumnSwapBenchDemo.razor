@@ -1,0 +1,210 @@
+@page "/demo/grid/column-swap"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+@using FlexCore.Showcase.Data
+
+<PageTitle>Dynamic Column Swapping — FlexCore DataGrid</PageTitle>
+
+<SyncfusionDemoLayout Title="Dynamic Column Swapping &amp; Layout Mutation"
+                      Category="DataGrid"
+                      BadgeText="Dynamic Schema"
+                      RazorCode="@_razorSourceCode"
+                      CSharpCode="@_csharpSourceCode"
+                      CSharpTabName="ColumnLayoutModel.cs">
+    <Summary>
+        <p>
+            In legacy applications, switching between view modes or user-customized column layouts often required discarding and remounting the entire grid component via Blazor's <code>@@key</code>.
+            This destroyed active row selection, scroll position, cell edits, and created unnecessary DOM thrashing.
+        </p>
+        <p>
+            FlexCore provides <strong>in-place dynamic column mutation</strong>: you can swap column sets, change column order, modify widths, and toggle column visibility 
+            without tearing down the component instance, preserving all runtime state while executing seamless layout updates.
+        </p>
+    </Summary>
+
+    <DemoControls>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;flex-wrap:wrap;">
+            <span><strong>Layout Presets:</strong></span>
+            <button class="btn btn-sm @(_activeLayout == "Default" ? "btn-primary" : "btn-outline-secondary")"
+                    @onclick='() => ApplyLayout("Default")'>📋 Default View</button>
+            <button class="btn btn-sm @(_activeLayout == "Purchasing" ? "btn-primary" : "btn-outline-secondary")"
+                    @onclick='() => ApplyLayout("Purchasing")'>🛒 Purchasing View</button>
+            <button class="btn btn-sm @(_activeLayout == "Minimal" ? "btn-primary" : "btn-outline-secondary")"
+                    @onclick='() => ApplyLayout("Minimal")'>⚡ Minimal Summary</button>
+            <span class="text-muted ms-2">Active Layout: <b>@_activeLayout</b> | Columns: <b>@_currentColumns.Count(c => c.Visible)</b> visible</span>
+        </div>
+    </DemoControls>
+
+    <DemoContent>
+        <div style="width:100%;">
+            <GridControl @ref="_grid"
+                         TValue="CRow"
+                         DataSource="@_rows"
+                         Height="340px"
+                         AllowSelection="true"
+                         AllowResizing="true"
+                         AllowSorting="true"
+                         ShowRowCountInFooter="true">
+                <GridColumnsBase @ref="_gridColumns">
+                    @foreach (var col in _currentColumns)
+                    {
+                        <GridColumn Field="@col.Field"
+                                    HeaderText="@col.Header"
+                                    Width="@col.Width"
+                                    Visible="@col.Visible"
+                                    AllowEditing="@col.Editable" />
+                    }
+                </GridColumnsBase>
+            </GridControl>
+        </div>
+    </DemoContent>
+
+    <DocumentationContent>
+        <h3>In-Place Column Mutation Benefits</h3>
+        <ul>
+            <li><strong>Zero Component Teardown:</strong> Avoids re-instantiating the grid component, retaining current scroll offsets and keyboard focus.</li>
+            <li><strong>State Preservation:</strong> Selected row indices and batch-edit modified cells remain intact across layout swaps.</li>
+            <li><strong>Custom User Perspectives:</strong> Easily support user profile saving, saved views, and role-based column visibility filters.</li>
+        </ul>
+
+        <h3>Column Specification Properties</h3>
+        <table class="sf-param-table">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>Field</code></td>
+                    <td>string</td>
+                    <td>Property name on the generic model type.</td>
+                </tr>
+                <tr>
+                    <td><code>Visible</code></td>
+                    <td>bool</td>
+                    <td>Toggles column rendering without altering underlying data rows.</td>
+                </tr>
+                <tr>
+                    <td><code>AllowEditing</code></td>
+                    <td>bool</td>
+                    <td>Restricts cell editing per column in the layout.</td>
+                </tr>
+            </tbody>
+        </table>
+    </DocumentationContent>
+</SyncfusionDemoLayout>
+
+@code {
+    public class CRow
+    {
+        public string Code { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string Vendor { get; set; } = string.Empty;
+        public string POIndex { get; set; } = string.Empty;
+        public decimal Qty { get; set; }
+        public decimal Price { get; set; }
+        public decimal Total => Qty * Price;
+    }
+
+    private GridControl<CRow>? _grid;
+    private GridColumnsBase? _gridColumns;
+    private List<CRow> _rows = [];
+    private string _activeLayout = "Default";
+    private List<ColumnSpec> _currentColumns = [];
+
+    protected override void OnInitialized()
+    {
+        _rows =
+        [
+            new CRow { Code = "01-100", Description = "Grading & Compaction", Category = "Sitework", Vendor = "Hill Country Excavation", POIndex = "PO-001", Qty = 1, Price = 4250.00m },
+            new CRow { Code = "02-210", Description = "Post-Tension Foundation Cables", Category = "Concrete", Vendor = "Austin Concrete Supply", POIndex = "PO-002", Qty = 24, Price = 115.00m },
+            new CRow { Code = "03-310", Description = "2x6 Exterior Wall Studs", Category = "Framing", Vendor = "Lone Star Lumber Co", POIndex = "PO-003", Qty = 450, Price = 8.75m },
+            new CRow { Code = "04-120", Description = "Architectural Shingles 30yr", Category = "Roofing", Vendor = "Summit Building Materials", POIndex = "PO-004", Qty = 65, Price = 34.50m },
+            new CRow { Code = "05-410", Description = "PEX Water Supply Piping", Category = "Plumbing", Vendor = "Capitol Plumbing Supply", POIndex = "PO-005", Qty = 12, Price = 145.00m },
+            new CRow { Code = "06-110", Description = "200A Main Distribution Panel", Category = "Electrical", Vendor = "Apex Electric Dist", POIndex = "PO-006", Qty = 2, Price = 680.00m }
+        ];
+
+        ApplyLayout("Default");
+    }
+
+    private void ApplyLayout(string layoutName)
+    {
+        _activeLayout = layoutName;
+        _currentColumns = layoutName switch
+        {
+            "Purchasing" =>
+            [
+                new ColumnSpec { Field = nameof(CRow.Code), Header = "Item Code", Width = "90px", Visible = true },
+                new ColumnSpec { Field = nameof(CRow.Description), Header = "Description", Width = "220px", Visible = true },
+                new ColumnSpec { Field = nameof(CRow.Vendor), Header = "Assigned Vendor", Width = "200px", Visible = true },
+                new ColumnSpec { Field = nameof(CRow.POIndex), Header = "PO Index", Width = "100px", Visible = true },
+                new ColumnSpec { Field = nameof(CRow.Price), Header = "Unit Price", Width = "100px", Visible = true, Editable = true },
+                new ColumnSpec { Field = nameof(CRow.Category), Header = "Category", Width = "120px", Visible = false }
+            ],
+            "Minimal" =>
+            [
+                new ColumnSpec { Field = nameof(CRow.Code), Header = "Code", Width = "100px", Visible = true },
+                new ColumnSpec { Field = nameof(CRow.Description), Header = "Description", Width = "300px", Visible = true },
+                new ColumnSpec { Field = nameof(CRow.Total), Header = "Total Cost", Width = "140px", Visible = true, Editable = false }
+            ],
+            _ => // Default
+            [
+                new ColumnSpec { Field = nameof(CRow.Code), Header = "Item Code", Width = "90px", Visible = true },
+                new ColumnSpec { Field = nameof(CRow.Description), Header = "Description", Width = "240px", Visible = true },
+                new ColumnSpec { Field = nameof(CRow.Category), Header = "Category", Width = "130px", Visible = true },
+                new ColumnSpec { Field = nameof(CRow.Qty), Header = "Qty", Width = "80px", Visible = true, Editable = true },
+                new ColumnSpec { Field = nameof(CRow.Price), Header = "Price", Width = "100px", Visible = true, Editable = true },
+                new ColumnSpec { Field = nameof(CRow.Total), Header = "Total", Width = "110px", Visible = true, Editable = false }
+            ]
+        };
+        StateHasChanged();
+    }
+
+    private const string _razorSourceCode = @"@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+
+<GridControl TValue=""CRow"" DataSource=""@Rows"" Height=""340px"" AllowSelection=""true"">
+    <GridColumnsBase>
+        @foreach (var col in ActiveColumns)
+        {
+            <GridColumn Field=""@col.Field""
+                        HeaderText=""@col.Header""
+                        Width=""@col.Width""
+                        Visible=""@col.Visible""
+                        AllowEditing=""@col.Editable"" />
+        }
+    </GridColumnsBase>
+</GridControl>
+
+@code {
+    private List<CRow> Rows = new();
+    private List<ColumnSpec> ActiveColumns = new();
+
+    private void SwitchToPurchasingLayout()
+    {
+        ActiveColumns = new List<ColumnSpec>
+        {
+            new() { Field = ""Code"", Header = ""Item Code"", Width = ""90px"" },
+            new() { Field = ""Description"", Header = ""Description"", Width = ""220px"" },
+            new() { Field = ""Vendor"", Header = ""Vendor"", Width = ""200px"" },
+            new() { Field = ""Price"", Header = ""Price"", Width = ""100px"", Editable = true }
+        };
+    }
+}";
+
+    private const string _csharpSourceCode = @"namespace FlexCore.Showcase.Data;
+
+public sealed class ColumnSpec
+{
+    public string Field { get; set; } = string.Empty;
+    public string Header { get; set; } = string.Empty;
+    public string Width { get; set; } = ""120px"";
+    public bool Visible { get; set; } = true;
+    public bool Editable { get; set; }
+}";
+}

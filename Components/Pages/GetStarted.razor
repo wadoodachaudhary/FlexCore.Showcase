@@ -1,0 +1,54 @@
+@page "/get-started"
+
+<PageTitle>Get Started — FlexCore</PageTitle>
+
+<div class="docs-page">
+    <h1>Get Started</h1>
+
+    <section>
+        <h2>Install</h2>
+        <p>Once published to NuGet:</p>
+        <pre><code>dotnet add package FlexCore</code></pre>
+
+        <p>Or as a project reference (during development):</p>
+        <pre><code>&lt;ProjectReference Include="..\path\to\FlexCore\FlexCore.csproj" /&gt;</code></pre>
+
+        <p>Or download the source as a zip:</p>
+        <p><a href="/downloads/FlexCore.zip" class="btn-primary">Download FlexCore.zip</a></p>
+    </section>
+
+    <section>
+        <h2>Register services</h2>
+        <p>In <code>Program.cs</code>:</p>
+        <pre><code>using Fx.ControlKit.Notifications;
+
+builder.Services.AddScoped&lt;NotificationService&gt;();
+// ...register your own adapters for IReportDataExecutor, IReportSessionContext,
+// IReportExporter, IReportPickListProvider if you use the report writer.</code></pre>
+    </section>
+
+    <section>
+        <h2>Use a control</h2>
+        <p>In a Razor page or layout:</p>
+        <pre><code>&#64;using Fx.ControlKit.Grid
+
+&lt;GridControl TValue="MyRow" DataSource="&#64;rows"
+             AllowSelection="true" AllowSorting="true"
+             AllowFiltering="true" AllowGrouping="true"&gt;
+    &lt;GridColumnsBase&gt;
+        &lt;GridColumn Field="Id"       HeaderText="ID"   Width="80px" /&gt;
+        &lt;GridColumn Field="Name"     HeaderText="Name" Width="200px" /&gt;
+        &lt;GridColumn Field="Quantity" HeaderText="Qty"  Width="100px"
+                    Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" /&gt;
+    &lt;/GridColumnsBase&gt;
+&lt;/GridControl&gt;</code></pre>
+    </section>
+
+    <section>
+        <h2>Targets</h2>
+        <ul>
+            <li>.NET 10.0</li>
+            <li>Blazor Server or Blazor WebAssembly</li>
+        </ul>
+    </section>
+</div>

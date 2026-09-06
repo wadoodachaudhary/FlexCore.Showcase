@@ -1,0 +1,303 @@
+@page "/demo/grid/provider-enterprise"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+@using System.Globalization
+
+<PageTitle>Provider Grouping &amp; Export — FlexCore Showcase</PageTitle>
+
+<div class="container-fluid py-3 provider-enterprise-demo">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h2>Remote grouping and complete-query export</h2>
+            <p class="text-muted mb-0">
+                This bench behaves like a remote database: root groups, child groups,
+                leaf rows, aggregates, and export pages are returned by the provider.
+            </p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <ButtonControl CssClass="btn btn-sm btn-primary" OnClick="ExportCsvAsync" Disabled="@(_grid?.IsProviderExporting == true)">
+                Export all CSV
+            </ButtonControl>
+            <ButtonControl CssClass="btn btn-sm btn-outline-secondary" OnClick="CancelExport" Disabled="@(_grid?.IsProviderExporting != true)">
+                Cancel export
+            </ButtonControl>
+        </div>
+    </div>
+
+    <div class="small text-muted mb-2">
+        @_lastRequest
+        @if (_exportProgress is not null)
+        {
+            <span class="ms-3">
+                Export: @_exportProgress.ExportedRows.ToString("N0")
+                @if (_exportProgress.TotalRows.HasValue)
+                {
+                    <text> / @_exportProgress.TotalRows.Value.ToString("N0")</text>
+                }
+                @(_exportProgress.IsCanceled ? " (canceled)" : _exportProgress.IsCompleted ? " (complete)" : "")
+            </span>
+        }
+    </div>
+
+    <div class="card shadow-sm provider-enterprise-grid">
+        <GridControl @ref="_grid"
+                     TValue="ProviderOrder"
+                     ItemsProvider="LoadOrdersAsync"
+                     ItemKeySelector="@(row => row.Id)"
+                     Height="620px"
+                     AllowGrouping="true"
+                     GroupColumns="@_groups"
+                     EnableProviderGrouping="true"
+                     ProviderGroupsInitiallyCollapsed="true"
+                     ProviderGroupPageSize="2"
+                     ProviderGroupItemPageSize="75"
+                     ShowGroupCount="true"
+                     AllowSorting="true"
+                     AllowFiltering="true"
+                     ShowSearchBar="true"
+                     AllowResizing="true"
+                     ExportAllProviderItems="true"
+                     ProviderExportPageSize="400"
+                     ProviderExportProgressChanged="OnExportProgress"
+                     ShowRowCountInFooter="true"
+                     AggregateRows="@_aggregates">
+            <GridColumnsBase>
+                <GridColumn Field="@nameof(ProviderOrder.Id)" HeaderText="Order" Width="90px" Type="ColumnType.Number" />
+                <GridColumn Field="@nameof(ProviderOrder.Region)" HeaderText="Region" Width="120px" />
+                <GridColumn Field="@nameof(ProviderOrder.Category)" HeaderText="Category" Width="140px" />
+                <GridColumn Field="@nameof(ProviderOrder.Customer)" HeaderText="Customer" Width="220px" />
+                <GridColumn Field="@nameof(ProviderOrder.OrderDate)" HeaderText="Date" Width="110px" Type="ColumnType.Date" Format="d" />
+                <GridColumn Field="@nameof(ProviderOrder.Quantity)" HeaderText="Qty" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" />
+                <GridColumn Field="@nameof(ProviderOrder.Amount)" HeaderText="Amount" Width="120px" Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+            </GridColumnsBase>
+        </GridControl>
+    </div>
+
+    <p class="small text-muted mt-3 mb-0">
+        Expand a region to issue a <code>GroupChildren</code> request, then expand a
+        category to issue paged <code>GroupItems</code> requests. “Export all CSV”
+        issues independent <code>Export</code> pages without replacing the visible window.
+    </p>
+</div>
+
+@code {
+    private GridControl<ProviderOrder>? _grid;
+    private readonly List<ProviderOrder> _orders = BuildOrders();
+    private readonly List<string> _groups =
+    [
+        nameof(ProviderOrder.Region),
+        nameof(ProviderOrder.Category)
+    ];
+    private GridProviderExportProgress? _exportProgress;
+    private string _lastRequest = "Waiting for the first provider request…";
+
+    private readonly List<AggregateRow> _aggregates =
+    [
+        new AggregateRow
+        {
+            ShowInGroupCaption = true,
+            ShowInFooter = true,
+            Columns =
+            [
+                new AggregateColumn
+                {
+                    Field = nameof(ProviderOrder.Amount),
+                    Type = AggregateType.Sum,
+                    Format = "C2",
+                    GroupCaptionTemplate = "sum {value}",
+                    FooterTemplate = "Total {value}"
+                }
+            ]
+        }
+    ];
+
+    private async ValueTask<GridItemsResult<ProviderOrder>> LoadOrdersAsync(GridItemsRequest request)
+    {
+        await Task.Delay(request.Purpose == GridItemsRequestPurpose.Export ? 20 : 90, request.CancellationToken);
+        var filtered = ApplyQuery(_orders, request.Query).ToList();
+        var scoped = ApplyGroupKeys(filtered, request.GroupRequest?.ParentKeys).ToList();
+        _lastRequest = $"Last request: {request.Purpose}, start {request.StartIndex:N0}, count {request.Count:N0}";
+        await InvokeAsync(StateHasChanged);
+
+        if (request.Purpose is GridItemsRequestPurpose.Groups or GridItemsRequestPurpose.GroupChildren)
+        {
+            var level = request.Purpose == GridItemsRequestPurpose.Groups
+                ? 0
+                : request.GroupRequest!.Level + 1;
+            var descriptor = request.Query.Groups[level];
+            var groups = scoped
+                .GroupBy(row => GetFieldValue(row, descriptor.Field))
+                .Select(group => new
+                {
+                    Key = group.Key,
+                    Rows = group.ToList()
+                });
+            groups = descriptor.Direction == SortDirection.Descending
+                ? groups.OrderByDescending(group => Convert.ToString(group.Key, CultureInfo.CurrentCulture))
+                : groups.OrderBy(group => Convert.ToString(group.Key, CultureInfo.CurrentCulture));
+            var groupList = groups.ToList();
+            var page = groupList
+                .Skip(request.StartIndex)
+                .Take(request.Count)
+                .Select(group => new GridProviderGroup<ProviderOrder>(
+                    descriptor.Field,
+                    group.Key,
+                    Convert.ToString(group.Key, CultureInfo.CurrentCulture),
+                    group.Rows.Count)
+                {
+                    HasChildren = group.Rows.Count > 0,
+                    Aggregates = BuildAggregates(group.Rows, request.Query.Aggregates)
+                })
+                .ToList();
+
+            return new GridItemsResult<ProviderOrder>(Array.Empty<ProviderOrder>(), filtered.Count)
+            {
+                Groups = page,
+                ResultSetCount = groupList.Count,
+                HasMore = request.StartIndex + page.Count < groupList.Count,
+                Aggregates = BuildAggregates(filtered, request.Query.Aggregates)
+            };
+        }
+
+        var sorted = ApplySorts(scoped, request.Query.Sorts).ToList();
+        var items = sorted.Skip(request.StartIndex).Take(request.Count).ToList();
+        return new GridItemsResult<ProviderOrder>(items, filtered.Count)
+        {
+            ResultSetCount = sorted.Count,
+            HasMore = request.StartIndex + items.Count < sorted.Count,
+            Aggregates = BuildAggregates(
+                request.Purpose == GridItemsRequestPurpose.Export ? filtered : scoped,
+                request.Query.Aggregates)
+        };
+    }
+
+    private static IEnumerable<ProviderOrder> ApplyQuery(
+        IEnumerable<ProviderOrder> source,
+        GridQueryDescriptor query)
+    {
+        var rows = source;
+        if (!string.IsNullOrWhiteSpace(query.SearchText))
+        {
+            var comparison = query.CaseSensitive
+                ? StringComparison.CurrentCulture
+                : StringComparison.CurrentCultureIgnoreCase;
+            rows = rows.Where(row =>
+                row.Customer.Contains(query.SearchText, comparison)
+                || row.Region.Contains(query.SearchText, comparison)
+                || row.Category.Contains(query.SearchText, comparison));
+        }
+        return rows;
+    }
+
+    private static IEnumerable<ProviderOrder> ApplyGroupKeys(
+        IEnumerable<ProviderOrder> source,
+        IReadOnlyList<GridProviderGroupKey>? keys)
+    {
+        if (keys is null)
+            return source;
+        foreach (var key in keys)
+        {
+            source = source.Where(row => Equals(
+                Convert.ToString(GetFieldValue(row, key.Field), CultureInfo.InvariantCulture),
+                Convert.ToString(key.Value, CultureInfo.InvariantCulture)));
+        }
+        return source;
+    }
+
+    private static IEnumerable<ProviderOrder> ApplySorts(
+        IEnumerable<ProviderOrder> source,
+        IReadOnlyList<GridSortDescriptor> sorts)
+    {
+        IOrderedEnumerable<ProviderOrder>? ordered = null;
+        foreach (var sort in sorts)
+        {
+            Func<ProviderOrder, object?> selector = row => GetFieldValue(row, sort.Field);
+            ordered = ordered is null
+                ? sort.Direction == SortDirection.Descending
+                    ? source.OrderByDescending(selector)
+                    : source.OrderBy(selector)
+                : sort.Direction == SortDirection.Descending
+                    ? ordered.ThenByDescending(selector)
+                    : ordered.ThenBy(selector);
+        }
+        return ordered ?? source.OrderBy(row => row.Id);
+    }
+
+    private static object? GetFieldValue(ProviderOrder row, string field) => field switch
+    {
+        nameof(ProviderOrder.Id) => row.Id,
+        nameof(ProviderOrder.Region) => row.Region,
+        nameof(ProviderOrder.Category) => row.Category,
+        nameof(ProviderOrder.Customer) => row.Customer,
+        nameof(ProviderOrder.OrderDate) => row.OrderDate,
+        nameof(ProviderOrder.Quantity) => row.Quantity,
+        nameof(ProviderOrder.Amount) => row.Amount,
+        _ => null
+    };
+
+    private static IReadOnlyList<GridAggregateResult> BuildAggregates(
+        IReadOnlyCollection<ProviderOrder> rows,
+        IReadOnlyList<GridAggregateQueryDescriptor> requested)
+    {
+        return requested.Select(aggregate =>
+        {
+            object? value = (aggregate.Field, aggregate.Type) switch
+            {
+                (nameof(ProviderOrder.Amount), AggregateType.Sum) => rows.Sum(row => row.Amount),
+                (nameof(ProviderOrder.Amount), AggregateType.Average) when rows.Count > 0 => rows.Average(row => row.Amount),
+                (nameof(ProviderOrder.Amount), AggregateType.Min) when rows.Count > 0 => rows.Min(row => row.Amount),
+                (nameof(ProviderOrder.Amount), AggregateType.Max) when rows.Count > 0 => rows.Max(row => row.Amount),
+                (_, AggregateType.Count) => rows.Count,
+                _ => null
+            };
+            return new GridAggregateResult(aggregate.Field, aggregate.Type, value);
+        }).ToList();
+    }
+
+    private async Task ExportCsvAsync(MouseEventArgs _)
+    {
+        if (_grid is not null)
+            await _grid.ExportProviderQueryAsync(GridExportFormat.Csv, "provider-orders.csv", "Provider orders");
+    }
+
+    private void CancelExport(MouseEventArgs _) => _grid?.CancelProviderExport();
+
+    private Task OnExportProgress(GridProviderExportProgress progress)
+    {
+        _exportProgress = progress;
+        return Task.CompletedTask;
+    }
+
+    private static List<ProviderOrder> BuildOrders()
+    {
+        string[] regions = ["North", "South", "East", "West"];
+        string[] categories = ["Cabinets", "Electrical", "Flooring", "Hardware", "Plumbing", "Windows"];
+        var rows = new List<ProviderOrder>(12_000);
+        for (var id = 1; id <= 12_000; id++)
+        {
+            rows.Add(new ProviderOrder
+            {
+                Id = id,
+                Region = regions[id % regions.Length],
+                Category = categories[(id * 7) % categories.Length],
+                Customer = $"Customer {(id * 13) % 425:D3}",
+                OrderDate = new DateTime(2024, 1, 1).AddDays(id % 730),
+                Quantity = 1 + id % 50,
+                Amount = 25m + (id % 500) * 3.17m
+            });
+        }
+        return rows;
+    }
+
+    private sealed class ProviderOrder
+    {
+        public int Id { get; init; }
+        public string Region { get; init; } = "";
+        public string Category { get; init; } = "";
+        public string Customer { get; init; } = "";
+        public DateTime OrderDate { get; init; }
+        public int Quantity { get; init; }
+        public decimal Amount { get; init; }
+    }
+}

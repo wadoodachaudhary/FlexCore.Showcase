@@ -1,0 +1,48 @@
+@page "/demo/buttons"
+
+<PageTitle>Buttons — FlexCore</PageTitle>
+
+<h1>Buttons</h1>
+<p>FlexCore's <code>ButtonControl</code> supports icons, disabled states, bare-style mode, and click propagation control.</p>
+
+<h2>Standard Variants</h2>
+<div class="demo-frame demo-buttons">
+    <ButtonControl CssClass="btn-primary">Primary</ButtonControl>
+    <ButtonControl CssClass="btn-secondary">Secondary</ButtonControl>
+    <ButtonControl CssClass="btn-accent">Accent</ButtonControl>
+    <ButtonControl CssClass="btn-success">Success</ButtonControl>
+    <ButtonControl CssClass="btn-warning">Warning</ButtonControl>
+    <ButtonControl CssClass="btn-danger">Danger</ButtonControl>
+    <ButtonControl CssClass="btn-primary" Disabled="true">Disabled</ButtonControl>
+</div>
+
+<h2>With Icons</h2>
+<div class="demo-frame demo-buttons">
+    <ButtonControl CssClass="btn-primary" IconCss="bi bi-plus-circle">Add Item</ButtonControl>
+    <ButtonControl CssClass="btn-secondary" IconCss="bi bi-pencil">Edit</ButtonControl>
+    <ButtonControl CssClass="btn-danger" IconCss="bi bi-trash">Delete</ButtonControl>
+</div>
+
+<h2>BareStyle Mode</h2>
+<p>When <code>BareStyle="true"</code>, the default <code>.fx-button</code> class is suppressed — the host owns all styling.</p>
+<div class="demo-frame demo-buttons">
+    <ButtonControl BareStyle="true" CssClass="btn-primary">Host-Styled</ButtonControl>
+    <ButtonControl BareStyle="true" CssClass="btn-accent">Custom Class Only</ButtonControl>
+</div>
+
+<h2>Interactive</h2>
+<div class="demo-frame">
+    <ButtonControl CssClass="btn-primary" OnClick="@HandleClick">Click Me (@_clickCount)</ButtonControl>
+    <p style="margin-top:8px; font-size:13px; color:#6b7280;">Click count: @_clickCount</p>
+</div>
+
+<h2>Markup</h2>
+<pre><code>&lt;ButtonControl CssClass="btn-primary" IconCss="bi bi-plus-circle"&gt;Add Item&lt;/ButtonControl&gt;
+&lt;ButtonControl CssClass="btn-danger" Disabled="true"&gt;Disabled&lt;/ButtonControl&gt;
+&lt;ButtonControl BareStyle="true" CssClass="my-class"&gt;Host-Styled&lt;/ButtonControl&gt;
+&lt;ButtonControl CssClass="btn-primary" OnClick="@@HandleClick"&gt;Click Me&lt;/ButtonControl&gt;</code></pre>
+
+@code {
+    int _clickCount;
+    void HandleClick() => _clickCount++;
+}

@@ -1,0 +1,167 @@
+@namespace FlexCore.Showcase.Components.Shared
+@inject IJSRuntime JS
+
+<div class="sf-demo-shell">
+    <!-- Breadcrumb & Title Header -->
+    <header class="sf-demo-header">
+        <nav class="sf-demo-breadcrumb" aria-label="Breadcrumb">
+            <a href="">FlexCore Showcase</a>
+            <span class="sf-breadcrumb-sep">/</span>
+            <span>@Category</span>
+            <span class="sf-breadcrumb-sep">/</span>
+            <span class="sf-breadcrumb-current">@Title</span>
+        </nav>
+        <div class="sf-title-row">
+            <h1 class="sf-demo-title">@Title</h1>
+            @if (!string.IsNullOrEmpty(BadgeText))
+            {
+                <span class="sf-demo-badge">@BadgeText</span>
+            }
+        </div>
+        @if (Summary != null)
+        {
+            <div class="sf-demo-summary">
+                @Summary
+            </div>
+        }
+    </header>
+
+    <!-- Live Interactive Demo Section -->
+    <section class="sf-demo-section" aria-labelledby="live-demo-heading">
+        <div class="sf-section-header">
+            <div class="sf-section-title">
+                <span class="sf-icon-pulse"></span>
+                <h2 id="live-demo-heading">Live Demo</h2>
+            </div>
+            @if (DemoControls != null)
+            {
+                <div class="sf-demo-controls">
+                    @DemoControls
+                </div>
+            }
+        </div>
+        <div class="sf-demo-card">
+            @DemoContent
+        </div>
+    </section>
+
+    <!-- Tabbed Source Code Viewer -->
+    <section class="sf-code-section" aria-labelledby="source-code-heading">
+        <div class="sf-code-header">
+            <div class="sf-code-tabs" role="tablist">
+                <button type="button"
+                        role="tab"
+                        aria-selected="@(_activeTab == "razor")"
+                        class="sf-code-tab @(_activeTab == "razor" ? "active" : "")"
+                        @onclick='() => _activeTab = "razor"'>
+                    <span class="sf-tab-icon">📄</span> Index.razor
+                </button>
+                @if (!string.IsNullOrEmpty(CSharpCode))
+                {
+                    <button type="button"
+                            role="tab"
+                            aria-selected="@(_activeTab == "csharp")"
+                            class="sf-code-tab @(_activeTab == "csharp" ? "active" : "")"
+                            @onclick='() => _activeTab = "csharp"'>
+                        <span class="sf-tab-icon">⚙️</span> @(CSharpTabName ?? "Model.cs")
+                    </button>
+                }
+                @if (ExtraTabs != null)
+                {
+                    @foreach (var tab in ExtraTabs)
+                    {
+                        var tabKey = tab.Key;
+                        <button type="button"
+                                role="tab"
+                                aria-selected="@(_activeTab == tabKey)"
+                                class="sf-code-tab @(_activeTab == tabKey ? "active" : "")"
+                                @onclick="() => _activeTab = tabKey">
+                            <span class="sf-tab-icon">📦</span> @tabKey
+                        </button>
+                    }
+                }
+            </div>
+
+            <button type="button" class="sf-copy-btn @(_copied ? "copied" : "")" @onclick="CopyActiveCodeAsync">
+                @if (_copied)
+                {
+                    <span>✓ Copied!</span>
+                }
+                else
+                {
+                    <span>📋 Copy Code</span>
+                }
+            </button>
+        </div>
+
+        <div class="sf-code-body">
+            @if (_activeTab == "razor")
+            {
+                <pre class="sf-code-block"><code class="language-razor">@RazorCode</code></pre>
+            }
+            else if (_activeTab == "csharp")
+            {
+                <pre class="sf-code-block"><code class="language-csharp">@CSharpCode</code></pre>
+            }
+            else if (ExtraTabs != null && ExtraTabs.TryGetValue(_activeTab, out var extraCode))
+            {
+                <pre class="sf-code-block"><code class="language-csharp">@extraCode</code></pre>
+            }
+        </div>
+    </section>
+
+    <!-- Conceptual Guide & Technical Reference -->
+    @if (DocumentationContent != null)
+    {
+        <section class="sf-doc-section" aria-labelledby="doc-heading">
+            <h2 id="doc-heading" class="sf-doc-title">Feature Overview &amp; Architecture Notes</h2>
+            <div class="sf-doc-content">
+                @DocumentationContent
+            </div>
+        </section>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "FlexCore Component Demo";
+    [Parameter] public string Category { get; set; } = "DataGrid";
+    [Parameter] public string? BadgeText { get; set; }
+    [Parameter] public RenderFragment? Summary { get; set; }
+    [Parameter] public RenderFragment? DemoControls { get; set; }
+    [Parameter] public RenderFragment? DemoContent { get; set; }
+    [Parameter] public string RazorCode { get; set; } = string.Empty;
+    [Parameter] public string? CSharpCode { get; set; }
+    [Parameter] public string? CSharpTabName { get; set; }
+    [Parameter] public Dictionary<string, string>? ExtraTabs { get; set; }
+    [Parameter] public RenderFragment? DocumentationContent { get; set; }
+
+    private string _activeTab = "razor";
+    private bool _copied;
+
+    private async Task CopyActiveCodeAsync()
+    {
+        var textToCopy = _activeTab switch
+        {
+            "razor" => RazorCode,
+            "csharp" => CSharpCode ?? string.Empty,
+            _ => (ExtraTabs != null && ExtraTabs.TryGetValue(_activeTab, out var code)) ? code : string.Empty
+        };
+
+        if (string.IsNullOrWhiteSpace(textToCopy)) return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", textToCopy);
+            _copied = true;
+            StateHasChanged();
+            await Task.Delay(2000);
+            _copied = false;
+            StateHasChanged();
+        }
+        catch
+        {
+            // Fallback gracefully if clipboard API is blocked in specific contexts
+            _copied = false;
+        }
+    }
+}

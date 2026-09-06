@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/bootstrap-icons/font/bootstrap-icons.min.css"]" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["FlexCore.Showcase.styles.css"]" />
+    <ImportMap />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet />
+</head>
+
+<body>
+    @* InteractiveServer render mode globally — event handlers (clicks, drag,
+       Enter on cell editors, etc.) need a live SignalR circuit. Without this
+       the pages render statically and nothing reacts to input. *@
+    <Routes @rendermode="InteractiveServer" />
+    <ReconnectModal />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script>
+        window.fxPositionDropdownGrid = function (container, popup) {
+            if (!container || !popup) return;
+
+            // Elevate parent table row and cell to stack above all subsequent rows
+            const tr = container.closest('tr');
+            if (tr) {
+                tr.style.setProperty('z-index', '1000', 'important');
+                tr.style.setProperty('position', 'relative', 'important');
+            }
+            const td = container.closest('td');
+            if (td) {
+                td.style.setProperty('z-index', '1000', 'important');
+                td.style.setProperty('position', 'relative', 'important');
+            }
+
+            const rect = container.getBoundingClientRect();
+            const popupWidth = popup.offsetWidth || 410;
+            const popupHeight = popup.offsetHeight || 220;
+            const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
+            let left = rect.left;
+            if (left + popupWidth > viewportWidth - 10) {
+                left = Math.max(10, viewportWidth - popupWidth - 10);
+            }
+
+            let top = rect.bottom + 2;
+            if (top + popupHeight > viewportHeight - 10 && rect.top - popupHeight - 2 > 10) {
+                top = rect.top - popupHeight - 2;
+            }
+
+            popup.style.position = "fixed";
+            popup.style.top = Math.max(8, top) + "px";
+            popup.style.left = Math.max(8, left) + "px";
+            popup.style.zIndex = "10001";
+            popup.style.visibility = "visible";
+        };
+
+        window.fxResetDropdownGrid = function (container) {
+            if (!container) return;
+            const tr = container.closest('tr');
+            if (tr) {
+                tr.style.removeProperty('z-index');
+                tr.style.removeProperty('position');
+            }
+            const td = container.closest('td');
+            if (td) {
+                td.style.removeProperty('z-index');
+                td.style.removeProperty('position');
+            }
+        };
+    </script>
+</body>
+
+</html>

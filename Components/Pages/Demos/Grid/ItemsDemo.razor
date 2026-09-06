@@ -1,0 +1,80 @@
+@page "/demo/grid/items"
+
+@using FlexCore.Showcase.Data
+
+<PageTitle>Grid — Items — FlexCore</PageTitle>
+
+<h1>Grid — Item Catalog</h1>
+<p>
+    A generic item catalog modeled after <code>FItems</code>. Categories cover
+    Material / Labor / Subcontract / Equipment / Overhead; rows are phase-keyed
+    with default cost and an Active flag. Demonstrates boolean rendering, default
+    sorts, and per-category grouping.
+</p>
+
+<div class="demo-frame">
+    <GridControl TValue="CatalogItem"
+                 DataSource="@_items"
+                 AllowSelection="true"
+                 AllowSorting="true"
+                 AllowFiltering="true"
+                 AllowGrouping="true"
+                 AllowResizing="true"
+                 AllowColumnReorder="true"
+                 EnableHover="true"
+                 ShowSearchBar="true"
+                 Height="520px"
+                 GroupColumns="@_groupColumns"
+                 ShowGroupCount="true"
+                 AggregateRows="_aggregates">
+        <GridColumnsBase>
+            <GridColumn Field="@nameof(CatalogItem.ItemId)"      HeaderText="Item ID"     Width="110px" />
+            <GridColumn Field="@nameof(CatalogItem.Description)" HeaderText="Description" Width="260px" />
+            <GridColumn Field="@nameof(CatalogItem.Phase)"       HeaderText="Phase"       Width="160px" />
+            <GridColumn Field="@nameof(CatalogItem.Category)"    HeaderText="Category"    Width="160px" />
+            <GridColumn Field="@nameof(CatalogItem.UOM)"         HeaderText="UOM"         Width="70px" />
+            <GridColumn Field="@nameof(CatalogItem.DefaultCost)" HeaderText="Default $"   Width="120px"
+                        Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+            <GridColumn Field="@nameof(CatalogItem.IsActive)"    HeaderText="Active"      Width="80px"
+                        Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
+        </GridColumnsBase>
+    </GridControl>
+</div>
+
+<h2>Things to try</h2>
+<ul>
+    <li>Pre-grouped by <strong>Category</strong> — drag to <strong>Phase</strong> to re-pivot.</li>
+    <li>Sort <strong>Default $</strong> descending to find the priciest items in a category.</li>
+    <li>Filter <strong>Active</strong> to <em>false</em> to spot inactive items.</li>
+    <li>Group sums show per-category average default cost in the caption.</li>
+</ul>
+
+<h2>Other Grid Demos</h2>
+<ul>
+    <li><a href="/demo/grid">Basic Grid</a></li>
+    <li><a href="/demo/grid/reordering">Reordering Grid</a></li>
+    <li><a href="/demo/grid/assembly">Assembly</a></li>
+    <li><a href="/demo/grid/vendor-prices">Vendor Prices</a></li>
+</ul>
+
+@code {
+    private List<CatalogItem> _items = DemoData.GenerateItemCatalog();
+
+    private List<string> _groupColumns = new() { nameof(CatalogItem.Category) };
+
+    private List<AggregateRow> _aggregates = new()
+    {
+        new AggregateRow
+        {
+            ShowInGroupCaption = true,
+            ShowInGroupFooter = true,
+            Columns = new()
+            {
+                new AggregateColumn { Field = nameof(CatalogItem.DefaultCost), Type = AggregateType.Average, Format = "C2",
+                    GroupCaptionTemplate = "avg {value}", GroupFooterTemplate = "Avg {value}" },
+                new AggregateColumn { Field = nameof(CatalogItem.DefaultCost), Type = AggregateType.Count,
+                    GroupCaptionTemplate = "({value} items)", GroupFooterTemplate = "{value} items" },
+            }
+        }
+    };
+}

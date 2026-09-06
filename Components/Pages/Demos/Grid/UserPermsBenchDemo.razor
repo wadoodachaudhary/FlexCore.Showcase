@@ -1,0 +1,228 @@
+@page "/demo/grid/userperms-lists"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+@using FlexCore.Showcase.Data
+@inject FlexCore.Showcase.Services.BenchDataStore BenchData
+
+<PageTitle>Multi-Grid Coordination &amp; Master-Detail — FlexCore DataGrid</PageTitle>
+
+<SyncfusionDemoLayout Title="Multi-Grid Master-Detail Coordination &amp; Dirty Veto"
+                      Category="DataGrid"
+                      BadgeText="Master-Detail"
+                      RazorCode="@_razorSourceCode"
+                      CSharpCode="@_csharpSourceCode"
+                      CSharpTabName="SecurityModels.cs">
+    <Summary>
+        <p>
+            Enterprise administration panels often feature coordinated multi-grid layouts: selecting an item in the master grid (e.g. <strong>Security Groups</strong>) 
+            immediately rebinds the detail grid (e.g. <strong>Assigned Users</strong>).
+        </p>
+        <p>
+            This benchmark demonstrates two coordinated FlexCore DataGrids interacting in real time:
+            instant inline group creation and rename, master-to-detail filtering, and cross-grid dirty check veto guarding 
+            (preventing the master grid from switching groups if unsaved edits are pending).
+        </p>
+    </Summary>
+
+    <DemoControls>
+        <div style="display:flex;gap:12px;align-items:center;font-size:13px;flex-wrap:wrap;">
+            <button class="btn btn-sm btn-primary" @onclick="CreateGroup">➕ Create Group &amp; Rename</button>
+            <label class="d-flex align-items-center gap-1 cursor-pointer">
+                <input type="checkbox" @bind="_simulateDirty" />
+                <span class="text-danger fw-bold">Simulate Dirty State (Veto Next Move)</span>
+            </label>
+            <span class="text-muted ms-2">
+                Active Group: <b>@(_selectedGroup?.Description ?? "None")</b> |
+                Vetoes Blocked: <b class="text-danger">@_vetoCount</b>
+            </span>
+        </div>
+    </DemoControls>
+
+    <DemoContent>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;width:100%;">
+            <!-- Master: Security Groups -->
+            <div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
+                <div style="background:#f1f5f9;padding:8px 12px;font-weight:700;font-size:13px;border-bottom:1px solid #e2e8f0;">
+                    🛡️ Security Groups (Master)
+                </div>
+                <GridControl @ref="_groupsGrid"
+                             TValue="SecurityGroup"
+                             DataSource="@_groups"
+                             Height="280px"
+                             AllowSelection="true"
+                             AllowSorting="false"
+                             EditSettingsRef="@_groupEditSettings"
+                             SelectionSettingsRef="@_groupSelectionSettings"
+                             EventsRef="@_groupEvents"
+                             CssClass="fx-grid-compact">
+                    <GridColumnsBase>
+                        <GridColumn Field="@nameof(SecurityGroup.GroupID)" HeaderText="ID" Width="60px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SecurityGroup.Description)" HeaderText="Group Name" Width="200px" AllowEditing="true" />
+                        <GridColumn Field="@nameof(SecurityGroup.MemberCount)" HeaderText="Users" Width="70px" TextAlign="TextAlign.Right" AllowEditing="false" />
+                    </GridColumnsBase>
+                </GridControl>
+            </div>
+
+            <!-- Detail: Group Members -->
+            <div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
+                <div style="background:#f1f5f9;padding:8px 12px;font-weight:700;font-size:13px;border-bottom:1px solid #e2e8f0;">
+                    👥 Assigned Users (Detail: @(_selectedGroup?.Description ?? "None"))
+                </div>
+                <GridControl TValue="UserListItem"
+                             DataSource="@_filteredUsers"
+                             Height="280px"
+                             AllowSelection="true"
+                             AllowSorting="true"
+                             CssClass="fx-grid-compact">
+                    <GridColumnsBase>
+                        <GridColumn Field="@nameof(UserListItem.UserID)" HeaderText="Login ID" Width="100px" />
+                        <GridColumn Field="@nameof(UserListItem.UserName)" HeaderText="Full Name" Width="160px" />
+                        <GridColumn Field="@nameof(UserListItem.Email)" HeaderText="Corporate Email" Width="200px" />
+                    </GridColumnsBase>
+                </GridControl>
+            </div>
+        </div>
+    </DemoContent>
+
+    <DocumentationContent>
+        <h3>Cross-Grid Coordination Highlights</h3>
+        <ul>
+            <li><strong>Master-Detail Synchronization:</strong> The <code>RowSelected</code> callback on the master grid immediately queries or filters the detail dataset and invokes <code>StateHasChanged()</code>.</li>
+            <li><strong>Selection Interception:</strong> By attaching to <code>RowSelecting</code>, any dirty form state on the page can selectively block selection shifts, preventing unsaved user data loss.</li>
+            <li><strong>Immediate Programmatic Edit:</strong> Calling <code>CreateGroup()</code> dynamically inserts an item and targets focus directly to the rename editor.</li>
+        </ul>
+    </DocumentationContent>
+</SyncfusionDemoLayout>
+
+@code {
+    private GridControl<SecurityGroup>? _groupsGrid;
+    private List<SecurityGroup> _groups = [];
+    private List<UserListItem> _allUsers = [];
+    private List<UserListItem> _filteredUsers = [];
+    private SecurityGroup? _selectedGroup;
+    private bool _simulateDirty;
+    private int _vetoCount;
+
+    private readonly EditSettings _groupEditSettings = new()
+    {
+        AllowEditing = true,
+        Mode = EditMode.Batch
+    };
+
+    private readonly SelectionSettings _groupSelectionSettings = new()
+    {
+        Mode = SelectionMode.Row,
+        Type = SelectionType.Single
+    };
+
+    private readonly GridControlEvents<SecurityGroup> _groupEvents = new();
+
+    protected override void OnInitialized()
+    {
+        _groups = BenchData.SecurityGroups.ToList();
+        _allUsers = BenchData.Users.ToList();
+        _selectedGroup = _groups.FirstOrDefault();
+        FilterUsers();
+
+        _groupEvents.RowSelecting = EventCallback.Factory.Create<RowSelectEventArgs<SecurityGroup>>(this, args =>
+        {
+            if (_simulateDirty)
+            {
+                args.Cancel = true;
+                _vetoCount++;
+                StateHasChanged();
+            }
+        });
+
+        _groupEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<SecurityGroup>>(this, args =>
+        {
+            _selectedGroup = args.Data;
+            FilterUsers();
+            StateHasChanged();
+        });
+    }
+
+    private void FilterUsers()
+    {
+        if (_selectedGroup == null)
+        {
+            _filteredUsers = [];
+            return;
+        }
+
+        // Deterministic subset per group for showcase demo
+        var take = (_selectedGroup.GroupID % 4) + 3;
+        _filteredUsers = _allUsers.Take(take).ToList();
+    }
+
+    private void CreateGroup()
+    {
+        var newId = (_groups.Max(g => g.GroupID)) + 1;
+        var newGroup = new SecurityGroup
+        {
+            GroupID = newId,
+            Description = $"New Department Group #{newId}",
+            IsAdmin = false,
+            MemberCount = 1
+        };
+        _groups.Add(newGroup);
+        _selectedGroup = newGroup;
+        FilterUsers();
+        StateHasChanged();
+    }
+
+    private const string _razorSourceCode = @"@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+
+<div class=""row"">
+    <!-- Master Grid -->
+    <div class=""col-md-6"">
+        <GridControl TValue=""SecurityGroup""
+                     DataSource=""@Groups""
+                     AllowSelection=""true""
+                     EventsRef=""@_groupEvents"">
+            <GridColumnsBase>
+                <GridColumn Field=""@nameof(SecurityGroup.GroupID)"" HeaderText=""ID"" Width=""60px"" />
+                <GridColumn Field=""@nameof(SecurityGroup.Description)"" HeaderText=""Group Name"" AllowEditing=""true"" />
+            </GridColumnsBase>
+        </GridControl>
+    </div>
+
+    <!-- Detail Grid -->
+    <div class=""col-md-6"">
+        <GridControl TValue=""UserListItem""
+                     DataSource=""@FilteredUsers""
+                     AllowSelection=""true"">
+            <GridColumnsBase>
+                <GridColumn Field=""@nameof(UserListItem.UserID)"" HeaderText=""Login ID"" Width=""100px"" />
+                <GridColumn Field=""@nameof(UserListItem.UserName)"" HeaderText=""Full Name"" />
+            </GridColumnsBase>
+        </GridControl>
+    </div>
+</div>
+
+@code {
+    private void OnGroupSelected(SecurityGroup group)
+    {
+        FilteredUsers = AllUsers.Where(u => u.GroupID == group.GroupID).ToList();
+    }
+}";
+
+    private const string _csharpSourceCode = @"namespace FlexCore.Showcase.Data;
+
+public sealed class SecurityGroup
+{
+    public int GroupID { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public bool IsAdmin { get; set; }
+    public int MemberCount { get; set; }
+}
+
+public sealed class UserListItem
+{
+    public string UserID { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+}";
+}

@@ -1,0 +1,152 @@
+@page "/demo/grid/advanced"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+@using System.ComponentModel
+@using System.ComponentModel.DataAnnotations
+
+<PageTitle>Advanced Grid — FlexCore Showcase</PageTitle>
+
+<div class="container-fluid py-3">
+    <div class="mb-3">
+        <h2>Advanced Grid Features</h2>
+        <p class="text-muted">
+            Demonstrating grouped headers, multiple Left and Right frozen columns,
+            annotation-driven columns, sorting, batch editing, and auto-sizing.
+        </p>
+    </div>
+
+    <div class="card shadow-sm mb-3" style="height: 420px;">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="font-monospace font-weight-bold">Header bands + two frozen columns on each edge</span>
+            <span class="badge bg-primary">@_rows.Count rows</span>
+        </div>
+        <div class="card-body p-0" style="overflow: hidden;">
+            <GridControl DataSource="@_rows"
+                         TValue="GridItem"
+                         Height="100%"
+                         AllowSorting="true"
+                         AllowResizing="true"
+                         AllowFiltering="true"
+                         AllowSelection="true"
+                         ColumnHeaderBands="@_headerBands"
+                         EditSettingsRef="@_editSettings">
+                <GridColumnsBase>
+                    <GridColumn Field="@nameof(GridItem.Id)" HeaderText="ID" Width="60px" IsFrozen="true" FrozenPosition="FrozenColumnPosition.Left" Type="ColumnType.Number" />
+                    <GridColumn Field="@nameof(GridItem.Code)" HeaderText="Code" Width="100px" IsFrozen="true" FrozenPosition="FrozenColumnPosition.Left" />
+                    <GridColumn Field="@nameof(GridItem.Name)" HeaderText="Product Name" Width="180px" />
+                    <GridColumn Field="@nameof(GridItem.Category)" HeaderText="Category" Width="120px" />
+                    <GridColumn Field="@nameof(GridItem.Quantity)" HeaderText="Qty" HeaderBand="Amounts" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" />
+                    <GridColumn Field="@nameof(GridItem.UnitPrice)" HeaderText="Price" HeaderBand="Amounts" Width="90px" Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+                    <GridColumn Field="@nameof(GridItem.Discount)" HeaderText="Discount" HeaderBand="Amounts" Width="85px" Type="ColumnType.Number" Format="N1" TextAlign="TextAlign.Right" />
+                    <GridColumn Field="@nameof(GridItem.Status)" HeaderText="Status" Width="110px" IsFrozen="true" FrozenPosition="FrozenColumnPosition.Right" />
+                    <GridColumn Field="@nameof(GridItem.Action)" HeaderText="Actions" Width="120px" IsFrozen="true" FrozenPosition="FrozenColumnPosition.Right" AllowEditing="false">
+                        <Template Context="row">
+                            <button type="button" class="btn btn-xs btn-outline-primary py-0 px-1" style="font-size: 0.75rem;" @onclick:stopPropagation="true">Edit</button>
+                            <button type="button" class="btn btn-xs btn-outline-danger py-0 px-1 ms-1" style="font-size: 0.75rem;" @onclick:stopPropagation="true">Del</button>
+                        </Template>
+                    </GridColumn>
+                </GridColumnsBase>
+            </GridControl>
+        </div>
+    </div>
+
+    <div class="card shadow-sm" style="height: 300px;">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="font-monospace font-weight-bold">AutoGenerateColumns from model annotations</span>
+            <span class="small text-muted">ID is a key; InternalCode is excluded; Total is read-only</span>
+        </div>
+        <div class="card-body p-0" style="overflow: hidden;">
+            <GridControl DataSource="@_annotatedRows"
+                         TValue="AnnotatedGridItem"
+                         AutoGenerateColumns="true"
+                         Height="100%"
+                         AllowSorting="true"
+                         AllowFiltering="true"
+                         EditSettingsRef="@_editSettings" />
+        </div>
+    </div>
+</div>
+
+@code {
+    public class GridItem
+    {
+        public int Id { get; set; }
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Category { get; set; } = "";
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal Discount { get; set; }
+        public string Status { get; set; } = "Active";
+        public string Action { get; set; } = "";
+    }
+
+    private List<GridItem> _rows = new();
+    private List<AnnotatedGridItem> _annotatedRows = new();
+    private readonly EditSettings _editSettings = new() { AllowEditing = true, Mode = EditMode.Batch };
+    private readonly IReadOnlyList<GridColumnHeaderBand> _headerBands =
+    [
+        new("Identity", nameof(GridItem.Id), nameof(GridItem.Code)),
+        new("Product", nameof(GridItem.Name), nameof(GridItem.Category)),
+        new("Workflow", nameof(GridItem.Status), nameof(GridItem.Action))
+    ];
+
+    public sealed class AnnotatedGridItem
+    {
+        [Key]
+        [Display(Name = "Item #", Order = 0, GroupName = "Identity")]
+        public int Id { get; set; }
+
+        [Display(Name = "SKU", Order = 1, GroupName = "Identity")]
+        public string Code { get; set; } = "";
+
+        [DisplayName("Product description")]
+        public string Description { get; set; } = "";
+
+        [Display(Name = "Unit price", Order = 2, GroupName = "Amounts")]
+        [DisplayFormat(DataFormatString = "{0:C2}")]
+        public decimal UnitPrice { get; set; }
+
+        [Display(Name = "Extended", Order = 3, GroupName = "Amounts")]
+        [DisplayFormat(DataFormatString = "{0:C2}")]
+        [Editable(false)]
+        public decimal Total { get; set; }
+
+        [Display(AutoGenerateField = false)]
+        public string InternalCode { get; set; } = "";
+    }
+
+    protected override void OnInitialized()
+    {
+        var list = new List<GridItem>();
+        var cats = new[] { "Electronics", "Hardware", "Lumber", "Paint", "Plumbing", "Electrical" };
+        for (int i = 1; i <= 200; i++)
+        {
+            list.Add(new GridItem
+            {
+                Id = i,
+                Code = $"SKU-{i:D5}",
+                Name = $"Material Item #{i}",
+                Category = cats[i % cats.Length],
+                Quantity = 10 + (i * 7) % 150,
+                UnitPrice = 15.50m + (i % 25) * 4.25m,
+                Discount = (i % 5) * 2.5m,
+                Status = (i % 6 == 0) ? "Pending" : "Active"
+            });
+        }
+        _rows = list;
+
+        _annotatedRows = list.Take(12)
+            .Select(row => new AnnotatedGridItem
+            {
+                Id = row.Id,
+                Code = row.Code,
+                Description = row.Name,
+                UnitPrice = row.UnitPrice,
+                Total = row.Quantity * row.UnitPrice,
+                InternalCode = $"INTERNAL-{row.Id}"
+            })
+            .ToList();
+    }
+}

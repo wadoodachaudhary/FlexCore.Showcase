@@ -1,0 +1,149 @@
+@page "/demo/reports/model-costs"
+
+@using Fx.ControlKit.Reports
+@using FlexCore.Showcase.Data
+
+@inject IWebHostEnvironment Env
+@inject ILogger<ModelCostsDemo> Logger
+
+<PageTitle>Model Costs Report — FlexCore</PageTitle>
+
+<h1>Reports — Model Costs</h1>
+<p>
+    A paginated, XML-driven Crystal-style report rendered by <code>ReportWriterControl</code>.
+    Pick a model + community below, hit <strong>Run</strong>, and FlexCore's
+    <code>CrystalXmlReportLoader</code> parses the bundled
+    <code>wwwroot/reports/Model&nbsp;Costs&nbsp;v1.xml</code> into a SQL definition,
+    routes it through <code>IReportDataExecutor</code> (here, a showcase stub that
+    synthesizes rows from <code>DemoData</code>), and lays out the result with
+    4 levels of group footers and per-group sums.
+</p>
+
+<div class="demo-controls">
+    <label>
+        Model
+        <select @bind="_model">
+            @foreach (var m in DemoData.HouseModels)
+            {
+                <option value="@m.Name">@m.Name &nbsp;·&nbsp; @m.Bedrooms bd / @m.SqFt sf</option>
+            }
+        </select>
+    </label>
+    <label>
+        Community
+        <select @bind="_community">
+            <option value="Showcase Estates">Showcase Estates</option>
+            <option value="Riverbend Hills">Riverbend Hills</option>
+            <option value="Northbrook Crossing">Northbrook Crossing</option>
+        </select>
+    </label>
+    <button class="btn-primary" @onclick="RunReport" disabled="@_running">
+        @(_running ? "Running…" : "Run")
+    </button>
+</div>
+
+<div class="demo-frame report-frame">
+    <ReportWriterControl @ref="_writer" />
+</div>
+
+<h2>What's happening</h2>
+<ul>
+    <li><strong>XML loaded:</strong> <code>wwwroot/reports/Model Costs v1.xml</code> — a stripped, fictionalized version of HomeFront's real Crystal Report.</li>
+    <li><strong>Loader:</strong> <code>CrystalXmlReportLoader.Load(path)</code> parses tables, joins, groups, formulas, and field placement into a <code>ReportDefinition</code>.</li>
+    <li><strong>Data executor:</strong> <code>ShowcaseReportDataExecutor</code> ignores the SQL and emits rows from <code>DemoData</code> — wired in <code>Program.cs</code> via <code>IReportDataExecutor</code>.</li>
+    <li><strong>Session context:</strong> <code>ShowcaseReportSessionContext</code> auto-injects <code>DivisionID</code> when the SQL references <code>@@DivisionID</code> but the caller didn't pass it.</li>
+    <li><strong>Renderer:</strong> <code>ReportWriterControl</code> applies adaptive column widths from the XML, computes per-group sums, and splits to landscape pages with <code>Sum(Amount)</code> in three group footers (Phase / Group / Model).</li>
+</ul>
+
+<h2>Markup</h2>
+<pre><code>&lt;ReportWriterControl @@ref="_writer" /&gt;
+
+@@code {
+    private ReportWriterControl? _writer;
+
+    async Task RunReport()
+    {
+        var path = Path.Combine(Env.WebRootPath, "reports", "Model Costs v1.xml");
+        await _writer!.ShowXmlReport(path, new Dictionary&lt;string, object&gt;
+        {
+            ["Model"]     = _model,
+            ["Community"] = _community,
+        });
+    }
+}</code></pre>
+
+@code {
+    private ReportWriterControl? _writer;
+    private string _model = DemoData.HouseModels[0].Name;
+    private string _community = "Showcase Estates";
+    private bool _running;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Auto-run on first paint so visitors land on a populated report.
+            await RunReport();
+        }
+    }
+
+    private async Task RunReport()
+    {
+        if (_writer is null) return;
+        _running = true;
+        StateHasChanged();
+        try
+        {
+            var path = Path.Combine(Env.WebRootPath, "reports", "Model Costs v1.xml");
+            Logger.LogInformation("Loading demi report: {Path}", path);
+            await _writer.ShowXmlReport(path, new Dictionary<string, object>
+            {
+                ["Model"]     = _model,
+                ["Community"] = _community,
+            });
+        }
+        finally
+        {
+            _running = false;
+            StateHasChanged();
+        }
+    }
+}
+
+<style>
+    .demo-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+    .demo-controls label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+        color: #4b5563;
+    }
+    .demo-controls select {
+        padding: 0.35rem 0.5rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        min-width: 220px;
+    }
+    .demo-controls .btn-primary {
+        padding: 0.45rem 1rem;
+        border: 1px solid #2563eb;
+        background: #2563eb;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .demo-controls .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    .report-frame {
+        min-height: 720px;
+    }
+</style>

@@ -1,0 +1,80 @@
+@page "/demo/grid"
+
+<PageTitle>Grid — FlexCore</PageTitle>
+
+<h1>GridControl</h1>
+<p>Sortable, filterable, groupable data grid. Click a header to sort, drag to reorder, right-click for menu.</p>
+
+<div class="demo-frame">
+    <GridControl TValue="Person" DataSource="@_people"
+                 AllowSelection="true"
+                 AllowSorting="true"
+                 AllowFiltering="true"
+                 AllowGrouping="true"
+                 AllowResizing="true"
+                 EnableHover="true"
+                 Height="420px">
+        <GridColumnsBase>
+            <GridColumn Field="@nameof(Person.Id)"        HeaderText="ID"          Width="60px"
+                        Type="ColumnType.Number" TextAlign="TextAlign.Right" />
+            <GridColumn Field="@nameof(Person.Name)"      HeaderText="Name"        Width="160px" />
+            <GridColumn Field="@nameof(Person.Department)" HeaderText="Department" Width="160px" />
+            <GridColumn Field="@nameof(Person.Role)"      HeaderText="Role"        Width="160px" />
+            <GridColumn Field="@nameof(Person.Salary)"    HeaderText="Salary"      Width="120px"
+                        Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" />
+            <GridColumn Field="@nameof(Person.HireDate)"  HeaderText="Hire Date"   Width="120px"
+                        Type="ColumnType.Date" Format="d" />
+        </GridColumnsBase>
+    </GridControl>
+</div>
+
+<h2>Flagship Enterprise Showcase</h2>
+<ul>
+    <li><a href="/demo/grid/ag-grid-showcase"><strong>AG Grid Showcase (4-in-1 Suite)</strong> — 100k Performance, Live Finance Tickers &amp; Sparklines, HR Tree Directory, and Inventory Master-Detail</a></li>
+    <li><a href="/demo/grid/enterprise-suite">Enterprise Grid Suite (ClosedXML Excel Export &amp; Checkbox Filters)</a></li>
+    <li><a href="/demo/grid/virtualization-bench">50K Row Virtualization &amp; Multi-Edit Batching</a></li>
+</ul>
+
+<h2>Other Grid Demos</h2>
+<ul>
+    <li><a href="/demo/grid/reordering">Reordering Grid</a></li>
+    <li><a href="/demo/grid/assembly">Assembly</a></li>
+    <li><a href="/demo/grid/vendor-prices">Vendor Prices</a></li>
+    <li><a href="/demo/grid/items">Items Catalog</a></li>
+</ul>
+
+<h2>Markup</h2>
+<pre><code>&lt;GridControl TValue="Person" DataSource="@@_people"
+             AllowSelection="true" AllowSorting="true"
+             AllowFiltering="true" AllowGrouping="true"
+             AllowResizing="true" EnableHover="true" Height="420px"&gt;
+    &lt;GridColumnsBase&gt;
+        &lt;GridColumn Field="Id"         HeaderText="ID"         Width="60px"
+                    Type="ColumnType.Number" TextAlign="TextAlign.Right" /&gt;
+        &lt;GridColumn Field="Name"       HeaderText="Name"       Width="160px" /&gt;
+        &lt;GridColumn Field="Department" HeaderText="Department" Width="160px" /&gt;
+        &lt;GridColumn Field="Role"       HeaderText="Role"       Width="160px" /&gt;
+        &lt;GridColumn Field="Salary"     HeaderText="Salary"     Width="120px"
+                    Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" /&gt;
+        &lt;GridColumn Field="HireDate"   HeaderText="Hire Date"  Width="120px"
+                    Type="ColumnType.Date" Format="d" /&gt;
+    &lt;/GridColumnsBase&gt;
+&lt;/GridControl&gt;</code></pre>
+
+@code {
+    record Person(int Id, string Name, string Department, string Role, decimal Salary, DateTime HireDate);
+
+    private List<Person> _people = new()
+    {
+        new(1,  "Avery Chen",      "Engineering", "Senior Engineer", 145_000m, new(2021, 3, 14)),
+        new(2,  "Blake Rivera",    "Engineering", "Engineer",         98_000m, new(2023, 6, 1)),
+        new(3,  "Casey Patel",     "Engineering", "Lead",            172_000m, new(2019, 9, 22)),
+        new(4,  "Drew Yamamoto",   "Design",      "UX Designer",     112_000m, new(2022, 1, 9)),
+        new(5,  "Elliot Marquez",  "Design",      "Senior Designer", 131_000m, new(2020, 8, 3)),
+        new(6,  "Finley Okafor",   "Product",     "PM",              125_000m, new(2022, 11, 15)),
+        new(7,  "Gray Solberg",    "Product",     "Senior PM",       154_000m, new(2018, 4, 28)),
+        new(8,  "Hayden Lin",      "Sales",       "AE",               92_000m, new(2024, 2, 5)),
+        new(9,  "Indigo Brooks",   "Sales",       "Senior AE",       118_000m, new(2021, 7, 17)),
+        new(10, "Jess Wakefield",  "Marketing",   "Manager",         108_000m, new(2020, 12, 2)),
+    };
+}

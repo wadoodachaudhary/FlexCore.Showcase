@@ -1,0 +1,319 @@
+@page "/demo/data-control"
+@using Fx.ControlKit.Data
+
+<PageTitle>DataControl - FlexCore</PageTitle>
+
+<div class="docs-page data-control-docs">
+    <h1>DataControl</h1>
+    <p>
+        <code>DataControl</code> is FlexCore's data-aware tabular component. It is inspired by
+        pandas <code>DataFrame</code> and PowerBuilder <code>DataWindow</code>: one in-memory
+        table surface that can feed <code>GridControl</code>, <code>ChartControl</code>,
+        <code>ReportWriterControl</code>, and future data-aware controls.
+    </p>
+
+    <section>
+        <h2>Live Frame</h2>
+        <div class="demo-frame data-summary">
+            <div>
+                <strong>Shape</strong>
+                <span>@_orders.Shape.Rows rows x @_orders.Shape.Columns columns</span>
+            </div>
+            <div>
+                <strong>Size</strong>
+                <span>@_orders.Size cells</span>
+            </div>
+            <div>
+                <strong>Empty</strong>
+                <span>@_orders.Empty</span>
+            </div>
+            <div>
+                <strong>Ndim</strong>
+                <span>@_orders.Ndim</span>
+            </div>
+        </div>
+
+        <div class="demo-frame data-table-frame">
+            <table class="data-doc-table">
+                <thead>
+                    <tr>
+                        <th>Index</th>
+                        @foreach (var column in _orders.Columns)
+                        {
+                            <th>@column.Name</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var r = 0; r < _orders.Shape.Rows; r++)
+                    {
+                        <tr>
+                            <td>@_orders.Index[r]</td>
+                            @for (var c = 0; c < _orders.Shape.Columns; c++)
+                            {
+                                <td>@FormatCell(_orders.Iat[r, c])</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <h2>Constructor</h2>
+        <p>
+            The pandas-style constructor accepts heterogeneous input and optional axis labels.
+            C# uses PascalCase elsewhere, but this signature maps directly to
+            <code>DataFrame(data=None, index=None, columns=None, dtype=None, copy=None)</code>.
+        </p>
+        <pre><code>var frame = new DataControl(
+    data: new Dictionary&lt;string, object?&gt;
+    {
+        ["Order"] = new[] { "A100", "A101", "A102" },
+        ["Customer"] = new[] { "Acme", "Northwind", "Contoso" },
+        ["Amount"] = new object?[] { "1280.50", "845.25", "2210.00" }
+    },
+    index: new[] { "row-a", "row-b", "row-c" },
+    columns: new[] { "Order", "Customer", "Amount" });</code></pre>
+    </section>
+
+    <section>
+        <h2>Metadata</h2>
+        <div class="api-grid">
+            @foreach (var item in _metadataDocs)
+            {
+                <article>
+                    <h3>@item.Name</h3>
+                    <p>@item.Description</p>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section>
+        <h2>Typed Access</h2>
+        <p>
+            <code>At</code> reads or writes a scalar by row label and column name.
+            <code>Iat</code> reads or writes by zero-based row and column position.
+        </p>
+        <pre><code>var amount = frame.At["row-a", "Amount"];
+frame.At["row-a", "Amount"] = 1300.00m;
+
+var firstCustomer = frame.Iat[0, 1];
+frame.Iat[0, 1] = "Acme Industries";</code></pre>
+    </section>
+
+    <section>
+        <h2>Dtypes</h2>
+        <p>
+            <code>ConvertDtypes</code> and <code>InferObjects</code> create converted frames.
+            <code>Astype</code> forces one or more columns to a requested CLR type.
+        </p>
+        <div class="demo-frame data-table-frame">
+            <table class="data-doc-table">
+                <thead>
+                    <tr>
+                        <th>Column</th>
+                        <th>Original dtype</th>
+                        <th>After ConvertDtypes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var column in _orders.Columns)
+                    {
+                        <tr>
+                            <td>@column.Name</td>
+                            <td>@ShortType(_orders.Dtypes[column.Name])</td>
+                            <td>@ShortType(_converted.Dtypes[column.Name])</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <pre><code>var converted = frame.ConvertDtypes();
+var decimals = frame.Astype("Amount", typeof(decimal));
+var numericOnly = frame.SelectDtypes(include: new[] { typeof(decimal), typeof(int) });</code></pre>
+    </section>
+
+    <section>
+        <h2>Chart Adapter</h2>
+        <p>
+            <code>ToChartBars</code> and <code>ToChartSeries</code> project the same data into
+            shapes already accepted by <code>ChartControl</code>.
+        </p>
+        <div class="demo-frame">
+            <ChartControl Title="Order Amounts"
+                          Bars="@_converted.ToChartBars("Order", "Amount")"
+                          ShowValues="true"
+                          ValueFormat="C0"
+                          Height="260px" />
+        </div>
+    </section>
+
+    <section>
+        <h2>DataFrame Methods</h2>
+        <div class="api-grid">
+            @foreach (var item in _dataFrameDocs)
+            {
+                <article>
+                    <h3>@item.Name</h3>
+                    <p>@item.Description</p>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section>
+        <h2>DataWindow Methods</h2>
+        <div class="api-grid">
+            @foreach (var item in _dataWindowDocs)
+            {
+                <article>
+                    <h3>@item.Name</h3>
+                    <p>@item.Description</p>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section>
+        <h2>Control Adapters</h2>
+        <div class="api-grid">
+            @foreach (var item in _adapterDocs)
+            {
+                <article>
+                    <h3>@item.Name</h3>
+                    <p>@item.Description</p>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section>
+        <h2>Support Types</h2>
+        <ul class="compact-list">
+            <li><code>DataControlColumn</code></li>
+            <li><code>DataControlInfo</code></li>
+            <li><code>DataControlShape</code></li>
+            <li><code>DataControlAtIndexer</code></li>
+            <li><code>DataControlIatIndexer</code></li>
+            <li><code>DataControlAggregateResult</code></li>
+            <li><code>DataControlRowChangedEventArgs</code></li>
+            <li><code>DataControlAggregate</code></li>
+            <li><code>DataControlSaveFormat</code></li>
+        </ul>
+    </section>
+</div>
+
+@code {
+    private readonly DataControl _orders = DataControl.DataFrame(
+        data: new Dictionary<string, object?>
+        {
+            ["Order"] = new[] { "A100", "A101", "A102", "A103" },
+            ["Customer"] = new[] { "Acme", "Northwind", "Contoso", "Fabrikam" },
+            ["Amount"] = new object?[] { "1280.50", "845.25", "2210.00", "1640.75" },
+            ["Open"] = new object?[] { "true", "false", "true", "true" }
+        },
+        index: new[] { "row-a", "row-b", "row-c", "row-d" },
+        columns: new[] { "Order", "Customer", "Amount", "Open" });
+
+    private DataControl _converted => _orders.ConvertDtypes();
+
+    private static string FormatCell(object? value) =>
+        value switch
+        {
+            null => "",
+            decimal money => money.ToString("N2"),
+            double number => number.ToString("N2"),
+            DateTime date => date.ToShortDateString(),
+            _ => value.ToString() ?? ""
+        };
+
+    private static string ShortType(Type type) => type.Name switch
+    {
+        "String" => "string",
+        "Decimal" => "decimal",
+        "Int32" => "int",
+        "Boolean" => "bool",
+        "DateTime" => "DateTime",
+        "Object" => "object",
+        _ => type.Name
+    };
+
+    private sealed record ApiDoc(string Name, string Description);
+
+    private readonly ApiDoc[] _metadataDocs =
+    [
+        new("Index", "Current row labels, defaulting to range-style labels when no index is supplied."),
+        new("Columns", "Column descriptors: name, caption, data type, nullability, readonly state, and ordinal."),
+        new("Dtypes", "Dictionary of column name to CLR type."),
+        new("Info", "Summary object containing table name, row count, column count, columns, and locale."),
+        new("Values", "Two-dimensional object array of visible values."),
+        new("Axes", "Two axes: row labels and column labels."),
+        new("Ndim", "Always 2 for this tabular control."),
+        new("Size", "Total visible cell count: rows times columns."),
+        new("Shape", "Rows and columns as a DataControlShape record."),
+        new("Empty", "True when there are no rows or no columns."),
+        new("At", "Label-based scalar accessor."),
+        new("Iat", "Position-based scalar accessor.")
+    ];
+
+    private readonly ApiDoc[] _dataFrameDocs =
+    [
+        new("Head(count)", "Returns the first rows as a new DataControl."),
+        new("Tail(count)", "Returns the last rows as a new DataControl."),
+        new("SelectColumns(...)", "Keeps only the requested columns."),
+        new("DropColumns(...)", "Removes requested columns from a copied frame."),
+        new("RenameColumn(oldName, newName)", "Renames a column on the current frame."),
+        new("AddColumn(name, type, defaultValue)", "Adds a typed column and initializes existing rows."),
+        new("DropNulls(...)", "Removes rows with null values in selected columns."),
+        new("FillNulls(value, ...)", "Replaces nulls in selected columns."),
+        new("Query(expression)", "Filters with a DataTable expression and returns a new frame."),
+        new("Where(predicate)", "Filters with a DataRow predicate and returns a new frame."),
+        new("SortBy(column, descending)", "Applies a DataView sort expression."),
+        new("GroupBy(groupColumn, valueColumn, aggregate)", "Groups rows and computes Count, Sum, Average, Min, or Max."),
+        new("SelectDtypes(include, exclude)", "Returns columns matching included and excluded CLR types."),
+        new("Astype(...)", "Returns a frame with one, many, or all columns converted to requested types."),
+        new("ConvertDtypes()", "Infers better CLR types from object or string columns."),
+        new("InferObjects()", "Infers object-backed columns without converting existing string columns."),
+        new("Copy(deep)", "Creates a copied DataControl; deep copy duplicates the table.")
+    ];
+
+    private readonly ApiDoc[] _dataWindowDocs =
+    [
+        new("RetrieveAsync(...)", "Loads a DataTable from a host-provided async retrieval function."),
+        new("SetData(table)", "Replaces the underlying table."),
+        new("Reset()", "Clears data and selection."),
+        new("ResetUpdate()", "Accepts changes and clears dirty state."),
+        new("GetChanges()", "Returns changed rows as a DataTable."),
+        new("RejectChanges()", "Rolls back pending changes."),
+        new("GetRow() / SetRow(...)", "Reads or sets the current 1-based row."),
+        new("GetItem(...)", "Reads a cell by 1-based row and column name."),
+        new("SetItem(...)", "Writes a cell by 1-based row and column name."),
+        new("InsertRow(...)", "Inserts a row with optional values."),
+        new("DeleteRow(...)", "Deletes a row by 1-based row number."),
+        new("RowsCopy(...)", "Copies a row range to another DataControl."),
+        new("RowsMove(...)", "Moves a row range to another DataControl."),
+        new("RowsDiscard(...)", "Removes a row range."),
+        new("SelectRow(...) / ClearSelection()", "Manages selected row numbers."),
+        new("SelectedData()", "Exports selected rows as a DataTable."),
+        new("Describe(expression)", "Reads simple metadata and DataWindow-style properties."),
+        new("Modify(property, value)", "Sets supported DataWindow-style properties."),
+        new("Find(expression, startRow, endRow)", "Finds the first row matching a DataTable expression."),
+        new("SaveAs(format)", "Exports to CSV or JSON text.")
+    ];
+
+    private readonly ApiDoc[] _adapterDocs =
+    [
+        new("ToGridRows()", "Projects visible rows as ExpandoObject instances for dynamic grid binding."),
+        new("ToDictionaries()", "Projects rows as dictionaries keyed by column name."),
+        new("ToExpandoRows()", "Projects rows as dynamic ExpandoObject records."),
+        new("ToChartSeries(labelColumn, valueColumns)", "Builds multi-series chart data."),
+        new("ToChartBars(labelColumn, valueColumn, colorColumn)", "Builds legacy ChartControl bar data."),
+        new("ToReportColumns()", "Creates ReportColumn definitions from the schema."),
+        new("ToReportDefinition(title)", "Creates a basic ReportDefinition from the current schema."),
+        new("ToJson()", "Serializes visible rows as JSON."),
+        new("ToCsv()", "Serializes visible rows as CSV.")
+    ];
+}

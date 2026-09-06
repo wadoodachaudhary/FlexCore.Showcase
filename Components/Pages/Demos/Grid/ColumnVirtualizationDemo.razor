@@ -1,0 +1,111 @@
+@page "/demo/grid/column-virtualization"
+@rendermode InteractiveServer
+
+<PageTitle>Column Virtualization — FlexCore</PageTitle>
+
+<div class="container-fluid py-3">
+    <h2>Horizontal Column Virtualization</h2>
+    <p class="text-muted">
+        Scroll horizontally through twenty-one fixed-width columns. The two
+        identity columns and the right-side status remain mounted and frozen;
+        off-screen metric columns are represented by fixed-width spacers. The
+        same grid also exercises the existing row window across 1,000 records.
+    </p>
+
+    <div class="card shadow-sm" style="height: 520px;">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="font-monospace">EnableColumnVirtualization=true; overscan=2</span>
+            <span class="badge bg-primary">@_rows.Count rows × 21 columns</span>
+        </div>
+        <div class="card-body p-0" style="overflow: hidden;">
+            <GridControl TValue="WideGridRow"
+                         DataSource="@_rows"
+                         Height="100%"
+                         WidthMode="GridWidthMode.FitColumns"
+                         AllowSorting="true"
+                         AllowMultiColumnSorting="true"
+                         ShowMultiColumnSortingIndex="true"
+                         AllowFiltering="true"
+                         AllowSelection="true"
+                         AllowResizing="true"
+                         EnableColumnVirtualization="true"
+                         ColumnVirtualizationOverscan="2"
+                         ShowColumnVirtualizationFallback="true">
+                <GridColumnsBase>
+                    <GridColumn Field="@nameof(WideGridRow.Id)" HeaderText="ID" Width="72px"
+                                Type="ColumnType.Number" IsFrozen="true" FrozenPosition="FrozenColumnPosition.Left" />
+                    <GridColumn Field="@nameof(WideGridRow.Code)" HeaderText="Code" Width="116px"
+                                IsFrozen="true" FrozenPosition="FrozenColumnPosition.Left" />
+                    <GridColumn Field="@nameof(WideGridRow.M01)" HeaderText="Metric 01" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M02)" HeaderText="Metric 02" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M03)" HeaderText="Metric 03" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M04)" HeaderText="Metric 04" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M05)" HeaderText="Metric 05" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M06)" HeaderText="Metric 06" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M07)" HeaderText="Metric 07" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M08)" HeaderText="Metric 08" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M09)" HeaderText="Metric 09" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M10)" HeaderText="Metric 10" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M11)" HeaderText="Metric 11" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M12)" HeaderText="Metric 12" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M13)" HeaderText="Metric 13" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M14)" HeaderText="Metric 14" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M15)" HeaderText="Metric 15" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M16)" HeaderText="Metric 16" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M17)" HeaderText="Metric 17" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.M18)" HeaderText="Metric 18" Width="112px" Type="ColumnType.Number" Format="N2" />
+                    <GridColumn Field="@nameof(WideGridRow.Status)" HeaderText="Status" Width="104px"
+                                IsFrozen="true" FrozenPosition="FrozenColumnPosition.Right" />
+                </GridColumnsBase>
+            </GridControl>
+        </div>
+    </div>
+</div>
+
+@code {
+    private readonly List<WideGridRow> _rows = BuildRows();
+
+    private static List<WideGridRow> BuildRows()
+        => Enumerable.Range(1, 1_000)
+            .Select(index => new WideGridRow
+            {
+                Id = index,
+                Code = $"ITEM-{index:D6}",
+                M01 = Value(index, 1), M02 = Value(index, 2), M03 = Value(index, 3),
+                M04 = Value(index, 4), M05 = Value(index, 5), M06 = Value(index, 6),
+                M07 = Value(index, 7), M08 = Value(index, 8), M09 = Value(index, 9),
+                M10 = Value(index, 10), M11 = Value(index, 11), M12 = Value(index, 12),
+                M13 = Value(index, 13), M14 = Value(index, 14), M15 = Value(index, 15),
+                M16 = Value(index, 16), M17 = Value(index, 17), M18 = Value(index, 18),
+                Status = index % 7 == 0 ? "Review" : "Ready"
+            })
+            .ToList();
+
+    private static decimal Value(int row, int metric)
+        => Math.Round((decimal)((row * 17 + metric * 31) % 10_000) / 13m, 2);
+
+    public sealed class WideGridRow
+    {
+        public int Id { get; set; }
+        public string Code { get; set; } = "";
+        public decimal M01 { get; set; }
+        public decimal M02 { get; set; }
+        public decimal M03 { get; set; }
+        public decimal M04 { get; set; }
+        public decimal M05 { get; set; }
+        public decimal M06 { get; set; }
+        public decimal M07 { get; set; }
+        public decimal M08 { get; set; }
+        public decimal M09 { get; set; }
+        public decimal M10 { get; set; }
+        public decimal M11 { get; set; }
+        public decimal M12 { get; set; }
+        public decimal M13 { get; set; }
+        public decimal M14 { get; set; }
+        public decimal M15 { get; set; }
+        public decimal M16 { get; set; }
+        public decimal M17 { get; set; }
+        public decimal M18 { get; set; }
+        public string Status { get; set; } = "";
+    }
+}

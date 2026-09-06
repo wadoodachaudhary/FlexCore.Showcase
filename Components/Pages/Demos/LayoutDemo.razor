@@ -1,0 +1,90 @@
+@page "/demo/layout"
+
+<PageTitle>Layout Controls — FlexCore</PageTitle>
+
+<h1>Layout Controls</h1>
+<p>FlexCore provides structural layout components: <code>PageLayoutControl</code>, <code>LeftPanelControl</code>, <code>CenterPanelControl</code>, <code>RightPanelControl</code>, and <code>DashboardLayoutControl</code>.</p>
+
+<h2>Page Layout with Panels</h2>
+<div class="demo-frame" style="height:350px;">
+    <PageLayoutControl Height="100%">
+        <LeftPanelControl Width="180px" Collapsible="true" Collapsed="@_leftCollapsed" CollapsedChanged="@(v => _leftCollapsed = v)">
+            <div style="padding:12px;">
+                <h4 style="margin:0 0 8px; font-size:14px;">Navigation</h4>
+                <ul style="list-style:none; padding:0; margin:0; font-size:13px;">
+                    <li style="padding:4px 0;">Dashboard</li>
+                    <li style="padding:4px 0;">Reports</li>
+                    <li style="padding:4px 0;">Settings</li>
+                </ul>
+            </div>
+        </LeftPanelControl>
+        <CenterPanelControl>
+            <div style="padding:16px;">
+                <h3 style="margin:0 0 8px;">Main Content Area</h3>
+                <p style="font-size:13px; color:#6b7280;">This center panel fills the remaining horizontal space. The left and right panels can be collapsed.</p>
+                <ProgressBarControl Value="65" Title="Task Progress" Status="65% complete" />
+            </div>
+        </CenterPanelControl>
+        <RightPanelControl Width="200px" Collapsible="true" Collapsed="@_rightCollapsed" CollapsedChanged="@(v => _rightCollapsed = v)">
+            <div style="padding:12px;">
+                <h4 style="margin:0 0 8px; font-size:14px;">Properties</h4>
+                <p style="font-size:12px; color:#6b7280;">Selected item details would appear here.</p>
+            </div>
+        </RightPanelControl>
+    </PageLayoutControl>
+</div>
+
+<h2>Dashboard Grid</h2>
+<div class="demo-frame">
+    <DashboardLayoutControl Columns="3" CellSpacing="@(new double[] { 12, 12 })">
+        <DashboardLayoutPanels>
+            <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
+                <div class="dash-card">
+                    <ChartControl Type="ChartType.KpiCard" KpiValue="1,234" KpiLabel="Orders" KpiTrend="+5.2%" Height="100px" />
+                </div>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
+                <div class="dash-card">
+                    <ChartControl Type="ChartType.KpiCard" KpiValue="$89K" KpiLabel="Revenue" KpiTrend="+12%" Height="100px" />
+                </div>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Row="0" Column="2" SizeX="1" SizeY="1">
+                <div class="dash-card">
+                    <ChartControl Type="ChartType.KpiCard" KpiValue="98.5%" KpiLabel="Uptime" KpiTrend="+0.1%" Height="100px" />
+                </div>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Row="1" Column="0" SizeX="2" SizeY="1">
+                <div class="dash-card">
+                    <ChartControl Type="ChartType.Line" Title="Traffic" Height="200px"
+                                  Series="@(new List<ChartSeries> { new() { Name = "Visits", DataPoints = new() {
+                                      new("Mon", 120), new("Tue", 180), new("Wed", 210), new("Thu", 190), new("Fri", 250), new("Sat", 140), new("Sun", 100) } } })" />
+                </div>
+            </DashboardLayoutPanel>
+            <DashboardLayoutPanel Row="1" Column="2" SizeX="1" SizeY="1">
+                <div class="dash-card">
+                    <ChartControl Type="ChartType.Donut" Title="Sources" Height="200px" InnerRadius="0.5"
+                                  Series="@(new List<ChartSeries> { new() { Name = "Traffic", DataPoints = new() {
+                                      new("Organic", 55), new("Paid", 25), new("Referral", 15), new("Direct", 5) } } })" />
+                </div>
+            </DashboardLayoutPanel>
+        </DashboardLayoutPanels>
+    </DashboardLayoutControl>
+</div>
+
+<h2>Markup</h2>
+<pre><code>&lt;PageLayoutControl Height="100%"&gt;
+    &lt;LeftPanelControl Width="200px" Collapsible="true"&gt;
+        &lt;!-- Navigation --&gt;
+    &lt;/LeftPanelControl&gt;
+    &lt;CenterPanelControl&gt;
+        &lt;!-- Main content --&gt;
+    &lt;/CenterPanelControl&gt;
+    &lt;RightPanelControl Width="250px" Collapsible="true"&gt;
+        &lt;!-- Properties/details --&gt;
+    &lt;/RightPanelControl&gt;
+&lt;/PageLayoutControl&gt;</code></pre>
+
+@code {
+    bool _leftCollapsed;
+    bool _rightCollapsed;
+}

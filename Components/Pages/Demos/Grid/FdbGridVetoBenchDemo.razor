@@ -1,0 +1,220 @@
+@page "/demo/grid/fdbgrid-veto"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+@using FlexCore.Showcase.Data
+
+<PageTitle>Dirty-Row Selection Veto — FlexCore DataGrid</PageTitle>
+
+<SyncfusionDemoLayout Title="Dirty-Row Selection Veto (FDBGrid Pattern)"
+                      Category="DataGrid"
+                      BadgeText="Data Integrity"
+                      RazorCode="@_razorSourceCode"
+                      CSharpCode="@_csharpSourceCode"
+                      CSharpTabName="LedgerRow.cs">
+    <Summary>
+        <p>
+            In mission-critical ERP systems ported from VB6 (such as HomeFront's <code>FDBGrid</code>), leaving an edited row with unsaved changes must be 
+            <strong>programmatically vetoed</strong> unless explicitly committed or reverted.
+        </p>
+        <p>
+            When client-side navigation preview is active, an uncommitted row navigation presents a severe risk surface: the visual cursor must not settle on an unauthorized row,
+            and any subsequent keystrokes must strictly stay bound to the <strong>dirty row</strong> rather than the target row.
+            This benchmark demonstrates how <code>RowSelecting(args)</code> with <code>args.Cancel = true</code> enforces row locking until <strong>Save</strong> is pressed.
+        </p>
+    </Summary>
+
+    <DemoControls>
+        <div style="display:flex;gap:12px;align-items:center;font-size:13px;flex-wrap:wrap;">
+            <button class="btn btn-sm btn-success" @onclick="Save" disabled="@(!_dirty)">💾 Save Row</button>
+            <span class="badge @(_dirty ? "bg-warning text-dark" : "bg-success")">@(_dirty ? "Status: DIRTY ROW LOCKED" : "Status: Clean")</span>
+            <span class="text-muted">
+                Dirty Row: <b>@(_dirtyRow?.Code ?? "None")</b> |
+                Vetoes Blocked: <b class="text-danger">@_vetoCount</b> |
+                Saves: <b class="text-success">@_saveCount</b>
+            </span>
+        </div>
+    </DemoControls>
+
+    <DemoContent>
+        <div style="width:100%;">
+            <GridControl @ref="_grid"
+                         ShowRowCountInFooter="true"
+                         TValue="LedgerRow"
+                         DataSource="@_rows"
+                         AllowSorting="false"
+                         AllowSelection="true"
+                         HighlightSelectedRows="true"
+                         EnableHover="true"
+                         Height="340px"
+                         RowHeight="26"
+                         MinRowHeight="26"
+                         TextEditorTypingBehavior="TextBoxTypingBehavior.ServerBacked"
+                         EditSettingsRef="@_editSettings"
+                         SelectionSettingsRef="@_selectionSettings"
+                         EventsRef="@_events"
+                         CssClass="fx-grid-compact">
+                <GridColumnsBase>
+                    <GridColumn Field="@nameof(LedgerRow.Code)" HeaderText="Code" Width="90px" AllowEditing="false" />
+                    <GridColumn Field="@nameof(LedgerRow.Description)" HeaderText="Description" Width="280px" AllowEditing="true" />
+                    <GridColumn Field="@nameof(LedgerRow.Qty)" HeaderText="Qty" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" />
+                    <GridColumn Field="@nameof(LedgerRow.Price)" HeaderText="Price" Width="100px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" Format="$#,##0.00" />
+                    <GridColumn Field="@nameof(LedgerRow.Notes)" HeaderText="Audit Notes" Width="260px" AllowEditing="true" />
+                </GridColumnsBase>
+            </GridControl>
+        </div>
+    </DemoContent>
+
+    <DocumentationContent>
+        <h3>How Selection Vetoing Works</h3>
+        <ul>
+            <li><strong>Intercepting Row Change:</strong> The <code>RowSelecting</code> event receives a <code>RowSelectingEventArgs&lt;T&gt;</code> argument containing the incoming target row index.</li>
+            <li><strong>Blocking Navigation:</strong> When changes are pending on the current row, setting <code>args.Cancel = true</code> aborts the row navigation on the server and synchronizes the client focus back to the active editing row.</li>
+            <li><strong>Transactional Integrity:</strong> This pattern guarantees that batch edits or dirty row states cannot be bypassed by keyboard down-arrow, PageDown, or direct row mouse clicks.</li>
+        </ul>
+
+        <h3>Relevant Event API</h3>
+        <table class="sf-param-table">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Argument</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>RowSelecting</code></td>
+                    <td><code>RowSelectingEventArgs&lt;T&gt;</code></td>
+                    <td>Fires prior to row selection committing. Set <code>Cancel = true</code> to abort selection.</td>
+                </tr>
+                <tr>
+                    <td><code>OnCellEdit</code></td>
+                    <td><code>CellEditArgs&lt;T&gt;</code></td>
+                    <td>Fires whenever an editable cell receives input or commits a keystroke/value change.</td>
+                </tr>
+            </tbody>
+        </table>
+    </DocumentationContent>
+</SyncfusionDemoLayout>
+
+@code {
+    private GridControl<LedgerRow>? _grid;
+    private List<LedgerRow> _rows = [];
+    private bool _dirty;
+    private LedgerRow? _dirtyRow;
+    private int _vetoCount;
+    private int _saveCount;
+
+    private readonly EditSettings _editSettings = new()
+    {
+        AllowEditing = true,
+        Mode = EditMode.Batch
+    };
+
+    private readonly SelectionSettings _selectionSettings = new()
+    {
+        Mode = SelectionMode.Row,
+        Type = SelectionType.Single
+    };
+
+    private readonly GridControlEvents<LedgerRow> _events = new();
+
+    protected override void OnInitialized()
+    {
+        _rows =
+        [
+            new LedgerRow { Code = "1010", Description = "General Operating Account", Qty = 1, Price = 125000.00m, Notes = "Reconciled monthly" },
+            new LedgerRow { Code = "1020", Description = "Payroll Clearing Account", Qty = 1, Price = 42000.00m, Notes = "Bi-weekly transfer" },
+            new LedgerRow { Code = "1200", Description = "Accounts Receivable - Trade", Qty = 14, Price = 86450.50m, Notes = "Outstanding 30-day invoices" },
+            new LedgerRow { Code = "1510", Description = "Subcontract Retainage Withheld", Qty = 8, Price = 38900.00m, Notes = "Held until final inspection" },
+            new LedgerRow { Code = "2010", Description = "Accounts Payable - Vendors", Qty = 22, Price = 94310.25m, Notes = "Standard Net-30 terms" },
+            new LedgerRow { Code = "4010", Description = "Construction Revenue", Qty = 5, Price = 450000.00m, Notes = "Q3 Completed milestones" }
+        ];
+
+        _events.OnCellEdit = EventCallback.Factory.Create<CellEditArgs<LedgerRow>>(this, args =>
+        {
+            _dirty = true;
+            _dirtyRow = args.Data;
+            StateHasChanged();
+        });
+
+        _events.RowSelecting = EventCallback.Factory.Create<RowSelectEventArgs<LedgerRow>>(this, args =>
+        {
+            if (_dirty && _dirtyRow != null && !ReferenceEquals(_dirtyRow, args.Data))
+            {
+                args.Cancel = true;
+                _vetoCount++;
+                StateHasChanged();
+            }
+        });
+    }
+
+    private void Save()
+    {
+        _dirty = false;
+        _dirtyRow = null;
+        _saveCount++;
+        StateHasChanged();
+    }
+
+    private const string _razorSourceCode = @"@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+
+<GridControl TValue=""LedgerRow""
+             DataSource=""@Rows""
+             AllowSelection=""true""
+             EditSettingsRef=""@_editSettings""
+             SelectionSettingsRef=""@_selectionSettings""
+             EventsRef=""@_events"">
+    <GridColumnsBase>
+        <GridColumn Field=""@nameof(LedgerRow.Code)"" HeaderText=""Code"" Width=""90px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(LedgerRow.Description)"" HeaderText=""Description"" Width=""280px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(LedgerRow.Qty)"" HeaderText=""Qty"" Width=""80px"" Type=""ColumnType.Number"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(LedgerRow.Price)"" HeaderText=""Price"" Width=""100px"" Type=""ColumnType.Number"" AllowEditing=""true"" Format=""$#,##0.00"" />
+        <GridColumn Field=""@nameof(LedgerRow.Notes)"" HeaderText=""Audit Notes"" Width=""260px"" AllowEditing=""true"" />
+    </GridColumnsBase>
+</GridControl>
+
+@code {
+    private bool _dirty;
+    private LedgerRow? _dirtyRow;
+
+    protected override void OnInitialized()
+    {
+        _events.OnCellEdit = args =>
+        {
+            _dirty = true;
+            _dirtyRow = args.RowData;
+            return Task.CompletedTask;
+        };
+
+        _events.RowSelecting = args =>
+        {
+            // Veto any attempt to leave the current row while dirty
+            if (_dirty && _dirtyRow != null && !ReferenceEquals(_dirtyRow, args.Data))
+            {
+                args.Cancel = true;
+            }
+            return Task.CompletedTask;
+        };
+    }
+
+    private void Save()
+    {
+        _dirty = false;
+        _dirtyRow = null;
+    }
+}";
+
+    private const string _csharpSourceCode = @"namespace FlexCore.Showcase.Data;
+
+public sealed class LedgerRow
+{
+    public string Code { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public decimal Qty { get; set; }
+    public decimal Price { get; set; }
+    public string Notes { get; set; } = string.Empty;
+}";
+}

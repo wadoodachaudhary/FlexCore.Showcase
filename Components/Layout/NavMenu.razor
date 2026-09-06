@@ -1,0 +1,219 @@
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">FlexCore Showcase</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Overview
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="get-started">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Get Started
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="components">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> All Components
+            </NavLink>
+        </div>
+
+        <div class="nav-section-title">Grid Live Benches</div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/virtualization-bench">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> 50K Virtualization
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/row-selection-50k">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> 50K Row Selection
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/fdbgrid-veto">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Veto Selection &amp; Dirty
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/blazor-optimizer">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Server Optimizer
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/column-swap">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Dynamic Column Swap
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/picklist-churn">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Picklist Churn
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/pm-entry">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Master-Detail PM Entry
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/userperms-lists">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Dual-List Transfer
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/edit-items-db">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> In-Place Batch Edit
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/items-provider-db">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> SQLite ItemsProvider
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/enterprise-suite">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Enterprise Suite
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/radzen-comparison">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Flex vs Radzen
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/ag-grid-showcase">
+                <span class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></span> AG Grid Showcase (4-in-1)
+            </NavLink>
+        </div>
+
+        <div class="nav-section-title">Tree &amp; TreeGrid</div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/tree/tree-load-bench">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> TreeGrid Hierarchy
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/tree/treeview-explorer">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> TreeView Explorer
+            </NavLink>
+        </div>
+
+        <div class="nav-section-title">Workspace &amp; Layout</div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/workspace/page-control-bench">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Tabbed PageControl
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/layout">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Panels &amp; Dashboard
+            </NavLink>
+        </div>
+
+        <div class="nav-section-title">Standard Grid Features</div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Basic Grid
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/advanced">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Frozen Columns
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/provider-enterprise">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Provider Grouping
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/column-virtualization">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Column Windowing
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/reordering">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Reordering Grid
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/assembly">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Assembly
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/vendor-prices">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Vendor Prices
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/grid/items">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Items Catalog
+            </NavLink>
+        </div>
+
+        <div class="nav-section-title">Charts &amp; Data</div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/data-control">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Data Control
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/charts">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Chart Gallery
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/charts/sunburst">
+                <span class="bi bi-pie-chart-fill" aria-hidden="true"></span> COVID-19 Sunburst
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/advanced-charts">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Advanced &amp; Gauges
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/pivot-formulas">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Pivot &amp; Formulas
+            </NavLink>
+        </div>
+
+        <div class="nav-section-title">Reports &amp; UI Controls</div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/reports/model-costs">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Model Costs
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/counterparts">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Dedicated Controls
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/new-components">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> New UI Components
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/buttons">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Buttons
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/notifications">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Notifications
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="demo/dialog">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Dialog
+            </NavLink>
+        </div>
+    </nav>
+</div>

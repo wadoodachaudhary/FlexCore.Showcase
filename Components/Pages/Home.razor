@@ -1,0 +1,1502 @@
+@page "/"
+@inject IJSRuntime JS
+@inject NotificationService Notifications
+
+<PageTitle>FlexCore — Enterprise Blazor Component Suite for .NET</PageTitle>
+
+<div class="landing-container">
+    <!-- ── 1. Catchy One-Liner Before Grid ────────────────────────── -->
+    <div class="top-hero-compact">
+        <div class="hero-tagline-badge">
+            <span class="badge-pulse"></span>
+            <span>FlexCore v0.2.31 Enterprise Suite &bull; .NET 10 &bull; 100% Pure C# &amp; SVG &bull; Zero JavaScript Overhead</span>
+        </div>
+        <h1 class="hero-oneliner">
+            High-throughput enterprise Blazor data grid with sub-millisecond 60 FPS virtualization, instant in-grid editing, and native ClosedXML Excel export.
+        </h1>
+    </div>
+
+    <!-- ── 2. Grid Brought Right to the Top ───────────────────────── -->
+    <section id="live-showcase" class="showcase-section">
+        <div class="showcase-shell">
+            <!-- Window Titlebar (Desktop App / Telerik Style) -->
+            <div class="window-titlebar">
+                <div class="window-controls">
+                    <span class="window-dot dot-red"></span>
+                    <span class="window-dot dot-yellow"></span>
+                    <span class="window-dot dot-green"></span>
+                </div>
+                <div class="window-title">
+                    <span class="bi bi-window-sidebar"></span>
+                    <span>Inbox — Custom Quotes (HomeFront Precision Estimating)</span>
+                </div>
+                <div class="window-tags">
+                    <span>FlexCore Grid v0.2.31 • .NET 10 • 1,000 Rows Virtualized</span>
+                </div>
+            </div>
+
+            <!-- Hint Subtitle Banner -->
+            <div class="grid-banner-hint">
+                <span class="bi bi-info-circle-fill" style="color: #0284c7;"></span>
+                <span><strong>Prepare quotes for custom requests:</strong> Double click on a request to build the quote. Requests can also be declined.</span>
+            </div>
+
+            <!-- Showcase Top Bar / Tabs -->
+            <div class="showcase-header">
+                <div class="showcase-tabs">
+                    <button type="button" class="@($"tab-btn {(_activeTab == "grid" ? "active" : "")}")" @onclick="@(() => _activeTab = "grid")">
+                        <span class="bi bi-table"></span> FlexGrid (Custom Quotes)
+                    </button>
+                    <button type="button" class="@($"tab-btn {(_activeTab == "charts" ? "active" : "")}")" @onclick="@(() => _activeTab = "charts")">
+                        <span class="bi bi-bar-chart-line"></span> 30+ SVG Charts
+                    </button>
+                    <button type="button" class="@($"tab-btn {(_activeTab == "ribbon" ? "active" : "")}")" @onclick="@(() => _activeTab = "ribbon")">
+                        <span class="bi bi-menu-button-wide"></span> Office Ribbon
+                    </button>
+                    <button type="button" class="@($"tab-btn {(_activeTab == "reports" ? "active" : "")}")" @onclick="@(() => _activeTab = "reports")">
+                        <span class="bi bi-file-earmark-spreadsheet"></span> Enterprise Reporting
+                    </button>
+                </div>
+
+                <div class="showcase-controls">
+                    <button type="button" class="btn-code-toggle" @onclick="@(() => _showCode = !_showCode)">
+                        <span class="bi bi-code-slash"></span> @(_showCode ? "Hide Code" : "View Razor Code")
+                    </button>
+                </div>
+            </div>
+
+            <!-- Showcase Active Tab Content -->
+            <div class="showcase-body">
+                @if (_activeTab == "grid")
+                {
+                    <div class="grid-card-toolbar">
+                        <div class="toolbar-left">
+                            <div class="view-select-group">
+                                <label class="view-label">View:</label>
+                                <DropDownListControl TValue="string" TItem="ViewOption"
+                                                     DataSource="@ViewOptions"
+                                                     Value="@_selectedView"
+                                                     ValueChanged="@(v => { _selectedView = v ?? "All"; StateHasChanged(); })"
+                                                     TextFieldName="Label"
+                                                     ValueFieldName="Key"
+                                                     Width="210px"
+                                                     CssClass="view-flex-dropdown" />
+                            </div>
+
+                            <div class="search-input-wrapper">
+                                <span class="bi bi-search search-icon"></span>
+                                <TextBoxControl Value="@_gridSearchTerm"
+                                                ValueChanged="@(v => { _gridSearchTerm = v ?? ""; StateHasChanged(); })"
+                                                placeholder="Search quotes, jobs, salespeople..."
+                                                CssClass="grid-search-input" />
+                            </div>
+                        </div>
+
+                        <div class="toolbar-right">
+                            <button type="button" class="btn-grid-action btn-excel" @onclick="ExportToExcel">
+                                <span class="bi bi-file-earmark-excel"></span> Export to Excel
+                            </button>
+                            <button type="button" class="btn-grid-action btn-new" @onclick="CreateNewQuote">
+                                <span class="bi bi-plus-lg"></span> New Request
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="category-filter-bar">
+                        <span class="filter-bar-label">Category:</span>
+                        @foreach (var cat in _quoteCategories)
+                        {
+                            <button type="button"
+                                    class="@($"btn-filter-pill {(_selectedCategory == cat ? "active" : "")}")"
+                                    @onclick="@(() => _selectedCategory = cat)">
+                                @cat
+                            </button>
+                        }
+                    </div>
+
+                    <!-- HIGH-PERFORMANCE HIGHLIGHTS BANNER -->
+                    <div class="grid-perf-highlights">
+                        <div class="perf-badge-item">
+                            <span class="perf-badge-icon">⚡</span>
+                            <div class="perf-badge-text">
+                                <strong>1,000 Rows Live Virtualized</strong>
+                                <span>Ultra-smooth 60 FPS scrolling with zero DOM lag</span>
+                            </div>
+                        </div>
+                        <div class="perf-badge-item">
+                            <span class="perf-badge-icon">⌨️</span>
+                            <div class="perf-badge-text">
+                                <strong>Instant In-Grid Typing</strong>
+                                <span>Click any Estimate cell to type directly — zero JS latency</span>
+                            </div>
+                        </div>
+                        <div class="perf-badge-item">
+                            <span class="perf-badge-icon">🎛️</span>
+                            <div class="perf-badge-text">
+                                <strong>DropDownGridControl</strong>
+                                <span>Multi-column category picker with search &amp; sort</span>
+                            </div>
+                        </div>
+                        <div class="perf-badge-item">
+                            <span class="perf-badge-icon">✏️</span>
+                            <div class="perf-badge-text">
+                                <strong>Modal Popup Editor</strong>
+                                <span>Click [✏ Edit] on Description for full quote editor</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <GridControl TValue="CustomQuote" DataSource="@FilteredQuotes"
+                                 AllowSelection="true"
+                                 AllowSorting="true"
+                                 AllowFiltering="true"
+                                 AllowResizing="true"
+                                 EnableHover="true"
+                                 CssClass="telerik-grid-theme"
+                                 EditSettingsRef="@_editSettings"
+                                 EventsRef="@_gridEvents"
+                                 Height="440px">
+                        <GridColumnsBase>
+                            <GridColumn Field="@nameof(CustomQuote.Job)" HeaderText="Job" Width="90px"
+                                        IsPrimaryKey="true" AllowEditing="false"
+                                        IsFrozen="true" FrozenPosition="FrozenColumnPosition.Left">
+                                <Template Context="row">
+                                    @{ var q = (CustomQuote)row; }
+                                    <BadgeControl Text="@q.Job" CssClass="grid-job-code" />
+                                </Template>
+                            </GridColumn>
+
+                            <GridColumn Field="@nameof(CustomQuote.Salesperson)" HeaderText="Salesperson" Width="145px" AllowEditing="false">
+                                <Template Context="row">
+                                    @{ var q = (CustomQuote)row; }
+                                    <div class="salesperson-cell">
+                                        <span class="salesperson-avatar" style="background:@q.AvatarBg">@q.AvatarInitials</span>
+                                        <span class="salesperson-name">@q.Salesperson</span>
+                                    </div>
+                                </Template>
+                            </GridColumn>
+
+                            <GridColumn Field="@nameof(CustomQuote.Community)" HeaderText="Community" Width="130px" AllowEditing="false" />
+
+                            <!-- IN-CELL DROP DOWN GRID CONTROL (Multi-column lookup) -->
+                            <GridColumn HeaderText="Category (DropDownGrid)" Width="190px" AllowEditing="false">
+                                <Template Context="row">
+                                    @{ var q = (CustomQuote)row; }
+                                    <div class="grid-cell-dropdowngrid">
+                                        <DropDownGridControl TItem="CategoryLookup" TValue="string"
+                                                             DataSource="@_categoryLookup"
+                                                             Value="@q.Category"
+                                                             ValueChanged="@(val => OnCategoryChanged(q, val))"
+                                                             TextFieldName="@nameof(CategoryLookup.Name)"
+                                                             ValueFieldName="@nameof(CategoryLookup.Code)"
+                                                             ClosedTextFieldName="@nameof(CategoryLookup.Code)"
+                                                             PopupWidth="410px"
+                                                             PopupHeight="220px"
+                                                             RowHeight="24"
+                                                             ShowSearch="true"
+                                                             SearchPlaceholder="Search trades..."
+                                                             AllowClear="false"
+                                                             Placeholder="Select category...">
+                                            <Columns>
+                                                <GridColumn Field="@nameof(CategoryLookup.Code)" HeaderText="Code" Width="95px" />
+                                                <GridColumn Field="@nameof(CategoryLookup.Name)" HeaderText="Category Name" Width="170px" />
+                                                <GridColumn Field="@nameof(CategoryLookup.Trade)" HeaderText="Trade" Width="110px" />
+                                            </Columns>
+                                        </DropDownGridControl>
+                                    </div>
+                                </Template>
+                            </GridColumn>
+
+                            <!-- IN-GRID FAST TYPING CELL (Click to edit directly) -->
+                            <GridColumn Field="@nameof(CustomQuote.EstimateAmount)" HeaderText="Estimate (Fast Typing)" Width="140px"
+                                        Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right"
+                                        AllowEditing="true" SelectAllOnEdit="true" />
+
+                            <!-- INLINE SVG SPARKLINE CHART CELL TEMPLATE -->
+                            <GridColumn HeaderText="Cost Trend" Width="135px" AllowSorting="false" AllowFiltering="false" AllowEditing="false">
+                                <Template Context="row">
+                                    @{
+                                        var q = (CustomQuote)row;
+                                        var spark = GetSparklinePoints(q.TrendHistory, 68, 22);
+                                        var isUp = q.TrendDeltaPercent >= 0;
+                                        var color = isUp ? "#10b981" : "#ef4444";
+                                        var fill = isUp ? "rgba(16, 185, 129, 0.16)" : "rgba(239, 68, 68, 0.16)";
+                                        var deltaClass = isUp ? "delta-up" : "delta-down";
+                                        var titleText = $"5-Month Cost Trend: {(isUp ? "+" : "")}{q.TrendDeltaPercent}%";
+                                        var deltaSign = isUp ? "▲" : "▼";
+                                    }
+                                    <div class="sparkline-cell" title="@titleText">
+                                        <svg width="68" height="22" viewBox="0 0 68 22" class="sparkline-svg">
+                                            <polygon points="@spark.AreaPoints" fill="@fill" />
+                                            <polyline points="@spark.PolylinePoints" fill="none" stroke="@color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            <circle cx="@spark.LastX" cy="@spark.LastY" r="2.5" fill="@color" />
+                                        </svg>
+                                        <span class="sparkline-delta @deltaClass">
+                                            @deltaSign@Math.Abs(q.TrendDeltaPercent)%
+                                        </span>
+                                    </div>
+                                </Template>
+                            </GridColumn>
+
+                            <GridColumn Field="@nameof(CustomQuote.Status)" HeaderText="Status" Width="110px" AllowEditing="false">
+                                <Template Context="row">
+                                    @{
+                                        var q = (CustomQuote)row;
+                                        var statusBadge = GetStatusBadgeClass(q.Status);
+                                    }
+                                    <BadgeControl Text="@q.Status" CssClass="@($"grid-badge {statusBadge}")" />
+                                </Template>
+                            </GridColumn>
+
+                            <!-- POPUP EDITABLE DESCRIPTION COLUMN -->
+                            <GridColumn HeaderText="Description (Popup Edit)" Width="280px" AllowEditing="false">
+                                <Template Context="row">
+                                    @{ var q = (CustomQuote)row; }
+                                    <div class="desc-cell-wrapper">
+                                        <span class="desc-text" title="@q.Description">@q.Description</span>
+                                        <button type="button" class="btn-cell-popup-edit" title="Edit in Modal Popup"
+                                                @onclick="@(() => OpenPopupEdit(q))" @onclick:stopPropagation="true">
+                                            <span class="bi bi-pencil-square"></span> Edit
+                                        </button>
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumnsBase>
+                    </GridControl>
+
+                    <div class="grid-status-footer">
+                        <div class="status-left">
+                            <span>Showing <strong>@FilteredQuotes.Count()</strong> of <strong>@_quotes.Count</strong> quotes (Virtual Scrolling 60 FPS)</span>
+                            @if (_selectedQuote != null)
+                            {
+                                <span class="status-selected-highlight">
+                                    • Selected: <strong>@_selectedQuote.Job</strong> (@_selectedQuote.Community) — <strong>@_selectedQuote.EstimateAmount.ToString("C2")</strong>
+                                </span>
+                            }
+                        </div>
+                        <div class="status-right">
+                            <span>Total Pipeline: <strong>@FilteredQuotes.Sum(q => q.EstimateAmount).ToString("C2")</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- POPUP EDIT MODAL DIALOG -->
+                    @if (_isPopupEditorOpen && _editingQuote != null)
+                    {
+                        <div class="modal-backdrop-blur" @onclick="ClosePopupEdit">
+                            <div class="edit-modal-card" @onclick:stopPropagation="true">
+                                <div class="modal-card-header">
+                                    <div class="modal-header-titles">
+                                        <BadgeControl Text="@_editingQuote.Job" CssClass="modal-badge-job" />
+                                        <div>
+                                            <h3 class="modal-h3">Edit Quote Specifications</h3>
+                                            <p class="modal-sub">@_editingQuote.Customer • @_editingQuote.Community</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-close-modal" @onclick="ClosePopupEdit" title="Close">&times;</button>
+                                </div>
+
+                                <div class="modal-card-body">
+                                    <div class="modal-grid-2">
+                                        <div class="modal-field">
+                                            <label>Salesperson</label>
+                                            <TextBoxControl CssClass="modal-input" Value="@_editingQuote.Salesperson" ValueChanged="@(v => _editingQuote.Salesperson = v ?? "")" />
+                                        </div>
+                                        <div class="modal-field">
+                                            <label>Community</label>
+                                            <TextBoxControl CssClass="modal-input" Value="@_editingQuote.Community" ValueChanged="@(v => _editingQuote.Community = v ?? "")" />
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-grid-2">
+                                        <div class="modal-field">
+                                            <label>Category</label>
+                                            <DropDownListControl TValue="string" TItem="CategoryLookup"
+                                                                 Width="100%"
+                                                                 DataSource="@_categoryLookup"
+                                                                 Value="@_editingQuote.Category"
+                                                                 ValueChanged="@(v => _editingQuote.Category = v ?? "")"
+                                                                 TextFieldName="Display"
+                                                                 ValueFieldName="Code"
+                                                                 CssClass="modal-flex-dropdown" />
+                                        </div>
+                                        <div class="modal-field">
+                                            <label>Estimate Amount ($)</label>
+                                            <NumericTextBoxControl TValue="decimal" Step="10" Width="100%" CssClass="modal-input" Value="@_editingQuote.EstimateAmount" ValueChanged="@(v => _editingQuote.EstimateAmount = v)" />
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-grid-2">
+                                        <div class="modal-field">
+                                            <label>Status</label>
+                                            <DropDownListControl TValue="string" TItem="string"
+                                                                 Width="100%"
+                                                                 DataSource="@_statusOptions"
+                                                                 Value="@_editingQuote.Status"
+                                                                 ValueChanged="@(v => _editingQuote.Status = v ?? "")"
+                                                                 CssClass="modal-flex-dropdown" />
+                                        </div>
+                                        <div class="modal-field">
+                                            <label>Date Requested</label>
+                                            <DatePickerControl Value="@_modalDateRequested"
+                                                               ValueChanged="@(dt => { if (_editingQuote != null && dt.HasValue) _editingQuote.DateRequested = dt.Value; })"
+                                                               Format="MM/dd/yyyy"
+                                                               CssClass="modal-flex-datepicker" />
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-field">
+                                        <label>Description &amp; Scope of Work</label>
+                                        <TextBoxControl Multiline="true" Rows="3" CssClass="modal-textarea" Value="@_editingQuote.Description" ValueChanged="@(v => _editingQuote.Description = v ?? "")" />
+                                    </div>
+
+                                    <div class="modal-field">
+                                        <label>Field Notes / Comments</label>
+                                        <TextBoxControl CssClass="modal-input" Value="@_editingQuote.Comments" ValueChanged="@(v => _editingQuote.Comments = v ?? "")" />
+                                    </div>
+                                </div>
+
+                                <div class="modal-card-footer">
+                                    <button type="button" class="btn-modal-cancel" @onclick="ClosePopupEdit">Cancel</button>
+                                    <button type="button" class="btn-modal-save" @onclick="SavePopupEdit">
+                                        <span class="bi bi-check-lg"></span> Save Quote Specs
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else if (_activeTab == "charts")
+                {
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+                        <div>
+                            <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #0f172a;">Quarterly Revenue vs. Target (Pure SVG)</h4>
+                            <ChartControl Type="ChartType.Bar" Title="Performance Overview" Height="280px" Series="@_quarterlySeries" />
+                        </div>
+                        <div>
+                            <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #0f172a;">Material Distribution Breakdown</h4>
+                            <ChartControl Type="ChartType.Pie" Title="Inventory Allocation" Height="280px" Series="@_pieSeries" />
+                        </div>
+                    </div>
+                }
+                else if (_activeTab == "ribbon")
+                {
+                    <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+                        <RibbonControl>
+                            <RibbonTab Title="Home">
+                                <RibbonGroup Title="Clipboard">
+                                    <RibbonButton Text="Paste" Icon="bi-clipboard" OnClick="@OnPaste" />
+                                    <RibbonButton Text="Copy" Icon="bi-files" OnClick="@OnCopy" />
+                                </RibbonGroup>
+                                <RibbonGroup Title="Actions">
+                                    <RibbonButton Text="New Order" Icon="bi-plus-circle" OnClick="@OnNewOrder" />
+                                    <RibbonButton Text="Save Batch" Icon="bi-save" OnClick="@OnSaveBatch" />
+                                </RibbonGroup>
+                                <RibbonGroup Title="Export">
+                                    <RibbonButton Text="Excel (XLSX)" Icon="bi-file-earmark-excel" OnClick="@OnExportRibbonExcel" />
+                                    <RibbonButton Text="Print PDF" Icon="bi-printer" OnClick="@OnPrintPdf" />
+                                </RibbonGroup>
+                            </RibbonTab>
+                            <RibbonTab Title="View &amp; Filter">
+                                <RibbonGroup Title="Display Options">
+                                    <RibbonButton Text="Toggle Grid" Icon="bi-table" OnClick="@OnToggleGrid" />
+                                    <RibbonButton Text="Freeze Headers" Icon="bi-pin-angle" OnClick="@OnFreezeHeaders" />
+                                </RibbonGroup>
+                            </RibbonTab>
+                        </RibbonControl>
+                        <div style="padding: 24px; background: #fafbfc; text-align: center; color: #64748b;">
+                            <p style="margin: 0; font-size: 14px;">
+                                💡 <strong>Interactive Ribbon:</strong> Click any of the ribbon buttons above to see live event handling and toast notifications!
+                            </p>
+                        </div>
+                    </div>
+                }
+                else if (_activeTab == "reports")
+                {
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <h3 style="margin: 0 0 4px; font-size: 18px; color: #0f172a;">Crystal Reports &amp; Paginated Print Engine</h3>
+                                <p style="margin: 0; font-size: 13px; color: #64748b;">
+                                    Load Crystal Reports (.rpt XML), bind session parameters, and stream to screen or print without Crystal runtime dependencies.
+                                </p>
+                            </div>
+                            <a href="demo/reports/model-costs" class="btn-filter-pill" style="background:#0284c7; color:#fff; text-decoration:none;">
+                                Open Full Report Demo &rarr;
+                            </a>
+                        </div>
+                        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 18px; font-family: monospace; font-size: 13px; color: #334155;">
+                            <div style="color: #0d3b66; font-weight: 700; border-bottom: 2px solid #0d3b66; padding-bottom: 6px; margin-bottom: 12px; display: flex; justify-content: space-between;">
+                                <span>MODEL COSTS &amp; ESTIMATING SUMMARY</span>
+                                <span>Division: 0100 | As of: @DateTime.Today.ToString("d")</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                                <span>100-FRAMING : Structural Timber &amp; Trusses</span>
+                                <span style="font-weight: 600;">$42,850.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                                <span>200-PLUMBING : Rough-in &amp; Copper Mains</span>
+                                <span style="font-weight: 600;">$18,420.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                                <span>300-ELECTRICAL : Panel 200A &amp; Romex Circuits</span>
+                                <span style="font-weight: 600;">$21,650.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 0; margin-top: 8px; border-top: 2px solid #cbd5e1; font-weight: 700; color: #0f172a;">
+                                <span>TOTAL MODEL ESTIMATE:</span>
+                                <span>$82,920.00</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Code Drawer -->
+            @if (_showCode)
+            {
+                <div class="code-drawer">
+                    <div class="code-header">
+                        <span>Razor Markup for @(_activeTab.ToUpper()) Component</span>
+                        <button type="button" class="btn-copy-code" @onclick="CopyActiveCode">
+                            @(_copiedCode ? "✓ Copied!" : "📋 Copy Code")
+                        </button>
+                    </div>
+                    <pre><code>@GetActiveCodeSnippet()</code></pre>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- ── 3. Most Popular UI Components (Syncfusion-Style Top Cards) ─ -->
+    <section class="popular-components-section">
+        <h2 class="popular-title">Most Popular UI components</h2>
+        <div class="popular-cards-grid">
+            <a href="demo/grid/ag-grid-showcase" class="popular-card">
+                <div class="popular-icon-box pink">
+                    <span class="bi bi-table"></span>
+                </div>
+                <span class="popular-name">Data Grid</span>
+            </a>
+
+            <a href="demo/charts" class="popular-card">
+                <div class="popular-icon-box purple">
+                    <span class="bi bi-pie-chart-fill"></span>
+                </div>
+                <span class="popular-name">Charts</span>
+            </a>
+
+            <a href="demo/charts/sunburst" class="popular-card">
+                <div class="popular-icon-box teal">
+                    <span class="bi bi-sun-fill"></span>
+                </div>
+                <span class="popular-name">Sunburst Chart</span>
+            </a>
+
+            <a href="demo/counterparts" class="popular-card">
+                <div class="popular-icon-box indigo">
+                    <span class="bi bi-calendar3"></span>
+                </div>
+                <span class="popular-name">Scheduler &amp; Gantt</span>
+            </a>
+
+            <a href="demo/reports/model-costs" class="popular-card">
+                <div class="popular-icon-box coral">
+                    <span class="bi bi-file-earmark-richtext"></span>
+                </div>
+                <span class="popular-name">Reports &amp; Writer</span>
+            </a>
+
+            <a href="demo/tree/tree-load-bench" class="popular-card">
+                <div class="popular-icon-box green">
+                    <span class="bi bi-diagram-2"></span>
+                </div>
+                <span class="popular-name">Tree Grid</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ── 4. Complete Component Directory (Syncfusion Multi-Column) ─ -->
+    <section class="catalog-directory-section" id="components">
+        <div class="directory-header">
+            <h2 class="directory-title">Blazor UI &amp; Data Visualization Components</h2>
+            <p class="directory-subtitle">
+                The FlexCore Blazor components library is an enterprise-grade suite engineered for high-throughput applications and legacy desktop modernizations. It contains 70+ high-performance, lightweight, and responsive UI controls with <strong>zero JavaScript dependencies</strong>.
+            </p>
+        </div>
+
+        <div class="directory-columns-container">
+            <!-- ── Column 1 ────────────────────────── -->
+            <div class="directory-col">
+                <div class="cat-group">
+                    <h3 class="cat-title">DATA MANAGEMENT</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="grid" /><a href="demo/grid">Data Grid</a></li>
+                        <li><MiniIcon Name="ag-grid" /><a href="demo/grid/ag-grid-showcase">AG Grid (4-in-1 Suite)</a></li>
+                        <li><MiniIcon Name="tree-grid" /><a href="demo/tree/tree-load-bench">Tree Grid</a></li>
+                        <li><MiniIcon Name="pivot" /><a href="demo/pivot-formulas">Pivot Table</a></li>
+                        <li><MiniIcon Name="data-control" /><a href="demo/data-control">Data Control</a></li>
+                        <li><MiniIcon Name="virtualization" /><a href="demo/grid/virtualization-bench">50K Virtualization</a></li>
+                        <li><MiniIcon Name="selection" /><a href="demo/grid/row-selection-50k">50K Row Selection</a></li>
+                        <li><MiniIcon Name="frozen" /><a href="demo/grid/advanced">Frozen Columns</a></li>
+                        <li><MiniIcon Name="col-virt" /><a href="demo/grid/column-virtualization">Column Virtualization</a></li>
+                        <li><MiniIcon Name="col-swap" /><a href="demo/grid/column-swap">Dynamic Column Swap</a></li>
+                        <li><MiniIcon Name="batch-edit" /><a href="demo/grid/edit-items-db">In-Place Batch Edit</a></li>
+                        <li><MiniIcon Name="sqlite" /><a href="demo/grid/items-provider-db">SQLite ItemsProvider</a></li>
+                        <li><MiniIcon Name="master-detail" /><a href="demo/grid/pm-entry">Master-Detail PM Entry</a></li>
+                        <li><MiniIcon Name="picklist" /><a href="demo/grid/picklist-churn">Picklist Churn</a></li>
+                        <li><MiniIcon Name="veto" /><a href="demo/grid/fdbgrid-veto">Veto Selection &amp; Dirty</a></li>
+                        <li><MiniIcon Name="optimizer" /><a href="demo/grid/blazor-optimizer">Server Optimizer</a></li>
+                        <li><MiniIcon Name="dual-list" /><a href="demo/grid/userperms-lists">Dual-List Transfer</a></li>
+                        <li><MiniIcon Name="reorder" /><a href="demo/grid/reordering">Reordering Grid</a></li>
+                        <li><MiniIcon Name="pager" /><a href="demo/grid">Pager Control</a></li>
+                    </ul>
+                </div>
+
+                <div class="cat-group">
+                    <h3 class="cat-title">FILE VIEWERS &amp; EDITORS</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="editor" /><a href="demo/counterparts">Rich Text Editor</a></li>
+                        <li><MiniIcon Name="pdf" /><a href="demo/counterparts">PDF Viewer</a></li>
+                        <li><MiniIcon Name="report" /><a href="demo/reports/model-costs">Report Writer Control</a></li>
+                        <li><MiniIcon Name="report-param" /><a href="demo/reports/model-costs">Report Parameter Dialog</a></li>
+                        <li><MiniIcon Name="format" /><a href="demo/counterparts">Format Control</a></li>
+                    </ul>
+                </div>
+
+                <div class="cat-group">
+                    <h3 class="cat-title">LAYOUT &amp; WORKSPACE</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="page-control" /><a href="demo/workspace/page-control-bench">PageControl / Tabbed MDI</a></li>
+                        <li><MiniIcon Name="dock" /><a href="demo/counterparts">Dock Manager</a></li>
+                        <li><MiniIcon Name="splitter" /><a href="demo/layout">Splitter Control</a></li>
+                        <li><MiniIcon Name="dashboard" /><a href="demo/layout">Dashboard Layout</a></li>
+                        <li><MiniIcon Name="grid" /><a href="demo/counterparts">Grid Layout</a></li>
+                        <li><MiniIcon Name="card" /><a href="demo/new-components">Card Control</a></li>
+                        <li><MiniIcon Name="card-group" /><a href="demo/new-components">Card Group</a></li>
+                        <li><MiniIcon Name="timeline" /><a href="demo/new-components">Timeline</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ── Column 2 ────────────────────────── -->
+            <div class="directory-col">
+                <div class="cat-group">
+                    <h3 class="cat-title">DATA VISUALIZATION</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="chart-bar" /><a href="demo/charts">30+ SVG Charts Gallery</a></li>
+                        <li><MiniIcon Name="sunburst" /><a href="demo/charts/sunburst">COVID-19 Sunburst</a></li>
+                        <li><MiniIcon Name="stock" /><a href="demo/counterparts">Stock &amp; Financial Chart</a></li>
+                        <li><MiniIcon Name="gauge-circular" /><a href="demo/counterparts">Circular Gauge</a></li>
+                        <li><MiniIcon Name="gauge-linear" /><a href="demo/counterparts">Linear Gauge</a></li>
+                        <li><MiniIcon Name="gauge-radial" /><a href="demo/counterparts">Radial Gauge</a></li>
+                        <li><MiniIcon Name="gauge-arc" /><a href="demo/counterparts">Arc Gauge</a></li>
+                        <li><MiniIcon Name="sparkline" /><a href="demo/grid">Sparkline Charts</a></li>
+                        <li><MiniIcon Name="barcode" /><a href="demo/new-components">Barcode Generator</a></li>
+                        <li><MiniIcon Name="qrcode" /><a href="demo/new-components">QR Code Generator</a></li>
+                        <li><MiniIcon Name="chart-bar" /><a href="demo/advanced-charts">Advanced Charts Suite</a></li>
+                        <li><MiniIcon Name="stock" /><a href="demo/counterparts">Financial Navigator</a></li>
+                    </ul>
+                </div>
+
+                <div class="cat-group">
+                    <h3 class="cat-title">DIAGRAMS &amp; WORKFLOWS</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="diagram" /><a href="demo/counterparts">Diagram Flowchart</a></li>
+                        <li><MiniIcon Name="treeview" /><a href="demo/tree/treeview-explorer">TreeView Explorer</a></li>
+                        <li><MiniIcon Name="property-grid" /><a href="demo/counterparts">Property Grid</a></li>
+                    </ul>
+                </div>
+
+                <div class="cat-group">
+                    <h3 class="cat-title">BUTTONS &amp; ACTIONS</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="button" /><a href="demo/buttons">Button Control</a></li>
+                        <li><MiniIcon Name="split-button" /><a href="demo/new-components">Split Button</a></li>
+                        <li><MiniIcon Name="toggle-button" /><a href="demo/counterparts">Toggle Button</a></li>
+                        <li><MiniIcon Name="fab" /><a href="demo/new-components">Floating Action Button (FAB)</a></li>
+                        <li><MiniIcon Name="speed-dial" /><a href="demo/new-components">Speed Dial Menu</a></li>
+                        <li><MiniIcon Name="button" /><a href="demo/buttons">Rounded Pill Buttons</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ── Column 3 ────────────────────────── -->
+            <div class="directory-col">
+                <div class="cat-group">
+                    <h3 class="cat-title">SCHEDULING &amp; CALENDARS</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="gantt" /><a href="demo/counterparts">Gantt Chart</a></li>
+                        <li><MiniIcon Name="scheduler" /><a href="demo/counterparts">Scheduler</a></li>
+                        <li><MiniIcon Name="calendar" /><a href="demo/counterparts">Calendar</a></li>
+                        <li><MiniIcon Name="datepicker" /><a href="demo/counterparts">DatePicker</a></li>
+                        <li><MiniIcon Name="timepicker" /><a href="demo/counterparts">TimePicker</a></li>
+                        <li><MiniIcon Name="timespan" /><a href="demo/new-components">TimeSpan Picker</a></li>
+                    </ul>
+                </div>
+
+                <div class="cat-group">
+                    <h3 class="cat-title">INPUTS &amp; EDITORS</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="input-number" /><a href="demo/counterparts">Numeric TextBox</a></li>
+                        <li><MiniIcon Name="input-text" /><a href="demo/counterparts">TextBox</a></li>
+                        <li><MiniIcon Name="textarea" /><a href="demo/counterparts">TextArea</a></li>
+                        <li><MiniIcon Name="otp" /><a href="demo/new-components">OTP / Security Code</a></li>
+                        <li><MiniIcon Name="slider" /><a href="demo/new-components">Range Slider</a></li>
+                        <li><MiniIcon Name="checkbox" /><a href="demo/counterparts">Checkbox</a></li>
+                        <li><MiniIcon Name="radio" /><a href="demo/counterparts">Radio Group</a></li>
+                        <li><MiniIcon Name="switch" /><a href="demo/new-components">Toggle Switch</a></li>
+                        <li><MiniIcon Name="palette" /><a href="demo/counterparts">Color Palette</a></li>
+                        <li><MiniIcon Name="rating" /><a href="demo/new-components">Star Rating</a></li>
+                    </ul>
+                </div>
+
+                <div class="cat-group">
+                    <h3 class="cat-title">FORMS &amp; VALIDATION</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="form" /><a href="demo/counterparts">Form Control</a></li>
+                        <li><MiniIcon Name="form-item" /><a href="demo/counterparts">Form Item Control</a></li>
+                        <li><MiniIcon Name="form-group" /><a href="demo/counterparts">Form Group Control</a></li>
+                        <li><MiniIcon Name="validation" /><a href="demo/counterparts">Validation Summary</a></li>
+                        <li><MiniIcon Name="validation" /><a href="demo/counterparts">Validation Message</a></li>
+                        <li><MiniIcon Name="validation" /><a href="demo/counterparts">Validation Tooltip</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ── Column 4 ────────────────────────── -->
+            <div class="directory-col">
+                <div class="cat-group">
+                    <h3 class="cat-title">DROPDOWNS &amp; SELECTORS</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="dropdown" /><a href="demo/counterparts">DropDownList</a></li>
+                        <li><MiniIcon Name="dropdowngrid" /><a href="demo/grid">DropDownGrid Control</a></li>
+                        <li><MiniIcon Name="autocomplete" /><a href="demo/counterparts">AutoComplete</a></li>
+                        <li><MiniIcon Name="listbox" /><a href="demo/counterparts">ListBox</a></li>
+                        <li><MiniIcon Name="dual-list" /><a href="demo/grid/userperms-lists">MultiSelect Dual List</a></li>
+                        <li><MiniIcon Name="picklist" /><a href="demo/grid/picklist-churn">Picklist Dropdown</a></li>
+                    </ul>
+                </div>
+
+                <div class="cat-group">
+                    <h3 class="cat-title">NAVIGATION &amp; COMMANDS</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="ribbon" /><a href="demo/buttons">Office Ribbon</a></li>
+                        <li><MiniIcon Name="toolbar" /><a href="demo/buttons">Toolbar Control</a></li>
+                        <li><MiniIcon Name="tab" /><a href="demo/workspace/page-control-bench">Tab Control</a></li>
+                        <li><MiniIcon Name="accordion" /><a href="demo/new-components">Accordion Control</a></li>
+                        <li><MiniIcon Name="appbar" /><a href="demo/counterparts">AppBar Control</a></li>
+                        <li><MiniIcon Name="breadcrumb" /><a href="demo/new-components">Breadcrumb</a></li>
+                        <li><MiniIcon Name="stepper" /><a href="demo/counterparts">Stepper Control</a></li>
+                        <li><MiniIcon Name="carousel" /><a href="demo/new-components">Carousel</a></li>
+                    </ul>
+                </div>
+
+                <div class="cat-group">
+                    <h3 class="cat-title">FEEDBACK &amp; NOTIFICATIONS</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="dialog" /><a href="demo/dialog">Modal Dialog</a></li>
+                        <li><MiniIcon Name="toast" /><a href="demo/notifications">Toast Notifications</a></li>
+                        <li><MiniIcon Name="toast" /><a href="demo/new-components">Context Alert Banners</a></li>
+                        <li><MiniIcon Name="badge" /><a href="demo/new-components">Status Badges</a></li>
+                        <li><MiniIcon Name="progress" /><a href="demo/counterparts">Progress Bar</a></li>
+                        <li><MiniIcon Name="skeleton" /><a href="demo/new-components">Loading Skeleton</a></li>
+                    </ul>
+                </div>
+
+                <div class="cat-group">
+                    <h3 class="cat-title">INTERACTIVE AI &amp; ASSIST</h3>
+                    <ul class="comp-list">
+                        <li><MiniIcon Name="ai-prompt" /><a href="demo/counterparts">AI Prompt Control</a></li>
+                        <li><MiniIcon Name="ai-prompt" /><a href="demo/counterparts">LLM Result Card</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── 5. Why Choose FlexCore: Key Architectural Pillars ───────── -->
+    <section class="pillars-section">
+        <div class="section-header">
+            <span class="section-tag">Enterprise Architecture</span>
+            <h2 class="section-title">Engineered for Enterprise Demand</h2>
+            <p class="section-desc">
+                Everything you need to deliver high-performance applications with the familiar productivity of desktop controls and the modern power of Blazor.
+            </p>
+        </div>
+
+        <div class="pillars-grid">
+            <div class="pillar-card">
+                <div class="pillar-icon blue">⚡</div>
+                <h3 class="pillar-title">Ultra-Fast Virtualization</h3>
+                <p class="pillar-desc">
+                    Virtual scrolling handles tens of thousands of rows at 60 FPS without memory leaks or DOM bloat. Excel-like keyboard navigation and instant sort/filter.
+                </p>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-icon purple">🛡️</div>
+                <h3 class="pillar-title">Zero JavaScript Dependencies</h3>
+                <p class="pillar-desc">
+                    Built 100% in C# and pure SVG. No npm packages, no webpack pipelines, and no fragile JS-interop serialization bottlenecks to slow down your circuits.
+                </p>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-icon green">🏢</div>
+                <h3 class="pillar-title">Legacy VB / WinForms Migration</h3>
+                <p class="pillar-desc">
+                    Engineered with 1-to-1 paradigm compatibility for VB6, WinForms, ActiveX grids, and Crystal Reports modernizations. Migrate decades of logic without rewrites.
+                </p>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-icon amber">📊</div>
+                <h3 class="pillar-title">Excel-Grade Grid Power</h3>
+                <p class="pillar-desc">
+                    Frozen columns, hierarchical TreeGrids, column reordering, aggregate footers, inline cell editing, and native ClosedXML Excel export out of the box.
+                </p>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-icon rose">🎨</div>
+                <h3 class="pillar-title">Adaptive Layout &amp; MDI</h3>
+                <p class="pillar-desc">
+                    IDE-style collapsible Left/Right panels, splitters, tab strips, and multi-document MDI window management designed for power-user desktop web apps.
+                </p>
+            </div>
+
+            <div class="pillar-card">
+                <div class="pillar-icon cyan">🔌</div>
+                <h3 class="pillar-title">Pluggable &amp; Host-Agnostic</h3>
+                <p class="pillar-desc">
+                    Every external dependency is exposed as a clean C# interface. Easily wire your own EF Core, Dapper, SQL Server, session context, or custom reporting backend.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── 6. Comparison Matrix (Side-by-Side Evaluation) ─────────── -->
+    <section class="comparison-section">
+        <div class="section-header">
+            <span class="section-tag">Feature Comparison</span>
+            <h2 class="section-title">How FlexCore Compares</h2>
+            <p class="section-desc">
+                See why engineering teams choose FlexCore over bloated JS wrappers and rigid enterprise licensing.
+            </p>
+        </div>
+
+        <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature / Capability</th>
+                        <th class="col-flexcore">FlexCore UI</th>
+                        <th>Heavy JS Wrapper Suites</th>
+                        <th>Basic Blazor Libraries</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Core Engine</strong></td>
+                        <td class="col-flexcore">100% Pure C# &amp; SVG</td>
+                        <td>Wrapped JavaScript (npm)</td>
+                        <td>Basic HTML5 Elements</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Virtualized Grid Performance</strong></td>
+                        <td class="col-flexcore"><span class="check-yes">✓ 100K+ Rows Smooth</span></td>
+                        <td>Heavy DOM / JS Memory</td>
+                        <td><span class="check-no">✗ Slow / Lags</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>JavaScript Interop Overhead</strong></td>
+                        <td class="col-flexcore"><span class="check-yes">✓ Zero (Pure Blazor)</span></td>
+                        <td>Heavy JSON serialization</td>
+                        <td>Low</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Crystal &amp; Legacy Report Engine</strong></td>
+                        <td class="col-flexcore"><span class="check-yes">✓ Native Built-in</span></td>
+                        <td><span class="check-no">✗ Not Available</span></td>
+                        <td><span class="check-no">✗ Not Available</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Office Ribbon &amp; IDE Layouts</strong></td>
+                        <td class="col-flexcore"><span class="check-yes">✓ Included</span></td>
+                        <td>Requires Expensive Addon</td>
+                        <td><span class="check-no">✗ Not Available</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ClosedXML Native Excel Export</strong></td>
+                        <td class="col-flexcore"><span class="check-yes">✓ Included</span></td>
+                        <td>Client-side CSV only</td>
+                        <td><span class="check-no">✗ None</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Licensing &amp; Per-Seat Fees</strong></td>
+                        <td class="col-flexcore"><strong>Host-Agnostic &amp; Free</strong></td>
+                        <td>$1,200+ / dev / year</td>
+                        <td>Varies</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── 7. Bottom Call to Action & Install Banner ──────────────── -->
+    <div class="cta-banner">
+        <h2>Ready to Build Lightning-Fast Blazor Apps?</h2>
+        <p>
+            Start developing in minutes. Add the FlexCore NuGet package to your project and experience the power of pure Blazor desktop-grade UI controls.
+        </p>
+
+        <div class="install-box" style="margin-bottom: 24px; background: rgba(0,0,0,0.4);">
+            <span>$</span>
+            <code>dotnet add package FlexCore</code>
+            <button type="button" class="btn-copy-install" @onclick="CopyInstallCommand" title="Copy to clipboard">
+                @(_copiedInstall ? "✓ Copied!" : "📋 Copy")
+            </button>
+        </div>
+
+        <div class="cta-buttons">
+            <a href="get-started" class="btn-hero-primary" style="background: #ffffff; color: #0d3b66;">
+                Get Started Now
+            </a>
+            <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" class="btn-hero-secondary">
+                <span class="bi bi-github"></span> View Source on GitHub
+            </a>
+            <a href="downloads/FlexCore.zip" class="btn-hero-secondary">
+                <span class="bi bi-download"></span> Download Package (.ZIP)
+            </a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _activeTab = "grid";
+    private bool _showCode = false;
+    private bool _copiedInstall = false;
+    private bool _copiedCode = false;
+    private string _selectedCategory = "All";
+    private string _selectedView = "New requests";
+    private string _gridSearchTerm = "";
+    private CustomQuote? _selectedQuote;
+    private GridControlEvents<CustomQuote> _gridEvents = new();
+
+    private EditSettings _editSettings = new()
+    {
+        AllowEditing = true,
+        Mode = EditMode.Batch,
+        EditOnEnterKey = true,
+        EditOnActiveCellClick = true,
+        AllowEditOnDblClick = true
+    };
+
+    private List<string> _quoteCategories = new()
+    {
+        "All", "Appliances", "Garage", "Switches", "Hardwood", "Plumbing", "Electrical", "Finishes", "Structural"
+    };
+
+    public class ViewOption
+    {
+        public string Key { get; set; } = "";
+        public string Label { get; set; } = "";
+    }
+
+    private List<ViewOption> ViewOptions => new()
+    {
+        new() { Key = "All", Label = $"All Requests ({_quotes.Count})" },
+        new() { Key = "New requests", Label = $"New requests ({_quotes.Count(q => q.Status == "New Request")})" },
+        new() { Key = "In Progress", Label = $"In Progress ({_quotes.Count(q => q.Status == "In Review")})" },
+        new() { Key = "Approved", Label = $"Approved Quotes ({_quotes.Count(q => q.Status == "Approved")})" },
+    };
+
+    public class CategoryLookup
+    {
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Trade { get; set; } = "";
+        public string LeadTime { get; set; } = "";
+        public string Display => $"{Code} - {Name}";
+    }
+
+    private List<CategoryLookup> _categoryLookup = new()
+    {
+        new() { Code = "APPLIANCES", Name = "Kitchen & Laundry Appliances", Trade = "Electrical / Plumbing", LeadTime = "2-3 wks" },
+        new() { Code = "SWITCHES", Name = "Smart Switches & Dimmers", Trade = "Electrical", LeadTime = "1 wk" },
+        new() { Code = "PLUMBING", Name = "Rough-in & Designer Fixtures", Trade = "Plumbing", LeadTime = "2 wks" },
+        new() { Code = "FINISHES", Name = "Drywall, Trim & Moldings", Trade = "Carpentry", LeadTime = "1-2 wks" },
+        new() { Code = "STRUCTURAL", Name = "Engineered Beams & Trusses", Trade = "Framing", LeadTime = "3-4 wks" },
+        new() { Code = "GARAGE", Name = "Insulated Doors & Openers", Trade = "Specialty", LeadTime = "2 wks" },
+        new() { Code = "HARDWOOD", Name = "Hardwood & Engineered Plank", Trade = "Flooring", LeadTime = "2 wks" },
+        new() { Code = "ELECTRICAL", Name = "200A Panels & High-Voltage", Trade = "Electrical", LeadTime = "1-2 wks" },
+    };
+
+    private static readonly List<string> _statusOptions = new() { "New Request", "In Review", "Approved", "Pending" };
+
+    public class CustomQuote
+    {
+        public int Id { get; set; }
+        public string Job { get; set; } = "";
+        public string Salesperson { get; set; } = "";
+        public string AvatarBg { get; set; } = "#0284c7";
+        public string AvatarInitials { get; set; } = "";
+        public DateTime DateRequested { get; set; }
+        public string Community { get; set; } = "";
+        public string CustomerNo { get; set; } = "";
+        public string Customer { get; set; } = "";
+        public string Category { get; set; } = "";
+        public string CategoryDesc { get; set; } = "";
+        public string Address { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Location { get; set; } = "";
+        public string Comments { get; set; } = "";
+        public decimal EstimateAmount { get; set; }
+        public string Status { get; set; } = "New Request";
+        public List<int> TrendHistory { get; set; } = new();
+        public int TrendDeltaPercent { get; set; }
+    }
+
+    private List<CustomQuote> _quotes = new();
+
+    // Popup Editor state
+    private bool _isPopupEditorOpen = false;
+    private CustomQuote? _editingQuote = null;
+    private CustomQuote? _originalQuoteRef = null;
+
+    private DateTime? _modalDateRequested
+    {
+        get => _editingQuote?.DateRequested;
+        set
+        {
+            if (_editingQuote != null && value.HasValue)
+            {
+                _editingQuote.DateRequested = value.Value;
+            }
+        }
+    }
+
+    private void OpenPopupEdit(CustomQuote quote)
+    {
+        _originalQuoteRef = quote;
+        _editingQuote = new CustomQuote
+        {
+            Id = quote.Id,
+            Job = quote.Job,
+            Salesperson = quote.Salesperson,
+            AvatarBg = quote.AvatarBg,
+            AvatarInitials = quote.AvatarInitials,
+            DateRequested = quote.DateRequested,
+            Community = quote.Community,
+            CustomerNo = quote.CustomerNo,
+            Customer = quote.Customer,
+            Category = quote.Category,
+            CategoryDesc = quote.CategoryDesc,
+            Address = quote.Address,
+            Description = quote.Description,
+            Location = quote.Location,
+            Comments = quote.Comments,
+            EstimateAmount = quote.EstimateAmount,
+            Status = quote.Status,
+            TrendHistory = new List<int>(quote.TrendHistory),
+            TrendDeltaPercent = quote.TrendDeltaPercent
+        };
+        _isPopupEditorOpen = true;
+        StateHasChanged();
+    }
+
+    private void SavePopupEdit()
+    {
+        if (_originalQuoteRef != null && _editingQuote != null)
+        {
+            _originalQuoteRef.Salesperson = _editingQuote.Salesperson;
+            _originalQuoteRef.Community = _editingQuote.Community;
+            _originalQuoteRef.Category = _editingQuote.Category;
+            _originalQuoteRef.CategoryDesc = _categoryLookup.FirstOrDefault(c => c.Code.Equals(_editingQuote.Category, StringComparison.OrdinalIgnoreCase))?.Name ?? _editingQuote.Category;
+            _originalQuoteRef.EstimateAmount = _editingQuote.EstimateAmount;
+            _originalQuoteRef.Status = _editingQuote.Status;
+            _originalQuoteRef.DateRequested = _editingQuote.DateRequested;
+            _originalQuoteRef.Description = _editingQuote.Description;
+            _originalQuoteRef.Comments = _editingQuote.Comments;
+
+            var initials = string.Join("", _originalQuoteRef.Salesperson.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => s[0])).ToUpper();
+            if (!string.IsNullOrEmpty(initials))
+                _originalQuoteRef.AvatarInitials = initials.Length > 2 ? initials[..2] : initials;
+
+            Notifications.Success($"Updated quote {_originalQuoteRef.Job} specifications via Popup Editor!");
+        }
+        _isPopupEditorOpen = false;
+        _editingQuote = null;
+        _originalQuoteRef = null;
+        StateHasChanged();
+    }
+
+    private void ClosePopupEdit()
+    {
+        _isPopupEditorOpen = false;
+        _editingQuote = null;
+        _originalQuoteRef = null;
+        StateHasChanged();
+    }
+
+    private void OnCategoryChanged(CustomQuote q, string? newCategory)
+    {
+        if (string.IsNullOrEmpty(newCategory)) return;
+        var old = q.Category;
+        q.Category = newCategory;
+        var lookup = _categoryLookup.FirstOrDefault(c => c.Code.Equals(newCategory, StringComparison.OrdinalIgnoreCase));
+        if (lookup != null)
+            q.CategoryDesc = lookup.Name;
+        Notifications.Success($"Updated {q.Job} category to {newCategory} via DropDownGridControl");
+        StateHasChanged();
+    }
+
+    private static List<CustomQuote> GenerateQuotes(int count)
+    {
+        var salesPeople = new[]
+        {
+            ("Prissy Pearl", "PP", "#0284c7"),
+            ("Snoop Dog", "SD", "#7c3aed"),
+            ("Alex Vance", "AV", "#10b981"),
+            ("Sarah Connor", "SC", "#d97706"),
+            ("Big Betty", "BB", "#e11d48"),
+            ("Gordon Freeman", "GF", "#0891b2"),
+            ("Dana Scully", "DS", "#4f46e5"),
+            ("Fox Mulder", "FM", "#059669")
+        };
+
+        var communities = new[]
+        {
+            "CARNATION ROW", "DAISY STREET", "LILY VALLEY", "FERN AVENUE",
+            "ROSE LANE", "MARGARITA VILLE", "ELLIOT TRAINING", "OAK RIDGE",
+            "PINE CREST", "CEDAR SPRINGS", "MAPLE GLEN", "WILLOW PARK"
+        };
+
+        var categories = new[]
+        {
+            ("APPLIANCES", "Kitchen & Laundry Appliances", 4500, 9500),
+            ("SWITCHES", "Smart Switches & Dimmers", 800, 2400),
+            ("PLUMBING", "Rough-in & Designer Fixtures", 1800, 4800),
+            ("FINISHES", "Drywall, Trim & Moldings", 1200, 3900),
+            ("STRUCTURAL", "Engineered Beams & Trusses", 6500, 18500),
+            ("GARAGE", "Insulated Doors & Openers", 2200, 12000),
+            ("HARDWOOD", "Hardwood & Engineered Plank", 4800, 19500),
+            ("ELECTRICAL", "200A Panels & High-Voltage", 2400, 5600)
+        };
+
+        var statuses = new[] { "Approved", "In Review", "New Request", "Pending" };
+
+        var descriptions = new[]
+        {
+            "Custom commercial double wall oven with warming drawer",
+            "Add 3-way dimmer switch in kitchen island & pantry",
+            "Dual shower rough-in with thermostatic mixer valve",
+            "Crown molding upgrade in master suite & dining",
+            "Engineered timber beam vault support for open concept",
+            "18x13 clear short glass insulated overhead garage door",
+            "Engineered French Oak 7-inch wide plank throughout main floor",
+            "200A electrical sub-panel installation with EV rough-in",
+            "Under-cabinet LED task strip lighting with smart dimmer",
+            "Freestanding soaking tub with floor-mounted Roman faucet",
+            "Custom coffered ceiling with integrated cove lighting",
+            "Zero-threshold walk-in shower with linear drain tile",
+            "Soundproofing insulation package between floors",
+            "Tankless high-efficiency continuous hot water system",
+            "Smart home automation hub with motorized blinds wiring"
+        };
+
+        var rnd = new Random(42);
+        var list = new List<CustomQuote>(count);
+        var startDate = new DateTime(2026, 1, 1);
+
+        for (int i = 1; i <= count; i++)
+        {
+            var sp = salesPeople[rnd.Next(salesPeople.Length)];
+            var comm = communities[rnd.Next(communities.Length)];
+            var cat = categories[rnd.Next(categories.Length)];
+            var status = statuses[rnd.Next(statuses.Length)];
+            var desc = descriptions[rnd.Next(descriptions.Length)];
+            var est = rnd.Next(cat.Item3 / 10, cat.Item4 / 10) * 10m;
+            var date = startDate.AddMinutes(rnd.Next(0, 180 * 24 * 60));
+
+            int baseTrend = (int)(est * 0.85m);
+            var trend = new List<int>
+            {
+                baseTrend,
+                baseTrend + rnd.Next(-300, 400),
+                baseTrend + rnd.Next(-100, 600),
+                baseTrend + rnd.Next(100, 800),
+                (int)est
+            };
+            int delta = (int)Math.Round(((decimal)trend[4] - trend[0]) / Math.Max(1, trend[0]) * 100);
+
+            string prefix = comm.Length >= 2 ? comm[..2] : "CR";
+            list.Add(new CustomQuote
+            {
+                Id = i,
+                Job = $"{prefix}{i:D4}",
+                Salesperson = sp.Item1,
+                AvatarInitials = sp.Item2,
+                AvatarBg = sp.Item3,
+                DateRequested = date,
+                Community = comm,
+                CustomerNo = $"90000{i:D4}",
+                Customer = $"{prefix}{i:D4} - SPEC",
+                Category = cat.Item1,
+                CategoryDesc = cat.Item2,
+                Address = $"{rnd.Next(10, 999)} {comm.Split(' ')[0]} Way",
+                Description = desc,
+                Location = "Main Floor",
+                Comments = "Client approved options sheet",
+                EstimateAmount = est,
+                Status = status,
+                TrendHistory = trend,
+                TrendDeltaPercent = delta
+            });
+        }
+
+        return list;
+    }
+
+    protected override void OnInitialized()
+    {
+        _quotes = GenerateQuotes(1000);
+        _selectedQuote = _quotes.FirstOrDefault();
+
+        _gridEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<CustomQuote>>(this, e =>
+        {
+            _selectedQuote = e.Data;
+            StateHasChanged();
+        });
+
+        _gridEvents.OnRecordDoubleClick = EventCallback.Factory.Create<CellClickEventArgs<CustomQuote>>(this, e =>
+        {
+            if (e.Data != null)
+            {
+                _selectedQuote = e.Data;
+                OpenPopupEdit(e.Data);
+            }
+        });
+    }
+
+    private IEnumerable<CustomQuote> FilteredQuotes
+    {
+        get
+        {
+            var list = _quotes.AsEnumerable();
+
+            if (_selectedCategory != "All")
+                list = list.Where(q => q.Category.Equals(_selectedCategory, StringComparison.OrdinalIgnoreCase));
+
+            if (_selectedView == "New requests")
+                list = list.Where(q => q.Status == "New Request");
+            else if (_selectedView == "In Progress")
+                list = list.Where(q => q.Status == "In Review");
+            else if (_selectedView == "Approved")
+                list = list.Where(q => q.Status == "Approved");
+
+            if (!string.IsNullOrWhiteSpace(_gridSearchTerm))
+            {
+                var term = _gridSearchTerm.Trim();
+                list = list.Where(q =>
+                    q.Job.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    q.Salesperson.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    q.Customer.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    q.Community.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    q.Description.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    q.Category.Contains(term, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return list;
+        }
+    }
+
+    private record SparklineCoord(string PolylinePoints, string AreaPoints, double LastX, double LastY);
+
+    private SparklineCoord GetSparklinePoints(List<int> values, double width, double height)
+    {
+        if (values == null || values.Count < 2)
+            return new SparklineCoord("0,11 68,11", "0,11 68,11 68,22 0,22", 68, 11);
+
+        int min = values.Min();
+        int max = values.Max();
+        int range = Math.Max(1, max - min);
+        double padY = 3.0;
+        double usableHeight = height - (padY * 2);
+
+        var coords = new List<(double X, double Y)>();
+        for (int i = 0; i < values.Count; i++)
+        {
+            double x = (i / (double)(values.Count - 1)) * (width - 6) + 3;
+            double norm = (values[i] - min) / (double)range;
+            double y = (height - padY) - (norm * usableHeight);
+            coords.Add((Math.Round(x, 1), Math.Round(y, 1)));
+        }
+
+        string polyline = string.Join(" ", coords.Select(c => $"{c.X.ToString(System.Globalization.CultureInfo.InvariantCulture)},{c.Y.ToString(System.Globalization.CultureInfo.InvariantCulture)}"));
+        string area = $"{polyline} {coords.Last().X.ToString(System.Globalization.CultureInfo.InvariantCulture)},{height.ToString(System.Globalization.CultureInfo.InvariantCulture)} {coords.First().X.ToString(System.Globalization.CultureInfo.InvariantCulture)},{height.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+
+        return new SparklineCoord(polyline, area, coords.Last().X, coords.Last().Y);
+    }
+
+    private string GetCategoryBadgeClass(string category) => category.ToUpperInvariant() switch
+    {
+        "APPLIANCES" => "grid-badge-blue",
+        "SWITCHES" or "ELECTRICAL" => "grid-badge-amber",
+        "PLUMBING" => "grid-badge-cyan",
+        "FINISHES" => "grid-badge-purple",
+        "STRUCTURAL" => "grid-badge-rose",
+        "GARAGE" => "grid-badge-green",
+        "HARDWOOD" => "grid-badge-amber",
+        _ => "grid-badge-gray"
+    };
+
+    private string GetStatusBadgeClass(string status) => status switch
+    {
+        "Approved" => "grid-badge-green",
+        "In Review" => "grid-badge-blue",
+        "Pending" => "grid-badge-amber",
+        "Declined" => "grid-badge-rose",
+        _ => "grid-badge-gray"
+    };
+
+    private void CreateNewQuote()
+    {
+        Notifications.Success("New quote request dialog opened. Ready to capture specifications.");
+    }
+
+    private List<ChartSeries> _quarterlySeries = new()
+    {
+        new()
+        {
+            Name = "Actual Revenue ($K)",
+            Color = "#0284c7",
+            Type = ChartType.Bar,
+            DataPoints = new()
+            {
+                new("Q1", 240),
+                new("Q2", 365),
+                new("Q3", 480),
+                new("Q4", 620)
+            }
+        },
+        new()
+        {
+            Name = "Annual Target ($K)",
+            Color = "#107c41",
+            Type = ChartType.Bar,
+            DataPoints = new()
+            {
+                new("Q1", 210),
+                new("Q2", 320),
+                new("Q3", 430),
+                new("Q4", 550)
+            }
+        }
+    };
+
+    private List<ChartSeries> _pieSeries = new()
+    {
+        new()
+        {
+            Name = "Categories",
+            Type = ChartType.Pie,
+            DataPoints = new()
+            {
+                new("Structural (35%)", 35, "#0284c7"),
+                new("Electrical (25%)", 25, "#7c3aed"),
+                new("Plumbing (20%)", 20, "#107c41"),
+                new("Mechanical (12%)", 12, "#d97706"),
+                new("Finishes (8%)", 8, "#e11d48")
+            }
+        }
+    };
+
+    private void ExportToExcel()
+    {
+        Notifications.Success($"Successfully generated Excel workbook for {FilteredQuotes.Count()} custom quotes using ClosedXML!");
+    }
+
+    private void OnPaste() => Notifications.Info("Pasted from clipboard.");
+    private void OnCopy() => Notifications.Info("Copied to clipboard.");
+    private void OnNewOrder() => Notifications.Success("Created new order ticket.");
+    private void OnSaveBatch() => Notifications.Success("Batch saved successfully.");
+    private void OnExportRibbonExcel() => Notifications.Success("Exported using ClosedXML.");
+    private void OnPrintPdf() => Notifications.Warning("Report queued to PDF virtual spooler.");
+    private void OnToggleGrid() => Notifications.Info("Toggled grid outlines.");
+    private void OnFreezeHeaders() => Notifications.Info("Header row pinned.");
+
+    private async Task CopyInstallCommand()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", "dotnet add package FlexCore");
+            _copiedInstall = true;
+            Notifications.Info("Install command copied to clipboard!");
+            StateHasChanged();
+            await Task.Delay(2000);
+            _copiedInstall = false;
+            StateHasChanged();
+        }
+        catch { }
+    }
+
+    private async Task CopyActiveCode()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", GetActiveCodeSnippet());
+            _copiedCode = true;
+            Notifications.Info("Code snippet copied to clipboard!");
+            StateHasChanged();
+            await Task.Delay(2000);
+            _copiedCode = false;
+            StateHasChanged();
+        }
+        catch { }
+    }
+
+    private string GetActiveCodeSnippet()
+    {
+        return _activeTab switch
+        {
+            "grid" =>
+@"<!-- Telerik-grade Enterprise DataGrid: 1,000 Rows, In-Grid Typing, DropDownGrid & Popup Edit -->
+<GridControl TValue=""CustomQuote"" DataSource=""@FilteredQuotes""
+             AllowSelection=""true""
+             AllowSorting=""true""
+             AllowFiltering=""true""
+             AllowResizing=""true""
+             EnableHover=""true""
+             CssClass=""telerik-grid-theme""
+             EditSettingsRef=""@_editSettings""
+             EventsRef=""@_gridEvents""
+             Height=""440px"">
+    <GridColumnsBase>
+        <GridColumn Field=""Job"" HeaderText=""Job"" Width=""90px""
+                    IsPrimaryKey=""true"" AllowEditing=""false""
+                    IsFrozen=""true"" FrozenPosition=""FrozenColumnPosition.Left"">
+            <Template Context=""row"">
+                <span class=""grid-job-code"">@(((CustomQuote)row).Job)</span>
+            </Template>
+        </GridColumn>
+
+        <GridColumn Field=""Salesperson"" HeaderText=""Salesperson"" Width=""145px"" AllowEditing=""false"">
+            <Template Context=""row"">
+                @{ var q = (CustomQuote)row; }
+                <div class=""salesperson-cell"">
+                    <span class=""salesperson-avatar"" style=""background:@q.AvatarBg"">@q.AvatarInitials</span>
+                    <span class=""salesperson-name"">@q.Salesperson</span>
+                </div>
+            </Template>
+        </GridColumn>
+
+        <GridColumn Field=""Community"" HeaderText=""Community"" Width=""130px"" AllowEditing=""false"" />
+
+        <!-- ── IN-CELL DROP DOWN GRID CONTROL (Multi-column lookup) ── -->
+        <GridColumn HeaderText=""Category (DropDownGrid)"" Width=""190px"" AllowEditing=""false"">
+            <Template Context=""row"">
+                @{ var q = (CustomQuote)row; }
+                <div class=""grid-cell-dropdowngrid"" @onclick:stopPropagation=""true"">
+                    <DropDownGridControl TItem=""CategoryLookup"" TValue=""string""
+                                         DataSource=""@_categoryLookup""
+                                         Value=""@q.Category""
+                                         ValueChanged=""@(val => OnCategoryChanged(q, val))""
+                                         TextFieldName=""@nameof(CategoryLookup.Name)""
+                                         ValueFieldName=""@nameof(CategoryLookup.Code)""
+                                         ClosedTextFieldName=""@nameof(CategoryLookup.Code)""
+                                         PopupWidth=""410px""
+                                         PopupHeight=""220px""
+                                         RowHeight=""24""
+                                         ShowSearch=""true""
+                                         Placeholder=""Select category..."">
+                        <Columns>
+                            <GridColumn Field=""Code"" HeaderText=""Code"" Width=""95px"" />
+                            <GridColumn Field=""Name"" HeaderText=""Category Name"" Width=""170px"" />
+                            <GridColumn Field=""Trade"" HeaderText=""Trade"" Width=""110px"" />
+                        </Columns>
+                    </DropDownGridControl>
+                </div>
+            </Template>
+        </GridColumn>
+
+        <!-- ── IN-GRID FAST TYPING CELL (Direct cell typing with zero JS lag) ── -->
+        <GridColumn Field=""EstimateAmount"" HeaderText=""Estimate (Fast Typing)"" Width=""140px""
+                    Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right""
+                    AllowEditing=""true"" SelectAllOnEdit=""true"" />
+
+        <!-- ── INLINE SVG SPARKLINE CHART CELL TEMPLATE ── -->
+        <GridColumn HeaderText=""Cost Trend"" Width=""135px"" AllowSorting=""false"" AllowFiltering=""false"" AllowEditing=""false"">
+            <Template Context=""row"">
+                @{
+                    var q = (CustomQuote)row;
+                    var spark = GetSparklinePoints(q.TrendHistory, 68, 22);
+                    var isUp = q.TrendDeltaPercent >= 0;
+                    var color = isUp ? ""#10b981"" : ""#ef4444"";
+                    var fill = isUp ? ""rgba(16, 185, 129, 0.16)"" : ""rgba(239, 68, 68, 0.16)"";
+                }
+                <div class=""sparkline-cell"" title=""5-Month Cost Trend: @(isUp ? ""+"" : """")@q.TrendDeltaPercent%"">
+                    <svg width=""68"" height=""22"" viewBox=""0 0 68 22"" class=""sparkline-svg"">
+                        <polygon points=""@spark.AreaPoints"" fill=""@fill"" />
+                        <polyline points=""@spark.PolylinePoints"" fill=""none"" stroke=""@color"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" />
+                        <circle cx=""@spark.LastX"" cy=""@spark.LastY"" r=""2.5"" fill=""@color"" />
+                    </svg>
+                    <span class=""sparkline-delta @(isUp ? ""delta-up"" : ""delta-down"")"">
+                        @(isUp ? ""▲"" : ""▼"")@Math.Abs(q.TrendDeltaPercent)%
+                    </span>
+                </div>
+            </Template>
+        </GridColumn>
+
+        <GridColumn Field=""Status"" HeaderText=""Status"" Width=""110px"" AllowEditing=""false"">
+            <Template Context=""row"">
+                @{ var q = (CustomQuote)row; }
+                <BadgeControl Text=""@q.Status"" CssClass=""@($""grid-badge {GetStatusBadgeClass(q.Status)}"")"" />
+            </Template>
+        </GridColumn>
+
+        <!-- ── POPUP EDITABLE DESCRIPTION COLUMN ── -->
+        <GridColumn HeaderText=""Description (Popup Edit)"" Width=""280px"" AllowEditing=""false"">
+            <Template Context=""row"">
+                @{ var q = (CustomQuote)row; }
+                <div class=""desc-cell-wrapper"">
+                    <span class=""desc-text"" title=""@q.Description"">@q.Description</span>
+                    <button type=""button"" class=""btn-cell-popup-edit"" title=""Edit in Modal Popup""
+                            @onclick=""@(() => OpenPopupEdit(q))"" @onclick:stopPropagation=""true"">
+                        <span class=""bi bi-pencil-square""></span> Edit
+                    </button>
+                </div>
+            </Template>
+        </GridColumn>
+    </GridColumnsBase>
+</GridControl>",
+
+            "charts" =>
+@"<ChartControl Type=""ChartType.Bar"" Title=""Performance Overview"" Height=""280px"" Series=""@_quarterlySeries"" />
+
+<ChartControl Type=""ChartType.Pie"" Title=""Inventory Allocation"" Height=""280px"" Series=""@_pieSeries"" />",
+
+            "ribbon" =>
+@"<RibbonControl>
+    <RibbonTab Title=""Home"">
+        <RibbonGroup Title=""Clipboard"">
+            <RibbonButton Text=""Paste"" Icon=""bi-clipboard"" OnClick=""@OnPaste"" />
+            <RibbonButton Text=""Copy"" Icon=""bi-files"" OnClick=""@OnCopy"" />
+        </RibbonGroup>
+        <RibbonGroup Title=""Export"">
+            <RibbonButton Text=""Excel (XLSX)"" Icon=""bi-file-earmark-excel"" OnClick=""@OnExportExcel"" />
+        </RibbonGroup>
+    </RibbonTab>
+</RibbonControl>",
+
+            "reports" =>
+@"// Crystal Reports XML / SQL Adaptive Reporting Pipeline
+builder.Services.AddScoped<CrystalXmlReportLoader>();
+builder.Services.AddScoped<IReportSessionContext, ShowcaseReportSessionContext>();
+builder.Services.AddScoped<IReportDataExecutor, ShowcaseReportDataExecutor>();
+
+<ReportWriterControl Definition=""@reportDef"" Executor=""@executor"" />",
+
+            _ => ""
+        };
+    }
+}

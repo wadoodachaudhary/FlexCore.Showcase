@@ -1,0 +1,44 @@
+## .NET / Visual Studio
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+publish/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.dbmdl
+*.jfm
+
+## Build artifacts
+*.dll
+*.pdb
+*.exe
+*.lib
+*.exp
+*.cache
+*.tlog
+*.tmp
+*.zip
+
+## IDEs
+.vs/
+.vscode/
+.idea/
+*.sln.docstates
+*.swp
+*.DS_Store
+
+## Generated CSS isolation
+*.styles.css
+*.scp.css
+
+## AI / editor tooling
+.claude/
+.codex-backups/
+
+# Serilog output
+Logs/
+*.log

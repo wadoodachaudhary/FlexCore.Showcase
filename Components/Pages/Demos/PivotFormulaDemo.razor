@@ -1,0 +1,343 @@
+@page "/demo/pivot-formulas"
+@using Fx.ControlKit.Grid
+
+<PageTitle>Pivot Tables - FlexCore</PageTitle>
+
+<div class="docs-page pivot-docs">
+    <h1>Multi-Level Pivot Table</h1>
+    <p>
+        <code>PivotControl</code> builds Excel-style pivot tables with multi-level column headers,
+        row-level grouping with subtotals, drag-and-drop field configuration, report filters,
+        and multiple value fields. It also integrates with <code>GridControl</code> formula columns.
+    </p>
+
+    @* ════════════════════════════════════════════════════════════════
+       Section 1 — Interactive Pivot Builder
+       ════════════════════════════════════════════════════════════════ *@
+    <section>
+        <h2>Interactive Pivot Builder</h2>
+        <p>
+            Drag fields from the <strong>Available Fields</strong> list into the
+            <strong>Rows</strong>, <strong>Columns</strong>, <strong>Values</strong>, or
+            <strong>Filters</strong> areas. The pivot table updates instantly. Change the
+            aggregation type on value fields using the dropdown.
+        </p>
+        <div class="demo-frame" style="min-height:540px;">
+            <PivotControl TValue="SaleRecord"
+                          DataSource="@_interactiveSales"
+                          RowFields="@(new[] { "Country" })"
+                          ColumnFields="@(new[] { "Quarter" })"
+                          ValueField="Amount"
+                          Aggregation="AggregateType.Sum"
+                          ValueFormat="C0"
+                          Interactive="true"
+                          ShowSubTotals="true"
+                          ShowGrandTotals="true"
+                          FieldLabels="@_fieldLabels"
+                          Height="420px" />
+        </div>
+        <pre><code>&lt;PivotControl TValue="SaleRecord"
+              DataSource="@@_sales"
+              RowFields="@@(new[] { "Country" })"
+              ColumnFields="@@(new[] { "Quarter" })"
+              ValueField="Amount"
+              Interactive="true"
+              ShowSubTotals="true"
+              ShowGrandTotals="true" /&gt;</code></pre>
+    </section>
+
+    @* ════════════════════════════════════════════════════════════════
+       Section 2 — How It Works (Documentation)
+       ════════════════════════════════════════════════════════════════ *@
+    <section>
+        <h2>How the Pivot Builder Works</h2>
+        <p>
+            The interactive builder mirrors Excel's PivotTable Fields pane.
+            Each field in your data model can be placed into one of four areas:
+        </p>
+        <div class="api-grid api-grid-2">
+            <article>
+                <h3>≡ Rows</h3>
+                <p>
+                    Row fields define the left-hand labels of the pivot table.
+                    With multiple row fields, the first field groups rows with
+                    <code>rowspan</code> and subtotals are inserted per group.
+                </p>
+            </article>
+            <article>
+                <h3>⊞ Columns</h3>
+                <p>
+                    Column fields create the horizontal dimension. With multiple
+                    column fields, multi-level headers are rendered using
+                    <code>colspan</code> — the first field spans the second.
+                </p>
+            </article>
+            <article>
+                <h3>Σ Values</h3>
+                <p>
+                    Value fields supply the numbers. Each value field can use a
+                    different aggregation: <strong>Sum</strong>, <strong>Count</strong>,
+                    <strong>Average</strong>, <strong>Min</strong>, or <strong>Max</strong>.
+                    Multiple value fields add sub-columns under each column key.
+                </p>
+            </article>
+            <article>
+                <h3>⊞ Filters</h3>
+                <p>
+                    Filter fields add dropdown selectors above the pivot. Choosing a
+                    value narrows the data before grouping — like Excel's Report Filter area.
+                </p>
+            </article>
+        </div>
+    </section>
+
+    @* ════════════════════════════════════════════════════════════════
+       Section 3 — Multiple Row Fields
+       ════════════════════════════════════════════════════════════════ *@
+    <section>
+        <h2>Multiple Row Fields</h2>
+        <p>
+            When two or more fields are in the <strong>Rows</strong> area, the first field
+            becomes a group header. Its cell spans all detail rows plus the subtotal row.
+            This is equivalent to Excel's "Group and Outline" for pivot row labels.
+        </p>
+        <div class="demo-frame">
+            <PivotControl TValue="SaleRecord"
+                          DataSource="@_interactiveSales"
+                          RowFields="@(new[] { "Country", "Category" })"
+                          ColumnFields="@(new[] { "Quarter" })"
+                          ValueField="Amount"
+                          Aggregation="AggregateType.Sum"
+                          ValueFormat="C0"
+                          ShowSubTotals="true"
+                          ShowGrandTotals="true"
+                          Height="480px" />
+        </div>
+        <pre><code>&lt;PivotControl TValue="SaleRecord"
+              RowFields="@@(new[] { "Country", "Category" })"
+              ColumnFields="@@(new[] { "Quarter" })"
+              ValueField="Amount"
+              ShowSubTotals="true" /&gt;</code></pre>
+    </section>
+
+    @* ════════════════════════════════════════════════════════════════
+       Section 4 — Multiple Column Fields (Multi-Level Headers)
+       ════════════════════════════════════════════════════════════════ *@
+    <section>
+        <h2>Multiple Column Fields</h2>
+        <p>
+            Placing two fields in <strong>Columns</strong> creates multi-level headers.
+            The first column field (<code>Quarter</code>) spans the values of the second
+            field (<code>Category</code>). This matches Excel's nested column labels.
+        </p>
+        <div class="demo-frame">
+            <PivotControl TValue="SaleRecord"
+                          DataSource="@_interactiveSales"
+                          RowFields="@(new[] { "Country" })"
+                          ColumnFields="@(new[] { "Quarter", "Category" })"
+                          ValueField="Amount"
+                          Aggregation="AggregateType.Sum"
+                          ValueFormat="C0"
+                          ShowGrandTotals="true"
+                          Height="300px" />
+        </div>
+    </section>
+
+    @* ════════════════════════════════════════════════════════════════
+       Section 5 — Multiple Value Fields
+       ════════════════════════════════════════════════════════════════ *@
+    <section>
+        <h2>Multiple Value Fields</h2>
+        <p>
+            Use the <code>ValueFields</code> parameter to aggregate more than one
+            measure. Each value field can have its own aggregation and format.
+            Below, <strong>Sum of Amount</strong> and <strong>Count of Quantity</strong>
+            appear side by side under each column group.
+        </p>
+        <div class="demo-frame">
+            <PivotControl TValue="SaleRecord"
+                          DataSource="@_interactiveSales"
+                          RowFields="@(new[] { "Country" })"
+                          ColumnFields="@(new[] { "Quarter" })"
+                          ValueFields="@_multiValueFields"
+                          ShowGrandTotals="true"
+                          Height="300px" />
+        </div>
+        <pre><code>&lt;PivotControl TValue="SaleRecord"
+              RowFields="@@(new[] { "Country" })"
+              ColumnFields="@@(new[] { "Quarter" })"
+              ValueFields="@@_multiValueFields" /&gt;
+
+@@code {
+    PivotValueConfig[] _multiValueFields = [
+        new() { Field = "Amount",   Aggregation = Sum,   Format = "C0" },
+        new() { Field = "Quantity", Aggregation = Count, Format = "N0" }
+    ];
+}</code></pre>
+    </section>
+
+    @* ════════════════════════════════════════════════════════════════
+       Section 6 — Grid Formula Cells
+       ════════════════════════════════════════════════════════════════ *@
+    <section>
+        <h2>Grid Formula Cells</h2>
+        <p>
+            <code>GridControl</code> supports computed columns via <code>GridColumn.Formula</code>
+            and cell-level <code>=</code> formulas when <code>AllowCellFormulas</code> is enabled.
+        </p>
+        <div class="demo-frame">
+            <GridControl TValue="Sale" DataSource="@_sales.Take(8).ToList()"
+                         AllowCellFormulas="true"
+                         AllowSorting="true"
+                         AllowFiltering="true"
+                         AllowResizing="true"
+                         Height="360px">
+                <GridColumnsBase>
+                    <GridColumn Field="@nameof(Sale.Region)" HeaderText="Region" Width="120px" />
+                    <GridColumn Field="@nameof(Sale.Rep)" HeaderText="Rep" Width="140px" />
+                    <GridColumn Field="@nameof(Sale.Product)" HeaderText="Product" Width="120px" />
+                    <GridColumn Field="@nameof(Sale.Revenue)" HeaderText="Revenue" Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" Width="120px" />
+                    <GridColumn Field="@nameof(Sale.Cost)" HeaderText="Cost" Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" Width="120px" />
+                    <GridColumn Field="GrossMargin" HeaderText="Gross Margin" Formula="[Revenue] - [Cost]" Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" Width="140px" />
+                    <GridColumn Field="MarginPct" HeaderText="Margin %" Formula="([Revenue] - [Cost]) / [Revenue]" Type="ColumnType.Number" Format="P1" TextAlign="TextAlign.Right" Width="120px" />
+                    <GridColumn Field="@nameof(Sale.CommissionFormula)" HeaderText="Commission" Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" Width="130px" />
+                </GridColumnsBase>
+            </GridControl>
+        </div>
+    </section>
+
+    @* ════════════════════════════════════════════════════════════════
+       Section 7 — API Reference
+       ════════════════════════════════════════════════════════════════ *@
+    <section>
+        <h2>PivotControl API</h2>
+        <div class="api-grid">
+            <article>
+                <h3>RowFields / ColumnFields</h3>
+                <p>String arrays naming the data fields used for row labels and column headers.</p>
+            </article>
+            <article>
+                <h3>ValueField / ValueFields</h3>
+                <p>Single field + aggregation, or a list of <code>PivotValueConfig</code> for multiple measures.</p>
+            </article>
+            <article>
+                <h3>Interactive</h3>
+                <p>Set <code>true</code> to show the drag-and-drop field builder panel alongside the table.</p>
+            </article>
+            <article>
+                <h3>ShowSubTotals / ShowGrandTotals</h3>
+                <p>Insert per-group subtotal rows and a grand total row at the bottom.</p>
+            </article>
+            <article>
+                <h3>FieldLabels</h3>
+                <p>Optional <code>Dictionary&lt;string, string&gt;</code> mapping field names to friendly display labels.</p>
+            </article>
+            <article>
+                <h3>Aggregation Types</h3>
+                <p>Sum, Count, Average, Min, Max — set per value field in <code>PivotValueConfig</code>.</p>
+            </article>
+        </div>
+    </section>
+</div>
+
+@code {
+    // ── Multi-value config ──────────────────────────────────────────
+    private readonly PivotValueConfig[] _multiValueFields =
+    [
+        new() { Field = "Amount", Aggregation = AggregateType.Sum, Format = "C0", Label = "Revenue" },
+        new() { Field = "Quantity", Aggregation = AggregateType.Sum, Format = "N0", Label = "Units" }
+    ];
+
+    private readonly Dictionary<string, string> _fieldLabels = new()
+    {
+        ["Country"] = "Country",
+        ["Category"] = "Category",
+        ["Product"] = "Product",
+        ["Salesperson"] = "Sales Rep",
+        ["Quarter"] = "Quarter",
+        ["Amount"] = "Amount",
+        ["Quantity"] = "Qty"
+    };
+
+    // ── Interactive demo data ───────────────────────────────────────
+    private readonly List<SaleRecord> _interactiveSales =
+    [
+        // USA
+        new("USA", "Electronics", "Laptop",  "Alice", "Q1", 48000, 12),
+        new("USA", "Electronics", "Phone",   "Alice", "Q1", 32000, 40),
+        new("USA", "Electronics", "Laptop",  "Bob",   "Q1", 55000, 14),
+        new("USA", "Electronics", "Tablet",  "Bob",   "Q1", 18000, 20),
+        new("USA", "Clothing",    "Jacket",  "Alice", "Q1", 14000, 70),
+        new("USA", "Clothing",    "Shoes",   "Bob",   "Q1", 22000, 55),
+        new("USA", "Electronics", "Laptop",  "Alice", "Q2", 52000, 13),
+        new("USA", "Electronics", "Phone",   "Alice", "Q2", 38000, 48),
+        new("USA", "Electronics", "Laptop",  "Bob",   "Q2", 61000, 16),
+        new("USA", "Electronics", "Tablet",  "Bob",   "Q2", 21000, 24),
+        new("USA", "Clothing",    "Jacket",  "Alice", "Q2", 11000, 55),
+        new("USA", "Clothing",    "Shoes",   "Bob",   "Q2", 26000, 65),
+        new("USA", "Electronics", "Laptop",  "Alice", "Q3", 58000, 15),
+        new("USA", "Electronics", "Phone",   "Bob",   "Q3", 29000, 36),
+        new("USA", "Clothing",    "Jacket",  "Alice", "Q3", 9000,  45),
+        new("USA", "Clothing",    "Shoes",   "Bob",   "Q3", 19000, 48),
+        new("USA", "Electronics", "Laptop",  "Alice", "Q4", 64000, 16),
+        new("USA", "Electronics", "Phone",   "Bob",   "Q4", 35000, 44),
+        new("USA", "Clothing",    "Jacket",  "Alice", "Q4", 16000, 80),
+        new("USA", "Clothing",    "Shoes",   "Bob",   "Q4", 28000, 70),
+        // UK
+        new("UK", "Electronics", "Laptop",  "Carol", "Q1", 42000, 11),
+        new("UK", "Electronics", "Phone",   "Carol", "Q1", 28000, 35),
+        new("UK", "Clothing",    "Jacket",  "Carol", "Q1", 12000, 60),
+        new("UK", "Electronics", "Laptop",  "Carol", "Q2", 46000, 12),
+        new("UK", "Electronics", "Phone",   "Carol", "Q2", 31000, 39),
+        new("UK", "Clothing",    "Jacket",  "Carol", "Q2", 15000, 75),
+        new("UK", "Electronics", "Laptop",  "Carol", "Q3", 39000, 10),
+        new("UK", "Electronics", "Phone",   "Carol", "Q3", 25000, 31),
+        new("UK", "Clothing",    "Shoes",   "Carol", "Q3", 18000, 45),
+        new("UK", "Electronics", "Laptop",  "Carol", "Q4", 51000, 13),
+        new("UK", "Electronics", "Phone",   "Carol", "Q4", 33000, 41),
+        new("UK", "Clothing",    "Shoes",   "Carol", "Q4", 21000, 53),
+        // Germany
+        new("Germany", "Electronics", "Tablet",  "Dave", "Q1", 24000, 27),
+        new("Germany", "Electronics", "Phone",   "Dave", "Q1", 31000, 39),
+        new("Germany", "Clothing",    "Shoes",   "Dave", "Q1", 17000, 43),
+        new("Germany", "Electronics", "Tablet",  "Dave", "Q2", 27000, 30),
+        new("Germany", "Electronics", "Phone",   "Dave", "Q2", 36000, 45),
+        new("Germany", "Clothing",    "Shoes",   "Dave", "Q2", 20000, 50),
+        new("Germany", "Electronics", "Tablet",  "Dave", "Q3", 22000, 25),
+        new("Germany", "Electronics", "Phone",   "Dave", "Q3", 29000, 36),
+        new("Germany", "Clothing",    "Jacket",  "Dave", "Q3", 13000, 65),
+        new("Germany", "Electronics", "Tablet",  "Dave", "Q4", 30000, 33),
+        new("Germany", "Electronics", "Phone",   "Dave", "Q4", 38000, 48),
+        new("Germany", "Clothing",    "Jacket",  "Dave", "Q4", 16000, 80),
+    ];
+
+    private sealed record SaleRecord(
+        string Country, string Category, string Product,
+        string Salesperson, string Quarter, double Amount, int Quantity);
+
+    // ── Formula grid data (existing) ────────────────────────────────
+    private readonly List<Sale> _sales =
+    [
+        new("East", "Avery Chen", "Q1", "Hardware", 125000, 73000),
+        new("East", "Avery Chen", "Q1", "Software", 98000, 38000),
+        new("East", "Avery Chen", "Q2", "Hardware", 141000, 82000),
+        new("East", "Avery Chen", "Q2", "Software", 112000, 44000),
+        new("East", "Blake Rivera", "Q1", "Hardware", 86000, 52000),
+        new("East", "Blake Rivera", "Q1", "Software", 74000, 29000),
+        new("East", "Blake Rivera", "Q2", "Hardware", 102000, 61000),
+        new("East", "Blake Rivera", "Q2", "Software", 88000, 35000),
+        new("West", "Casey Patel", "Q1", "Hardware", 132000, 79000),
+        new("West", "Casey Patel", "Q1", "Software", 121000, 47000),
+        new("West", "Casey Patel", "Q2", "Hardware", 154000, 91000),
+        new("West", "Casey Patel", "Q2", "Software", 139000, 54000),
+        new("West", "Drew Yamamoto", "Q1", "Hardware", 92000, 56000),
+        new("West", "Drew Yamamoto", "Q1", "Software", 83000, 32000),
+        new("West", "Drew Yamamoto", "Q2", "Hardware", 116000, 69000),
+        new("West", "Drew Yamamoto", "Q2", "Software", 97000, 39000),
+    ];
+
+    private sealed record Sale(string Region, string Rep, string Quarter, string Product, double Revenue, double Cost)
+    {
+        public string CommissionFormula => "=[Revenue] * 0.08";
+    }
+}

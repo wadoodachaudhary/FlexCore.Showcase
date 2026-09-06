@@ -1,0 +1,74 @@
+.catalog-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px 32px 48px;
+}
+
+.catalog-page h1 {
+    font-size: 32px;
+    color: #0d3b66;
+    margin: 0 0 8px;
+}
+
+.catalog-lede {
+    font-size: 15px;
+    color: #4b5563;
+    margin: 0 0 32px;
+    line-height: 1.6;
+}
+
+.cat-section {
+    margin-bottom: 36px;
+}
+
+.cat-section h2 {
+    font-size: 20px;
+    color: #0d3b66;
+    margin: 0 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+}
+
+.comp-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px 20px;
+    background: #fff;
+    transition: box-shadow 0.15s;
+}
+
+.comp-card:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.comp-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: #0d3b66;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+}
+
+.comp-card p {
+    font-size: 13px;
+    color: #4b5563;
+    margin: 0 0 6px;
+    line-height: 1.5;
+}
+
+.comp-card a {
+    font-size: 13px;
+    color: #1d6fa5;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.comp-card a:hover {
+    text-decoration: underline;
+}

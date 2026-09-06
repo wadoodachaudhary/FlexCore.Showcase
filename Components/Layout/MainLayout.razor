@@ -1,0 +1,82 @@
+@inherits LayoutComponentBase
+
+<div class="showcase-shell-layout">
+    <header class="top-nav-bar">
+        <div class="nav-brand-container">
+            <a href="" class="brand-link">
+                <span class="brand-logo-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <rect x="2" y="2" width="9" height="9" rx="2" fill="#0284c7" />
+                        <rect x="13" y="2" width="9" height="9" rx="2" fill="#38bdf8" />
+                        <rect x="2" y="13" width="9" height="9" rx="2" fill="#6366f1" />
+                        <rect x="13" y="13" width="9" height="9" rx="2" fill="#10b981" />
+                    </svg>
+                </span>
+                <span class="brand-name">FlexCore</span>
+                <span class="brand-badge">Showcase</span>
+            </a>
+        </div>
+
+        <nav class="top-nav-menu">
+            <NavLink class="nav-menu-item" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door"></span> Overview
+            </NavLink>
+            <NavLink class="nav-menu-item" href="demo/grid/ag-grid-showcase">
+                <span class="bi bi-grid-3x3-gap-fill"></span> AG Grid (4-in-1)
+            </NavLink>
+            <NavLink class="nav-menu-item" href="demo/charts">
+                <span class="bi bi-bar-chart-line"></span> Charts
+            </NavLink>
+            <NavLink class="nav-menu-item" href="demo/charts/sunburst">
+                <span class="bi bi-pie-chart-fill"></span> Sunburst
+            </NavLink>
+            <NavLink class="nav-menu-item" href="demo/reports/model-costs">
+                <span class="bi bi-file-earmark-spreadsheet"></span> Reports
+            </NavLink>
+            <NavLink class="nav-menu-item" href="demo/counterparts">
+                <span class="bi bi-ui-checks"></span> Dedicated Controls
+            </NavLink>
+            <NavLink class="nav-menu-item" href="components">
+                <span class="bi bi-collection"></span> All Components
+            </NavLink>
+        </nav>
+
+        <div class="top-nav-actions">
+            <a href="get-started" class="btn-nav-primary">
+                <span class="bi bi-rocket-takeoff"></span> Quick Start
+            </a>
+            <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" class="btn-nav-icon" title="View Source on GitHub">
+                <span class="bi bi-github"></span>
+            </a>
+        </div>
+    </header>
+
+    <main class="main-body-container">
+        @Body
+    </main>
+
+    <footer class="showcase-site-footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <strong>FlexCore</strong> &bull; Enterprise Blazor UI Suite for .NET 10 &bull; 100% Pure C# &amp; SVG &bull; Zero JavaScript Dependencies
+            </div>
+            <div class="footer-right">
+                <a href="">Overview</a>
+                <a href="components">All Components</a>
+                <a href="demo/grid/ag-grid-showcase">AG Grid</a>
+                <a href="demo/charts/sunburst">COVID-19 Sunburst</a>
+                <a href="demo/reports/model-costs">Reports</a>
+                <a href="get-started">Get Started</a>
+                <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </footer>
+
+    <NotificationDisplayControl />
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

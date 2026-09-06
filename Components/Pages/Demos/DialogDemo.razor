@@ -1,0 +1,52 @@
+@page "/demo/dialog"
+
+<PageTitle>Dialog — FlexCore</PageTitle>
+
+<h1>Dialog</h1>
+<p>FlexCore's <code>DialogControl</code> provides modal overlays with header, body, close-on-escape, and configurable visibility.</p>
+
+<div class="demo-frame demo-buttons">
+    <ButtonControl CssClass="btn-primary" OnClick="@(() => _show = true)">Open Dialog</ButtonControl>
+    <ButtonControl CssClass="btn-secondary" OnClick="@(() => _showWide = true)">Open Wide Dialog</ButtonControl>
+</div>
+
+<DialogControl @bind-Visible="_show" Header="Confirm Action" Width="480px" IsModal="true" ShowCloseIcon="true" CloseOnEscape="true">
+    <p style="padding:16px;">Are you sure you want to proceed? This uses FlexCore's <code>DialogControl</code> with modal overlay, close-on-escape, and header close icon.</p>
+    <div style="padding:8px 16px; display:flex; gap:8px; justify-content:flex-end; border-top:1px solid #e5e7eb;">
+        <ButtonControl CssClass="btn-primary" OnClick="@OnConfirm">OK</ButtonControl>
+        <ButtonControl CssClass="btn-secondary" OnClick="@(() => _show = false)">Cancel</ButtonControl>
+    </div>
+</DialogControl>
+
+<DialogControl @bind-Visible="_showWide" Header="Wide Dialog" Width="700px" IsModal="true" ShowCloseIcon="true" CloseOnEscape="true">
+    <div style="padding:16px;">
+        <p>Dialogs can host any FlexCore content — grids, charts, forms:</p>
+        <ChartControl Type="ChartType.Bar" Title="Quarterly Results" Height="200px"
+                      Series="@(new List<ChartSeries> { new() { Name = "Revenue", DataPoints = new() {
+                          new("Q1", 120), new("Q2", 180), new("Q3", 240), new("Q4", 310) } } })" />
+    </div>
+</DialogControl>
+
+@if (_lastAction != null)
+{
+    <p style="margin-top:16px;"><strong>Last action:</strong> @_lastAction</p>
+}
+
+<h2>Markup</h2>
+<pre><code>&lt;DialogControl @@bind-Visible="_show" Header="Title" Width="480px"
+              IsModal="true" ShowCloseIcon="true" CloseOnEscape="true"&gt;
+    &lt;p&gt;Dialog body content…&lt;/p&gt;
+    &lt;ButtonControl CssClass="btn-primary" OnClick="@@OnConfirm"&gt;OK&lt;/ButtonControl&gt;
+&lt;/DialogControl&gt;</code></pre>
+
+@code {
+    bool _show;
+    bool _showWide;
+    string? _lastAction;
+
+    void OnConfirm()
+    {
+        _show = false;
+        _lastAction = $"Confirmed at {DateTime.Now:HH:mm:ss}";
+    }
+}

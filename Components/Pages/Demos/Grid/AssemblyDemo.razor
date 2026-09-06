@@ -1,0 +1,78 @@
+@page "/demo/grid/assembly"
+
+@using FlexCore.Showcase.Data
+
+<PageTitle>Grid — Assembly — FlexCore</PageTitle>
+
+<h1>Grid — Assembly Line Items</h1>
+<p>
+    A heavier grid modeled after HomeFront's <code>FAssembly</code> form: editable
+    line items with vendor, PO index, description, qty, UOM, unit price, total —
+    plus a sum footer over <strong>Total</strong>, grouping by PO index, drag-reorder
+    headers, and per-row formatting.
+</p>
+
+<div class="demo-frame">
+    <GridControl TValue="AssemblyItem"
+                 DataSource="@_items"
+                 AllowSelection="true"
+                 AllowSorting="true"
+                 AllowFiltering="true"
+                 AllowGrouping="true"
+                 AllowResizing="true"
+                 AllowColumnReorder="true"
+                 EnableHover="true"
+                 ShowSearchBar="true"
+                 Height="520px"
+                 AggregateRows="_aggregates">
+        <GridColumnsBase>
+            <GridColumn Field="@nameof(AssemblyItem.PriceLevel)"  HeaderText="Price Level" Width="160px" />
+            <GridColumn Field="@nameof(AssemblyItem.Vendor)"      HeaderText="Vendor"      Width="180px" />
+            <GridColumn Field="@nameof(AssemblyItem.POIndex)"     HeaderText="PO Index"    Width="120px" />
+            <GridColumn Field="@nameof(AssemblyItem.Description)" HeaderText="Description" Width="240px" />
+            <GridColumn Field="@nameof(AssemblyItem.Qty)"         HeaderText="Qty"         Width="80px"
+                        Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" />
+            <GridColumn Field="@nameof(AssemblyItem.UOM)"         HeaderText="UOM"         Width="80px" />
+            <GridColumn Field="@nameof(AssemblyItem.ItemType)"    HeaderText="Item Type"   Width="110px" />
+            <GridColumn Field="@nameof(AssemblyItem.Price)"       HeaderText="Unit Price"  Width="110px"
+                        Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+            <GridColumn Field="@nameof(AssemblyItem.Total)"       HeaderText="Total"       Width="120px"
+                        Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+        </GridColumnsBase>
+    </GridControl>
+</div>
+
+<h2>Things to try</h2>
+<ul>
+    <li>Drag the <strong>PO Index</strong> column header onto the group panel — sums update per group.</li>
+    <li>Click any header to sort ascending / descending / clear.</li>
+    <li>Click the filter icon on a header to filter; combine with sort.</li>
+    <li>Drag column headers left/right to reorder; widths persist.</li>
+    <li>Search across all columns using the search bar above the headers.</li>
+</ul>
+
+<h2>Other Grid Demos</h2>
+<ul>
+    <li><a href="/demo/grid">Basic Grid</a></li>
+    <li><a href="/demo/grid/reordering">Reordering Grid</a></li>
+    <li><a href="/demo/grid/vendor-prices">Vendor Prices</a></li>
+    <li><a href="/demo/grid/items">Items Catalog</a></li>
+</ul>
+
+@code {
+    private List<AssemblyItem> _items = DemoData.GenerateAssemblyItems(60);
+
+    private List<AggregateRow> _aggregates = new()
+    {
+        new AggregateRow
+        {
+            ShowInGroupFooter = true,
+            ShowInFooter = true,
+            Columns = new()
+            {
+                new AggregateColumn { Field = nameof(AssemblyItem.Qty),   Type = AggregateType.Sum, Format = "N0", FooterTemplate = "Σ {value}" },
+                new AggregateColumn { Field = nameof(AssemblyItem.Total), Type = AggregateType.Sum, Format = "C2", FooterTemplate = "Σ {value}" },
+            }
+        }
+    };
+}

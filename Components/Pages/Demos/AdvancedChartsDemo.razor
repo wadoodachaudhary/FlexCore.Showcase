@@ -1,0 +1,156 @@
+@page "/demo/advanced-charts"
+@rendermode InteractiveServer
+@using Fx.ControlKit.Charts
+
+<PageTitle>Advanced Charts & Gauges — FlexCore Showcase</PageTitle>
+
+<div class="container-fluid py-3">
+    <div class="mb-4">
+        <h2>Advanced Charts, Financials & Gauges</h2>
+        <p class="text-muted">
+            Explore newly ported chart series types in FlexCore — Financial Candlestick, OHLC, Performance Bullet Charts, Range Intervals, Sankey Flow Diagrams, and Radial/Linear Gauges (rendered via pure SVG with zero external dependencies).
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <!-- 1. Candlestick Financial Chart -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white font-monospace">
+                    <strong>1. Candlestick Financial Chart</strong>
+                </div>
+                <div class="card-body">
+                    <ChartControl Type="ChartType.Candlestick" Series="_candlestickSeries" Height="280px" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. OHLC Financial Chart -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white font-monospace">
+                    <strong>2. OHLC Financial Chart</strong>
+                </div>
+                <div class="card-body">
+                    <ChartControl Type="ChartType.Ohlc" Series="_candlestickSeries" Height="280px" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Bullet Chart (Target vs Actual) -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white font-monospace">
+                    <strong>3. Performance Bullet Chart (Actual vs Target)</strong>
+                </div>
+                <div class="card-body">
+                    <ChartControl Type="ChartType.Bullet" Series="_bulletSeries" Height="240px" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Range Column Chart (Min - Max Floating Intervals) -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white font-monospace">
+                    <strong>4. Range Interval Chart (Min - Max Salary / Temp)</strong>
+                </div>
+                <div class="card-body">
+                    <ChartControl Type="ChartType.RangeColumn" Series="_rangeSeries" Height="240px" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Sankey Flow Diagram -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white font-monospace">
+                    <strong>5. Sankey Flow Diagram</strong>
+                </div>
+                <div class="card-body">
+                    <ChartControl Type="ChartType.Sankey" Series="_sankeySeries" Height="280px" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Advanced Gauges (Radial & Linear) -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white font-monospace">
+                    <strong>6. Radial & Linear Gauges</strong>
+                </div>
+                <div class="card-body d-flex flex-column gap-3 align-items-center">
+                    <div class="d-flex gap-4 align-items-center justify-content-center w-100">
+                        <div>
+                            <h6 class="text-muted small text-center">Radial Gauge</h6>
+                            <ChartControl Type="ChartType.RadialGauge" Series="_gaugeSeries" Height="180px" />
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted small text-center">Linear Gauge</h6>
+                            <ChartControl Type="ChartType.LinearGauge" Series="_gaugeSeries" Height="90px" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ChartSeries> _candlestickSeries = new()
+    {
+        new ChartSeries("Equities", ChartType.Candlestick, new[]
+        {
+            ChartDataPoint.Financial("Day 1", 120, 135, 115, 130),
+            ChartDataPoint.Financial("Day 2", 130, 142, 125, 138),
+            ChartDataPoint.Financial("Day 3", 138, 140, 122, 126),
+            ChartDataPoint.Financial("Day 4", 126, 132, 120, 131),
+            ChartDataPoint.Financial("Day 5", 131, 145, 128, 143),
+            ChartDataPoint.Financial("Day 6", 143, 148, 135, 137),
+            ChartDataPoint.Financial("Day 7", 137, 150, 136, 149)
+        })
+    };
+
+    private List<ChartSeries> _bulletSeries = new()
+    {
+        new ChartSeries("Metrics", ChartType.Bullet, new[]
+        {
+            ChartDataPoint.Bullet("Revenue ($k)", 275, 250),
+            ChartDataPoint.Bullet("Profit ($k)", 42, 50),
+            ChartDataPoint.Bullet("Orders", 310, 280),
+            ChartDataPoint.Bullet("NPS Score", 78, 85)
+        })
+    };
+
+    private List<ChartSeries> _rangeSeries = new()
+    {
+        new ChartSeries("Salary Ranges", ChartType.RangeColumn, new[]
+        {
+            ChartDataPoint.Range("Junior Dev", 60, 85),
+            ChartDataPoint.Range("Mid Dev", 85, 120),
+            ChartDataPoint.Range("Senior Dev", 120, 165),
+            ChartDataPoint.Range("Lead Architect", 160, 210),
+            ChartDataPoint.Range("Principal", 200, 260)
+        })
+    };
+
+    private List<ChartSeries> _sankeySeries = new()
+    {
+        new ChartSeries("Budget Flow", ChartType.Sankey, new[]
+        {
+            ChartDataPoint.Sankey("Revenue", "Engineering", 120),
+            ChartDataPoint.Sankey("Revenue", "Marketing", 60),
+            ChartDataPoint.Sankey("Revenue", "Operations", 40),
+            ChartDataPoint.Sankey("Investment", "R&D", 80),
+            ChartDataPoint.Sankey("Investment", "Expansion", 50)
+        })
+    };
+
+    private List<ChartSeries> _gaugeSeries = new()
+    {
+        new ChartSeries("Performance", ChartType.RadialGauge, new[]
+        {
+            new ChartDataPoint("Score", 82.5)
+        })
+    };
+}

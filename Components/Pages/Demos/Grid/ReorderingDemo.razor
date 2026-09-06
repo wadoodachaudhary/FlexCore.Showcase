@@ -1,0 +1,92 @@
+@page "/demo/grid/reordering"
+
+<PageTitle>Grid — Reordering Grid — FlexCore</PageTitle>
+
+<h1>Reordering Grid</h1>
+<p>
+    Focused demo for column drag-and-drop behavior. Use this page to validate
+    first-drop reorder, left/right drop positioning, and repeated reorder cycles.
+</p>
+
+<div style="display:flex; align-items:center; gap:10px; margin:10px 0 14px;">
+    <label for="reorderPipeColor" style="font-weight:600;">Reorder pipe color</label>
+    <input id="reorderPipeColor" type="color" @bind="_reorderPipeColor" />
+    <input type="text" @bind="_reorderPipeColor" style="width:110px;" />
+</div>
+
+<div class="demo-frame">
+    <GridControl TValue="ReorderingRow"
+                 DataSource="@_rows"
+                 AllowSelection="true"
+                 AllowSorting="true"
+                 AllowFiltering="true"
+                 AllowGrouping="false"
+                 AllowResizing="true"
+                 AllowColumnReorder="true"
+                 ColumnReorderPipeColor="@_reorderPipeColor"
+                 EnableHover="true"
+                 ShowSearchBar="true"
+                 Height="520px">
+        <GridColumnsBase>
+            <GridColumn Field="@nameof(ReorderingRow.Model)"       HeaderText="Model"        Width="130px" />
+            <GridColumn Field="@nameof(ReorderingRow.Community)"   HeaderText="Community"    Width="150px" />
+            <GridColumn Field="@nameof(ReorderingRow.Phase)"       HeaderText="Phase"        Width="120px" />
+            <GridColumn Field="@nameof(ReorderingRow.Task)"        HeaderText="Task"         Width="220px" />
+            <GridColumn Field="@nameof(ReorderingRow.Owner)"       HeaderText="Owner"        Width="150px" />
+            <GridColumn Field="@nameof(ReorderingRow.Priority)"    HeaderText="Priority"     Width="100px" />
+            <GridColumn Field="@nameof(ReorderingRow.Hours)"       HeaderText="Hours"        Width="90px"
+                        Type="ColumnType.Number" Format="N1" TextAlign="TextAlign.Right" />
+            <GridColumn Field="@nameof(ReorderingRow.Cost)"        HeaderText="Cost"         Width="120px"
+                        Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+            <GridColumn Field="@nameof(ReorderingRow.LastUpdated)" HeaderText="Last Updated" Width="130px"
+                        Type="ColumnType.Date" Format="d" />
+        </GridColumnsBase>
+    </GridControl>
+</div>
+
+<h2>Things to try</h2>
+<ul>
+    <li>Drag <strong>Priority</strong> before <strong>Model</strong> and confirm first drop reorders immediately.</li>
+    <li>Drag <strong>Owner</strong> to the right half of <strong>Cost</strong> and verify it lands after Cost.</li>
+    <li>Perform 4-5 sequential reorders and confirm only the dragged column moves each time.</li>
+    <li>Reload the page and repeat to validate consistent behavior from a fresh state.</li>
+</ul>
+
+<h2>Other Grid Demos</h2>
+<ul>
+    <li><a href="/demo/grid">Basic Grid</a></li>
+    <li><a href="/demo/grid/assembly">Assembly</a></li>
+    <li><a href="/demo/grid/vendor-prices">Vendor Prices</a></li>
+    <li><a href="/demo/grid/items">Items Catalog</a></li>
+</ul>
+
+    @code {
+    private string _reorderPipeColor = "#2b2b2b";
+
+    private record ReorderingRow(
+        string Model,
+        string Community,
+        string Phase,
+        string Task,
+        string Owner,
+        string Priority,
+        decimal Hours,
+        decimal Cost,
+        DateTime LastUpdated);
+
+    private readonly List<ReorderingRow> _rows = new()
+    {
+        new("A100", "North Ridge", "Frame",      "Rough carpentry review",   "Alex Nguyen",   "High",   6.5m,  845.50m, new(2026, 1, 8)),
+        new("A100", "North Ridge", "Electrical", "Panel schedule update",    "Sana Patel",    "High",   4.0m,  620.00m, new(2026, 1, 9)),
+        new("A200", "Maple Hills", "Plumbing",   "Fixture coordination",     "Marcus Lee",    "Medium", 3.0m,  410.25m, new(2026, 1, 10)),
+        new("B150", "Oak View",    "Drywall",    "Shear wall punch list",    "Diana Ortiz",   "Low",    2.5m,  275.00m, new(2026, 1, 11)),
+        new("C300", "Willow Park", "Paint",      "Color board approval",     "Jonah Kim",     "Medium", 1.5m,  190.00m, new(2026, 1, 12)),
+        new("C300", "Willow Park", "Final",      "QC closeout walk",         "Aisha Brown",   "High",   5.0m,  700.00m, new(2026, 1, 13)),
+        new("D410", "River Bend",  "Concrete",   "Slab tolerance check",     "Noah Garcia",   "Medium", 3.5m,  535.75m, new(2026, 1, 14)),
+        new("D410", "River Bend",  "Roof",       "Flashing detail review",   "Priya Menon",   "Low",    2.0m,  260.00m, new(2026, 1, 15)),
+        new("E520", "Cedar Grove", "HVAC",       "Duct reroute approval",    "Ethan Walker",  "High",   4.5m,  655.40m, new(2026, 1, 16)),
+        new("E520", "Cedar Grove", "Trim",       "Cabinet filler alignment", "Mina Hassan",   "Medium", 2.0m,  285.30m, new(2026, 1, 17)),
+        new("F610", "Stone Creek", "Landscape",  "Irrigation valve map",     "Luca Romano",   "Low",    1.0m,  140.00m, new(2026, 1, 18)),
+        new("F610", "Stone Creek", "Final",      "Warranty turnover packet", "Grace Mitchell","Medium", 2.8m,  360.00m, new(2026, 1, 19)),
+    };
+}

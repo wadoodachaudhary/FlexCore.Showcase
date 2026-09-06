@@ -1,0 +1,144 @@
+@page "/demo/counterparts"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Fx.ControlKit
+@using Fx.ControlKit.Layout
+@using Fx.ControlKit.Charts
+@using Fx.ControlKit.Docking
+@using Fx.ControlKit.Gantt
+@using Fx.ControlKit.Pdf
+@using Fx.ControlKit.AI
+
+<PageTitle>Dedicated controls — FlexCore Showcase</PageTitle>
+<div class="counterparts-demo">
+    <AppBarControl>
+        <StartContent><SvgIconControl Name="sparkles" Size="24px" /><strong>FlexCore dedicated controls</strong></StartContent>
+        <ChildContent>Shared foundations, independent controls</ChildContent>
+        <EndContent><FontIconControl Glyph="◆" Label="Component gallery" /></EndContent>
+    </AppBarControl>
+    <ToolbarControl ShowCaptionsToggle="false">
+        @foreach(var name in _sections){<ToggleButtonControl Selected="@(_section==name)" OnClick="()=>_section=name">@name</ToggleButtonControl>}
+    </ToolbarControl>
+    <p role="status" id="demo-status">@_status</p>
+    @switch(_section)
+    {
+        case "Forms":
+            <GridLayoutControl>
+                <GridLayoutItemControl>
+                    <h3>Generated form</h3>
+                    <p>Try clearing Name or entering a quantity outside 1–20. Invalid drafts remain editable.</p>
+                    <FormControl Model="@_record" Columns="2" OnValidSubmit="RecordSaved" OnInvalidSubmit="InvalidForm" />
+                </GridLayoutItemControl>
+                <GridLayoutItemControl>
+                    <h3>Grouped form with templates</h3>
+                    <FormControl Model="@_grouped" OnValidSubmit="GroupSaved">
+                        <ChildContent>
+                            <FormGroupControl Label="Contact" Columns="2"><FormItemControl Field="Name" /><FormItemControl Field="Quantity" /></FormGroupControl>
+                            <FormItemControl Field="Notes" EditorType="FormEditorType.TextArea" />
+                            <ValidationTooltipControl Field="Name"><span>Focus or hover here for Name validation.</span></ValidationTooltipControl>
+                        </ChildContent>
+                    </FormControl>
+                </GridLayoutItemControl>
+            </GridLayoutControl>
+            break;
+        case "Selection":
+            <GridLayoutControl>
+                <GridLayoutItemControl>
+                    <h3>Suggestions and choices</h3>
+                    <AutoCompleteControl TItem="string" DataSource="@_cities" @bind-Value="_city" MinLength="1" AriaLabel="City" Placeholder="Type a city" />
+                    <p id="city-value">City: @_city</p>
+                    <RadioGroupControl TValue="string" Items="@_radioItems" @bind-Value="_choice" AriaLabel="Delivery" />
+                    <p>Delivery: @_choice</p>
+                    <TimePickerControl @bind-Value="_time" AriaLabel="Appointment time" Min="@(new TimeOnly(8,0))" Max="@(new TimeOnly(18,0))" />
+                    <p id="time-value">Appointment: @_time</p>
+                    <ToggleButtonControl @bind-Selected="_enabled">Notifications @(_enabled?"on":"off")</ToggleButtonControl>
+                    <StepperControl Steps="@_steps" @bind-Value="_step" Linear="false" />
+                    <p id="step-value">Step: @(_step+1)</p>
+                    <ColorPaletteControl @bind-Value="_color" />
+                    <p id="color-value">Color: @_color</p>
+                </GridLayoutItemControl>
+                <GridLayoutItemControl>
+                    <h3>Standalone calendar</h3>
+                    <DropDownListControl TItem="string" TValue="string" DataSource="@(Enum.GetNames<CalendarSelectionMode>())" Value="@_calendarMode.ToString()" ValueChanged="v=>_calendarMode=Enum.Parse<CalendarSelectionMode>(v)" AriaLabel="Calendar selection mode" />
+                    <CalendarControl @bind-Value="_date" @bind-Values="_dates" @bind-Range="_range" SelectionMode="@_calendarMode" />
+                    <p id="calendar-value">@(_calendarMode==CalendarSelectionMode.Single?_date?.ToString("d"):_calendarMode==CalendarSelectionMode.Multiple?string.Join(", ",_dates.Select(d=>d.ToString("d"))):$"{_range.Start:d} – {_range.End:d}")</p>
+                </GridLayoutItemControl>
+            </GridLayoutControl>
+            break;
+        case "Charts":
+            <GridLayoutControl Columns="repeat(4,minmax(0,1fr))">
+                <GridLayoutItemControl><h3>Arc</h3><ArcGaugeControl Value="65" Ranges="@_ranges" AriaLabel="Arc example" /></GridLayoutItemControl>
+                <GridLayoutItemControl><h3>Circular</h3><CircularGaugeControl Value="80" AriaLabel="Circular example" /></GridLayoutItemControl>
+                <GridLayoutItemControl><h3>Radial</h3><RadialGaugeControl Value="45" Min="-20" Max="80" Pointers="@_pointers" AriaLabel="Radial example" /></GridLayoutItemControl>
+                <GridLayoutItemControl><h3>Linear</h3><LinearGaugeControl Value="20" Min="10" Max="30" AriaLabel="Linear example" /></GridLayoutItemControl>
+            </GridLayoutControl>
+            <StockChartControl DataSource="@_prices" RangeChanged="StockChanged" />
+            break;
+        case "Docking":
+            <ToolbarControl ShowCaptionsToggle="false"><ButtonControl OnClick="SaveDock">Save layout</ButtonControl><ButtonControl Disabled="@(_savedLayout==null)" OnClick="RestoreDock">Restore layout</ButtonControl></ToolbarControl>
+            <p>Drag a pane tab onto another group, or use Dock… to choose a position. Floating windows can be moved and resized.</p>
+            <DockManagerControl @ref="_dock" Panels="@_panels" Height="500px" StateChanged="DockChanged" />
+            break;
+        case "Gantt":
+            <p>Double-click a task to edit it. Drag a bar to move it, or its edge to resize. Dependency constraints reject invalid schedules.</p>
+            <GanttControl Tasks="@_tasks" TasksChanged="TasksUpdated" />
+            break;
+        case "PDF":
+            <p>Open a local PDF, select text to highlight it, edit form fields, or add a note. Download includes your changes.</p>
+            <ButtonControl OnClick="SavePdfToHost">Save to host</ButtonControl>
+            <PdfViewerControl @ref="_pdf" Url="counterparts-sample.pdf" FileName="counterparts-sample.pdf" Height="650px" />
+            break;
+        case "AI prompt":
+            <p>This example uses a local demonstration provider. Applications connect their own provider through the Generate callback.</p>
+            <AIPromptControl Prompt="Summarize the project schedule" Suggestions="@_suggestions" Commands="@_commands" Generate="DemoGenerateAsync" Apply="r=>_status=r.Output" />
+            break;
+    }
+</div>
+@code {
+    private readonly string[] _sections=["Forms","Selection","Charts","Docking","Gantt","PDF","AI prompt"];
+    private string _section="Forms",_status="Ready.";
+    private DemoRecord _record=new(),_grouped=new();
+    private readonly string[] _cities=["Amsterdam","Boston","Chicago","Denver","London","New York","San Francisco","Seattle"];
+    private string? _city;
+    private string _choice="Standard";
+    private IReadOnlyList<RadioGroupItem<string>> _radioItems=[new("Standard","Standard"),new("Express","Express"),new("Unavailable","Unavailable",true)];
+    private TimeOnly? _time=new(9,0);
+    private bool _enabled;
+    private int _step;
+    private IReadOnlyList<WizardStepDescriptor> _steps=[new(){Title="Details"},new(){Title="Review"},new(){Title="Complete"}];
+    private string? _color="#0080FF";
+    private DateTime? _date=new(2026,9,5);
+    private IReadOnlyList<DateTime> _dates=[];
+    private CalendarRange _range=new(null,null);
+    private CalendarSelectionMode _calendarMode;
+    private IReadOnlyList<GaugeRange> _ranges=[new(0,40,"#16a34a"),new(40,75,"#f59e0b"),new(75,100,"#dc2626")];
+    private IReadOnlyList<GaugePointer> _pointers=[new(60,"#dc2626","Target")];
+    private ChartDataPoint[] _prices=Enumerable.Range(0,60).Select(i=>ChartDataPoint.Financial(new DateTime(2026,7,1).AddDays(i).ToString("MMM d"),100+Math.Sin(i/4d)*10,115+Math.Sin(i/4d)*10,90+Math.Sin(i/4d)*10,105+Math.Sin(i/4d)*10,new DateTime(2026,7,1).AddDays(i))).ToArray();
+    private DockManagerControl? _dock;
+    private string? _savedLayout;
+    private PdfViewerControl? _pdf;
+    private async Task SavePdfToHost(){if(_pdf?.PageCount>0){var bytes=await _pdf.SaveAsync();_status=$"Saved {bytes.Length:N0} PDF bytes to the host.";}}
+    private IReadOnlyList<DockPanel> _panels=[];
+    private IReadOnlyList<GanttTask> _tasks=[new(){Id="plan",Title="Planning",Start=new(2026,9,1),End=new(2026,9,4),Progress=100},new(){Id="build",Title="Implementation",Start=new(2026,9,4),End=new(2026,9,12),Progress=45,Predecessors="plan"},new(){Id="test",Title="Verification",Start=new(2026,9,12),End=new(2026,9,16),Predecessors="build"}];
+    private string[] _suggestions=["Summarize the project schedule","Draft a progress update"];
+    private AIPromptCommand[] _commands=[new("shorten","Shorten","Use one sentence."),new("expand","Expand","Include supporting detail.")];
+    protected override void OnInitialized(){_panels=[new("files","Files",b=>b.AddContent(0,"Project files and folders")),new("document","Document",b=>b.AddContent(0,"Document workspace"),false),new("properties","Properties",b=>b.AddContent(0,"Selected document properties"))];}
+    private void RecordSaved()=>_status=$"Saved {_record.Name}; quantity {_record.Quantity}.";
+    private void InvalidForm()=>_status="Correct the highlighted fields.";
+    private void GroupSaved()=>_status="Grouped form saved.";
+    private void StockChanged(StockChartRange range)=>_status=$"Stock range {range.Start:d} – {range.End:d}";
+    private void DockChanged(DockLayoutState state)=>_status="Dock layout updated.";
+    private void TasksUpdated(IReadOnlyList<GanttTask> tasks){_tasks=tasks;_status="Task schedule updated.";}
+    private void SaveDock(){_savedLayout=_dock!.SaveLayout();_status="Layout saved.";}
+    private async Task RestoreDock(){if(_savedLayout!=null){await _dock!.RestoreLayoutAsync(_savedLayout);_status="Layout restored.";}}
+    private static async Task<string> DemoGenerateAsync(AIPromptRequest request,CancellationToken cancellation){await Task.Delay(750,cancellation);return $"Demo response: {request.Prompt}. {(request.Command?.Instruction??"Connect a provider to generate a live response.")}";}
+    public sealed class DemoRecord
+    {
+        [Required,MinLength(2)]public string Name {get;set;}="Sample record";
+        [Range(1,20)]public int Quantity {get;set;}=1;
+        public DateTime Effective {get;set;}=new(2026,9,5);
+        public TimeOnly Appointment {get;set;}=new(9,0);
+        public bool Active {get;set;}=true;
+        public string Notes {get;set;}="";
+    }
+}

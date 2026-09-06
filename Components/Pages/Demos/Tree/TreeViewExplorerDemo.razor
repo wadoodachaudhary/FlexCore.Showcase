@@ -1,0 +1,202 @@
+@page "/demo/tree/treeview-explorer"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using Fx.ControlKit.Navigation
+
+<PageTitle>TreeView Hierarchical Explorer — FlexCore Controls</PageTitle>
+
+<SyncfusionDemoLayout Title="TreeView Hierarchical Explorer &amp; Folder Styles"
+                      Category="Tree"
+                      BadgeText="Navigation"
+                      RazorCode="@_razorSourceCode"
+                      CSharpCode="@_csharpSourceCode"
+                      CSharpTabName="TreeNodeModel.cs">
+    <Summary>
+        <p>
+            The <strong>TreeViewControl</strong> delivers authentic enterprise hierarchical tree navigation with multiple folder icon themes 
+            (Yellow, Grey, Classic VB6, and Modern), multi-level parent/child expansion, checkbox selection, and node selection callbacks.
+        </p>
+        <p>
+            This demo presents an interactive organizational project structure with deep nesting, node toggle actions, and selection details.
+        </p>
+    </Summary>
+
+    <DemoControls>
+        <div style="display:flex;gap:12px;align-items:center;font-size:13px;flex-wrap:wrap;">
+            <span><strong>Folder Style:</strong></span>
+            <button class="btn btn-sm @(_folderStyle == TreeFolderStyle.Yellow ? "btn-primary" : "btn-outline-secondary")"
+                    @onclick="() => SetFolderStyle(TreeFolderStyle.Yellow)">📁 Yellow Folder</button>
+            <button class="btn btn-sm @(_folderStyle == TreeFolderStyle.Grey ? "btn-primary" : "btn-outline-secondary")"
+                    @onclick="() => SetFolderStyle(TreeFolderStyle.Grey)">📁 Grey Enterprise</button>
+            <button class="btn btn-sm @(_useVb6Style ? "btn-dark" : "btn-outline-secondary")"
+                    @onclick="() => _useVb6Style = !_useVb6Style">Classic VB6 Lines @(_useVb6Style ? "ON" : "OFF")</button>
+
+            <span class="text-muted ms-2">
+                Selected Node: <b>@(_selectedNode?.Text ?? "None")</b>
+            </span>
+        </div>
+    </DemoControls>
+
+    <DemoContent>
+        <div style="display:grid;grid-template-columns:340px 1fr;gap:1.5rem;width:100%;min-height:360px;">
+            <!-- TreeView Panel -->
+            <div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;background:#ffffff;overflow-y:auto;max-height:420px;">
+                <TreeViewControl Nodes="@_treeNodes"
+                                 SelectedNode="@_selectedNode"
+                                 SelectedNodeChanged="HandleNodeSelected"
+                                 ToggleOnNodeClick="true"
+                                 ShowIcons="true"
+                                 UseVb6TreeStyle="@_useVb6Style"
+                                 FolderStyle="@_folderStyle"
+                                 TreeIndentPixels="16"
+                                 Height="100%" />
+            </div>
+
+            <!-- Selected Node Inspector Details -->
+            <div style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;background:#f8fafc;">
+                <h5 style="font-weight:700;margin-bottom:12px;">Node Property Inspector</h5>
+                @if (_selectedNode != null)
+                {
+                    <div class="card p-3 shadow-sm bg-white">
+                        <div class="mb-2"><strong>Node ID:</strong> <code>@_selectedNode.Id</code></div>
+                        <div class="mb-2"><strong>Label Text:</strong> @_selectedNode.Text</div>
+                        <div class="mb-2"><strong>Child Nodes:</strong> @_selectedNode.Children.Count</div>
+                        <div class="mb-2"><strong>Expanded State:</strong> @(_selectedNode.IsExpanded ? "Expanded" : "Collapsed")</div>
+                        <div class="mb-2"><strong>Custom Tag Data:</strong> @(_selectedNode.Tag?.ToString() ?? "N/A")</div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Click any tree item on the left to inspect its hierarchical properties.</p>
+                }
+            </div>
+        </div>
+    </DemoContent>
+
+    <DocumentationContent>
+        <h3>TreeView Component Features</h3>
+        <ul>
+            <li><strong>Authentic Visual Themes:</strong> Supports modern flat styling as well as faithful legacy enterprise rendering with dotted connector lines and classic folder icons.</li>
+            <li><strong>Interactive Node State:</strong> Supports selection, expansion toggles, checkboxes, and metadata tag binding.</li>
+        </ul>
+    </DocumentationContent>
+</SyncfusionDemoLayout>
+
+@code {
+    private List<TreeNode> _treeNodes = [];
+    private TreeNode? _selectedNode;
+    private TreeFolderStyle _folderStyle = TreeFolderStyle.Yellow;
+    private bool _useVb6Style = true;
+
+    protected override void OnInitialized()
+    {
+        _treeNodes = BuildSampleTree();
+        _selectedNode = _treeNodes.FirstOrDefault();
+    }
+
+    private void SetFolderStyle(TreeFolderStyle style)
+    {
+        _folderStyle = style;
+        StateHasChanged();
+    }
+
+    private void HandleNodeSelected(TreeNode node)
+    {
+        _selectedNode = node;
+        StateHasChanged();
+    }
+
+    private static List<TreeNode> BuildSampleTree()
+    {
+        return
+        [
+            new TreeNode
+            {
+                Id = "root-1",
+                Text = "Highland Estates Project",
+                IsExpanded = true,
+                Tag = "Project Root",
+                Children =
+                [
+                    new TreeNode
+                    {
+                        Id = "site-dev",
+                        Text = "Site Development",
+                        IsExpanded = true,
+                        Children =
+                        [
+                            new TreeNode { Id = "clearing", Text = "Clearing & Grubbing", Tag = "Status: Completed" },
+                            new TreeNode { Id = "rough-grade", Text = "Rough Grading & Drainage", Tag = "Status: In Progress" },
+                            new TreeNode { Id = "utilities", Text = "Underground Utilities (Wet/Dry)", Tag = "Status: Pending" }
+                        ]
+                    },
+                    new TreeNode
+                    {
+                        Id = "phase-1",
+                        Text = "Phase 1 - Single Family Lots (1-50)",
+                        IsExpanded = false,
+                        Children =
+                        [
+                            new TreeNode { Id = "foundations", Text = "Foundations & Slabs", Tag = "42 of 50 Poured" },
+                            new TreeNode { Id = "framing", Text = "Structural Framing", Tag = "28 Active Crews" },
+                            new TreeNode { Id = "roofing", Text = "Dry-In & Roofing", Tag = "18 Completed" }
+                        ]
+                    },
+                    new TreeNode
+                    {
+                        Id = "phase-2",
+                        Text = "Phase 2 - Commercial Center",
+                        Children =
+                        [
+                            new TreeNode { Id = "retail-a", Text = "Building A (Anchor Grocery)" },
+                            new TreeNode { Id = "retail-b", Text = "Building B (Shops & Dining)" }
+                        ]
+                    }
+                ]
+            },
+            new TreeNode
+            {
+                Id = "root-2",
+                Text = "Corporate Standards & Specifications",
+                Children =
+                [
+                    new TreeNode { Id = "safety", Text = "Safety Protocols 2026" },
+                    new TreeNode { Id = "subcontractor-guidelines", Text = "Subcontractor Master Agreement" }
+                ]
+            }
+        ];
+    }
+
+    private const string _razorSourceCode = @"@using Fx.ControlKit
+@using Fx.ControlKit.Navigation
+
+<TreeViewControl Nodes=""@TreeNodes""
+                 SelectedNode=""@SelectedNode""
+                 SelectedNodeChanged=""HandleNodeSelected""
+                 ToggleOnNodeClick=""true""
+                 ShowIcons=""true""
+                 UseVb6TreeStyle=""true""
+                 FolderStyle=""TreeFolderStyle.Yellow""
+                 TreeIndentPixels=""16""
+                 Height=""100%"" />
+
+@code {
+    private List<TreeNode> TreeNodes = new();
+    private TreeNode? SelectedNode;
+
+    private void HandleNodeSelected(TreeNode node)
+    {
+        SelectedNode = node;
+    }
+}";
+
+    private const string _csharpSourceCode = @"// TreeNode model from Fx.ControlKit.Navigation
+public class TreeNode
+{
+    public string Id { get; set; } = string.Empty;
+    public string Text { get; set; } = string.Empty;
+    public bool Expanded { get; set; }
+    public object? Tag { get; set; }
+    public List<TreeNode> Children { get; set; } = new();
+}";
+}
