@@ -1,0 +1,423 @@
+@namespace FlexCore.Showcase.Components.Shared
+
+<section class="popular-components-section">
+    <h2 class="popular-title">Most Popular UI components</h2>
+    <div class="popular-cards-grid">
+        <a href="demo/grid/ag-grid-showcase" class="popular-card">
+            <div class="popular-icon-box pink">
+                <span class="bi bi-table"></span>
+            </div>
+            <span class="popular-name">Data Grid</span>
+        </a>
+
+        <a href="demo/charts" class="popular-card">
+            <div class="popular-icon-box purple">
+                <span class="bi bi-pie-chart-fill"></span>
+            </div>
+            <span class="popular-name">Charts</span>
+        </a>
+
+        <a href="demo/charts/sunburst" class="popular-card">
+            <div class="popular-icon-box teal">
+                <span class="bi bi-sun-fill"></span>
+            </div>
+            <span class="popular-name">Sunburst Chart</span>
+        </a>
+
+        <a href="demo/counterparts" class="popular-card">
+            <div class="popular-icon-box indigo">
+                <span class="bi bi-calendar3"></span>
+            </div>
+            <span class="popular-name">Scheduler &amp; Gantt</span>
+        </a>
+
+        <a href="demo/reports/model-costs" class="popular-card">
+            <div class="popular-icon-box coral">
+                <span class="bi bi-file-earmark-richtext"></span>
+            </div>
+            <span class="popular-name">Reports &amp; Writer</span>
+        </a>
+
+        <a href="demo/tree/tree-load-bench" class="popular-card">
+            <div class="popular-icon-box green">
+                <span class="bi bi-diagram-2"></span>
+            </div>
+            <span class="popular-name">Tree Grid</span>
+        </a>
+    </div>
+</section>
+
+<!-- ── Complete Component Directory (Syncfusion Multi-Column) ─ -->
+<section class="catalog-directory-section" id="components">
+    <div class="directory-header">
+        <h2 class="directory-title">Blazor UI &amp; Data Visualization Components</h2>
+        <p class="directory-subtitle">
+            The FlexCore Blazor components library is an enterprise-grade suite engineered for high-throughput applications and legacy desktop modernizations. It contains 70+ high-performance, lightweight, and responsive UI controls with <strong>zero JavaScript dependencies</strong>.
+        </p>
+
+        <div class="catalog-search-wrapper">
+            <span class="bi bi-search catalog-search-icon"></span>
+            <input type="text" class="catalog-search-input"
+                   placeholder="Filter components (e.g. grid, chart, date, dialog, form)..."
+                   @bind="_searchTerm" @bind:event="oninput" />
+            @if (!string.IsNullOrWhiteSpace(_searchTerm))
+            {
+                <button type="button" class="btn-clear-search" @onclick="@(() => _searchTerm = "")" title="Clear search">
+                    <span class="bi bi-x"></span>
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="directory-columns-container">
+        <!-- ── Column 1 ────────────────────────── -->
+        <div class="directory-col">
+            @if (MatchesCategory("DATA MANAGEMENT", _dataManagement))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">DATA MANAGEMENT</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_dataManagement))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (MatchesCategory("FILE VIEWERS & EDITORS", _fileViewers))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">FILE VIEWERS &amp; EDITORS</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_fileViewers))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (MatchesCategory("LAYOUT & WORKSPACE", _layoutWorkspace))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">LAYOUT &amp; WORKSPACE</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_layoutWorkspace))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+
+        <!-- ── Column 2 ────────────────────────── -->
+        <div class="directory-col">
+            @if (MatchesCategory("DATA VISUALIZATION", _dataVis))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">DATA VISUALIZATION</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_dataVis))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (MatchesCategory("DIAGRAMS & WORKFLOWS", _diagrams))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">DIAGRAMS &amp; WORKFLOWS</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_diagrams))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (MatchesCategory("BUTTONS & ACTIONS", _buttonsActions))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">BUTTONS &amp; ACTIONS</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_buttonsActions))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+
+        <!-- ── Column 3 ────────────────────────── -->
+        <div class="directory-col">
+            @if (MatchesCategory("SCHEDULING & CALENDARS", _scheduling))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">SCHEDULING &amp; CALENDARS</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_scheduling))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (MatchesCategory("INPUTS & EDITORS", _inputs))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">INPUTS &amp; EDITORS</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_inputs))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (MatchesCategory("FORMS & VALIDATION", _forms))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">FORMS &amp; VALIDATION</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_forms))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+
+        <!-- ── Column 4 ────────────────────────── -->
+        <div class="directory-col">
+            @if (MatchesCategory("DROPDOWNS & SELECTORS", _dropdowns))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">DROPDOWNS &amp; SELECTORS</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_dropdowns))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (MatchesCategory("NAVIGATION & COMMANDS", _navigation))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">NAVIGATION &amp; COMMANDS</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_navigation))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (MatchesCategory("FEEDBACK & NOTIFICATIONS", _feedback))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">FEEDBACK &amp; NOTIFICATIONS</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_feedback))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (MatchesCategory("INTERACTIVE AI & ASSIST", _aiAssist))
+            {
+                <div class="cat-group">
+                    <h3 class="cat-title">INTERACTIVE AI &amp; ASSIST</h3>
+                    <ul class="comp-list">
+                        @foreach (var item in FilterItems(_aiAssist))
+                        {
+                            <li><MiniIcon Name="@item.Icon" /><a href="@item.Href">@item.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    private string _searchTerm = "";
+
+    record DirectoryItem(string Icon, string Name, string Href);
+
+    private readonly DirectoryItem[] _dataManagement =
+    [
+        new("grid", "Data Grid", "demo/grid"),
+        new("ag-grid", "AG Grid (4-in-1 Suite)", "demo/grid/ag-grid-showcase"),
+        new("tree-grid", "Tree Grid", "demo/tree/tree-load-bench"),
+        new("pivot", "Pivot Table", "demo/pivot-formulas"),
+        new("data-control", "Data Control", "demo/data-control"),
+        new("virtualization", "50K Virtualization", "demo/grid/virtualization-bench"),
+        new("selection", "50K Row Selection", "demo/grid/row-selection-50k"),
+        new("frozen", "Frozen Columns", "demo/grid/advanced"),
+        new("col-virt", "Column Virtualization", "demo/grid/column-virtualization"),
+        new("col-swap", "Dynamic Column Swap", "demo/grid/column-swap"),
+        new("batch-edit", "In-Place Batch Edit", "demo/grid/edit-items-db"),
+        new("sqlite", "SQLite ItemsProvider", "demo/grid/items-provider-db"),
+        new("master-detail", "Master-Detail PM Entry", "demo/grid/pm-entry"),
+        new("picklist", "Picklist Churn", "demo/grid/picklist-churn"),
+        new("veto", "Veto Selection & Dirty", "demo/grid/fdbgrid-veto"),
+        new("optimizer", "Server Optimizer", "demo/grid/blazor-optimizer"),
+        new("dual-list", "Dual-List Transfer", "demo/grid/userperms-lists"),
+        new("reorder", "Reordering Grid", "demo/grid/reordering"),
+        new("pager", "Pager Control", "demo/grid")
+    ];
+
+    private readonly DirectoryItem[] _fileViewers =
+    [
+        new("editor", "Rich Text Editor", "demo/counterparts"),
+        new("pdf", "PDF Viewer", "demo/counterparts"),
+        new("report", "Report Writer Control", "demo/reports/model-costs"),
+        new("report-param", "Report Parameter Dialog", "demo/reports/model-costs"),
+        new("format", "Format Control", "demo/counterparts")
+    ];
+
+    private readonly DirectoryItem[] _layoutWorkspace =
+    [
+        new("page-control", "PageControl / Tabbed MDI", "demo/workspace/page-control-bench"),
+        new("dock", "Dock Manager", "demo/counterparts"),
+        new("splitter", "Splitter Control", "demo/layout"),
+        new("dashboard", "Dashboard Layout", "demo/layout"),
+        new("grid", "Grid Layout", "demo/counterparts"),
+        new("card", "Card Control", "demo/new-components"),
+        new("card-group", "Card Group", "demo/new-components"),
+        new("timeline", "Timeline", "demo/new-components")
+    ];
+
+    private readonly DirectoryItem[] _dataVis =
+    [
+        new("chart-bar", "30+ SVG Charts Gallery", "demo/charts"),
+        new("sunburst", "COVID-19 Sunburst", "demo/charts/sunburst"),
+        new("stock", "Stock & Financial Chart", "demo/counterparts"),
+        new("gauge-circular", "Circular Gauge", "demo/counterparts"),
+        new("gauge-linear", "Linear Gauge", "demo/counterparts"),
+        new("gauge-radial", "Radial Gauge", "demo/counterparts"),
+        new("gauge-arc", "Arc Gauge", "demo/counterparts"),
+        new("sparkline", "Sparkline Charts", "demo/grid"),
+        new("barcode", "Barcode Generator", "demo/new-components"),
+        new("qrcode", "QR Code Generator", "demo/new-components"),
+        new("chart-bar", "Advanced Charts Suite", "demo/advanced-charts"),
+        new("stock", "Financial Navigator", "demo/counterparts")
+    ];
+
+    private readonly DirectoryItem[] _diagrams =
+    [
+        new("diagram", "Diagram Flowchart", "demo/counterparts"),
+        new("treeview", "TreeView Explorer", "demo/tree/treeview-explorer"),
+        new("property-grid", "Property Grid", "demo/counterparts")
+    ];
+
+    private readonly DirectoryItem[] _buttonsActions =
+    [
+        new("button", "Button Control", "demo/buttons"),
+        new("split-button", "Split Button", "demo/new-components"),
+        new("toggle-button", "Toggle Button", "demo/counterparts"),
+        new("fab", "Floating Action Button (FAB)", "demo/new-components"),
+        new("speed-dial", "Speed Dial Menu", "demo/new-components"),
+        new("button", "Rounded Pill Buttons", "demo/buttons")
+    ];
+
+    private readonly DirectoryItem[] _scheduling =
+    [
+        new("gantt", "Gantt Chart", "demo/counterparts"),
+        new("scheduler", "Scheduler", "demo/counterparts"),
+        new("calendar", "Calendar", "demo/counterparts"),
+        new("datepicker", "DatePicker", "demo/counterparts"),
+        new("timepicker", "TimePicker", "demo/counterparts"),
+        new("timespan", "TimeSpan Picker", "demo/new-components")
+    ];
+
+    private readonly DirectoryItem[] _inputs =
+    [
+        new("input-number", "Numeric TextBox", "demo/counterparts"),
+        new("input-text", "TextBox", "demo/counterparts"),
+        new("textarea", "TextArea", "demo/counterparts"),
+        new("otp", "OTP / Security Code", "demo/new-components"),
+        new("slider", "Range Slider", "demo/new-components"),
+        new("checkbox", "Checkbox", "demo/counterparts"),
+        new("radio", "Radio Group", "demo/counterparts"),
+        new("switch", "Toggle Switch", "demo/new-components"),
+        new("palette", "Color Palette", "demo/counterparts"),
+        new("rating", "Star Rating", "demo/new-components")
+    ];
+
+    private readonly DirectoryItem[] _forms =
+    [
+        new("form", "Form Control", "demo/counterparts"),
+        new("form-item", "Form Item Control", "demo/counterparts"),
+        new("form-group", "Form Group Control", "demo/counterparts"),
+        new("validation", "Validation Summary", "demo/counterparts"),
+        new("validation", "Validation Message", "demo/counterparts"),
+        new("validation", "Validation Tooltip", "demo/counterparts")
+    ];
+
+    private readonly DirectoryItem[] _dropdowns =
+    [
+        new("dropdown", "DropDownList", "demo/counterparts"),
+        new("dropdowngrid", "DropDownGrid Control", "demo/grid"),
+        new("autocomplete", "AutoComplete", "demo/counterparts"),
+        new("listbox", "ListBox", "demo/counterparts"),
+        new("dual-list", "MultiSelect Dual List", "demo/grid/userperms-lists"),
+        new("picklist", "Picklist Dropdown", "demo/grid/picklist-churn")
+    ];
+
+    private readonly DirectoryItem[] _navigation =
+    [
+        new("ribbon", "Office Ribbon", "demo/buttons"),
+        new("toolbar", "Toolbar Control", "demo/buttons"),
+        new("tab", "Tab Control", "demo/workspace/page-control-bench"),
+        new("accordion", "Accordion Control", "demo/new-components"),
+        new("appbar", "AppBar Control", "demo/counterparts"),
+        new("breadcrumb", "Breadcrumb", "demo/new-components"),
+        new("stepper", "Stepper Control", "demo/counterparts"),
+        new("carousel", "Carousel", "demo/new-components")
+    ];
+
+    private readonly DirectoryItem[] _feedback =
+    [
+        new("dialog", "Modal Dialog", "demo/dialog"),
+        new("toast", "Toast Notifications", "demo/notifications"),
+        new("toast", "Context Alert Banners", "demo/new-components"),
+        new("badge", "Status Badges", "demo/new-components"),
+        new("progress", "Progress Bar", "demo/counterparts"),
+        new("skeleton", "Loading Skeleton", "demo/new-components")
+    ];
+
+    private readonly DirectoryItem[] _aiAssist =
+    [
+        new("ai-prompt", "AI Prompt Control", "demo/counterparts"),
+        new("ai-prompt", "LLM Result Card", "demo/counterparts")
+    ];
+
+    private bool MatchesCategory(string catName, DirectoryItem[] items)
+    {
+        if (string.IsNullOrWhiteSpace(_searchTerm)) return true;
+        if (catName.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)) return true;
+        return items.Any(i => i.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IEnumerable<DirectoryItem> FilterItems(DirectoryItem[] items)
+    {
+        if (string.IsNullOrWhiteSpace(_searchTerm)) return items;
+        var term = _searchTerm.Trim();
+        return items.Where(i => i.Name.Contains(term, StringComparison.OrdinalIgnoreCase));
+    }
+}
