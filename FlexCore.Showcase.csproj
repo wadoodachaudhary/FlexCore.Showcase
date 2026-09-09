@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FlexCore\FlexCore.csproj" />
+    <ProjectReference Include="..\FlexCore\FlexCore.Documents\FlexCore.Documents.csproj" />
   </ItemGroup>
 
 </Project>
