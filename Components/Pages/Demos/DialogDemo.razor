@@ -10,8 +10,13 @@
     <ButtonControl CssClass="btn-secondary" OnClick="@(() => _showWide = true)">Open Wide Dialog</ButtonControl>
 </div>
 
-<DialogControl @bind-Visible="_show" Header="Confirm Action" Width="480px" IsModal="true" ShowCloseIcon="true" CloseOnEscape="true">
-    <p style="padding:16px;">Are you sure you want to proceed? This uses FlexCore's <code>DialogControl</code> with modal overlay, close-on-escape, and header close icon.</p>
+<DialogControl @bind-Visible="_show" Header="Confirm Action" Width="480px" IsModal="true" ShowCloseIcon="true" CloseOnEscape="true" OnEnter="@OnConfirm">
+    <p style="padding:16px 16px 8px;">Are you sure you want to proceed? This uses FlexCore's <code>DialogControl</code> with modal overlay, close-on-escape, and header close icon. OK is the default button: Enter anywhere in the dialog presses it.</p>
+    <div style="padding:0 16px 12px; display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center;">
+        <span>Note</span><TextBoxControl @bind-Value="_note" TypingBehavior="TextBoxTypingBehavior.ClientBuffered" Placeholder="Optional note" />
+        <span>Due</span><DatePickerControl @bind-Value="_due" />
+        <span>Priority</span><DropDownListControl TItem="string" TValue="string" DataSource="@_priorities" @bind-Value="_priority" Width="160px" />
+    </div>
     <div style="padding:8px 16px; display:flex; gap:8px; justify-content:flex-end; border-top:1px solid #e5e7eb;">
         <ButtonControl CssClass="btn-primary" OnClick="@OnConfirm">OK</ButtonControl>
         <ButtonControl CssClass="btn-secondary" OnClick="@(() => _show = false)">Cancel</ButtonControl>
@@ -34,7 +39,8 @@
 
 <h2>Markup</h2>
 <pre><code>&lt;DialogControl @@bind-Visible="_show" Header="Title" Width="480px"
-              IsModal="true" ShowCloseIcon="true" CloseOnEscape="true"&gt;
+              IsModal="true" ShowCloseIcon="true" CloseOnEscape="true"
+              OnEnter="@@OnConfirm"&gt;  @@* default button: Enter presses OK *@@
     &lt;p&gt;Dialog body content…&lt;/p&gt;
     &lt;ButtonControl CssClass="btn-primary" OnClick="@@OnConfirm"&gt;OK&lt;/ButtonControl&gt;
 &lt;/DialogControl&gt;</code></pre>
@@ -43,10 +49,16 @@
     bool _show;
     bool _showWide;
     string? _lastAction;
+    string _note = "";
+    DateTime? _due;
+    string _priority = "Normal";
+    readonly List<string> _priorities = new() { "Low", "Normal", "High" };
 
     void OnConfirm()
     {
         _show = false;
-        _lastAction = $"Confirmed at {DateTime.Now:HH:mm:ss}";
+        _lastAction = $"Confirmed at {DateTime.Now:HH:mm:ss} — priority {_priority}"
+            + (_due is { } due ? $", due {due:d}" : "")
+            + (string.IsNullOrWhiteSpace(_note) ? "" : $", note: {_note}");
     }
 }
