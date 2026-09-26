@@ -1,0 +1,103 @@
+@page "/curriculum"
+@inject AcademyStore Store
+
+<PageTitle>How courses are designed — Gov AI Academy</PageTitle>
+
+<h1>How courses are designed</h1>
+<p class="lede">
+    The U.S. Department of Labor’s AI Literacy Framework (Training and Employment Notice No. 07-25) describes a baseline every worker should have.
+    Approved courses in this academy start above that baseline. They teach role proficiency: applied judgment in a public-sector job, with an instructor in the class.
+</p>
+<p>
+    Source: <a href="https://www.dol.gov/agencies/eta/advisories/ten-07-25">TEN 07-25</a>.
+    The notes below are original. They are not a copy of the notice.
+</p>
+
+<AlertControl Severity="AlertSeverity.Info" Title="What “approved” means here">
+    An approved course is instructor-led, practiced on the officer’s own tools and tasks, and closed out by attendance plus a required exercise checklist.
+    Online live, in person, and hybrid all qualify. A self-paced recording does not.
+</AlertControl>
+
+<h2>Content areas, taught above the baseline</h2>
+<AccordionControl Multiple="true">
+    <AccordionItemControl Title="Understand AI Principles" InitiallyExpanded="true">
+        Baseline literacy names ideas such as probabilistic output and invented facts. Approved classes use those ideas on a work product: a memo, a ticket group, or a table. Foundation courses do this without asking officers to train a model.
+    </AccordionItemControl>
+    <AccordionItemControl Title="Explore AI Uses">
+        Uses are occupation-specific. A contract specialist looks at public-source market notes. A duty officer looks at alert grouping. The class does not tour a generic product menu.
+    </AccordionItemControl>
+    <AccordionItemControl Title="Direct AI Effectively">
+        Prompt practice is tied to a template the office already has. Learners iterate, then keep a record of what they accepted.
+    </AccordionItemControl>
+    <AccordionItemControl Title="Evaluate AI Outputs">
+        Every approved course includes a check against a source the learner can point to: a sheet, a log field, a cell, or a public page. The model is not the authority.
+    </AccordionItemControl>
+    <AccordionItemControl Title="Use AI Responsibly">
+        Learners name what must not be pasted into a tool, who remains accountable, and which decisions stay with a person. The sample app itself refuses to be a place for real sensitive text.
+    </AccordionItemControl>
+</AccordionControl>
+
+<h2>Delivery principles the approval gate requires</h2>
+<ul class="fact-list">
+    <li><strong>Experiential learning.</strong> Required exercises are hands-on. Reading about a tool is not enough.</li>
+    <li><strong>Learning in context.</strong> The first meeting is where an agency swaps in its template, tool list, and redacted cases.</li>
+    <li><strong>Human skills.</strong> Classes pair the draft with judgment, plain language, and domain knowledge.</li>
+    <li><strong>Prerequisites.</strong> Each approved course states the digital and job skills a learner needs so the class does not assume a programmer.</li>
+    <li><strong>Pathways.</strong> Foundation work leads to practitioner and technical evaluation courses. The path is role proficiency, not a single orientation.</li>
+    <li><strong>Enabling roles.</strong> Supervisors have a course on coaching a team. Cyber and oversight courses also practice review of someone else’s output.</li>
+    <li><strong>Agility.</strong> Modules are short enough for a host to replace the scenario when tools or policy change, without rewriting the attendance rule.</li>
+</ul>
+
+<h2>Catalog against the gate</h2>
+<p>Select a row to read the course. “Gaps” is zero only when the course is eligible for approval.</p>
+<GridControl TValue="DesignRow" DataSource="_rows" AllowSorting="true" AllowFiltering="true"
+             AllowSelection="true" Height="420px" EnableHover="true">
+    <GridColumnsBase>
+        <GridColumn Field="@nameof(DesignRow.Title)" HeaderText="Course" Width="280px" />
+        <GridColumn Field="@nameof(DesignRow.Level)" HeaderText="Level" Width="160px" />
+        <GridColumn Field="@nameof(DesignRow.Role)" HeaderText="Role path" Width="170px" />
+        <GridColumn Field="@nameof(DesignRow.Approval)" HeaderText="Status" Width="110px" />
+        <GridColumn Field="@nameof(DesignRow.Gaps)" HeaderText="Rule gaps" Width="110px" Type="ColumnType.Number" TextAlign="TextAlign.Right" />
+        <GridColumn Field="@nameof(DesignRow.Areas)" HeaderText="Content areas" Width="280px" />
+    </GridColumnsBase>
+</GridControl>
+
+<h2>Level tracks and role paths</h2>
+<div class="card-grid">
+    <CardControl Title="Foundation" Subtitle="Non-technical" Elevation="1">
+        <p>Plain-language practice for officers who write, coordinate, or brief. Still above a one-time literacy talk.</p>
+    </CardControl>
+    <CardControl Title="Practitioner" Subtitle="Role depth" Elevation="1">
+        <p>Policy, acquisition, data review, and supervision. The exercise matches the file or the team the officer already has.</p>
+    </CardControl>
+    <CardControl Title="Advanced / technical" Subtitle="Evaluation and operations" Elevation="1">
+        <p>Sampling, logging, and confirmation. Not a class on building exploits or training a production model.</p>
+    </CardControl>
+</div>
+
+@code {
+    private sealed class DesignRow
+    {
+        public string Title { get; set; } = "";
+        public string Level { get; set; } = "";
+        public string Role { get; set; } = "";
+        public string Approval { get; set; } = "";
+        public int Gaps { get; set; }
+        public string Areas { get; set; } = "";
+    }
+
+    private List<DesignRow> _rows = [];
+
+    protected override void OnInitialized()
+    {
+        _rows = Store.Courses.Select(c => new DesignRow
+        {
+            Title = c.Title,
+            Level = AcademyLabels.Level(c.Level),
+            Role = AcademyLabels.Role(c.Role),
+            Approval = AcademyLabels.Approval(c.Approval),
+            Gaps = PedagogyRules.Violations(c).Count,
+            Areas = string.Join(", ", c.DolContentAreas)
+        }).ToList();
+    }
+}

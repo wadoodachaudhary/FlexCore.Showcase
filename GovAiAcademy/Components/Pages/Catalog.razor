@@ -1,0 +1,245 @@
+@page "/catalog"
+@inject AcademyStore Store
+@inject NavigationManager Nav
+
+<PageTitle>Courses — Gov AI Academy</PageTitle>
+
+<BreadCrumbControl Items="_crumbs" />
+<h1>Courses</h1>
+<p class="lede">
+    Filter by the kind of work you do, how the class meets, and whether it is approved.
+    Approved courses are instructor-led and check attendance. The recorded tour stays visible so you can see why it is not approved.
+</p>
+
+<div class="filter-bar">
+    <div class="field">
+        <label for="course-search">Search</label>
+        <TextBoxControl Value="@_filter.Text"
+                        ValueChanged="OnSearch"
+                        Placeholder="Title, role, or scenario"
+                        Width="280px"
+                        HtmlAttributes="_searchAttrs" />
+    </div>
+    <div class="field">
+        <label>Approval</label>
+        <DropDownListControl TItem="NamedOption" TValue="string"
+                             DataSource="_approvalOptions"
+                             TextFieldName="Label"
+                             ValueFieldName="Id"
+                             Value="@_approvalId"
+                             ValueChanged="OnApproval"
+                             AriaLabel="Approval filter"
+                             Width="220px" />
+    </div>
+    <ButtonControl CssClass="btn-secondary" OnClick="ClearFilters">Clear filters</ButtonControl>
+</div>
+
+<div class="catalog-layout">
+    <PageLayoutControl Height="100%">
+        <LeftPanelControl Width="240px" Collapsible="true">
+            <div class="panel-pad">
+                <h2 style="margin-top:0;font-size:1rem;">Browse</h2>
+                <TreeViewControl Nodes="_nodes"
+                                 SelectedNode="_selectedNode"
+                                 SelectedNodeChanged="OnNode"
+                                 ToggleOnNodeClick="true"
+                                 ShowIcons="true"
+                                 FolderStyle="TreeFolderStyle.Grey"
+                                 Height="640px" />
+            </div>
+        </LeftPanelControl>
+        <CenterPanelControl>
+            <div class="panel-pad">
+                <p class="muted">@_visible.Count course(s). Select a row in the table to open it, or use the cards.</p>
+                <TabControl @bind-SelectedIndex="_tab">
+                    <TabItem HeaderText="Cards">
+                        <div class="card-grid">
+                            @foreach (var course in _visible)
+                            {
+                                <CardControl Title="@course.Title" Subtitle="@AcademyLabels.Level(course.Level)" Elevation="1">
+                                    <div class="badge-row">
+                                        <ApprovalBadge Status="course.Approval" />
+                                        <BadgeControl Text="@AcademyLabels.Role(course.Role)" Variant="BadgeVariant.Info" />
+                                        <BadgeControl Text="@AcademyLabels.Delivery(course.Delivery)" Variant="BadgeVariant.Secondary" />
+                                    </div>
+                                    <p>@course.Summary</p>
+                                    <p><a class="text-link" href="@($"courses/{course.Id}")">View course</a></p>
+                                </CardControl>
+                            }
+                        </div>
+                        @if (_visible.Count == 0)
+                        {
+                            <p>No courses match these filters. Clear the filters and try again.</p>
+                        }
+                    </TabItem>
+                    <TabItem HeaderText="Table">
+                        <GridControl TValue="CourseGridRow" DataSource="_gridRows"
+                                     AllowSorting="true" AllowFiltering="true" AllowSelection="true"
+                                     EnableHover="true" Height="520px" EventsRef="_events">
+                            <GridColumnsBase>
+                                <GridColumn Field="@nameof(CourseGridRow.Title)" HeaderText="Course" Width="280px" />
+                                <GridColumn Field="@nameof(CourseGridRow.Level)" HeaderText="Level" Width="150px" />
+                                <GridColumn Field="@nameof(CourseGridRow.Role)" HeaderText="Role path" Width="170px" />
+                                <GridColumn Field="@nameof(CourseGridRow.Delivery)" HeaderText="Delivery" Width="150px" />
+                                <GridColumn Field="@nameof(CourseGridRow.Approval)" HeaderText="Approval" Width="120px" />
+                                <GridColumn Field="@nameof(CourseGridRow.Hours)" HeaderText="Hours" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" />
+                            </GridColumnsBase>
+                        </GridControl>
+                    </TabItem>
+                </TabControl>
+            </div>
+        </CenterPanelControl>
+    </PageLayoutControl>
+</div>
+
+@code {
+    private sealed class CourseGridRow
+    {
+        public string Id { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Level { get; set; } = "";
+        public string Role { get; set; } = "";
+        public string Delivery { get; set; } = "";
+        public string Approval { get; set; } = "";
+        public int Hours { get; set; }
+    }
+
+    private readonly IList<BreadCrumbItem> _crumbs =
+    [
+        new("Home", "/"),
+        new("Courses")
+    ];
+
+    private readonly List<NamedOption> _approvalOptions =
+    [
+        new() { Id = "any", Label = "Any approval state" },
+        new() { Id = nameof(ApprovalStatus.Approved), Label = "Approved only" },
+        new() { Id = nameof(ApprovalStatus.InReview), Label = "In review only" }
+    ];
+
+    private readonly CatalogFilter _filter = new();
+    private readonly GridControlEvents<CourseGridRow> _events = new();
+    private List<TreeNode> _nodes = [];
+    private TreeNode? _selectedNode;
+    private List<Course> _visible = [];
+    private List<CourseGridRow> _gridRows = [];
+    private string _approvalId = "any";
+    private int _tab;
+    private readonly Dictionary<string, object> _searchAttrs = new()
+    {
+        ["id"] = "course-search",
+        ["aria-label"] = "Search courses"
+    };
+
+    protected override void OnInitialized()
+    {
+        _events.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<CourseGridRow>>(this, OnRowSelected);
+        _nodes = BuildTree();
+        _selectedNode = _nodes[0];
+        Apply();
+    }
+
+    private void OnSearch(string? text)
+    {
+        _filter.Text = text ?? "";
+        Apply();
+    }
+
+    private void OnApproval(string? id)
+    {
+        _approvalId = string.IsNullOrWhiteSpace(id) ? "any" : id;
+        _filter.Approval = _approvalId == "any" ? null : Enum.Parse<ApprovalStatus>(_approvalId);
+        Apply();
+    }
+
+    private void OnNode(TreeNode node)
+    {
+        _selectedNode = node;
+        _filter.Level = null;
+        _filter.Role = null;
+        _filter.Delivery = null;
+        var tag = node.Tag as string ?? "all";
+        var parts = tag.Split(':', 2);
+        if (parts.Length == 2)
+        {
+            switch (parts[0])
+            {
+                case "level":
+                    _filter.Level = Enum.Parse<CourseLevel>(parts[1]);
+                    break;
+                case "role":
+                    _filter.Role = Enum.Parse<RolePath>(parts[1]);
+                    break;
+                case "delivery":
+                    _filter.Delivery = Enum.Parse<DeliveryMode>(parts[1]);
+                    break;
+            }
+        }
+
+        Apply();
+    }
+
+    private void ClearFilters()
+    {
+        _filter.Level = null;
+        _filter.Role = null;
+        _filter.Delivery = null;
+        _filter.Approval = null;
+        _filter.Text = "";
+        _approvalId = "any";
+        _selectedNode = _nodes.FirstOrDefault();
+        Apply();
+    }
+
+    private void Apply()
+    {
+        _visible = Store.FilterCourses(_filter).ToList();
+        _gridRows = _visible.Select(c => new CourseGridRow
+        {
+            Id = c.Id,
+            Title = c.Title,
+            Level = AcademyLabels.Level(c.Level),
+            Role = AcademyLabels.Role(c.Role),
+            Delivery = AcademyLabels.Delivery(c.Delivery),
+            Approval = AcademyLabels.Approval(c.Approval),
+            Hours = c.ContactHours
+        }).ToList();
+    }
+
+    private void OnRowSelected(RowSelectEventArgs<CourseGridRow> args)
+    {
+        if (!string.IsNullOrWhiteSpace(args.Data?.Id))
+            Nav.NavigateTo($"courses/{args.Data.Id}");
+    }
+
+    private static List<TreeNode> BuildTree()
+    {
+        TreeNode Node(string text, string tag, params TreeNode[] children) => new()
+        {
+            Text = text,
+            Tag = tag,
+            IsExpanded = true,
+            Children = children.ToList()
+        };
+
+        return
+        [
+            Node("All courses", "all",
+                Node("By level", "all",
+                    Node("Foundation (non-technical)", "level:Foundation"),
+                    Node("Practitioner", "level:Practitioner"),
+                    Node("Advanced / technical", "level:AdvancedTechnical")),
+                Node("By role path", "all",
+                    Node("Policy", "role:Policy"),
+                    Node("Acquisition", "role:Acquisition"),
+                    Node("Cybersecurity", "role:Cybersecurity"),
+                    Node("Data and analytics", "role:DataAnalytics"),
+                    Node("Program management", "role:ProgramManagement")),
+                Node("By how the class meets", "all",
+                    Node("Online live", "delivery:OnlineLive"),
+                    Node("In person", "delivery:InPerson"),
+                    Node("Hybrid", "delivery:Hybrid"),
+                    Node("Self-paced recording", "delivery:SelfPacedRecording")))
+        ];
+    }
+}
