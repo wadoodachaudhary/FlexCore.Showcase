@@ -325,14 +325,15 @@
         new("property-grid", "Property Grid", "demo/counterparts")
     ];
 
+    // Split/Toggle/Pill/Toolbar deep-link to sections of the Button page (2026-09-28).
     private readonly DirectoryItem[] _buttonsActions =
     [
         new("button", "Button Control", "demo/buttons"),
-        new("split-button", "Split Button", "demo/new-components"),
-        new("toggle-button", "Toggle Button", "demo/counterparts"),
+        new("split-button", "Split Button", "demo/buttons#split"),
+        new("toggle-button", "Toggle Button", "demo/buttons#toggle"),
         new("fab", "Floating Action Button (FAB)", "demo/new-components"),
         new("speed-dial", "Speed Dial Menu", "demo/new-components"),
-        new("button", "Rounded Pill Buttons", "demo/buttons")
+        new("button", "Rounded Pill Buttons", "demo/buttons#pill")
     ];
 
     private readonly DirectoryItem[] _scheduling =
@@ -382,7 +383,7 @@
     private readonly DirectoryItem[] _navigation =
     [
         new("ribbon", "Office Ribbon", "demo/buttons"),
-        new("toolbar", "Toolbar Control", "demo/buttons"),
+        new("toolbar", "Toolbar Control", "demo/buttons#toolbar"),
         new("tab", "Tab Control", "demo/workspace/page-control-bench"),
         new("accordion", "Accordion Control", "demo/new-components"),
         new("appbar", "AppBar Control", "demo/counterparts"),
