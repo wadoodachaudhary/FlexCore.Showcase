@@ -1,48 +1,577 @@
 @page "/demo/buttons"
+@using FlexCore.Showcase.Components.Shared
 
-<PageTitle>Buttons — FlexCore</PageTitle>
+@* 2026-09-28: rebuilt from a 4-section skeleton. Deferred until ButtonControl.razor.css
+   ships the classes: appearance configurator, outline set, flat/text, icon-only/round,
+   block, spinner. Everything below uses only CSS that exists in FlexCore 0.2.48. *@
 
-<h1>Buttons</h1>
-<p>FlexCore's <code>ButtonControl</code> supports icons, disabled states, bare-style mode, and click propagation control.</p>
+<PageTitle>Button - FlexCore UI</PageTitle>
 
-<h2>Standard Variants</h2>
-<div class="demo-frame demo-buttons">
-    <ButtonControl CssClass="btn-primary">Primary</ButtonControl>
-    <ButtonControl CssClass="btn-secondary">Secondary</ButtonControl>
-    <ButtonControl CssClass="btn-accent">Accent</ButtonControl>
-    <ButtonControl CssClass="btn-success">Success</ButtonControl>
-    <ButtonControl CssClass="btn-warning">Warning</ButtonControl>
-    <ButtonControl CssClass="btn-danger">Danger</ButtonControl>
-    <ButtonControl CssClass="btn-primary" Disabled="true">Disabled</ButtonControl>
-</div>
+@* Title/Category were missing; header showed "FlexCore Component Demo / DataGrid". *@
+<SyncfusionDemoLayout Title="Button" Category="Buttons &amp; Actions" BadgeText="Zero JS"
+                      RazorCode="@_razorCode" CSharpCode="@_csharpCode" CSharpTabName="ButtonsDemo.razor.cs"
+                      ExtraTabs="@_extraTabs">
+    <Summary>
+        <p>
+            <code>ButtonControl</code> is the base action control. It renders one native <code>&lt;button&gt;</code>,
+            styles it through CSS custom properties, and forwards any unmatched attribute
+            (<code>aria-*</code>, <code>data-*</code>, <code>form</code>, <code>accesskey</code>) to the element.
+            Variants are CSS classes, so a theme can restyle every button without touching markup.
+        </p>
+    </Summary>
 
-<h2>With Icons</h2>
-<div class="demo-frame demo-buttons">
-    <ButtonControl CssClass="btn-primary" IconCss="bi bi-plus-circle">Add Item</ButtonControl>
-    <ButtonControl CssClass="btn-secondary" IconCss="bi bi-pencil">Edit</ButtonControl>
-    <ButtonControl CssClass="btn-danger" IconCss="bi bi-trash">Delete</ButtonControl>
-</div>
+    @* --fx-zoom is a FlexCore-wide scale factor; the slider applies it to the demo card only. *@
+    <DemoControls>
+        <label class="btn-demo-zoom">
+            Zoom <input type="range" min="0.75" max="1.75" step="0.25" @bind="_zoom" @bind:event="oninput" /> <span>@_zoom.ToString("0.00")×</span>
+        </label>
+    </DemoControls>
 
-<h2>BareStyle Mode</h2>
-<p>When <code>BareStyle="true"</code>, the default <code>.fx-button</code> class is suppressed — the host owns all styling.</p>
-<div class="demo-frame demo-buttons">
-    <ButtonControl BareStyle="true" CssClass="btn-primary">Host-Styled</ButtonControl>
-    <ButtonControl BareStyle="true" CssClass="btn-accent">Custom Class Only</ButtonControl>
-</div>
+    <DemoContent>
+        <div class="btn-demo" style="--fx-zoom: @_zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)">
 
-<h2>Interactive</h2>
-<div class="demo-frame">
-    <ButtonControl CssClass="btn-primary" OnClick="@HandleClick">Click Me (@_clickCount)</ButtonControl>
-    <p style="margin-top:8px; font-size:13px; color:#6b7280;">Click count: @_clickCount</p>
-</div>
+            <section class="demo-section" id="colors">
+                <h4>Contextual colors</h4>
+                <p class="demo-hint">Default look comes from the theme variables. Add one <code>btn-*</code> class for a semantic color.</p>
+                <div class="demo-flex-row">
+                    <ButtonControl>Default</ButtonControl>
+                    <ButtonControl CssClass="btn-primary">Primary</ButtonControl>
+                    <ButtonControl CssClass="btn-secondary">Secondary</ButtonControl>
+                    <ButtonControl CssClass="btn-success">Success</ButtonControl>
+                    <ButtonControl CssClass="btn-warning">Warning</ButtonControl>
+                    <ButtonControl CssClass="btn-danger">Danger</ButtonControl>
+                </div>
+            </section>
 
-<h2>Markup</h2>
-<pre><code>&lt;ButtonControl CssClass="btn-primary" IconCss="bi bi-plus-circle"&gt;Add Item&lt;/ButtonControl&gt;
-&lt;ButtonControl CssClass="btn-danger" Disabled="true"&gt;Disabled&lt;/ButtonControl&gt;
-&lt;ButtonControl BareStyle="true" CssClass="my-class"&gt;Host-Styled&lt;/ButtonControl&gt;
-&lt;ButtonControl CssClass="btn-primary" OnClick="@@HandleClick"&gt;Click Me&lt;/ButtonControl&gt;</code></pre>
+            @* Only btn-outline-primary exists in the library today. *@
+            <section class="demo-section" id="outline">
+                <h4>Outline</h4>
+                <div class="demo-flex-row">
+                    <ButtonControl CssClass="btn-outline-primary">Primary</ButtonControl>
+                    <ButtonControl CssClass="btn-outline-primary" Disabled="true">Disabled</ButtonControl>
+                </div>
+            </section>
+
+            <section class="demo-section" id="icons">
+                <h4>Icons</h4>
+                <p class="demo-hint"><code>IconCss</code> renders a leading icon. A trailing icon is ordinary child content.</p>
+                <div class="demo-flex-row align-items-center">
+                    <ButtonControl CssClass="btn-primary" IconCss="bi bi-plus-lg">New</ButtonControl>
+                    <ButtonControl CssClass="btn-secondary" IconCss="bi bi-pencil">Edit</ButtonControl>
+                    <ButtonControl CssClass="btn-danger" IconCss="bi bi-trash">Delete</ButtonControl>
+                    <ButtonControl CssClass="btn-outline-primary">Next <span class="bi bi-arrow-right"></span></ButtonControl>
+                </div>
+            </section>
+
+            <section class="demo-section" id="sizes">
+                <h4>Sizes</h4>
+                <div class="demo-flex-row align-items-center">
+                    <ButtonControl CssClass="btn-primary btn-sm" IconCss="bi bi-plus">Small</ButtonControl>
+                    <ButtonControl CssClass="btn-primary" IconCss="bi bi-plus">Default</ButtonControl>
+                    <ButtonControl CssClass="btn-primary btn-lg" IconCss="bi bi-plus">Large</ButtonControl>
+                </div>
+            </section>
+
+            <section class="demo-section" id="states">
+                <h4>States</h4>
+                <p class="demo-hint">Disabled buttons drop hover and active styling. A busy button is disabled, swaps its icon, and reports <code>aria-busy</code>.</p>
+                <div class="demo-flex-row align-items-center">
+                    <ButtonControl CssClass="btn-primary" Disabled="true">Disabled</ButtonControl>
+                    @* aria-busy reaches the <button> through the attribute splat. *@
+                    <ButtonControl CssClass="btn-success"
+                                   Disabled="@_saving"
+                                   aria-busy="@(_saving ? "true" : null)"
+                                   IconCss="@(_saving ? "bi bi-hourglass-split" : "bi bi-cloud-upload")"
+                                   OnClick="@SaveAsync">
+                        @(_saving ? "Saving…" : "Save")
+                    </ButtonControl>
+                    <ButtonControl @ref="_focusTarget" CssClass="btn-outline-primary">Focus target</ButtonControl>
+                    <ButtonControl CssClass="btn-secondary" OnClick="@(() => _focusTarget!.FocusAsync())">Focus it via @@ref</ButtonControl>
+                    @if (_savedAt is not null)
+                    {
+                        <span class="demo-result">Saved at @_savedAt.Value.ToString("HH:mm:ss")</span>
+                    }
+                </div>
+            </section>
+
+            <section class="demo-section" id="dropdown">
+                <h4>Dropdown button</h4>
+                <p class="demo-hint">Supply <code>DropDownContent</code> and the button becomes a popup trigger. Click-away closes it through a backdrop element, no script.</p>
+                <div class="demo-flex-row align-items-center">
+                    <ButtonControl @ref="_exportButton" CssClass="btn-primary" IconCss="bi bi-download" DropDownCssClass="demo-menu">
+                        <ChildContent>Export <span class="bi bi-caret-down-fill demo-caret"></span></ChildContent>
+                        <DropDownContent>
+                            @foreach (var fmt in new[] { "Excel (.xlsx)", "CSV", "PDF" })
+                            {
+                                <button type="button" class="demo-menu-item" @onclick="@(() => PickExport(fmt))">@fmt</button>
+                            }
+                        </DropDownContent>
+                    </ButtonControl>
+                    @if (_export is not null)
+                    {
+                        <span class="demo-result">Exporting as @_export</span>
+                    }
+                </div>
+            </section>
+
+            <section class="demo-section" id="events">
+                <h4>Events</h4>
+                <p class="demo-hint"><code>OnClick</code> delivers <code>MouseEventArgs</code>, so handlers can read modifier keys and button number.</p>
+                <div class="demo-flex-row align-items-center">
+                    <ButtonControl CssClass="btn-primary" OnClick="@HandleClick">Click me</ButtonControl>
+                    <span class="demo-result">Clicks: <strong>@_clickCount</strong> @(_lastModifier is null ? "" : $"(last: {_lastModifier})")</span>
+                </div>
+                <form class="demo-flex-row align-items-center mt-3" @onsubmit="@(() => _submitted++)" @onsubmit:preventDefault="true">
+                    <ButtonControl ButtonType="submit" CssClass="btn-success">Submit form</ButtonControl>
+                    <ButtonControl ButtonType="reset" CssClass="btn-secondary">Reset</ButtonControl>
+                    <span class="demo-result">Submitted: <strong>@_submitted</strong></span>
+                </form>
+            </section>
+
+            @* Palettes copied from flexkit-themes.css onto wrappers; the file itself is not loaded
+               because its :root block would restyle every default button on the site. *@
+            <section class="demo-section" id="themes">
+                <h4>Theming with CSS variables</h4>
+                <p class="demo-hint">
+                    Every default button reads <code>--fx-btn-*</code> variables. Set them on any ancestor to retheme a region.
+                    The three palettes below are the ones shipped in <code>flexkit-themes.css</code>. Use the Zoom slider above to see <code>--fx-zoom</code> scale all of them.
+                </p>
+                <div class="demo-theme-grid">
+                    <div class="demo-theme demo-theme-vb">
+                        <span class="demo-theme-name">Classic (VB6 / Win32)</span>
+                        <div class="demo-flex-row">
+                            <ButtonControl>OK</ButtonControl>
+                            <ButtonControl>Cancel</ButtonControl>
+                            <ButtonControl Disabled="true">Apply</ButtonControl>
+                        </div>
+                    </div>
+                    <div class="demo-theme demo-theme-blue">
+                        <span class="demo-theme-name">Modern blue</span>
+                        <div class="demo-flex-row">
+                            <ButtonControl>OK</ButtonControl>
+                            <ButtonControl>Cancel</ButtonControl>
+                            <ButtonControl Disabled="true">Apply</ButtonControl>
+                        </div>
+                    </div>
+                    <div class="demo-theme demo-theme-dark">
+                        <span class="demo-theme-name">Dark</span>
+                        <div class="demo-flex-row">
+                            <ButtonControl>OK</ButtonControl>
+                            <ButtonControl>Cancel</ButtonControl>
+                            <ButtonControl Disabled="true">Apply</ButtonControl>
+                        </div>
+                    </div>
+                    <div class="demo-theme">
+                        <span class="demo-theme-name">Built-in classes</span>
+                        <div class="demo-flex-row align-items-center">
+                            <ButtonControl CssClass="fx-button-classic">fx-button-classic</ButtonControl>
+                            <ButtonControl CssClass="mini-btn">mini-btn</ButtonControl>
+                            <ButtonControl CssClass="fx-dialog-btn btn-primary">fx-dialog-btn</ButtonControl>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="demo-section" id="bare">
+                <h4>Bring your own CSS</h4>
+                <p class="demo-hint"><code>BareStyle="true"</code> drops the <code>fx-button</code> base class. Click wiring, disabled gating, and the icon slot stay.</p>
+                <div class="demo-flex-row align-items-center">
+                    <ButtonControl BareStyle="true" CssClass="demo-brand-btn" IconCss="bi bi-stars">Host-styled</ButtonControl>
+                    <ButtonControl BareStyle="true" CssClass="demo-brand-btn" Disabled="true">Disabled</ButtonControl>
+                </div>
+            </section>
+
+            @* Anchors #toggle #group #split #pill #toolbar are catalog targets. *@
+            <section class="demo-section" id="related">
+                <h4>Related controls</h4>
+                <p class="demo-hint">Each of these builds on <code>ButtonControl</code> or shares its styling contract.</p>
+
+                <div class="demo-related-grid">
+                    <div class="demo-related" id="toggle">
+                        <span class="demo-related-name">ToggleButtonControl</span>
+                        <div class="demo-flex-row align-items-center">
+                            <ToggleButtonControl @bind-Selected="_bold" IconCss="bi bi-type-bold" Title="Bold" aria-label="Bold" />
+                            <ToggleButtonControl @bind-Selected="_italic" IconCss="bi bi-type-italic" Title="Italic" aria-label="Italic" />
+                            <ToggleButtonControl @bind-Selected="_notify">Notifications @(_notify ? "on" : "off")</ToggleButtonControl>
+                        </div>
+                    </div>
+
+                    <div class="demo-related" id="group">
+                        <span class="demo-related-name">ButtonGroupControl · single, keyboard arrows</span>
+                        <ButtonGroupControl Items="_alignItems" @bind-Values="_align" Selection="ChoiceSelectionMode.Single" AriaLabel="Text alignment" />
+                        <span class="demo-result">@string.Join(", ", _align)</span>
+                    </div>
+
+                    <div class="demo-related">
+                        <span class="demo-related-name">ButtonGroupControl · multiple, vertical</span>
+                        <ButtonGroupControl Items="_dayItems" @bind-Values="_days" Selection="ChoiceSelectionMode.Multiple"
+                                            Orientation="FlexOrientation.Vertical" AllowEmpty="true" AriaLabel="Working days" />
+                        <span class="demo-result">@(_days.Count == 0 ? "none" : string.Join(", ", _days))</span>
+                    </div>
+
+                    <div class="demo-related" id="split">
+                        <span class="demo-related-name">SplitButtonControl</span>
+                        <div class="demo-flex-row align-items-center">
+                            <SplitButtonControl Text="Save" IconCss="bi bi-save" Items="_splitItems"
+                                                OnClick="@(() => _splitMsg = "Saved")" OnItemClick="@(i => _splitMsg = i.Text)" />
+                            @if (_splitMsg is not null) { <span class="demo-result">@_splitMsg</span> }
+                        </div>
+                    </div>
+
+                    <div class="demo-related" id="pill">
+                        <span class="demo-related-name">RoundedButtonControl · pill variants</span>
+                        <div class="demo-flex-row align-items-center">
+                            <RoundedButtonControl Variant="accent">accent</RoundedButtonControl>
+                            <RoundedButtonControl Variant="muted">muted</RoundedButtonControl>
+                            <RoundedButtonControl Variant="success" IconCss="bi bi-check2">success</RoundedButtonControl>
+                            <RoundedButtonControl Variant="danger" IconCss="bi bi-exclamation-triangle">danger</RoundedButtonControl>
+                        </div>
+                    </div>
+
+                    <div class="demo-related" id="verbs">
+                        <span class="demo-related-name">SaveButtonControl · CancelButtonControl</span>
+                        <div class="demo-flex-row align-items-center">
+                            <SaveButtonControl IsSaving="@_verbSaving" OnClick="@VerbSaveAsync" />
+                            <CancelButtonControl OnClick="@(() => _verbSaving = false)" />
+                            <SaveButtonControl Label="" Title="Save (icon only)" />
+                            <CancelButtonControl ShowIcon="false" />
+                        </div>
+                    </div>
+
+                    <div class="demo-related" id="toolbar">
+                        <span class="demo-related-name">ToolbarControl · ToolbarButtonControl</span>
+                        <ToolbarControl ShowCaptionsToggle="true">
+                            <ToolbarButtonControl IconCss="bi bi-folder2-open" Label="Open" OnClick="@(() => _toolbarMsg = "Open")" />
+                            <ToolbarButtonControl IconCss="bi bi-save" Label="Save" OnClick="@(() => _toolbarMsg = "Save")" />
+                            <ToolbarSeparatorControl />
+                            <ToolbarButtonControl IconCss="bi bi-scissors" Label="Cut" OnClick="@(() => _toolbarMsg = "Cut")" />
+                            <ToolbarButtonControl IconCss="bi bi-clipboard" Label="Paste" Disabled="true" />
+                            <ToolbarButtonControl IconCss="bi bi-printer" Label="Print" HasDropdown="true" OnClick="@(() => _toolbarMsg = "Print ▾")" />
+                        </ToolbarControl>
+                        @if (_toolbarMsg is not null) { <span class="demo-result">@_toolbarMsg</span> }
+                    </div>
+                </div>
+
+                <p class="demo-hint mt-3">
+                    Also in the family: <a href="demo/new-components">FabMenuControl</a> (floating action menu),
+                    <a href="demo/new-components">ChipControl</a>, and the Office <a href="">RibbonControl</a> on the home page.
+                </p>
+            </section>
+        </div>
+    </DemoContent>
+
+    <DocumentationContent>
+        <h3>Parameters</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped mt-2 api-table">
+                <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>ChildContent</code></td><td><code>RenderFragment?</code></td><td>—</td><td>Button label or any markup.</td></tr>
+                    <tr><td><code>CssClass</code></td><td><code>string?</code></td><td><code>null</code></td><td>Appended after <code>fx-button</code>. Variant and size classes go here (table below).</td></tr>
+                    <tr><td><code>IconCss</code></td><td><code>string?</code></td><td><code>null</code></td><td>Class list for a leading icon <code>&lt;span&gt;</code>. Any icon font works; the showcase uses Bootstrap Icons.</td></tr>
+                    <tr><td><code>Disabled</code></td><td><code>bool</code></td><td><code>false</code></td><td>Sets the native <code>disabled</code> attribute. Hover and active styles are suppressed.</td></tr>
+                    <tr><td><code>ButtonType</code></td><td><code>string</code></td><td><code>"button"</code></td><td>Native <code>type</code>: <code>button</code>, <code>submit</code>, or <code>reset</code>.</td></tr>
+                    <tr><td><code>OnClick</code></td><td><code>EventCallback&lt;MouseEventArgs&gt;</code></td><td>—</td><td>Click handler. Also fires in dropdown mode before the panel toggles.</td></tr>
+                    <tr><td><code>Title</code></td><td><code>string?</code></td><td><code>null</code></td><td>Native tooltip. Required on icon-only buttons.</td></tr>
+                    <tr><td><code>Style</code></td><td><code>string?</code></td><td><code>null</code></td><td>Inline style. Useful for per-button CSS variables.</td></tr>
+                    <tr><td><code>TabIndex</code></td><td><code>int?</code></td><td><code>null</code></td><td>Native <code>tabindex</code>.</td></tr>
+                    <tr><td><code>AutoFocus</code></td><td><code>bool</code></td><td><code>false</code></td><td>Focuses the button once after first render, unless disabled.</td></tr>
+                    <tr><td><code>BareStyle</code></td><td><code>bool</code></td><td><code>false</code></td><td>Omits the <code>fx-button</code> base class so the host's CSS owns the look.</td></tr>
+                    <tr><td><code>StopPropagation</code></td><td><code>bool</code></td><td><code>false</code></td><td>Stops the click bubbling to ancestors that also handle clicks.</td></tr>
+                    <tr><td><code>PreventMouseDownDefault</code></td><td><code>bool</code></td><td><code>false</code></td><td>Keeps focus where it was on mousedown. Needed for editor formatting buttons.</td></tr>
+                    <tr><td><code>DropDownContent</code></td><td><code>RenderFragment?</code></td><td><code>null</code></td><td>When set, the button toggles a popup panel beneath itself. Click-away closes it.</td></tr>
+                    <tr><td><code>DropDownCssClass</code></td><td><code>string?</code></td><td><code>null</code></td><td>Extra class on the popup panel.</td></tr>
+                    <tr><td><em>unmatched attributes</em></td><td><code>Dictionary&lt;string,object&gt;</code></td><td>—</td><td>Forwarded to the <code>&lt;button&gt;</code>: <code>id</code>, <code>name</code>, <code>form</code>, <code>accesskey</code>, <code>aria-*</code>, <code>data-*</code>. Explicit parameters win on conflict.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="mt-4">Methods</h3>
+        <ul>
+            <li><code>ValueTask FocusAsync()</code>: focuses the element without scrolling. Capture the component with <code>@@ref</code>.</li>
+            <li><code>void CloseDropDown()</code>: closes the popup from inside <code>DropDownContent</code>, for example after a menu item is picked.</li>
+        </ul>
+
+        @* Lists only classes present in ButtonControl.razor.css today. *@
+        <h3 class="mt-4">CSS classes</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped mt-2 api-table">
+                <thead><tr><th>Class</th><th>Effect</th></tr></thead>
+                <tbody>
+                    <tr><td><code>btn-primary</code> <code>btn-secondary</code> <code>btn-success</code> <code>btn-warning</code> <code>btn-danger</code></td><td>Filled semantic colors.</td></tr>
+                    <tr><td><code>btn-outline-primary</code></td><td>Transparent fill, blue border and text; fills on hover.</td></tr>
+                    <tr><td><code>btn-sm</code> <code>btn-lg</code></td><td>Compact and large padding and font size.</td></tr>
+                    <tr><td><code>fx-button-classic</code></td><td>Win32 3D bevel, MS Sans Serif, square corners. For migrated VB6 forms.</td></tr>
+                    <tr><td><code>mini-btn</code> <code>fx-dialog-btn</code></td><td>Compact grid-cell button; dialog footer padding.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="mt-4">CSS variables</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped mt-2 api-table">
+                <thead><tr><th>Variable</th><th>Purpose</th><th>Fallback</th></tr></thead>
+                <tbody>
+                    <tr><td><code>--fx-btn-bg</code> / <code>--fx-btn-color</code></td><td>Resting fill and text.</td><td><code>#f7f7f7</code> / <code>#333</code></td></tr>
+                    <tr><td><code>--fx-btn-border</code> / <code>--fx-btn-border-color</code></td><td>Border shorthand and a separate per-side color (used for the Win32 bevel).</td><td><code>1px solid #c9c9c9</code></td></tr>
+                    <tr><td><code>--fx-btn-radius</code></td><td>Corner radius.</td><td><code>4px</code></td></tr>
+                    <tr><td><code>--fx-btn-hover-bg</code> / <code>--fx-btn-hover-border</code> / <code>--fx-btn-hover-border-color</code></td><td>Hover state.</td><td><code>#e6e6e6</code></td></tr>
+                    <tr><td><code>--fx-btn-active-bg</code></td><td>Pressed state.</td><td><code>#b6b6b6</code></td></tr>
+                    <tr><td><code>--fx-btn-shadow</code></td><td>Box shadow.</td><td><code>none</code></td></tr>
+                    <tr><td><code>--fx-font-size</code> × <code>--fx-zoom</code></td><td>Font size. Zoom scales every FlexCore control together; the library's <code>ZoomService</code> drives it.</td><td><code>13px</code> × <code>1</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="mt-4">Accessibility</h3>
+        <ul>
+            <li>Renders a real <code>&lt;button&gt;</code>: Space and Enter activate it, it participates in forms, and screen readers announce its role.</li>
+            <li>Icon-only buttons need <code>Title</code> plus <code>aria-label</code>; the icon span carries no text.</li>
+            <li><code>ToggleButtonControl</code> and <code>ButtonGroupControl</code> emit <code>aria-pressed</code>; the group moves focus with Arrow, Home, and End keys and uses <code>role="group"</code>.</li>
+            <li>Dropdown mode sets <code>aria-haspopup</code> and <code>aria-expanded</code>.</li>
+            <li>Inside <code>DialogControl</code>, the default button fires on Enter through <code>DefaultButtonScope</code>; a control that needs Enter for itself calls <code>ConsumeEnter()</code>.</li>
+        </ul>
+    </DocumentationContent>
+</SyncfusionDemoLayout>
+
+<style>
+    .btn-demo { display: flex; flex-direction: column; gap: 1.25rem; }
+    .demo-section { background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; }
+    .demo-section h4 { margin: 0 0 6px; font-size: 16px; color: #495057; }
+    .demo-hint { margin: 0 0 14px; font-size: 13px; color: #6c757d; }
+    .demo-flex-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .demo-result { font-size: 13px; color: #495057; }
+    .demo-caret { font-size: 0.7em; margin-left: 4px; }
+    .btn-demo-zoom { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #495057; }
+    .btn-demo-zoom input { width: 120px; }
+
+    .demo-menu { min-width: 160px; padding: 4px 0; border-radius: 6px; }
+    .demo-menu-item { display: block; width: 100%; text-align: left; padding: 6px 14px; background: none; border: 0; font-size: 13px; cursor: pointer; }
+    .demo-menu-item:hover { background: #eef2f7; }
+
+    .demo-theme-grid, .demo-related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .demo-theme, .demo-related { background: #fff; border: 1px solid #e9ecef; border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .demo-theme-name, .demo-related-name { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #6c757d; }
+
+    /* flexkit-themes.css palettes (.theme-vb / .theme-modern-blue / .theme-dark), scoped to wrappers. */
+    .demo-theme-vb   { --fx-btn-bg: #e6e6e6; --fx-btn-color: #000; --fx-btn-border: 1px solid; --fx-btn-border-color: #fff #404040 #404040 #fff;
+                       --fx-btn-radius: 0; --fx-btn-hover-bg: #e6e6e6; --fx-btn-hover-border: 1px solid; --fx-btn-hover-border-color: #fff #404040 #404040 #fff;
+                       --fx-btn-active-bg: #b6b6b6; --fx-btn-shadow: none; background: #d4d0c8; }
+    .demo-theme-blue { --fx-btn-bg: #3b82f6; --fx-btn-color: #fff; --fx-btn-border: 1px solid #2563eb; --fx-btn-radius: 6px;
+                       --fx-btn-hover-bg: #2563eb; --fx-btn-hover-border: 1px solid #1d4ed8; --fx-btn-active-bg: #1d4ed8; --fx-btn-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .demo-theme-dark { --fx-btn-bg: #6366f1; --fx-btn-color: #fff; --fx-btn-border: 1px solid #4f46e5; --fx-btn-radius: 6px;
+                       --fx-btn-hover-bg: #4f46e5; --fx-btn-hover-border: 1px solid #4338ca; --fx-btn-active-bg: #4338ca; --fx-btn-shadow: 0 1px 2px rgba(0,0,0,.2);
+                       background: #1e293b; border-color: #334155; }
+    .demo-theme-dark .demo-theme-name { color: #94a3b8; }
+
+    /* Host-owned look for the BareStyle example. */
+    .demo-brand-btn { padding: 8px 18px; border: 0; border-radius: 999px; color: #fff; cursor: pointer;
+                      background: linear-gradient(135deg, #7c3aed, #db2777); font-weight: 600; letter-spacing: .01em; }
+    .demo-brand-btn:hover:not(:disabled) { filter: brightness(1.08); }
+    .demo-brand-btn:disabled { opacity: .5; cursor: default; }
+    .demo-brand-btn .bi { margin-right: 6px; }
+
+    .api-table td:first-child { white-space: nowrap; }
+    .mt-3 { margin-top: 1rem; } .mt-4 { margin-top: 1.5rem; }
+</style>
 
 @code {
-    int _clickCount;
-    void HandleClick() => _clickCount++;
+    private double _zoom = 1.0;
+
+    // Events
+    private int _clickCount;
+    private string? _lastModifier;
+    private int _submitted;
+    private void HandleClick(MouseEventArgs e)
+    {
+        _clickCount++;
+        _lastModifier = e.CtrlKey ? "Ctrl" : e.ShiftKey ? "Shift" : e.AltKey ? "Alt" : e.MetaKey ? "Meta" : null;
+    }
+
+    // States
+    private bool _saving;
+    private DateTime? _savedAt;
+    private ButtonControl? _focusTarget;
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        await Task.Delay(1500);
+        _saving = false;
+        _savedAt = DateTime.Now;
+    }
+
+    // Dropdown
+    private ButtonControl? _exportButton;
+    private string? _export;
+    private void PickExport(string format)
+    {
+        _export = format;
+        _exportButton?.CloseDropDown();
+    }
+
+    // Related controls
+    private bool _bold, _italic, _notify = true;
+
+    private readonly SelectionItem[] _alignItems =
+    {
+        new("left", "", IconCss: "bi bi-text-left"),
+        new("center", "", IconCss: "bi bi-text-center"),
+        new("right", "", IconCss: "bi bi-text-right"),
+        new("justify", "", IconCss: "bi bi-justify"),
+    };
+    private IReadOnlyList<string> _align = new[] { "left" };
+
+    private readonly SelectionItem[] _dayItems =
+    {
+        new("mon", "Monday"), new("tue", "Tuesday"), new("wed", "Wednesday"),
+        new("thu", "Thursday"), new("fri", "Friday"), new("sat", "Saturday", Disabled: true),
+    };
+    private IReadOnlyList<string> _days = new[] { "mon", "tue", "wed", "thu", "fri" };
+
+    private readonly List<SplitButtonItem> _splitItems = new()
+    {
+        new("Save as…", "bi bi-file-earmark"),
+        new("Save a copy", "bi bi-files"),
+        new("Save and close", "bi bi-box-arrow-right"),
+        new("Save as template", "bi bi-file-earmark-lock", disabled: true),
+    };
+    private string? _splitMsg;
+
+    private bool _verbSaving;
+    private async Task VerbSaveAsync()
+    {
+        _verbSaving = true;
+        await Task.Delay(1200);
+        _verbSaving = false;
+    }
+
+    private string? _toolbarMsg;
+
+    // Code tabs
+    private readonly Dictionary<string, string> _extraTabs = new()
+    {
+        ["theme.css"] = @"/* Retheme a region: every default ButtonControl inside reads these. */
+.brand-area {
+    --fx-btn-bg: #3b82f6;
+    --fx-btn-color: #fff;
+    --fx-btn-border: 1px solid #2563eb;
+    --fx-btn-radius: 6px;
+    --fx-btn-hover-bg: #2563eb;
+    --fx-btn-active-bg: #1d4ed8;
+    --fx-btn-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+
+/* Scale every FlexCore control in a region (ZoomService sets this app-wide). */
+.compact { --fx-zoom: 0.85; }
+"
+    };
+
+    private readonly string _razorCode = @"<!-- Colors -->
+<ButtonControl>Default</ButtonControl>
+<ButtonControl CssClass=""btn-primary"">Primary</ButtonControl>
+<ButtonControl CssClass=""btn-danger"">Danger</ButtonControl>
+<ButtonControl CssClass=""btn-outline-primary"">Outline</ButtonControl>
+
+<!-- Icons: leading via IconCss, trailing as content -->
+<ButtonControl CssClass=""btn-primary"" IconCss=""bi bi-plus-lg"">New</ButtonControl>
+<ButtonControl CssClass=""btn-outline-primary"">Next <span class=""bi bi-arrow-right""></span></ButtonControl>
+
+<!-- Sizes -->
+<ButtonControl CssClass=""btn-primary btn-sm"">Small</ButtonControl>
+<ButtonControl CssClass=""btn-primary btn-lg"">Large</ButtonControl>
+
+<!-- Busy state -->
+<ButtonControl CssClass=""btn-success"" Disabled=""@_saving""
+               aria-busy=""@(_saving ? ""true"" : null)""
+               IconCss=""@(_saving ? ""bi bi-hourglass-split"" : ""bi bi-cloud-upload"")""
+               OnClick=""@SaveAsync"">
+    @(_saving ? ""Saving…"" : ""Save"")
+</ButtonControl>
+
+<!-- Programmatic focus -->
+<ButtonControl @ref=""_focusTarget"">Focus target</ButtonControl>
+<ButtonControl OnClick=""@(() => _focusTarget!.FocusAsync())"">Focus it</ButtonControl>
+
+<!-- Dropdown button: no JavaScript, click-away closes -->
+<ButtonControl @ref=""_exportButton"" CssClass=""btn-primary"" IconCss=""bi bi-download"">
+    <ChildContent>Export</ChildContent>
+    <DropDownContent>
+        <button type=""button"" @onclick=""@(() => PickExport(""CSV""))"">CSV</button>
+        <button type=""button"" @onclick=""@(() => PickExport(""PDF""))"">PDF</button>
+    </DropDownContent>
+</ButtonControl>
+
+<!-- Events -->
+<ButtonControl CssClass=""btn-primary"" OnClick=""@HandleClick"">Click me</ButtonControl>
+<form @onsubmit=""@(() => _submitted++)"" @onsubmit:preventDefault=""true"">
+    <ButtonControl ButtonType=""submit"" CssClass=""btn-success"">Submit</ButtonControl>
+</form>
+
+<!-- Theming: set variables on any ancestor -->
+<div style=""--fx-btn-bg:#6366f1; --fx-btn-color:#fff; --fx-btn-radius:6px"">
+    <ButtonControl>Themed</ButtonControl>
+</div>
+
+<!-- Host CSS owns the look -->
+<ButtonControl BareStyle=""true"" CssClass=""brand-btn"" IconCss=""bi bi-stars"">Host-styled</ButtonControl>
+
+<!-- Related controls -->
+<ToggleButtonControl @bind-Selected=""_bold"" IconCss=""bi bi-type-bold"" aria-label=""Bold"" />
+<ButtonGroupControl Items=""_alignItems"" @bind-Values=""_align"" Selection=""ChoiceSelectionMode.Single"" />
+<SplitButtonControl Text=""Save"" IconCss=""bi bi-save"" Items=""_splitItems"" OnClick=""Save"" OnItemClick=""i => Run(i)"" />
+<RoundedButtonControl Variant=""accent"">accent</RoundedButtonControl>
+<SaveButtonControl IsSaving=""@_verbSaving"" OnClick=""@VerbSaveAsync"" />
+<CancelButtonControl />
+<ToolbarControl>
+    <ToolbarButtonControl IconCss=""bi bi-save"" Label=""Save"" OnClick=""Save"" />
+    <ToolbarSeparatorControl />
+    <ToolbarButtonControl IconCss=""bi bi-printer"" Label=""Print"" HasDropdown=""true"" />
+</ToolbarControl>
+";
+
+    private readonly string _csharpCode = @"@code {
+    private int _clickCount;
+    private string? _lastModifier;
+    private int _submitted;
+    private void HandleClick(MouseEventArgs e)
+    {
+        _clickCount++;
+        _lastModifier = e.CtrlKey ? ""Ctrl"" : e.ShiftKey ? ""Shift"" : null;
+    }
+
+    private bool _saving;
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        await Task.Delay(1500);   // real work here
+        _saving = false;
+    }
+
+    private ButtonControl? _focusTarget;
+    private ButtonControl? _exportButton;
+    private void PickExport(string format)
+    {
+        // ... start the export ...
+        _exportButton?.CloseDropDown();
+    }
+
+    // ButtonGroupControl takes SelectionItem(Value, Text, Disabled, IconCss)
+    private readonly SelectionItem[] _alignItems =
+    {
+        new(""left"", """", IconCss: ""bi bi-text-left""),
+        new(""center"", """", IconCss: ""bi bi-text-center""),
+        new(""right"", """", IconCss: ""bi bi-text-right""),
+    };
+    private IReadOnlyList<string> _align = new[] { ""left"" };
+
+    private readonly List<SplitButtonItem> _splitItems = new()
+    {
+        new(""Save as…"", ""bi bi-file-earmark""),
+        new(""Save and close"", ""bi bi-box-arrow-right""),
+    };
+
+    private bool _bold;
+    private bool _verbSaving;
+    private async Task VerbSaveAsync() { _verbSaving = true; await Task.Delay(1200); _verbSaving = false; }
+}";
 }
