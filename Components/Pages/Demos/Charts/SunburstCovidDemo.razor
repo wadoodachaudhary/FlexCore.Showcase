@@ -216,11 +216,11 @@
                             </div>
                             <div class="d-flex justify-content-between border-bottom pb-1">
                                 <span class="text-muted">Case Fatality Rate:</span>
-                                <strong>@cfr.ToString("0.02")%</strong>
+                                <strong>@cfr.ToString("0.00")%</strong>
                             </div>
                             <div class="d-flex justify-content-between border-bottom pb-1">
                                 <span class="text-muted">Share of Global Cases:</span>
-                                <strong>@pctWorld.ToString("0.1")%</strong>
+                                <strong>@pctWorld.ToString("0.0")%</strong>
                             </div>
                             @if (node.CustomAttributes.TryGetValue("Continent", out var cont) && cont != null)
                             {
@@ -256,10 +256,11 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="list-group list-group-flush" style="font-size: 12.5px;">
+                        @{ var topMax = _topCountries.Count > 0 ? _topCountries.Max(c => c.TotalCases) : 0.0; }
                         @foreach (var (country, idx) in _topCountries.Select((c, i) => (c, i + 1)))
                         {
                             var isSelected = _highlightedNodeName == country.Name;
-                            var pct = (country.TotalCases / 12591163.0) * 100.0; // Scaled to US max
+                            var pct = topMax > 0 ? (country.TotalCases / topMax) * 100.0 : 0.0; // scaled to the #1 entry
 
                             <button type="button"
                                     class="list-group-item list-group-item-action d-flex flex-column py-2 px-3 @(isSelected ? "bg-light border-primary" : "")"
