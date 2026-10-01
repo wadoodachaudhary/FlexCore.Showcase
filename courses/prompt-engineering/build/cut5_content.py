@@ -1,8 +1,8 @@
 """Five-minute pilot narration for GA-PE-210. Original, unclassified, fictional examples."""
 
 COURSE_CODE = "GA-PE-210"
-VOICE = "en-US-AndrewNeural"
-VOICE_RATE = "+0%"
+VOICE = "en-US-GuyNeural"
+VOICE_RATE = "pitch and pace varied by slide"
 
 SLIDES = [
     {
@@ -17,11 +17,11 @@ SLIDES = [
             "This cut is a look, voice, and lip-sync pilot.",
         ],
         "narration": (
-            "Welcome to Gov A I Academy course 210, Prompt Engineering for Government Officers. "
-            "This is a five-minute pilot of the briefing. The full facilitated session is longer, and it is instructor-led. "
-            "You will not write code. You will practice assigning work to a generative model with the same care you use when you task a colleague. "
-            "Watching this video does not complete the course. Completion requires attendance and three worksheets. "
-            "Every example is fictional. Do not add facts from your real workload."
+            "Welcome to Gov A I Academy, course 210, Prompt Engineering for Government Officers. "
+            "This is a five-minute pilot of the briefing. The full session is longer, and it is instructor-led. "
+            "You will not write code. You will practice assigning work to a generative model, with the same care you already use when you task a colleague. "
+            "Watching this video does not complete the course. You still need attendance, and you still need the three worksheets. "
+            "Every example is fictional. Please do not add facts from your real workload."
         ),
     },
     {
@@ -37,9 +37,9 @@ SLIDES = [
         ],
         "narration": (
             "The Department of Labor published its Artificial Intelligence Literacy Framework in Training and Employment Notice 07-25, dated February 13, 2026. "
-            "That notice is voluntary guidance. It treats literacy as a baseline: understand how generative tools behave, explore real uses, direct them with clear instructions, evaluate the output, and use them responsibly. "
-            "The Department says many roles need greater depth. This academy treats that framework as the floor you should already meet, including the fact that fluent text can still be false. "
-            "Course 210 drills applied direction: a repeatable prompt structure, source binding, a short revision sequence, and a written accept-or-reject decision. "
+            "That notice is voluntary guidance. It treats literacy as a baseline. Understand how generative tools behave. Explore real uses. Direct them with clear instructions. Evaluate the output. And use them responsibly. "
+            "The Department says many roles need greater depth. This academy treats that framework as the floor you should already meet, including this fact: fluent text can still be false. "
+            "Course 210 drills applied direction. A repeatable prompt structure. Source binding. A short revision sequence. And a written accept-or-reject decision. "
             "This briefing is not a Department of Labor publication, and it does not authorize any commercial tool."
         ),
     },
@@ -57,7 +57,7 @@ SLIDES = [
         "callout": "If you would not leave it on a shared printer, do not put it in a prompt.",
         "narration": (
             "Memorize the boundary. Never put classified information into a prompt, including a paraphrase that still conveys it. "
-            "Never put controlled unclassified information into a tool that is not authorized for it. If you are unsure of the marking, leave it out and ask. "
+            "Never put controlled unclassified information into a tool that is not authorized for it. If you are unsure of the marking, leave it out, and ask. "
             "Never put personal data, a personnel action, investigative details, source-selection material, or attorney work product. "
             "Never put a password or a token, even as an example. "
             "Use only a tool your agency has approved for this training. If none is approved, write the labs on paper. "
@@ -77,8 +77,8 @@ SLIDES = [
             "Output — a shape you can check, plus a Gaps line.",
         ],
         "narration": (
-            "A prompt is the full assignment, not a handful of search words. A search box retrieves pages that exist. A generative model writes new text, and it will guess whatever you leave out. "
-            "Use five parts. Role: the staff job and the reader. Context: the only source you are allowed to paste. Task: one verb and the finished use. Constraints: bind the source, set a length, and forbid invented quotes and numbers. Output: headings or a table, and a last line titled Gaps. "
+            "A prompt is the full assignment, not a handful of search words. A search box retrieves pages that already exist. A generative model writes new text, and it will guess whatever you leave out. "
+            "Use five parts. Role: the staff job, and the reader. Context: the only source you are allowed to paste. Task: one verb, and the finished use. Constraints: bind the source, set a length, and forbid invented quotes and numbers. Output: headings or a table, and a last line titled Gaps. "
             "Read the prompt once before you send it. Did you include a fact you cannot share? Did you ask for two jobs? Did you leave a hole that will be filled by invention? "
             "If the answer is yes, fix the prompt. Do not plan to repair a fluent mistake after it arrives."
         ),
@@ -95,8 +95,8 @@ SLIDES = [
             "If the source is too sensitive to paste, do not run the prompt.",
         ],
         "narration": (
-            "Source binding is the habit that keeps a draft from becoming a rumor. Put the allowed text in the prompt and write, use only this source. "
-            "Where a date, name, or figure is missing, require the words not in source. Then check two concrete claims against that text. If you cannot find them, the draft fails, even when the prose is smooth. "
+            "Source binding is the habit that keeps a draft from becoming a rumor. Put the allowed text in the prompt, and write: use only this source. "
+            "Where a date, a name, or a figure is missing, require the words not in source. Then check two concrete claims against that text. If you cannot find them, the draft fails, even when the prose is smooth. "
             "If the useful source is too sensitive to paste, you do not have a wording problem. You have a task you should not run. A careful paraphrase of controlled or personal information is still that information. "
             "Do the smaller public task, or do the work without the model."
         ),
@@ -115,10 +115,10 @@ SLIDES = [
         ),
         "narration": (
             "Here is the pattern for a briefing officer. Harbor Town is fictional, and these figures exist only in the prompt. "
-            "You are a staff assistant writing for the library board. The task is a read-ahead the board can skim in three minutes, not a speech and not a recommendation. "
-            "The only source is a public flyer. A Saturday trial at Riverside Library, nine to one, for three months. The board meets on the first Tuesday. The flyer estimates about four hundred twenty dollars a week for two clerks. "
-            "Do not invent a public comment or a vote. Use the headings Purpose, Decision needed, Facts, and Questions. End with Gaps. Stay under two hundred words. "
-            "Your check takes a minute. Every number matches the flyer. No quotation appears. The draft does not speak for the board."
+            "You are a staff assistant, writing for the library board. The task is a read-ahead the board can skim in three minutes. Not a speech. Not a recommendation. "
+            "The only source is a public flyer. A Saturday trial at Riverside Library, nine to one, for three months. The board meets on the first Tuesday. The flyer estimates about four hundred twenty dollars a week, for two clerks. "
+            "Do not invent a public comment, or a vote. Use the headings Purpose, Decision needed, Facts, and Questions. End with Gaps. Stay under two hundred words. "
+            "Your check takes a minute. Every number matches the flyer. No quotation appears. And the draft does not speak for the board."
         ),
     },
     {
@@ -135,7 +135,7 @@ SLIDES = [
         "narration": (
             "Getting more from a prompt means a short sequence, not a longer first message. "
             "Pass one asks for headings only, so you can see whether the job was understood. "
-            "Pass two fills those headings from the source and marks every hole. "
+            "Pass two fills those headings from the source, and marks every hole. "
             "Pass three applies the reader, the length, and a neutral tone. "
             "Before you polish, ask the model to list assumptions you did not state, and facts that would change the outline if they were in the source. Tell it not to add those facts. "
             "If an assumption is dangerous, or the missing fact is something you are not allowed to type, stop. "
@@ -155,12 +155,12 @@ SLIDES = [
         ],
         "callout": "You own the words you adopt. The chat is not the official file.",
         "narration": (
-            "Use three doors, and write the one you chose in a sentence. "
-            "Reject when the draft does the wrong job, invents a material fact, or when sensitive information already entered the thread. Do not ask the model to forget. Follow your incident steps and assume the text remains in a log. "
-            "Revise when the job is right and the problems are fixable. "
-            "Accept as a draft only when the claims you checked match the source and a named person will review the text before it is used. "
-            "Accept does not mean cleared or ready for the public. Copy cleared language into the official system. If policy says to note that a tool assisted, note it. You own the words you adopt. "
-            "To finish course 210, stay for the labs and turn in the three worksheets. Your facilitator records attendance. The responsibility stays with you."
+            "Use three doors, and write the one you chose, in a sentence. "
+            "Reject when the draft does the wrong job, invents a material fact, or when sensitive information has already entered the thread. Do not ask the model to forget. Follow your incident steps, and assume the text remains in a log. "
+            "Revise when the job is right, and the problems are fixable. "
+            "Accept as a draft only when the claims you checked match the source, and a named person will review the text before it is used. "
+            "Accept does not mean cleared. It does not mean ready for the public. Copy cleared language into the official system. If policy says to note that a tool assisted, note it. You own the words you adopt. "
+            "To finish course 210, stay for the labs, and turn in the three worksheets. Your facilitator records attendance. The responsibility stays with you."
         ),
     },
 ]

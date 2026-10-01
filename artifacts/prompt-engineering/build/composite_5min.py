@@ -139,7 +139,7 @@ def main() -> None:
         "",
         "Companion to `video/GA-PE-210-prompt-engineering-5min.mp4`.",
         "This is the review cut for look, voice, and lip-sync. The full thirty-minute lip-synced briefing is not in this file.",
-        f"Voice: {VOICE} at {VOICE_RATE}. Male American English. Mouth movement is Wav2Lip driven by this soundtrack.",
+        f"Voice: {VOICE} ({VOICE_RATE}). Male American English, with sentence-level pitch and pace. Head, eyes, and mouth are driven by SadTalker from this soundtrack.",
         "Unclassified training. Fictional Harbor Town examples. Not a Department of Labor publication.",
         "",
         f"Duration: {fmt(final)} ({final:.1f} seconds).",
