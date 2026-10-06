@@ -41,3 +41,13 @@ Open [http://localhost:5002](http://localhost:5002) in your browser.
 # Windows (PowerShell):
 .\deploy-to-azure.ps1
 ```
+
+## Gov AI Academy
+
+This repository also contains **Gov AI Academy**, a separate Blazor Server app for instructor-led public-sector AI classes. It does not replace Showcase and it does not deploy to flexcoreui.com.
+
+```bash
+dotnet run --project GovAiAcademy/GovAiAcademy.csproj --launch-profile http
+```
+
+Open [http://localhost:5080](http://localhost:5080). Setup, Entra notes, and the dedicated Azure scripts are in [GovAiAcademy/README.md](GovAiAcademy/README.md). FlexCore must still be cloned as a sibling of this repository (`../../FlexCore` from the Academy project).
