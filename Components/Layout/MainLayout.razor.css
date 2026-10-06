@@ -67,7 +67,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    overflow-x: auto;
+    overflow: visible; /* was overflow-x:auto; that clipped MenuDropDownControl's absolute panel into a horizontal scroll strip */
 }
 
 .nav-menu-item {
