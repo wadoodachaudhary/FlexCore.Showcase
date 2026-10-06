@@ -9,7 +9,7 @@
     <div class="top-hero-compact">
         <div class="hero-tagline-badge">
             <span class="badge-pulse"></span>
-            <span>FlexCore v0.2.31 Enterprise Suite &bull; .NET 10 &bull; C# and SVG rendering &bull; No npm or third-party JavaScript</span>
+            <span>FlexCore v@_flexCoreVersion Enterprise Suite &bull; .NET 10 &bull; C# and SVG rendering &bull; No npm or third-party JavaScript</span>
         </div>
         <h1 class="hero-oneliner">
             High-throughput enterprise Blazor data grid with sub-millisecond 60 FPS virtualization, instant in-grid editing, and native ClosedXML Excel export.
@@ -31,7 +31,7 @@
                     <span>Inbox — Custom Quotes (HomeFront Precision Estimating)</span>
                 </div>
                 <div class="window-tags">
-                    <span>FlexCore Grid v0.2.31 • .NET 10 • 1,000 Rows Virtualized</span>
+                    <span>FlexCore Grid v@_flexCoreVersion • .NET 10 • 1,000 Rows Virtualized</span>
                 </div>
             </div>
 
@@ -621,14 +621,15 @@
             <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" class="btn-hero-secondary">
                 <span class="bi bi-github"></span> View Source on GitHub
             </a>
-            <a href="downloads/FlexCore.zip" class="btn-hero-secondary">
-                <span class="bi bi-download"></span> Download Package (.ZIP)
-            </a>
         </div>
     </div>
 </div>
 
 @code {
+    // Library version read from the FlexCore assembly so the badge cannot drift (was a hard-coded v0.2.31).
+    private static readonly string _flexCoreVersion =
+        typeof(Fx.ControlKit.ButtonControl).Assembly.GetName().Version is { } v ? $"{v.Major}.{v.Minor}.{v.Build}" : "";
+
     private string _activeTab = "grid";
     private bool _showCode = false;
     private bool _copiedInstall = false;

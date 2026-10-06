@@ -14,7 +14,7 @@
     <ButtonControl CssClass="btn-danger" OnClick="@(() => Notifications.Error("Couldn't connect to server."))">Error</ButtonControl>
 </div>
 
-<NotificationDisplayControl />
+@* NotificationDisplayControl is rendered once by MainLayout; a second copy here showed every toast twice (removed 2026-10-06). *@
 
 <h2>Markup</h2>
 <pre><code>@@inject NotificationService Notifications

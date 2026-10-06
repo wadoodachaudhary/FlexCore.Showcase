@@ -27,10 +27,10 @@ Each is a one-file edit; none changes behaviour except the double toast.
 
 | ID | Page | Fix | Status | Detail |
 |---|---|---|---|---|
-| SC-010 | `/` | Version badge | pending approval | `Home.razor` lines 12 and 34 say v0.2.31; library is 0.2.48. Replace with `typeof(Fx.ControlKit.ButtonControl).Assembly.GetName().Version` so it cannot drift. |
-| SC-011 | `/ and /get-started` | Remove `downloads/FlexCore.zip` links | pending approval | `Home.razor:624`, `GetStarted.razor:17`. No `wwwroot/downloads` folder exists; both links 404. Point to the NuGet package or the GitHub release instead. |
-| SC-012 | `/get-started` | "Once published to NuGet" | pending approval | `GetStarted.razor:10`. FlexCore 0.2.47 is on nuget.org (3.7K downloads). Replace with `dotnet add package FlexCore`. |
-| SC-013 | `/demo/notifications` | Double toast | pending approval | Page renders its own `NotificationDisplayControl` (3 references); `MainLayout` already renders one. Remove the page copy. |
+| SC-010 | `/` | Version badge | done | `Home.razor` lines 12 and 34 say v0.2.31; library is 0.2.48. Replace with `typeof(Fx.ControlKit.ButtonControl).Assembly.GetName().Version` so it cannot drift. |
+| SC-011 | `/ and /get-started` | Remove `downloads/FlexCore.zip` links | done | `Home.razor:624`, `GetStarted.razor:17`. No `wwwroot/downloads` folder exists; both links 404. Point to the NuGet package or the GitHub release instead. |
+| SC-012 | `/get-started` | "Once published to NuGet" | done | `GetStarted.razor:10`. FlexCore 0.2.47 is on nuget.org (3.7K downloads). Replace with `dotnet add package FlexCore`. |
+| SC-013 | `/demo/notifications` | Double toast | done | Page renders its own `NotificationDisplayControl` (3 references); `MainLayout` already renders one. Remove the page copy. |
 | SC-014 | `/demo/grid/virtualization-bench` | Literal timings | pending approval | Copy states 1.2 ms, 60 FPS and near-zero memory; nothing on the page measures them. Remove or measure with a Stopwatch and show the method. |
 | SC-015 | `/demo/grid/row-selection-50k` | "50 columns / 2.5M cells" | pending approval | Grid defines 12 columns. Change the copy or add the columns. |
 | SC-016 | `/demo/charts` | "30+ chart types" | pending approval | Gallery renders 24. State 24 or render the rest. |
