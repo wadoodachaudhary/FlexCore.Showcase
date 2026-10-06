@@ -25,8 +25,8 @@
             <strong>Inventory Logistics</strong> (master-detail product catalog with multi-warehouse stock breakdown).
         </p>
         <p>
-            Built entirely in <strong>pure C# with FlexCore controls</strong> — running with <strong>zero external JavaScript grid libraries</strong>,
-            near-instant server diffing, and true WebAssembly/Server circuit execution.
+            Built with <strong>FlexCore controls in C#</strong>. <strong>No third-party JavaScript grid library</strong>; GridControl loads its own interop script on demand.
+            Runs on Blazor Server or WebAssembly.
         </p>
     </Summary>
 
@@ -47,7 +47,7 @@
                 <span class="text-muted ms-auto">
                     Loaded: <b>@_perfRows.Count.ToString("N0")</b> rows |
                     Gen Time: <b>@_perfGenMs.ToString("0.0") ms</b> |
-                    Virtual Window: <b>60 FPS</b>
+                    Rendered: <b>visible window only</b>
                 </span>
             }
             else if (_activeTab == AgTab.Finance)
@@ -595,14 +595,14 @@
     </DemoContent>
 
     <DocumentationContent>
-        <h3>FlexCore Pure C# vs. AG Grid Architecture</h3>
+        <h3>FlexCore vs. AG Grid Architecture</h3>
         <p>
             This showcase brings the four flagship use cases of <strong>AG Grid</strong> into the .NET ecosystem using
-            <strong>pure C# FlexCore controls</strong> with zero JavaScript wrapper dependencies:
+            <strong>FlexCore controls written in C#</strong>, with no wrapper around a third-party JavaScript grid:
         </p>
         <ul>
             <li>
-                <strong>1. Performance (100,000 Rows):</strong> FlexCore's virtual scroll engine recycles DOM nodes to maintain consistent 60 FPS scrolling and minimal browser memory usage, regardless of dataset scale.
+                <strong>1. Performance (100,000 Rows):</strong> FlexCore renders only the visible rows plus a small buffer and recycles those elements, so DOM size does not grow with the dataset. Frame rate is not measured here.
             </li>
             <li>
                 <strong>2. High-Frequency Market Ticker (Finance):</strong> High-rate delta recalculations and price flashes are computed directly in C# on server or client circuits.
@@ -631,13 +631,13 @@
                     <td><strong>Execution Runtime</strong></td>
                     <td>Native C# / Blazor WebAssembly &amp; Server</td>
                     <td>JavaScript / TypeScript V8</td>
-                    <td>Strong typing, shared backend models, zero serialization overhead</td>
+                    <td>Strong typing and shared backend models; no JSON contract between grid and app code</td>
                 </tr>
                 <tr>
                     <td><strong>Sparkline Footprint</strong></td>
                     <td>Lightweight Pure SVG polyline</td>
-                    <td>AG Charts JS Module (~300 KB)</td>
-                    <td>Zero third-party JavaScript asset payload</td>
+                    <td>AG Charts JavaScript module</td>
+                    <td>No third-party charting script</td>
                 </tr>
                 <tr>
                     <td><strong>Tree Data Binding</strong></td>
@@ -647,9 +647,9 @@
                 </tr>
                 <tr>
                     <td><strong>100k Rows Memory</strong></td>
-                    <td>Recycled DOM viewport + buffer (~18 elements)</td>
                     <td>Recycled DOM viewport + buffer</td>
-                    <td>Consistent sub-millisecond scrolling latency</td>
+                    <td>Recycled DOM viewport + buffer</td>
+                    <td>DOM size fixed at the visible window; scroll latency not measured</td>
                 </tr>
             </tbody>
         </table>
