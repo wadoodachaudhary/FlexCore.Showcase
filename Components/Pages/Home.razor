@@ -9,7 +9,7 @@
     <div class="top-hero-compact">
         <div class="hero-tagline-badge">
             <span class="badge-pulse"></span>
-            <span>FlexCore v0.2.31 Enterprise Suite &bull; .NET 10 &bull; 100% Pure C# &amp; SVG &bull; Zero JavaScript Overhead</span>
+            <span>FlexCore v0.2.31 Enterprise Suite &bull; .NET 10 &bull; C# and SVG rendering &bull; No npm or third-party JavaScript</span>
         </div>
         <h1 class="hero-oneliner">
             High-throughput enterprise Blazor data grid with sub-millisecond 60 FPS virtualization, instant in-grid editing, and native ClosedXML Excel export.
@@ -127,7 +127,7 @@
                             <span class="perf-badge-icon">⌨️</span>
                             <div class="perf-badge-text">
                                 <strong>Instant In-Grid Typing</strong>
-                                <span>Click any Estimate cell to type directly — zero JS latency</span>
+                                <span>Click any Estimate cell to type directly — keystrokes stay in the browser until commit</span>
                             </div>
                         </div>
                         <div class="perf-badge-item">
@@ -491,9 +491,9 @@
 
             <div class="pillar-card">
                 <div class="pillar-icon purple">🛡️</div>
-                <h3 class="pillar-title">Zero JavaScript Dependencies</h3>
+                <h3 class="pillar-title">No Third-Party JavaScript</h3>
                 <p class="pillar-desc">
-                    Built 100% in C# and pure SVG. No npm packages, no webpack pipelines, and no fragile JS-interop serialization bottlenecks to slow down your circuits.
+                    Rendering is C# and SVG. No npm packages or webpack. The library ships its own interop scripts for focus, scrolling and clipboard, loaded on demand.
                 </p>
             </div>
 
@@ -554,7 +554,7 @@
                 <tbody>
                     <tr>
                         <td><strong>Core Engine</strong></td>
-                        <td class="col-flexcore">100% Pure C# &amp; SVG</td>
+                        <td class="col-flexcore">C# &amp; SVG rendering, own interop scripts</td>
                         <td>Wrapped JavaScript (npm)</td>
                         <td>Basic HTML5 Elements</td>
                     </tr>
@@ -1176,7 +1176,7 @@
             </Template>
         </GridColumn>
 
-        <!-- ── IN-GRID FAST TYPING CELL (Direct cell typing with zero JS lag) ── -->
+        <!-- ── IN-GRID FAST TYPING CELL (Typed in the browser, committed on blur) ── -->
         <GridColumn Field=""EstimateAmount"" HeaderText=""Estimate (Fast Typing)"" Width=""140px""
                     Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right""
                     AllowEditing=""true"" SelectAllOnEdit=""true"" />
