@@ -1,8 +1,10 @@
 @page "/demo/grid"
+@page "/demo/grid/radzen-comparison"
+@* Retitled 2026-10-06 to match the site nav; copy unchanged. *@
 
-<PageTitle>Grid — FlexCore</PageTitle>
+<PageTitle>Data Grid — FlexCore Showcase</PageTitle>
 
-<h1>GridControl</h1>
+<h1>Data Grid</h1>
 <p>Sortable, filterable, groupable data grid. Click a header to sort, drag to reorder, right-click for menu.</p>
 
 <div class="demo-frame">
@@ -28,19 +30,13 @@
     </GridControl>
 </div>
 
-<h2>Flagship Enterprise Showcase</h2>
+<h2>Grid pages</h2>
+@* Built from SiteNav so this list and the Data Grid menu cannot disagree. *@
 <ul>
-    <li><a href="/demo/grid/ag-grid-showcase"><strong>AG Grid Showcase (4-in-1 Suite)</strong> — 100k Performance, Live Finance Tickers &amp; Sparklines, HR Tree Directory, and Inventory Master-Detail</a></li>
-    <li><a href="/demo/grid/enterprise-suite">Enterprise Grid Suite (ClosedXML Excel Export &amp; Checkbox Filters)</a></li>
-    <li><a href="/demo/grid/virtualization-bench">50K Row Virtualization &amp; Multi-Edit Batching</a></li>
-</ul>
-
-<h2>Other Grid Demos</h2>
-<ul>
-    <li><a href="/demo/grid/reordering">Reordering Grid</a></li>
-    <li><a href="/demo/grid/assembly">Assembly</a></li>
-    <li><a href="/demo/grid/vendor-prices">Vendor Prices</a></li>
-    <li><a href="/demo/grid/items">Items Catalog</a></li>
+    @foreach (var link in SiteNav.LinksOf("Data Grid"))
+    {
+        <li><a href="@link.Href">@link.Text</a></li>
+    }
 </ul>
 
 <h2>Markup</h2>

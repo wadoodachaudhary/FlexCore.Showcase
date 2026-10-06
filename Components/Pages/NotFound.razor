@@ -1,5 +1,13 @@
-﻿@page "/not-found"
+@page "/not-found"
 @layout MainLayout
 
 <h3>Not Found</h3>
-<p>Sorry, the content you are looking for does not exist.</p>
+<p>That page does not exist. Pages that moved keep their old address, so this is usually a typo.</p>
+<ul>
+    @foreach (var g in SiteNav.FooterGroups)
+    {
+        <li><a href="@g.Href">@g.Label</a></li>
+    }
+    <li><a href="components">All components</a></li>
+    <li><a href="get-started">Get Started</a></li>
+</ul>

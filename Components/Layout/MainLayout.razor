@@ -106,11 +106,10 @@
                 <strong>FlexCore</strong> &bull; Enterprise Blazor UI Suite for .NET 10 &bull; C# and SVG rendering &bull; No npm or third-party JavaScript
             </div>
             <div class="footer-right">
-                <a href="components">Components</a>
-                <a href="demo/grid">Data Grid</a>
-                <a href="demo/charts">Charts</a>
-                <a href="demo/reports/model-costs">Reports</a>
-                <a href="demo/counterparts">VB6 Migration</a>
+                @foreach (var g in SiteNav.FooterGroups)
+                {
+                    <a href="@g.Href">@g.Label</a>
+                }
                 <a href="get-started">Get Started</a>
                 <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank">GitHub</a>
             </div>
@@ -129,70 +128,8 @@
 @code {
     [Inject] private NavigationManager Nav { get; set; } = default!;
 
-    private sealed record NavItem(string Text, string? Href);           // Href null = sub-heading
-    private sealed record NavGroup(string Label, string Icon, string? Href, string AllLabel, NavItem[] Items);
+    // Nav data lives in Components/Shared/SiteNav.cs (shared with the footer, drawer and overview pages).
+    private static NavGroup[] _groups => SiteNav.Groups;
 
-    // One entry per product area. Keep labels to one or two words; the dropdown carries the detail.
-    private static readonly NavGroup[] _groups =
-    {
-        new("Components", "bi-collection", "components", "All components (catalog)", new NavItem[]
-        {
-            new("Data management", "components#cat-data"), new("Data visualization", "components#cat-viz"),
-            new("Inputs & editors", "components#cat-inputs"), new("Dropdowns & selectors", "components#cat-dropdowns"),
-            new("Buttons & actions", "components#cat-buttons"), new("Forms & validation", "components#cat-forms"),
-            new("Layout & workspace", "components#cat-layout"), new("Navigation & commands", "components#cat-nav"),
-            new("Feedback & notifications", "components#cat-feedback"), new("Scheduling & calendars", "components#cat-scheduling"),
-            new("File viewers & editors", "components#cat-files"), new("Diagrams & workflows", "components#cat-diagrams"),
-            new("Interactive AI & assist", "components#cat-ai"),
-        }),
-        new("Data Grid", "bi-grid-3x3-gap-fill", "demo/grid", "Grid overview", new NavItem[]
-        {
-            new("AG Grid 4-in-1 suite", "demo/grid/ag-grid-showcase"),
-            new("Enterprise grid suite", "demo/grid/enterprise-suite"),
-            new("Advanced grid", "demo/grid/advanced"),
-            new("Server-side provider grid", "demo/grid/provider-enterprise"),
-            new("Column virtualization", "demo/grid/column-virtualization"),
-            new("Column reordering", "demo/grid/reordering"),
-            new("Data control", "demo/data-control"),
-            new("Pivot formulas", "demo/pivot-formulas"),
-            new("TreeGrid", "demo/tree/tree-load-bench"),
-            new("TreeView explorer", "demo/tree/treeview-explorer"),
-        }),
-        new("Charts", "bi-bar-chart-line", "demo/charts", "Charts overview", new NavItem[]
-        {
-            new("Advanced charts", "demo/advanced-charts"),
-            new("COVID-19 Sunburst", "demo/charts/sunburst"),
-        }),
-        new("Reports", "bi-file-earmark-spreadsheet", "demo/reports/model-costs", "Report viewer (Crystal XML)", new NavItem[]
-        {
-            new("PDF viewer and spreadsheet", "demo/counterparts"),
-        }),
-        new("VB6 Migration", "bi-ui-checks", "demo/counterparts", "", Array.Empty<NavItem>()),
-        new("Benchmarks", "bi-speedometer2", null, "", new NavItem[]
-        {
-            new("Grid", null),
-            new("Virtualization, 100K rows", "demo/grid/virtualization-bench"),
-            new("Row selection, 50K rows", "demo/grid/row-selection-50k"),
-            new("Column swap", "demo/grid/column-swap"),
-            new("Edit items against DB", "demo/grid/edit-items-db"),
-            new("Items provider, SQLite", "demo/grid/items-provider-db"),
-            new("FDB grid veto", "demo/grid/fdbgrid-veto"),
-            new("Blazor optimizer", "demo/grid/blazor-optimizer"),
-            new("Picklist churn", "demo/grid/picklist-churn"),
-            new("PM entry", "demo/grid/pm-entry"),
-            new("User permission lists", "demo/grid/userperms-lists"),
-            new("Radzen comparison", "demo/grid/radzen-comparison"),
-            new("Tree and workspace", null),
-            new("TreeGrid load", "demo/tree/tree-load-bench"),
-            new("Page control", "demo/workspace/page-control-bench"),
-        }),
-    };
-
-    // A group is active when the current path is one of its links (query and fragment ignored).
-    private bool IsActive(NavGroup g)
-    {
-        var path = Nav.ToBaseRelativePath(Nav.Uri).Split('?')[0].Split('#')[0].TrimEnd('/');
-        if (g.Href is not null && path == g.Href.Split('#')[0]) return true;
-        return g.Items.Any(i => i.Href is not null && path == i.Href.Split('#')[0]);
-    }
+    private bool IsActive(NavGroup g) => SiteNav.IsActive(g, Nav.ToBaseRelativePath(Nav.Uri));
 }

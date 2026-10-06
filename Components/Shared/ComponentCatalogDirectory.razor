@@ -261,21 +261,20 @@
     private readonly DirectoryItem[] _dataManagement =
     [
         new("grid", "Data Grid", "demo/grid"),
-        new("ag-grid", "AG Grid (4-in-1 Suite)", "demo/grid/ag-grid-showcase"),
+        new("ag-grid", "Four Grid Scenarios", "demo/grid/scenarios"),
         new("tree-grid", "Tree Grid", "demo/tree/tree-load-bench"),
         new("pivot", "Pivot Table", "demo/pivot-formulas"),
         new("data-control", "Data Control", "demo/data-control"),
-        new("virtualization", "50K Virtualization", "demo/grid/virtualization-bench"),
-        new("selection", "50K Row Selection", "demo/grid/row-selection-50k"),
+        new("virtualization", "Scroll vs Paging", "demo/grid/virtualization-bench"),
+        new("selection", "50k Rows", "demo/grid/row-selection-50k"),
         new("frozen", "Frozen Columns", "demo/grid/advanced"),
         new("col-virt", "Column Virtualization", "demo/grid/column-virtualization"),
         new("col-swap", "Dynamic Column Swap", "demo/grid/column-swap"),
         new("batch-edit", "In-Place Batch Edit", "demo/grid/edit-items-db"),
-        new("sqlite", "SQLite ItemsProvider", "demo/grid/items-provider-db"),
-        new("master-detail", "Master-Detail PM Entry", "demo/grid/pm-entry"),
-        new("picklist", "Picklist Churn", "demo/grid/picklist-churn"),
-        new("veto", "Veto Selection & Dirty", "demo/grid/fdbgrid-veto"),
-        new("optimizer", "Server Optimizer", "demo/grid/blazor-optimizer"),
+        new("sqlite", "On-Demand Items Provider", "demo/grid/items-provider-db"),
+        new("master-detail", "Typing Modes", "demo/grid/typing-modes"),
+        new("picklist", "Dynamic Columns", "demo/grid/dynamic-columns"),
+        new("veto", "Unsaved-Row Lock", "demo/grid/unsaved-row-lock"),
         new("dual-list", "Dual-List Transfer", "demo/grid/userperms-lists"),
         new("reorder", "Reordering Grid", "demo/grid/reordering"),
         new("pager", "Pager Control", "demo/grid")
@@ -377,7 +376,7 @@
         new("autocomplete", "AutoComplete", "demo/counterparts"),
         new("listbox", "ListBox", "demo/counterparts"),
         new("dual-list", "MultiSelect Dual List", "demo/grid/userperms-lists"),
-        new("picklist", "Picklist Dropdown", "demo/grid/picklist-churn")
+        new("picklist", "Picklist Dropdown", "demo/grid/dynamic-columns")
     ];
 
     private readonly DirectoryItem[] _navigation =
