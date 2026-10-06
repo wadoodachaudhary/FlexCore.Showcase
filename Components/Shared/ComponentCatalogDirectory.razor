@@ -74,7 +74,7 @@
         <div class="directory-col">
             @if (MatchesCategory("DATA MANAGEMENT", _dataManagement))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-data">
                     <h3 class="cat-title">DATA MANAGEMENT</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_dataManagement))
@@ -87,7 +87,7 @@
 
             @if (MatchesCategory("FILE VIEWERS & EDITORS", _fileViewers))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-files">
                     <h3 class="cat-title">FILE VIEWERS &amp; EDITORS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_fileViewers))
@@ -100,7 +100,7 @@
 
             @if (MatchesCategory("LAYOUT & WORKSPACE", _layoutWorkspace))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-layout">
                     <h3 class="cat-title">LAYOUT &amp; WORKSPACE</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_layoutWorkspace))
@@ -116,7 +116,7 @@
         <div class="directory-col">
             @if (MatchesCategory("DATA VISUALIZATION", _dataVis))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-viz">
                     <h3 class="cat-title">DATA VISUALIZATION</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_dataVis))
@@ -129,7 +129,7 @@
 
             @if (MatchesCategory("DIAGRAMS & WORKFLOWS", _diagrams))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-diagrams">
                     <h3 class="cat-title">DIAGRAMS &amp; WORKFLOWS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_diagrams))
@@ -142,7 +142,7 @@
 
             @if (MatchesCategory("BUTTONS & ACTIONS", _buttonsActions))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-buttons">
                     <h3 class="cat-title">BUTTONS &amp; ACTIONS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_buttonsActions))
@@ -158,7 +158,7 @@
         <div class="directory-col">
             @if (MatchesCategory("SCHEDULING & CALENDARS", _scheduling))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-scheduling">
                     <h3 class="cat-title">SCHEDULING &amp; CALENDARS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_scheduling))
@@ -171,7 +171,7 @@
 
             @if (MatchesCategory("INPUTS & EDITORS", _inputs))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-inputs">
                     <h3 class="cat-title">INPUTS &amp; EDITORS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_inputs))
@@ -184,7 +184,7 @@
 
             @if (MatchesCategory("FORMS & VALIDATION", _forms))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-forms">
                     <h3 class="cat-title">FORMS &amp; VALIDATION</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_forms))
@@ -200,7 +200,7 @@
         <div class="directory-col">
             @if (MatchesCategory("DROPDOWNS & SELECTORS", _dropdowns))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-dropdowns">
                     <h3 class="cat-title">DROPDOWNS &amp; SELECTORS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_dropdowns))
@@ -213,7 +213,7 @@
 
             @if (MatchesCategory("NAVIGATION & COMMANDS", _navigation))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-nav">
                     <h3 class="cat-title">NAVIGATION &amp; COMMANDS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_navigation))
@@ -226,7 +226,7 @@
 
             @if (MatchesCategory("FEEDBACK & NOTIFICATIONS", _feedback))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-feedback">
                     <h3 class="cat-title">FEEDBACK &amp; NOTIFICATIONS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_feedback))
@@ -239,7 +239,7 @@
 
             @if (MatchesCategory("INTERACTIVE AI & ASSIST", _aiAssist))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-ai">
                     <h3 class="cat-title">INTERACTIVE AI &amp; ASSIST</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_aiAssist))

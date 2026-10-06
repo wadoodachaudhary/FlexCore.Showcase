@@ -17,29 +17,48 @@
             </a>
         </div>
 
-        <nav class="top-nav-menu">
-            <NavLink class="nav-menu-item" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door"></span> Overview
-            </NavLink>
-            <NavLink class="nav-menu-item" href="demo/grid/ag-grid-showcase">
-                <span class="bi bi-grid-3x3-gap-fill"></span> AG Grid (4-in-1)
-            </NavLink>
-            <NavLink class="nav-menu-item" href="demo/charts">
-                <span class="bi bi-bar-chart-line"></span> Charts
-            </NavLink>
-            <NavLink class="nav-menu-item" href="demo/charts/sunburst">
-                <span class="bi bi-pie-chart-fill"></span> Sunburst
-            </NavLink>
-            <NavLink class="nav-menu-item" href="demo/reports/model-costs">
-                <span class="bi bi-file-earmark-spreadsheet"></span> Reports
-            </NavLink>
-            <NavLink class="nav-menu-item" href="demo/counterparts">
-                <span class="bi bi-ui-checks"></span> Dedicated Controls
-            </NavLink>
-            <NavLink class="nav-menu-item" href="components">
-                <span class="bi bi-collection"></span> All Components
-            </NavLink>
-        </nav>
+        @* Desktop nav is FlexCore's own MenuBarControl + MenuDropDownControl (dogfooding rule, 2026-10-06).
+           Items are plain <a role="menuitem"> so they stay real links (new tab, crawlers); the library's
+           keyboard script already treats any role="menuitem" as a menu item. Groups live in @code so the
+           phone drawer below renders the same list. *@
+        <div class="top-nav-menu">
+            <MenuBarControl CssClass="site-menubar">
+                @foreach (var g in _groups)
+                {
+                    @if (g.Items.Length == 0)
+                    {
+                        <NavLink class="nav-menu-item" href="@g.Href"><span class="bi @g.Icon"></span> @g.Label</NavLink>
+                    }
+                    else
+                    {
+                        <MenuDropDownControl CssClass="@(IsActive(g) ? "site-dd active" : "site-dd")"
+                                             TriggerCssClass="nav-menu-item"
+                                             PanelCssClass="@(g.Items.Length > 8 ? "site-panel wide" : "site-panel")">
+                            <TriggerContent>
+                                <span class="bi @g.Icon"></span> @g.Label <span class="bi bi-chevron-down nav-caret"></span>
+                            </TriggerContent>
+                            <ChildContent>
+                                @if (g.Href is not null)
+                                {
+                                    <a class="nav-dd-link nav-dd-all" role="menuitem" href="@g.Href">@g.AllLabel</a>
+                                }
+                                @foreach (var it in g.Items)
+                                {
+                                    @if (it.Href is null)
+                                    {
+                                        <div class="nav-dd-head">@it.Text</div>
+                                    }
+                                    else
+                                    {
+                                        <a class="nav-dd-link" role="menuitem" href="@it.Href">@it.Text</a>
+                                    }
+                                }
+                            </ChildContent>
+                        </MenuDropDownControl>
+                    }
+                }
+            </MenuBarControl>
+        </div>
 
         <div class="top-nav-actions">
             <a href="get-started" class="btn-nav-primary">
@@ -48,8 +67,34 @@
             <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" class="btn-nav-icon" title="View Source on GitHub">
                 <span class="bi bi-github"></span>
             </a>
+            @* Phone: no FlexCore off-canvas control exists yet, so this is a checkbox-toggled drawer. *@
+            <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Open menu" />
+            <label for="nav-toggle" class="btn-nav-icon nav-burger" title="Menu"><span class="bi bi-list"></span></label>
         </div>
     </header>
+
+    <nav class="nav-drawer" aria-label="Primary, mobile">
+        @foreach (var g in _groups)
+        {
+            @if (g.Items.Length == 0)
+            {
+                <a class="nav-drawer-top" href="@g.Href"><span class="bi @g.Icon"></span> @g.Label</a>
+            }
+            else
+            {
+                <details class="nav-drawer-group" open="@IsActive(g)">
+                    <summary><span class="bi @g.Icon"></span> @g.Label</summary>
+                    @if (g.Href is not null) { <a class="nav-drawer-link" href="@g.Href">@g.AllLabel</a> }
+                    @foreach (var it in g.Items)
+                    {
+                        @if (it.Href is null) { <div class="nav-drawer-head">@it.Text</div> }
+                        else { <a class="nav-drawer-link" href="@it.Href">@it.Text</a> }
+                    }
+                </details>
+            }
+        }
+        <a class="nav-drawer-top" href="get-started"><span class="bi bi-rocket-takeoff"></span> Quick Start</a>
+    </nav>
 
     <main class="main-body-container">
         @Body
@@ -61,11 +106,11 @@
                 <strong>FlexCore</strong> &bull; Enterprise Blazor UI Suite for .NET 10 &bull; C# and SVG rendering &bull; No npm or third-party JavaScript
             </div>
             <div class="footer-right">
-                <a href="">Overview</a>
-                <a href="components">All Components</a>
-                <a href="demo/grid/ag-grid-showcase">AG Grid</a>
-                <a href="demo/charts/sunburst">COVID-19 Sunburst</a>
+                <a href="components">Components</a>
+                <a href="demo/grid">Data Grid</a>
+                <a href="demo/charts">Charts</a>
                 <a href="demo/reports/model-costs">Reports</a>
+                <a href="demo/counterparts">VB6 Migration</a>
                 <a href="get-started">Get Started</a>
                 <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank">GitHub</a>
             </div>
@@ -80,3 +125,74 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    [Inject] private NavigationManager Nav { get; set; } = default!;
+
+    private sealed record NavItem(string Text, string? Href);           // Href null = sub-heading
+    private sealed record NavGroup(string Label, string Icon, string? Href, string AllLabel, NavItem[] Items);
+
+    // One entry per product area. Keep labels to one or two words; the dropdown carries the detail.
+    private static readonly NavGroup[] _groups =
+    {
+        new("Components", "bi-collection", "components", "All components (catalog)", new NavItem[]
+        {
+            new("Data management", "components#cat-data"), new("Data visualization", "components#cat-viz"),
+            new("Inputs & editors", "components#cat-inputs"), new("Dropdowns & selectors", "components#cat-dropdowns"),
+            new("Buttons & actions", "components#cat-buttons"), new("Forms & validation", "components#cat-forms"),
+            new("Layout & workspace", "components#cat-layout"), new("Navigation & commands", "components#cat-nav"),
+            new("Feedback & notifications", "components#cat-feedback"), new("Scheduling & calendars", "components#cat-scheduling"),
+            new("File viewers & editors", "components#cat-files"), new("Diagrams & workflows", "components#cat-diagrams"),
+            new("Interactive AI & assist", "components#cat-ai"),
+        }),
+        new("Data Grid", "bi-grid-3x3-gap-fill", "demo/grid", "Grid overview", new NavItem[]
+        {
+            new("AG Grid 4-in-1 suite", "demo/grid/ag-grid-showcase"),
+            new("Enterprise grid suite", "demo/grid/enterprise-suite"),
+            new("Advanced grid", "demo/grid/advanced"),
+            new("Server-side provider grid", "demo/grid/provider-enterprise"),
+            new("Column virtualization", "demo/grid/column-virtualization"),
+            new("Column reordering", "demo/grid/reordering"),
+            new("Data control", "demo/data-control"),
+            new("Pivot formulas", "demo/pivot-formulas"),
+            new("TreeGrid", "demo/tree/tree-load-bench"),
+            new("TreeView explorer", "demo/tree/treeview-explorer"),
+        }),
+        new("Charts", "bi-bar-chart-line", "demo/charts", "Charts overview", new NavItem[]
+        {
+            new("Advanced charts", "demo/advanced-charts"),
+            new("COVID-19 Sunburst", "demo/charts/sunburst"),
+        }),
+        new("Reports", "bi-file-earmark-spreadsheet", "demo/reports/model-costs", "Report viewer (Crystal XML)", new NavItem[]
+        {
+            new("PDF viewer and spreadsheet", "demo/counterparts"),
+        }),
+        new("VB6 Migration", "bi-ui-checks", "demo/counterparts", "", Array.Empty<NavItem>()),
+        new("Benchmarks", "bi-speedometer2", null, "", new NavItem[]
+        {
+            new("Grid", null),
+            new("Virtualization, 100K rows", "demo/grid/virtualization-bench"),
+            new("Row selection, 50K rows", "demo/grid/row-selection-50k"),
+            new("Column swap", "demo/grid/column-swap"),
+            new("Edit items against DB", "demo/grid/edit-items-db"),
+            new("Items provider, SQLite", "demo/grid/items-provider-db"),
+            new("FDB grid veto", "demo/grid/fdbgrid-veto"),
+            new("Blazor optimizer", "demo/grid/blazor-optimizer"),
+            new("Picklist churn", "demo/grid/picklist-churn"),
+            new("PM entry", "demo/grid/pm-entry"),
+            new("User permission lists", "demo/grid/userperms-lists"),
+            new("Radzen comparison", "demo/grid/radzen-comparison"),
+            new("Tree and workspace", null),
+            new("TreeGrid load", "demo/tree/tree-load-bench"),
+            new("Page control", "demo/workspace/page-control-bench"),
+        }),
+    };
+
+    // A group is active when the current path is one of its links (query and fragment ignored).
+    private bool IsActive(NavGroup g)
+    {
+        var path = Nav.ToBaseRelativePath(Nav.Uri).Split('?')[0].Split('#')[0].TrimEnd('/');
+        if (g.Href is not null && path == g.Href.Split('#')[0]) return true;
+        return g.Items.Any(i => i.Href is not null && path == i.Href.Split('#')[0]);
+    }
+}
