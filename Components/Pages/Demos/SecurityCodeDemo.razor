@@ -1,0 +1,133 @@
+@page "/demo/security-code"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-12: new page on FeatureDemoLayout; one example. Facts checked against SecurityCodeControl.razor(.css) and FlexControlBase.cs
+   (FlexCore 0.2.48). The control has no focus auto-advance and no paste handling: the page says so rather than implying it (tracker SC-253). *@
+
+<PageTitle>Security code — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Security code" Category="Components" ControlName="SecurityCodeControl"
+                   Tagline="One box per character for verification codes and PINs, with a callback when the last box is filled."
+                   SourcePath="SecurityCodeControl.razor">
+    <Overview>
+        <p>
+            <code>SecurityCodeControl</code> renders <code>Length</code> single-character inputs and joins them into one string bound through
+            <code>Value</code>. <code>OnComplete</code> fires when every box holds a character. <code>Type="Numeric"</code> rejects anything
+            but digits and uses <code>type="tel"</code>, so phones show the number pad. Each box is an ordinary input: Tab or a click moves
+            between them, a character fills a box and Backspace clears it. The control does not move focus on its own and does not split a
+            pasted code across the boxes.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="verify" Title="Verification code" RazorCode="@Code.Verify" CSharpCode="@Code.VerifyCs">
+            <Description><p>Six digits, checked in <code>OnComplete</code>. Fill the boxes in order with Tab between them; the demo code is <code>492018</code>. Clear resets the bound value, which empties every box.</p></Description>
+            <Demo>
+                <p class="lead">We sent a code to +1 (425) ••• 0142. Enter it to continue.</p>
+                <div class="code-row">
+                    <SecurityCodeControl @bind-Value="_code" Length="6" OnComplete="Check" />
+                    <ButtonControl CssClass="btn-sm" OnClick="Clear">Clear</ButtonControl>
+                </div>
+                <p class="result @(_accepted == true ? "ok" : _accepted == false ? "bad" : null)">@Status</p>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="SecurityCodeControl parameters" Rows="Vocab.Params" />
+        <ApiTable Kind="ApiKind.Properties" Title="SecurityCodeType (nested enum)" Rows="Vocab.Types" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <p>Colors are fixed in the control's stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
+    </Vocabulary>
+
+    <Accessibility>
+        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
+        <ul>
+            <li>The boxes are plain inputs with <code>maxlength="1"</code> and no accessible name of their own. Put a visible instruction before the control, as above.</li>
+            <li>The host is a <code>&lt;div&gt;</code> without a role; unmatched attributes such as <code>id</code> or <code>data-*</code> land on it.</li>
+            <li>Numeric boxes are <code>type="tel"</code>, alphanumeric boxes <code>type="text"</code>. A non-digit typed into a numeric box is ignored.</li>
+            <li>Clearing a middle box leaves a gap in <code>Value</code> (a space), so <code>OnComplete</code> waits until that box is filled again.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>Other small inputs: <a href="demo/new-components">UI elements</a>. Numbers by dragging: <a href="demo/sliders">Sliders</a>.</li>
+            <li>A password box with reveal: <code>TextBoxControl</code> in the <a href="demo/counterparts?tab=forms">Control tour</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    private const string Expected = "492018";
+    private string? _code = "";
+    private bool? _accepted;
+
+    private string Status => _accepted switch
+    {
+        true => "Code accepted. Signing you in…",
+        false => "That code does not match. Clear and try again.",
+        _ => $"{(_code ?? "").Replace(" ", "").Length} of 6 digits entered",
+    };
+
+    private void Check(string code) => _accepted = code == Expected;
+
+    private void Clear()
+    {
+        _code = "";
+        _accepted = null;
+    }
+
+    // Vocabulary rows, one per public member (0.2.48). Base-class parameters marked (base).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Params =
+        {
+            new("Value", "The joined characters. Two-way with <code>@bind-Value</code>; a cleared middle box leaves a space.", "string?", "null"),
+            new("ValueChanged", "Fires after every keystroke that changes a box.", "EventCallback&lt;string?&gt;"),
+            new("Length", "Number of boxes.", "int", "6"),
+            new("Type", "<code>Numeric</code> accepts digits only and renders <code>type=\"tel\"</code>; <code>AlphaNumeric</code> accepts any character.", "SecurityCodeControl.SecurityCodeType", "Numeric"),
+            new("OnComplete", "Fires with the full code once every box is filled, after <code>ValueChanged</code>.", "EventCallback&lt;string&gt;"),
+            new("Disabled", "Disables every box and greys the host. The base <code>Enabled</code> is not read by this control.", "bool", "false"),
+            new("CssClass / Style (base)", "On the host element. The base <code>Visible</code> is not applied.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the host <code>&lt;div&gt;</code>, not to the boxes.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Types =
+        {
+            new("Numeric", "Digits 0–9; other characters are ignored.", "", null),
+            new("AlphaNumeric", "Any single character per box; no case folding.", "", null),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-security-code-host · .disabled", "Inline flex row, 0.5rem gap; <code>disabled</code> greys the boxes and sets <code>cursor: not-allowed</code>."),
+            new("fx-security-code-cell", "Each box: 42×48px, bold 1.25rem text, 2px border; focus turns the border blue with a 3px ring."),
+        };
+        public static readonly ApiRow[] Keys =
+        {
+            new("Tab / Shift+Tab", "Move to the next or previous box. The control does not move focus itself."),
+            new("Character", "Fills the box. In <code>Numeric</code> mode only digits are accepted."),
+            new("Backspace", "Clears the box; focus stays."),
+            new("Arrow keys", "Not handled; the caret moves inside the single-character box."),
+        };
+    }
+
+    private static class Code
+    {
+        public const string Verify = @"<SecurityCodeControl @bind-Value=""_code"" Length=""6"" OnComplete=""Check"" />
+<ButtonControl CssClass=""btn-sm"" OnClick=""Clear"">Clear</ButtonControl>
+<p>@Status</p>";
+        public const string VerifyCs = @"private const string Expected = ""492018"";
+private string? _code = """";
+private bool? _accepted;
+
+private string Status => _accepted switch
+{
+    true  => ""Code accepted. Signing you in…"",
+    false => ""That code does not match. Clear and try again."",
+    _     => $""{(_code ?? """").Replace("" "", """").Length} of 6 digits entered"",
+};
+
+private void Check(string code) => _accepted = code == Expected;
+private void Clear() { _code = """"; _accepted = null; }";
+    }
+}

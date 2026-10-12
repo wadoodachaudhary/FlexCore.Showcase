@@ -112,14 +112,12 @@
     {
         public const string Levels = @"@inject NotificationService Notifications
 
-<ButtonControl CssClass=""btn-success""
-               OnClick=""@(() => Notifications.Success(""Quote 1042 saved"", ""3 lines updated""))"">Save</ButtonControl>
-
-<ButtonControl CssClass=""btn-danger""
-               OnClick=""@(() => Notifications.Error(""Could not save quote 1042"", ""SQL timeout after 30 s""))"">Fail</ButtonControl>
-
-<!-- stays until the user closes it -->
-<ButtonControl OnClick=""@(() => Notifications.Error(""Sync failed"", durationMs: 0))"">Sticky</ButtonControl>";
+<ButtonControl CssClass=""btn-primary"" OnClick=""@(() => Notifications.Info(""File uploaded"", ""report-q3.xlsx, 2.1 MB""))"">Info</ButtonControl>
+<ButtonControl CssClass=""btn-success"" OnClick=""@(() => Notifications.Success(""Quote 1042 saved"", ""3 lines updated""))"">Success</ButtonControl>
+<ButtonControl CssClass=""btn-warning"" OnClick=""@(() => Notifications.Warning(""Price list expires in 3 days"", ""Renew it under Settings, Vendors""))"">Warning</ButtonControl>
+<ButtonControl CssClass=""btn-danger"" OnClick=""@(() => Notifications.Error(""Could not save quote 1042"", ""SQL timeout after 30 s""))"">Error</ButtonControl>
+<ButtonControl CssClass=""btn-outline-primary"" OnClick=""@(() => Notifications.Error(""Sync failed"", ""Stays until you close it"", durationMs: 0))"">Sticky error</ButtonControl>
+<ButtonControl OnClick=""@(() => Notifications.Clear())"">Clear all</ButtonControl>";
         public const string LevelsCs = @"// Program.cs, once:
 builder.Services.AddScoped<NotificationService>();
 

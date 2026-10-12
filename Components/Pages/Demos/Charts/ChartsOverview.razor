@@ -1,13 +1,29 @@
 @page "/demo/charts"
 @using Fx.ControlKit.Charts
 @using FlexCore.Showcase.Services
-@* Retitled 2026-10-06 to match the site nav; copy unchanged. *@
+@using FlexCore.Showcase.Components.Shared
+@* 2026-10-12: wrapped in FeatureDemoLayout as one example (the tabbed gallery, unchanged). "No JavaScript
+   dependencies" reworded per the claims rule. ChartControl parameter table pending (SC-264). *@
 
 <PageTitle>Charts — FlexCore Showcase</PageTitle>
 
-<h1>Charts</h1>
-<p>Pure SVG charting with 30+ visualization types — no JavaScript dependencies. Configure via <code>ChartType</code> enum and <code>Series</code> data binding.</p>
+<FeatureDemoLayout Title="Charts" Category="Charts" CategoryHref="demo/charts" ControlName="ChartControl"
+                   Tagline="One control, thirty-plus chart types, drawn in SVG from C#."
+                   SourcePath="Charts/ChartControl.razor">
+    <Overview>
+        <p>
+            <code>ChartControl</code> takes a <code>ChartType</code> and a list of <code>ChartSeries</code> and draws the result as SVG;
+            there is no npm package or third-party script behind it. The gallery groups the types by the question they answer:
+            comparison, trend, part-to-whole, distribution, correlation, multivariate, single values, statistics, project, heatmap and
+            sparklines. Candlestick, OHLC, bullet, range, Sankey and the gauge family are on <a href="demo/advanced-charts">Financial &amp; gauges</a>;
+            the drill-down sunburst has <a href="demo/charts/sunburst">its own page</a>.
+        </p>
+    </Overview>
 
+    <Examples>
+        <DemoExample Id="gallery" Title="Gallery by purpose" RazorCode="@Code.Gallery" CSharpCode="@Code.GalleryCs">
+            <Description><p>Every chart here is the same control with a different <code>Type</code>. Series data is bound; titles, heights and palettes are parameters.</p></Description>
+            <Demo>
 <TabControl>
     <TabItem HeaderText="Comparison">
         <h2>Bar Charts</h2>
@@ -207,8 +223,36 @@
         </div>
     </TabItem>
 </TabControl>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <p class="fd-pending"><code>ChartControl</code>, <code>ChartSeries</code> and <code>ChartDataPoint</code> tables are still to be written from <code>Charts/ChartControl.razor</code>. Tracker SC-264.</p>
+    </Vocabulary>
+
+    <Related>
+        <ul>
+            <li><a href="demo/advanced-charts">Financial &amp; gauges</a>: candlestick, OHLC, bullet, range, Sankey, radial and linear gauges.</li>
+            <li><a href="demo/charts/sunburst">Sunburst</a>: drill-down hierarchy on a real dataset.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
 
 @code {
+    private static class Code
+    {
+        public const string Gallery = @"@* four of the gallery's charts; every tab repeats this pattern inside a DashboardLayoutControl *@
+<ChartControl Type=""ChartType.Bar"" Title=""Vertical Bar"" Height=""250px"" Series=""_series"" />
+<ChartControl Type=""ChartType.Line"" Title=""Line Chart"" Height=""250px"" Series=""_series"" />
+<ChartControl Type=""ChartType.Donut"" Title=""Donut Chart"" Height=""280px"" InnerRadius=""0.55"" Series=""_pie"" />
+<ChartControl Type=""ChartType.Sparkline"" Width=""120px"" Height=""24px"" Series=""_spark"" />";
+        public const string GalleryCs = @"private readonly List<ChartSeries> _series = new()
+{
+    new() { Name = ""2024"", DataPoints = new() { new(""Q1"", 120), new(""Q2"", 180), new(""Q3"", 240), new(""Q4"", 310) } },
+};";
+    }
+
     List<ChartSeries> _groupedBarSeries = new()
     {
         new() { Name = "2024", DataPoints = new() { new("Q1", 120), new("Q2", 180), new("Q3", 240), new("Q4", 310) } },

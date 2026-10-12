@@ -27,11 +27,17 @@ public static class SiteNav
             new("Floating action button", "demo/fab"),
             new("Dialogs", "demo/dialog"),
             new("Toasts", "demo/notifications"),
-            new("UI elements", "demo/new-components"),
+            new("Sliders", "demo/sliders"),
+            new("Security code", "demo/security-code"),
+            new("Date & time", "demo/date-time"),
             new("Control tour", "demo/counterparts"),          // 7-tab sampler; split in phase 2
             new("Layout & navigation", null),
             new("Page layouts", "demo/layout"),
+            new("Tabs & accordion", "demo/tabs-accordion"),
             new("Tree view", "demo/tree/treeview-explorer"),
+            new("Display", null),
+            new("UI elements", "demo/new-components"),
+            new("Barcodes & QR", "demo/barcodes"),
         }),
         new("Data Grid", "bi-grid-3x3-gap-fill", "demo/grid", "Grid overview", new NavItem[]
         {

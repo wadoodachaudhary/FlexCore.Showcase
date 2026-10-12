@@ -1,103 +1,76 @@
 @page "/demo/advanced-charts"
 @rendermode InteractiveServer
 @using Fx.ControlKit.Charts
-@* Retitled 2026-10-06 to match the site nav; copy unchanged. *@
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-12: moved onto FeatureDemoLayout; six Bootstrap cards became three examples with the same charts.
+   Parameter table pending (SC-264). *@
 
 <PageTitle>Financial &amp; gauges — FlexCore Showcase</PageTitle>
 
-<div class="container-fluid py-3">
-    <div class="mb-4">
-        <h2>Financial &amp; gauges</h2>
-        <p class="text-muted">
-            Explore newly ported chart series types in FlexCore — Financial Candlestick, OHLC, Performance Bullet Charts, Range Intervals, Sankey Flow Diagrams, and Radial/Linear Gauges (rendered via pure SVG with zero external dependencies).
+<FeatureDemoLayout Title="Financial &amp; gauges" Category="Charts" CategoryHref="demo/charts" ControlName="ChartControl"
+                   Tagline="Candlestick and OHLC, bullet and range comparisons, a Sankey flow, and two gauges."
+                   SourcePath="Charts/ChartControl.razor">
+    <Overview>
+        <p>
+            The same <code>ChartControl</code> as the <a href="demo/charts">gallery</a>, with the types a finance or operations screen
+            needs. Financial series use <code>ChartDataPoint.Financial</code> for open, high, low and close; the others bind ordinary series.
         </p>
-    </div>
+    </Overview>
 
-    <div class="row g-4">
-        <!-- 1. Candlestick Financial Chart -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white font-monospace">
-                    <strong>1. Candlestick Financial Chart</strong>
+    <Examples>
+        <DemoExample Id="financial" Title="Candlestick and OHLC" RazorCode="@Code.Financial">
+            <Description><p>Both read the same series; <code>Candlestick</code> fills the body, <code>Ohlc</code> draws ticks.</p></Description>
+            <Demo>
+                <div class="two">
+                    <ChartControl Type="ChartType.Candlestick" Title="Candlestick" Series="_candlestickSeries" Height="280px" />
+                    <ChartControl Type="ChartType.Ohlc" Title="OHLC" Series="_candlestickSeries" Height="280px" />
                 </div>
-                <div class="card-body">
-                    <ChartControl Type="ChartType.Candlestick" Series="_candlestickSeries" Height="280px" />
-                </div>
-            </div>
-        </div>
+            </Demo>
+        </DemoExample>
 
-        <!-- 2. OHLC Financial Chart -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white font-monospace">
-                    <strong>2. OHLC Financial Chart</strong>
+        <DemoExample Id="comparisons" Title="Bullet, range and Sankey" RazorCode="@Code.Comparisons">
+            <Description><p><code>Bullet</code> shows actual against target bands, <code>RangeColumn</code> floats a minimum to maximum bar, <code>Sankey</code> draws weighted flows between nodes.</p></Description>
+            <Demo>
+                <div class="three">
+                    <ChartControl Type="ChartType.Bullet" Title="Actual vs target" Series="_bulletSeries" Height="240px" />
+                    <ChartControl Type="ChartType.RangeColumn" Title="Min to max" Series="_rangeSeries" Height="240px" />
+                    <ChartControl Type="ChartType.Sankey" Title="Flow" Series="_sankeySeries" Height="280px" />
                 </div>
-                <div class="card-body">
-                    <ChartControl Type="ChartType.Ohlc" Series="_candlestickSeries" Height="280px" />
-                </div>
-            </div>
-        </div>
+            </Demo>
+        </DemoExample>
 
-        <!-- 3. Bullet Chart (Target vs Actual) -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white font-monospace">
-                    <strong>3. Performance Bullet Chart (Actual vs Target)</strong>
+        <DemoExample Id="gauges" Title="Radial and linear gauges" RazorCode="@Code.Gauges">
+            <Description><p>One series, two gauge types. The standalone <code>ArcGaugeControl</code>, <code>CircularGaugeControl</code>, <code>RadialGaugeControl</code> and <code>LinearGaugeControl</code> are on the <a href="demo/counterparts?tab=charts">Control tour</a>.</p></Description>
+            <Demo>
+                <div class="gauges">
+                    <ChartControl Type="ChartType.RadialGauge" Title="Radial" Series="_gaugeSeries" Height="180px" />
+                    <ChartControl Type="ChartType.LinearGauge" Title="Linear" Series="_gaugeSeries" Height="90px" />
                 </div>
-                <div class="card-body">
-                    <ChartControl Type="ChartType.Bullet" Series="_bulletSeries" Height="240px" />
-                </div>
-            </div>
-        </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-        <!-- 4. Range Column Chart (Min - Max Floating Intervals) -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white font-monospace">
-                    <strong>4. Range Interval Chart (Min - Max Salary / Temp)</strong>
-                </div>
-                <div class="card-body">
-                    <ChartControl Type="ChartType.RangeColumn" Series="_rangeSeries" Height="240px" />
-                </div>
-            </div>
-        </div>
-
-        <!-- 5. Sankey Flow Diagram -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white font-monospace">
-                    <strong>5. Sankey Flow Diagram</strong>
-                </div>
-                <div class="card-body">
-                    <ChartControl Type="ChartType.Sankey" Series="_sankeySeries" Height="280px" />
-                </div>
-            </div>
-        </div>
-
-        <!-- 6. Advanced Gauges (Radial & Linear) -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white font-monospace">
-                    <strong>6. Radial & Linear Gauges</strong>
-                </div>
-                <div class="card-body d-flex flex-column gap-3 align-items-center">
-                    <div class="d-flex gap-4 align-items-center justify-content-center w-100">
-                        <div>
-                            <h6 class="text-muted small text-center">Radial Gauge</h6>
-                            <ChartControl Type="ChartType.RadialGauge" Series="_gaugeSeries" Height="180px" />
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="text-muted small text-center">Linear Gauge</h6>
-                            <ChartControl Type="ChartType.LinearGauge" Series="_gaugeSeries" Height="90px" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    <Vocabulary>
+        <p class="fd-pending"><code>ChartControl</code> and <code>ChartSeries</code> tables are still to be written from source; see the <a href="demo/charts">gallery</a>. Tracker SC-264.</p>
+    </Vocabulary>
+</FeatureDemoLayout>
 
 @code {
+    private static class Code
+    {
+        public const string Financial = @"<ChartControl Type=""ChartType.Candlestick"" Title=""Candlestick"" Series=""_candlestickSeries"" Height=""280px"" />
+<ChartControl Type=""ChartType.Ohlc"" Title=""OHLC"" Series=""_candlestickSeries"" Height=""280px"" />
+
+// one point per bar: label, open, high, low, close
+// ChartDataPoint.Financial(""Jul 1"", open: 100, high: 115, low: 90, close: 108)";
+        public const string Comparisons = @"<ChartControl Type=""ChartType.Bullet"" Title=""Actual vs target"" Series=""_bulletSeries"" Height=""240px"" />
+<ChartControl Type=""ChartType.RangeColumn"" Title=""Min to max"" Series=""_rangeSeries"" Height=""240px"" />
+<ChartControl Type=""ChartType.Sankey"" Title=""Flow"" Series=""_sankeySeries"" Height=""280px"" />";
+        public const string Gauges = @"<ChartControl Type=""ChartType.RadialGauge"" Title=""Radial"" Series=""_gaugeSeries"" Height=""180px"" />
+<ChartControl Type=""ChartType.LinearGauge"" Title=""Linear"" Series=""_gaugeSeries"" Height=""90px"" />";
+    }
+
     private List<ChartSeries> _candlestickSeries = new()
     {
         new ChartSeries("Equities", ChartType.Candlestick, new[]

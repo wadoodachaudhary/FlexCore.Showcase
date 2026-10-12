@@ -8,9 +8,27 @@
 @using Fx.ControlKit.Gantt
 @using Fx.ControlKit.Pdf
 @using Fx.ControlKit.AI
-@* Retitled 2026-10-06 to match the site nav; copy unchanged. *@
+@using FlexCore.Showcase.Components.Shared
+@* 2026-10-12: wrapped in FeatureDemoLayout as one example; the seven workbenches are unchanged and ?tab= still
+   opens one. Phase 2 (SC-028..) splits them into pages; vocabulary pending until then (SC-264). *@
 
 <PageTitle>Control tour — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Control tour" Category="Components"
+                   Tagline="Seven working slices, one per area: forms, selection, charts, docking, Gantt, PDF and an AI prompt.">
+    <Overview>
+        <p>
+            Each tab below is a small working screen built from several controls at once: generated and grouped forms with validation,
+            pickers and selectors, gauges and a stock chart, a dock manager, a Gantt chart, the PDF viewer, and the AI prompt control.
+            Open a tab directly with <code>?tab=forms</code>, <code>selection</code>, <code>charts</code>, <code>docking</code>,
+            <code>gantt</code>, <code>pdf</code> or <code>ai-prompt</code>. These slices will become pages of their own.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="tour" Title="Workbenches">
+            <Description><p>Pick a tab. The status line under the toolbar reports what each control just did.</p></Description>
+            <Demo>
 <div class="counterparts-demo">
     <AppBarControl>
         <StartContent><SvgIconControl Name="sparkles" Size="24px" /><strong>Control tour</strong></StartContent>
@@ -95,6 +113,15 @@
             break;
     }
 </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <p class="fd-pending">Parameter tables arrive with the split into pages. Controls on this tour: <code>FormControl</code>, <code>FormGroupControl</code>, <code>FormItemControl</code>, <code>ValidationTooltipControl</code>, <code>AutoCompleteControl</code>, <code>RadioGroupControl</code>, <code>TimePickerControl</code>, <code>StepperControl</code>, <code>ColorPaletteControl</code>, <code>DropDownListControl</code>, <code>CalendarControl</code>, <code>ArcGaugeControl</code>, <code>CircularGaugeControl</code>, <code>RadialGaugeControl</code>, <code>LinearGaugeControl</code>, <code>StockChartControl</code>, <code>DockManagerControl</code>, <code>GanttControl</code>, <code>PdfViewerControl</code>, <code>AIPromptControl</code>, plus <code>AppBarControl</code>, <code>ToolbarControl</code> and <code>GridLayoutControl</code> for the frame. Tracker SC-264.</p>
+    </Vocabulary>
+</FeatureDemoLayout>
+
 @code {
     private readonly string[] _sections=["Forms","Selection","Charts","Docking","Gantt","PDF","AI prompt"];
     private string _section="Forms",_status="Ready.";

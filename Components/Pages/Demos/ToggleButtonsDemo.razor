@@ -157,9 +157,10 @@
     {
         public const string Toggle = @"<ToggleButtonControl @bind-Selected=""_bold"" IconCss=""bi bi-type-bold"" Title=""Bold"" aria-label=""Bold"" />
 <ToggleButtonControl @bind-Selected=""_italic"" IconCss=""bi bi-type-italic"" Title=""Italic"" aria-label=""Italic"" />
+<ToggleButtonControl @bind-Selected=""_underline"" IconCss=""bi bi-type-underline"" Title=""Underline"" aria-label=""Underline"" />
 <ToggleButtonControl @bind-Selected=""_notify"">Notifications @(_notify ? ""on"" : ""off"")</ToggleButtonControl>
 <ToggleButtonControl Selected=""true"" Enabled=""false"">Locked</ToggleButtonControl>";
-        public const string ToggleCs = @"private bool _bold, _italic, _notify = true;";
+        public const string ToggleCs = @"private bool _bold, _italic, _underline, _notify = true;";
 
         public const string Group = @"<ButtonGroupControl Items=""_alignItems"" @bind-Values=""_align""
                     Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Text alignment"" />

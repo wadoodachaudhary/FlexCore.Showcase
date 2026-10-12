@@ -1,202 +1,107 @@
 @page "/demo/new-components"
 @rendermode InteractiveServer
 @using Fx.ControlKit
-@* Retitled 2026-10-06 to match the site nav; copy unchanged. *@
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-12: moved onto FeatureDemoLayout. The four Bootstrap cards became three examples; the existing
+   demos were kept, a breadcrumb was added (the catalog listed one here), the split button moved to its own
+   page, and copy that made library claims was replaced with neutral sample text. Vocabulary pending (SC-264). *@
 
 <PageTitle>UI elements — FlexCore Showcase</PageTitle>
 
-<div class="container-fluid py-3">
-    <div class="mb-4">
-        <h2>UI elements</h2>
-        <p class="text-muted">
-            Explore newly ported UI components in FlexCore — Badges, Alerts, Skeletons, Rating, Cards, Accordion, Breadcrumbs, Timelines, Carousels, Switches, Sliders, SplitButtons, FABs, QR/Barcodes, Security Code, and TimeSpan Pickers.
+<FeatureDemoLayout Title="UI elements" Category="Components"
+                   Tagline="The small parts: badges, alerts, skeletons, cards, timeline, breadcrumb, switch and rating.">
+    <Overview>
+        <p>
+            Nine small controls that have no page of their own yet, grouped by what they do: status and feedback, content
+            containers, and inputs. Each is shown with the parameters it is usually given. Tables for each control follow later.
         </p>
-    </div>
+    </Overview>
 
-    <div class="row g-4">
-        <!-- 1. Badges & Alerts -->
-        <div class="col-lg-6">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-white font-monospace font-weight-bold">
-                    <strong>1. Badges & Alerts</strong>
+    <Examples>
+        <DemoExample Id="status" Title="Badges, alerts and skeletons">
+            <Description><p><code>BadgeControl</code> takes a <code>Variant</code>, a <code>Size</code>, or <code>IsDot</code> for a status dot. <code>AlertControl</code> is an inline banner with a <code>Severity</code> and an optional close. <code>SkeletonControl</code> holds the place of loading content.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <BadgeControl Text="Primary" Variant="BadgeVariant.Primary" />
+                    <BadgeControl Text="Success" Variant="BadgeVariant.Success" />
+                    <BadgeControl Text="Danger" Variant="BadgeVariant.Danger" />
+                    <BadgeControl Text="Warning" Variant="BadgeVariant.Warning" />
+                    <BadgeControl Text="Info" Variant="BadgeVariant.Info" />
+                    <BadgeControl Text="Dark" Variant="BadgeVariant.Dark" />
+                    <BadgeControl Text="Small" Size="BadgeSize.Small" Variant="BadgeVariant.Secondary" />
+                    <BadgeControl Text="Large" Size="BadgeSize.Large" Variant="BadgeVariant.Primary" />
+                    <BadgeControl IsDot="true" Variant="BadgeVariant.Success" Title="Online" />
                 </div>
-                <div class="card-body d-flex flex-column gap-3">
-                    <div>
-                        <h6 class="text-muted small">Badge Variants & Sizes</h6>
-                        <div class="d-flex gap-2 align-items-center flex-wrap">
-                            <BadgeControl Text="Primary" Variant="BadgeVariant.Primary" />
-                            <BadgeControl Text="Success" Variant="BadgeVariant.Success" />
-                            <BadgeControl Text="Danger" Variant="BadgeVariant.Danger" />
-                            <BadgeControl Text="Warning" Variant="BadgeVariant.Warning" />
-                            <BadgeControl Text="Info" Variant="BadgeVariant.Info" />
-                            <BadgeControl Text="Dark" Variant="BadgeVariant.Dark" />
-                            <BadgeControl Text="Small" Size="BadgeSize.Small" Variant="BadgeVariant.Secondary" />
-                            <BadgeControl Text="Large" Size="BadgeSize.Large" Variant="BadgeVariant.Primary" />
-                            <BadgeControl IsDot="true" Variant="BadgeVariant.Success" Title="Online" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <h6 class="text-muted small">Alert Banners</h6>
-                        <AlertControl Severity="AlertSeverity.Success" Title="Success Alert" Text="Your data model changes have been saved successfully." AllowClose="true" />
-                        <AlertControl Severity="AlertSeverity.Warning" Title="Warning Alert" Text="Your connection is operating on high latency (200ms)." AllowClose="true" />
-                        <AlertControl Severity="AlertSeverity.Error" Title="Error Alert" Text="Failed to sync with upstream server circuit." AllowClose="true" />
-                        <AlertControl Severity="AlertSeverity.Info" Title="Informational" Text="All grid rows are rendered via pure SVG / native Blazor." AllowClose="true" />
-                    </div>
+                <div class="stack mt">
+                    <AlertControl Severity="AlertSeverity.Success" Title="Import finished" Text="1,204 vendor rows loaded; 3 skipped as duplicates." AllowClose="true" />
+                    <AlertControl Severity="AlertSeverity.Warning" Title="Slow connection" Text="Round trips are taking about 200 ms." AllowClose="true" />
+                    <AlertControl Severity="AlertSeverity.Error" Title="Sync failed" Text="The upstream server did not answer." AllowClose="true" />
+                    <AlertControl Severity="AlertSeverity.Info" Title="Scheduled maintenance" Text="Saturday 02:00 to 03:00 UTC." AllowClose="true" />
                 </div>
-            </div>
-        </div>
-
-        <!-- 2. Cards & Accordion -->
-        <div class="col-lg-6">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-white font-monospace font-weight-bold">
-                    <strong>2. Cards & Accordion</strong>
+                <div class="skeletons mt">
+                    <SkeletonControl Variant="SkeletonVariant.Text" />
+                    <SkeletonControl Variant="SkeletonVariant.Text" Animation="SkeletonAnimation.Wave" />
+                    <div class="demo-row"><SkeletonControl Variant="SkeletonVariant.Circular" /><SkeletonControl Variant="SkeletonVariant.Text" Width="140px" /></div>
                 </div>
-                <div class="card-body d-flex flex-column gap-3">
-                    <CardGroupControl>
-                        <CardControl Title="Project Alpha" Subtitle="Active Project" Elevation="2">
-                            <ChildContent>
-                                <p class="m-0">Detailed description for Project Alpha with milestone metrics.</p>
-                            </ChildContent>
-                            <FooterContent>
-                                <BadgeControl Text="In Progress" Variant="BadgeVariant.Success" />
-                            </FooterContent>
-                        </CardControl>
-                        <CardControl Title="Project Beta" Subtitle="Planning Phase" Elevation="2">
-                            <ChildContent>
-                                <p class="m-0">Preliminary architecture specifications and resource allocation.</p>
-                            </ChildContent>
-                            <FooterContent>
-                                <BadgeControl Text="Queued" Variant="BadgeVariant.Warning" />
-                            </FooterContent>
-                        </CardControl>
-                    </CardGroupControl>
+            </Demo>
+        </DemoExample>
 
-                    <div>
-                        <h6 class="text-muted small">Accordion Multi-Section</h6>
-                        <AccordionControl Multiple="true">
-                            <AccordionItemControl Title="System Architecture" InitiallyExpanded="true">
-                                FlexCore provides host-independent, zero-dependency pure Blazor UI controls.
-                            </AccordionItemControl>
-                            <AccordionItemControl Title="Grid Performance">
-                                Features custom row windowing, boundary guards, and client-buffered keyboard entry.
-                            </AccordionItemControl>
-                            <AccordionItemControl Title="Rendering Engine">
-                                Pure SVG graphics with zero JavaScript framework dependencies.
-                            </AccordionItemControl>
-                        </AccordionControl>
-                    </div>
+        <DemoExample Id="content" Title="Cards, timeline and breadcrumb">
+            <Description><p><code>CardGroupControl</code> lays <code>CardControl</code>s out in a responsive grid. <code>TimelineControl</code> lists events with a coloured point per item. <code>BreadCrumbControl</code> takes a list of <code>BreadCrumbItem</code>s; the last one has no link.</p></Description>
+            <Demo>
+                <CardGroupControl>
+                    <CardControl Title="EST-2042 Contoso" Subtitle="Draft" Elevation="2">
+                        <ChildContent><p class="m0">14 lines, last saved today 09:12.</p></ChildContent>
+                        <FooterContent><BadgeControl Text="In progress" Variant="BadgeVariant.Success" /></FooterContent>
+                    </CardControl>
+                    <CardControl Title="EST-2043 Fabrikam" Subtitle="Awaiting approval" Elevation="2">
+                        <ChildContent><p class="m0">22 lines, sent for review yesterday.</p></ChildContent>
+                        <FooterContent><BadgeControl Text="Queued" Variant="BadgeVariant.Warning" /></FooterContent>
+                    </CardControl>
+                </CardGroupControl>
+                <div class="two mt">
+                    <TimelineControl>
+                        <TimelineItemControl Title="Contract signed" Time="09:00" PointColor="BadgeVariant.Success">Initial phase authorised.</TimelineItemControl>
+                        <TimelineItemControl Title="Materials dispatched" Time="13:30" PointColor="BadgeVariant.Primary">Lumber and concrete en route.</TimelineItemControl>
+                        <TimelineItemControl Title="Quality inspection" Time="16:45" PointColor="BadgeVariant.Warning">Compliance check scheduled.</TimelineItemControl>
+                    </TimelineControl>
                 </div>
-            </div>
-        </div>
-
-        <!-- 3. Form Inputs: Switch, Slider, Rating, SplitButton, Security Code -->
-        <div class="col-lg-6">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-white font-monospace font-weight-bold">
-                    <strong>3. Advanced Inputs & Pickers</strong>
+                <div class="demo-row mt">
+                    <BreadCrumbControl Items="_crumbs" />
                 </div>
-                <div class="card-body d-flex flex-column gap-3">
-                    <div>
-                        <h6 class="text-muted small">Toggle Switches & Sliders</h6>
-                        <div class="d-flex gap-4 align-items-center mb-2">
-                            <SwitchControl @bind-Checked="_switchState" Label="@($"Switch is: {(_switchState ? "ON" : "OFF")}")" />
-                            <SwitchControl Checked="true" Disabled="true" Label="Disabled Switch" />
-                        </div>
-                        <div class="my-2">
-                            <label class="form-label small text-muted">Range Slider: @_sliderValue%</label>
-                            <SliderControl @bind-Value="_sliderValue" Min="0" Max="100" Step="5" />
-                        </div>
-                    </div>
+            </Demo>
+        </DemoExample>
 
-                    <div class="d-flex gap-4 align-items-center flex-wrap">
-                        <div>
-                            <h6 class="text-muted small">Star Rating: @_rating / 5</h6>
-                            <RatingControl @bind-Value="_rating" />
-                        </div>
-                        <div>
-                            <h6 class="text-muted small">Split Button</h6>
-                            <SplitButtonControl Text="Save Changes" Items="_splitItems" OnClick='() => _actionMsg = "Saved!"' OnItemClick="i => _actionMsg = i.Text" />
-                            @if (!string.IsNullOrEmpty(_actionMsg))
-                            {
-                                <span class="badge bg-light text-dark ms-2">@_actionMsg</span>
-                            }
-                        </div>
-                    </div>
-
-                    <div>
-                        <h6 class="text-muted small">Security Code (OTP PIN): @_otpCode</h6>
-                        <SecurityCodeControl @bind-Value="_otpCode" Length="6" />
-                    </div>
-
-                    <div>
-                        <h6 class="text-muted small">TimeSpan Duration Picker</h6>
-                        <TimeSpanPickerControl @bind-Value="_duration" ShowDays="true" ShowSeconds="true" />
-                    </div>
+        <DemoExample Id="inputs" Title="Switch and rating">
+            <Description><p>Both bind two ways. <code>SwitchControl</code> takes a <code>Label</code> or child content; <code>RatingControl</code> takes <code>MaxStars</code> and <code>ReadOnly</code>.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <SwitchControl @bind-Checked="_switchState" Label="@($"Notifications {(_switchState ? "on" : "off")}")" />
+                    <SwitchControl Checked="true" Disabled="true" Label="Locked setting" />
                 </div>
-            </div>
-        </div>
-
-        <!-- 4. Barcode, QR Code, Timeline, Carousel, Skeleton -->
-        <div class="col-lg-6">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-white font-monospace font-weight-bold">
-                    <strong>4. QR, Barcode, Timeline & Skeleton</strong>
+                <div class="demo-row mt">
+                    <div class="stack"><span class="label">Rating: @_rating / 5</span><RatingControl @bind-Value="_rating" /></div>
                 </div>
-                <div class="card-body d-flex flex-column gap-3">
-                    <div class="d-flex gap-3 align-items-center flex-wrap">
-                        <div>
-                            <h6 class="text-muted small">Pure SVG QR Code</h6>
-                            <QrCodeControl Value="https://github.com/flexcore" Size="110" />
-                        </div>
-                        <div>
-                            <h6 class="text-muted small">Pure SVG Barcode</h6>
-                            <BarcodeControl Value="FLEX-9988" />
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="text-muted small">Loading Skeletons</h6>
-                            <SkeletonControl Variant="SkeletonVariant.Text" />
-                            <SkeletonControl Variant="SkeletonVariant.Text" Animation="SkeletonAnimation.Wave" />
-                            <div class="d-flex gap-2 align-items-center mt-2">
-                                <SkeletonControl Variant="SkeletonVariant.Circular" />
-                                <SkeletonControl Variant="SkeletonVariant.Text" Width="140px" />
-                            </div>
-                        </div>
-                    </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-                    <div>
-                        <h6 class="text-muted small">Event Timeline</h6>
-                        <TimelineControl>
-                            <TimelineItemControl Title="Contract Signed" Time="09:00 AM" PointColor="BadgeVariant.Success">
-                                Milestone initial phase authorization.
-                            </TimelineItemControl>
-                            <TimelineItemControl Title="Materials Dispatched" Time="01:30 PM" PointColor="BadgeVariant.Primary">
-                                Lumber and concrete shipment en route.
-                            </TimelineItemControl>
-                            <TimelineItemControl Title="Quality Inspection" Time="04:45 PM" PointColor="BadgeVariant.Warning">
-                                Scheduled compliance evaluation.
-                            </TimelineItemControl>
-                        </TimelineControl>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    <Vocabulary>
+        <p class="fd-pending">Parameter tables for these nine controls are still to be written from source (<code>BadgeControl</code>, <code>AlertControl</code>, <code>SkeletonControl</code>, <code>CardControl</code>, <code>CardGroupControl</code>, <code>TimelineControl</code>, <code>BreadCrumbControl</code>, <code>SwitchControl</code>, <code>RatingControl</code>). Tracker SC-264.</p>
+    </Vocabulary>
+
+    <Related>
+        <ul>
+            <li>Buttons of every kind: <a href="demo/buttons">Buttons</a>, <a href="demo/split-button">Split button</a>, <a href="demo/toggle-buttons">Toggle buttons</a>.</li>
+            <li>Messages that pop up rather than sit in the page: <a href="demo/notifications">Toasts</a> and <a href="demo/dialog">Dialogs</a>.</li>
+            <li>Moved to their own pages: <a href="demo/sliders">Sliders</a>, <a href="demo/security-code">Security code</a>, <a href="demo/date-time">Date &amp; time</a>, <a href="demo/tabs-accordion">Tabs &amp; accordion</a>, <a href="demo/barcodes">Barcodes &amp; QR</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
 
 @code {
     private bool _switchState = true;
-    private double _sliderValue = 65;
     private int _rating = 4;
-    private string _actionMsg = "";
-    private string _otpCode = "492018";
-    private TimeSpan? _duration = new TimeSpan(1, 4, 30, 0);
-
-    private readonly List<SplitButtonItem> _splitItems = new()
-    {
-        new("Save & Close", "bi bi-check"),
-        new("Save & New", "bi bi-plus"),
-        new("Export PDF", "bi bi-file-earmark-pdf")
-    };
+    private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", ""), new("Estimates", "demo/layout"), new("EST-2042 Contoso") };
 }

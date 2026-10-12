@@ -168,13 +168,15 @@
 <ButtonControl CssClass=""btn-secondary"" IconCss=""bi bi-gear"" Title=""Settings"" aria-label=""Settings"" />
 
 <RoundedButtonControl Variant=""accent"">accent</RoundedButtonControl>
-<RoundedButtonControl Variant=""success"" IconCss=""bi bi-check2"">success</RoundedButtonControl>";
+<RoundedButtonControl Variant=""muted"">muted</RoundedButtonControl>
+<RoundedButtonControl Variant=""success"" IconCss=""bi bi-check2"">success</RoundedButtonControl>
+<RoundedButtonControl Variant=""danger"" IconCss=""bi bi-exclamation-triangle"">danger</RoundedButtonControl>";
 
-        public const string Dropdown = @"<ButtonControl @ref=""_export"" CssClass=""btn-primary"" IconCss=""bi bi-download"">
+        public const string Dropdown = @"<ButtonControl @ref=""_export"" CssClass=""btn-primary"" IconCss=""bi bi-download"" DropDownCssClass=""menu"">
     <ChildContent>Export</ChildContent>
     <DropDownContent>
-        <ButtonControl BareStyle=""true"" OnClick=""@(() => Pick(""CSV""))"">CSV</ButtonControl>
-        <ButtonControl BareStyle=""true"" OnClick=""@(() => Pick(""PDF""))"">PDF</ButtonControl>
+        <ButtonControl BareStyle=""true"" CssClass=""menu-item"" OnClick=""@(() => Pick(""CSV""))"">CSV</ButtonControl>
+        <ButtonControl BareStyle=""true"" CssClass=""menu-item"" OnClick=""@(() => Pick(""PDF""))"">PDF</ButtonControl>
     </DropDownContent>
 </ButtonControl>";
         public const string DropdownCs = @"private ButtonControl? _export;

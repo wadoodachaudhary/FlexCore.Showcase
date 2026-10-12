@@ -256,7 +256,7 @@ private void Archive()
     // ... archive the project ...
 }";
 
-        public const string Window = @"<ButtonControl OnClick=""@(() => _winOpen = true)"">Open window</ButtonControl>
+        public const string Window = @"<ButtonControl CssClass=""btn-primary"" OnClick=""@(() => _winOpen = true)"">Open window</ButtonControl>
 
 <DialogControl @bind-Visible=""_winOpen"" Header=""Inspector"" IsModal=""false"" ShowWindowIcon=""true""
                @bind-Width=""_winWidth"" @bind-Height=""_winHeight"" @bind-Position=""_winPos""
@@ -275,8 +275,8 @@ private DialogPosition? _winPos;   // offset from centre after a drag; null unti
 <ButtonControl OnClick=""Alert"">Alert</ButtonControl>
 
 <!-- page-owned box for icons, the .NET look, or a confirmation checkbox -->
-<ButtonControl OnClick=""AskDotNet"">Yes / No / Cancel</ButtonControl>
-<ButtonControl OnClick=""GatedDelete"">Gated delete</ButtonControl>
+<ButtonControl OnClick=""AskDotNet"">Yes / No / Cancel, .NET look</ButtonControl>
+<ButtonControl CssClass=""btn-danger"" OnClick=""GatedDelete"">Gated delete</ButtonControl>
 <MessageBoxControl @ref=""_box"" />";
         public const string ServiceCs = @"// Program.cs, once:
 builder.Services.AddScoped<DialogService>();

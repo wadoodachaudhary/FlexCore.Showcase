@@ -1,0 +1,16 @@
+@namespace FlexCore.Showcase.Components.Shared
+
+@* Stands in for a live example that is not written yet (2026-10-12). Replace with a DemoExample body. *@
+<div class="ph" role="img" aria-label="@($"Placeholder: {Label}")">
+    <span class="bi bi-image ph-icon" aria-hidden="true"></span>
+    <span class="ph-text">@Label</span>
+    @if (!string.IsNullOrEmpty(Note))
+    {
+        <span class="ph-note">@Note</span>
+    }
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "Example to come";
+    [Parameter] public string? Note { get; set; }
+}

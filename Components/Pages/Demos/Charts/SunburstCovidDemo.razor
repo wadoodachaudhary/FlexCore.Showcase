@@ -4,47 +4,36 @@
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Services
 @using System.Globalization
-@* Retitled 2026-10-06 to match the site nav; copy unchanged. *@
+@using FlexCore.Showcase.Components.Shared
+@* 2026-10-12: header moved onto FeatureDemoLayout; the metric switch and reset are FlexCore controls in the card
+   header; the filters, chart, side panels and dataset grid below are unchanged. The "Pure SVG • Zero JS" badge
+   was removed per the claims rule. Parameter table pending (SC-264). *@
 
 <PageTitle>Sunburst — FlexCore Showcase</PageTitle>
 
-<div class="container-fluid py-3 px-4">
-    <!-- Header Section -->
-    <div class="d-flex flex-wrap align-items-center justify-content-between pb-3 mb-3 border-bottom gap-3">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span style="font-size: 24px;">☀️</span>
-                <h2 class="mb-0 fw-bold" style="color: #0f172a; font-size: 1.65rem;">Sunburst</h2>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 ms-2">Pure SVG • Zero JS</span>
-            </div>
-            <p class="text-muted mb-0" style="font-size: 13.5px;">
-                Visualizing <strong>56,956,080 confirmed cases</strong> and <strong>1,397,672 deaths</strong> across 6 continents and 210 countries.
-                Click any continent to drill down, or click the center circle to zoom back out.
-                <a href="https://towardsdatascience.com/how-i-created-a-sunburst-chart-using-javascript-to-visualize-covid-19-data-4ef27b45af8a/"
-                   target="_blank" rel="noopener noreferrer" class="text-decoration-none ms-1">
-                    Based on Towards Data Science research ↗
-                </a>
-            </p>
-        </div>
+<FeatureDemoLayout Title="Sunburst" Category="Charts" CategoryHref="demo/charts" ControlName="SunburstChartControl"
+                   Tagline="A drill-down hierarchy chart on a real dataset: 210 countries in 6 continents."
+                   SourcePath="Charts/SunburstChartControl.razor">
+    <Overview>
+        <p>
+            <code>SunburstChartControl</code> draws a <code>SunburstNode</code> tree as concentric rings. Click a ring segment to drill into it,
+            click the centre to zoom back out; a breadcrumb tracks the path and <code>OnNodeClick</code> / <code>OnNodeHover</code> report
+            the node. The dataset is 56,956,080 confirmed COVID-19 cases and 1,397,672 deaths, after
+            <a href="https://towardsdatascience.com/how-i-created-a-sunburst-chart-using-javascript-to-visualize-covid-19-data-4ef27b45af8a/" target="_blank" rel="noopener">an article on Towards Data Science</a>.
+        </p>
+    </Overview>
 
-        <!-- Metric Toggle & Reset Actions -->
-        <div class="d-flex align-items-center gap-2">
-            <div class="btn-group shadow-sm" role="group">
-                <button type="button" class="btn btn-sm @(!_useDeathsAsMetric ? "btn-primary" : "btn-outline-secondary")"
-                        @onclick="() => SwitchMetric(false)">
-                    <b>Total Cases</b> (56.96M)
-                </button>
-                <button type="button" class="btn btn-sm @(_useDeathsAsMetric ? "btn-danger" : "btn-outline-secondary")"
-                        @onclick="() => SwitchMetric(true)">
-                    <b>Total Deaths</b> (1.40M)
-                </button>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline-primary" @onclick="ResetToWorld">
-                🔄 Reset View
-            </button>
-        </div>
-    </div>
-
+    <Examples>
+        <DemoExample Id="covid" Title="Cases and deaths by continent and country" RazorCode="@Code.Sunburst">
+            <Description><p>Switch the metric, filter a continent, search a country, or open the data table underneath. The chart, the stats and the leaderboard share one selection.</p></Description>
+            <Controls>
+                <ButtonGroupControl Items="_metricItems" Values="@(new[] { _useDeathsAsMetric ? "deaths" : "cases" })"
+                                    ValuesChanged="@(v => SwitchMetric(v.Count > 0 && v[0] == "deaths"))"
+                                    Selection="ChoiceSelectionMode.Single" AriaLabel="Metric" />
+                <ButtonControl CssClass="btn-sm" OnClick="ResetToWorld">Reset view</ButtonControl>
+            </Controls>
+            <Demo>
+<div class="sunburst-body">
     <!-- Continent Quick-Filters & Search Bar -->
     <div class="row g-2 align-items-center mb-3">
         <div class="col-lg-8 col-md-12">
@@ -323,8 +312,29 @@
         }
     </div>
 </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <p class="fd-pending"><code>SunburstChartControl</code> table still to be written from source. Parameters used here: <code>RootNode</code>, <code>MetricName</code>, <code>SecondaryMetricName</code>, <code>CenterTitle</code>, <code>CenterColor</code>, <code>ValueFormat</code>, <code>EnableDrilldown</code>, <code>ShowBreadcrumb</code>, <code>ShowLabels</code>, <code>HighlightedNodeId</code>, <code>OnNodeClick</code>, <code>OnNodeHover</code>, <code>Height</code>. Tracker SC-264.</p>
+    </Vocabulary>
+</FeatureDemoLayout>
 
 @code {
+    private readonly SelectionItem[] _metricItems = { new("cases", "Total cases (56.96M)"), new("deaths", "Total deaths (1.40M)") };
+    private static class Code
+    {
+        public const string Sunburst = @"@* the chart alone; the metric switch, filters and results grid are ButtonGroupControl and GridControl markup in the page source *@
+<SunburstChartControl RootNode=""@_sunburstRoot""
+                      MetricName=""Cases"" SecondaryMetricName=""Deaths""
+                      CenterTitle=""TOTAL CASES"" CenterColor=""#56abf6"" ValueFormat=""N0""
+                      EnableDrilldown=""true"" ShowBreadcrumb=""true"" ShowLabels=""true""
+                      HighlightedNodeId=""@_highlightedNodeId""
+                      OnNodeClick=""HandleNodeClick"" OnNodeHover=""HandleNodeHover""
+                      Height=""620px"" />";
+    }
+
     private SunburstNode _sunburstRoot = default!;
     private SunburstNode? _selectedOrHoveredNode;
     private bool _useDeathsAsMetric = false;

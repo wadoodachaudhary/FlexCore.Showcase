@@ -1,0 +1,274 @@
+@page "/demo/date-time"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-12: new page on FeatureDemoLayout; three examples (appointment, date range, calendar). Facts checked against DatePickerControl.razor,
+   TimePickerControl.razor, DateRangePickerControl.razor, CalendarControl.razor, TimeSpanPickerControl.razor, CalendarModels.cs and their
+   stylesheets (FlexCore 0.2.48). TimeSpanPickerControl was moved here from UI elements; the Control tour keeps its form samples. *@
+
+<PageTitle>Date & time — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Date & time" Category="Components"
+                   ControlName="DatePickerControl · TimePickerControl · DateRangePickerControl · CalendarControl · TimeSpanPickerControl"
+                   Tagline="Type it or pick it: dates with a calendar drop-down, times from a stepped list, ranges, multi-day selections and durations."
+                   SourcePath="DatePickerControl.razor; TimePickerControl.razor; DateRangePickerControl.razor; CalendarControl.razor; TimeSpanPickerControl.razor">
+    <Overview>
+        <p>
+            <code>DatePickerControl</code> is a text box that parses what you type (sixteen built-in date formats, more with <code>ShowTime</code>) and opens a calendar
+            on the 📅 button, F4 or Enter on an empty field. <code>TimePickerControl</code> is an editable drop-down of times from <code>Min</code>
+            to <code>Max</code> every <code>Step</code>. <code>DateRangePickerControl</code> pairs two date pickers with a range calendar in a popup,
+            and <code>CalendarControl</code> is that calendar on its own, in single, multiple or range mode. <code>TimeSpanPickerControl</code> is a
+            row of number boxes for a duration. All five bind their value two ways and report validation through <code>EditContext</code> when
+            used inside an <code>EditForm</code>.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="appointment" Title="Date, time and duration" RazorCode="@Code.Appointment" CSharpCode="@Code.AppointmentCs">
+            <Description><p><code>MinDate</code> greys out the past; <code>ShowCalendarSidebar</code> adds Today, Tomorrow and week shortcuts to the drop-down. The time list runs 8:00 to 18:00 in half hours, and typed times outside it are refused with the control's own message. The duration commits when a box loses focus.</p></Description>
+            <Demo>
+                <div class="fields">
+                    <div class="field"><span class="field-label">Date</span><DatePickerControl @bind-Value="_date" MinDate="DateTime.Today" ShowCalendarSidebar="true" AriaLabel="Appointment date" /></div>
+                    <div class="field"><span class="field-label">Start</span><TimePickerControl @bind-Value="_time" Min="@(new TimeOnly(8, 0))" Max="@(new TimeOnly(18, 0))" Width="150px" AriaLabel="Appointment time" /></div>
+                    <div class="field"><span class="field-label">Duration</span><TimeSpanPickerControl @bind-Value="_duration" /></div>
+                </div>
+                <p class="result">@Appointment</p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="range" Title="Date range" RazorCode="@Code.Range" CSharpCode="@Code.RangeCs">
+            <Description><p>One <code>CalendarRange</code> binds both pickers and the popup calendar. <code>Min</code> and <code>Max</code> bound the hire window. Put the end before the start and the control reports it; the bound value still updates, so the page can refuse to count nights.</p></Description>
+            <Demo>
+                <DateRangePickerControl @bind-Value="_hire" Min="DateTime.Today" Max="DateTime.Today.AddDays(180)" AriaLabel="Crane hire" />
+                <p class="result">@Hire</p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="calendar" Title="Calendar, several dates" RazorCode="@Code.Calendar" CSharpCode="@Code.CalendarCs">
+            <Description><p><code>SelectionMode="Multiple"</code> toggles days into <code>Values</code>. <code>DisabledDate</code> greys out weekends, <code>FirstDayOfWeek</code> starts the grid on Monday, and the heading button switches to a year or decade view. Arrow keys move through the days.</p></Description>
+            <Demo>
+                <div class="cal-row">
+                    <CalendarControl @bind-Values="_visits" SelectionMode="CalendarSelectionMode.Multiple" Min="DateTime.Today" Max="DateTime.Today.AddDays(90)"
+                                     DisabledDate="Weekend" FirstDayOfWeek="DayOfWeek.Monday" />
+                    <p class="result visits">@Visits</p>
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="DatePickerControl parameters" Rows="Vocab.DatePicker" />
+        <ApiTable Kind="ApiKind.Parameters" Title="TimePickerControl parameters" Rows="Vocab.TimePicker" />
+        <ApiTable Kind="ApiKind.Parameters" Title="DateRangePickerControl parameters" Rows="Vocab.RangePicker" />
+        <ApiTable Kind="ApiKind.Parameters" Title="CalendarControl parameters" Rows="Vocab.CalendarRows" />
+        <ApiTable Kind="ApiKind.Parameters" Title="TimeSpanPickerControl parameters" Rows="Vocab.Duration" />
+        <ApiTable Kind="ApiKind.Properties" Title="CalendarRange and CalendarCellContext" Rows="Vocab.Records" />
+        <ApiTable Kind="ApiKind.Methods" Title="Methods and read-only properties" Rows="Vocab.Methods" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+    </Vocabulary>
+
+    <Accessibility>
+        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard: date picker input" Rows="Vocab.DateKeys" />
+        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard: calendar grid" Rows="Vocab.CalendarKeys" />
+        <ul>
+            <li>The date input carries <code>aria-label</code>, <code>aria-expanded</code> and <code>aria-invalid</code>; the 📅 button is named "Toggle calendar". A parse error renders in a <code>role="alert"</code> pill with <code>aria-live="assertive"</code>.</li>
+            <li>The time picker's error and the range picker's error are <code>role="alert"</code>. The range picker is a <code>role="group"</code> whose inputs are named "Start date" and "End date".</li>
+            <li>The calendar is a <code>role="grid"</code> with column headers and <code>aria-selected</code> cells. Each day is a button named with the full date; one day holds the Tab stop and the arrows move it.</li>
+            <li>The time span boxes have no label beyond the unit letters d, h, m, s; put a visible label before the control.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>These controls inside a validated form: <a href="demo/counterparts?tab=forms">Control tour, Forms</a> and <a href="demo/counterparts?tab=selection">Selection</a>.</li>
+            <li>Date columns in the grid use the same picker as a cell editor: <a href="demo/grid/typing-modes">Typing modes</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Appointment
+    private DateTime? _date = DateTime.Today.AddDays(1);
+    private TimeOnly? _time = new(9, 30);
+    private TimeSpan? _duration = TimeSpan.FromMinutes(90);
+    private string Appointment => _date is { } d && _time is { } t
+        ? $"{d:ddd d MMM yyyy}, {t:h:mm tt} – {t.Add(_duration ?? TimeSpan.Zero):h:mm tt}"
+        : "Pick a date and a start time.";
+
+    // Date range
+    private CalendarRange _hire = new(DateTime.Today.AddDays(7), DateTime.Today.AddDays(10));
+    private string Hire => _hire is { Start: { } s, End: { } e } && e >= s
+        ? $"{(e - s).Days} day hire, {s:ddd d MMM} to {e:ddd d MMM}"
+        : "Pick a start and an end date.";
+
+    // Calendar
+    private IReadOnlyList<DateTime> _visits = Weekdays(DateTime.Today.AddDays(1), 5).Where((_, i) => i % 2 == 0).ToArray();
+    private static bool Weekend(DateTime d) => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+    private static List<DateTime> Weekdays(DateTime from, int count)
+    {
+        var list = new List<DateTime>();
+        for (var d = from.Date; list.Count < count; d = d.AddDays(1))
+            if (!Weekend(d)) list.Add(d);
+        return list;
+    }
+    private string Visits => _visits.Count == 0
+        ? "No site visits picked."
+        : $"{_visits.Count} site visit{(_visits.Count == 1 ? "" : "s")}: {string.Join(", ", _visits.OrderBy(d => d).Select(d => d.ToString("ddd d MMM")))}";
+
+    // Vocabulary rows (0.2.48). Base-class parameters marked (base).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] DatePicker =
+        {
+            new("Value", "Selected date, or date and time with <code>ShowTime</code>. Two-way with <code>@bind-Value</code>.", "DateTime?", "null"),
+            new("ValueChanged", "Fires when typed text parses (Enter or blur) or a day is picked.", "EventCallback&lt;DateTime?&gt;"),
+            new("ValueExpression", "Set by <code>@bind-Value</code>; marks the field changed on the cascaded <code>EditContext</code>.", "Expression&lt;Func&lt;DateTime?&gt;&gt;?", "null"),
+            new("Format", "Display format. Typed text is tried against this first, then the built-in list.", "string?", "\"MM/dd/yyyy\" (with time: \"MM/dd/yyyy hh:mm tt\")"),
+            new("Placeholder", "Input placeholder.", "string?", "the format"),
+            new("ShowTime", "Adds a time box to the drop-down and time formats to parsing.", "bool", "false"),
+            new("MinDate / MaxDate", "Days outside are disabled in the calendar and rejected when typed.", "DateTime?", "null"),
+            new("ShowCalendarSidebar", "Expandable sidebar of shortcuts: Today, Yesterday, Tomorrow, Start and End of Week, Next Week, Start and End of Month, Clear Date.", "bool", "false"),
+            new("ParseFormats", "Extra formats tried before the sixteen built-in ones (ISO, US, day-month, <code>dd-MMM-yy</code>, digit runs).", "IEnumerable&lt;string&gt;?", "null"),
+            new("Culture", "Parsing and formatting culture.", "CultureInfo?", "current"),
+            new("ShowTriggerButton", "Shows the 📅 button. Without it Enter on an empty field no longer opens the calendar.", "bool", "true"),
+            new("OpenCalendarOnDoubleClick", "Double-click in the input opens the calendar.", "bool", "false"),
+            new("AutoFocus", "Focuses the input once after first render.", "bool", "false"),
+            new("AriaLabel", "Accessible name of the input.", "string?", "null"),
+            new("ValidationChanged", "Fires with the parse message, or null when the text is valid again.", "EventCallback&lt;string?&gt;"),
+            new("Enabled / Visible / Id / CssClass / Style (base)", "All honoured on the host.", "", null),
+            new("Grid-cell hosting", "<code>OpenOnRender</code>, <code>InitialText</code>, <code>Uncontrolled</code>, <code>InputValueChanged</code>, <code>ElementReferenceCaptured</code>, <code>OnKeyDown</code>, <code>CalendarButtonKeyDown</code> serve the grid's cell editor; see the source comments before using them in a form.", "", null),
+        };
+        public static readonly ApiRow[] TimePicker =
+        {
+            new("Value", "Selected time. Two-way with <code>@bind-Value</code>.", "TimeOnly?", "null"),
+            new("ValueChanged", "Fires when a list entry is chosen or typed text parses on Enter.", "EventCallback&lt;TimeOnly?&gt;"),
+            new("ValueExpression", "Set by <code>@bind-Value</code>; validation messages go to the <code>EditContext</code>.", "Expression&lt;Func&lt;TimeOnly?&gt;&gt;?", "null"),
+            new("Min / Max", "First and last entry; typed times outside are refused.", "TimeOnly", "00:00 / 23:59:59.9999999"),
+            new("Step", "Gap between entries. At least one second, and at most 1441 entries, or the control throws.", "TimeSpan", "30 minutes"),
+            new("Format", "Display and parse format; free-form input is also tried with the culture's parser.", "string", "\"hh:mm tt\""),
+            new("Culture", "Formatting culture.", "CultureInfo", "current"),
+            new("Width", "CSS width of the drop-down.", "string?", "null"),
+            new("AriaLabel", "Accessible name of the input.", "string?", "null"),
+            new("ValidationChanged", "Fires with the error text, or null once valid.", "EventCallback&lt;string?&gt;"),
+            new("OnKeyDown", "Raw key events from the input.", "EventCallback&lt;KeyboardEventArgs&gt;"),
+            new("Enabled / Visible (base)", "Honoured.", "bool", "true"),
+        };
+        public static readonly ApiRow[] RangePicker =
+        {
+            new("Value", "Start and end; either may be null. Two-way with <code>@bind-Value</code>.", "CalendarRange", "(null, null)"),
+            new("ValueChanged", "Fires after either picker or the popup calendar changes the range, even when it is invalid.", "EventCallback&lt;CalendarRange&gt;"),
+            new("ValueExpression", "Set by <code>@bind-Value</code>; the error goes to the <code>EditContext</code>.", "Expression&lt;Func&lt;CalendarRange&gt;&gt;?", "null"),
+            new("Min / Max", "Bounds for both dates. <code>Min</code> after <code>Max</code> throws.", "DateTime?", "null"),
+            new("DisabledDate", "Days that cannot be inside the range.", "Func&lt;DateTime,bool&gt;?", "null"),
+            new("AriaLabel", "Accessible name of the group.", "string", "\"Date range\""),
+            new("Enabled (base)", "false disables the pickers and the Choose range button.", "bool", "true"),
+        };
+        public static readonly ApiRow[] CalendarRows =
+        {
+            new("Value / ValueChanged", "Selection in <code>Single</code> mode.", "DateTime?", "null"),
+            new("Values / ValuesChanged", "Selection in <code>Multiple</code> mode; a click toggles the day and the list is kept sorted.", "IReadOnlyList&lt;DateTime&gt;", "empty"),
+            new("Range / RangeChanged", "Selection in <code>Range</code> mode: first click sets the start, second the end; a click before the start swaps them.", "CalendarRange", "(null, null)"),
+            new("SelectionMode", "<code>Single</code>, <code>Multiple</code> or <code>Range</code>.", "CalendarSelectionMode", "Single"),
+            new("Min / Max", "Days outside are disabled and the month buttons stop there.", "DateTime?", "null"),
+            new("DisabledDate", "Extra disabled days. A range that would cross one is refused.", "Func&lt;DateTime,bool&gt;?", "null"),
+            new("Culture", "Day names, month names and the default first day.", "CultureInfo", "current"),
+            new("FirstDayOfWeek", "Overrides the culture's first day.", "DayOfWeek?", "null"),
+            new("DisplayDate / DisplayDateChanged", "Month on show. Changes when the user navigates.", "DateTime?", "value or today"),
+            new("View / ViewChanged", "<code>Month</code>, <code>Year</code> (pick a month) or <code>Decade</code> (pick a year). The heading button cycles them.", "CalendarView", "Month"),
+            new("ShowTodayButton", "Renders a Today button under the grid.", "bool", "true"),
+            new("DayTemplate", "Custom day cell; receives <code>CalendarCellContext</code>.", "RenderFragment&lt;CalendarCellContext&gt;?", "null"),
+            new("Enabled / Visible / Id (base)", "Honoured.", "", null),
+        };
+        public static readonly ApiRow[] Duration =
+        {
+            new("Value", "Duration. Two-way with <code>@bind-Value</code>; null shows zeros.", "TimeSpan?", "null"),
+            new("ValueChanged", "Fires when a box commits (blur or Enter), not per keystroke.", "EventCallback&lt;TimeSpan?&gt;"),
+            new("ShowDays", "Adds a days box (0 or more).", "bool", "false"),
+            new("ShowSeconds", "Adds a seconds box (0–59).", "bool", "false"),
+            new("Disabled", "Disables the boxes. The base <code>Enabled</code> and <code>Visible</code> are not read by this control.", "bool", "false"),
+            new("(unmatched attributes)", "Forwarded to the host <code>&lt;div&gt;</code>.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Records =
+        {
+            new("CalendarRange.Start / End", "Either bound may be null. Positional record: <code>new(start, end)</code>, update with <code>with</code>.", "DateTime?"),
+            new("CalendarCellContext", "<code>Date</code>, <code>Selected</code>, <code>Disabled</code>, <code>InCurrentMonth</code>: what a <code>DayTemplate</code> receives.", "record"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("DatePickerControl.FocusAsync()", "Focuses the input.", "Task"),
+            new("TimePickerControl.FocusAsync()", "Focuses the drop-down's input.", "Task"),
+            new("TimePickerControl.ErrorMessage", "Current parse or bounds message, or null.", "string?"),
+            new("DateRangePickerControl.SetValueAsync(range)", "Validates order, bounds and disabled days, publishes the error and raises <code>ValueChanged</code>.", "Task"),
+            new("DateRangePickerControl.Error", "Current message, or null.", "string?"),
+            new("CalendarControl.NavigateAsync(direction)", "Moves one period back (−1) or forward (+1) in the current view.", "Task"),
+            new("CalendarControl.SelectAsync(date)", "Same as clicking the day: honours the selection mode and disabled days.", "Task"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-datepicker-host · -input-group · -input · -trigger", "Host, the input row, the text box and the 📅 button. <code>-input-group-no-trigger</code> when the button is hidden."),
+            new("fx-datepicker-dropdown · -popup-layer · -backdrop · -validation-pill", "The calendar (<code>expanded</code> or <code>minimal</code> with the sidebar), its top-layer wrapper, the click-away backdrop and the error pill."),
+            new("fx-calendar-main · fx-calendar-sidebar · fx-shortcut-btn", "Drop-down month panel, shortcut sidebar and its buttons."),
+            new("fx-timepicker · fx-timepicker-error", "Host around the drop-down list and the error line."),
+            new("fx-date-range · fx-range-error", "Flex row of the two pickers, the Choose range button and the error."),
+            new("fx-calendar · -header · -cells · -row · -cell", "Standalone calendar; cells take <code>selected</code>, <code>today</code> and <code>outside</code>."),
+            new("fx-timespan-picker · -segment · -input · -unit", "Bordered row of number boxes with unit letters; <code>disabled</code> greys it."),
+        };
+        public static readonly ApiRow[] Vars =
+        {
+            new("--fx-border · --fx-surface · --fx-text · --fx-primary", "Read by <code>CalendarControl</code> for its frame, background, text and the selected day.", "#cbd5e1 · #fff · #202630 · #2563eb"),
+            new("--fx-zoom", "Scales the date picker's drop-down.", "1"),
+            new("(none)", "The time, range and time span pickers read no variables.", "—"),
+        };
+        public static readonly ApiRow[] DateKeys =
+        {
+            new("F4 / Alt+Arrow Down", "Open or close the calendar."),
+            new("Enter", "Parse the typed text. On an empty field, open the calendar instead."),
+            new("Escape", "Close the calendar; typed text stays for correction."),
+            new("Arrow keys (calendar open)", "Left and Right move a day, Up and Down a week."),
+            new("Page Up / Page Down", "Previous or next month; with Shift, a year."),
+            new("Home / End", "First or last day of the focused week."),
+            new("Enter / Space (calendar open)", "Select the focused day."),
+        };
+        public static readonly ApiRow[] CalendarKeys =
+        {
+            new("Arrow keys", "Move the focused day; disabled days are skipped and the month follows."),
+            new("Page Up / Page Down", "Same day in the previous or next month; with Shift, year."),
+            new("Home / End", "First or last day of the week, honouring <code>FirstDayOfWeek</code>."),
+            new("Enter / Space", "Select the focused day (a native button)."),
+        };
+    }
+
+    private static class Code
+    {
+        public const string Appointment = @"<DatePickerControl @bind-Value=""_date"" MinDate=""DateTime.Today"" ShowCalendarSidebar=""true"" AriaLabel=""Appointment date"" />
+<TimePickerControl @bind-Value=""_time"" Min=""@(new TimeOnly(8, 0))"" Max=""@(new TimeOnly(18, 0))"" Width=""150px"" AriaLabel=""Appointment time"" />
+<TimeSpanPickerControl @bind-Value=""_duration"" />
+<p>@Appointment</p>";
+        public const string AppointmentCs = @"private DateTime? _date = DateTime.Today.AddDays(1);
+private TimeOnly? _time = new(9, 30);
+private TimeSpan? _duration = TimeSpan.FromMinutes(90);
+
+private string Appointment => _date is { } d && _time is { } t
+    ? $""{d:ddd d MMM yyyy}, {t:h:mm tt} – {t.Add(_duration ?? TimeSpan.Zero):h:mm tt}""
+    : ""Pick a date and a start time."";";
+
+        public const string Range = @"<DateRangePickerControl @bind-Value=""_hire"" Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(180)"" AriaLabel=""Crane hire"" />
+<p>@Hire</p>";
+        public const string RangeCs = @"private CalendarRange _hire = new(DateTime.Today.AddDays(7), DateTime.Today.AddDays(10));   // record CalendarRange(DateTime? Start, DateTime? End)
+
+private string Hire => _hire is { Start: { } s, End: { } e } && e >= s
+    ? $""{(e - s).Days} day hire, {s:ddd d MMM} to {e:ddd d MMM}""
+    : ""Pick a start and an end date."";";
+
+        public const string Calendar = @"<CalendarControl @bind-Values=""_visits"" SelectionMode=""CalendarSelectionMode.Multiple""
+                 Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(90)""
+                 DisabledDate=""Weekend"" FirstDayOfWeek=""DayOfWeek.Monday"" />
+<p>@Visits</p>";
+        public const string CalendarCs = @"private IReadOnlyList<DateTime> _visits = new[] { /* three weekdays */ };
+private static bool Weekend(DateTime d) => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+
+private string Visits => _visits.Count == 0
+    ? ""No site visits picked.""
+    : $""{_visits.Count} site visits: {string.Join("", "", _visits.OrderBy(d => d).Select(d => d.ToString(""ddd d MMM"")))}"";";
+    }
+}

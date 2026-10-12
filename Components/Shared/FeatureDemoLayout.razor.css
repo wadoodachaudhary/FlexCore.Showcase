@@ -30,3 +30,7 @@
     .fd-body { grid-template-columns: 1fr; }
     .fd-toc { display: none; }
 }
+
+/* "to be written" note a page can drop into Vocabulary or Accessibility */
+.fd-section ::deep .fd-pending { font-size: 13.5px; color: #64748b; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px 14px; margin: 0 0 16px; }
+.fd-section ::deep .fd-pending code { font-size: 12.5px; background: #eef2f7; padding: 1px 4px; border-radius: 4px; color: #334155; }

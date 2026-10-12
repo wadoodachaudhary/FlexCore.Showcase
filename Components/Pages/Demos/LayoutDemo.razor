@@ -283,10 +283,10 @@
             </PrimaryContent>
             <SecondaryContent>
                 <h4>@_selected.Title</h4>
-                <TooltipControl Text=""@(_leftCollapsed ? ""Show navigation"" : ""Hide navigation"")"">
+                <TooltipControl Text=""@(_leftCollapsed ? ""Show navigation"" : ""Hide navigation"")"" Placement=""PopupPlacement.BottomEnd"">
                     <ToggleButtonControl @bind-Selected=""_leftCollapsed"" IconCss=""bi bi-layout-sidebar"" aria-label=""Toggle navigation"" />
                 </TooltipControl>
-                <TooltipControl Text=""@(_rightCollapsed ? ""Show properties"" : ""Hide properties"")"">
+                <TooltipControl Text=""@(_rightCollapsed ? ""Show properties"" : ""Hide properties"")"" Placement=""PopupPlacement.BottomEnd"">
                     <ToggleButtonControl @bind-Selected=""_rightCollapsed"" IconCss=""bi bi-layout-sidebar-reverse"" aria-label=""Toggle properties"" />
                 </TooltipControl>
                 <p>@_selected.Summary</p>
@@ -313,18 +313,18 @@ private void Go(string section) { _section = section; _selected = _data[section]
         {
             var t = _place[k.Key];
             <DashboardLayoutPanel @key=""k.Key"" Row=""t.Row"" Column=""t.Col"" SizeX=""t.SizeX"" SizeY=""t.SizeY"">
-                <TooltipControl Text=""@k.Detail"">
+                <TooltipControl Text=""@k.Detail"" CssClass=""tile-anchor"" Placement=""PopupPlacement.BottomStart"">
                     <div @onclick=""() => Toggle(k.Key)"">
-                        <CardControl Elevation=""0""><ChartControl Type=""ChartType.KpiCard"" KpiValue=""@k.Value"" KpiLabel=""@k.Label"" KpiTrend=""@k.Trend"" Height=""100px"" /></CardControl>
+                        <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.KpiCard"" KpiValue=""@k.Value"" KpiLabel=""@k.Label"" KpiTrend=""@k.Trend"" Height=""100px"" /></CardControl>
                     </div>
                 </TooltipControl>
             </DashboardLayoutPanel>
         }
         <DashboardLayoutPanel Row=""ChartsRow"" Column=""0"" SizeX=""2"" SizeY=""3"">
-            <CardControl Elevation=""0""><ChartControl Type=""ChartType.Line"" Title=""Traffic"" Height=""200px"" Series=""_traffic"" /></CardControl>
+            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Line"" Title=""Traffic"" Height=""200px"" Series=""_traffic"" /></CardControl>
         </DashboardLayoutPanel>
         <DashboardLayoutPanel Row=""ChartsRow"" Column=""2"" SizeY=""3"">
-            <CardControl Elevation=""0""><ChartControl Type=""ChartType.Donut"" Title=""Sources"" Height=""200px"" InnerRadius=""0.5"" Series=""_sources"" /></CardControl>
+            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Donut"" Title=""Sources"" Height=""200px"" InnerRadius=""0.5"" Series=""_sources"" /></CardControl>
         </DashboardLayoutPanel>
     </DashboardLayoutPanels>
 </DashboardLayoutControl>";
