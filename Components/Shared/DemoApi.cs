@@ -4,6 +4,7 @@ namespace FlexCore.Showcase.Components.Shared;
 public enum ApiKind
 {
     Parameters,   // Parameter | Type | Default | Description
+    Properties,   // Property | Type | Default | Description (model classes such as SplitButtonItem)
     Events,       // Event | Payload | Description
     Methods,      // Method | Returns | Description
     CssClasses,   // Class | Effect

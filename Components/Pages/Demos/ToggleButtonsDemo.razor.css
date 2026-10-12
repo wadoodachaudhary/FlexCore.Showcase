@@ -1,0 +1,3 @@
+.demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }   /* not .row: Bootstrap owns that name */
+.demo-row.top { align-items: flex-start; }
+.result { font-size: 13px; color: #475569; }

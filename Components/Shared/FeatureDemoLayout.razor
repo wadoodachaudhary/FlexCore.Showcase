@@ -20,9 +20,18 @@
             <p class="fd-tagline">@Tagline</p>
         }
         <div class="fd-links">
-            @if (!string.IsNullOrEmpty(SourcePath))
+            @if (SourcePaths.Length == 1)
             {
-                <a href="@($"https://github.com/wadoodachaudhary/FlexCore/blob/main/{SourcePath}")" target="_blank" rel="noopener">Source on GitHub</a>
+                <a href="@Gh(SourcePaths[0])" target="_blank" rel="noopener">Source on GitHub</a>
+            }
+            else if (SourcePaths.Length > 1)
+            {
+                <span class="fd-sources">Source:
+                    @foreach (var p in SourcePaths)
+                    {
+                        <a href="@Gh(p)" target="_blank" rel="noopener">@System.IO.Path.GetFileName(p)</a>
+                    }
+                </span>
             }
             @if (Vocabulary is not null)
             {
@@ -91,8 +100,10 @@
     /// <summary>Type name shown beside the title, e.g. ButtonControl.</summary>
     [Parameter] public string? ControlName { get; set; }
     [Parameter] public string? Tagline { get; set; }
-    /// <summary>Repo-relative path of the control's source, for the GitHub link.</summary>
+    /// <summary>Repo-relative path(s) of the control's source, ';'-separated, for the GitHub links.</summary>
     [Parameter] public string? SourcePath { get; set; }
+    private string[] SourcePaths => (SourcePath ?? "").Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    private static string Gh(string path) => $"https://github.com/wadoodachaudhary/FlexCore/blob/main/{path}";
 
     [Parameter, EditorRequired] public RenderFragment? Overview { get; set; }
     /// <summary>One or more DemoExample components.</summary>

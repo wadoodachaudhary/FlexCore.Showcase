@@ -22,6 +22,9 @@ public static class SiteNav
         {
             new("Inputs & feedback", null),
             new("Buttons", "demo/buttons"),
+            new("Split button", "demo/split-button"),
+            new("Toggle buttons", "demo/toggle-buttons"),
+            new("Floating action button", "demo/fab"),
             new("Dialogs", "demo/dialog"),
             new("Toasts", "demo/notifications"),
             new("UI elements", "demo/new-components"),

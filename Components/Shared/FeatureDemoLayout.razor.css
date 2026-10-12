@@ -7,6 +7,8 @@
 .fd-links { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; font-size: 13px; }
 .fd-links a { color: #2563eb; text-decoration: none; }
 .fd-links a:hover { text-decoration: underline; }
+.fd-sources { color: #64748b; }
+.fd-sources a { margin-left: 6px; }
 
 .fd-body { display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 32px; align-items: start; }
 .fd-main { min-width: 0; }

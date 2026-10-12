@@ -44,12 +44,13 @@
     [Parameter] public string? Title { get; set; }
     [Parameter] public string? Id { get; set; }
 
-    private bool HasType => Kind is ApiKind.Parameters or ApiKind.Events or ApiKind.Methods or ApiKind.CssVariables;
-    private bool HasDefault => Kind is ApiKind.Parameters;
+    private bool HasType => Kind is ApiKind.Parameters or ApiKind.Properties or ApiKind.Events or ApiKind.Methods or ApiKind.CssVariables;
+    private bool HasDefault => Kind is ApiKind.Parameters or ApiKind.Properties;
 
     private IEnumerable<string> Headers => Kind switch
     {
         ApiKind.Parameters   => new[] { "Parameter", "Type", "Default", "Description" },
+        ApiKind.Properties   => new[] { "Property", "Type", "Default", "Description" },
         ApiKind.Events       => new[] { "Event", "Payload", "Description" },
         ApiKind.Methods      => new[] { "Method", "Returns", "Description" },
         ApiKind.CssClasses   => new[] { "Class", "Effect" },
