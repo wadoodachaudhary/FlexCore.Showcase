@@ -324,7 +324,7 @@
         new("property-grid", "Property Grid", "demo/counterparts")
     ];
 
-    // Split/Toggle/Pill/Toolbar deep-link to sections of the Button page (2026-09-28).
+    // Split/Toggle/Pill deep-link to the Button page's Related controls example (2026-10-12).
     private readonly DirectoryItem[] _buttonsActions =
     [
         new("button", "Button Control", "demo/buttons"),
@@ -381,8 +381,8 @@
 
     private readonly DirectoryItem[] _navigation =
     [
-        new("ribbon", "Office Ribbon", "demo/buttons"),
-        new("toolbar", "Toolbar Control", "demo/buttons#toolbar"),
+        new("ribbon", "Office Ribbon", ""),                 // ribbon lives on the home page
+        new("toolbar", "Toolbar Control", "demo/counterparts"),   // toolbar demo moved off the Button page 2026-10-12
         new("tab", "Tab Control", "demo/workspace/page-control-bench"),
         new("accordion", "Accordion Control", "demo/new-components"),
         new("appbar", "AppBar Control", "demo/counterparts"),

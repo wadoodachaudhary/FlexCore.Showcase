@@ -1,0 +1,89 @@
+@namespace FlexCore.Showcase.Components.Shared
+@inject IJSRuntime JS
+
+@* One example (2026-10-12): title with anchor, one-line description, then Example | Razor | C# | CSS
+   tabs on TabStripControl inside a CardControl. The live markup stays mounted while a code tab is
+   shown, so demo state and @ref captures survive switching. Registers with FeatureDemoLayout. *@
+<section class="ex" id="@Id">
+    <CardControl Elevation="0" CssClass="ex-card">
+        <HeaderContent>
+            <div class="ex-head">
+                <h3 class="ex-title"><a class="ex-anchor" href="@($"{_path}#{Id}")" aria-label="Link to @Title">#</a>@Title</h3>
+                @if (Controls is not null)
+                {
+                    <div class="ex-controls">@Controls</div>
+                }
+            </div>
+            @if (Description is not null)
+            {
+                <div class="ex-desc">@Description</div>
+            }
+        </HeaderContent>
+        <ChildContent>
+            @if (_codes.Count > 0)
+            {
+                <TabStripControl Items="_tabs" @bind-SelectedIndex="_tab" CssClass="ex-tabs" />
+            }
+            <div class="ex-live" hidden="@(_tab != 0)">@Demo</div>
+            @if (_tab > 0)
+            {
+                <div class="ex-code-pane">
+                    <ButtonControl CssClass="btn-sm ex-copy" Title="Copy to clipboard" OnClick="CopyAsync">@(_copied ? "Copied" : "Copy")</ButtonControl>
+                    <pre class="ex-pre"><code>@_codes[_tab - 1]</code></pre>
+                </div>
+            }
+        </ChildContent>
+    </CardControl>
+</section>
+
+@code {
+    [CascadingParameter] public FeatureDemoLayout? Layout { get; set; }
+
+    [Parameter, EditorRequired] public string Id { get; set; } = "";
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    [Parameter] public RenderFragment? Description { get; set; }
+    [Parameter] public RenderFragment? Controls { get; set; }
+    /// <summary>The live markup. Named, because Razor needs explicit slots once other fragments are set.</summary>
+    [Parameter, EditorRequired] public RenderFragment? Demo { get; set; }
+    [Parameter] public string? RazorCode { get; set; }
+    [Parameter] public string? CSharpCode { get; set; }
+    [Parameter] public string? CssCode { get; set; }
+
+    private readonly List<TabStripItem> _tabs = new();   // [Example, code tabs...]
+    private readonly List<string> _codes = new();        // parallel to _tabs[1..]
+    private bool _copied;
+    private int _tab;
+    private string _path = "";
+
+    protected override void OnInitialized()
+    {
+        _path = Layout?.PagePath ?? "";
+        Layout?.Register(Id, Title);
+    }
+
+    protected override void OnParametersSet()
+    {
+        _tabs.Clear(); _codes.Clear();
+        Add("Razor", RazorCode); Add("C#", CSharpCode); Add("CSS", CssCode);
+        if (_codes.Count > 0) _tabs.Insert(0, new TabStripItem("Example"));
+        if (_tab > _codes.Count) _tab = 0;
+        void Add(string name, string? code)
+        {
+            if (string.IsNullOrEmpty(code)) return;
+            _tabs.Add(new TabStripItem(name)); _codes.Add(code);
+        }
+    }
+
+    private async Task CopyAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", _codes[_tab - 1]);
+            _copied = true;
+            StateHasChanged();
+            await Task.Delay(1500);
+        }
+        catch { /* clipboard blocked: button just stays "Copy" */ }
+        _copied = false;
+    }
+}

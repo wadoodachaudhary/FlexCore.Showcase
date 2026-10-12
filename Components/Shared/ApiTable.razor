@@ -1,0 +1,59 @@
+@namespace FlexCore.Showcase.Components.Shared
+
+@* Vocabulary table (2026-10-12). Kind picks the columns; rows are records so every page renders the
+   same shape. Plain <table>: FlexCore has no static-table control and the grid is overkill here. *@
+<div class="api-block" id="@Id">
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        <h3 class="api-title">@Title</h3>
+    }
+    <div class="api-wrap">
+        <table class="api-table">
+            <thead>
+                <tr>
+                    @foreach (var h in Headers)
+                    {
+                        <th>@h</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Rows)
+                {
+                    <tr>
+                        <td class="api-name"><code>@r.Name</code></td>
+                        @if (HasType)
+                        {
+                            <td class="api-type">@if (r.Type is not null) { <code>@r.Type</code> }</td>
+                        }
+                        @if (HasDefault)
+                        {
+                            <td class="api-default">@if (r.Default is not null) { <code>@r.Default</code> } else { <span class="api-none">—</span> }</td>
+                        }
+                        <td class="api-desc">@((MarkupString)r.Description)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ApiKind Kind { get; set; }
+    [Parameter, EditorRequired] public IReadOnlyList<ApiRow> Rows { get; set; } = Array.Empty<ApiRow>();
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Id { get; set; }
+
+    private bool HasType => Kind is ApiKind.Parameters or ApiKind.Events or ApiKind.Methods or ApiKind.CssVariables;
+    private bool HasDefault => Kind is ApiKind.Parameters;
+
+    private IEnumerable<string> Headers => Kind switch
+    {
+        ApiKind.Parameters   => new[] { "Parameter", "Type", "Default", "Description" },
+        ApiKind.Events       => new[] { "Event", "Payload", "Description" },
+        ApiKind.Methods      => new[] { "Method", "Returns", "Description" },
+        ApiKind.CssClasses   => new[] { "Class", "Effect" },
+        ApiKind.CssVariables => new[] { "Variable", "Fallback", "Purpose" },
+        _                    => new[] { "Key", "Action" },
+    };
+}

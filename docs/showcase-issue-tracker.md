@@ -42,7 +42,7 @@ Each is a one-file edit; none changes behaviour except the double toast.
 | SC-022 | `/demo/grid/dynamic-columns` | Fabricated figures | pending approval | "Staged baseline" numbers are typed in; delete. |
 | SC-023 | `/demo/grid/column-swap` | Unshown claims | pending approval | Batch-edit survival and scroll-offset claims are not demonstrable with the current rows; remove or add EditSettings and enough rows. |
 | SC-024 | `/demo/grid/items (Grouping & totals)` | "sums" | pending approval | Group captions show Average and Count, not sums. |
-| SC-025 | `/demo/buttons` | Family links | pending approval | FabMenuControl and ChipControl links go to UI elements, which has neither; RibbonControl link is `href=""`. Point at real pages or drop. |
+| SC-025 | `/demo/buttons` | Family links | done | 2026-10-12: Related section now lists Control tour (Toolbar), Dialogs (default button), home page (Ribbon); FabMenu/Chip mentions dropped. |
 | SC-026 | `/demo/counterparts` | PDF "Save to host" | pending approval | Writes a status line only; nothing is saved. Download the bytes or remove the button. |
 | SC-027 | `/demo/tree/treeview-explorer` | Checkbox claim | pending approval | Copy promises checkboxes; `ShowCheckboxes` is not set. |
 
@@ -66,7 +66,7 @@ Each is a one-file edit; none changes behaviour except the double toast.
 | SC-041 | New `/migration`: classic theme toggle on live controls, classic tree lines, unsaved-row lock, Crystal XML report, VB6/WinForms → FlexCore mapping table | pending approval | bar item added only when it renders |
 | SC-042 | Home: popular cards + All components link instead of the full directory; `/components` gets an H1 | pending approval |  |
 | SC-043 | Delete `Components/Layout/NavMenu.razor` and `.css` | pending approval | unreferenced since 2026-09-06 |
-| SC-044 | Feature-page template (tabled proposal): FeatureDemoLayout, DemoExample, ApiTable | pending approval | https://claude.ai/artifact/1QUJHJv36fVqgKontBVmQP |
+| SC-044 | Feature-page template (tabled proposal): FeatureDemoLayout, DemoExample, ApiTable | in progress | Components landed and Buttons converted 2026-10-12 (section 5); other pages pending approval |
 | SC-045 | Library CSS additions for buttons (tabled): outline set, flat/text, icon-only, block, spinner | pending approval | FlexCore PR, owner-gated |
 
 ## 4. Findings by page (inventory of 2026-10-06)
@@ -100,7 +100,7 @@ Raw reader findings, lightly deduplicated against sections 1–3. Items already 
 | SC-068 | `/demo/advanced-charts` | Gauges are shown here via ChartControl and again on /demo/counterparts via four dedicated gauge controls, with no cross-link explaining which to use | pending approval |
 | SC-069 | `/demo/buttons` | Not linked from MainLayout nav, Home, footer or /components; the only link is in Layout/NavMenu.razor, which is not referenced anywhere | done |
 | SC-070 | `/demo/buttons` | "Also in the family" links FabMenuControl and ChipControl to demo/new-components, but that page contains neither control | pending approval |
-| SC-071 | `/demo/buttons` | RibbonControl link is href="" (resolves to home) with the text "on the home page" — fragile and unlabeled | pending approval |
+| SC-071 | `/demo/buttons` | RibbonControl link is href="" (resolves to home) with the text "on the home page" — fragile and unlabeled | done |
 | SC-072 | `/demo/buttons` | PageTitle brand is "FlexCore UI" while every other page uses "FlexCore" or "FlexCore Showcase" | done |
 | SC-073 | `/demo/buttons` | Copy names flexkit-themes.css — FlexKit is the internal library name, not FlexCore; also "Classic (VB6 / Win32)" and "For migrated VB6 forms" are migration jargon on a buyer page | pending approval |
 | SC-074 | `/demo/buttons` | Code tab is labeled "ButtonsDemo.razor.cs" but no such file exists; the C# shown is a hand-written excerpt | pending approval |
@@ -276,3 +276,16 @@ Raw reader findings, lightly deduplicated against sections 1–3. Items already 
 | SC-244 | `/get-started` | '/downloads/FlexCore.zip' link 404s (no wwwroot/downloads folder). | pending approval |
 | SC-245 | `/get-started` | No live control on the page; snippets only. | pending approval |
 | SC-246 | `/get-started` | Service registration shows only NotificationService; the report adapters it names (IReportDataExecutor etc.) have no example. | pending approval |
+
+
+## 5. Feature-page template rollout (started 2026-10-12)
+
+Reader feedback on the Buttons page: too busy. Rule for converted pages: a few examples, one concept each; everything else lives in the vocabulary tables.
+
+| ID | Page | Status | Note |
+|---|---|---|---|
+| SC-247 | Shared: `FeatureDemoLayout`, `DemoExample`, `ApiTable`, `DemoApi.cs` under `Components/Shared` | done | BreadCrumbControl, CardControl, TabStripControl, ButtonControl inside; `SyncfusionDemoLayout` stays until the last page leaves it |
+| SC-248 | `/demo/buttons` on the template: 10 sections → 5 examples (Variants, Icons and sizes, Dropdown, Theme, Related controls) + 4 vocabulary tables | done | removed demos: busy/focus, form types, BareStyle, Save/Cancel, Toolbar, zoom slider, 4-palette grid |
+| SC-249 | Catalog: Toolbar → Control tour, Office Ribbon → home; Split/Toggle/Pill still deep-link into `/demo/buttons` | done | |
+| SC-250 | Convert remaining feature pages (Dialogs, Toasts, Page layouts, Tree view, Charts, …) one commit each | pending approval | vocabulary written from each control's source |
+
