@@ -300,3 +300,5 @@ Reader feedback on the Buttons page: too busy. Rule for converted pages (2026-10
 | SC-260 | 1–2 examples rule applied to the button pages: Buttons 5 → 2 (variants, icons, sizes and pills in one card, theming on its CSS tab; dropdown), Split button 3 → 2 (Item values dropped), Toggle buttons 3 → 2 (group modes merged), FAB 2 | done | Dialogs still has 4; pending a decision |
 | SC-261 | Rule revised to at most three examples; Dialogs 4 → 3 (classic look is now a switch on the modal example) | done | |
 | SC-262 | `/demo/notifications` rebuilt on the template: one example (levels, detail, duration, sticky, clear), NotificationService and Notification tables, CSS classes; accessibility states there is no aria-live region | done | |
+| SC-263 | `/demo/layout` rebuilt on the template: application shell (page layout with collapsible panels, splitter in the centre, collapse buttons inside the demo) and dashboard grid in CardControls; five vocabulary tables | done | catalog Splitter row now lands on a live splitter |
+
