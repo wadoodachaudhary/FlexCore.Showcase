@@ -1,7 +1,7 @@
 @page "/demo/toggle-buttons"
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-12: new page on FeatureDemoLayout. Facts checked against ToggleButtonControl.razor,
+@* 2026-10-12: new page on FeatureDemoLayout; two examples (toggle button, button group) per the 1–2 examples rule. Facts checked against ToggleButtonControl.razor,
    ButtonGroupControl.razor, their stylesheets, FlexControlBase.cs and ContentModels.cs (FlexCore 0.2.48). *@
 
 <PageTitle>Toggle buttons — FlexCore Showcase</PageTitle>
@@ -33,25 +33,19 @@
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="single" Title="Single selection" RazorCode="@Code.Single" CSharpCode="@Code.SingleCs">
-            <Description><p>One value at a time. Clicking the selected button leaves it selected unless <code>AllowEmpty</code> is set. <code>Enabled="false"</code> disables the whole group.</p></Description>
-            <Demo>
-                <div class="demo-row">
-                    <ButtonGroupControl Items="_alignItems" @bind-Values="_align" Selection="ChoiceSelectionMode.Single" AriaLabel="Text alignment" />
-                    <ButtonGroupControl Items="_rangeItems" @bind-Values="_range" Selection="ChoiceSelectionMode.Single" AriaLabel="Date range" />
-                    <ButtonGroupControl Items="_rangeItems" Values="_range" Enabled="false" AriaLabel="Date range, disabled" />
-                    <span class="result">@_align[0] · @_range[0]</span>
-                </div>
-            </Demo>
-        </DemoExample>
-
-        <DemoExample Id="multiple" Title="Multiple selection, vertical" RazorCode="@Code.Multiple" CSharpCode="@Code.MultipleCs">
-            <Description><p><code>Selection="Multiple"</code> toggles each value. <code>AllowEmpty</code> lets the last one go. A disabled item stays in place and is skipped by the arrow keys.</p></Description>
+        <DemoExample Id="group" Title="Button group" RazorCode="@Code.Group" CSharpCode="@Code.GroupCs">
+            <Description><p><code>Selection="Single"</code> replaces the selection; <code>Multiple</code> toggles each value. <code>Orientation="Vertical"</code> stacks the buttons. <code>AllowEmpty</code> lets the last value go; a disabled item stays in place and is skipped by the arrow keys.</p></Description>
             <Demo>
                 <div class="demo-row top">
-                    <ButtonGroupControl Items="_dayItems" @bind-Values="_days" Selection="ChoiceSelectionMode.Multiple"
-                                        Orientation="FlexOrientation.Vertical" AllowEmpty="true" AriaLabel="Working days" />
-                    <span class="result">@(_days.Count == 0 ? "none" : string.Join(", ", _days))</span>
+                    <div class="stack">
+                        <ButtonGroupControl Items="_alignItems" @bind-Values="_align" Selection="ChoiceSelectionMode.Single" AriaLabel="Text alignment" />
+                        <span class="result">@_align[0]</span>
+                    </div>
+                    <div class="stack">
+                        <ButtonGroupControl Items="_dayItems" @bind-Values="_days" Selection="ChoiceSelectionMode.Multiple"
+                                            Orientation="FlexOrientation.Vertical" AllowEmpty="true" AriaLabel="Working days" />
+                        <span class="result">@(_days.Count == 0 ? "none" : string.Join(", ", _days))</span>
+                    </div>
                 </div>
             </Demo>
         </DemoExample>
@@ -88,7 +82,7 @@
     private bool _bold, _italic, _underline, _notify = true;
     private string FormatState => string.Join(" ", new[] { (_bold, "B"), (_italic, "I"), (_underline, "U") }.Where(t => t.Item1).Select(t => t.Item2)) is { Length: > 0 } s ? $"Format: {s}" : "Format: none";
 
-    // Single
+    // Group
     private readonly SelectionItem[] _alignItems =
     {
         new("left", "", IconCss: "bi bi-text-left"),
@@ -97,10 +91,7 @@
         new("justify", "", IconCss: "bi bi-justify"),
     };
     private IReadOnlyList<string> _align = new[] { "left" };
-    private readonly SelectionItem[] _rangeItems = { new("day", "Day"), new("week", "Week"), new("month", "Month") };
-    private IReadOnlyList<string> _range = new[] { "week" };
 
-    // Multiple
     private readonly SelectionItem[] _dayItems =
     {
         new("mon", "Monday"), new("tue", "Tuesday"), new("wed", "Wednesday"),
@@ -170,14 +161,14 @@
 <ToggleButtonControl Selected=""true"" Enabled=""false"">Locked</ToggleButtonControl>";
         public const string ToggleCs = @"private bool _bold, _italic, _notify = true;";
 
-        public const string Single = @"<ButtonGroupControl Items=""_alignItems"" @bind-Values=""_align""
+        public const string Group = @"<ButtonGroupControl Items=""_alignItems"" @bind-Values=""_align""
                     Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Text alignment"" />
 
-<ButtonGroupControl Items=""_rangeItems"" @bind-Values=""_range""
-                    Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Date range"" />
-
-<ButtonGroupControl Items=""_rangeItems"" Values=""_range"" Enabled=""false"" />";
-        public const string SingleCs = @"// SelectionItem(Value, Text, Disabled, IconCss)
+<ButtonGroupControl Items=""_dayItems"" @bind-Values=""_days""
+                    Selection=""ChoiceSelectionMode.Multiple""
+                    Orientation=""FlexOrientation.Vertical""
+                    AllowEmpty=""true"" AriaLabel=""Working days"" />";
+        public const string GroupCs = @"// SelectionItem(Value, Text, Disabled, IconCss)
 private readonly SelectionItem[] _alignItems =
 {
     new(""left"",    """", IconCss: ""bi bi-text-left""),
@@ -187,14 +178,7 @@ private readonly SelectionItem[] _alignItems =
 };
 private IReadOnlyList<string> _align = new[] { ""left"" };
 
-private readonly SelectionItem[] _rangeItems = { new(""day"", ""Day""), new(""week"", ""Week""), new(""month"", ""Month"") };
-private IReadOnlyList<string> _range = new[] { ""week"" };";
-
-        public const string Multiple = @"<ButtonGroupControl Items=""_dayItems"" @bind-Values=""_days""
-                    Selection=""ChoiceSelectionMode.Multiple""
-                    Orientation=""FlexOrientation.Vertical""
-                    AllowEmpty=""true"" AriaLabel=""Working days"" />";
-        public const string MultipleCs = @"private readonly SelectionItem[] _dayItems =
+private readonly SelectionItem[] _dayItems =
 {
     new(""mon"", ""Monday""), new(""tue"", ""Tuesday""), new(""wed"", ""Wednesday""),
     new(""thu"", ""Thursday""), new(""fri"", ""Friday""), new(""sat"", ""Saturday"", Disabled: true),

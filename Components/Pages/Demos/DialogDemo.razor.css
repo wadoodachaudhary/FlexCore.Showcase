@@ -1,0 +1,7 @@
+.demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }   /* not .row: Bootstrap owns that name */
+.result { font-size: 13px; color: #475569; }
+.note { font-size: 13.5px; color: #475569; margin: -8px 0 14px; }
+.note code { font-size: 12.5px; background: #f1f5f9; padding: 1px 4px; border-radius: 4px; color: #334155; }
+.dlg-text { margin: 0; }
+/* classic frame: the library leaves the footer white; match the grey body */
+.dlg-host ::deep .fx-dialog-classic .fx-dialog-footer { background: #f0f0f0; border-top: 0; padding-top: 0; }

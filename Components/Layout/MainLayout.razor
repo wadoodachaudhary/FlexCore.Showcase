@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@using Fx.ControlKit.Dialogs
 
 <div class="showcase-shell-layout">
     <header class="top-nav-bar">
@@ -117,6 +118,7 @@
     </footer>
 
     <NotificationDisplayControl />
+    <DialogHostControl />   @* one per app: backs IDialogService (2026-10-12) *@
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>

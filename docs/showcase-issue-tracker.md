@@ -280,7 +280,7 @@ Raw reader findings, lightly deduplicated against sections 1–3. Items already 
 
 ## 5. Feature-page template rollout (started 2026-10-12)
 
-Reader feedback on the Buttons page: too busy. Rule for converted pages: a few examples, one concept each; everything else lives in the vocabulary tables.
+Reader feedback on the Buttons page: too busy. Rule for converted pages (2026-10-12): at most three examples per page, one concept each, and one good example beats three mediocre ones; everything else lives in the vocabulary tables or a code tab.
 
 | ID | Page | Status | Note |
 |---|---|---|---|
@@ -290,7 +290,13 @@ Reader feedback on the Buttons page: too busy. Rule for converted pages: a few e
 | SC-250 | Convert remaining feature pages (Dialogs, Toasts, Page layouts, Tree view, Charts, …) one commit each | pending approval | vocabulary written from each control's source |
 | SC-251 | New `/demo/split-button` on the template: three examples (default action, item values, custom menu content), Parameters, SplitButtonItem and CSS tables | done | nav: Components ▾ → Split button; catalog Split Button row points here |
 | SC-252 | Catalog rows FAB and Speed Dial Menu link to UI elements, which renders no FabMenuControl | done | both rows now point at `/demo/fab` (2026-10-12); Speed Dial is the same control open |
-| SC-253 | Library gaps found while writing pages (owner-gated): SplitButtonControl has no public close for MenuContent and no arrow/Escape keys; TabStripControl tabs are divs, not keyboard-focusable; FabMenuControl has no rule for `BadgeVariant.Light` (no fill) and no Escape/arrow keys | pending approval | FlexCore, not Showcase |
+| SC-253 | Library gaps found while writing pages (owner-gated): SplitButtonControl has no public close for MenuContent and no arrow/Escape keys; TabStripControl tabs are divs, not keyboard-focusable; FabMenuControl has no rule for `BadgeVariant.Light` (no fill) and no Escape/arrow keys; MessageBoxControl with RequiredConfirmationText does not take focus (OK is disabled), so Escape goes to the page until the user clicks inside; NotificationDisplayControl has no aria-live region and its close button has no accessible name | pending approval | FlexCore, not Showcase |
 | SC-254 | New `/demo/toggle-buttons` on the template: ToggleButtonControl + ButtonGroupControl, three examples (toggle, single, multiple vertical), six vocabulary tables | done | nav: Components ▾ → Toggle buttons; catalog Toggle Button row points here; layout accepts several source links |
 | SC-255 | New `/demo/fab` on the template: FabMenuControl, two examples (action menu with Disabled switch, custom trigger and content), Parameters, FabMenuItem and CSS tables | done | instances pinned inside a stage with two scoped overrides, stated on the page |
-
+| SC-256 | `/demo/dialog` rebuilt on the template: DialogControl, MessageBoxControl, InputDialogControl, IDialogService; four examples (modal with default button, non-modal window, classic look, service and message box), seven vocabulary tables | done | DialogService registered in Program.cs and DialogHostControl hosted in MainLayout, both new |
+| SC-257 | Catalog cleanup: labels and routes follow the nav (Wide Grids, Column Sets, Batch Editing, Column Reorder, Master-Detail, Tree Grid route, Financial & Gauges); duplicates removed (Financial Navigator, MultiSelect Dual List, Pager); Sparkline → Charts, Progress Bar → Page layouts; Most Popular: Data Grid → grid overview, Dialogs and Buttons replace Scheduler & Gantt and Tree Grid | done | 2026-10-12 |
+| SC-258 | Control tour accepts `?tab=` so 30 catalog rows land on the right tab (forms, selection, charts, docking, gantt, pdf, ai-prompt) | done | removed when phase 2 splits the tour |
+| SC-259 | Catalog rows whose control is demonstrated nowhere: Rich Text Editor (EditorControl), Format Control, Diagram Flowchart, Property Grid, Scheduler, ListBox; AppBar is shown only as the tour's own bar | pending approval | drop the rows or build demos; all six controls exist in the library |
+| SC-260 | 1–2 examples rule applied to the button pages: Buttons 5 → 2 (variants, icons, sizes and pills in one card, theming on its CSS tab; dropdown), Split button 3 → 2 (Item values dropped), Toggle buttons 3 → 2 (group modes merged), FAB 2 | done | Dialogs still has 4; pending a decision |
+| SC-261 | Rule revised to at most three examples; Dialogs 4 → 3 (classic look is now a switch on the modal example) | done | |
+| SC-262 | `/demo/notifications` rebuilt on the template: one example (levels, detail, duration, sticky, clear), NotificationService and Notification tables, CSS classes; accessibility states there is no aria-live region | done | |

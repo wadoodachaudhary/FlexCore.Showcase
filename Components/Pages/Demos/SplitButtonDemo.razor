@@ -1,7 +1,7 @@
 @page "/demo/split-button"
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-12: new page on FeatureDemoLayout. Facts checked against SplitButtonControl.razor,
+@* 2026-10-12: new page on FeatureDemoLayout; two examples per the 1–2 rule (Item values dropped, Value stays in the table). Facts checked against SplitButtonControl.razor,
    SplitButtonItem.cs and SplitButtonControl.razor.css in FlexCore 0.2.48. *@
 
 <PageTitle>Split button — FlexCore Showcase</PageTitle>
@@ -27,17 +27,6 @@
                                         OnClick="@(() => _saved = "Saved")" OnItemClick="@(i => _saved = i.Text)" />
                     <SplitButtonControl Text="Save" IconCss="bi bi-save" Items="_saveItems" Disabled="true" />
                     @if (_saved is not null) { <span class="result">@_saved</span> }
-                </div>
-            </Demo>
-        </DemoExample>
-
-        <DemoExample Id="values" Title="Item values" RazorCode="@Code.Values" CSharpCode="@Code.ValuesCs">
-            <Description><p><code>Value</code> carries any object, so the handler can act on it instead of matching text. Here the main half repeats the last format.</p></Description>
-            <Demo>
-                <div class="demo-row">
-                    <SplitButtonControl Text="@($"Export .{_format}")" IconCss="bi bi-download" Items="_exportItems"
-                                        OnClick="@(() => Export(_format))" OnItemClick="@(i => Export((string)i.Value!))" />
-                    @if (_exported is not null) { <span class="result">Exported @_exported</span> }
                 </div>
             </Demo>
         </DemoExample>
@@ -96,17 +85,6 @@
     };
     private string? _saved;
 
-    // Values
-    private readonly List<SplitButtonItem> _exportItems = new()
-    {
-        new("Excel", "bi bi-file-earmark-excel", "xlsx"),
-        new("CSV", "bi bi-filetype-csv", "csv"),
-        new("PDF", "bi bi-file-earmark-pdf", "pdf"),
-    };
-    private string _format = "xlsx";
-    private string? _exported;
-    private void Export(string format) { _format = format; _exported = $"report.{format}"; }
-
     // Menu content
     private readonly List<SplitButtonItem> _publishItems = new() { new("Schedule…", "bi bi-calendar-event") };
     private bool _notify = true, _pin;
@@ -133,7 +111,7 @@
         {
             new("Text", "Entry label.", "string", "\"\""),
             new("IconCss", "Leading icon.", "string?", "null"),
-            new("Value", "Any payload; read it in <code>OnItemClick</code>.", "object?", "null"),
+            new("Value", "Any payload; read it in <code>OnItemClick</code> instead of matching on <code>Text</code>.", "object?", "null"),
             new("Disabled", "Rendered greyed; clicks ignored.", "bool", "false"),
             new("ctor", "<code>new(text, iconCss, value, disabled)</code>, all but text optional.", "", null),
         };
@@ -162,22 +140,6 @@ private readonly List<SplitButtonItem> _saveItems = new()
     new(""Save as template"", ""bi bi-file-earmark-lock"", disabled: true),
 };
 private string? _saved;";
-
-        public const string Values = @"<SplitButtonControl Text=""@($""Export .{_format}"")"" IconCss=""bi bi-download"" Items=""_exportItems""
-                    OnClick=""@(() => Export(_format))""
-                    OnItemClick=""@(i => Export((string)i.Value!))"" />";
-        public const string ValuesCs = @"private readonly List<SplitButtonItem> _exportItems = new()
-{
-    new(""Excel"", ""bi bi-file-earmark-excel"", ""xlsx""),
-    new(""CSV"",   ""bi bi-filetype-csv"",       ""csv""),
-    new(""PDF"",   ""bi bi-file-earmark-pdf"",   ""pdf""),
-};
-private string _format = ""xlsx"";
-private void Export(string format)
-{
-    _format = format;
-    // ... write report.{format} ...
-}";
 
         public const string Menu = @"<SplitButtonControl Text=""Publish"" IconCss=""bi bi-cloud-upload"" Items=""_publishItems""
                     OnClick=""@(() => Publish(""now""))"" OnItemClick=""@(i => Publish(i.Text))"">

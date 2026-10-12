@@ -12,6 +12,9 @@ builder.Services.AddRazorComponents()
 // FlexCore services
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<Fx.ControlKit.ZoomService>();
+// Dialog service (confirm / alert / prompt); its host is <DialogHostControl /> in MainLayout. Added 2026-10-12 for /demo/dialog.
+builder.Services.AddScoped<Fx.ControlKit.Dialogs.DialogService>();
+builder.Services.AddScoped<Fx.ControlKit.Dialogs.IDialogService>(sp => sp.GetRequiredService<Fx.ControlKit.Dialogs.DialogService>());
 builder.Services.AddSingleton<BenchDataStore>();
 
 // Report pipeline — stub services that synthesize demo data instead of hitting a DB.

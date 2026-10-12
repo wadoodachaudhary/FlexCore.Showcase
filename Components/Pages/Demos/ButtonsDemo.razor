@@ -1,9 +1,10 @@
 @page "/demo/buttons"
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-12: moved onto FeatureDemoLayout and cut from ten sections to five examples
-   (reader feedback: too busy). Busy/focus, form types, BareStyle, Save/Cancel and Toolbar
-   demos removed; the parameters stay in the vocabulary. Uses only CSS shipped in FlexCore 0.2.48. *@
+@* 2026-10-12: on FeatureDemoLayout. Two examples (variants/icons/sizes with the pill subclass, dropdown);
+   theming is the CSS tab of the first. Toggle, button group and split button moved to their own pages; busy/focus, form types, BareStyle,
+   Save/Cancel and Toolbar demos removed, their parameters stay in the vocabulary. Uses only CSS
+   shipped in FlexCore 0.2.48. *@
 
 <PageTitle>Buttons — FlexCore Showcase</PageTitle>
 
@@ -19,8 +20,8 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="variants" Title="Variants" RazorCode="@Code.Variants">
-            <Description><p>The default look comes from the theme variables. Add one <code>btn-*</code> class for a semantic color.</p></Description>
+        <DemoExample Id="variants" Title="Variants, icons and sizes" RazorCode="@Code.Variants" CssCode="@Code.ThemeCss">
+            <Description><p>The default look comes from the theme variables; add one <code>btn-*</code> class for a semantic color. <code>IconCss</code> renders a leading icon, a trailing icon is ordinary content, and <code>btn-sm</code> / <code>btn-lg</code> change the size. Icon-only buttons need <code>Title</code> and <code>aria-label</code>. <code>RoundedButtonControl</code> is a pill-shaped subclass with four <code>Variant</code> colors. The CSS tab shows how a region is rethemed through <code>--fx-btn-*</code>.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <ButtonControl>Default</ButtonControl>
@@ -31,18 +32,19 @@
                     <ButtonControl CssClass="btn-outline-primary">Outline</ButtonControl>
                     <ButtonControl CssClass="btn-primary" Disabled="true">Disabled</ButtonControl>
                 </div>
-            </Demo>
-        </DemoExample>
-
-        <DemoExample Id="icons" Title="Icons and sizes" RazorCode="@Code.Icons">
-            <Description><p><code>IconCss</code> renders a leading icon; a trailing icon is ordinary content. <code>btn-sm</code> and <code>btn-lg</code> change padding and font size. Icon-only buttons need <code>Title</code> and <code>aria-label</code>.</p></Description>
-            <Demo>
-                <div class="demo-row">
+                <div class="demo-row mt">
                     <ButtonControl CssClass="btn-primary btn-sm" IconCss="bi bi-plus">Small</ButtonControl>
                     <ButtonControl CssClass="btn-primary" IconCss="bi bi-plus-lg">New</ButtonControl>
                     <ButtonControl CssClass="btn-primary btn-lg" IconCss="bi bi-plus">Large</ButtonControl>
                     <ButtonControl CssClass="btn-outline-primary">Next <span class="bi bi-arrow-right"></span></ButtonControl>
                     <ButtonControl CssClass="btn-secondary" IconCss="bi bi-gear" Title="Settings" aria-label="Settings" />
+                </div>
+                @* #pill is a catalog target *@
+                <div class="demo-row mt" id="pill">
+                    <RoundedButtonControl Variant="accent">accent</RoundedButtonControl>
+                    <RoundedButtonControl Variant="muted">muted</RoundedButtonControl>
+                    <RoundedButtonControl Variant="success" IconCss="bi bi-check2">success</RoundedButtonControl>
+                    <RoundedButtonControl Variant="danger" IconCss="bi bi-exclamation-triangle">danger</RoundedButtonControl>
                 </div>
             </Demo>
         </DemoExample>
@@ -65,57 +67,6 @@
             </Demo>
         </DemoExample>
 
-        @* Palettes copied from flexkit-themes.css onto wrappers; the file itself is not loaded. *@
-        <DemoExample Id="theme" Title="Theme with CSS variables" RazorCode="@Code.Theme" CssCode="@Code.ThemeCss">
-            <Description><p>Default buttons read <code>--fx-btn-*</code>. Set the variables on any ancestor to retheme that region; no markup changes.</p></Description>
-            <Demo>
-                <div class="demo-row">
-                    <div class="theme theme-classic">
-                        <span class="theme-name">Classic (Win32)</span>
-                        <div class="demo-row"><ButtonControl>OK</ButtonControl><ButtonControl>Cancel</ButtonControl><ButtonControl Disabled="true">Apply</ButtonControl></div>
-                    </div>
-                    <div class="theme theme-dark">
-                        <span class="theme-name">Dark</span>
-                        <div class="demo-row"><ButtonControl>OK</ButtonControl><ButtonControl>Cancel</ButtonControl><ButtonControl Disabled="true">Apply</ButtonControl></div>
-                    </div>
-                </div>
-            </Demo>
-        </DemoExample>
-
-        @* Anchors #toggle #group #split #pill are catalog targets. *@
-        <DemoExample Id="family" Title="Related controls" RazorCode="@Code.Family" CSharpCode="@Code.FamilyCs">
-            <Description><p>Each builds on <code>ButtonControl</code> or shares its styling contract.</p></Description>
-            <Demo>
-                <div class="demo-row fam-row">
-                    <div class="fam" id="toggle">
-                        <span class="theme-name">ToggleButtonControl</span>
-                        <div class="demo-row">
-                            <ToggleButtonControl @bind-Selected="_bold" IconCss="bi bi-type-bold" Title="Bold" aria-label="Bold" />
-                            <ToggleButtonControl @bind-Selected="_italic" IconCss="bi bi-type-italic" Title="Italic" aria-label="Italic" />
-                        </div>
-                    </div>
-                    <div class="fam" id="group">
-                        <span class="theme-name">ButtonGroupControl</span>
-                        <ButtonGroupControl Items="_alignItems" @bind-Values="_align" Selection="ChoiceSelectionMode.Single" AriaLabel="Text alignment" />
-                    </div>
-                    <div class="fam" id="split">
-                        <span class="theme-name">SplitButtonControl</span>
-                        <div class="demo-row">
-                            <SplitButtonControl Text="Save" IconCss="bi bi-save" Items="_splitItems"
-                                                OnClick="@(() => _msg = "Saved")" OnItemClick="@(i => _msg = i.Text)" />
-                            @if (_msg is not null) { <span class="result">@_msg</span> }
-                        </div>
-                    </div>
-                    <div class="fam" id="pill">
-                        <span class="theme-name">RoundedButtonControl</span>
-                        <div class="demo-row">
-                            <RoundedButtonControl Variant="accent">accent</RoundedButtonControl>
-                            <RoundedButtonControl Variant="danger" IconCss="bi bi-exclamation-triangle">danger</RoundedButtonControl>
-                        </div>
-                    </div>
-                </div>
-            </Demo>
-        </DemoExample>
     </Examples>
 
     <Vocabulary>
@@ -130,16 +81,15 @@
             <li>Renders a real <code>&lt;button&gt;</code>: Space and Enter activate it, it takes part in forms, and screen readers announce its role.</li>
             <li>Icon-only buttons need <code>Title</code> plus <code>aria-label</code>; the icon span carries no text.</li>
             <li>Dropdown mode sets <code>aria-haspopup</code> and <code>aria-expanded</code>.</li>
-            <li><code>ToggleButtonControl</code> and <code>ButtonGroupControl</code> emit <code>aria-pressed</code>; the group moves focus with Arrow, Home and End.</li>
             <li>Inside <code>DialogControl</code>, Enter fires the default button through <code>DefaultButtonScope</code>; a control that needs Enter for itself calls <code>ConsumeEnter()</code>.</li>
         </ul>
     </Accessibility>
 
     <Related>
         <ul>
-            <li><code>SaveButtonControl</code> and <code>CancelButtonControl</code> are presets of this control.</li>
             <li>Own pages: <a href="demo/split-button">Split button</a>, <a href="demo/toggle-buttons">Toggle buttons</a> (ToggleButtonControl and ButtonGroupControl), <a href="demo/fab">Floating action button</a>.</li>
-            <li><code>ToolbarControl</code> and <code>ToolbarButtonControl</code>: <a href="demo/counterparts">Control tour</a>.</li>
+            <li><code>SaveButtonControl</code> and <code>CancelButtonControl</code> are presets of this control.</li>
+            <li><code>ToolbarControl</code> and <code>ToolbarButtonControl</code>: <a href="demo/counterparts?tab=docking">Control tour</a>.</li>
             <li>Default button on Enter: <a href="demo/dialog">Dialogs</a>.</li>
             <li><code>RibbonControl</code>: <a href="">home page</a>.</li>
         </ul>
@@ -151,22 +101,6 @@
     private ButtonControl? _export;
     private string? _picked;
     private void Pick(string format) { _picked = format; _export?.CloseDropDown(); }
-
-    // Related controls
-    private bool _bold, _italic;
-    private readonly SelectionItem[] _alignItems =
-    {
-        new("left", "", IconCss: "bi bi-text-left"),
-        new("center", "", IconCss: "bi bi-text-center"),
-        new("right", "", IconCss: "bi bi-text-right"),
-    };
-    private IReadOnlyList<string> _align = new[] { "left" };
-    private readonly List<SplitButtonItem> _splitItems = new()
-    {
-        new("Save as…", "bi bi-file-earmark"),
-        new("Save and close", "bi bi-box-arrow-right"),
-    };
-    private string? _msg;
 
     // Vocabulary rows, one per public member of ButtonControl.razor (0.2.48).
     private static class Vocab
@@ -189,6 +123,7 @@
             new("DropDownContent", "When set, the button toggles a popup panel beneath itself.", "RenderFragment?", "null"),
             new("DropDownCssClass", "Extra class on the popup panel.", "string?", "null"),
             new("(unmatched attributes)", "Forwarded to the button: <code>id</code>, <code>name</code>, <code>form</code>, <code>accesskey</code>, <code>aria-*</code>, <code>data-*</code>. Explicit parameters win.", "Dictionary&lt;string,object&gt;"),
+            new("RoundedButtonControl.Variant", "Pill subclass only: <code>accent</code>, <code>muted</code>, <code>success</code> or <code>danger</code>.", "string", "\"muted\""),
         };
         public static readonly ApiRow[] Methods =
         {
@@ -224,13 +159,16 @@
 <ButtonControl CssClass=""btn-success"">Success</ButtonControl>
 <ButtonControl CssClass=""btn-danger"">Danger</ButtonControl>
 <ButtonControl CssClass=""btn-outline-primary"">Outline</ButtonControl>
-<ButtonControl CssClass=""btn-primary"" Disabled=""true"">Disabled</ButtonControl>";
+<ButtonControl CssClass=""btn-primary"" Disabled=""true"">Disabled</ButtonControl>
 
-        public const string Icons = @"<ButtonControl CssClass=""btn-primary btn-sm"" IconCss=""bi bi-plus"">Small</ButtonControl>
+<ButtonControl CssClass=""btn-primary btn-sm"" IconCss=""bi bi-plus"">Small</ButtonControl>
 <ButtonControl CssClass=""btn-primary"" IconCss=""bi bi-plus-lg"">New</ButtonControl>
 <ButtonControl CssClass=""btn-primary btn-lg"" IconCss=""bi bi-plus"">Large</ButtonControl>
 <ButtonControl CssClass=""btn-outline-primary"">Next <span class=""bi bi-arrow-right""></span></ButtonControl>
-<ButtonControl CssClass=""btn-secondary"" IconCss=""bi bi-gear"" Title=""Settings"" aria-label=""Settings"" />";
+<ButtonControl CssClass=""btn-secondary"" IconCss=""bi bi-gear"" Title=""Settings"" aria-label=""Settings"" />
+
+<RoundedButtonControl Variant=""accent"">accent</RoundedButtonControl>
+<RoundedButtonControl Variant=""success"" IconCss=""bi bi-check2"">success</RoundedButtonControl>";
 
         public const string Dropdown = @"<ButtonControl @ref=""_export"" CssClass=""btn-primary"" IconCss=""bi bi-download"">
     <ChildContent>Export</ChildContent>
@@ -246,12 +184,7 @@ private void Pick(string format)
     _export?.CloseDropDown();
 }";
 
-        public const string Theme = @"<div class=""classic"">
-    <ButtonControl>OK</ButtonControl>
-    <ButtonControl>Cancel</ButtonControl>
-    <ButtonControl Disabled=""true"">Apply</ButtonControl>
-</div>";
-        public const string ThemeCss = @"/* Every default ButtonControl inside .classic reads these. */
+        public const string ThemeCss = @"/* Retheme a region: every default ButtonControl inside .classic reads these (Win32 look). */
 .classic {
     --fx-btn-bg: #e6e6e6;
     --fx-btn-color: #000;
@@ -264,26 +197,5 @@ private void Pick(string format)
 
 /* Scale every FlexCore control in a region (ZoomService sets this app-wide). */
 .compact { --fx-zoom: 0.85; }";
-
-        public const string Family = @"<ToggleButtonControl @bind-Selected=""_bold"" IconCss=""bi bi-type-bold"" aria-label=""Bold"" />
-<ButtonGroupControl Items=""_alignItems"" @bind-Values=""_align"" Selection=""ChoiceSelectionMode.Single"" />
-<SplitButtonControl Text=""Save"" IconCss=""bi bi-save"" Items=""_splitItems"" OnClick=""Save"" OnItemClick=""i => Run(i)"" />
-<RoundedButtonControl Variant=""accent"">accent</RoundedButtonControl>";
-        public const string FamilyCs = @"private bool _bold;
-
-// SelectionItem(Value, Text, Disabled, IconCss)
-private readonly SelectionItem[] _alignItems =
-{
-    new(""left"", """", IconCss: ""bi bi-text-left""),
-    new(""center"", """", IconCss: ""bi bi-text-center""),
-    new(""right"", """", IconCss: ""bi bi-text-right""),
-};
-private IReadOnlyList<string> _align = new[] { ""left"" };
-
-private readonly List<SplitButtonItem> _splitItems = new()
-{
-    new(""Save as…"", ""bi bi-file-earmark""),
-    new(""Save and close"", ""bi bi-box-arrow-right""),
-};";
     }
 }

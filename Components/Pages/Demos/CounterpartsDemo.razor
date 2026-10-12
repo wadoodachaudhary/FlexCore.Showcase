@@ -98,6 +98,10 @@
 @code {
     private readonly string[] _sections=["Forms","Selection","Charts","Docking","Gantt","PDF","AI prompt"];
     private string _section="Forms",_status="Ready.";
+    // ?tab=forms|selection|charts|docking|gantt|pdf|ai-prompt opens that tab (2026-10-12, catalog deep links). Case and dashes ignored.
+    [Parameter, SupplyParameterFromQuery(Name="tab")] public string? Tab {get;set;}
+    protected override void OnParametersSet(){ if(!string.IsNullOrWhiteSpace(Tab)){ var hit=_sections.FirstOrDefault(n=>Norm(n)==Norm(Tab)); if(hit is not null)_section=hit; } }
+    private static string Norm(string v)=>v.Replace(" ","").Replace("-","").ToLowerInvariant();
     private DemoRecord _record=new(),_grouped=new();
     private readonly string[] _cities=["Amsterdam","Boston","Chicago","Denver","London","New York","San Francisco","Seattle"];
     private string? _city;
