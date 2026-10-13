@@ -5,7 +5,7 @@
 
 @* 2026-10-12: moved onto FeatureDemoLayout. The four Bootstrap cards became three examples; the existing
    demos were kept, a breadcrumb was added (the catalog listed one here), the split button moved to its own
-   page, and copy that made library claims was replaced with neutral sample text. Vocabulary pending (SC-264). *@
+   page, and copy that made library claims was replaced with neutral sample text. Vocabulary pending (SC-264). Code tabs added 2026-10-13. *@
 
 <PageTitle>UI elements — FlexCore Showcase</PageTitle>
 
@@ -19,7 +19,7 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="status" Title="Badges, alerts and skeletons">
+        <DemoExample Id="status" Title="Badges, alerts and skeletons" RazorCode="@Code.Status">
             <Description><p><code>BadgeControl</code> takes a <code>Variant</code>, a <code>Size</code>, or <code>IsDot</code> for a status dot. <code>AlertControl</code> is an inline banner with a <code>Severity</code> and an optional close. <code>SkeletonControl</code> holds the place of loading content.</p></Description>
             <Demo>
                 <div class="demo-row">
@@ -47,7 +47,7 @@
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="content" Title="Cards, timeline and breadcrumb">
+        <DemoExample Id="content" Title="Cards, timeline and breadcrumb" RazorCode="@Code.Content" CSharpCode="@Code.ContentCs">
             <Description><p><code>CardGroupControl</code> lays <code>CardControl</code>s out in a responsive grid. <code>TimelineControl</code> lists events with a coloured point per item. <code>BreadCrumbControl</code> takes a list of <code>BreadCrumbItem</code>s; the last one has no link.</p></Description>
             <Demo>
                 <CardGroupControl>
@@ -73,7 +73,7 @@
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="inputs" Title="Switch and rating">
+        <DemoExample Id="inputs" Title="Switch and rating" RazorCode="@Code.Inputs" CSharpCode="@Code.InputsCs">
             <Description><p>Both bind two ways. <code>SwitchControl</code> takes a <code>Label</code> or child content; <code>RatingControl</code> takes <code>MaxStars</code> and <code>ReadOnly</code>.</p></Description>
             <Demo>
                 <div class="demo-row">
@@ -104,4 +104,61 @@
     private bool _switchState = true;
     private int _rating = 4;
     private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", ""), new("Estimates", "demo/layout"), new("EST-2042 Contoso") };
+
+    // Code tabs are verbatim copies of the Demo blocks above (2026-10-13).
+    private static class Code
+    {
+        public const string Status = @"<div class=""demo-row"">
+    <BadgeControl Text=""Primary"" Variant=""BadgeVariant.Primary"" />
+    <BadgeControl Text=""Success"" Variant=""BadgeVariant.Success"" />
+    <BadgeControl Text=""Danger"" Variant=""BadgeVariant.Danger"" />
+    <BadgeControl Text=""Warning"" Variant=""BadgeVariant.Warning"" />
+    <BadgeControl Text=""Info"" Variant=""BadgeVariant.Info"" />
+    <BadgeControl Text=""Dark"" Variant=""BadgeVariant.Dark"" />
+    <BadgeControl Text=""Small"" Size=""BadgeSize.Small"" Variant=""BadgeVariant.Secondary"" />
+    <BadgeControl Text=""Large"" Size=""BadgeSize.Large"" Variant=""BadgeVariant.Primary"" />
+    <BadgeControl IsDot=""true"" Variant=""BadgeVariant.Success"" Title=""Online"" />
+</div>
+<div class=""stack mt"">
+    <AlertControl Severity=""AlertSeverity.Success"" Title=""Import finished"" Text=""1,204 vendor rows loaded; 3 skipped as duplicates."" AllowClose=""true"" />
+    <AlertControl Severity=""AlertSeverity.Warning"" Title=""Slow connection"" Text=""Round trips are taking about 200 ms."" AllowClose=""true"" />
+    <AlertControl Severity=""AlertSeverity.Error"" Title=""Sync failed"" Text=""The upstream server did not answer."" AllowClose=""true"" />
+    <AlertControl Severity=""AlertSeverity.Info"" Title=""Scheduled maintenance"" Text=""Saturday 02:00 to 03:00 UTC."" AllowClose=""true"" />
+</div>
+<div class=""skeletons mt"">
+    <SkeletonControl Variant=""SkeletonVariant.Text"" />
+    <SkeletonControl Variant=""SkeletonVariant.Text"" Animation=""SkeletonAnimation.Wave"" />
+    <div class=""demo-row""><SkeletonControl Variant=""SkeletonVariant.Circular"" /><SkeletonControl Variant=""SkeletonVariant.Text"" Width=""140px"" /></div>
+</div>";
+        public const string Content = @"<CardGroupControl>
+    <CardControl Title=""EST-2042 Contoso"" Subtitle=""Draft"" Elevation=""2"">
+        <ChildContent><p class=""m0"">14 lines, last saved today 09:12.</p></ChildContent>
+        <FooterContent><BadgeControl Text=""In progress"" Variant=""BadgeVariant.Success"" /></FooterContent>
+    </CardControl>
+    <CardControl Title=""EST-2043 Fabrikam"" Subtitle=""Awaiting approval"" Elevation=""2"">
+        <ChildContent><p class=""m0"">22 lines, sent for review yesterday.</p></ChildContent>
+        <FooterContent><BadgeControl Text=""Queued"" Variant=""BadgeVariant.Warning"" /></FooterContent>
+    </CardControl>
+</CardGroupControl>
+<div class=""two mt"">
+    <TimelineControl>
+        <TimelineItemControl Title=""Contract signed"" Time=""09:00"" PointColor=""BadgeVariant.Success"">Initial phase authorised.</TimelineItemControl>
+        <TimelineItemControl Title=""Materials dispatched"" Time=""13:30"" PointColor=""BadgeVariant.Primary"">Lumber and concrete en route.</TimelineItemControl>
+        <TimelineItemControl Title=""Quality inspection"" Time=""16:45"" PointColor=""BadgeVariant.Warning"">Compliance check scheduled.</TimelineItemControl>
+    </TimelineControl>
+</div>
+<div class=""demo-row mt"">
+    <BreadCrumbControl Items=""_crumbs"" />
+</div>";
+        public const string ContentCs = @"private readonly List<BreadCrumbItem> _crumbs = new() { new(""Home"", """"), new(""Estimates"", ""demo/layout""), new(""EST-2042 Contoso"") };";
+        public const string Inputs = @"<div class=""demo-row"">
+    <SwitchControl @bind-Checked=""_switchState"" Label=""@($""Notifications {(_switchState ? ""on"" : ""off"")}"")"" />
+    <SwitchControl Checked=""true"" Disabled=""true"" Label=""Locked setting"" />
+</div>
+<div class=""demo-row mt"">
+    <div class=""stack""><span class=""label"">Rating: @_rating / 5</span><RatingControl @bind-Value=""_rating"" /></div>
+</div>";
+        public const string InputsCs = @"private bool _switchState = true;
+private int _rating = 4;";
+    }
 }
