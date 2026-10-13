@@ -1,0 +1,99 @@
+@page "/signup"
+@rendermode InteractiveServer
+@using FlexCore.Showcase.Services.Signups
+@inject ISignupStore Store
+@inject NavigationManager Nav
+@inject ILogger<SignUp> Log
+
+@* 2026-10-13: sign-up and question form (owner decision: site stays open, the Community edition ships by email). Built on the library's
+   FormControl / FormItemControl so the form is itself a FlexCore example. Submissions go to ISignupStore (a JSON-lines file
+   for now); email delivery is not wired yet, see tracker SC-274. Anti-spam: a honeypot field and three submissions per circuit. *@
+
+<PageTitle>Sign up — FlexCore</PageTitle>
+
+<div class="signup-page">
+    <div class="signup-grid">
+        <section class="signup-intro">
+            <p class="eyebrow">Preview site</p>
+            <h1>Get the Community edition, or ask us anything</h1>
+            <p>
+                FlexCore is on NuGet today. The Community edition will be available as a download link sent by email. Leave your details and
+                we will send it when it is ready, and answer any question you put in the message.
+            </p>
+            <h2>What happens next</h2>
+            <ul>
+                <li>You get a confirmation that we have your request.</li>
+                <li>Questions are answered by a person, usually within two working days.</li>
+                <li>When the Community edition is ready, the download link goes to the address you give here.</li>
+            </ul>
+            <p class="fine">We use your email only to send the link and to reply. No newsletter, no sharing.</p>
+        </section>
+
+        <section class="signup-form" aria-live="polite">
+            @if (_saved is { } saved)
+            {
+                <AlertControl Severity="AlertSeverity.Success" Title="@($"Thanks, {saved.Name}.")"
+                              Text="@(saved.WantsDownload ? $"We have your request and will email {saved.Email} when the Community edition is ready." : $"We have your message and will reply to {saved.Email}.")" />
+                <ButtonControl CssClass="btn-sm" OnClick="Reset">Send another</ButtonControl>
+            }
+            else
+            {
+                <FormControl Model="@_request" Columns="2" SubmitText="Send" ShowValidationSummary="false" Enabled="@(!_blocked)"
+                             OnValidSubmit="SubmitAsync" OnInvalidSubmit="@(_ => _status = "Please check the highlighted fields.")">
+                    <ChildContent>
+                        <FormItemControl Field="Name" />
+                        <FormItemControl Field="Email" Hint="Where the download link and any reply will go." />
+                        <FormItemControl Field="Company" ColSpan="2" />
+                        <FormItemControl Field="Message" EditorType="FormEditorType.TextArea" Rows="4" ColSpan="2" />
+                        <FormItemControl Field="WantsDownload" EditorType="FormEditorType.Switch" ShowLabel="false" ColSpan="2" />
+                        @* Honeypot: hidden from people, filled by bots. A filled value is accepted silently and not stored. *@
+                        <input class="hp" @bind="_website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+                    </ChildContent>
+                </FormControl>
+                @if (_status is not null)
+                {
+                    <p class="status" role="status">@_status</p>
+                }
+            }
+        </section>
+    </div>
+</div>
+
+@code {
+    private SignupRequest _request = new();
+    private SignupRecord? _saved;
+    private string? _status;
+    private string? _website;          // honeypot
+    private int _submissions;          // per circuit
+    private bool _blocked => _submissions >= 3;
+
+    private async Task SubmitAsync(EditContext _)
+    {
+        if (_blocked) { _status = "That is enough for one visit. Thank you."; return; }
+        _submissions++;
+        _status = null;
+        if (!string.IsNullOrWhiteSpace(_website))
+        {
+            // Looks automated: pretend it worked, store nothing.
+            _saved = new SignupRecord(Guid.Empty, DateTimeOffset.UtcNow, _request.Name, _request.Email, null, null, _request.WantsDownload, "");
+            return;
+        }
+        try
+        {
+            _saved = await Store.SaveAsync(_request, new Uri(Nav.BaseUri).Host);
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(ex, "Sign-up could not be stored");
+            _status = "Sorry, that did not go through. Please try again in a minute, or email us from the GitHub page.";
+        }
+    }
+
+    private void Reset()
+    {
+        _request = new();
+        _saved = null;
+        _status = null;
+        _website = null;
+    }
+}

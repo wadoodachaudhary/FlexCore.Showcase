@@ -2,6 +2,15 @@
 @using Fx.ControlKit.Dialogs
 
 <div class="showcase-shell-layout">
+    @* Preview banner (owner decision 2026-10-13: keep the site open, point NuGet visitors at the sign-up form; wording "Community edition" per owner 2026-10-13). AlertControl is the library's own banner. *@
+    @if (_showBanner)
+    {
+        <div class="preview-banner">
+            <AlertControl Severity="AlertSeverity.Info" AllowClose="true" OnClose="@(() => _showBanner = false)" CssClass="preview-alert">
+                <strong>Preview site.</strong> The library is on <a href="https://www.nuget.org/packages/FlexCore" target="_blank" rel="noopener">NuGet</a>; the Community edition will be available by email. <a href="signup">Sign up or ask a question</a>.
+            </AlertControl>
+        </div>
+    }
     <header class="top-nav-bar">
         <div class="nav-brand-container">
             <a href="" class="brand-link">
@@ -95,6 +104,7 @@
             }
         }
         <a class="nav-drawer-top" href="get-started"><span class="bi bi-rocket-takeoff"></span> Quick Start</a>
+        <a class="nav-drawer-top" href="signup"><span class="bi bi-envelope"></span> Sign up</a>
     </nav>
 
     <main class="main-body-container">
@@ -112,6 +122,7 @@
                     <a href="@g.Href">@g.Label</a>
                 }
                 <a href="get-started">Get Started</a>
+                <a href="signup">Sign up</a>
                 <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank">GitHub</a>
             </div>
         </div>
@@ -129,6 +140,8 @@
 
 @code {
     [Inject] private NavigationManager Nav { get; set; } = default!;
+
+    private bool _showBanner = true;   // closes for the rest of the circuit; comes back on a full reload
 
     // Nav data lives in Components/Shared/SiteNav.cs (shared with the footer, drawer and overview pages).
     private static NavGroup[] _groups => SiteNav.Groups;

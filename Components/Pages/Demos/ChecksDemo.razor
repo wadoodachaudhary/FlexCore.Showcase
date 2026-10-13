@@ -1,0 +1,288 @@
+@page "/demo/checks"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-13: new page on FeatureDemoLayout; three examples (check boxes, radio group and switch, rating). Facts checked against
+   CheckBoxControl.razor(.css), RadioGroupControl.razor, RadioControl.razor(.css), RadioGroupItem.cs, SwitchControl.razor(.css),
+   RatingControl.razor(.css) and FlexControlBase.cs (FlexCore 0.2.48). Switch and rating moved here from UI elements; the check box
+   and radio group had no page. The Razor tabs are generated verbatim from the Demo blocks by script. *@
+
+<PageTitle>Checks & switches — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Checks & switches" Category="Components" ControlName="CheckBoxControl · RadioGroupControl · SwitchControl · RatingControl"
+                   Tagline="Yes or no, one of several, on or off, and how many stars: the small inputs every form needs."
+                   SourcePath="CheckBoxControl.razor; RadioGroupControl.razor; RadioControl.razor; SwitchControl.razor; RatingControl.razor">
+    <Overview>
+        <p>
+            <code>CheckBoxControl</code> is a native check box with a classic 13px look and an <code>Indeterminate</code> state for
+            "some of these". <code>RadioGroupControl&lt;TValue&gt;</code> renders one <code>RadioControl</code> per
+            <code>RadioGroupItem</code>, shares a name between them so the arrow keys work, and binds the chosen value.
+            <code>SwitchControl</code> is a check box drawn as a track and thumb. <code>RatingControl</code> is a row of star buttons.
+            All four bind their value two ways; the radio group also reports to an <code>EditContext</code>.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="checks" Title="Check boxes with select all" RazorCode="@Code.Checks" CSharpCode="@Code.ChecksCs">
+            <Description><p>The parent box is checked when every child is, and <code>Indeterminate</code> when only some are. Clicking it sets all three. A disabled box keeps its value and is skipped by Tab.</p></Description>
+            <Demo>
+                <div class="stack">
+                    <CheckBoxControl Checked="@AllChecked" Indeterminate="@SomeChecked" CheckedChanged="SetAll" Label="Include in quote" />
+                    <div class="stack indent">
+                        <CheckBoxControl @bind-Checked="_tax" Label="Sales tax" />
+                        <CheckBoxControl @bind-Checked="_labour" Label="Labour" />
+                        <CheckBoxControl @bind-Checked="_permits" Label="Permits" />
+                        <CheckBoxControl Checked="true" Disabled="true" Label="Materials (always included)" />
+                    </div>
+                </div>
+                <p class="result">@Included</p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="radio" Title="Radio group and switches" RazorCode="@Code.Radio" CSharpCode="@Code.RadioCs">
+            <Description><p>One value from a list of <code>RadioGroupItem</code>s, laid out with <code>Vertical</code>; the third item is disabled. Switches are independent on-off settings with a <code>Label</code>. The line below reads the bound values.</p></Description>
+            <Demo>
+                <div class="demo-row top">
+                    <div class="stack">
+                        <span class="field-label">Delivery</span>
+                        <RadioGroupControl TValue="string" Items="_deliveryItems" @bind-Value="_delivery" Vertical="true" AriaLabel="Delivery" />
+                    </div>
+                    <div class="stack">
+                        <span class="field-label">Options</span>
+                        <SwitchControl @bind-Checked="_signature" Label="Signature required" />
+                        <SwitchControl @bind-Checked="_insure" Label="Insure the shipment" />
+                        <SwitchControl Checked="true" Disabled="true" Label="Tracking (included)" />
+                    </div>
+                </div>
+                <p class="result">@Delivery</p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="rating" Title="Rating" RazorCode="@Code.Rating" CSharpCode="@Code.RatingCs">
+            <Description><p>Hover previews a value, a click sets it. <code>ReadOnly</code> shows a value without letting it change; <code>MaxStars</code> sets the count.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <RatingControl @bind-Value="_stars" />
+                    <span class="result inline">@Stars</span>
+                </div>
+                <div class="demo-row mt">
+                    <RatingControl Value="4" ReadOnly="true" />
+                    <span class="field-label">Average of 38 reviews</span>
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="CheckBoxControl parameters" Rows="Vocab.CheckBox" />
+        <ApiTable Kind="ApiKind.Parameters" Title="RadioGroupControl&lt;TValue&gt; parameters" Rows="Vocab.RadioGroup" />
+        <ApiTable Kind="ApiKind.Properties" Title="RadioGroupItem&lt;TValue&gt; and RadioControl" Rows="Vocab.RadioItem" />
+        <ApiTable Kind="ApiKind.Parameters" Title="SwitchControl parameters" Rows="Vocab.Switch" />
+        <ApiTable Kind="ApiKind.Parameters" Title="RatingControl parameters" Rows="Vocab.Rating" />
+        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <p>None of the four stylesheets reads a <code>--fx-*</code> variable. The check box has a second look, <code>fx-checkbox-theme-blue</code>, that switches to the browser's native 16px box with a blue accent.</p>
+    </Vocabulary>
+
+    <Accessibility>
+        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
+        <ul>
+            <li>Check box and switch are native <code>&lt;input type="checkbox"&gt;</code> elements inside a <code>&lt;label&gt;</code>, so the label text is their accessible name. The switch hides its input and shows a focus ring on the track.</li>
+            <li><code>Indeterminate</code> sets <code>aria-checked="mixed"</code> and draws a dash; the input's own checked value is unchanged.</li>
+            <li>The radio group is <code>role="radiogroup"</code> named by <code>AriaLabel</code>; each radio is named by its item text. One radio holds the Tab stop: the selected one, else the first enabled.</li>
+            <li>The rating stars are buttons without an accessible name or pressed state, and the hover preview is mouse only. Put a visible label beside the control.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>Pressed-state buttons and button groups: <a href="demo/toggle-buttons">Toggle buttons</a>. Numbers by dragging: <a href="demo/sliders">Sliders</a>.</li>
+            <li>These controls inside a validated form: <a href="demo/counterparts?tab=forms">Control tour, Forms</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Check boxes
+    private bool _tax = true, _labour = true, _permits;
+    private bool AllChecked => _tax && _labour && _permits;
+    private bool SomeChecked => !AllChecked && (_tax || _labour || _permits);
+    private void SetAll(bool value) => _tax = _labour = _permits = value;
+    private string Included
+    {
+        get
+        {
+            var parts = new List<string> { "materials" };
+            if (_tax) parts.Add("sales tax");
+            if (_labour) parts.Add("labour");
+            if (_permits) parts.Add("permits");
+            return "Quote includes " + string.Join(", ", parts) + ".";
+        }
+    }
+
+    // Radio group and switches
+    private readonly RadioGroupItem<string>[] _deliveryItems =
+    {
+        new("standard", "Standard, 5 days"), new("express", "Express, next day"), new("courier", "Courier, same day", true),
+    };
+    private string? _delivery = "standard";
+    private bool _signature = true, _insure;
+    private string Delivery => $"{_deliveryItems.First(i => i.Value == _delivery).Text}; signature {(_signature ? "required" : "not required")}; {(_insure ? "insured" : "not insured")}; tracked.";
+
+    // Rating
+    private int _stars = 3;
+    private string Stars => _stars switch
+    {
+        0 => "Not rated",
+        1 => "1 star, poor",
+        2 => "2 stars, fair",
+        3 => "3 stars, good",
+        4 => "4 stars, very good",
+        _ => "5 stars, excellent",
+    };
+
+    // Vocabulary rows, one per public member (0.2.48). Base-class parameters marked (base).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] CheckBox =
+        {
+            new("Checked", "State. Two-way with <code>@bind-Checked</code>.", "bool", "false"),
+            new("CheckedChanged", "Fires on the input's <code>change</code> event.", "EventCallback&lt;bool&gt;"),
+            new("Indeterminate", "Draws a dash and sets <code>aria-checked=\"mixed\"</code>. Visual only; <code>Checked</code> still decides what a click toggles to.", "bool", "false"),
+            new("Label", "Text after the box, inside the same <code>&lt;label&gt;</code>.", "string?", "null"),
+            new("Disabled", "Disables the input and dims the label.", "bool", "false"),
+            new("CssClass", "Appended to the label; <code>fx-checkbox-theme-blue</code> picks the native look.", "string?", "null"),
+            new("TabIndex", "Tab order of the input.", "int?", "null"),
+            new("OnMouseDown / OnFocus / OnKeyDown", "Raw events from the input, for hosts such as grid cells.", "EventCallback"),
+            new("StopClickPropagation / StopMouseDownPropagation / StopKeyDownPropagation", "Stop those events reaching ancestors.", "bool", "false"),
+            new("PreventKeyDownDefault", "Cancels the browser's default for key presses on the input.", "bool", "false"),
+            new("(no base class)", "This control does not derive from <code>FlexControlBase</code>: no <code>Enabled</code>, <code>Visible</code>, <code>Style</code> or unmatched attributes.", "", null),
+        };
+        public static readonly ApiRow[] RadioGroup =
+        {
+            new("Items", "One radio per item, in order.", "IReadOnlyList&lt;RadioGroupItem&lt;TValue&gt;&gt;", "empty"),
+            new("Value", "Selected item's value. Two-way with <code>@bind-Value</code>; a value that matches no enabled item is ignored.", "TValue?", "default"),
+            new("ValueChanged", "Fires when an enabled radio is selected.", "EventCallback&lt;TValue?&gt;"),
+            new("ValueExpression", "Set by <code>@bind-Value</code>; marks the field changed on the cascaded <code>EditContext</code>.", "Expression&lt;Func&lt;TValue&gt;&gt;?", "null"),
+            new("AriaLabel", "Accessible name of the group.", "string?", "null"),
+            new("Vertical", "Stacks the radios in a column.", "bool", "false"),
+            new("Spacing", "Flex gap between radios.", "string", "\"12px\""),
+            new("Enabled (base)", "false disables every radio.", "bool", "true"),
+            new("Visible (base)", "false hides the group with <code>display:none</code>.", "bool", "true"),
+            new("CssClass / Style (base)", "On the group element; <code>Style</code> is appended after the layout styles.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the group <code>&lt;div&gt;</code>.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] RadioItem =
+        {
+            new("RadioGroupItem.Value / Text / Disabled", "Positional record: <code>new(value, text, disabled)</code>. A disabled item renders but cannot be chosen.", "TValue / string / bool", "— / — / false"),
+            new("RadioControl (standalone)", "<code>Value</code>, <code>SelectedValue</code> (two-way), <code>Name</code>, <code>Label</code>, <code>Disabled</code>, <code>TabIndex</code>, <code>CssClass</code>, <code>ChildContent</code>. Give every button in a group the same <code>Name</code>.", "", null),
+        };
+        public static readonly ApiRow[] Switch =
+        {
+            new("Checked", "State. Two-way with <code>@bind-Checked</code>.", "bool", "false"),
+            new("CheckedChanged", "Fires on the hidden input's <code>change</code> event.", "EventCallback&lt;bool&gt;"),
+            new("Label", "Text after the track. Takes precedence over child content.", "string?", "null"),
+            new("ChildContent", "Markup label, used when <code>Label</code> is empty.", "RenderFragment?", "null"),
+            new("Disabled", "Disables the input and dims the control. The base <code>Enabled</code> is not read.", "bool", "false"),
+            new("CssClass / Style (base)", "On the <code>&lt;label&gt;</code> host. The base <code>Visible</code> is not applied.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the hidden <code>&lt;input&gt;</code>: <code>aria-label</code>, <code>name</code>, <code>data-*</code>.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Rating =
+        {
+            new("Value", "Filled stars, 0 to <code>MaxStars</code>. Two-way with <code>@bind-Value</code>.", "int", "0"),
+            new("ValueChanged", "Fires when a star is clicked or activated.", "EventCallback&lt;int&gt;"),
+            new("MaxStars", "Number of stars.", "int", "5"),
+            new("ReadOnly", "Disables the star buttons without dimming them.", "bool", "false"),
+            new("Disabled", "Disables and dims; also blocks pointer events. The base <code>Enabled</code> is not read.", "bool", "false"),
+            new("CssClass / Style (base)", "On the <code>fx-rating</code> root. The base <code>Visible</code> is not applied.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the root <code>&lt;div&gt;</code>.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("CheckBoxControl.FocusAsync()", "Focuses the input without scrolling.", "Task"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-checkbox · .fx-checkbox-indeterminate · .fx-checkbox-theme-blue · fx-checkbox-label", "Label host; the classic 13px square box, the dash state, the native blue variant, and the text."),
+            new("fx-radio-group · fx-radio · fx-radio-label", "Flex group; each radio label with a native 16px button; focus draws a dotted outline on the text."),
+            new("fx-switch-host · .fx-switch-disabled · fx-switch-input · fx-switch-track · fx-switch-thumb · fx-switch-label", "Label host, hidden input, 38×22px track (blue when checked), 18px thumb that slides 16px, and the text."),
+            new("fx-rating · .fx-rating-readonly · .fx-rating-disabled · fx-rating-item · .fx-rating-filled / .fx-rating-empty", "Row of 20px star buttons; filled stars are amber, empty ones grey; hover scales a star by 15%."),
+        };
+        public static readonly ApiRow[] Keys =
+        {
+            new("Space (check box, switch)", "Toggles. Enter does nothing, as on a native check box."),
+            new("Tab (radio group)", "Enters the group on the selected radio, or the first enabled one."),
+            new("Arrow keys (radio group)", "Move the selection to the previous or next enabled radio; the browser does this because the radios share a name."),
+            new("Tab / Enter / Space (rating)", "Tab moves through the stars one by one; Enter or Space selects the focused star. There are no arrow keys."),
+        };
+    }
+
+    private static class Code
+    {
+        public const string Checks = @"<div class=""stack"">
+    <CheckBoxControl Checked=""@AllChecked"" Indeterminate=""@SomeChecked"" CheckedChanged=""SetAll"" Label=""Include in quote"" />
+    <div class=""stack indent"">
+        <CheckBoxControl @bind-Checked=""_tax"" Label=""Sales tax"" />
+        <CheckBoxControl @bind-Checked=""_labour"" Label=""Labour"" />
+        <CheckBoxControl @bind-Checked=""_permits"" Label=""Permits"" />
+        <CheckBoxControl Checked=""true"" Disabled=""true"" Label=""Materials (always included)"" />
+    </div>
+</div>
+<p class=""result"">@Included</p>";
+        public const string ChecksCs = @"private bool _tax = true, _labour = true, _permits;
+private bool AllChecked  => _tax && _labour && _permits;
+private bool SomeChecked => !AllChecked && (_tax || _labour || _permits);
+private void SetAll(bool value) => _tax = _labour = _permits = value;
+
+private string Included
+{
+    get
+    {
+        var parts = new List<string> { ""materials"" };
+        if (_tax) parts.Add(""sales tax"");
+        if (_labour) parts.Add(""labour"");
+        if (_permits) parts.Add(""permits"");
+        return ""Quote includes "" + string.Join("", "", parts) + ""."";
+    }
+}";
+        public const string Radio = @"<div class=""demo-row top"">
+    <div class=""stack"">
+        <span class=""field-label"">Delivery</span>
+        <RadioGroupControl TValue=""string"" Items=""_deliveryItems"" @bind-Value=""_delivery"" Vertical=""true"" AriaLabel=""Delivery"" />
+    </div>
+    <div class=""stack"">
+        <span class=""field-label"">Options</span>
+        <SwitchControl @bind-Checked=""_signature"" Label=""Signature required"" />
+        <SwitchControl @bind-Checked=""_insure"" Label=""Insure the shipment"" />
+        <SwitchControl Checked=""true"" Disabled=""true"" Label=""Tracking (included)"" />
+    </div>
+</div>
+<p class=""result"">@Delivery</p>";
+        public const string RadioCs = @"// RadioGroupItem<TValue>(Value, Text, Disabled = false)
+private readonly RadioGroupItem<string>[] _deliveryItems =
+{
+    new(""standard"", ""Standard, 5 days""), new(""express"", ""Express, next day""), new(""courier"", ""Courier, same day"", true),
+};
+private string? _delivery = ""standard"";
+private bool _signature = true, _insure;
+
+private string Delivery => $""{_deliveryItems.First(i => i.Value == _delivery).Text}; signature {(_signature ? ""required"" : ""not required"")}; {(_insure ? ""insured"" : ""not insured"")}; tracked."";";
+        public const string Rating = @"<div class=""demo-row"">
+    <RatingControl @bind-Value=""_stars"" />
+    <span class=""result inline"">@Stars</span>
+</div>
+<div class=""demo-row mt"">
+    <RatingControl Value=""4"" ReadOnly=""true"" />
+    <span class=""field-label"">Average of 38 reviews</span>
+</div>";
+        public const string RatingCs = @"private int _stars = 3;
+private string Stars => _stars switch
+{
+    0 => ""Not rated"",
+    1 => ""1 star, poor"",
+    2 => ""2 stars, fair"",
+    3 => ""3 stars, good"",
+    4 => ""4 stars, very good"",
+    _ => ""5 stars, excellent"",
+};";
+    }
+}

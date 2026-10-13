@@ -107,6 +107,7 @@
 }
 
 .btn-nav-primary {
+    white-space: nowrap;   /* keeps 'Quick Start' on one line next to the wider menu items (2026-10-13) */
     background: #0284c7;
     color: #ffffff;
     font-size: 13px;
@@ -216,7 +217,7 @@
    The library's scoped rules are Win32-flavoured (Tahoma 11px, bevel). These ::deep overrides
    win on specificity (.top-nav-menu[scope] .x  >  .x[scope]) and leave behaviour untouched. ── */
 .top-nav-menu ::deep .site-menubar { border: 0; background: transparent; padding: 0; gap: 4px; font: inherit; }
-.top-nav-menu ::deep .site-dd .nav-menu-item { height: auto; font-family: inherit; font-size: 13.5px; }
+.top-nav-menu ::deep .site-dd .nav-menu-item { height: auto; font-family: inherit; font-size: 13.5px; gap: 8px; padding: 7px 12px; white-space: nowrap; }   /* the library button is not in this file's scope, so the gap above does not reach it (2026-10-13) */
 .top-nav-menu ::deep .site-dd .nav-menu-item:hover { background: #f1f5f9; border-color: transparent; color: #0284c7; }
 .top-nav-menu ::deep .site-dd .nav-menu-item.active { background: #e0f2fe; border-color: transparent; color: #0284c7; }
 .top-nav-menu ::deep .site-dd.active .nav-menu-item { color: #0284c7; background: #e0f2fe; font-weight: 600; }
@@ -260,3 +261,8 @@
     .nav-drawer-link:hover { background: #f1f5f9; }
     .nav-drawer-head { padding: 8px 8px 0 34px; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; }
 }
+
+/* Preview banner above the sticky top bar (2026-10-13). AlertControl supplies the look; this only flattens it to a strip. */
+.preview-banner ::deep .fx-alert { margin: 0; border-radius: 0; border-width: 0 0 1px; padding: 7px 24px; justify-content: center; align-items: center; font-size: 13px; }
+.preview-banner ::deep .fx-alert-content { flex-grow: 0; }
+.preview-banner ::deep .fx-alert a { color: inherit; text-decoration: underline; font-weight: 600; }

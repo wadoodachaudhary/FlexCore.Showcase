@@ -1,0 +1,174 @@
+@page "/demo/cards"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-13: new page on FeatureDemoLayout; two examples (card, card group). Facts checked against CardControl.razor(.css),
+   CardGroupControl.razor and FlexControlBase.cs (FlexCore 0.2.48). Cards moved here from UI elements. The Razor tabs are
+   generated verbatim from the Demo blocks by script. *@
+
+<PageTitle>Cards — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Cards" Category="Components" ControlName="CardControl · CardGroupControl"
+                   Tagline="A bordered container with an optional header, image, body and footer, and a grid that lays several of them out."
+                   SourcePath="CardControl.razor; CardGroupControl.razor">
+    <Overview>
+        <p>
+            <code>CardControl</code> stacks four regions: a header from <code>Title</code> and <code>Subtitle</code> (or your own
+            <code>HeaderContent</code>), an image from <code>ImageUrl</code>, the body from child content, and a right-aligned
+            <code>FooterContent</code> row. <code>Elevation</code> picks one of three shadow depths. <code>CardGroupControl</code> is a
+            grid of 280px-minimum columns that wraps as the page narrows and stretches every card in a row to the same height.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="card" Title="Card with image, header and footer" RazorCode="@Code.Card" CSharpCode="@Code.CardCs">
+            <Description><p><code>Title</code> and <code>Subtitle</code> fill the header; the image sits between header and body, and <code>ImageAlt</code> falls back to the title. Footer children line up on the right. Pick an elevation to compare the shadows; 0 leaves only the border.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <span class="field-label">Elevation</span>
+                    <ButtonGroupControl Items="_elevationItems" Values="@(new[] { _elevation.ToString() })" ValuesChanged="PickElevation" AriaLabel="Elevation" />
+                </div>
+                <div class="card-stage">
+                    <CardControl Title="EST-2042 Contoso kitchen" Subtitle="Draft · 14 lines" ImageUrl="images/card-kitchen.svg" ImageAlt="Kitchen plan, revision B" Elevation="@_elevation">
+                        <ChildContent><p class="m0">Quartz counters, cabinet install and tile backsplash. Last saved today 09:12 by Dana.</p></ChildContent>
+                        <FooterContent>
+                            <BadgeControl Text="In progress" Variant="BadgeVariant.Success" />
+                            <ButtonControl CssClass="btn-sm" OnClick="@(() => _opened++)">Open</ButtonControl>
+                        </FooterContent>
+                    </CardControl>
+                </div>
+                <p class="result">@(_opened == 0 ? "Open has not been clicked." : $"Open clicked {_opened} time{(_opened == 1 ? "" : "s")}.")</p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="group" Title="Card group" RazorCode="@Code.Group" CSharpCode="@Code.GroupCs">
+            <Description><p>Three cards from a list. <code>HeaderContent</code> replaces the title block, here with an icon. Narrow the window and the grid drops to two columns, then one.</p></Description>
+            <Demo>
+                <CardGroupControl>
+                    @foreach (var e in _estimates)
+                    {
+                        <CardControl Elevation="1">
+                            <HeaderContent><span class="head"><span class="@e.Icon"></span> @e.Name</span></HeaderContent>
+                            <ChildContent><p class="m0">@e.Summary</p></ChildContent>
+                            <FooterContent><BadgeControl Text="@e.Status" Variant="@e.Variant" /></FooterContent>
+                        </CardControl>
+                    }
+                </CardGroupControl>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="CardControl parameters" Rows="Vocab.Card" />
+        <ApiTable Kind="ApiKind.Parameters" Title="CardGroupControl parameters" Rows="Vocab.Group" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <p>Colours, padding and the three shadows are fixed in the stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>A card is a plain <code>&lt;div&gt;</code> with no role. <code>Title</code> renders as an <code>&lt;h5&gt;</code> and <code>Subtitle</code> as an <code>&lt;h6&gt;</code>; use <code>HeaderContent</code> when the page needs a different heading level.</li>
+            <li>The image's <code>alt</code> is <code>ImageAlt</code>, then <code>Title</code>, then "Card image". Give decorative images an empty <code>ImageAlt</code>.</li>
+            <li>Nothing in a card is focusable except what you put in it. The footer is a flex row, so buttons there keep their natural Tab order.</li>
+            <li><code>CardGroupControl</code> is a CSS grid; it adds no list semantics.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>Badges, alerts, skeletons, timeline and breadcrumb: <a href="demo/new-components">UI elements</a>.</li>
+            <li>Cards placed on a fixed grid of cells: the dashboard example in <a href="demo/layout#dashboard">Page layouts</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Card
+    private int _elevation = 2;
+    private int _opened;
+    private readonly SelectionItem[] _elevationItems = { new("0", "None"), new("1", "1"), new("2", "2"), new("3", "3") };
+    private void PickElevation(IReadOnlyList<string> values)
+    {
+        if (values.Count > 0) _elevation = int.Parse(values[0]);
+    }
+
+    // Card group
+    private sealed record Estimate(string Name, string Icon, string Summary, string Status, BadgeVariant Variant);
+    private readonly Estimate[] _estimates =
+    {
+        new("EST-2042 Contoso", "bi bi-house", "Kitchen, 14 lines, $12,480.", "In progress", BadgeVariant.Success),
+        new("EST-2043 Fabrikam", "bi bi-building", "Office fit-out, 22 lines, $48,900.", "Awaiting approval", BadgeVariant.Warning),
+        new("EST-2044 Northwind", "bi bi-shop", "Storefront, 9 lines, $7,150.", "Draft", BadgeVariant.Secondary),
+    };
+
+    // Vocabulary rows, one per public member (0.2.48). Base-class parameters marked (base).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Card =
+        {
+            new("Title (base)", "Header heading. The base class documents it as a descriptive title; this control renders it as an <code>&lt;h5&gt;</code>.", "string?", "null"),
+            new("Subtitle", "Second line under the title.", "string?", "null"),
+            new("ImageUrl", "Image rendered full width between header and body.", "string?", "null"),
+            new("ImageAlt", "Alt text; falls back to <code>Title</code>, then \"Card image\".", "string?", "null"),
+            new("Elevation", "Shadow depth 1 to 3; 0 or less draws only the border.", "int", "1"),
+            new("HeaderContent", "Replaces the title and subtitle inside the header.", "RenderFragment?", "null"),
+            new("ChildContent", "Body.", "RenderFragment?", "null"),
+            new("FooterContent", "Footer, a right-aligned flex row with a 0.5rem gap.", "RenderFragment?", "null"),
+            new("CssClass / Style (base)", "On the <code>fx-card</code> root. The base <code>Visible</code> is not applied.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the root <code>&lt;div&gt;</code>.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Group =
+        {
+            new("ChildContent", "The cards.", "RenderFragment?", "null"),
+            new("CssClass / Style (base)", "On the <code>fx-card-group</code> grid.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the grid <code>&lt;div&gt;</code>.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-card · fx-card-elevation-1 / -2 / -3", "White rounded box with a hairline border, <code>overflow: hidden</code>; the elevation classes add the shadows."),
+            new("fx-card-header · fx-card-title · fx-card-subtitle", "Header block with a bottom hairline; bold 1rem title, 0.8rem grey subtitle."),
+            new("fx-card-image", "Full-width image block; the image is <code>display: block</code>."),
+            new("fx-card-body", "Padded body that grows to fill the card."),
+            new("fx-card-footer", "Light grey footer, flex row aligned to the end."),
+            new("fx-card-group", "Grid, <code>repeat(auto-fit, minmax(280px, 1fr))</code>, 1rem gap."),
+        };
+    }
+
+    private static class Code
+    {
+        public const string Card = @"<div class=""demo-row"">
+    <span class=""field-label"">Elevation</span>
+    <ButtonGroupControl Items=""_elevationItems"" Values=""@(new[] { _elevation.ToString() })"" ValuesChanged=""PickElevation"" AriaLabel=""Elevation"" />
+</div>
+<div class=""card-stage"">
+    <CardControl Title=""EST-2042 Contoso kitchen"" Subtitle=""Draft · 14 lines"" ImageUrl=""images/card-kitchen.svg"" ImageAlt=""Kitchen plan, revision B"" Elevation=""@_elevation"">
+        <ChildContent><p class=""m0"">Quartz counters, cabinet install and tile backsplash. Last saved today 09:12 by Dana.</p></ChildContent>
+        <FooterContent>
+            <BadgeControl Text=""In progress"" Variant=""BadgeVariant.Success"" />
+            <ButtonControl CssClass=""btn-sm"" OnClick=""@(() => _opened++)"">Open</ButtonControl>
+        </FooterContent>
+    </CardControl>
+</div>
+<p class=""result"">@(_opened == 0 ? ""Open has not been clicked."" : $""Open clicked {_opened} time{(_opened == 1 ? """" : ""s"")}."")</p>";
+        public const string CardCs = @"private int _elevation = 2;
+private int _opened;
+private readonly SelectionItem[] _elevationItems = { new(""0"", ""None""), new(""1"", ""1""), new(""2"", ""2""), new(""3"", ""3"") };
+private void PickElevation(IReadOnlyList<string> values) => _elevation = int.Parse(values[0]);";
+        public const string Group = @"<CardGroupControl>
+    @foreach (var e in _estimates)
+    {
+        <CardControl Elevation=""1"">
+            <HeaderContent><span class=""head""><span class=""@e.Icon""></span> @e.Name</span></HeaderContent>
+            <ChildContent><p class=""m0"">@e.Summary</p></ChildContent>
+            <FooterContent><BadgeControl Text=""@e.Status"" Variant=""@e.Variant"" /></FooterContent>
+        </CardControl>
+    }
+</CardGroupControl>";
+        public const string GroupCs = @"private sealed record Estimate(string Name, string Icon, string Summary, string Status, BadgeVariant Variant);
+private readonly Estimate[] _estimates =
+{
+    new(""EST-2042 Contoso"",   ""bi bi-house"",    ""Kitchen, 14 lines, $12,480."",        ""In progress"",       BadgeVariant.Success),
+    new(""EST-2043 Fabrikam"",  ""bi bi-building"", ""Office fit-out, 22 lines, $48,900."", ""Awaiting approval"", BadgeVariant.Warning),
+    new(""EST-2044 Northwind"", ""bi bi-shop"",     ""Storefront, 9 lines, $7,150."",       ""Draft"",             BadgeVariant.Secondary),
+};";
+    }
+}

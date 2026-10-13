@@ -10,11 +10,10 @@
 <PageTitle>UI elements — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="UI elements" Category="Components"
-                   Tagline="The small parts: badges, alerts, skeletons, cards, timeline, breadcrumb, switch and rating.">
+                   Tagline="The small parts: badges, alerts, skeletons, timeline and breadcrumb.">
     <Overview>
         <p>
-            Nine small controls that have no page of their own yet, grouped by what they do: status and feedback, content
-            containers, and inputs. Each is shown with the parameters it is usually given. Tables for each control follow later.
+            Five small controls that have no page of their own yet, grouped by what they do: status and feedback, and content. Each is shown with the parameters it is usually given. Tables for each control follow later.
         </p>
     </Overview>
 
@@ -47,20 +46,10 @@
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="content" Title="Cards, timeline and breadcrumb" RazorCode="@Code.Content" CSharpCode="@Code.ContentCs">
-            <Description><p><code>CardGroupControl</code> lays <code>CardControl</code>s out in a responsive grid. <code>TimelineControl</code> lists events with a coloured point per item. <code>BreadCrumbControl</code> takes a list of <code>BreadCrumbItem</code>s; the last one has no link.</p></Description>
+        <DemoExample Id="content" Title="Timeline and breadcrumb" RazorCode="@Code.Content" CSharpCode="@Code.ContentCs">
+            <Description><p><code>TimelineControl</code> lists <code>TimelineItemControl</code>s, each with a title, a time and a coloured point. <code>BreadCrumbControl</code> takes a list of <code>BreadCrumbItem</code>s; the last one renders without a link.</p></Description>
             <Demo>
-                <CardGroupControl>
-                    <CardControl Title="EST-2042 Contoso" Subtitle="Draft" Elevation="2">
-                        <ChildContent><p class="m0">14 lines, last saved today 09:12.</p></ChildContent>
-                        <FooterContent><BadgeControl Text="In progress" Variant="BadgeVariant.Success" /></FooterContent>
-                    </CardControl>
-                    <CardControl Title="EST-2043 Fabrikam" Subtitle="Awaiting approval" Elevation="2">
-                        <ChildContent><p class="m0">22 lines, sent for review yesterday.</p></ChildContent>
-                        <FooterContent><BadgeControl Text="Queued" Variant="BadgeVariant.Warning" /></FooterContent>
-                    </CardControl>
-                </CardGroupControl>
-                <div class="two mt">
+                <div class="two">
                     <TimelineControl>
                         <TimelineItemControl Title="Contract signed" Time="09:00" PointColor="BadgeVariant.Success">Initial phase authorised.</TimelineItemControl>
                         <TimelineItemControl Title="Materials dispatched" Time="13:30" PointColor="BadgeVariant.Primary">Lumber and concrete en route.</TimelineItemControl>
@@ -72,37 +61,22 @@
                 </div>
             </Demo>
         </DemoExample>
-
-        <DemoExample Id="inputs" Title="Switch and rating" RazorCode="@Code.Inputs" CSharpCode="@Code.InputsCs">
-            <Description><p>Both bind two ways. <code>SwitchControl</code> takes a <code>Label</code> or child content; <code>RatingControl</code> takes <code>MaxStars</code> and <code>ReadOnly</code>.</p></Description>
-            <Demo>
-                <div class="demo-row">
-                    <SwitchControl @bind-Checked="_switchState" Label="@($"Notifications {(_switchState ? "on" : "off")}")" />
-                    <SwitchControl Checked="true" Disabled="true" Label="Locked setting" />
-                </div>
-                <div class="demo-row mt">
-                    <div class="stack"><span class="label">Rating: @_rating / 5</span><RatingControl @bind-Value="_rating" /></div>
-                </div>
-            </Demo>
-        </DemoExample>
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending">Parameter tables for these nine controls are still to be written from source (<code>BadgeControl</code>, <code>AlertControl</code>, <code>SkeletonControl</code>, <code>CardControl</code>, <code>CardGroupControl</code>, <code>TimelineControl</code>, <code>BreadCrumbControl</code>, <code>SwitchControl</code>, <code>RatingControl</code>). Tracker SC-264.</p>
+        <p class="fd-pending">Parameter tables for these five controls are still to be written from source (<code>BadgeControl</code>, <code>AlertControl</code>, <code>SkeletonControl</code>, <code>TimelineControl</code>, <code>BreadCrumbControl</code>). Tracker SC-264.</p>
     </Vocabulary>
 
     <Related>
         <ul>
             <li>Buttons of every kind: <a href="demo/buttons">Buttons</a>, <a href="demo/split-button">Split button</a>, <a href="demo/toggle-buttons">Toggle buttons</a>.</li>
             <li>Messages that pop up rather than sit in the page: <a href="demo/notifications">Toasts</a> and <a href="demo/dialog">Dialogs</a>.</li>
-            <li>Moved to their own pages: <a href="demo/sliders">Sliders</a>, <a href="demo/security-code">Security code</a>, <a href="demo/date-time">Date &amp; time</a>, <a href="demo/tabs-accordion">Tabs &amp; accordion</a>, <a href="demo/barcodes">Barcodes &amp; QR</a>.</li>
+            <li>Moved to their own pages: <a href="demo/cards">Cards</a>, <a href="demo/checks">Checks &amp; switches</a>, <a href="demo/sliders">Sliders</a>, <a href="demo/security-code">Security code</a>, <a href="demo/date-time">Date &amp; time</a>, <a href="demo/tabs-accordion">Tabs &amp; accordion</a>, <a href="demo/barcodes">Barcodes &amp; QR</a>.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
 
 @code {
-    private bool _switchState = true;
-    private int _rating = 4;
     private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", ""), new("Estimates", "demo/layout"), new("EST-2042 Contoso") };
 
     // Code tabs are verbatim copies of the Demo blocks above (2026-10-13).
@@ -130,17 +104,7 @@
     <SkeletonControl Variant=""SkeletonVariant.Text"" Animation=""SkeletonAnimation.Wave"" />
     <div class=""demo-row""><SkeletonControl Variant=""SkeletonVariant.Circular"" /><SkeletonControl Variant=""SkeletonVariant.Text"" Width=""140px"" /></div>
 </div>";
-        public const string Content = @"<CardGroupControl>
-    <CardControl Title=""EST-2042 Contoso"" Subtitle=""Draft"" Elevation=""2"">
-        <ChildContent><p class=""m0"">14 lines, last saved today 09:12.</p></ChildContent>
-        <FooterContent><BadgeControl Text=""In progress"" Variant=""BadgeVariant.Success"" /></FooterContent>
-    </CardControl>
-    <CardControl Title=""EST-2043 Fabrikam"" Subtitle=""Awaiting approval"" Elevation=""2"">
-        <ChildContent><p class=""m0"">22 lines, sent for review yesterday.</p></ChildContent>
-        <FooterContent><BadgeControl Text=""Queued"" Variant=""BadgeVariant.Warning"" /></FooterContent>
-    </CardControl>
-</CardGroupControl>
-<div class=""two mt"">
+        public const string Content = @"<div class=""two"">
     <TimelineControl>
         <TimelineItemControl Title=""Contract signed"" Time=""09:00"" PointColor=""BadgeVariant.Success"">Initial phase authorised.</TimelineItemControl>
         <TimelineItemControl Title=""Materials dispatched"" Time=""13:30"" PointColor=""BadgeVariant.Primary"">Lumber and concrete en route.</TimelineItemControl>
@@ -151,14 +115,5 @@
     <BreadCrumbControl Items=""_crumbs"" />
 </div>";
         public const string ContentCs = @"private readonly List<BreadCrumbItem> _crumbs = new() { new(""Home"", """"), new(""Estimates"", ""demo/layout""), new(""EST-2042 Contoso"") };";
-        public const string Inputs = @"<div class=""demo-row"">
-    <SwitchControl @bind-Checked=""_switchState"" Label=""@($""Notifications {(_switchState ? ""on"" : ""off"")}"")"" />
-    <SwitchControl Checked=""true"" Disabled=""true"" Label=""Locked setting"" />
-</div>
-<div class=""demo-row mt"">
-    <div class=""stack""><span class=""label"">Rating: @_rating / 5</span><RatingControl @bind-Value=""_rating"" /></div>
-</div>";
-        public const string InputsCs = @"private bool _switchState = true;
-private int _rating = 4;";
     }
 }
