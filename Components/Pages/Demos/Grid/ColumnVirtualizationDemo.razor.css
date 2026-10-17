@@ -1,0 +1,6 @@
+/* 2026-10-17: Wide grids page. No Bootstrap names in here. */
+.result { font-size: 13px; color: #475569; margin: 8px 0 0; }
+/* Frozen body cells are position:sticky with background-color:inherit, and the library gives rows no background, so scrolled
+   columns show through the pinned ones. Giving the rows a background paints the pinned cells until the library fix (SC-292);
+   the library's hover and selection row rules are more specific and still win. */
+.wide ::deep .fx-grid tbody tr { background-color: #fff; }

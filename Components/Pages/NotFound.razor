@@ -1,13 +1,22 @@
 @page "/not-found"
 @layout MainLayout
 
-<h3>Not Found</h3>
-<p>That page does not exist. Pages that moved keep their old address, so this is usually a typo.</p>
-<ul>
-    @foreach (var g in SiteNav.FooterGroups)
-    {
-        <li><a href="@g.Href">@g.Label</a></li>
-    }
-    <li><a href="components">All components</a></li>
-    <li><a href="get-started">Get Started</a></li>
-</ul>
+@* 2026-10-17: title and h1 added (FocusOnNavigate in Routes.razor targets h1, so the page now gets focus on arrival); links come
+   from SiteNav as before. Tracker SC-284. *@
+
+<PageTitle>Page not found — FlexCore Showcase</PageTitle>
+
+<div class="docs-page">
+    <h1>Page not found</h1>
+    <p>There is no page at this address. Pages that moved keep their old address, so this is usually a typo in the link.</p>
+    <p>Where to go instead:</p>
+    <ul>
+        @foreach (var g in SiteNav.FooterGroups)
+        {
+            <li><a href="@g.Href">@g.Label</a></li>
+        }
+        <li><a href="components">All components</a></li>
+        <li><a href="get-started">Get Started</a></li>
+        <li><a href="signup">Sign up or ask a question</a></li>
+    </ul>
+</div>

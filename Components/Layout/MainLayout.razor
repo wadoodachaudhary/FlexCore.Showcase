@@ -31,8 +31,12 @@
            Items are plain <a role="menuitem"> so they stay real links (new tab, crawlers); the library's
            keyboard script already treats any role="menuitem" as a menu item. Groups live in @code so the
            phone drawer below renders the same list. *@
+        @* @key on the current URL (2026-10-17, Baaria's report): the panel items are plain links, and MenuDropDownControl only closes
+           itself for MenuActionControl clicks, Escape, the backdrop or the trigger, so after a link navigation the layout (which
+           survives navigations) kept the panel open over the new page. Remounting the menubar on each URL change resets it.
+           Library-side fix proposed in SC-253. *@
         <div class="top-nav-menu">
-            <MenuBarControl CssClass="site-menubar">
+            <MenuBarControl @key="Nav.Uri" CssClass="site-menubar">
                 @foreach (var g in _groups)
                 {
                     @if (g.Items.Length == 0)

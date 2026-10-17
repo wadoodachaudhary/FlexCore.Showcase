@@ -3,101 +3,83 @@
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Data
-@* Retitled 2026-10-06 to match the site nav; copy unchanged. *@
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-17: moved onto FeatureDemoLayout (row 4 of the Data Grid list). Same six rows and three column sets. Changes, closing
+   SC-023 and SC-128 to SC-131: the layout buttons are a ButtonGroupControl; EditSettings (Batch) added so the ColumnSpec.Editable
+   flag the page already carried does something (SC-129); a readout names the selected row through RowSelected/RowDeselected so the
+   one claim the page keeps (selection survives a swap) can be seen; the scroll-offset claim went (six rows never scroll, SC-130);
+   the swap now goes through the grid's own SuspendRedraw(fields) scope (GridControl.razor.cs:88-135): without it a reused
+   GridColumn instance with a new Field kept the old column on screen (GridColumn registers once, GridColumn.cs:311) and, once
+   keyed, new fields appended after the fields the grid already knew instead of taking the declared order; the columns are keyed by
+   field so added and removed columns converge in place;
+   the two unused @refs went (SC-131); "legacy applications", "DOM thrashing" and "seamless" left the copy. Parameter tables are a
+   later pass (SC-278). *@
 
 <PageTitle>Column sets — FlexCore Showcase</PageTitle>
 
-<SyncfusionDemoLayout Title="Column sets"
-                      Category="DataGrid"
-                      BadgeText="Dynamic Schema"
-                      RazorCode="@_razorSourceCode"
-                      CSharpCode="@_csharpSourceCode"
-                      CSharpTabName="ColumnLayoutModel.cs">
-    <Summary>
+<FeatureDemoLayout Title="Column sets" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
+                   Tagline="Swap the whole column set at runtime from a list of specs, without remounting the grid."
+                   SourcePath="Grid/GridControl.razor.cs;Grid/GridColumn.cs">
+    <Overview>
         <p>
-            In legacy applications, switching between view modes or user-customized column layouts often required discarding and remounting the entire grid component via Blazor's <code>@@key</code>.
-            This destroyed active row selection, scroll position, cell edits, and created unnecessary DOM thrashing.
+            The columns inside <code>GridColumnsBase</code> are ordinary Razor markup, so a <code>@@foreach</code> over a list of column
+            specs defines them. Replace the list and the grid re-reads its columns in place: a different set, order, width or
+            <code>Visible</code> flag, while the component instance, its data and its selection stay. Wrap the swap in
+            <code>SuspendRedraw(fields)</code>: the grid holds its rendering while the list changes, converges added and removed columns in
+            place and applies the order you pass; without it, new fields append after the ones the grid already knows.
+            <code>Visible="false"</code> keeps a column in the set but off the screen.
         </p>
-        <p>
-            FlexCore provides <strong>in-place dynamic column mutation</strong>: you can swap column sets, change column order, modify widths, and toggle column visibility 
-            without tearing down the component instance, preserving all runtime state while executing seamless layout updates.
-        </p>
-    </Summary>
+    </Overview>
 
-    <DemoControls>
-        <div style="display:flex;gap:10px;align-items:center;font-size:13px;flex-wrap:wrap;">
-            <span><strong>Layout Presets:</strong></span>
-            <button class="btn btn-sm @(_activeLayout == "Default" ? "btn-primary" : "btn-outline-secondary")"
-                    @onclick='() => ApplyLayout("Default")'>📋 Default View</button>
-            <button class="btn btn-sm @(_activeLayout == "Purchasing" ? "btn-primary" : "btn-outline-secondary")"
-                    @onclick='() => ApplyLayout("Purchasing")'>🛒 Purchasing View</button>
-            <button class="btn btn-sm @(_activeLayout == "Minimal" ? "btn-primary" : "btn-outline-secondary")"
-                    @onclick='() => ApplyLayout("Minimal")'>⚡ Minimal Summary</button>
-            <span class="text-muted ms-2">Active Layout: <b>@_activeLayout</b> | Columns: <b>@_currentColumns.Count(c => c.Visible)</b> visible</span>
-        </div>
-    </DemoControls>
+    <Examples>
+        <DemoExample Id="sets" Title="Three column sets, one grid" RazorCode="@Code.Sets" CSharpCode="@Code.SetsCs">
+            <Description><p>Select a row, then switch between the Default, Purchasing and Minimal sets: the selection stays while the columns change. Each set is a list of <code>ColumnSpec</code> objects; the Purchasing set also carries a hidden Category column. Qty and Price are editable in Default, Price in Purchasing (<code>EditMode.Batch</code>: double-click a cell).</p></Description>
+            <Controls>
+                <ButtonGroupControl Items="_layouts" Values="@(new[] { _activeLayout })"
+                                    ValuesChanged="@(v => ApplyLayoutAsync(v.Count > 0 ? v[0] : "Default"))"
+                                    Selection="ChoiceSelectionMode.Single" AriaLabel="Column set" />
+            </Controls>
+            <Demo>
+                <GridControl @ref="_grid"
+                             TValue="CRow"
+                             DataSource="@_rows"
+                             Height="340px"
+                             AllowSelection="true"
+                             AllowResizing="true"
+                             AllowSorting="true"
+                             ShowRowCountInFooter="true"
+                             EditSettingsRef="@_editSettings"
+                             EventsRef="@_events">
+                    <GridColumnsBase>
+                        @foreach (var col in _currentColumns)
+                        {
+                            <GridColumn @key="col.Field"
+                                        Field="@col.Field"
+                                        HeaderText="@col.Header"
+                                        Width="@col.Width"
+                                        Visible="@col.Visible"
+                                        AllowEditing="@col.Editable" />
+                        }
+                    </GridColumnsBase>
+                </GridControl>
+                <p class="result">@_activeLayout set: @_currentColumns.Count(c => c.Visible) of @_currentColumns.Count columns visible@(_selected is null ? "" : $" · selected row {_selected}")</p>
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-    <DemoContent>
-        <div style="width:100%;">
-            <GridControl @ref="_grid"
-                         TValue="CRow"
-                         DataSource="@_rows"
-                         Height="340px"
-                         AllowSelection="true"
-                         AllowResizing="true"
-                         AllowSorting="true"
-                         ShowRowCountInFooter="true">
-                <GridColumnsBase @ref="_gridColumns">
-                    @foreach (var col in _currentColumns)
-                    {
-                        <GridColumn Field="@col.Field"
-                                    HeaderText="@col.Header"
-                                    Width="@col.Width"
-                                    Visible="@col.Visible"
-                                    AllowEditing="@col.Editable" />
-                    }
-                </GridColumnsBase>
-            </GridControl>
-        </div>
-    </DemoContent>
+    <Vocabulary>
+        <p class="fd-pending"><code>GridColumn</code> (<code>Field</code>, <code>HeaderText</code>, <code>Width</code>, <code>Visible</code>, <code>AllowEditing</code>), <code>GridColumnsBase</code> and the selection events on <code>GridControlEvents</code> are still to be written up from <code>Grid/GridColumn.cs</code> and <code>Grid/GridControlEvents.cs</code>. Tracker SC-278.</p>
+    </Vocabulary>
 
-    <DocumentationContent>
-        <h3>In-Place Column Mutation Benefits</h3>
+    <Related>
         <ul>
-            <li><strong>Zero Component Teardown:</strong> Avoids re-instantiating the grid component, retaining current scroll offsets and keyboard focus.</li>
-            <li><strong>State Preservation:</strong> Selected row indices and batch-edit modified cells remain intact across layout swaps.</li>
-            <li><strong>Custom User Perspectives:</strong> Easily support user profile saving, saved views, and role-based column visibility filters.</li>
+            <li><a href="demo/grid">Grid overview</a>: the core flags on a small list.</li>
+            <li><a href="demo/grid/dynamic-columns">Dynamic columns</a>: columns that follow the data.</li>
+            <li><a href="demo/grid/reordering">Column reorder</a>: the user moves columns by dragging headers.</li>
         </ul>
-
-        <h3>Column Specification Properties</h3>
-        <table class="sf-param-table">
-            <thead>
-                <tr>
-                    <th>Property</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>Field</code></td>
-                    <td>string</td>
-                    <td>Property name on the generic model type.</td>
-                </tr>
-                <tr>
-                    <td><code>Visible</code></td>
-                    <td>bool</td>
-                    <td>Toggles column rendering without altering underlying data rows.</td>
-                </tr>
-                <tr>
-                    <td><code>AllowEditing</code></td>
-                    <td>bool</td>
-                    <td>Restricts cell editing per column in the layout.</td>
-                </tr>
-            </tbody>
-        </table>
-    </DocumentationContent>
-</SyncfusionDemoLayout>
+    </Related>
+</FeatureDemoLayout>
 
 @code {
     public class CRow
@@ -112,11 +94,15 @@
         public decimal Total => Qty * Price;
     }
 
+    private readonly SelectionItem[] _layouts = { new("Default", "Default"), new("Purchasing", "Purchasing"), new("Minimal", "Minimal") };
     private GridControl<CRow>? _grid;
-    private GridColumnsBase? _gridColumns;
     private List<CRow> _rows = [];
     private string _activeLayout = "Default";
     private List<ColumnSpec> _currentColumns = [];
+    private string? _selected;
+
+    private readonly EditSettings _editSettings = new() { AllowEditing = true, Mode = EditMode.Batch };
+    private readonly GridControlEvents<CRow> _events = new();
 
     protected override void OnInitialized()
     {
@@ -130,13 +116,25 @@
             new CRow { Code = "06-110", Description = "200A Main Distribution Panel", Category = "Electrical", Vendor = "Apex Electric Dist", POIndex = "PO-006", Qty = 2, Price = 680.00m }
         ];
 
-        ApplyLayout("Default");
+        _events.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<CRow>>(this, args => _selected = args.Data?.Code);
+        _events.RowDeselected = EventCallback.Factory.Create<RowSelectEventArgs<CRow>>(this, _ => _selected = null);
+
+        _currentColumns = ColumnsFor("Default");
     }
 
-    private void ApplyLayout(string layoutName)
+    private async Task ApplyLayoutAsync(string layoutName)
     {
         _activeLayout = layoutName;
-        _currentColumns = layoutName switch
+        var columns = ColumnsFor(layoutName);
+        if (_grid is null) { _currentColumns = columns; return; }
+        await using (_grid.SuspendRedraw(columns.Select(c => c.Field)))
+        {
+            _currentColumns = columns;
+        }
+    }
+
+    private static List<ColumnSpec> ColumnsFor(string layoutName)
+        => layoutName switch
         {
             "Purchasing" =>
             [
@@ -163,17 +161,26 @@
                 new ColumnSpec { Field = nameof(CRow.Total), Header = "Total", Width = "110px", Visible = true, Editable = false }
             ]
         };
-        StateHasChanged();
-    }
 
-    private const string _razorSourceCode = @"@using Fx.ControlKit
-@using Fx.ControlKit.Grid
-
-<GridControl TValue=""CRow"" DataSource=""@Rows"" Height=""340px"" AllowSelection=""true"">
+    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed); the C# tab also carries
+    // ColumnSpec from Data/BenchModels.cs.
+    private static class Code
+    {
+        public const string Sets = @"<GridControl @ref=""_grid""
+             TValue=""CRow""
+             DataSource=""@_rows""
+             Height=""340px""
+             AllowSelection=""true""
+             AllowResizing=""true""
+             AllowSorting=""true""
+             ShowRowCountInFooter=""true""
+             EditSettingsRef=""@_editSettings""
+             EventsRef=""@_events"">
     <GridColumnsBase>
-        @foreach (var col in ActiveColumns)
+        @foreach (var col in _currentColumns)
         {
-            <GridColumn Field=""@col.Field""
+            <GridColumn @key=""col.Field""
+                        Field=""@col.Field""
                         HeaderText=""@col.Header""
                         Width=""@col.Width""
                         Visible=""@col.Visible""
@@ -181,25 +188,94 @@
         }
     </GridColumnsBase>
 </GridControl>
+<p class=""result"">@_activeLayout set: @_currentColumns.Count(c => c.Visible) of @_currentColumns.Count columns visible@(_selected is null ? """" : $"" · selected row {_selected}"")</p>";
+        public const string SetsCs = @"public class CRow
+{
+    public string Code { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public string Vendor { get; set; } = string.Empty;
+    public string POIndex { get; set; } = string.Empty;
+    public decimal Qty { get; set; }
+    public decimal Price { get; set; }
+    public decimal Total => Qty * Price;
+}
 
-@code {
-    private List<CRow> Rows = new();
-    private List<ColumnSpec> ActiveColumns = new();
+private readonly SelectionItem[] _layouts = { new(""Default"", ""Default""), new(""Purchasing"", ""Purchasing""), new(""Minimal"", ""Minimal"") };
 
-    private void SwitchToPurchasingLayout()
+private GridControl<CRow>? _grid;
+
+private List<CRow> _rows = [];
+
+private string _activeLayout = ""Default"";
+
+private List<ColumnSpec> _currentColumns = [];
+
+private string? _selected;
+
+private readonly EditSettings _editSettings = new() { AllowEditing = true, Mode = EditMode.Batch };
+
+private readonly GridControlEvents<CRow> _events = new();
+
+protected override void OnInitialized()
+{
+    _rows =
+    [
+        new CRow { Code = ""01-100"", Description = ""Grading & Compaction"", Category = ""Sitework"", Vendor = ""Hill Country Excavation"", POIndex = ""PO-001"", Qty = 1, Price = 4250.00m },
+        new CRow { Code = ""02-210"", Description = ""Post-Tension Foundation Cables"", Category = ""Concrete"", Vendor = ""Austin Concrete Supply"", POIndex = ""PO-002"", Qty = 24, Price = 115.00m },
+        new CRow { Code = ""03-310"", Description = ""2x6 Exterior Wall Studs"", Category = ""Framing"", Vendor = ""Lone Star Lumber Co"", POIndex = ""PO-003"", Qty = 450, Price = 8.75m },
+        new CRow { Code = ""04-120"", Description = ""Architectural Shingles 30yr"", Category = ""Roofing"", Vendor = ""Summit Building Materials"", POIndex = ""PO-004"", Qty = 65, Price = 34.50m },
+        new CRow { Code = ""05-410"", Description = ""PEX Water Supply Piping"", Category = ""Plumbing"", Vendor = ""Capitol Plumbing Supply"", POIndex = ""PO-005"", Qty = 12, Price = 145.00m },
+        new CRow { Code = ""06-110"", Description = ""200A Main Distribution Panel"", Category = ""Electrical"", Vendor = ""Apex Electric Dist"", POIndex = ""PO-006"", Qty = 2, Price = 680.00m }
+    ];
+
+    _events.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<CRow>>(this, args => _selected = args.Data?.Code);
+    _events.RowDeselected = EventCallback.Factory.Create<RowSelectEventArgs<CRow>>(this, _ => _selected = null);
+
+    _currentColumns = ColumnsFor(""Default"");
+}
+
+private async Task ApplyLayoutAsync(string layoutName)
+{
+    _activeLayout = layoutName;
+    var columns = ColumnsFor(layoutName);
+    if (_grid is null) { _currentColumns = columns; return; }
+    await using (_grid.SuspendRedraw(columns.Select(c => c.Field)))
     {
-        ActiveColumns = new List<ColumnSpec>
-        {
-            new() { Field = ""Code"", Header = ""Item Code"", Width = ""90px"" },
-            new() { Field = ""Description"", Header = ""Description"", Width = ""220px"" },
-            new() { Field = ""Vendor"", Header = ""Vendor"", Width = ""200px"" },
-            new() { Field = ""Price"", Header = ""Price"", Width = ""100px"", Editable = true }
-        };
+        _currentColumns = columns;
     }
-}";
+}
 
-    private const string _csharpSourceCode = @"namespace FlexCore.Showcase.Data;
+private static List<ColumnSpec> ColumnsFor(string layoutName)
+    => layoutName switch
+    {
+        ""Purchasing"" =>
+        [
+            new ColumnSpec { Field = nameof(CRow.Code), Header = ""Item Code"", Width = ""90px"", Visible = true },
+            new ColumnSpec { Field = nameof(CRow.Description), Header = ""Description"", Width = ""220px"", Visible = true },
+            new ColumnSpec { Field = nameof(CRow.Vendor), Header = ""Assigned Vendor"", Width = ""200px"", Visible = true },
+            new ColumnSpec { Field = nameof(CRow.POIndex), Header = ""PO Index"", Width = ""100px"", Visible = true },
+            new ColumnSpec { Field = nameof(CRow.Price), Header = ""Unit Price"", Width = ""100px"", Visible = true, Editable = true },
+            new ColumnSpec { Field = nameof(CRow.Category), Header = ""Category"", Width = ""120px"", Visible = false }
+        ],
+        ""Minimal"" =>
+        [
+            new ColumnSpec { Field = nameof(CRow.Code), Header = ""Code"", Width = ""100px"", Visible = true },
+            new ColumnSpec { Field = nameof(CRow.Description), Header = ""Description"", Width = ""300px"", Visible = true },
+            new ColumnSpec { Field = nameof(CRow.Total), Header = ""Total Cost"", Width = ""140px"", Visible = true, Editable = false }
+        ],
+        _ => // Default
+        [
+            new ColumnSpec { Field = nameof(CRow.Code), Header = ""Item Code"", Width = ""90px"", Visible = true },
+            new ColumnSpec { Field = nameof(CRow.Description), Header = ""Description"", Width = ""240px"", Visible = true },
+            new ColumnSpec { Field = nameof(CRow.Category), Header = ""Category"", Width = ""130px"", Visible = true },
+            new ColumnSpec { Field = nameof(CRow.Qty), Header = ""Qty"", Width = ""80px"", Visible = true, Editable = true },
+            new ColumnSpec { Field = nameof(CRow.Price), Header = ""Price"", Width = ""100px"", Visible = true, Editable = true },
+            new ColumnSpec { Field = nameof(CRow.Total), Header = ""Total"", Width = ""110px"", Visible = true, Editable = false }
+        ]
+    };
 
+// Data/BenchModels.cs
 public sealed class ColumnSpec
 {
     public string Field { get; set; } = string.Empty;
@@ -208,4 +284,5 @@ public sealed class ColumnSpec
     public bool Visible { get; set; } = true;
     public bool Editable { get; set; }
 }";
+    }
 }

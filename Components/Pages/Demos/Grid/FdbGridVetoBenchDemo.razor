@@ -3,108 +3,90 @@
 @rendermode InteractiveServer
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
-@using FlexCore.Showcase.Data
-@* Retitled 2026-10-06 to match the site nav; copy unchanged. *@
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-17: moved onto FeatureDemoLayout (row 7 of the Data Grid list). Changes, closing SC-146 to SC-150: "FDBGrid", "VB6",
+   "HomeFront", "mission-critical ERP", "benchmark" and "severe risk surface" left the copy; the rows are purchase-order lines in a
+   page-local OrderLine class instead of ledger accounts with quantities (SC-150; Data.LedgerRow is left as is); a row becomes dirty
+   when a value is written (OnCellSave) rather than when an editor opens (OnCellEdit, which also fired for edits abandoned with
+   Escape); the doc table that named a non-existent RowSelectingEventArgs is gone and the code tabs are generated from the page
+   (SC-148, SC-149); the unused @ref and the explicit TextEditorTypingBehavior (its default) went; Save is a ButtonControl.
+   Parameter tables are a later pass (SC-278). *@
 
 <PageTitle>Unsaved-row lock — FlexCore Showcase</PageTitle>
 
-<SyncfusionDemoLayout Title="Unsaved-row lock"
-                      Category="DataGrid"
-                      BadgeText="Data Integrity"
-                      RazorCode="@_razorSourceCode"
-                      CSharpCode="@_csharpSourceCode"
-                      CSharpTabName="LedgerRow.cs">
-    <Summary>
+<FeatureDemoLayout Title="Unsaved-row lock" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
+                   Tagline="Veto the move to another row while the current one has unsaved changes."
+                   SourcePath="Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/GridControl.razor.cs">
+    <Overview>
         <p>
-            In mission-critical ERP systems ported from VB6 (such as HomeFront's <code>FDBGrid</code>), leaving an edited row with unsaved changes must be 
-            <strong>programmatically vetoed</strong> unless explicitly committed or reverted.
+            <code>RowSelecting</code> fires before the selection moves. Its <code>RowSelectEventArgs</code> carries the target row in
+            <code>Data</code> and a <code>Cancel</code> flag; set it and the move is refused, whether it came from a click or from the
+            keyboard. This page marks a row dirty when a cell value is written (<code>OnCellSave</code>) and refuses every move
+            away from it until Save is pressed; moves within the dirty row are still allowed.
         </p>
-        <p>
-            When client-side navigation preview is active, an uncommitted row navigation presents a severe risk surface: the visual cursor must not settle on an unauthorized row,
-            and any subsequent keystrokes must strictly stay bound to the <strong>dirty row</strong> rather than the target row.
-            This benchmark demonstrates how <code>RowSelecting(args)</code> with <code>args.Cancel = true</code> enforces row locking until <strong>Save</strong> is pressed.
-        </p>
-    </Summary>
+    </Overview>
 
-    <DemoControls>
-        <div style="display:flex;gap:12px;align-items:center;font-size:13px;flex-wrap:wrap;">
-            <button class="btn btn-sm btn-success" @onclick="Save" disabled="@(!_dirty)">💾 Save Row</button>
-            <span class="badge @(_dirty ? "bg-warning text-dark" : "bg-success")">@(_dirty ? "Status: DIRTY ROW LOCKED" : "Status: Clean")</span>
-            <span class="text-muted">
-                Dirty Row: <b>@(_dirtyRow?.Code ?? "None")</b> |
-                Vetoes Blocked: <b class="text-danger">@_vetoCount</b> |
-                Saves: <b class="text-success">@_saveCount</b>
-            </span>
-        </div>
-    </DemoControls>
+    <Examples>
+        <DemoExample Id="lock" Title="Leave a row only after saving it" RazorCode="@Code.Lock" CSharpCode="@Code.LockCs">
+            <Description><p>Double-click a Qty, Price or Notes cell, change it and press Enter. Now click another row, or press the Down arrow: the other row does not become selected and the line under the grid counts the refusal. Press Save and the lock lifts.</p></Description>
+            <Controls>
+                <ButtonControl CssClass="btn-sm" OnClick="Save" Disabled="@(!_dirty)">Save</ButtonControl>
+            </Controls>
+            <Demo>
+                <GridControl TValue="OrderLine"
+                             DataSource="@_rows"
+                             ShowRowCountInFooter="true"
+                             AllowSorting="false"
+                             AllowSelection="true"
+                             HighlightSelectedRows="true"
+                             EnableHover="true"
+                             Height="340px"
+                             RowHeight="26"
+                             MinRowHeight="26"
+                             EditSettingsRef="@_editSettings"
+                             SelectionSettingsRef="@_selectionSettings"
+                             EventsRef="@_events"
+                             CssClass="fx-grid-compact">
+                    <GridColumnsBase>
+                        <GridColumn Field="@nameof(OrderLine.Code)" HeaderText="Line" Width="90px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(OrderLine.Description)" HeaderText="Description" Width="280px" AllowEditing="true" />
+                        <GridColumn Field="@nameof(OrderLine.Qty)" HeaderText="Qty" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" />
+                        <GridColumn Field="@nameof(OrderLine.Price)" HeaderText="Unit price" Width="100px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" Format="$#,##0.00" />
+                        <GridColumn Field="@nameof(OrderLine.Notes)" HeaderText="Notes" Width="260px" AllowEditing="true" />
+                    </GridColumnsBase>
+                </GridControl>
+                <p class="result">@(_dirtyRow is null ? "No unsaved changes." : $"Unsaved changes on line {_dirtyRow.Code}: {_vetoCount} {(_vetoCount == 1 ? "move" : "moves")} refused.")@(_saveCount > 0 ? $" Saved {_saveCount} {(_saveCount == 1 ? "time" : "times")}." : "")</p>
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-    <DemoContent>
-        <div style="width:100%;">
-            <GridControl @ref="_grid"
-                         ShowRowCountInFooter="true"
-                         TValue="LedgerRow"
-                         DataSource="@_rows"
-                         AllowSorting="false"
-                         AllowSelection="true"
-                         HighlightSelectedRows="true"
-                         EnableHover="true"
-                         Height="340px"
-                         RowHeight="26"
-                         MinRowHeight="26"
-                         TextEditorTypingBehavior="TextBoxTypingBehavior.ServerBacked"
-                         EditSettingsRef="@_editSettings"
-                         SelectionSettingsRef="@_selectionSettings"
-                         EventsRef="@_events"
-                         CssClass="fx-grid-compact">
-                <GridColumnsBase>
-                    <GridColumn Field="@nameof(LedgerRow.Code)" HeaderText="Code" Width="90px" AllowEditing="false" />
-                    <GridColumn Field="@nameof(LedgerRow.Description)" HeaderText="Description" Width="280px" AllowEditing="true" />
-                    <GridColumn Field="@nameof(LedgerRow.Qty)" HeaderText="Qty" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" />
-                    <GridColumn Field="@nameof(LedgerRow.Price)" HeaderText="Price" Width="100px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" Format="$#,##0.00" />
-                    <GridColumn Field="@nameof(LedgerRow.Notes)" HeaderText="Audit Notes" Width="260px" AllowEditing="true" />
-                </GridColumnsBase>
-            </GridControl>
-        </div>
-    </DemoContent>
+    <Vocabulary>
+        <p class="fd-pending"><code>RowSelecting</code> / <code>RowSelected</code>, <code>RowSelectEventArgs</code>, <code>OnCellSave</code> and <code>SelectionSettings</code> are still to be written up from <code>Grid/GridControlEvents.cs</code> and <code>Grid/GridModels.cs</code>. Tracker SC-278.</p>
+    </Vocabulary>
 
-    <DocumentationContent>
-        <h3>How Selection Vetoing Works</h3>
+    <Related>
         <ul>
-            <li><strong>Intercepting Row Change:</strong> The <code>RowSelecting</code> event receives a <code>RowSelectingEventArgs&lt;T&gt;</code> argument containing the incoming target row index.</li>
-            <li><strong>Blocking Navigation:</strong> When changes are pending on the current row, setting <code>args.Cancel = true</code> aborts the row navigation on the server and synchronizes the client focus back to the active editing row.</li>
-            <li><strong>Transactional Integrity:</strong> This pattern guarantees that batch edits or dirty row states cannot be bypassed by keyboard down-arrow, PageDown, or direct row mouse clicks.</li>
+            <li><a href="demo/grid/batch-editing">Batch editing</a>: the cell editing used here.</li>
+            <li><a href="demo/grid/typing-modes">Typing modes</a>: how keystrokes reach the editors.</li>
+            <li><a href="demo/grid">Grid overview</a>: the core flags on a small list.</li>
         </ul>
-
-        <h3>Relevant Event API</h3>
-        <table class="sf-param-table">
-            <thead>
-                <tr>
-                    <th>Event</th>
-                    <th>Argument</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>RowSelecting</code></td>
-                    <td><code>RowSelectingEventArgs&lt;T&gt;</code></td>
-                    <td>Fires prior to row selection committing. Set <code>Cancel = true</code> to abort selection.</td>
-                </tr>
-                <tr>
-                    <td><code>OnCellEdit</code></td>
-                    <td><code>CellEditArgs&lt;T&gt;</code></td>
-                    <td>Fires whenever an editable cell receives input or commits a keystroke/value change.</td>
-                </tr>
-            </tbody>
-        </table>
-    </DocumentationContent>
-</SyncfusionDemoLayout>
+    </Related>
+</FeatureDemoLayout>
 
 @code {
-    private GridControl<LedgerRow>? _grid;
-    private List<LedgerRow> _rows = [];
+    public sealed class OrderLine
+    {
+        public string Code { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Qty { get; set; }
+        public decimal Price { get; set; }
+        public string Notes { get; set; } = string.Empty;
+    }
+
+    private List<OrderLine> _rows = [];
     private bool _dirty;
-    private LedgerRow? _dirtyRow;
+    private OrderLine? _dirtyRow;
     private int _vetoCount;
     private int _saveCount;
 
@@ -120,34 +102,32 @@
         Type = SelectionType.Single
     };
 
-    private readonly GridControlEvents<LedgerRow> _events = new();
+    private readonly GridControlEvents<OrderLine> _events = new();
 
     protected override void OnInitialized()
     {
         _rows =
         [
-            new LedgerRow { Code = "1010", Description = "General Operating Account", Qty = 1, Price = 125000.00m, Notes = "Reconciled monthly" },
-            new LedgerRow { Code = "1020", Description = "Payroll Clearing Account", Qty = 1, Price = 42000.00m, Notes = "Bi-weekly transfer" },
-            new LedgerRow { Code = "1200", Description = "Accounts Receivable - Trade", Qty = 14, Price = 86450.50m, Notes = "Outstanding 30-day invoices" },
-            new LedgerRow { Code = "1510", Description = "Subcontract Retainage Withheld", Qty = 8, Price = 38900.00m, Notes = "Held until final inspection" },
-            new LedgerRow { Code = "2010", Description = "Accounts Payable - Vendors", Qty = 22, Price = 94310.25m, Notes = "Standard Net-30 terms" },
-            new LedgerRow { Code = "4010", Description = "Construction Revenue", Qty = 5, Price = 450000.00m, Notes = "Q3 Completed milestones" }
+            new OrderLine { Code = "10", Description = "Ready-mix concrete 4000 psi", Qty = 24, Price = 142.00m, Notes = "Pump truck on site 6:30" },
+            new OrderLine { Code = "20", Description = "#4 rebar, 20 ft", Qty = 180, Price = 11.25m, Notes = "Tie wire included" },
+            new OrderLine { Code = "30", Description = "2x6 studs, 92 5/8 in", Qty = 450, Price = 8.75m, Notes = "Deliver to lot 14" },
+            new OrderLine { Code = "40", Description = "Architectural shingles, 30 yr", Qty = 65, Price = 34.50m, Notes = "Match sample board" },
+            new OrderLine { Code = "50", Description = "PEX supply pipe, 3/4 in", Qty = 12, Price = 145.00m, Notes = "Red and blue coils" },
+            new OrderLine { Code = "60", Description = "200 A main panel", Qty = 2, Price = 680.00m, Notes = "Inspection before cover" }
         ];
 
-        _events.OnCellEdit = EventCallback.Factory.Create<CellEditArgs<LedgerRow>>(this, args =>
+        _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<OrderLine>>(this, args =>
         {
             _dirty = true;
             _dirtyRow = args.Data;
-            StateHasChanged();
         });
 
-        _events.RowSelecting = EventCallback.Factory.Create<RowSelectEventArgs<LedgerRow>>(this, args =>
+        _events.RowSelecting = EventCallback.Factory.Create<RowSelectEventArgs<OrderLine>>(this, args =>
         {
             if (_dirty && _dirtyRow != null && !ReferenceEquals(_dirtyRow, args.Data))
             {
                 args.Cancel = true;
                 _vetoCount++;
-                StateHasChanged();
             }
         });
     }
@@ -156,67 +136,103 @@
     {
         _dirty = false;
         _dirtyRow = null;
+        _vetoCount = 0;
         _saveCount++;
-        StateHasChanged();
     }
 
-    private const string _razorSourceCode = @"@using Fx.ControlKit
-@using Fx.ControlKit.Grid
-
-<GridControl TValue=""LedgerRow""
-             DataSource=""@Rows""
+    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    private static class Code
+    {
+        public const string Lock = @"<GridControl TValue=""OrderLine""
+             DataSource=""@_rows""
+             ShowRowCountInFooter=""true""
+             AllowSorting=""false""
              AllowSelection=""true""
+             HighlightSelectedRows=""true""
+             EnableHover=""true""
+             Height=""340px""
+             RowHeight=""26""
+             MinRowHeight=""26""
              EditSettingsRef=""@_editSettings""
              SelectionSettingsRef=""@_selectionSettings""
-             EventsRef=""@_events"">
+             EventsRef=""@_events""
+             CssClass=""fx-grid-compact"">
     <GridColumnsBase>
-        <GridColumn Field=""@nameof(LedgerRow.Code)"" HeaderText=""Code"" Width=""90px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(LedgerRow.Description)"" HeaderText=""Description"" Width=""280px"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(LedgerRow.Qty)"" HeaderText=""Qty"" Width=""80px"" Type=""ColumnType.Number"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(LedgerRow.Price)"" HeaderText=""Price"" Width=""100px"" Type=""ColumnType.Number"" AllowEditing=""true"" Format=""$#,##0.00"" />
-        <GridColumn Field=""@nameof(LedgerRow.Notes)"" HeaderText=""Audit Notes"" Width=""260px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(OrderLine.Code)"" HeaderText=""Line"" Width=""90px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(OrderLine.Description)"" HeaderText=""Description"" Width=""280px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(OrderLine.Qty)"" HeaderText=""Qty"" Width=""80px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(OrderLine.Price)"" HeaderText=""Unit price"" Width=""100px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" Format=""$#,##0.00"" />
+        <GridColumn Field=""@nameof(OrderLine.Notes)"" HeaderText=""Notes"" Width=""260px"" AllowEditing=""true"" />
     </GridColumnsBase>
 </GridControl>
-
-@code {
-    private bool _dirty;
-    private LedgerRow? _dirtyRow;
-
-    protected override void OnInitialized()
-    {
-        _events.OnCellEdit = args =>
-        {
-            _dirty = true;
-            _dirtyRow = args.RowData;
-            return Task.CompletedTask;
-        };
-
-        _events.RowSelecting = args =>
-        {
-            // Veto any attempt to leave the current row while dirty
-            if (_dirty && _dirtyRow != null && !ReferenceEquals(_dirtyRow, args.Data))
-            {
-                args.Cancel = true;
-            }
-            return Task.CompletedTask;
-        };
-    }
-
-    private void Save()
-    {
-        _dirty = false;
-        _dirtyRow = null;
-    }
-}";
-
-    private const string _csharpSourceCode = @"namespace FlexCore.Showcase.Data;
-
-public sealed class LedgerRow
+<p class=""result"">@(_dirtyRow is null ? ""No unsaved changes."" : $""Unsaved changes on line {_dirtyRow.Code}: {_vetoCount} {(_vetoCount == 1 ? ""move"" : ""moves"")} refused."")@(_saveCount > 0 ? $"" Saved {_saveCount} {(_saveCount == 1 ? ""time"" : ""times"")}."" : """")</p>";
+        public const string LockCs = @"public sealed class OrderLine
 {
     public string Code { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal Qty { get; set; }
     public decimal Price { get; set; }
     public string Notes { get; set; } = string.Empty;
+}
+
+private List<OrderLine> _rows = [];
+
+private bool _dirty;
+
+private OrderLine? _dirtyRow;
+
+private int _vetoCount;
+
+private int _saveCount;
+
+private readonly EditSettings _editSettings = new()
+{
+    AllowEditing = true,
+    Mode = EditMode.Batch
+};
+
+private readonly SelectionSettings _selectionSettings = new()
+{
+    Mode = SelectionMode.Row,
+    Type = SelectionType.Single
+};
+
+private readonly GridControlEvents<OrderLine> _events = new();
+
+protected override void OnInitialized()
+{
+    _rows =
+    [
+        new OrderLine { Code = ""10"", Description = ""Ready-mix concrete 4000 psi"", Qty = 24, Price = 142.00m, Notes = ""Pump truck on site 6:30"" },
+        new OrderLine { Code = ""20"", Description = ""#4 rebar, 20 ft"", Qty = 180, Price = 11.25m, Notes = ""Tie wire included"" },
+        new OrderLine { Code = ""30"", Description = ""2x6 studs, 92 5/8 in"", Qty = 450, Price = 8.75m, Notes = ""Deliver to lot 14"" },
+        new OrderLine { Code = ""40"", Description = ""Architectural shingles, 30 yr"", Qty = 65, Price = 34.50m, Notes = ""Match sample board"" },
+        new OrderLine { Code = ""50"", Description = ""PEX supply pipe, 3/4 in"", Qty = 12, Price = 145.00m, Notes = ""Red and blue coils"" },
+        new OrderLine { Code = ""60"", Description = ""200 A main panel"", Qty = 2, Price = 680.00m, Notes = ""Inspection before cover"" }
+    ];
+
+    _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<OrderLine>>(this, args =>
+    {
+        _dirty = true;
+        _dirtyRow = args.Data;
+    });
+
+    _events.RowSelecting = EventCallback.Factory.Create<RowSelectEventArgs<OrderLine>>(this, args =>
+    {
+        if (_dirty && _dirtyRow != null && !ReferenceEquals(_dirtyRow, args.Data))
+        {
+            args.Cancel = true;
+            _vetoCount++;
+        }
+    });
+}
+
+private void Save()
+{
+    _dirty = false;
+    _dirtyRow = null;
+    _vetoCount = 0;
+    _saveCount++;
 }";
+    }
 }
