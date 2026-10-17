@@ -4,7 +4,7 @@
 @using FlexCore.Showcase.Components.Shared
 
 @* 2026-10-12: moved onto FeatureDemoLayout; six Bootstrap cards became three examples with the same charts.
-   Parameter table pending (SC-264). *@
+   Parameter table pending (SC-264). C# tabs added 2026-10-17: the series fields, verbatim (SC-277). *@
 
 <PageTitle>Financial &amp; gauges — FlexCore Showcase</PageTitle>
 
@@ -19,7 +19,7 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="financial" Title="Candlestick and OHLC" RazorCode="@Code.Financial">
+        <DemoExample Id="financial" Title="Candlestick and OHLC" RazorCode="@Code.Financial" CSharpCode="@Code.FinancialCs">
             <Description><p>Both read the same series; <code>Candlestick</code> fills the body, <code>Ohlc</code> draws ticks.</p></Description>
             <Demo>
                 <div class="two">
@@ -29,7 +29,7 @@
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="comparisons" Title="Bullet, range and Sankey" RazorCode="@Code.Comparisons">
+        <DemoExample Id="comparisons" Title="Bullet, range and Sankey" RazorCode="@Code.Comparisons" CSharpCode="@Code.ComparisonsCs">
             <Description><p><code>Bullet</code> shows actual against target bands, <code>RangeColumn</code> floats a minimum to maximum bar, <code>Sankey</code> draws weighted flows between nodes.</p></Description>
             <Demo>
                 <div class="three">
@@ -40,7 +40,7 @@
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="gauges" Title="Radial and linear gauges" RazorCode="@Code.Gauges">
+        <DemoExample Id="gauges" Title="Radial and linear gauges" RazorCode="@Code.Gauges" CSharpCode="@Code.GaugesCs">
             <Description><p>One series, two gauge types. The standalone <code>ArcGaugeControl</code>, <code>CircularGaugeControl</code>, <code>RadialGaugeControl</code> and <code>LinearGaugeControl</code> are on the <a href="demo/counterparts?tab=charts">Control tour</a>.</p></Description>
             <Demo>
                 <div class="gauges">
@@ -60,15 +60,66 @@
     private static class Code
     {
         public const string Financial = @"<ChartControl Type=""ChartType.Candlestick"" Title=""Candlestick"" Series=""_candlestickSeries"" Height=""280px"" />
-<ChartControl Type=""ChartType.Ohlc"" Title=""OHLC"" Series=""_candlestickSeries"" Height=""280px"" />
-
-// one point per bar: label, open, high, low, close
-// ChartDataPoint.Financial(""Jul 1"", open: 100, high: 115, low: 90, close: 108)";
+<ChartControl Type=""ChartType.Ohlc"" Title=""OHLC"" Series=""_candlestickSeries"" Height=""280px"" />";
+        public const string FinancialCs = @"private List<ChartSeries> _candlestickSeries = new()
+{
+    new ChartSeries(""Equities"", ChartType.Candlestick, new[]
+    {
+        ChartDataPoint.Financial(""Day 1"", 120, 135, 115, 130),
+        ChartDataPoint.Financial(""Day 2"", 130, 142, 125, 138),
+        ChartDataPoint.Financial(""Day 3"", 138, 140, 122, 126),
+        ChartDataPoint.Financial(""Day 4"", 126, 132, 120, 131),
+        ChartDataPoint.Financial(""Day 5"", 131, 145, 128, 143),
+        ChartDataPoint.Financial(""Day 6"", 143, 148, 135, 137),
+        ChartDataPoint.Financial(""Day 7"", 137, 150, 136, 149)
+    })
+};";
         public const string Comparisons = @"<ChartControl Type=""ChartType.Bullet"" Title=""Actual vs target"" Series=""_bulletSeries"" Height=""240px"" />
 <ChartControl Type=""ChartType.RangeColumn"" Title=""Min to max"" Series=""_rangeSeries"" Height=""240px"" />
 <ChartControl Type=""ChartType.Sankey"" Title=""Flow"" Series=""_sankeySeries"" Height=""280px"" />";
+        public const string ComparisonsCs = @"private List<ChartSeries> _bulletSeries = new()
+{
+    new ChartSeries(""Metrics"", ChartType.Bullet, new[]
+    {
+        ChartDataPoint.Bullet(""Revenue ($k)"", 275, 250),
+        ChartDataPoint.Bullet(""Profit ($k)"", 42, 50),
+        ChartDataPoint.Bullet(""Orders"", 310, 280),
+        ChartDataPoint.Bullet(""NPS Score"", 78, 85)
+    })
+};
+
+private List<ChartSeries> _rangeSeries = new()
+{
+    new ChartSeries(""Salary Ranges"", ChartType.RangeColumn, new[]
+    {
+        ChartDataPoint.Range(""Junior Dev"", 60, 85),
+        ChartDataPoint.Range(""Mid Dev"", 85, 120),
+        ChartDataPoint.Range(""Senior Dev"", 120, 165),
+        ChartDataPoint.Range(""Lead Architect"", 160, 210),
+        ChartDataPoint.Range(""Principal"", 200, 260)
+    })
+};
+
+private List<ChartSeries> _sankeySeries = new()
+{
+    new ChartSeries(""Budget Flow"", ChartType.Sankey, new[]
+    {
+        ChartDataPoint.Sankey(""Revenue"", ""Engineering"", 120),
+        ChartDataPoint.Sankey(""Revenue"", ""Marketing"", 60),
+        ChartDataPoint.Sankey(""Revenue"", ""Operations"", 40),
+        ChartDataPoint.Sankey(""Investment"", ""R&D"", 80),
+        ChartDataPoint.Sankey(""Investment"", ""Expansion"", 50)
+    })
+};";
         public const string Gauges = @"<ChartControl Type=""ChartType.RadialGauge"" Title=""Radial"" Series=""_gaugeSeries"" Height=""180px"" />
 <ChartControl Type=""ChartType.LinearGauge"" Title=""Linear"" Series=""_gaugeSeries"" Height=""90px"" />";
+        public const string GaugesCs = @"private List<ChartSeries> _gaugeSeries = new()
+{
+    new ChartSeries(""Performance"", ChartType.RadialGauge, new[]
+    {
+        new ChartDataPoint(""Score"", 82.5)
+    })
+};";
     }
 
     private List<ChartSeries> _candlestickSeries = new()

@@ -1,61 +1,67 @@
 @page "/demo/grid"
 @page "/demo/grid/radzen-comparison"
-@* Retitled 2026-10-06 to match the site nav; copy unchanged. *@
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-17: moved onto FeatureDemoLayout (one-example-plus-code push, tracker section 6). The grid and its data are unchanged;
+   the hand-typed markup block became Razor and C# tabs copied from the live example. "Right-click for menu" left the copy:
+   GridControl only raises OnContextMenu when the host handles it, and this page does not. Parameter tables are a later pass (SC-278). *@
 
 <PageTitle>Data Grid — FlexCore Showcase</PageTitle>
 
-<h1>Data Grid</h1>
-<p>Sortable, filterable, groupable data grid. Click a header to sort, drag to reorder, right-click for menu.</p>
+<FeatureDemoLayout Title="Data Grid" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
+                   Tagline="Sort, filter, group and resize a bound list. Every other grid page takes one feature further."
+                   SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs">
+    <Overview>
+        <p>
+            <code>GridControl</code> binds a list through <code>DataSource</code> and <code>TValue</code>, declares its columns in
+            <code>GridColumnsBase</code> and switches behaviours on with <code>Allow*</code> flags. This page shows the core set on a
+            ten-row list. The pages in the Data Grid menu each take one feature further, from batch editing and frozen columns to
+            on-demand loading, grouping with totals and the tree grid; they are listed under Related.
+        </p>
+    </Overview>
 
-<div class="demo-frame">
-    <GridControl TValue="Person" DataSource="@_people"
-                 AllowSelection="true"
-                 AllowSorting="true"
-                 AllowFiltering="true"
-                 AllowGrouping="true"
-                 AllowResizing="true"
-                 EnableHover="true"
-                 Height="420px">
-        <GridColumnsBase>
-            <GridColumn Field="@nameof(Person.Id)"        HeaderText="ID"          Width="60px"
-                        Type="ColumnType.Number" TextAlign="TextAlign.Right" />
-            <GridColumn Field="@nameof(Person.Name)"      HeaderText="Name"        Width="160px" />
-            <GridColumn Field="@nameof(Person.Department)" HeaderText="Department" Width="160px" />
-            <GridColumn Field="@nameof(Person.Role)"      HeaderText="Role"        Width="160px" />
-            <GridColumn Field="@nameof(Person.Salary)"    HeaderText="Salary"      Width="120px"
-                        Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" />
-            <GridColumn Field="@nameof(Person.HireDate)"  HeaderText="Hire Date"   Width="120px"
-                        Type="ColumnType.Date" Format="d" />
-        </GridColumnsBase>
-    </GridControl>
-</div>
+    <Examples>
+        <DemoExample Id="people" Title="Sort, filter, group and resize" RazorCode="@Code.People" CSharpCode="@Code.PeopleCs">
+            <Description><p>Click a header to sort. Use the filter icon in a header to filter. Drag a header into the bar above the grid to group by it, drag a header edge to resize, and drag a header sideways to reorder (<code>AllowColumnReorder</code> is on by default).</p></Description>
+            <Demo>
+                <GridControl TValue="Person" DataSource="@_people"
+                             AllowSelection="true"
+                             AllowSorting="true"
+                             AllowFiltering="true"
+                             AllowGrouping="true"
+                             AllowResizing="true"
+                             EnableHover="true"
+                             Height="420px">
+                    <GridColumnsBase>
+                        <GridColumn Field="@nameof(Person.Id)"        HeaderText="ID"          Width="60px"
+                                    Type="ColumnType.Number" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(Person.Name)"      HeaderText="Name"        Width="160px" />
+                        <GridColumn Field="@nameof(Person.Department)" HeaderText="Department" Width="160px" />
+                        <GridColumn Field="@nameof(Person.Role)"      HeaderText="Role"        Width="160px" />
+                        <GridColumn Field="@nameof(Person.Salary)"    HeaderText="Salary"      Width="120px"
+                                    Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(Person.HireDate)"  HeaderText="Hire Date"   Width="120px"
+                                    Type="ColumnType.Date" Format="d" />
+                    </GridColumnsBase>
+                </GridControl>
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-<h2>Grid pages</h2>
-@* Built from SiteNav so this list and the Data Grid menu cannot disagree. *@
-<ul>
-    @foreach (var link in SiteNav.LinksOf("Data Grid"))
-    {
-        <li><a href="@link.Href">@link.Text</a></li>
-    }
-</ul>
+    <Vocabulary>
+        <p class="fd-pending"><code>GridControl</code>, <code>GridColumn</code> and <code>AggregateRow</code> tables are still to be written from <code>Grid/GridControl.razor.cs</code> and its partial files. Tracker SC-278.</p>
+    </Vocabulary>
 
-<h2>Markup</h2>
-<pre><code>&lt;GridControl TValue="Person" DataSource="@@_people"
-             AllowSelection="true" AllowSorting="true"
-             AllowFiltering="true" AllowGrouping="true"
-             AllowResizing="true" EnableHover="true" Height="420px"&gt;
-    &lt;GridColumnsBase&gt;
-        &lt;GridColumn Field="Id"         HeaderText="ID"         Width="60px"
-                    Type="ColumnType.Number" TextAlign="TextAlign.Right" /&gt;
-        &lt;GridColumn Field="Name"       HeaderText="Name"       Width="160px" /&gt;
-        &lt;GridColumn Field="Department" HeaderText="Department" Width="160px" /&gt;
-        &lt;GridColumn Field="Role"       HeaderText="Role"       Width="160px" /&gt;
-        &lt;GridColumn Field="Salary"     HeaderText="Salary"     Width="120px"
-                    Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" /&gt;
-        &lt;GridColumn Field="HireDate"   HeaderText="Hire Date"  Width="120px"
-                    Type="ColumnType.Date" Format="d" /&gt;
-    &lt;/GridColumnsBase&gt;
-&lt;/GridControl&gt;</code></pre>
+    <Related>
+        @* Built from SiteNav so this list and the Data Grid menu cannot disagree. *@
+        <ul>
+            @foreach (var link in SiteNav.LinksOf("Data Grid"))
+            {
+                <li><a href="@link.Href">@link.Text</a></li>
+            }
+        </ul>
+    </Related>
+</FeatureDemoLayout>
 
 @code {
     record Person(int Id, string Name, string Department, string Role, decimal Salary, DateTime HireDate);
@@ -73,4 +79,44 @@
         new(9,  "Indigo Brooks",   "Sales",       "Senior AE",       118_000m, new(2021, 7, 17)),
         new(10, "Jess Wakefield",  "Marketing",   "Manager",         108_000m, new(2020, 12, 2)),
     };
+
+    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    private static class Code
+    {
+        public const string People = @"<GridControl TValue=""Person"" DataSource=""@_people""
+             AllowSelection=""true""
+             AllowSorting=""true""
+             AllowFiltering=""true""
+             AllowGrouping=""true""
+             AllowResizing=""true""
+             EnableHover=""true""
+             Height=""420px"">
+    <GridColumnsBase>
+        <GridColumn Field=""@nameof(Person.Id)""        HeaderText=""ID""          Width=""60px""
+                    Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(Person.Name)""      HeaderText=""Name""        Width=""160px"" />
+        <GridColumn Field=""@nameof(Person.Department)"" HeaderText=""Department"" Width=""160px"" />
+        <GridColumn Field=""@nameof(Person.Role)""      HeaderText=""Role""        Width=""160px"" />
+        <GridColumn Field=""@nameof(Person.Salary)""    HeaderText=""Salary""      Width=""120px""
+                    Type=""ColumnType.Number"" Format=""C0"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(Person.HireDate)""  HeaderText=""Hire Date""   Width=""120px""
+                    Type=""ColumnType.Date"" Format=""d"" />
+    </GridColumnsBase>
+</GridControl>";
+        public const string PeopleCs = @"record Person(int Id, string Name, string Department, string Role, decimal Salary, DateTime HireDate);
+
+private List<Person> _people = new()
+{
+    new(1,  ""Avery Chen"",      ""Engineering"", ""Senior Engineer"", 145_000m, new(2021, 3, 14)),
+    new(2,  ""Blake Rivera"",    ""Engineering"", ""Engineer"",         98_000m, new(2023, 6, 1)),
+    new(3,  ""Casey Patel"",     ""Engineering"", ""Lead"",            172_000m, new(2019, 9, 22)),
+    new(4,  ""Drew Yamamoto"",   ""Design"",      ""UX Designer"",     112_000m, new(2022, 1, 9)),
+    new(5,  ""Elliot Marquez"",  ""Design"",      ""Senior Designer"", 131_000m, new(2020, 8, 3)),
+    new(6,  ""Finley Okafor"",   ""Product"",     ""PM"",              125_000m, new(2022, 11, 15)),
+    new(7,  ""Gray Solberg"",    ""Product"",     ""Senior PM"",       154_000m, new(2018, 4, 28)),
+    new(8,  ""Hayden Lin"",      ""Sales"",       ""AE"",               92_000m, new(2024, 2, 5)),
+    new(9,  ""Indigo Brooks"",   ""Sales"",       ""Senior AE"",       118_000m, new(2021, 7, 17)),
+    new(10, ""Jess Wakefield"",  ""Marketing"",   ""Manager"",         108_000m, new(2020, 12, 2)),
+};";
+    }
 }

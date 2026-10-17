@@ -7,7 +7,8 @@
 @using FlexCore.Showcase.Components.Shared
 @* 2026-10-12: header moved onto FeatureDemoLayout; the metric switch and reset are FlexCore controls in the card
    header; the filters, chart, side panels and dataset grid below are unchanged. The "Pure SVG • Zero JS" badge
-   was removed per the claims rule. Parameter table pending (SC-264). *@
+   was removed per the claims rule. Parameter table pending (SC-264). Code tabs 2026-10-17 (SC-277): Razor and C# are
+   verbatim excerpts covering the two FlexCore controls and the members they bind; the comment in each tab says what is left out. *@
 
 <PageTitle>Sunburst — FlexCore Showcase</PageTitle>
 
@@ -24,7 +25,7 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="covid" Title="Cases and deaths by continent and country" RazorCode="@Code.Sunburst">
+        <DemoExample Id="covid" Title="Cases and deaths by continent and country" RazorCode="@Code.Sunburst" CSharpCode="@Code.SunburstCs">
             <Description><p>Switch the metric, filter a continent, search a country, or open the data table underneath. The chart, the stats and the leaderboard share one selection.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_metricItems" Values="@(new[] { _useDeathsAsMetric ? "deaths" : "cases" })"
@@ -325,14 +326,114 @@
     private readonly SelectionItem[] _metricItems = { new("cases", "Total cases (56.96M)"), new("deaths", "Total deaths (1.40M)") };
     private static class Code
     {
-        public const string Sunburst = @"@* the chart alone; the metric switch, filters and results grid are ButtonGroupControl and GridControl markup in the page source *@
+        public const string Sunburst = @"@* excerpt: the two FlexCore controls in the example. The metric switch is the ButtonGroupControl in the example toolbar; the continent
+   filters, search box, stat cards and leaderboard are plain markup in the page source. *@
 <SunburstChartControl RootNode=""@_sunburstRoot""
-                      MetricName=""Cases"" SecondaryMetricName=""Deaths""
-                      CenterTitle=""TOTAL CASES"" CenterColor=""#56abf6"" ValueFormat=""N0""
-                      EnableDrilldown=""true"" ShowBreadcrumb=""true"" ShowLabels=""true""
+                      MetricName=""@(_useDeathsAsMetric ? ""Deaths"" : ""Cases"")""
+                      SecondaryMetricName=""@(_useDeathsAsMetric ? ""Cases"" : ""Deaths"")""
+                      CenterTitle=""@(_useDeathsAsMetric ? ""TOTAL DEATHS"" : ""TOTAL CASES"")""
+                      CenterColor=""@(_useDeathsAsMetric ? ""#e53935"" : ""#56abf6"")""
+                      ValueFormat=""N0""
+                      EnableDrilldown=""true""
+                      ShowBreadcrumb=""true""
+                      ShowLabels=""true""
                       HighlightedNodeId=""@_highlightedNodeId""
-                      OnNodeClick=""HandleNodeClick"" OnNodeHover=""HandleNodeHover""
-                      Height=""620px"" />";
+                      OnNodeClick=""HandleNodeClick""
+                      OnNodeHover=""HandleNodeHover""
+                      Height=""620px"" />
+
+@* the data table under the chart, rendered while _showGrid is true *@
+<GridControl TValue=""CovidCountryData""
+             DataSource=""@_filteredTableData""
+             AllowSorting=""true""
+             AllowFiltering=""true""
+             AllowPaging=""true""
+             PageSize=""15""
+             ShowRowCountInFooter=""true""
+             Height=""420px""
+             CssClass=""fx-grid-compact"">
+    <GridColumnsBase>
+        <GridColumn Field=""@nameof(CovidCountryData.IsoCode)"" HeaderText=""ISO"" Width=""75px"" TextAlign=""TextAlign.Center"" />
+        <GridColumn Field=""@nameof(CovidCountryData.Name)"" HeaderText=""Country / Territory"" Width=""220px"" />
+        <GridColumn Field=""@nameof(CovidCountryData.Continent)"" HeaderText=""Continent"" Width=""140px"" />
+        <GridColumn Field=""@nameof(CovidCountryData.TotalCases)"" HeaderText=""Total Cases"" Width=""130px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0"" />
+        <GridColumn Field=""@nameof(CovidCountryData.TotalDeaths)"" HeaderText=""Total Deaths"" Width=""120px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0"" />
+        <GridColumn Field=""@nameof(CovidCountryData.TotalCasesPerMillion)"" HeaderText=""Cases / Million"" Width=""130px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0.0"" />
+        <GridColumn Field=""@nameof(CovidCountryData.TotalDeathsPerMillion)"" HeaderText=""Deaths / Million"" Width=""130px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0.0"" />
+    </GridColumnsBase>
+</GridControl>";
+        public const string SunburstCs = @"// excerpt: the fields and handlers the chart and the metric switch use. FilterByContinent, HighlightCountry, HandleSearchInput and
+// ClearSearch drive the plain-markup filters and are in the page source.
+private readonly SelectionItem[] _metricItems = { new(""cases"", ""Total cases (56.96M)""), new(""deaths"", ""Total deaths (1.40M)"") };
+
+private SunburstNode _sunburstRoot = default!;
+private SunburstNode? _selectedOrHoveredNode;
+private bool _useDeathsAsMetric = false;
+private string? _activeContinentFilter;
+private string? _highlightedNodeId;
+private string? _highlightedNodeName;
+private string _searchQuery = """";
+private bool _showGrid = false;
+
+private List<CovidCountryData> _allCountryData = new();
+private List<CovidCountryData> _topCountries = new();
+private List<CovidCountryData> _filteredTableData = new();
+
+protected override void OnInitialized()
+{
+    LoadData();
+}
+
+private void LoadData()
+{
+    _allCountryData = CovidDataService.GetFlatCountryData();
+    _topCountries = _allCountryData.OrderByDescending(c => c.TotalCases).Take(10).ToList();
+    _filteredTableData = _allCountryData;
+    _sunburstRoot = CovidDataService.GetCovidSunburstTree(_useDeathsAsMetric);
+    _selectedOrHoveredNode = _sunburstRoot;
+}
+
+private void SwitchMetric(bool useDeaths)
+{
+    _useDeathsAsMetric = useDeaths;
+    _sunburstRoot = CovidDataService.GetCovidSunburstTree(_useDeathsAsMetric);
+    if (!string.IsNullOrEmpty(_activeContinentFilter))
+    {
+        var match = _sunburstRoot.Children.FirstOrDefault(c => c.Name.Equals(_activeContinentFilter, StringComparison.OrdinalIgnoreCase));
+        if (match != null)
+            _selectedOrHoveredNode = match;
+    }
+    else
+    {
+        _selectedOrHoveredNode = _sunburstRoot;
+    }
+}
+
+private void ResetToWorld()
+{
+    _activeContinentFilter = null;
+    _highlightedNodeId = null;
+    _highlightedNodeName = null;
+    _searchQuery = """";
+    _sunburstRoot = CovidDataService.GetCovidSunburstTree(_useDeathsAsMetric);
+    _selectedOrHoveredNode = _sunburstRoot;
+    _filteredTableData = _allCountryData;
+}
+
+private void HandleNodeClick(SunburstNode node)
+{
+    _selectedOrHoveredNode = node;
+    _highlightedNodeId = node.Id;
+    _highlightedNodeName = node.Name;
+}
+
+private void HandleNodeHover(SunburstNode? node)
+{
+    if (node != null)
+    {
+        _selectedOrHoveredNode = node;
+    }
+}";
     }
 
     private SunburstNode _sunburstRoot = default!;
