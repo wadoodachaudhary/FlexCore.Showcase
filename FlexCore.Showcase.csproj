@@ -5,7 +5,16 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <!-- Gov AI Academy is a separate web app in this repo. Keep its sources out of Showcase. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);GovAiAcademy/**;GovAiAcademy.Tests/**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="GovAiAcademy/**;GovAiAcademy.Tests/**" />
+    <Content Remove="GovAiAcademy/**;GovAiAcademy.Tests/**" />
+    <None Remove="GovAiAcademy/**;GovAiAcademy.Tests/**" />
+    <RazorComponent Remove="GovAiAcademy/**;GovAiAcademy.Tests/**" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FlexCore\FlexCore.csproj" />

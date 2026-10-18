@@ -1,0 +1,84 @@
+@page "/signin"
+@inject AcademyAuthState Auth
+@inject AcademyStore Store
+@inject NavigationManager Nav
+@inject NotificationService Notifications
+
+<PageTitle>Sign in — Gov AI Academy</PageTitle>
+
+<h1>Sign in</h1>
+
+@if (!Auth.Options.PersonaSignInAllowed)
+{
+    <AlertControl Severity="AlertSeverity.Warning" Title="Entra ID is the configured sign-in">
+        This environment is set to Entra ID. Sample personas are turned off.
+        The Microsoft sign-in handshake is not completed in this build.
+    </AlertControl>
+    <h2>What a tenant administrator still has to supply</h2>
+    <ul class="fact-list">
+        <li>Confirm the cloud. Azure Government tenants use <code>https://login.microsoftonline.us/</code>. Commercial tenants use <code>https://login.microsoftonline.com/</code>.</li>
+        <li>App registration, single tenant. Redirect URI <code>https://&lt;your-academy-host&gt;@Auth.Options.Entra.CallbackPath</code>.</li>
+        <li>Application (client) ID and directory (tenant) ID in App Service settings: <code>Authentication__Entra__ClientId</code> and <code>Authentication__Entra__TenantId</code>.</li>
+        <li>Client secret or certificate in Key Vault. Do not commit it. App setting name: <code>Authentication__Entra__ClientSecret</code>.</li>
+        <li>App roles: Learner, Instructor, Administrator. Map those claims in the app when you add the <code>Microsoft.Identity.Web</code> package.</li>
+    </ul>
+    <p>Configured instance: <code>@(string.IsNullOrWhiteSpace(Auth.Options.Entra.Instance) ? "(not set)" : Auth.Options.Entra.Instance)</code></p>
+    <p>Client ID present: @(Auth.Options.Entra.HasRegistration ? "yes" : "no")</p>
+    <p><a href="security">Full security and Entra notes</a></p>
+}
+else
+{
+    <AlertControl Severity="AlertSeverity.Info" Title="Development sign-in" AllowClose="false">
+        These are sample people, not real officers. There is no password. Do not use this mode in production.
+        Production configuration sets <code>Authentication:Mode</code> to <code>EntraId</code> and hides this list.
+    </AlertControl>
+
+    @if (Auth.IsSignedIn && Auth.Current is not null)
+    {
+        <p>You are signed in as <strong>@Auth.Current.DisplayName</strong> (@AcademyLabels.Persona(Auth.Current.Role)).</p>
+        <div class="button-row">
+            <ButtonControl CssClass="btn-secondary" OnClick="SignOut">Sign out</ButtonControl>
+            <a class="text-link" href="learn">My learning</a>
+            @if (Auth.CanInstruct)
+            {
+                <a class="text-link" href="instruct">Instructor desk</a>
+            }
+        </div>
+    }
+
+    <h2>Choose a sample account</h2>
+    <div class="card-grid">
+        @foreach (var person in _personas)
+        {
+            <CardControl Title="@person.DisplayName" Subtitle="@AcademyLabels.Persona(person.Role)" Elevation="1">
+                <p>@person.JobTitle, @person.Agency</p>
+                <p class="muted">@person.Email</p>
+                <ButtonControl CssClass="btn-primary" OnClick="@(() => UseAccount(person.Id))">Use this account</ButtonControl>
+            </CardControl>
+        }
+    </div>
+}
+
+@code {
+    private List<Person> _personas = [];
+
+    protected override void OnInitialized() => _personas = Store.DevPersonas.ToList();
+
+    private void UseAccount(string personId)
+    {
+        if (!Auth.TrySignInPersona(personId, out var message))
+        {
+            Notifications.Warning(message);
+            return;
+        }
+
+        Notifications.Success(message);
+        Nav.NavigateTo(Auth.CanInstruct ? "instruct" : "learn");
+    }
+
+    private void SignOut()
+    {
+        Auth.SignOut();
+        Notifications.Info("Signed out.");
+    }
+}
