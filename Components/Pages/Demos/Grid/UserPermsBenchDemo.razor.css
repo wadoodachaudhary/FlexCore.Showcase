@@ -1,0 +1,5 @@
+/* 2026-10-18: Master-detail page. No Bootstrap names in here. */
+.pair { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; }
+.pane-title { font-size: 13px; font-weight: 600; color: #334155; margin: 0 0 6px; }
+.result { font-size: 13px; color: #475569; margin: 8px 0 0; }
+@media (max-width: 900px) { .pair { grid-template-columns: 1fr; } }

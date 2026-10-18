@@ -12,5 +12,7 @@ public enum ApiKind
     Keyboard      // Key | Action
 }
 
-/// <summary>One vocabulary row. <paramref name="Description"/> may hold inline HTML such as &lt;code&gt;.</summary>
-public sealed record ApiRow(string Name, string Description, string? Type = null, string? Default = null);
+/// <summary>One documentation row. <paramref name="Description"/> may hold inline HTML such as &lt;code&gt;.
+/// For <see cref="ApiKind.Methods"/> the table shows the method as <c>Name()</c> and lists its parameters in an Inputs column:
+/// either from <paramref name="Inputs"/>, or split out of a <paramref name="Name"/> written as <c>Name(type a, type b)</c>.</summary>
+public sealed record ApiRow(string Name, string Description, string? Type = null, string? Default = null, string? Inputs = null);

@@ -6,6 +6,8 @@
 .api-table td { padding: 8px 12px; vertical-align: top; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
 .api-table tr:last-child td { border-bottom: 0; }
 .api-name, .api-type, .api-default { white-space: nowrap; }
+.api-inputs { white-space: nowrap; line-height: 1.6; }
+.api-inputs code { display: inline-block; }
 .api-desc { min-width: 240px; }   /* narrow screens scroll the table instead of squeezing this column */
 .api-table code { color: #334155; font-size: 12.5px; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; }
 .api-name code { background: #eef2ff; color: #3730a3; }

@@ -10,13 +10,15 @@
    with it as off-topic here. The .wide wrapper exists for the page CSS: frozen body cells use background-color:inherit and the
    library gives rows none, so scrolled columns show through the pinned ones; the page gives rows a white background until the
    library fix (SC-292).
-   Parameter tables are a later pass (SC-278). *@
+   2026-10-18: vocabulary written from GridControl.ColumnVirtualization.cs (parameters, status properties, every fallback reason in
+   TryCreateColumnVirtualizationLayout and TryResolveColumnVirtualizationWidth), GridEnums.cs (GridWidthMode) and the markup/CSS hooks in
+   GridControl.razor and GridControl.razor.css; rows checked against the source with scratchpad/vocabcheck.py. *@
 
 <PageTitle>Wide grids — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Wide grids" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
                    Tagline="Twenty-one columns and a thousand rows: pinned edges, and only the columns in view kept in the page."
-                   SourcePath="Grid/GridControl.ColumnVirtualization.cs;Grid/GridColumn.cs">
+                   SourcePath="Grid/GridControl.ColumnVirtualization.cs;Grid/GridEnums.cs;Grid/GridControl.razor.cs">
     <Overview>
         <p>
             <code>EnableColumnVirtualization</code> renders only the non-frozen columns that are horizontally in view, plus
@@ -78,7 +80,15 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>EnableColumnVirtualization</code>, <code>ColumnVirtualizationOverscan</code>, <code>ColumnVirtualizationDefaultWidth</code>, <code>ShowColumnVirtualizationFallback</code>, <code>ColumnVirtualizationStatus</code>, <code>ColumnVirtualizationFallbackReason</code> and <code>WidthMode</code> are still to be written up from <code>Grid/GridControl.ColumnVirtualization.cs</code> and <code>Grid/GridEnums.cs</code>.</p>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters" Rows="Vocab.Grid" />
+        <ApiTable Kind="ApiKind.Properties" Title="Read-only status on GridControl" Rows="Vocab.Status" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes and data attributes" Rows="Vocab.Dom" />
+        <p>
+            Whether a column can be windowed is decided by its own <code>Width</code>, <code>MinWidth</code> and <code>MaxWidth</code>: a pixel
+            value (<code>120px</code> or a bare <code>120</code>) counts, anything else does not; a column the user has resized keeps that width.
+            The scroll area reports its position and width through the grid's script, and the grid re-renders only when the set of mounted
+            columns changes.
+        </p>
     </Vocabulary>
 
     <Related>
@@ -240,5 +250,29 @@ public sealed class WideGridRow
     public decimal M18 { get; set; }
     public string Status { get; set; } = """";
 }";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Grid =
+        {
+            new("EnableColumnVirtualization", "Mounts only the non-frozen columns that are horizontally in view, plus the overscan on each side; the omitted width becomes a spacer so column positions and the scrollbar stay right. Frozen columns always stay mounted. The first paint after mount renders every column because the viewport is not measured yet; the window applies once the scroll area has reported its size. Flat tables only: the fallback reasons below list what turns it off.", "bool", "false"),
+            new("ColumnVirtualizationOverscan", "Extra scrollable columns kept mounted before and after the visible range. A negative value counts as zero.", "int", "2"),
+            new("ColumnVirtualizationDefaultWidth", "Width assumed for a column that declares no <code>Width</code> and has not been resized. At zero such a column makes the grid fall back to a full render.", "double", "0"),
+            new("ShowColumnVirtualizationFallback", "Shows a one-line note, \"Columns: full render (reason)\", when virtualization is on but the current layout cannot be windowed.", "bool", "true"),
+            new("WidthMode", "<code>FillAvailable</code> keeps the table at least as wide as the grid's host. <code>FitColumns</code> sizes host and table to the sum of the visible column widths, up to the parent's width.", "GridWidthMode", "GridWidthMode.FillAvailable"),
+        };
+        public static readonly ApiRow[] Status =
+        {
+            new("ColumnVirtualizationStatus", "<code>Disabled</code> when the flag is off, <code>Active</code> when the current layout can be windowed, <code>Fallback</code> when it cannot. Computed on each read.", "GridColumnVirtualizationStatus"),
+            new("ColumnVirtualizationFallbackReason", "Why the grid renders every column; null when disabled or active. Reasons: a pivot or chart view; grouped rows; an inline row edit in progress; header bands; a <code>RowTemplate</code>; stacked or adaptive layout; no scrollable column (all frozen); a column whose <code>Width</code>, <code>MinWidth</code> or <code>MaxWidth</code> is not a pixel value, or that has no width and no default width.", "string?"),
+        };
+        public static readonly ApiRow[] Dom =
+        {
+            new("data-fx-column-virtualization", "On the grid's root element: <code>disabled</code>, <code>active</code> or <code>fallback</code>."),
+            new("data-fx-column-virtualization-fallback", "On the root element: the fallback reason, empty otherwise."),
+            new("fx-column-window-spacer-col / fx-column-window-spacer", "The <code>&lt;col&gt;</code> and the header, filter, body and aggregate cells that stand in for the omitted columns' width."),
+            new("fx-grid-column-virtualization-fallback", "The fallback note: one grey 9px line with <code>role=\"status\"</code> and the reason in its tooltip."),
+        };
     }
 }

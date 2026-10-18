@@ -7,13 +7,16 @@
    user does; the reorder-pipe colour picker went (a test knob; the parameter is named in the overview instead); the "Other Grid
    Demos" list went (the menu and Related cover it). OnLayoutChanged (GridSettings snapshot, fired from the header drop handler,
    GridControl.razor.cs ~12931) feeds a line under the grid with the new column order, so a drop has a visible result and the hook
-   for saving user layouts is on show. Parameter tables are a later pass (SC-278). *@
+   for saving user layouts is on show.
+   2026-10-18: vocabulary written from GridControl.razor.cs (AllowColumnReorder ~675, ColumnReorderPipeColor ~713,
+   OnLayoutChanged ~781, PersistenceKey ~794) and GridSettings.cs; rows checked against the source with scratchpad/vocabcheck.py.
+   Library doc gaps found on the way are in SC-253 (owner-gated). *@
 
 <PageTitle>Column reorder — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Column reorder" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
                    Tagline="Drag a header sideways and drop it where the column should go."
-                   SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs">
+                   SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs;Grid/GridSettings.cs">
     <Overview>
         <p>
             <code>AllowColumnReorder</code> is on by default: every header is draggable, and while a header is being dragged the grid shows a
@@ -61,7 +64,17 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>AllowColumnReorder</code>, <code>ColumnReorderPipeColor</code>, <code>OnLayoutChanged</code> and <code>GridSettings</code> are still to be written up from <code>Grid/GridControl.razor.cs</code> and <code>Grid/GridSettings.cs</code>.</p>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters for reordering and layout" Rows="Vocab.Grid" />
+        <ApiTable Kind="ApiKind.Properties" Title="GridSettings" Rows="Vocab.Settings" />
+        <ApiTable Kind="ApiKind.Methods" Title="IGridSettingsStore" Rows="Vocab.Store" />
+        <p>
+            The host registers one <code>IGridSettingsStore</code>, scoped or singleton; with none registered the grid does not persist. There is no
+            public method that returns or applies a <code>GridSettings</code> on its own; <code>GetState()</code> and <code>SetStateAsync()</code>
+            round-trip the wider <code>GridState</code>, which includes the column layout, and <code>EndUpdateAsync</code> or
+            <code>SuspendRedraw</code> take a final column order (see <a href="demo/grid/column-swap">Column sets</a>). Besides dragging, the
+            header menu's Choose Columns dialog moves a column with its Move Up and Move Down buttons. There is no per-column switch, so a host
+            that must keep one column in place has to turn <code>AllowColumnReorder</code> off.
+        </p>
     </Vocabulary>
 
     <Related>
@@ -166,5 +179,30 @@ private readonly List<ReorderingRow> _rows = new()
     new(""F610"", ""Stone Creek"", ""Landscape"",  ""Irrigation valve map"",     ""Luca Romano"",   ""Low"",    1.0m,  140.00m, new(2026, 1, 18)),
     new(""F610"", ""Stone Creek"", ""Final"",      ""Warranty turnover packet"", ""Grace Mitchell"",""Medium"", 2.8m,  360.00m, new(2026, 1, 19)),
 };";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Grid =
+        {
+            new("AllowColumnReorder", "Lets a header be dragged onto another header. When off, headers stay draggable only for grouping (with <code>AllowGrouping</code> on) and a drop on a header does nothing.", "bool", "true"),
+            new("ColumnReorderPipeColor", "Colour of the vertical pipe that marks where the column will land; any CSS colour, written to the grid's <code>--fx-grid-reorder-pipe-color</code> variable. Blank falls back to the default.", "string", "\"#2b2b2b\""),
+            new("OnLayoutChanged", "Fires after a layout change the grid can persist: a header drop, the end of a column or row resize, fit-to-grid and auto-fit, a group added or removed, the header menu's rename, lock and hide commands, a column shown or hidden from the options panel, and OK in the Choose Columns dialog. The argument is a <code>GridSettings</code> snapshot of the whole layout, not just the part that changed; save it to restore the layout later.", "EventCallback&lt;GridSettings&gt;"),
+            new("PersistenceKey", "Opt-in persistence. When set and an <code>IGridSettingsStore</code> is registered in DI, the grid loads the saved snapshot once it has its columns and saves a new one at every change that raises <code>OnLayoutChanged</code>.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Settings =
+        {
+            new("ColumnOrder", "Fields in display order. Fields missing from the list go to the end.", "List&lt;string&gt;?", "null"),
+            new("Visibility", "Per-field visibility; overrides the column's <code>Visible</code> parameter.", "Dictionary&lt;string, bool&gt;?", "null"),
+            new("Widths", "Per-field pixel width from the user's last resize.", "Dictionary&lt;string, double&gt;?", "null"),
+            new("FrozenPositions", "Per-field lock: Left or Right pins the column, a null value leaves it scrollable. A null dictionary keeps the markup's layout (settings written by older builds).", "Dictionary&lt;string, FrozenColumnPosition?&gt;?", "null"),
+            new("HeaderOverrides", "Per-field header text from the header menu's rename command.", "Dictionary&lt;string, string&gt;?", "null"),
+            new("GroupColumns", "Fields grouped on, in the order they were dropped on the grouping bar.", "List&lt;string&gt;?", "null"),
+        };
+        public static readonly ApiRow[] Store =
+        {
+            new("LoadAsync(string key)", "Returns the saved snapshot for the key, or null when nothing has been saved.", "Task&lt;GridSettings?&gt;"),
+            new("SaveAsync(string key, GridSettings settings)", "Overwrites whatever was saved under the key.", "Task"),
+        };
     }
 }

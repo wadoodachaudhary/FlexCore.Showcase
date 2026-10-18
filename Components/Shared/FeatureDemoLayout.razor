@@ -1,9 +1,11 @@
 @namespace FlexCore.Showcase.Components.Shared
 @inject NavigationManager Nav
 
-@* Page frame for one feature (2026-10-12): header → Overview → Examples → Vocabulary →
+@* Page frame for one feature (2026-10-12): header → Overview → Examples → Documentation →
    Keyboard and accessibility → Related, plus an "On this page" list filled by the DemoExamples.
-   Breadcrumb is BreadCrumbControl; the two-column frame has no FlexCore equivalent. *@
+   Breadcrumb is BreadCrumbControl; the two-column frame has no FlexCore equivalent.
+   2026-10-18 (Baaria's review): "Vocabulary" became "Documentation"; the source files moved from the header to the rail under
+   "On this page" and are listed without links, because whether the full source stays public is still an open decision. *@
 <CascadingValue Value="this" IsFixed="true">
 <div class="fd-shell">
     <header class="fd-header">
@@ -19,25 +21,12 @@
         {
             <p class="fd-tagline">@Tagline</p>
         }
-        <div class="fd-links">
-            @if (SourcePaths.Length == 1)
-            {
-                <a href="@Gh(SourcePaths[0])" target="_blank" rel="noopener">Source on GitHub</a>
-            }
-            else if (SourcePaths.Length > 1)
-            {
-                <span class="fd-sources">Source:
-                    @foreach (var p in SourcePaths)
-                    {
-                        <a href="@Gh(p)" target="_blank" rel="noopener">@System.IO.Path.GetFileName(p)</a>
-                    }
-                </span>
-            }
-            @if (Vocabulary is not null)
-            {
-                <a href="@($"{PagePath}#vocabulary")">Vocabulary</a>
-            }
-        </div>
+        @if (Vocabulary is not null)
+        {
+            <div class="fd-links">
+                <a href="@($"{PagePath}#documentation")">Documentation</a>
+            </div>
+        }
     </header>
 
     <div class="fd-body">
@@ -54,8 +43,8 @@
 
             @if (Vocabulary is not null)
             {
-                <section class="fd-section" id="vocabulary">
-                    <h2>Vocabulary</h2>
+                <section class="fd-section" id="documentation">
+                    <h2>Documentation</h2>
                     @Vocabulary
                 </section>
             }
@@ -84,9 +73,17 @@
             {
                 <a class="fd-toc-ex" href="@($"{PagePath}#{id}")">@title</a>
             }
-            @if (Vocabulary is not null) { <a href="@($"{PagePath}#vocabulary")">Vocabulary</a> }
+            @if (Vocabulary is not null) { <a href="@($"{PagePath}#documentation")">Documentation</a> }
             @if (Accessibility is not null) { <a href="@($"{PagePath}#accessibility")">Keyboard and accessibility</a> }
             @if (Related is not null) { <a href="@($"{PagePath}#related")">Related</a> }
+            @if (SourcePaths.Length > 0)
+            {
+                <div class="fd-toc-title fd-toc-sources-title">Source files</div>
+                @foreach (var p in SourcePaths)
+                {
+                    <span class="fd-toc-source">@p</span>
+                }
+            }
         </aside>
     </div>
 </div>
@@ -100,14 +97,14 @@
     /// <summary>Type name shown beside the title, e.g. ButtonControl.</summary>
     [Parameter] public string? ControlName { get; set; }
     [Parameter] public string? Tagline { get; set; }
-    /// <summary>Repo-relative path(s) of the control's source, ';'-separated, for the GitHub links.</summary>
+    /// <summary>Repo-relative path(s) of the control's source, ';'-separated; listed in the rail, not linked.</summary>
     [Parameter] public string? SourcePath { get; set; }
     private string[] SourcePaths => (SourcePath ?? "").Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-    private static string Gh(string path) => $"https://github.com/wadoodachaudhary/FlexCore/blob/main/{path}";
 
     [Parameter, EditorRequired] public RenderFragment? Overview { get; set; }
     /// <summary>One or more DemoExample components.</summary>
     [Parameter, EditorRequired] public RenderFragment? Examples { get; set; }
+    /// <summary>The Documentation section (tables and notes). The slot keeps its original name so pages need no change.</summary>
     [Parameter] public RenderFragment? Vocabulary { get; set; }
     [Parameter] public RenderFragment? Accessibility { get; set; }
     [Parameter] public RenderFragment? Related { get; set; }

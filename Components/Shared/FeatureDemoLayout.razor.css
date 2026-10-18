@@ -7,8 +7,6 @@
 .fd-links { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; font-size: 13px; }
 .fd-links a { color: #2563eb; text-decoration: none; }
 .fd-links a:hover { text-decoration: underline; }
-.fd-sources { color: #64748b; }
-.fd-sources a { margin-left: 6px; }
 
 .fd-body { display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 32px; align-items: start; }
 .fd-main { min-width: 0; }
@@ -25,12 +23,14 @@
 .fd-toc a { color: #475569; text-decoration: none; }
 .fd-toc a:hover { color: #2563eb; }
 .fd-toc-ex { padding-left: 10px; }
+.fd-toc-sources-title { margin-top: 14px; }
+.fd-toc-source { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; color: #64748b; word-break: break-all; line-height: 1.35; }
 
 @media (max-width: 900px) {
     .fd-body { grid-template-columns: 1fr; }
     .fd-toc { display: none; }
 }
 
-/* "to be written" note a page can drop into Vocabulary or Accessibility */
+/* "to be written" note a page can drop into Documentation or Accessibility */
 .fd-section ::deep .fd-pending { font-size: 13.5px; color: #64748b; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px 14px; margin: 0 0 16px; }
 .fd-section ::deep .fd-pending code { font-size: 12.5px; background: #eef2f7; padding: 1px 4px; border-radius: 4px; color: #334155; }

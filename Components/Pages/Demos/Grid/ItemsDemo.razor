@@ -8,13 +8,17 @@
    caption showed the count twice; the internal catalog name left the intro; "default sorts" left the intro because the page sets
    none. Two library behaviours shape the copy (logged in SC-253): a group footer prints only the first aggregate defined for a
    column, so the Count footer template never shows; and the caption aggregates' pill styling is scoped CSS that never matches the
-   spans built in GridControl.razor.cs, so they run together, which the page CSS works around through the .catalog wrapper. Parameter tables are a later pass (SC-278). *@
+   spans built in GridControl.razor.cs, so they run together, which the page CSS works around through the .catalog wrapper.
+   2026-10-18: vocabulary written from GridControl.razor.cs (grouping parameters, AddGroup/RemoveGroup/ClearAllGroupsAsync, the public
+   group methods, ComputeAggregates, FormatAggregateValue, the caption and footer renderers), GridControl.AdvancedFeatures.cs,
+   GridColumn.cs, GridModels.cs (AggregateRow, AggregateColumn, GroupEventArgs), GridControlEvents.cs and GridEnums.cs; rows checked with
+   scratchpad/vocabcheck.py. Declared-but-unused members are named as such; library notes in SC-253. *@
 
 <PageTitle>Grouping &amp; totals — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Grouping &amp; totals" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
                    Tagline="Group rows by a column, with averages and counts in the group captions and footers."
-                   SourcePath="Grid/GridControl.razor;Grid/GridModels.cs">
+                   SourcePath="Grid/GridControl.razor.cs;Grid/GridModels.cs;Grid/GridControlEvents.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
             <code>GroupColumns</code> opens the grid already grouped; with <code>AllowGrouping</code> the user regroups by dragging a header
@@ -60,7 +64,19 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>GridControl</code> grouping and aggregate parameters, and the <code>AggregateRow</code>, <code>AggregateColumn</code> and <code>AggregateType</code> tables, are still to be written from <code>Grid/GridControl.razor.cs</code> and <code>Grid/GridModels.cs</code>.</p>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl grouping parameters" Rows="Vocab.Grid" />
+        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn" Rows="Vocab.Column" />
+        <ApiTable Kind="ApiKind.Properties" Title="AggregateRow" Rows="Vocab.Row" />
+        <ApiTable Kind="ApiKind.Properties" Title="AggregateColumn" Rows="Vocab.Agg" />
+        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, grouping" Rows="Vocab.Events" />
+        <ApiTable Kind="ApiKind.Methods" Title="Grouping methods" Rows="Vocab.Methods" />
+        <p>
+            <code>AggregateType</code> is <code>Sum</code>, <code>Average</code>, <code>Count</code>, <code>Min</code> or <code>Max</code>. Values are
+            read as doubles: numeric properties directly, anything else through a parse of its text. <code>Count</code> therefore counts the
+            values that parse as numbers, so on a text or boolean column it prints nothing; count a numeric column instead, as this page does.
+            A group footer and the grid footer print one value per column, the first <code>AggregateColumn</code> for that field; a caption
+            prints every value of every caption row.
+        </p>
     </Vocabulary>
 
     <Related>
@@ -147,5 +163,62 @@ private List<AggregateRow> _aggregates = new()
 // Data/DemoData.cs
 public record CatalogItem(string ItemId, string Description, string Phase, string Category,
     string UOM, decimal DefaultCost, bool IsActive);";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Grid =
+        {
+            new("AllowGrouping", "Required for any grouping. Shows the group bar, lets a header be dragged onto it and a chip be removed, and makes <code>GroupColumns</code> take effect; off, the grid stays flat.", "bool", "false"),
+            new("GroupColumns", "Fields to group by on first render, outermost first. A new list instance re-syncs the groups.", "List&lt;string&gt;?", "null"),
+            new("HideGroupedColumns", "Hides a grouped column from the data rows. False keeps it in place as well.", "bool", "true"),
+            new("ShowGroupCount", "Appends (n items) to each caption.", "bool", "false"),
+            new("DefaultGroupsCollapsed", "Start with every group collapsed.", "bool", "false"),
+            new("ShowGroupExpandCollapse", "Shows the Expand All / Collapse All toggle in the group bar.", "bool", "true"),
+            new("GroupExpandIconStyle", "<code>PlusMinus</code> boxes or <code>Triangle</code> chevrons on the caption rows. The expand-icon template and glyph parameters override the preset.", "GroupExpandIconStyle", "GroupExpandIconStyle.PlusMinus"),
+            new("GroupHeaderTextSelector", "Replaces the caption text. Receives the field, the key as text and the group's rows; the key itself, and so collapse state, is unchanged.", "Func&lt;string, string, IReadOnlyList&lt;TValue&gt;, string&gt;?", "null"),
+            new("AggregateRows", "What to compute and where to print it; the two tables below.", "List&lt;AggregateRow&gt;?", "null"),
+            new("GroupedColumnColor / GroupItemTextColor / GroupTotalTextColor", "Optional CSS colours for the grouped values in caption rows and chips, the caption text, and the aggregate values. Empty inherits.", "string", "\"\""),
+            new("ShowRowCountInFooter", "Prints the row count of the complete filtered result in the footer, not of the rendered window or page.", "bool", "false"),
+            new("EnableGroupedRowWindowing", "Windows the rows of a grouped grid the way a flat grid is windowed. Off renders every row.", "bool", "true"),
+            new("GroupFooterTemplate", "Declared, but <code>GridControl</code> never reads it.", "RenderFragment&lt;object&gt;?", "null"),
+            new("GroupFootersAlwaysVisible", "Declared, but <code>GridControl</code> never reads it.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Column =
+        {
+            new("AllowGrouping", "False keeps this column out of grouping: its header cannot be dropped on the bar, its header menu offers no group command, and <code>GroupByColumnAsync</code> ignores it.", "bool", "true"),
+        };
+        public static readonly ApiRow[] Row =
+        {
+            new("Columns", "The aggregates of this row.", "List&lt;AggregateColumn&gt;", "new()"),
+            new("ShowInGroupFooter", "A row of values under each group, aligned with the columns.", "bool", "true"),
+            new("ShowInFooter", "The same row after all data.", "bool", "false"),
+            new("ShowInGroupCaption", "Every value inline in the caption, after the group name and the count.", "bool", "false"),
+            new("ShowInGroupHeader", "An extra aligned row at the top of each group, under the caption.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Agg =
+        {
+            new("Field", "The property to aggregate.", "string", "\"\""),
+            new("Type", "Sum, Average, Count, Min or Max.", "AggregateType", "AggregateType.Sum"),
+            new("Format", ".NET format applied to the number, such as <code>C2</code> or <code>N0</code>.", "string?", "null"),
+            new("FooterTemplate", "Text with <code>{value}</code> for the number, used wherever no more specific template is set. The words <code>Total:</code>, <code>Sub Total:</code> and <code>Grand Total:</code> are removed from the result.", "string", "\"{value}\""),
+            new("GroupFooterTemplate", "Template for group footers; falls back to <code>FooterTemplate</code>.", "string?", "null"),
+            new("GroupCaptionTemplate", "Template for captions and the group header row; falls back to <code>FooterTemplate</code>.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("Grouping", "Before a field is grouped by drag or <code>GroupByColumnAsync</code>; <code>Field</code> names it and <code>Cancel</code> refuses. Not raised for <code>GroupColumns</code>.", "GroupEventArgs"),
+            new("Grouped", "After the group is added.", "GroupEventArgs"),
+            new("Ungrouping", "Before a field is ungrouped from its chip, the bar's Clear All or <code>UngroupColumnAsync</code>; <code>Cancel</code> refuses. <code>ClearGroupingAsync</code> raises neither this nor <code>Ungrouped</code>.", "GroupEventArgs"),
+            new("Ungrouped", "After the group is removed.", "GroupEventArgs"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("GroupByColumnAsync(string field)", "Adds a group, with the events and the column's <code>AllowGrouping</code> honoured.", "Task"),
+            new("UngroupColumnAsync(string field)", "Removes a group, with the events.", "Task"),
+            new("ClearGroupingAsync()", "Removes every group without raising the events.", "Task"),
+            new("ExpandAllGroupAsync()", "Expands every group and re-renders.", "Task"),
+            new("CollapseAllGroupAsync()", "Marks every group collapsed; the change shows on the next render.", "Task"),
+        };
     }
 }

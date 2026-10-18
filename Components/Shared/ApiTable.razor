@@ -1,6 +1,8 @@
 @namespace FlexCore.Showcase.Components.Shared
 
-@* Vocabulary table (2026-10-12). Kind picks the columns; rows are records so every page renders the
+@* Vocabulary table (2026-10-12). 2026-10-18: Name, Type and Default render as markup, because rows are written with &lt; &gt;
+   for generics and Razor was encoding them again, so every generic type showed as literal "&lt;" text (SC-308). Title stays
+   encoded: it arrives through an attribute, which Razor has already decoded, so a Title of "X&lt;T&gt;" is the string "X<T>". Kind picks the columns; rows are records so every page renders the
    same shape. Plain <table>: FlexCore has no static-table control and the grid is overkill here. *@
 <div class="api-block" id="@Id">
     @if (!string.IsNullOrEmpty(Title))
@@ -21,14 +23,18 @@
                 @foreach (var r in Rows)
                 {
                     <tr>
-                        <td class="api-name"><code>@r.Name</code></td>
+                        <td class="api-name"><code>@((MarkupString)DisplayName(r))</code></td>
+                        @if (HasInputs)
+                        {
+                            <td class="api-inputs">@if (InputsOf(r) is { Length: > 0 } inputs) { <code>@((MarkupString)inputs)</code> } else { <span class="api-none">—</span> }</td>
+                        }
                         @if (HasType)
                         {
-                            <td class="api-type">@if (r.Type is not null) { <code>@r.Type</code> }</td>
+                            <td class="api-type">@if (r.Type is not null) { <code>@((MarkupString)r.Type)</code> }</td>
                         }
                         @if (HasDefault)
                         {
-                            <td class="api-default">@if (r.Default is not null) { <code>@r.Default</code> } else { <span class="api-none">—</span> }</td>
+                            <td class="api-default">@if (r.Default is not null) { <code>@((MarkupString)r.Default)</code> } else { <span class="api-none">—</span> }</td>
                         }
                         <td class="api-desc">@((MarkupString)r.Description)</td>
                     </tr>
@@ -46,13 +52,47 @@
 
     private bool HasType => Kind is ApiKind.Parameters or ApiKind.Properties or ApiKind.Events or ApiKind.Methods or ApiKind.CssVariables;
     private bool HasDefault => Kind is ApiKind.Parameters or ApiKind.Properties;
+    private bool HasInputs => Kind is ApiKind.Methods;
+
+    // Methods (2026-10-18, Baaria's review): a long signature in the first column pushed the table off narrow screens, so the
+    // method shows as Name() and its parameters go to an Inputs column, one per line. "A(x) / B(y)" rows keep both names.
+    private string DisplayName(ApiRow r)
+    {
+        if (!HasInputs) return r.Name;
+        return string.Join(" / ", r.Name.Split(" / ").Select(part =>
+        {
+            var open = part.IndexOf('(');
+            return open < 0 ? part : part[..open] + "()";
+        }));
+    }
+
+    private static string InputsOf(ApiRow r)
+    {
+        if (r.Inputs is not null) return r.Inputs;
+        var lines = new List<string>();
+        foreach (var part in r.Name.Split(" / "))
+        {
+            var open = part.IndexOf('('); var close = part.LastIndexOf(')');
+            if (open < 0 || close <= open + 1) continue;
+            var inner = part[(open + 1)..close];
+            var depth = 0; var start = 0;   // split on commas outside <> only
+            for (var i = 0; i < inner.Length; i++)
+            {
+                if (inner[i] == '<' || (inner[i] == '&' && inner[i..].StartsWith("&lt;"))) depth++;
+                else if (inner[i] == '>' || (inner[i] == '&' && inner[i..].StartsWith("&gt;"))) depth--;
+                else if (inner[i] == ',' && depth == 0) { lines.Add(inner[start..i].Trim()); start = i + 1; }
+            }
+            lines.Add(inner[start..].Trim());
+        }
+        return string.Join("<br>", lines.Where(l => l.Length > 0));
+    }
 
     private IEnumerable<string> Headers => Kind switch
     {
         ApiKind.Parameters   => new[] { "Parameter", "Type", "Default", "Description" },
         ApiKind.Properties   => new[] { "Property", "Type", "Default", "Description" },
         ApiKind.Events       => new[] { "Event", "Payload", "Description" },
-        ApiKind.Methods      => new[] { "Method", "Returns", "Description" },
+        ApiKind.Methods      => new[] { "Method", "Inputs", "Returns", "Description" },
         ApiKind.CssClasses   => new[] { "Class", "Effect" },
         ApiKind.CssVariables => new[] { "Variable", "Fallback", "Purpose" },
         _                    => new[] { "Key", "Action" },

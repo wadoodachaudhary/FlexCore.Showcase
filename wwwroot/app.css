@@ -1963,3 +1963,18 @@ td:has(.fx-dropdown-grid.fx-open),
 
 
 
+
+
+/* ── 2026-10-18, Baaria's review ─────────────────────────────────────────────
+   Frozen header cells: GridControl.razor writes style="…position:sticky;left:…; position:relative;" on every header cell, so the
+   later position:relative wins and a frozen column's header scrolls away while its body cells stay pinned (SC-292). Until the
+   library fix, force sticky on header cells whose inline style asked for it. */
+.fx-grid th.fx-header-cell[style*="position:sticky"] { position: sticky !important; }
+
+/* Grid scrollbars: macOS overlay scrollbars hide the horizontal bar until a sideways gesture, so a wide grid looked unscrollable.
+   Styling the WebKit scrollbar makes it a classic, always-visible bar in Chrome, Edge and Safari. */
+.fx-grid-content::-webkit-scrollbar { width: 12px; height: 12px; }
+.fx-grid-content::-webkit-scrollbar-track { background: #f3f3f3; }
+.fx-grid-content::-webkit-scrollbar-thumb { background: #b9b9b9; border-radius: 6px; border: 2px solid #f3f3f3; }
+.fx-grid-content::-webkit-scrollbar-thumb:hover { background: #8a8a8a; }
+.fx-grid-content::-webkit-scrollbar-corner { background: #f3f3f3; }

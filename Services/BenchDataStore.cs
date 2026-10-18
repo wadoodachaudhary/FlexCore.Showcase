@@ -84,7 +84,7 @@ public sealed class BenchDataStore
             VendorContacts = contacts;
 
             SecurityGroups = SynthesizeSecurityGroups();
-            Users = SynthesizeUsers();
+            Users = SynthesizeUsers(SecurityGroups);
 
             sw.Stop();
             LoadReport = $"Data loaded in {sw.ElapsedMilliseconds} ms | Estimating: {EstimatingItems.Count:N0} items | Assemblies: {AssemblyDetails.Count:N0} | Vendors: {Vendors.Count:N0}";
@@ -269,19 +269,46 @@ public sealed class BenchDataStore
         ];
     }
 
-    private static List<UserListItem> SynthesizeUsers()
+    /// <summary>
+    /// One user per <see cref="SecurityGroup.MemberCount"/>, so the Users column of the master grid and the detail
+    /// grid's row count agree. Names cycle through two lists; login ids are made unique with a numeric suffix.
+    /// Every ninth user is inactive.
+    /// </summary>
+    private static List<UserListItem> SynthesizeUsers(IEnumerable<SecurityGroup> groups)
     {
-        return
+        string[] firstNames =
         [
-            new UserListItem { UserID = "asmith", UserName = "Alex Smith", Email = "asmith@enterprise.local", Active = true },
-            new UserListItem { UserID = "bjenkins", UserName = "Bradley Jenkins", Email = "bjenkins@enterprise.local", Active = true },
-            new UserListItem { UserID = "cclark", UserName = "Catherine Clark", Email = "cclark@enterprise.local", Active = true },
-            new UserListItem { UserID = "ddavis", UserName = "David Davis", Email = "ddavis@enterprise.local", Active = true },
-            new UserListItem { UserID = "eevans", UserName = "Elena Evans", Email = "eevans@enterprise.local", Active = true },
-            new UserListItem { UserID = "ffoster", UserName = "Frank Foster", Email = "ffoster@enterprise.local", Active = true },
-            new UserListItem { UserID = "ggarcia", UserName = "Grace Garcia", Email = "ggarcia@enterprise.local", Active = true },
-            new UserListItem { UserID = "hharris", UserName = "Henry Harris", Email = "hharris@enterprise.local", Active = true }
+            "Alex", "Bradley", "Catherine", "David", "Elena", "Frank", "Grace", "Henry", "Isabel", "Jonah", "Keira", "Liam", "Maya",
+            "Noah", "Olivia", "Priya", "Quentin", "Rosa", "Samuel", "Tessa", "Umar", "Vera", "Wesley", "Ximena", "Yusuf", "Zoe"
         ];
+        string[] lastNames =
+        [
+            "Smith", "Jenkins", "Clark", "Davis", "Evans", "Foster", "Garcia", "Harris", "Ibarra", "Jones", "Kim", "Lopez", "Murphy",
+            "Nguyen", "Ortiz", "Patel", "Quinn", "Reed", "Singh", "Turner", "Usman", "Vargas", "Walsh", "Xu", "Young", "Zimmer"
+        ];
+        var users = new List<UserListItem>();
+        var taken = new HashSet<string>(StringComparer.Ordinal);
+        var n = 0;
+        foreach (var group in groups)
+        {
+            for (var i = 0; i < group.MemberCount; i++, n++)
+            {
+                var first = firstNames[n % firstNames.Length];
+                var last = lastNames[(n * 7 + n / firstNames.Length) % lastNames.Length];
+                var login = $"{char.ToLowerInvariant(first[0])}{last.ToLowerInvariant()}";
+                for (var suffix = 2; !taken.Add(login); suffix++)
+                    login = $"{char.ToLowerInvariant(first[0])}{last.ToLowerInvariant()}{suffix}";
+                users.Add(new UserListItem
+                {
+                    UserID = login,
+                    UserName = $"{first} {last}",
+                    Email = $"{login}@enterprise.local",
+                    Active = n % 9 != 4,
+                    GroupID = group.GroupID
+                });
+            }
+        }
+        return users;
     }
 
     // ══════════════════════════════════════════════════════════════════════
