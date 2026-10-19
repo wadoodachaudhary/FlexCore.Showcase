@@ -1,0 +1,248 @@
+@page "/demo/gauges"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using Fx.ControlKit.Charts
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-19: new page (Baaria approved the Control tour split; fourth page; replaces the SC-033 idea of folding these into
+   Financial & gauges, which already has three examples). The tour's Charts tab moved here and was removed there. Documentation
+   written from Charts/GaugeControl.razor, GaugeControls.cs, GaugeVisualControl.razor, GaugeModels.cs, StockChartControl.razor,
+   StockChartRange.cs and ChartModels.cs; rows checked with scratchpad/vocabcheck.py; the drawing and toolbar sentences read
+   from GaugeVisualControl's markup and StockChartControl's SetRangeAsync/ZoomAsync/PanAsync/OnParametersSet. *@
+
+<PageTitle>Gauges &amp; stock chart — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Gauges &amp; stock chart" Category="Charts" CategoryHref="demo/charts"
+                   ControlName="ArcGaugeControl · CircularGaugeControl · RadialGaugeControl · LinearGaugeControl · StockChartControl"
+                   Tagline="Four gauges that share one set of parameters, and a candlestick chart with a date toolbar and a navigator."
+                   SourcePath="Charts/GaugeControl.razor;Charts/GaugeControls.cs;Charts/GaugeVisualControl.razor;Charts/GaugeModels.cs;Charts/StockChartControl.razor;Charts/StockChartRange.cs;Charts/ChartModels.cs">
+    <Overview>
+        <p>
+            The four gauge controls are one <code>GaugeControl</code> with a different shape each: <code>ArcGaugeControl</code> fills a
+            three-quarter arc, <code>CircularGaugeControl</code> a full ring, <code>RadialGaugeControl</code> adds a needle to the arc, and
+            <code>LinearGaugeControl</code> is a horizontal bar. They take the same parameters: a value between <code>Min</code> and
+            <code>Max</code>, coloured <code>Ranges</code>, extra <code>Pointers</code>, tick count and formats. Each is drawn as inline SVG and
+            exposes itself as a <code>meter</code>. <code>StockChartControl</code> wraps a candlestick, OHLC or high-low chart in a toolbar of
+            date pickers, zoom and pan buttons, with a navigator strip of closing prices and two sliders underneath; the visible range is
+            yours through <code>Start</code>, <code>End</code> and <code>RangeChanged</code>.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="gauges" Title="Four gauges, one value" RazorCode="@Code.Gauges" CSharpCode="@Code.GaugesCs">
+            <Description><p>The buttons move one value through all four. The arc has three coloured ranges, so its value arc is drawn thinner over them. The ring uses ten ticks and a <code>ValueTemplate</code> in place of the printed value. The radial gauge carries a second needle, a <code>GaugePointer</code> for the target, in its own colour. The linear gauge combines ranges, a pointer and formats with a percent sign. Hover a range or a pointer for its label.</p></Description>
+            <Controls>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _value = Math.Max(0, _value - 10)" Disabled="@(_value <= 0)">−10</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _value = Math.Min(100, _value + 10)" Disabled="@(_value >= 100)">+10</ButtonControl>
+            </Controls>
+            <Demo>
+                <div class="four">
+                    <div><p class="pane-title">Arc</p><ArcGaugeControl Value="@_value" Ranges="@_ranges" AriaLabel="Utilisation" Height="200px" /></div>
+                    <div>
+                        <p class="pane-title">Circular</p>
+                        <CircularGaugeControl Value="@_value" TickCount="10" Color="#0f766e" AriaLabel="Progress" Height="200px">
+                            <ValueTemplate Context="g"><strong class="ring-value">@g.Value of @g.Max</strong></ValueTemplate>
+                        </CircularGaugeControl>
+                    </div>
+                    <div><p class="pane-title">Radial</p><RadialGaugeControl Value="@_value" Pointers="@_target" Color="#7c3aed" AriaLabel="Throughput" Height="200px" /></div>
+                    <div><p class="pane-title">Linear</p><LinearGaugeControl Value="@_value" Ranges="@_ranges" Pointers="@_target" LabelFormat="0'%'" ValueFormat="0'%'" AriaLabel="Capacity" Height="110px" /></div>
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="stock" Title="Stock chart" RazorCode="@Code.Stock" CSharpCode="@Code.StockCs">
+            <Description><p>Ninety trading days of generated prices. The toolbar's pickers set the start and end and cannot cross each other or leave the data; Zoom in halves the visible span around its centre, Zoom out doubles it, Earlier and Later slide it by half, All shows everything. The navigator draws the closes and its two sliders move the same range. The buttons above call <code>SetRangeAsync</code> from the page and switch the chart type; the line below is fed by <code>RangeChanged</code>.</p></Description>
+            <Controls>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _stock!.SetRangeAsync(_lastDay.AddDays(-30), _lastDay)">Last 30 days</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _stock!.SetRangeAsync(null, null)">Everything</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _type = _type == ChartType.Candlestick ? ChartType.Ohlc : ChartType.Candlestick">Show as @(_type == ChartType.Candlestick ? "OHLC" : "candlesticks")</ButtonControl>
+            </Controls>
+            <Demo>
+                <StockChartControl @ref="_stock" DataSource="@_prices" Type="@_type" RangeChanged='r => _range = $"{r.Start:MMM d} to {r.End:MMM d}, {(r.End - r.Start).Days + 1} days."' />
+                <p class="result">Range: @_range</p>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="Gauge parameters, shared by the four controls" Rows="Vocab.Gauge" />
+        <p>
+            <code>GaugeRange(double From, double To, string Color, string? Label = null)</code> and
+            <code>GaugePointer(double Value, string Color = "#dc2626", string? Label = null)</code> are records;
+            <code>GaugeValueContext(double Value, double Min, double Max)</code> is what a <code>ValueTemplate</code> receives.
+            <code>CssClass</code>, <code>Style</code>, <code>Id</code>, <code>Visible</code> and <code>AdditionalAttributes</code> come from
+            <code>FlexControlBase</code> and apply to the root <code>div</code>.
+        </p>
+        <p>How the gauges draw, from the shared SVG:</p>
+        <ul>
+            <li>The arc, radial and circular gauges use a 300 by 300 view box. The track and the ranges are 16 px arcs; the value arc is 16 px on its own and 7 px over ranges. The arc and radial gauges sweep 270 degrees from the lower left; the circular gauge sweeps the full 360.</li>
+            <li>The radial gauge draws a needle for the value; every gauge draws a needle, or a vertical mark on the linear gauge, for each pointer. Ranges and pointers carry a <code>title</code> with their label, so hovering shows it.</li>
+            <li><code>TickCount</code> intervals give <code>TickCount + 1</code> labels formatted with <code>LabelFormat</code>; the circular gauge drops the last one, which would overlap the first.</li>
+            <li>The value is printed in the middle with <code>ValueFormat</code> unless a <code>ValueTemplate</code> is set, in which case the template is centred over the drawing.</li>
+            <li>For drawing and for <code>aria-valuenow</code> the value is clamped into <code>Min</code> to <code>Max</code>; a range or pointer outside that span is clamped the same way.</li>
+            <li>The gauge throws when a value is not finite, when <code>Max</code> is not above <code>Min</code>, when <code>TickCount</code> is outside 1 to 100, or when a range ends before it starts.</li>
+        </ul>
+        <ApiTable Kind="ApiKind.Parameters" Title="StockChartControl parameters" Rows="Vocab.Stock" />
+        <ApiTable Kind="ApiKind.Events" Title="StockChartControl events" Rows="Vocab.StockEvents" />
+        <ApiTable Kind="ApiKind.Methods" Title="StockChartControl methods" Rows="Vocab.StockMethods" />
+        <p>
+            Each data point is a <code>ChartDataPoint</code> made with <code>ChartDataPoint.Financial(label, open, high, low, close, date)</code>:
+            open, high, low and close land in <code>Value</code> to <code>Value4</code> and are read back through <code>Open</code>, <code>High</code>,
+            <code>Low</code> and <code>Close</code>; <code>DateValue</code> is required and the points are sorted by it. <code>StockChartRange(DateTime Start, DateTime End)</code>
+            is the record <code>RangeChanged</code> delivers. The control throws for a <code>Type</code> other than <code>Candlestick</code>, <code>Ohlc</code>
+            or <code>HighLow</code>, for a point without a date, and for a <code>Start</code> after <code>End</code>. With no points it shows
+            "No financial data." instead of the chart.
+        </p>
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+    </Vocabulary>
+
+    <Accessibility>
+        <p>
+            Each gauge is a <code>meter</code> named by <code>AriaLabel</code> with <code>aria-valuenow</code>, <code>aria-valuemin</code> and
+            <code>aria-valuemax</code>; its SVG is hidden from assistive technology so the figures are not read twice. The stock chart's
+            pickers are labelled "Stock chart start date" and "Stock chart end date", the navigator sliders "Navigator start" and
+            "Navigator end", and the empty state is a status message.
+        </p>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li><a href="demo/advanced-charts">Financial &amp; gauges</a>: the same shapes as <code>ChartControl</code> types fed by a series, without the toolbar or the meter semantics.</li>
+            <li><a href="demo/charts">Charts overview</a>: the chart gallery.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    private double _value = 65;
+    private readonly IReadOnlyList<GaugeRange> _ranges = [new(0, 40, "#16a34a", "Healthy"), new(40, 75, "#f59e0b", "Busy"), new(75, 100, "#dc2626", "Saturated")];
+    private readonly IReadOnlyList<GaugePointer> _target = [new(80, "#dc2626", "Target")];
+
+    private StockChartControl? _stock;
+    private ChartType _type = ChartType.Candlestick;
+    private string _range = "everything.";
+    private readonly DateTime _lastDay;
+    private readonly ChartDataPoint[] _prices;
+
+    public GaugesDemo()
+    {
+        // 90 trading days of a seeded random walk, so the chart is the same on every visit.
+        var random = new Random(7);
+        var day = new DateTime(2026, 6, 1);
+        var close = 104.0;
+        var points = new List<ChartDataPoint>();
+        while (points.Count < 90)
+        {
+            if (day.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday))
+            {
+                var open = close;
+                close = Math.Round(open * (1 + (random.NextDouble() - 0.48) * 0.04), 2);
+                var high = Math.Round(Math.Max(open, close) * (1 + random.NextDouble() * 0.015), 2);
+                var low = Math.Round(Math.Min(open, close) * (1 - random.NextDouble() * 0.015), 2);
+                points.Add(ChartDataPoint.Financial(day.ToString("MMM d"), open, high, low, close, day));
+            }
+            day = day.AddDays(1);
+        }
+        _prices = points.ToArray();
+        _lastDay = _prices[^1].DateValue!.Value;
+    }
+
+    // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
+    private static class Code
+    {
+        public const string Gauges = @"<div class=""four"">
+    <div><p class=""pane-title"">Arc</p><ArcGaugeControl Value=""@_value"" Ranges=""@_ranges"" AriaLabel=""Utilisation"" Height=""200px"" /></div>
+    <div>
+        <p class=""pane-title"">Circular</p>
+        <CircularGaugeControl Value=""@_value"" TickCount=""10"" Color=""#0f766e"" AriaLabel=""Progress"" Height=""200px"">
+            <ValueTemplate Context=""g""><strong class=""ring-value"">@g.Value of @g.Max</strong></ValueTemplate>
+        </CircularGaugeControl>
+    </div>
+    <div><p class=""pane-title"">Radial</p><RadialGaugeControl Value=""@_value"" Pointers=""@_target"" Color=""#7c3aed"" AriaLabel=""Throughput"" Height=""200px"" /></div>
+    <div><p class=""pane-title"">Linear</p><LinearGaugeControl Value=""@_value"" Ranges=""@_ranges"" Pointers=""@_target"" LabelFormat=""0'%'"" ValueFormat=""0'%'"" AriaLabel=""Capacity"" Height=""110px"" /></div>
+</div>";
+        public const string GaugesCs = @"private double _value = 65;
+
+private readonly IReadOnlyList<GaugeRange> _ranges = [new(0, 40, ""#16a34a"", ""Healthy""), new(40, 75, ""#f59e0b"", ""Busy""), new(75, 100, ""#dc2626"", ""Saturated"")];
+
+private readonly IReadOnlyList<GaugePointer> _target = [new(80, ""#dc2626"", ""Target"")];";
+        public const string Stock = @"<StockChartControl @ref=""_stock"" DataSource=""@_prices"" Type=""@_type"" RangeChanged='r => _range = $""{r.Start:MMM d} to {r.End:MMM d}, {(r.End - r.Start).Days + 1} days.""' />
+<p class=""result"">Range: @_range</p>";
+        public const string StockCs = @"private StockChartControl? _stock;
+
+private ChartType _type = ChartType.Candlestick;
+
+private string _range = ""everything."";
+
+private readonly DateTime _lastDay;
+
+private readonly ChartDataPoint[] _prices;
+
+public GaugesDemo()
+{
+    // 90 trading days of a seeded random walk, so the chart is the same on every visit.
+    var random = new Random(7);
+    var day = new DateTime(2026, 6, 1);
+    var close = 104.0;
+    var points = new List<ChartDataPoint>();
+    while (points.Count < 90)
+    {
+        if (day.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday))
+        {
+            var open = close;
+            close = Math.Round(open * (1 + (random.NextDouble() - 0.48) * 0.04), 2);
+            var high = Math.Round(Math.Max(open, close) * (1 + random.NextDouble() * 0.015), 2);
+            var low = Math.Round(Math.Min(open, close) * (1 - random.NextDouble() * 0.015), 2);
+            points.Add(ChartDataPoint.Financial(day.ToString(""MMM d""), open, high, low, close, day));
+        }
+        day = day.AddDays(1);
+    }
+    _prices = points.ToArray();
+    _lastDay = _prices[^1].DateValue!.Value;
+}";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Gauge =
+        {
+            new("Value", "The reading. Drawn and announced clamped into <code>Min</code> to <code>Max</code>.", "double", "0"),
+            new("Min", "Start of the scale.", "double", "0"),
+            new("Max", "End of the scale; must be above <code>Min</code>.", "double", "100"),
+            new("Ranges", "Coloured bands along the scale, each with a label for its tooltip.", "IReadOnlyList&lt;GaugeRange&gt;", "Array.Empty&lt;GaugeRange&gt;()"),
+            new("Pointers", "Extra markers: needles on the round gauges, vertical marks on the linear one, each with a colour and a label.", "IReadOnlyList&lt;GaugePointer&gt;", "Array.Empty&lt;GaugePointer&gt;()"),
+            new("Color", "Colour of the value arc or bar and of the radial gauge's needle.", "string", "\"#2563eb\""),
+            new("TickCount", "Number of intervals on the scale, 1 to 100; one label per interval boundary.", "int", "5"),
+            new("LabelFormat", "Numeric format of the tick labels.", "string", "\"0\""),
+            new("ValueFormat", "Numeric format of the printed value.", "string", "\"0.##\""),
+            new("Height", "Height of the drawing; the width follows the container.", "string", "\"260px\""),
+            new("AriaLabel", "Accessible name of the meter.", "string", "\"Gauge\""),
+            new("ValueTemplate", "Replaces the printed value with your own content, centred over the gauge; receives value, min and max.", "RenderFragment&lt;GaugeValueContext&gt;?", "null"),
+        };
+        public static readonly ApiRow[] Stock =
+        {
+            new("DataSource", "The financial points; each needs <code>DateValue</code>. Sorted by date on arrival.", "IEnumerable&lt;ChartDataPoint&gt;", "Array.Empty&lt;ChartDataPoint&gt;()"),
+            new("Type", "<code>Candlestick</code>, <code>Ohlc</code> or <code>HighLow</code>; anything else throws.", "ChartType", "ChartType.Candlestick"),
+            new("Start", "First visible date. Null means the first point; re-applied when the value changes, clamped to the data.", "DateTime?", "null"),
+            new("End", "Last visible date. Null means the last point; re-applied when the value changes, clamped to the data.", "DateTime?", "null"),
+            new("Height", "Height of the main chart; the navigator adds 90 px.", "string", "\"340px\""),
+            new("ValueFormat", "Numeric format of the price axis and values.", "string", "\"N2\""),
+            new("ShowNavigator", "Shows the strip of closing prices with the start and end sliders.", "bool", "true"),
+        };
+        public static readonly ApiRow[] StockEvents =
+        {
+            new("RangeChanged", "After every change of the visible range: pickers, buttons, sliders or the methods.", "StockChartRange"),
+        };
+        public static readonly ApiRow[] StockMethods =
+        {
+            new("SetRangeAsync(DateTime? start, DateTime? end)", "Sets the visible range from code; null falls back to the first or last point, dates outside the data are clamped, and start after end throws. Raises <code>RangeChanged</code>.", "Task"),
+            new("ZoomAsync(double factor)", "Multiplies the visible span by the factor around its centre, never below one day; the toolbar uses 0.5 and 2.", "Task"),
+            new("PanAsync(int direction)", "Slides the range by half its span, earlier for a negative direction and later for a positive one, clamped to the data.", "Task"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-gauge", "A gauge's root element; <code>fx-gauge-value-template</code> is the centred template."),
+            new("fx-stock-chart", "The stock chart's root; <code>fx-stock-navigator</code> is the strip with the sliders."),
+        };
+    }
+}

@@ -1,0 +1,378 @@
+@page "/demo/pickers"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-19: new page (Baaria approved the Control tour split; third page). The tour's Selection tab moved here and was removed
+   there. Of that tab, RadioGroupControl already lives on Checks & switches and CalendarControl and TimePickerControl on Date & time,
+   so this page carries AutoCompleteControl, StepperControl and ColorPaletteControl; DropDownListControl (29 parameters) is proposed
+   as a page of its own (SC-279). Documentation written from AutoCompleteControl.razor, StepperControl.razor, WizardModels.cs,
+   ColorPaletteControl.razor and ColorPalettes.cs; rows checked with scratchpad/vocabcheck.py; behaviour sentences read from
+   SearchAsync/CommitAsync, CanSelect/SelectAsync/KeyAsync and SelectAsync/KeyAsync/OnParametersSet. *@
+
+<PageTitle>Pickers &amp; selectors — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Pickers &amp; selectors" Category="Components" CategoryHref="components"
+                   ControlName="AutoCompleteControl · StepperControl · ColorPaletteControl"
+                   Tagline="Suggestions while typing, a step indicator that knows which steps may be entered, and a colour palette."
+                   SourcePath="AutoCompleteControl.razor;StepperControl.razor;WizardModels.cs;ColorPaletteControl.razor;ColorPalettes.cs">
+    <Overview>
+        <p>
+            Three small controls that pick one thing. <code>AutoCompleteControl</code> is an editable dropdown whose popup fills with
+            suggestions while the user types, from a list it filters itself or from a callback you supply; its value is the text, and it tells
+            you separately when that text is one of the suggestions. <code>StepperControl</code> draws the steps of a process as buttons and
+            decides which of them may be entered: in linear mode only earlier steps and the next one, never past an invalid step, never a
+            disabled step. <code>ColorPaletteControl</code> is a grid of swatches with one focusable tile and arrow-key movement.
+            Radio groups are on <a href="demo/checks">Checks &amp; switches</a>, calendars and time pickers on <a href="demo/date-time">Date &amp; time</a>.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="suggest" Title="Suggestions while typing" RazorCode="@Code.Suggest" CSharpCode="@Code.SuggestCs">
+            <Description><p>Left: twelve cities filtered by the control, case-insensitive, anywhere in the name, after one character and a 250 ms pause; an <code>ItemTemplate</code> adds the country, and <code>ItemSelected</code> reports the city object once the text matches a suggestion. Right: <code>OnRead</code> answers from a callback that waits 300 ms like a server would, after two characters and a 400 ms pause, five suggestions at most; typing on cancels the previous lookup. In both, the bound value is the text, whether or not it came from the list.</p></Description>
+            <Demo>
+                <div class="pair">
+                    <div>
+                        <p class="pane-title">From a list</p>
+                        <AutoCompleteControl TItem="City" DataSource="@_cities" TextField="Name" @bind-Value="_cityText" ItemSelected="c => _pickedCity = c" Placeholder="Type a city" AriaLabel="City" Width="100%">
+                            <ItemTemplate Context="city"><span>@city.Name</span> <span class="muted">@city.Country</span></ItemTemplate>
+                        </AutoCompleteControl>
+                        <p class="result">Text: @(_cityText ?? "") · Picked: @(_pickedCity is null ? "nothing yet" : $"{_pickedCity.Name}, {_pickedCity.Country}")</p>
+                    </div>
+                    <div>
+                        <p class="pane-title">From a callback</p>
+                        <AutoCompleteControl TItem="string" OnRead="LookupAsync" MinLength="2" DebounceDelay="400" MaxSuggestions="5" @bind-Value="_product" Placeholder="Type two letters" AriaLabel="Product" Width="100%" />
+                        <p class="result">Text: @(_product ?? "") · @_lookups lookups so far.</p>
+                    </div>
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="steps" Title="Steps" RazorCode="@Code.Steps" CSharpCode="@Code.StepsCs">
+            <Description><p>Four steps in the default linear mode: any earlier step can be clicked, the next one too, the ones after it are disabled. Mark the current step invalid and it gains a warning sign while every later step closes, so Next does nothing until the step is valid again; going back is always allowed. The Back and Next buttons call <code>SelectAsync</code> from the page, <code>CanNavigate</code> sees every move before it happens, and the arrow keys walk from step to step.</p></Description>
+            <Controls>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _stepper!.SelectAsync(_step - 1)" Disabled="@(_step == 0)">Back</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _stepper!.SelectAsync(_step + 1)" Disabled="@(_step == _steps.Count - 1)">Next</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _stepValid = !_stepValid">@(_stepValid ? "Mark this step invalid" : "Mark this step valid")</ButtonControl>
+            </Controls>
+            <Demo>
+                <StepperControl @ref="_stepper" Steps="@_steps" @bind-Value="_step" InvalidSteps="@InvalidSteps" CanNavigate="Navigating" AriaLabel="Checkout steps" />
+                <p class="result">Step @(_step + 1) of @_steps.Count: @_steps[_step].Title. @_navLog</p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="palette" Title="Colour palette" RazorCode="@Code.Palette" CSharpCode="@Code.PaletteCs">
+            <Description><p>Left: the built-in 48-colour palette, eight across. Right: ten colours of your own, five across, larger tiles, and a <code>TileTemplate</code> that prints the hex value instead of the tick. Click a swatch or move with the arrow keys, Home and End; Up and Down jump by a row. The selected swatch keeps an outline whatever the template shows.</p></Description>
+            <Demo>
+                <div class="pair">
+                    <div>
+                        <p class="pane-title">Default palette</p>
+                        <ColorPaletteControl @bind-Value="_color" />
+                    </div>
+                    <div>
+                        <p class="pane-title">Custom colours</p>
+                        <ColorPaletteControl Colors="@_brand" Columns="5" TileSize="36px" @bind-Value="_accent" AriaLabel="Accent colour">
+                            <TileTemplate Context="colour"><span class="tile-label">@colour.TrimStart('#')</span></TileTemplate>
+                        </ColorPaletteControl>
+                    </div>
+                </div>
+                <p class="result"><span class="swatch" style="background:@_color"></span>@_color · <span class="swatch" style="background:@_accent"></span>@_accent</p>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="AutoCompleteControl&lt;TItem&gt; parameters" Rows="Vocab.Auto" />
+        <ApiTable Kind="ApiKind.Events" Title="AutoCompleteControl events" Rows="Vocab.AutoEvents" />
+        <ApiTable Kind="ApiKind.Methods" Title="AutoCompleteControl methods" Rows="Vocab.AutoMethods" />
+        <ApiTable Kind="ApiKind.Properties" Title="AutoCompleteControl read-only state" Rows="Vocab.AutoState" />
+        <p>
+            The text box and the popup are a <code>DropDownListControl</code> in editable mode. A search starts when the text has at least
+            <code>MinLength</code> characters, waits <code>DebounceDelay</code> milliseconds, and is cancelled by the next keystroke. Without
+            <code>OnRead</code> the suggestions are the items whose text contains the typed text, ignoring case. The popup opens when there is at
+            least one suggestion and closes when there is none, when the text is too short, when the control is disabled, or when the page
+            changes <code>Value</code>. An exception thrown by <code>OnRead</code> becomes <code>ErrorMessage</code>, shown under the box.
+        </p>
+        <ApiTable Kind="ApiKind.Parameters" Title="StepperControl parameters" Rows="Vocab.Stepper" />
+        <ApiTable Kind="ApiKind.Events" Title="StepperControl events" Rows="Vocab.StepperEvents" />
+        <ApiTable Kind="ApiKind.Methods" Title="StepperControl methods" Rows="Vocab.StepperMethods" />
+        <ApiTable Kind="ApiKind.Properties" Title="WizardStepDescriptor" Rows="Vocab.StepDesc" />
+        <ApiTable Kind="ApiKind.Properties" Title="WizardStepContext, passed to StepTemplate" Rows="Vocab.StepCtx" />
+        <p>
+            A step can be entered when the control is enabled, no move is in progress, the step is not in <code>DisabledSteps</code>, and, in linear
+            mode, it is at most one past the current step and the current step is not in <code>InvalidSteps</code> when moving forward. A step that
+            cannot be entered renders as a disabled button. The current step carries <code>aria-current="step"</code>, an invalid step a warning
+            sign, and each button's tooltip is the step's <code>Description</code>.
+        </p>
+        <ApiTable Kind="ApiKind.Parameters" Title="ColorPaletteControl parameters" Rows="Vocab.Palette" />
+        <ApiTable Kind="ApiKind.Events" Title="ColorPaletteControl events" Rows="Vocab.PaletteEvents" />
+        <ApiTable Kind="ApiKind.Methods" Title="ColorPaletteControl methods" Rows="Vocab.PaletteMethods" />
+        <p>
+            Colours are compared ignoring case. <code>ColorPalettes.Basic</code> is the default list: 48 colours in six rows of eight. One swatch at a
+            time is in the Tab order; it follows <code>Value</code> when the page changes it and the focus when the user moves with the keys.
+        </p>
+        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+    </Vocabulary>
+
+    <Accessibility>
+        <p>
+            The autocomplete box takes <code>AriaLabel</code>, sets <code>aria-busy</code> while it searches and announces "Loading suggestions…"
+            through a status element. The stepper is a <code>nav</code> labelled by <code>AriaLabel</code>; its steps are buttons, the current one
+            marked with <code>aria-current</code>, and steps that may not be entered are disabled rather than hidden. The palette is a
+            <code>listbox</code> of <code>option</code> buttons, each labelled with its colour value and carrying <code>aria-selected</code>, with one
+            tab stop and arrow-key movement.
+        </p>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li><a href="demo/checks">Checks &amp; switches</a>: the radio group, for picking one of a few visible options.</li>
+            <li><a href="demo/date-time">Date &amp; time</a>: calendar, date, time and time-span pickers.</li>
+            <li><a href="demo/forms">Forms</a>: the dropdown editor a form item uses for enums and nullable booleans.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    private sealed record City(string Name, string Country);
+    private readonly City[] _cities =
+    [
+        new("Amsterdam", "Netherlands"), new("Boston", "United States"), new("Chicago", "United States"), new("Denver", "United States"),
+        new("Dublin", "Ireland"), new("Lisbon", "Portugal"), new("London", "United Kingdom"), new("Madrid", "Spain"),
+        new("New York", "United States"), new("Oslo", "Norway"), new("San Francisco", "United States"), new("Seattle", "United States"),
+    ];
+    private string? _cityText;
+    private City? _pickedCity;
+
+    private readonly string[] _products =
+    [
+        "Anchor bolt", "Angle bracket", "Ball valve", "Brass elbow", "Cable tie", "Carriage bolt", "Copper pipe", "Deck screw",
+        "Drywall anchor", "Flat washer", "Hex nut", "Lag screw", "Machine screw", "Pipe clamp", "Spring washer", "Steel strap",
+        "Toggle bolt", "Wall plug", "Wing nut", "Wood dowel",
+    ];
+    private string? _product;
+    private int _lookups;
+    private async Task<IEnumerable<string>> LookupAsync(string text, CancellationToken token)
+    {
+        _lookups++;
+        await InvokeAsync(StateHasChanged);   // the control re-renders itself, not this page, so refresh the counter here
+        await Task.Delay(300, token);
+        return _products.Where(p => p.Contains(text, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private StepperControl? _stepper;
+    private readonly IReadOnlyList<WizardStepDescriptor> _steps =
+    [
+        new() { Title = "Details", Description = "Who is ordering" },
+        new() { Title = "Shipping", Description = "Where it goes" },
+        new() { Title = "Payment", Description = "How it is paid" },
+        new() { Title = "Review", Description = "Check and confirm" },
+    ];
+    private int _step;
+    private bool _stepValid = true;
+    private string _navLog = "No moves yet.";
+    private IReadOnlyCollection<int> InvalidSteps => _stepValid ? Array.Empty<int>() : [_step];
+    private Task<bool> Navigating(int from, int to)
+    {
+        _navLog = $"Last move: {from + 1} to {to + 1}.";
+        return Task.FromResult(true);
+    }
+
+    private string? _color = "#0080FF";
+    private string? _accent = "#0284c7";
+    private readonly string[] _brand = ["#0f172a", "#1d4ed8", "#0284c7", "#0f766e", "#b45309", "#be123c", "#7c3aed", "#475569", "#e2e8f0", "#ffffff"];
+
+    // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
+    private static class Code
+    {
+        public const string Suggest = @"<div class=""pair"">
+    <div>
+        <p class=""pane-title"">From a list</p>
+        <AutoCompleteControl TItem=""City"" DataSource=""@_cities"" TextField=""Name"" @bind-Value=""_cityText"" ItemSelected=""c => _pickedCity = c"" Placeholder=""Type a city"" AriaLabel=""City"" Width=""100%"">
+            <ItemTemplate Context=""city""><span>@city.Name</span> <span class=""muted"">@city.Country</span></ItemTemplate>
+        </AutoCompleteControl>
+        <p class=""result"">Text: @(_cityText ?? """") · Picked: @(_pickedCity is null ? ""nothing yet"" : $""{_pickedCity.Name}, {_pickedCity.Country}"")</p>
+    </div>
+    <div>
+        <p class=""pane-title"">From a callback</p>
+        <AutoCompleteControl TItem=""string"" OnRead=""LookupAsync"" MinLength=""2"" DebounceDelay=""400"" MaxSuggestions=""5"" @bind-Value=""_product"" Placeholder=""Type two letters"" AriaLabel=""Product"" Width=""100%"" />
+        <p class=""result"">Text: @(_product ?? """") · @_lookups lookups so far.</p>
+    </div>
+</div>";
+        public const string SuggestCs = @"private sealed record City(string Name, string Country);
+
+private readonly City[] _cities =
+[
+    new(""Amsterdam"", ""Netherlands""), new(""Boston"", ""United States""), new(""Chicago"", ""United States""), new(""Denver"", ""United States""),
+    new(""Dublin"", ""Ireland""), new(""Lisbon"", ""Portugal""), new(""London"", ""United Kingdom""), new(""Madrid"", ""Spain""),
+    new(""New York"", ""United States""), new(""Oslo"", ""Norway""), new(""San Francisco"", ""United States""), new(""Seattle"", ""United States""),
+];
+
+private string? _cityText;
+
+private City? _pickedCity;
+
+private readonly string[] _products =
+[
+    ""Anchor bolt"", ""Angle bracket"", ""Ball valve"", ""Brass elbow"", ""Cable tie"", ""Carriage bolt"", ""Copper pipe"", ""Deck screw"",
+    ""Drywall anchor"", ""Flat washer"", ""Hex nut"", ""Lag screw"", ""Machine screw"", ""Pipe clamp"", ""Spring washer"", ""Steel strap"",
+    ""Toggle bolt"", ""Wall plug"", ""Wing nut"", ""Wood dowel"",
+];
+
+private string? _product;
+
+private int _lookups;
+
+private async Task<IEnumerable<string>> LookupAsync(string text, CancellationToken token)
+{
+    _lookups++;
+    await InvokeAsync(StateHasChanged);   // the control re-renders itself, not this page, so refresh the counter here
+    await Task.Delay(300, token);
+    return _products.Where(p => p.Contains(text, StringComparison.OrdinalIgnoreCase));
+}";
+        public const string Steps = @"<StepperControl @ref=""_stepper"" Steps=""@_steps"" @bind-Value=""_step"" InvalidSteps=""@InvalidSteps"" CanNavigate=""Navigating"" AriaLabel=""Checkout steps"" />
+<p class=""result"">Step @(_step + 1) of @_steps.Count: @_steps[_step].Title. @_navLog</p>";
+        public const string StepsCs = @"private StepperControl? _stepper;
+
+private readonly IReadOnlyList<WizardStepDescriptor> _steps =
+[
+    new() { Title = ""Details"", Description = ""Who is ordering"" },
+    new() { Title = ""Shipping"", Description = ""Where it goes"" },
+    new() { Title = ""Payment"", Description = ""How it is paid"" },
+    new() { Title = ""Review"", Description = ""Check and confirm"" },
+];
+
+private int _step;
+
+private bool _stepValid = true;
+
+private string _navLog = ""No moves yet."";
+
+private IReadOnlyCollection<int> InvalidSteps => _stepValid ? Array.Empty<int>() : [_step];
+
+private Task<bool> Navigating(int from, int to)
+{
+    _navLog = $""Last move: {from + 1} to {to + 1}."";
+    return Task.FromResult(true);
+}";
+        public const string Palette = @"<div class=""pair"">
+    <div>
+        <p class=""pane-title"">Default palette</p>
+        <ColorPaletteControl @bind-Value=""_color"" />
+    </div>
+    <div>
+        <p class=""pane-title"">Custom colours</p>
+        <ColorPaletteControl Colors=""@_brand"" Columns=""5"" TileSize=""36px"" @bind-Value=""_accent"" AriaLabel=""Accent colour"">
+            <TileTemplate Context=""colour""><span class=""tile-label"">@colour.TrimStart('#')</span></TileTemplate>
+        </ColorPaletteControl>
+    </div>
+</div>
+<p class=""result""><span class=""swatch"" style=""background:@_color""></span>@_color · <span class=""swatch"" style=""background:@_accent""></span>@_accent</p>";
+        public const string PaletteCs = @"private string? _color = ""#0080FF"";
+
+private string? _accent = ""#0284c7"";
+
+private readonly string[] _brand = [""#0f172a"", ""#1d4ed8"", ""#0284c7"", ""#0f766e"", ""#b45309"", ""#be123c"", ""#7c3aed"", ""#475569"", ""#e2e8f0"", ""#ffffff""];";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Auto =
+        {
+            new("DataSource", "Items to filter when <code>OnRead</code> is not set.", "IEnumerable&lt;TItem&gt;", "Array.Empty&lt;TItem&gt;()"),
+            new("TextSelector", "Text of an item. When null, <code>TextField</code> is read by reflection; when that is blank too, <code>ToString()</code>.", "Func&lt;TItem, string&gt;?", "null"),
+            new("TextField", "Name of the property that holds an item's text.", "string", "\"\""),
+            new("Value", "The text in the box: what was typed or the suggestion that was chosen. A new value from the page clears the suggestions.", "string?", "null"),
+            new("ValueExpression", "Set by <code>@bind-Value</code>; lets an enclosing form hear the change.", "Expression&lt;Func&lt;string?&gt;&gt;?", "null"),
+            new("OnRead", "Supplies the suggestions for the typed text; the token is cancelled by the next keystroke.", "Func&lt;string, CancellationToken, Task&lt;IEnumerable&lt;TItem&gt;&gt;&gt;?", "null"),
+            new("ItemTemplate", "Renders a suggestion in the popup; the default is the item's text.", "RenderFragment&lt;TItem&gt;?", "null"),
+            new("MinLength", "Characters needed before a search runs.", "int", "1"),
+            new("DebounceDelay", "Milliseconds of quiet after a keystroke before the search runs.", "int", "250"),
+            new("MaxSuggestions", "Upper bound on the suggestions shown, at least 1.", "int", "25"),
+            new("Width", "Width of the box.", "string?", "null"),
+            new("AriaLabel", "Accessible name of the box.", "string?", "null"),
+            new("Placeholder", "Text shown while the box is empty.", "string?", "null"),
+        };
+        public static readonly ApiRow[] AutoEvents =
+        {
+            new("ValueChanged", "When text is committed: a suggestion picked or the typed text accepted.", "string?"),
+            new("ItemSelected", "Right after <code>ValueChanged</code>, when the committed text equals a current suggestion's text; carries that item.", "TItem"),
+        };
+        public static readonly ApiRow[] AutoMethods =
+        {
+            new("SearchAsync(string text)", "Runs the search for that text from code, with the same length check, delay and popup handling.", "Task"),
+        };
+        public static readonly ApiRow[] AutoState =
+        {
+            new("IsLoading", "True from the keystroke until the suggestions are in.", "bool", "false"),
+            new("ErrorMessage", "The message of an exception thrown by <code>OnRead</code>; null otherwise.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Stepper =
+        {
+            new("Steps", "The steps, in order; only <code>Title</code> and <code>Description</code> are used here.", "IReadOnlyList&lt;WizardStepDescriptor&gt;", "Array.Empty&lt;WizardStepDescriptor&gt;()"),
+            new("Value", "Index of the current step, from 0.", "int", "0"),
+            new("Linear", "True allows only earlier steps and the next one, and blocks forward moves while the current step is invalid. False lets any enabled step be entered.", "bool", "true"),
+            new("Vertical", "Stacks the steps.", "bool", "false"),
+            new("DisabledSteps", "Indexes that can never be entered.", "IReadOnlyCollection&lt;int&gt;", "Array.Empty&lt;int&gt;()"),
+            new("InvalidSteps", "Indexes shown with a warning sign; in linear mode an invalid current step blocks forward moves.", "IReadOnlyCollection&lt;int&gt;", "Array.Empty&lt;int&gt;()"),
+            new("CanNavigate", "Called with the current and the requested index before a move; return false to refuse it.", "Func&lt;int, int, Task&lt;bool&gt;&gt;?", "null"),
+            new("AriaLabel", "Accessible name of the <code>nav</code> element.", "string", "\"Steps\""),
+            new("StepTemplate", "Renders the inside of a step button; the default is \"<em>n</em>. Title\".", "RenderFragment&lt;WizardStepContext&gt;?", "null"),
+        };
+        public static readonly ApiRow[] StepperEvents =
+        {
+            new("ValueChanged", "After a move has been accepted, with the new index.", "int"),
+        };
+        public static readonly ApiRow[] StepperMethods =
+        {
+            new("SelectAsync(int index)", "Moves to that step from code, with the same rules as a click: the step must be enterable and <code>CanNavigate</code> must agree. Does nothing for the current step.", "Task"),
+        };
+        public static readonly ApiRow[] StepDesc =
+        {
+            new("Key", "Identifier for the hosting wizard; not read by the stepper.", "string", "\"\""),
+            new("Title", "Text of the step.", "string", "\"\""),
+            new("Description", "Tooltip of the step button.", "string", "\"\""),
+            new("IconCss / IconUrl", "Icon hints for the hosting wizard; not read by the stepper.", "string", "\"\""),
+        };
+        public static readonly ApiRow[] StepCtx =
+        {
+            new("StepIndex", "Index of the step being rendered.", "int", "0"),
+            new("Step", "Its descriptor.", "WizardStepDescriptor", "new()"),
+            new("IsFirst", "True for the first step.", "bool", "false"),
+            new("IsLast", "True for the last step.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Palette =
+        {
+            new("Colors", "The swatches, as CSS colour strings.", "IReadOnlyList&lt;string&gt;", "ColorPalettes.Basic"),
+            new("Value", "The selected colour; must be one of <code>Colors</code>, compared ignoring case.", "string?", "null"),
+            new("Columns", "Swatches per row; also the distance of an Up or Down key press.", "int", "8"),
+            new("TileSize", "Width and height of a swatch.", "string", "\"28px\""),
+            new("AriaLabel", "Accessible name of the listbox.", "string", "\"Color palette\""),
+            new("TileTemplate", "Content drawn inside each swatch instead of the tick on the selected one; it receives the colour string.", "RenderFragment&lt;string&gt;?", "null"),
+        };
+        public static readonly ApiRow[] PaletteEvents =
+        {
+            new("ValueChanged", "After a swatch is chosen.", "string?"),
+        };
+        public static readonly ApiRow[] PaletteMethods =
+        {
+            new("SelectAsync(string color)", "Selects that colour from code; ignored when the control is disabled or the colour is not in <code>Colors</code>.", "Task"),
+        };
+        public static readonly ApiRow[] Keys =
+        {
+            new("Stepper: Left, Up / Right, Down", "Moves to the previous or next step that can be entered and focuses it."),
+            new("Palette: Left / Right", "Focuses the previous or next swatch."),
+            new("Palette: Up / Down", "Focuses the swatch one row up or down."),
+            new("Palette: Home / End", "Focuses the first or last swatch."),
+            new("Palette: Enter or Space", "Selects the focused swatch (it is a button)."),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-autocomplete", "The autocomplete's root; the box and popup inside it are the dropdown list's own elements."),
+            new("fx-stepper", "The <code>nav</code> holding the step buttons."),
+            new("fx-color-palette", "The palette grid; <code>--fx-palette-columns</code> and <code>--fx-swatch-size</code> carry <code>Columns</code> and <code>TileSize</code>."),
+            new("fx-palette-swatch", "A swatch button; <code>selected</code> is added to the chosen one."),
+        };
+    }
+}

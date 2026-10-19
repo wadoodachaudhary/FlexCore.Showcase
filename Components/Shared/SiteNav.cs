@@ -11,7 +11,7 @@ public sealed record NavGroup(string Label, string Icon, string? Href, string Al
 /// The single source of truth for site navigation (2026-10-06). The menubar, phone drawer,
 /// footer and the Grid overview's link list all read this, so they cannot drift apart.
 /// Rules: labels say what the page shows; no internal HomeFront names; a page appears here
-/// only if it exists. Phase 2 pages (Forms &amp; pickers, PDF viewer, Gantt, AI prompt,
+/// only if it exists. Phase 2 pages (AI prompt,
 /// /performance, /migration) are added when they render.
 /// </summary>
 public static class SiteNav
@@ -31,9 +31,12 @@ public static class SiteNav
             new("Security code", "demo/security-code"),
             new("Date & time", "demo/date-time"),
             new("Checks & switches", "demo/checks"),
+            new("Forms", "demo/forms"),                        // own page since 2026-10-19; was a Control tour tab
+            new("Pickers & selectors", "demo/pickers"),        // own page since 2026-10-19; was the tour's Selection tab
             new("Control tour", "demo/counterparts"),          // 7-tab sampler; split in phase 2
             new("Layout & navigation", null),
             new("Page layouts", "demo/layout"),
+            new("Dock manager", "demo/dock-manager"),           // own page since 2026-10-19; was the tour's Docking tab
             new("Tabs & accordion", "demo/tabs-accordion"),
             new("Tree view", "demo/tree/treeview-explorer"),
             new("Display", null),
@@ -59,17 +62,19 @@ public static class SiteNav
             new("Grouping & totals", "demo/grid/grouping"),
             new("On-demand loading", "demo/grid/provider-enterprise"),
             new("Master-detail", "demo/grid/master-detail"),
-            new("Pivot tables", "demo/pivot-formulas"),
+            new("Pivot tables", "demo/pivot"),
             new("Tree grid", "demo/grid/tree-grid"),
         }),
         new("Charts", "bi-bar-chart-line", "demo/charts", "Charts overview", new NavItem[]
         {
             new("Financial & gauges", "demo/advanced-charts"),
             new("Sunburst", "demo/charts/sunburst"),
+            new("Gantt chart", "demo/gantt"),                    // own page since 2026-10-19; was a Control tour tab
+            new("Gauges & stock chart", "demo/gauges"),          // own page since 2026-10-19; was the tour's Charts tab
         }),
         new("Reports", "bi-file-earmark-spreadsheet", "demo/reports/model-costs", "Report writer", new NavItem[]
         {
-            new("PDF viewer (in Control tour)", "demo/counterparts"),   // own page in phase 2
+            new("PDF viewer", "demo/pdf-viewer"),                  // own page since 2026-10-19; was a Control tour tab
         }),
         // Only pages that measure something and say how. Tree grid load joins when it times the real load.
         new("Performance", "bi-speedometer2", null, "", new NavItem[]
