@@ -36,6 +36,7 @@ public static class SiteNav
             new("Control tour", "demo/counterparts"),          // 7-tab sampler; split in phase 2
             new("Layout & navigation", null),
             new("Page layouts", "demo/layout"),
+            new("Page navigation", "demo/page-navigation"),               // PageControl: keyboard navigation graph (2026-10-20)
             new("Dock manager", "demo/dock-manager"),           // own page since 2026-10-19; was the tour's Docking tab
             new("Tabs & accordion", "demo/tabs-accordion"),
             new("Tree view", "demo/tree/treeview-explorer"),

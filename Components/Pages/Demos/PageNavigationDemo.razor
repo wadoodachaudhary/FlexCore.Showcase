@@ -1,0 +1,263 @@
+@page "/demo/page-navigation"
+@page "/demo/workspace/page-control-bench"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+@using FlexCore.Showcase.Data
+@using FlexCore.Showcase.Components.Shared
+@inject FlexCore.Showcase.Services.BenchDataStore BenchData
+@* 2026-10-20 (developer meeting, point 2): replaces the PageControl bench (docs/retired-pages/PageControlBenchDemo.razor.txt), whose
+   tabs were plain buttons, whose code tab showed a PageControl it never rendered, and whose summary promised keyboard shortcuts it
+   did not have. The library's PageControl is not a tab control: it is a page region with a keyboard navigation graph, so this page
+   is about that. One example: the same vendor record, laid out as three regions the keyboard moves between. Facts checked against
+   PageControl.razor, PageNavigationMap.cs, wwwroot/page-control.js (registerPageNavigationGraph, resolveShortcut) and
+   GridControl.razor.cs (TabNavigationMode, PageNavigationContext). Zoom shortcuts are off here because this site registers a
+   ZoomService but applies its value nowhere. *@
+
+<PageTitle>Page navigation — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Page navigation" Category="Components" CategoryHref="components" ControlName="PageControl"
+                   Tagline="A page region the keyboard can work through: named focus nodes, Tab order across controls and grids, and shortcuts."
+                   SourcePath="PageControl.razor;PageNavigationMap.cs;Grid/GridControl.razor.cs">
+    <Overview>
+        <p>
+            <code>PageControl</code> wraps a page or a form and owns its Tab key. A <code>PageNavigationGraph</code> names the focus
+            nodes, each a CSS selector: one focusable control such as a grid, or a region whose controls are visited in DOM order. Tab
+            and Shift+Tab move through the nodes' targets in declared order (or <code>Order</code>), wrapping at the ends when
+            <code>Wrap</code> is on; <code>Next</code> and <code>Previous</code> override the order for a page that is not linear, and
+            <code>Entry</code> says whether a node is entered at its first or last target. A node's <code>Shortcuts</code> jump to it, or
+            activate it, from anywhere in the page; while the user is typing in an editor a shortcut is ignored unless it allows that.
+        </p>
+        <p>
+            A <code>GridControl</code> inside keeps Tab for its own cells by default; set its <code>TabNavigationMode</code> to
+            <code>PageControl</code> and Tab leaves the grid for the next node. <code>FocusFirstNodeOnLoad</code> puts the keyboard on the
+            first target once the page has data, the way a desktop form opens. <code>ScrollMode</code> decides how the region scrolls
+            when its content is larger than its space, and with a <code>ZoomService</code> that the host applies, Ctrl with plus, minus
+            and zero zoom the page's FlexCore text.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="vendor" Title="A vendor record worked from the keyboard" RazorCode="@Code.Vendor" CSharpCode="@Code.VendorCs">
+            <Description><p>Three regions, three nodes: the address fields, the contacts grid and the certificate switches. Click into the first field and press Tab repeatedly: focus walks the fields, enters the grid, leaves it after its last cell for the switches, and wraps back to the first field. Alt with D, C or O jumps to a region from anywhere on the page. Previous and Next load another vendor into the same regions; the switches are bound to the record, so a change survives moving away and back.</p></Description>
+            <Controls>
+                <ButtonControl CssClass="btn-sm" OnClick="@(() => Show(_index - 1))" Disabled="@(_index <= 0)">Previous</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="@(() => Show(_index + 1))" Disabled="@(_index >= _vendors.Count - 1)">Next</ButtonControl>
+            </Controls>
+            <Demo>
+                <PageControl NavigationGraph="@Graph" FocusFirstNodeOnLoad="true" EnableZoomShortcuts="false" CssClass="vendor-page">
+                    <div class="vendor-head"><strong>@_vendor.Vendor_Name</strong> <span class="muted">vendor @(_index + 1) of @_vendors.Count</span></div>
+                    <section id="vendor-details" class="region">
+                        <h4>Details <kbd>Alt</kbd>+<kbd>D</kbd></h4>
+                        <div class="fields">
+                            <label>Name <TextBoxControl @bind-Value="_vendor.Vendor_Name" /></label>
+                            <label>Street <TextBoxControl @bind-Value="_vendor.Addr1" /></label>
+                            <label>City <TextBoxControl @bind-Value="_vendor.City" /></label>
+                            <label>State <TextBoxControl @bind-Value="_vendor.State" Width="80px" /></label>
+                            <label>Postal code <TextBoxControl @bind-Value="_vendor.Zip" Width="110px" /></label>
+                            <label>Telephone <TextBoxControl @bind-Value="_vendor.Phone" Width="150px" /></label>
+                        </div>
+                    </section>
+                    <section id="vendor-contacts" class="region">
+                        <h4>Contacts <kbd>Alt</kbd>+<kbd>C</kbd></h4>
+                        <GridControl TValue="VendorContactRecord" DataSource="@_contacts" Height="200px" AllowSorting="true"
+                                     TabNavigationMode="GridTabNavigationMode.PageControl">
+                            <GridColumnsBase>
+                                <GridColumn Field="@nameof(VendorContactRecord.DisplayName)" HeaderText="Contact" Width="180px" />
+                                <GridColumn Field="@nameof(VendorContactRecord.Role)" HeaderText="Role" Width="160px" />
+                                <GridColumn Field="@nameof(VendorContactRecord.WorkPhone)" HeaderText="Phone" Width="130px" />
+                                <GridColumn Field="@nameof(VendorContactRecord.Email)" HeaderText="Email" Width="220px" />
+                                <GridColumn Field="@nameof(VendorContactRecord.Active)" HeaderText="Active" Width="80px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
+                            </GridColumnsBase>
+                        </GridControl>
+                    </section>
+                    <section id="vendor-options" class="region">
+                        <h4>Certificates <kbd>Alt</kbd>+<kbd>O</kbd></h4>
+                        <SwitchControl @bind-Checked="GeneralLiability" Label="General liability certificate required" />
+                        <SwitchControl @bind-Checked="WorkersCompensation" Label="Workers' compensation certificate required" />
+                        <SwitchControl @bind-Checked="PortalEnabled" Label="Supplier portal enabled" />
+                    </section>
+                </PageControl>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="PageControl parameters" Rows="Vocab.Page" />
+        <ApiTable Kind="ApiKind.Properties" Title="PageNavigationNode" Rows="Vocab.Node" />
+        <ApiTable Kind="ApiKind.Properties" Title="PageNavigationShortcut" Rows="Vocab.Shortcut" />
+        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+        <p>
+            <code>PageNavigationGraph(nodes, wrap)</code> validates the nodes once: every node needs an id and a selector, ids are unique,
+            and <code>Next</code> / <code>Previous</code> must name existing nodes. <code>PageNavigationNodeMode</code> is <code>Auto</code>
+            (the matched element when focusable, else its focusable descendants), <code>Element</code> or <code>Descendants</code>;
+            <code>PageNavigationEntry</code> is <code>Directional</code>, <code>First</code> or <code>Last</code>;
+            <code>PageShortcutAction</code> is <code>Focus</code> or <code>Activate</code>. <code>PageNavigationMap</code> is the older
+            linear form, a list of named regions, which the control converts to a graph.
+        </p>
+    </Vocabulary>
+
+    <Accessibility>
+        <ApiTable Kind="ApiKind.Keyboard" Title="Keys" Rows="Vocab.Keys" />
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li><a href="demo/layout">Page layouts</a>: panels and a splitter around content; this control goes inside them.</li>
+            <li><a href="demo/forms">Forms</a>: the fields a page like this is usually made of.</li>
+            <li><a href="demo/grid">Grid overview</a>: the grid's own keyboard rules once focus is inside it.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Three nodes in page order; Alt+letter jumps to each. The grid node needs no mode: its focus element is focusable, so Auto picks it.
+    private static readonly PageNavigationGraph Graph = new(
+    [
+        new("details", "#vendor-details", Mode: PageNavigationNodeMode.Descendants, Shortcuts: [new("d", PageShortcutModifiers.Alt)]),
+        new("contacts", "#vendor-contacts", Shortcuts: [new("c", PageShortcutModifiers.Alt)]),
+        new("options", "#vendor-options", Mode: PageNavigationNodeMode.Descendants, Shortcuts: [new("o", PageShortcutModifiers.Alt)]),
+    ], wrap: true);
+
+    private List<VendorRecord> _vendors = [];
+    private VendorRecord _vendor = new();
+    private List<VendorContactRecord> _contacts = [];
+    private int _index;
+
+    // The switches bind to the record, so each vendor keeps its own values while you move between them.
+    private bool GeneralLiability { get => _vendor.GLInsRequired ?? false; set => _vendor.GLInsRequired = value; }
+    private bool WorkersCompensation { get => _vendor.WCInsRequired ?? false; set => _vendor.WCInsRequired = value; }
+    private bool PortalEnabled { get => _vendor.BuildProEnabled ?? false; set => _vendor.BuildProEnabled = value; }
+
+    protected override void OnInitialized()
+    {
+        _vendors = BenchData.Vendors.ToList();
+        if (_vendors.Count > 0) Show(0);
+    }
+
+    private void Show(int index)
+    {
+        _index = Math.Clamp(index, 0, _vendors.Count - 1);
+        _vendor = _vendors[_index];
+        _contacts = BenchData.VendorContacts.Where(c => c.VendorCode == _vendor.Vendor_ID).ToList();
+    }
+
+    // Documentation rows (2026-10-20) from PageControl.razor and PageNavigationMap.cs.
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Page =
+        {
+            new("NavigationGraph", "The focus nodes and their order; the next table. With no graph the page does not take Tab.", "PageNavigationGraph?", "null"),
+            new("NavigationMap", "Older linear form: named regions visited in order. Converted to a graph.", "PageNavigationMap?", "null"),
+            new("FocusFirstNodeOnLoad", "Focus the first target once the page has loaded, retried over a few renders until a grid has rows; never takes focus the user already placed.", "bool", "false"),
+            new("EnableZoomShortcuts", "With a ZoomService registered on the host, Ctrl with plus, minus and zero zoom FlexCore text. Off on this page because this site does not apply the service's value.", "bool", "true"),
+            new("ScrollMode", "How the region scrolls when its content is larger than its space. Auto turns each scrollbar on only when that axis overflows.", "PageScrollMode", "Auto"),
+            new("MaxHeight", "Height cap for the scroll container, e.g. 100dvh, when the host layout gives none.", "string?", "null"),
+            new("ChildContent", "The page content.", "RenderFragment?"),
+        };
+        public static readonly ApiRow[] Node =
+        {
+            new("Id", "Unique name of the node; Next, Previous and shortcuts refer to it.", "string"),
+            new("Selector", "CSS selector of the element or region.", "string"),
+            new("Order", "Position in the Tab order; declaration order when null.", "int?", "null"),
+            new("Next", "Node Tab goes to instead of the next in order.", "string?", "null"),
+            new("Previous", "Node Shift+Tab goes to instead of the previous in order.", "string?", "null"),
+            new("Mode", "Which elements are the node's targets: Auto, Element or Descendants.", "PageNavigationNodeMode", "Auto"),
+            new("Shortcuts", "Keys that jump to or activate the node from anywhere in the page.", "IReadOnlyList&lt;PageNavigationShortcut&gt;?", "null"),
+            new("Entry", "Where focus lands when arriving from another node: Directional, First or Last.", "PageNavigationEntry", "Directional"),
+        };
+        public static readonly ApiRow[] Shortcut =
+        {
+            new("Key", "The key, as the browser names it.", "string"),
+            new("Modifiers", "Alt, Control, Meta, Shift, combined as flags.", "PageShortcutModifiers", "None"),
+            new("Action", "Focus the node's target, or Activate it.", "PageShortcutAction", "Focus"),
+            new("AllowInEditor", "Also fire while the user is typing in a text editor.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("FocusFirstNavigationTargetAsync()", "Puts focus on the first available target again, for example after New or Open. False when the page has no graph.", "Task&lt;bool&gt;"),
+        };
+        public static readonly ApiRow[] Keys =
+        {
+            new("Tab / Shift+Tab", "Next or previous target across the nodes, wrapping at the ends when the graph wraps."),
+            new("Alt+D, Alt+C, Alt+O", "This page's shortcuts: focus the details, the contacts grid or the certificates."),
+            new("Inside the grid", "The grid's own keys; Tab leaves it at the last cell because its TabNavigationMode is PageControl."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Vendor = @"<ButtonControl CssClass=""btn-sm"" OnClick=""@(() => Show(_index - 1))"" Disabled=""@(_index <= 0)"">Previous</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""@(() => Show(_index + 1))"" Disabled=""@(_index >= _vendors.Count - 1)"">Next</ButtonControl>
+
+<PageControl NavigationGraph=""@Graph"" FocusFirstNodeOnLoad=""true"" EnableZoomShortcuts=""false"" CssClass=""vendor-page"">
+    <div class=""vendor-head""><strong>@_vendor.Vendor_Name</strong> <span class=""muted"">vendor @(_index + 1) of @_vendors.Count</span></div>
+    <section id=""vendor-details"" class=""region"">
+        <h4>Details <kbd>Alt</kbd>+<kbd>D</kbd></h4>
+        <div class=""fields"">
+            <label>Name <TextBoxControl @bind-Value=""_vendor.Vendor_Name"" /></label>
+            <label>Street <TextBoxControl @bind-Value=""_vendor.Addr1"" /></label>
+            <label>City <TextBoxControl @bind-Value=""_vendor.City"" /></label>
+            <label>State <TextBoxControl @bind-Value=""_vendor.State"" Width=""80px"" /></label>
+            <label>Postal code <TextBoxControl @bind-Value=""_vendor.Zip"" Width=""110px"" /></label>
+            <label>Telephone <TextBoxControl @bind-Value=""_vendor.Phone"" Width=""150px"" /></label>
+        </div>
+    </section>
+    <section id=""vendor-contacts"" class=""region"">
+        <h4>Contacts <kbd>Alt</kbd>+<kbd>C</kbd></h4>
+        <GridControl TValue=""VendorContactRecord"" DataSource=""@_contacts"" Height=""200px"" AllowSorting=""true""
+                     TabNavigationMode=""GridTabNavigationMode.PageControl"">
+            <GridColumnsBase>
+                <GridColumn Field=""@nameof(VendorContactRecord.DisplayName)"" HeaderText=""Contact"" Width=""180px"" />
+                <GridColumn Field=""@nameof(VendorContactRecord.Role)"" HeaderText=""Role"" Width=""160px"" />
+                <GridColumn Field=""@nameof(VendorContactRecord.WorkPhone)"" HeaderText=""Phone"" Width=""130px"" />
+                <GridColumn Field=""@nameof(VendorContactRecord.Email)"" HeaderText=""Email"" Width=""220px"" />
+                <GridColumn Field=""@nameof(VendorContactRecord.Active)"" HeaderText=""Active"" Width=""80px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" />
+            </GridColumnsBase>
+        </GridControl>
+    </section>
+    <section id=""vendor-options"" class=""region"">
+        <h4>Certificates <kbd>Alt</kbd>+<kbd>O</kbd></h4>
+        <SwitchControl @bind-Checked=""GeneralLiability"" Label=""General liability certificate required"" />
+        <SwitchControl @bind-Checked=""WorkersCompensation"" Label=""Workers' compensation certificate required"" />
+        <SwitchControl @bind-Checked=""PortalEnabled"" Label=""Supplier portal enabled"" />
+    </section>
+</PageControl>";
+        public const string VendorCs = @"// Three nodes in page order; Alt+letter jumps to each. The grid node needs no mode: its focus element is focusable, so Auto picks it.
+private static readonly PageNavigationGraph Graph = new(
+[
+    new(""details"", ""#vendor-details"", Mode: PageNavigationNodeMode.Descendants, Shortcuts: [new(""d"", PageShortcutModifiers.Alt)]),
+    new(""contacts"", ""#vendor-contacts"", Shortcuts: [new(""c"", PageShortcutModifiers.Alt)]),
+    new(""options"", ""#vendor-options"", Mode: PageNavigationNodeMode.Descendants, Shortcuts: [new(""o"", PageShortcutModifiers.Alt)]),
+], wrap: true);
+
+private List<VendorRecord> _vendors = [];
+
+private VendorRecord _vendor = new();
+
+private List<VendorContactRecord> _contacts = [];
+
+private int _index;
+
+// The switches bind to the record, so each vendor keeps its own values while you move between them.
+private bool GeneralLiability { get => _vendor.GLInsRequired ?? false; set => _vendor.GLInsRequired = value; }
+
+private bool WorkersCompensation { get => _vendor.WCInsRequired ?? false; set => _vendor.WCInsRequired = value; }
+
+private bool PortalEnabled { get => _vendor.BuildProEnabled ?? false; set => _vendor.BuildProEnabled = value; }
+
+protected override void OnInitialized()
+{
+    _vendors = BenchData.Vendors.ToList();
+    if (_vendors.Count > 0) Show(0);
+}
+
+private void Show(int index)
+{
+    _index = Math.Clamp(index, 0, _vendors.Count - 1);
+    _vendor = _vendors[_index];
+    _contacts = BenchData.VendorContacts.Where(c => c.VendorCode == _vendor.Vendor_ID).ToList();
+}";
+    }
+}

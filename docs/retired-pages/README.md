@@ -11,3 +11,5 @@ them too). Each was replaced by an example on a FeatureDemoLayout page or droppe
 | `VendorPricesDemo.razor.txt` | dropped; it repeated the Grouping & totals catalog example on other data |
 | `SqliteProviderBenchDemo.razor.txt` | second example on On-demand loading (`/demo/grid/provider-enterprise`) |
 | `NavMenu.razor.txt` | nothing; the side menu had no references |
+| `PageControlBenchDemo.razor.txt` | `/demo/page-navigation` (the old address forwards): the library's PageControl is a keyboard navigation region, not a tab control, so the page became its page |
+| `DataControlDemo.razor.txt` | `/demo/data-control` rebuilt as one example (grid, chart and CSV from one frame) with documentation tables |
