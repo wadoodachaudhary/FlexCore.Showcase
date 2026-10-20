@@ -631,6 +631,16 @@
         typeof(Fx.ControlKit.ButtonControl).Assembly.GetName().Version is { } v ? $"{v.Major}.{v.Minor}.{v.Build}" : "";
 
     private string _activeTab = "grid";
+    private static readonly string[] HeroTabs = ["grid", "charts", "ribbon", "reports"];
+
+    /// <summary>Hero tab named in the address, e.g. ?tab=ribbon (catalog row Office Ribbon); read on load, never written back.</summary>
+    [SupplyParameterFromQuery(Name = "tab")] public string? Tab { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        var tab = Tab?.Trim().ToLowerInvariant();
+        if (tab is not null && HeroTabs.Contains(tab)) _activeTab = tab;
+    }
     private bool _showCode = false;
     private bool _copiedInstall = false;
     private bool _copiedCode = false;

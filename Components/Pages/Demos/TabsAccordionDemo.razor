@@ -201,36 +201,62 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
         public const string Tabs = @"<TabControl @bind-SelectedIndex=""_tab"">
     <TabItems>
-        <TabItem HeaderText=""Summary""><dl>…</dl></TabItem>
-        <TabItem HeaderText=""Lines""><table>…</table></TabItem>
-        <TabItem HeaderText=""Notes""><p>Quote valid 30 days.</p></TabItem>
+        <TabItem HeaderText=""Summary"">
+            <dl class=""summary"">
+                <dt>Estimate</dt><dd>EST-2042 Contoso kitchen</dd>
+                <dt>Status</dt><dd>Draft, 14 lines</dd>
+                <dt>Total</dt><dd>$12,480</dd>
+            </dl>
+        </TabItem>
+        <TabItem HeaderText=""Lines"">
+            <table class=""lines"">
+                <thead><tr><th>Item</th><th>Qty</th><th class=""num"">Amount</th></tr></thead>
+                <tbody>
+                    <tr><td>Quartz counters</td><td>24 ft</td><td class=""num"">$4,800</td></tr>
+                    <tr><td>Cabinet install</td><td>18 hr</td><td class=""num"">$2,340</td></tr>
+                    <tr><td>Tile backsplash</td><td>36 sq ft</td><td class=""num"">$1,260</td></tr>
+                </tbody>
+            </table>
+        </TabItem>
+        <TabItem HeaderText=""Notes"">
+            <p class=""m0"">Quote valid 30 days. Crane access confirmed for the week of the 20th; site contact is the foreman.</p>
+        </TabItem>
     </TabItems>
 </TabControl>
-<p>Tab @(_tab + 1) of 3 selected</p>";
-        public const string TabsCs = @"private int _tab;";
+<p class=""result"">Tab @(_tab + 1) of 3 selected</p>";
+        public const string TabsCs = @"// Tab control
+private int _tab;";
 
         public const string Strip = @"<TabStripControl Items=""_docs"" @bind-SelectedIndex=""_doc"" OnTabClose=""CloseDoc"" />
 <div class=""strip-pane"">@(_docs.Count == 0 ? ""No documents open."" : _docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag)</div>
-<ButtonControl CssClass=""btn-sm"" OnClick=""Reopen"" Disabled=""@(_closed.Count == 0)"">Reopen last closed</ButtonControl>";
-        public const string StripCs = @"private int _doc;
+<div class=""strip-actions"">
+    <ButtonControl CssClass=""btn-sm"" OnClick=""Reopen"" Disabled=""@(_closed.Count == 0)"">Reopen last closed</ButtonControl>
+    <span class=""result"">@_docs.Count open, @_closed.Count closed</span>
+</div>";
+        public const string StripCs = @"// Tab strip
+private int _doc;
+
 private readonly List<TabStripItem> _docs = new()
 {
     new(""Estimate"", ""bi bi-file-earmark-text"", closable: true) { Tag = ""EST-2042 Contoso kitchen, 14 lines, draft."" },
-    new(""Drawings"", ""bi bi-image"", closable: true)             { Tag = ""Plan view and two elevations, revision B."" },
-    new(""Photos"", ""bi bi-camera"", closable: true)              { Tag = ""Six site photos from the survey visit."" },
-    new(""Invoice"", ""bi bi-receipt"")                            { Disabled = true, Tag = ""Not issued yet."" },
+    new(""Drawings"", ""bi bi-image"", closable: true) { Tag = ""Plan view and two elevations, revision B."" },
+    new(""Photos"", ""bi bi-camera"", closable: true) { Tag = ""Six site photos from the survey visit."" },
+    new(""Invoice"", ""bi bi-receipt"") { Disabled = true, Tag = ""Not issued yet."" },
 };
+
 private readonly Stack<TabStripItem> _closed = new();
 
 private void CloseDoc(int index)
 {
     _closed.Push(_docs[index]);
     _docs.RemoveAt(index);
-    if (index < _doc || _doc >= _docs.Count) _doc = Math.Max(0, _doc - 1);   // keep the same document selected
+    // Keep the same document selected when one before it closes; fall back a step when the last one closes.
+    if (index < _doc || _doc >= _docs.Count) _doc = Math.Max(0, _doc - 1);
 }
 
 private void Reopen()
@@ -240,11 +266,13 @@ private void Reopen()
     _doc = _docs.Count - 1;
 }";
 
-        public const string Accordion = @"<AccordionControl Multiple=""true"">
-    <AccordionItemControl Title=""Customer"" IconCss=""bi bi-person"" InitiallyExpanded=""true"">Contoso Ltd, account 10420, net 30.</AccordionItemControl>
-    <AccordionItemControl Title=""Delivery"" IconCss=""bi bi-truck"">Site address in Redmond; crane access confirmed.</AccordionItemControl>
-    <AccordionItemControl Title=""Notes"" IconCss=""bi bi-sticky"">Quote valid 30 days.</AccordionItemControl>
-    <AccordionItemControl Title=""Attachments (none)"" IconCss=""bi bi-paperclip"" Disabled=""true"">—</AccordionItemControl>
-</AccordionControl>";
+        public const string Accordion = @"<div class=""acc"">
+    <AccordionControl Multiple=""true"">
+        <AccordionItemControl Title=""Customer"" IconCss=""bi bi-person"" InitiallyExpanded=""true"">Contoso Ltd, account 10420, net 30.</AccordionItemControl>
+        <AccordionItemControl Title=""Delivery"" IconCss=""bi bi-truck"">Site address in Redmond; crane access confirmed.</AccordionItemControl>
+        <AccordionItemControl Title=""Notes"" IconCss=""bi bi-sticky"">Quote valid 30 days.</AccordionItemControl>
+        <AccordionItemControl Title=""Attachments (none)"" IconCss=""bi bi-paperclip"" Disabled=""true"">—</AccordionItemControl>
+    </AccordionControl>
+</div>";
     }
 }

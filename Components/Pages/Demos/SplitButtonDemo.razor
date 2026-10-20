@@ -31,7 +31,7 @@
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="menu-content" Title="Custom menu content" RazorCode="@Code.Menu" CSharpCode="@Code.MenuCs">
+        <DemoExample Id="menu-content" Title="Custom menu content" RazorCode="@Code.MenuContent" CSharpCode="@Code.MenuContentCs">
             <Description><p><code>MenuContent</code> renders after the items. Clicks inside it do not close the menu, so it suits options that stay open; click-away closes it.</p></Description>
             <Demo>
                 <div class="demo-row">
@@ -125,13 +125,16 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
-        public const string Basic = @"<SplitButtonControl Text=""Save"" IconCss=""bi bi-save"" Items=""_saveItems""
-                    OnClick=""@(() => _saved = ""Saved"")"" OnItemClick=""@(i => _saved = i.Text)"" />
-
-<SplitButtonControl Text=""Save"" IconCss=""bi bi-save"" Items=""_saveItems"" Disabled=""true"" />";
-        public const string BasicCs = @"// SplitButtonItem(text, iconCss, value, disabled)
+        public const string Basic = @"<div class=""demo-row"">
+    <SplitButtonControl Text=""Save"" IconCss=""bi bi-save"" Items=""_saveItems""
+                        OnClick=""@(() => _saved = ""Saved"")"" OnItemClick=""@(i => _saved = i.Text)"" />
+    <SplitButtonControl Text=""Save"" IconCss=""bi bi-save"" Items=""_saveItems"" Disabled=""true"" />
+    @if (_saved is not null) { <span class=""result"">@_saved</span> }
+</div>";
+        public const string BasicCs = @"// Basic
 private readonly List<SplitButtonItem> _saveItems = new()
 {
     new(""Save as…"", ""bi bi-file-earmark""),
@@ -139,17 +142,28 @@ private readonly List<SplitButtonItem> _saveItems = new()
     new(""Save and close"", ""bi bi-box-arrow-right""),
     new(""Save as template"", ""bi bi-file-earmark-lock"", disabled: true),
 };
+
 private string? _saved;";
 
-        public const string Menu = @"<SplitButtonControl Text=""Publish"" IconCss=""bi bi-cloud-upload"" Items=""_publishItems""
-                    OnClick=""@(() => Publish(""now""))"" OnItemClick=""@(i => Publish(i.Text))"">
-    <MenuContent>
-        <CheckBoxControl @bind-Checked=""_notify"" Label=""Notify subscribers"" />
-        <CheckBoxControl @bind-Checked=""_pin"" Label=""Pin to top"" />
-    </MenuContent>
-</SplitButtonControl>";
-        public const string MenuCs = @"private readonly List<SplitButtonItem> _publishItems = new() { new(""Schedule…"", ""bi bi-calendar-event"") };
+        public const string MenuContent = @"<div class=""demo-row"">
+    <SplitButtonControl Text=""Publish"" IconCss=""bi bi-cloud-upload"" Items=""_publishItems""
+                        OnClick=""@(() => Publish(""now""))"" OnItemClick=""@(i => Publish(i.Text))"">
+        <MenuContent>
+            <div class=""menu-options"">
+                <CheckBoxControl @bind-Checked=""_notify"" Label=""Notify subscribers"" />
+                <CheckBoxControl @bind-Checked=""_pin"" Label=""Pin to top"" />
+            </div>
+        </MenuContent>
+    </SplitButtonControl>
+    @if (_published is not null) { <span class=""result"">@_published</span> }
+</div>";
+        public const string MenuContentCs = @"// Menu content
+private readonly List<SplitButtonItem> _publishItems = new() { new(""Schedule…"", ""bi bi-calendar-event"") };
+
 private bool _notify = true, _pin;
-private void Publish(string how) { /* uses _notify and _pin */ }";
+
+private string? _published;
+
+private void Publish(string how) => _published = $""Publish {how} (notify {(_notify ? ""on"" : ""off"")}, pin {(_pin ? ""on"" : ""off"")})"";";
     }
 }

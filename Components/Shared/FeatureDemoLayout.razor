@@ -5,7 +5,8 @@
    Keyboard and accessibility → Related, plus an "On this page" list filled by the DemoExamples.
    Breadcrumb is BreadCrumbControl; the two-column frame has no FlexCore equivalent.
    2026-10-18 (Baaria's review): "Vocabulary" became "Documentation"; the source files moved from the header to the rail under
-   "On this page" and are listed without links, because whether the full source stays public is still an open decision. *@
+   "On this page" and are listed without links, because whether the full source stays public is still an open decision.
+   2026-10-20 (developer meeting): the rail shows an Examples entry with the example titles nested under it. *@
 <CascadingValue Value="this" IsFixed="true">
 <div class="fd-shell">
     <header class="fd-header">
@@ -69,6 +70,7 @@
         <aside class="fd-toc" aria-label="On this page">
             <div class="fd-toc-title">On this page</div>
             <a href="@($"{PagePath}#overview")">Overview</a>
+            <a href="@($"{PagePath}#examples")">Examples</a>
             @foreach (var (id, title) in _examples)
             {
                 <a class="fd-toc-ex" href="@($"{PagePath}#{id}")">@title</a>

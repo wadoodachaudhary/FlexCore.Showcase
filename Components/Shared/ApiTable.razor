@@ -3,7 +3,8 @@
 @* Vocabulary table (2026-10-12). 2026-10-18: Name, Type and Default render as markup, because rows are written with &lt; &gt;
    for generics and Razor was encoding them again, so every generic type showed as literal "&lt;" text (SC-308). Title stays
    encoded: it arrives through an attribute, which Razor has already decoded, so a Title of "X&lt;T&gt;" is the string "X<T>". Kind picks the columns; rows are records so every page renders the
-   same shape. Plain <table>: FlexCore has no static-table control and the grid is overkill here. *@
+   same shape. Plain <table>: FlexCore has no static-table control and the grid is overkill here.
+   2026-10-20 (Baaria, Barcodes page): enum members get their own Values column set, and an empty Type or Default string draws no chip. *@
 <div class="api-block" id="@Id">
     @if (!string.IsNullOrEmpty(Title))
     {
@@ -30,11 +31,11 @@
                         }
                         @if (HasType)
                         {
-                            <td class="api-type">@if (r.Type is not null) { <code>@((MarkupString)r.Type)</code> }</td>
+                            <td class="api-type">@if (!string.IsNullOrEmpty(r.Type)) { <code>@((MarkupString)r.Type)</code> }</td>
                         }
                         @if (HasDefault)
                         {
-                            <td class="api-default">@if (r.Default is not null) { <code>@((MarkupString)r.Default)</code> } else { <span class="api-none">—</span> }</td>
+                            <td class="api-default">@if (!string.IsNullOrEmpty(r.Default)) { <code>@((MarkupString)r.Default)</code> } else { <span class="api-none">—</span> }</td>
                         }
                         <td class="api-desc">@((MarkupString)r.Description)</td>
                     </tr>
@@ -95,6 +96,7 @@
         ApiKind.Methods      => new[] { "Method", "Inputs", "Returns", "Description" },
         ApiKind.CssClasses   => new[] { "Class", "Effect" },
         ApiKind.CssVariables => new[] { "Variable", "Fallback", "Purpose" },
+        ApiKind.Values       => new[] { "Value", "Description" },
         _                    => new[] { "Key", "Action" },
     };
 }

@@ -4,6 +4,8 @@
 @using System.Dynamic
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
+@using System.ComponentModel
+@using System.ComponentModel.DataAnnotations
 @using FlexCore.Showcase.Components.Shared
 
 @* 2026-10-17: moved onto FeatureDemoLayout (row 8 of the Data Grid list) and made to match its menu label. The old page bound
@@ -16,15 +18,17 @@
 <PageTitle>Dynamic columns — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Dynamic columns" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Rows as property bags and columns read from their keys: a grid whose shape follows the data."
-                   SourcePath="Grid/GridControl.razor.cs;Grid/GridColumn.cs">
+                   Tagline="Columns read from the rows' keys, or generated from the row type's attributes: a grid whose shape follows the data."
+                   SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.ColumnFeatures.cs;Grid/GridColumn.cs">
     <Overview>
         <p>
             The grid reads a cell through the column's <code>Field</code>. When a row is an <code>IDictionary&lt;string, object&gt;</code>,
             which is what <code>ExpandoObject</code> is, <code>Field</code> is the key, so ad-hoc query results bind without a model class.
             On this page the columns come from the data too: a <code>@@foreach</code> over the keys of the first row declares one
             <code>GridColumn</code> per key, numeric values get <code>ColumnType.Number</code> and a format, and when the key set changes the
-            swap runs inside <code>SuspendRedraw</code> so the grid converges the columns in place.
+            swap runs inside <code>SuspendRedraw</code> so the grid converges the columns in place. With <code>AutoGenerateColumns</code>
+            the shape comes from the row type instead: <code>Display</code>, <code>DisplayName</code>, <code>DisplayFormat</code>,
+            <code>Editable</code> and <code>Key</code> attributes set the header, band, order, format and whether a cell can be edited.
         </p>
     </Overview>
 
@@ -63,9 +67,31 @@
                 <p class="result">@_rows.Count.ToString("N0") rows · @_columns.Count columns: @string.Join(" · ", _columns.Select(c => c.Header))</p>
             </Demo>
         </DemoExample>
+        <DemoExample Id="annotations" Title="Columns from data annotations" RazorCode="@Code.Annotations" CSharpCode="@Code.AnnotationsCs">
+            <Description><p>No column markup: the grid builds its columns from the attributes on <code>AnnotatedGridItem</code>. <code>Display</code> gives Item #, SKU, Unit price and Extended their headers, order and bands; <code>DisplayName</code> labels the description; <code>DisplayFormat</code> formats the money; <code>Key</code> and <code>Editable(false)</code> keep Item # and Extended read-only; <code>AutoGenerateField = false</code> hides InternalCode.</p></Description>
+            <Demo>
+                <GridControl DataSource="@_annotatedRows"
+                             TValue="AnnotatedGridItem"
+                             AutoGenerateColumns="true"
+                             Height="300px"
+                             AllowSorting="true"
+                             AllowFiltering="true"
+                             EditSettingsRef="@_editSettings" />
+            </Demo>
+        </DemoExample>
     </Examples>
 
     <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters" Rows="Vocab.Grid" />
+        <h3 class="api-title">What AutoGenerateColumns reads from the row type</h3>
+        <ul>
+            <li><strong>Which properties:</strong> public instance properties with a public getter and no indexer. <code>[Display(AutoGenerateField = false)]</code> or <code>[ScaffoldColumn(false)]</code> leaves one out. A scalar row type such as <code>string</code> or <code>int</code> generates nothing.</li>
+            <li><strong>Order:</strong> <code>Display.Order</code>, then declaration order.</li>
+            <li><strong>Header:</strong> <code>Display.Name</code>, else <code>[DisplayName]</code>, else the property name. <code>Display.GroupName</code> becomes the column's <code>HeaderBand</code>.</li>
+            <li><strong>Format:</strong> <code>DisplayFormat.DataFormatString</code> with the <code>{0:…}</code> wrapper removed, so <code>{0:C2}</code> becomes <code>C2</code>.</li>
+            <li><strong>Read-only:</strong> <code>[Key]</code> (which also sets <code>IsPrimaryKey</code>), <code>[Editable(false)]</code>, <code>[ReadOnly(true)]</code>, or no public setter.</li>
+            <li><strong>Type:</strong> <code>[DataType(DataType.Password)]</code> gives Password; a DataType of Date, DateTime or Time gives Date; <code>bool</code> gives CheckBox; <code>DateTime</code>, <code>DateTimeOffset</code> and <code>DateOnly</code> give Date; the numeric types give Number; everything else is Text. Numbers and dates align right, check boxes centre.</li>
+        </ul>
         <p class="fd-pending"><code>GridColumn</code> (<code>Field</code>, <code>Type</code>, <code>Format</code>), dictionary-backed rows and <code>SuspendRedraw</code> / <code>EndUpdateAsync</code> are still to be written up from <code>Grid/GridColumn.cs</code>, <code>Grid/GridEnums.cs</code> and <code>Grid/GridControl.razor.cs</code>.</p>
     </Vocabulary>
 
@@ -151,6 +177,54 @@
     private static string Humanize(string key)
         => System.Text.RegularExpressions.Regex.Replace(key, "(?<=[a-z])(?=[A-Z])", " ");
 
+    // Columns from data annotations (moved here from Frozen columns, 2026-10-20)
+    public sealed class AnnotatedGridItem
+    {
+        [Key]
+        [Display(Name = "Item #", Order = 0, GroupName = "Identity")]
+        public int Id { get; set; }
+
+        [Display(Name = "SKU", Order = 1, GroupName = "Identity")]
+        public string Code { get; set; } = "";
+
+        [DisplayName("Product description")]
+        public string Description { get; set; } = "";
+
+        [Display(Name = "Unit price", Order = 2, GroupName = "Amounts")]
+        [DisplayFormat(DataFormatString = "{0:C2}")]
+        public decimal UnitPrice { get; set; }
+
+        [Display(Name = "Extended", Order = 3, GroupName = "Amounts")]
+        [DisplayFormat(DataFormatString = "{0:C2}")]
+        [Editable(false)]
+        public decimal Total { get; set; }
+
+        [Display(AutoGenerateField = false)]
+        public string InternalCode { get; set; } = "";
+    }
+
+    private readonly EditSettings _editSettings = new() { AllowEditing = true, Mode = EditMode.Batch };
+    private List<AnnotatedGridItem> _annotatedRows = BuildAnnotated();
+
+    private static List<AnnotatedGridItem> BuildAnnotated() =>
+        Enumerable.Range(1, 12).Select(i =>
+        {
+            var price = 15.50m + (i % 25) * 4.25m;
+            return new AnnotatedGridItem
+            {
+                Id = i, Code = $"SKU-{i:D5}", Description = $"Material Item #{i}",
+                UnitPrice = price, Total = (10 + (i * 7) % 150) * price, InternalCode = $"INTERNAL-{i}"
+            };
+        }).ToList();
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Grid =
+        {
+            new("AutoGenerateColumns", "Builds one column per public readable property of <code>TValue</code>, as listed below. An explicit <code>GridColumn</code> with the same <code>Field</code> replaces the generated one; extra explicit columns follow the generated set.", "bool", "false"),
+        };
+    }
+
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
     private static class Code
     {
@@ -177,6 +251,53 @@
     </GridColumnsBase>
 </GridControl>
 <p class=""result"">@_rows.Count.ToString(""N0"") rows · @_columns.Count columns: @string.Join("" · "", _columns.Select(c => c.Header))</p>";
+        public const string Annotations = @"<GridControl DataSource=""@_annotatedRows""
+             TValue=""AnnotatedGridItem""
+             AutoGenerateColumns=""true""
+             Height=""300px""
+             AllowSorting=""true""
+             AllowFiltering=""true""
+             EditSettingsRef=""@_editSettings"" />";
+        public const string AnnotationsCs = @"// Columns from data annotations (moved here from Frozen columns, 2026-10-20)
+public sealed class AnnotatedGridItem
+{
+    [Key]
+    [Display(Name = ""Item #"", Order = 0, GroupName = ""Identity"")]
+    public int Id { get; set; }
+
+    [Display(Name = ""SKU"", Order = 1, GroupName = ""Identity"")]
+    public string Code { get; set; } = """";
+
+    [DisplayName(""Product description"")]
+    public string Description { get; set; } = """";
+
+    [Display(Name = ""Unit price"", Order = 2, GroupName = ""Amounts"")]
+    [DisplayFormat(DataFormatString = ""{0:C2}"")]
+    public decimal UnitPrice { get; set; }
+
+    [Display(Name = ""Extended"", Order = 3, GroupName = ""Amounts"")]
+    [DisplayFormat(DataFormatString = ""{0:C2}"")]
+    [Editable(false)]
+    public decimal Total { get; set; }
+
+    [Display(AutoGenerateField = false)]
+    public string InternalCode { get; set; } = """";
+}
+
+private readonly EditSettings _editSettings = new() { AllowEditing = true, Mode = EditMode.Batch };
+
+private List<AnnotatedGridItem> _annotatedRows = BuildAnnotated();
+
+private static List<AnnotatedGridItem> BuildAnnotated() =>
+    Enumerable.Range(1, 12).Select(i =>
+    {
+        var price = 15.50m + (i % 25) * 4.25m;
+        return new AnnotatedGridItem
+        {
+            Id = i, Code = $""SKU-{i:D5}"", Description = $""Material Item #{i}"",
+            UnitPrice = price, Total = (10 + (i * 7) % 150) * price, InternalCode = $""INTERNAL-{i}""
+        };
+    }).ToList();";
         public const string DynamicCs = @"private sealed record DynamicColumn(string Field, string Header, bool IsNumber, string? Format);
 
 private readonly SelectionItem[] _sizes = { new(""50"", ""50 rows""), new(""500"", ""500 rows""), new(""2000"", ""2,000 rows"") };

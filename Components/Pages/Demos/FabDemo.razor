@@ -129,38 +129,75 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
-        public const string Menu = @"<FabMenuControl Items=""_actions"" Title=""Create"" Disabled=""@_disabled"" />";
-        public const string MenuCs = @"private List<FabMenuItem> _actions = new();
-private string? _last;
+        public const string Menu = @"<ToggleButtonControl @bind-Selected=""_disabled"">Disabled</ToggleButtonControl>
 
-protected override void OnInitialized() => _actions = new()
+<div class=""fab-stage"">
+    <div class=""stage-lines""><span style=""width:38%""></span><span style=""width:72%""></span><span style=""width:55%""></span><span style=""width:64%""></span></div>
+    <FabMenuControl Items=""_actions"" Disabled=""@_disabled"" Title=""Create"" />
+</div>
+<span class=""result"">@(_last is null ? ""Open the menu and pick an action."" : $""Picked: {_last}"")</span>";
+        public const string MenuCs = @"private bool _disabled;
+
+private string? _last, _contact;
+
+private List<FabMenuItem> _actions = new(), _support = new();
+
+protected override void OnInitialized()
 {
-    Action(""New document"", ""bi bi-file-earmark-plus"", BadgeVariant.Primary),
-    Action(""Upload"",       ""bi bi-upload"",            BadgeVariant.Success),
-    Action(""Share"",        ""bi bi-share"",             BadgeVariant.Info),
-    Action(""Delete"",       ""bi bi-trash"",             BadgeVariant.Danger),
-};
+    _actions = new()
+    {
+        Action(""New document"", ""bi bi-file-earmark-plus"", BadgeVariant.Primary, t => _last = t),
+        Action(""Upload"", ""bi bi-upload"", BadgeVariant.Success, t => _last = t),
+        Action(""Share"", ""bi bi-share"", BadgeVariant.Info, t => _last = t),
+        Action(""Delete"", ""bi bi-trash"", BadgeVariant.Danger, t => _last = t),
+    };
+    _support = new()
+    {
+        Action(""Chat with us"", ""bi bi-chat-text"", BadgeVariant.Primary, t => _contact = t),
+        Action(""Email"", ""bi bi-envelope"", BadgeVariant.Secondary, t => _contact = t),
+    };
+}
 
-// FabMenuItem(title, iconCss, color); OnClick is a settable EventCallback
-private FabMenuItem Action(string title, string icon, BadgeVariant color) =>
-    new(title, icon, color) { OnClick = EventCallback.Factory.Create(this, () => _last = title) };";
+// FabMenuItem(title, iconCss, color); OnClick is a settable EventCallback.
+private FabMenuItem Action(string title, string icon, BadgeVariant color, Action<string> pick) =>
+    new(title, icon, color) { OnClick = EventCallback.Factory.Create(this, () => pick(title)) };";
         public const string MenuCss = @"/* Demo only: pin the control inside a panel instead of the viewport corner. */
 .fab-stage { position: relative; isolation: isolate; height: 320px; padding: 1rem;
              display: flex; justify-content: flex-end; align-items: flex-end; }
 .fab-stage ::deep .fx-fab-host { position: static; }
 .fab-stage ::deep .fx-fab-backdrop { position: absolute; }   /* covers the stage, not the page */";
 
-        public const string Custom = @"<FabMenuControl IconCss=""bi bi-chat-dots"" Items=""_support"" Title=""Support"">
-    <div class=""fab-note"">Replies within a day</div>
-</FabMenuControl>";
-        public const string CustomCs = @"private List<FabMenuItem> _support = new();
+        public const string Custom = @"<div class=""fab-stage short"">
+    <FabMenuControl IconCss=""bi bi-chat-dots"" Items=""_support"" Title=""Support"">
+        <div class=""fab-note"">Replies within a day</div>
+    </FabMenuControl>
+</div>
+<span class=""result"">@(_contact is null ? """" : $""Picked: {_contact}"")</span>";
+        public const string CustomCs = @"private string? _last, _contact;
 
-protected override void OnInitialized() => _support = new()
+private List<FabMenuItem> _actions = new(), _support = new();
+
+protected override void OnInitialized()
 {
-    Action(""Chat with us"", ""bi bi-chat-text"", BadgeVariant.Primary),
-    Action(""Email"",        ""bi bi-envelope"",  BadgeVariant.Secondary),
-};";
+    _actions = new()
+    {
+        Action(""New document"", ""bi bi-file-earmark-plus"", BadgeVariant.Primary, t => _last = t),
+        Action(""Upload"", ""bi bi-upload"", BadgeVariant.Success, t => _last = t),
+        Action(""Share"", ""bi bi-share"", BadgeVariant.Info, t => _last = t),
+        Action(""Delete"", ""bi bi-trash"", BadgeVariant.Danger, t => _last = t),
+    };
+    _support = new()
+    {
+        Action(""Chat with us"", ""bi bi-chat-text"", BadgeVariant.Primary, t => _contact = t),
+        Action(""Email"", ""bi bi-envelope"", BadgeVariant.Secondary, t => _contact = t),
+    };
+}
+
+// FabMenuItem(title, iconCss, color); OnClick is a settable EventCallback.
+private FabMenuItem Action(string title, string icon, BadgeVariant color, Action<string> pick) =>
+    new(title, icon, color) { OnClick = EventCallback.Factory.Create(this, () => pick(title)) };";
     }
 }

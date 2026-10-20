@@ -258,6 +258,10 @@
 
     record DirectoryItem(string Icon, string Name, string Href);
 
+    // Href rule (developer meeting, 2026-10-19): a control with its own page links to the page; a control that is one
+    // example on a shared page links to that example's anchor (the DemoExample Id). Rows whose control has no demo
+    // yet keep their old target (Baaria, 2026-10-20).
+
     private readonly DirectoryItem[] _dataManagement =
     [
         new("grid", "Data Grid", "demo/grid"),
@@ -271,9 +275,9 @@
         new("col-virt", "Wide Grids", "demo/grid/column-virtualization"),
         new("col-swap", "Column Sets", "demo/grid/column-swap"),
         new("batch-edit", "Batch Editing", "demo/grid/batch-editing"),
-        new("sqlite", "On-Demand Items Provider", "demo/grid/items-provider-db"),
+        new("sqlite", "On-Demand Items Provider", "demo/grid/provider-enterprise#search"),
         new("master-detail", "Typing Modes", "demo/grid/typing-modes"),
-        new("picklist", "Dynamic Columns", "demo/grid/dynamic-columns"),
+        new("picklist", "Dynamic Columns", "demo/grid/dynamic-columns#dynamic"),
         new("veto", "Unsaved-Row Lock", "demo/grid/unsaved-row-lock"),
         new("dual-list", "Master-Detail", "demo/grid/master-detail"),
         new("reorder", "Column Reorder", "demo/grid/reordering")
@@ -292,26 +296,26 @@
     [
         new("page-control", "PageControl / Tabbed MDI", "demo/workspace/page-control-bench"),
         new("dock", "Dock Manager", "demo/dock-manager"),
-        new("splitter", "Splitter Control", "demo/layout"),
-        new("dashboard", "Dashboard Layout", "demo/layout"),
+        new("splitter", "Splitter Control", "demo/layout#shell"),
+        new("dashboard", "Dashboard Layout", "demo/layout#dashboard"),
         new("grid", "Grid Layout", "demo/counterparts"),
-        new("card", "Card Control", "demo/cards"),
-        new("card-group", "Card Group", "demo/cards"),
-        new("timeline", "Timeline", "demo/new-components")
+        new("card", "Card Control", "demo/cards#card"),
+        new("card-group", "Card Group", "demo/cards#group"),
+        new("timeline", "Timeline", "demo/new-components#content")
     ];
 
     private readonly DirectoryItem[] _dataVis =
     [
         new("chart-bar", "30+ SVG Charts Gallery", "demo/charts"),
         new("sunburst", "COVID-19 Sunburst", "demo/charts/sunburst"),
-        new("stock", "Stock & Financial Chart", "demo/gauges"),
-        new("gauge-circular", "Circular Gauge", "demo/gauges"),
-        new("gauge-linear", "Linear Gauge", "demo/gauges"),
-        new("gauge-radial", "Radial Gauge", "demo/gauges"),
-        new("gauge-arc", "Arc Gauge", "demo/gauges"),
-        new("sparkline", "Sparkline Charts", "demo/charts"),
-        new("barcode", "Barcode Generator", "demo/barcodes"),
-        new("qrcode", "QR Code Generator", "demo/barcodes"),
+        new("stock", "Stock & Financial Chart", "demo/gauges#stock"),
+        new("gauge-circular", "Circular Gauge", "demo/gauges#gauges"),
+        new("gauge-linear", "Linear Gauge", "demo/gauges#gauges"),
+        new("gauge-radial", "Radial Gauge", "demo/gauges#gauges"),
+        new("gauge-arc", "Arc Gauge", "demo/gauges#gauges"),
+        new("sparkline", "Sparkline Charts", "demo/charts?tab=sparkline#gallery"),
+        new("barcode", "Barcode Generator", "demo/barcodes#barcode"),
+        new("qrcode", "QR Code Generator", "demo/barcodes#qr"),
         new("chart-bar", "Financial & Gauges", "demo/advanced-charts")
     ];
 
@@ -328,74 +332,74 @@
         new("button", "Button Control", "demo/buttons"),
         new("split-button", "Split Button", "demo/split-button"),
         new("toggle-button", "Toggle Button", "demo/toggle-buttons"),
-        new("fab", "Floating Action Button (FAB)", "demo/fab"),
-        new("speed-dial", "Speed Dial Menu", "demo/fab"),          // same control, open state
-        new("button", "Rounded Pill Buttons", "demo/buttons#pill")
+        new("fab", "Floating Action Button (FAB)", "demo/fab#menu"),
+        new("speed-dial", "Speed Dial Menu", "demo/fab#menu"),          // same control, open state
+        new("button", "Rounded Pill Buttons", "demo/buttons#variants")
     ];
 
     private readonly DirectoryItem[] _scheduling =
     [
         new("gantt", "Gantt Chart", "demo/gantt"),
         new("scheduler", "Scheduler", "demo/counterparts"),
-        new("calendar", "Calendar", "demo/date-time"),
-        new("datepicker", "DatePicker", "demo/date-time"),
-        new("timepicker", "TimePicker", "demo/date-time"),
-        new("timespan", "TimeSpan Picker", "demo/date-time")
+        new("calendar", "Calendar", "demo/date-time#calendar"),
+        new("datepicker", "DatePicker", "demo/date-time#appointment"),
+        new("timepicker", "TimePicker", "demo/date-time#appointment"),
+        new("timespan", "TimeSpan Picker", "demo/date-time#appointment")
     ];
 
     private readonly DirectoryItem[] _inputs =
     [
-        new("input-number", "Numeric TextBox", "demo/forms"),
-        new("input-text", "TextBox", "demo/forms"),
-        new("textarea", "TextArea", "demo/forms"),
+        new("input-number", "Numeric TextBox", "demo/forms#generated"),
+        new("input-text", "TextBox", "demo/forms#generated"),
+        new("textarea", "TextArea", "demo/forms#handbuilt"),
         new("otp", "OTP / Security Code", "demo/security-code"),
         new("slider", "Slider & Range Slider", "demo/sliders"),
-        new("checkbox", "Checkbox", "demo/checks"),
-        new("radio", "Radio Group", "demo/checks"),
-        new("switch", "Toggle Switch", "demo/checks"),
-        new("palette", "Color Palette", "demo/pickers"),
-        new("rating", "Star Rating", "demo/checks")
+        new("checkbox", "Checkbox", "demo/checks#checks"),
+        new("radio", "Radio Group", "demo/checks#radio"),
+        new("switch", "Toggle Switch", "demo/checks#radio"),
+        new("palette", "Color Palette", "demo/pickers#palette"),
+        new("rating", "Star Rating", "demo/checks#rating")
     ];
 
     private readonly DirectoryItem[] _forms =
     [
-        new("form", "Form Control", "demo/forms"),
-        new("form-item", "Form Item Control", "demo/forms"),
-        new("form-group", "Form Group Control", "demo/forms"),
-        new("validation", "Validation Summary", "demo/forms"),
-        new("validation", "Validation Message", "demo/forms"),
-        new("validation", "Validation Tooltip", "demo/forms")
+        new("form", "Form Control", "demo/forms#generated"),
+        new("form-item", "Form Item Control", "demo/forms#handbuilt"),
+        new("form-group", "Form Group Control", "demo/forms#handbuilt"),
+        new("validation", "Validation Summary", "demo/forms#generated"),
+        new("validation", "Validation Message", "demo/forms#generated"),
+        new("validation", "Validation Tooltip", "demo/forms#handbuilt")
     ];
 
     private readonly DirectoryItem[] _dropdowns =
     [
-        new("dropdown", "DropDownList", "demo/forms"),
+        new("dropdown", "DropDownList", "demo/forms#generated"),
         new("dropdowngrid", "DropDownGrid Control", "demo/grid"),
-        new("autocomplete", "AutoComplete", "demo/pickers"),
+        new("autocomplete", "AutoComplete", "demo/pickers#suggest"),
         new("listbox", "ListBox", "demo/counterparts"),
-        new("picklist", "Picklist Dropdown", "demo/grid/dynamic-columns")
+        new("picklist", "Picklist Dropdown", "demo/grid/dynamic-columns#dynamic")
     ];
 
     private readonly DirectoryItem[] _navigation =
     [
-        new("ribbon", "Office Ribbon", ""),                 // ribbon lives on the home page
+        new("ribbon", "Office Ribbon", "?tab=ribbon#live-showcase"),   // the home hero, opened on its Ribbon tab (base href is the site root)
         new("toolbar", "Toolbar Control", "demo/counterparts"),
-        new("tab", "Tab Control", "demo/workspace/page-control-bench"),
-        new("accordion", "Accordion Control", "demo/tabs-accordion"),
+        new("tab", "Tab Control", "demo/tabs-accordion#tabs"),
+        new("accordion", "Accordion Control", "demo/tabs-accordion#accordion"),
         new("appbar", "AppBar Control", "demo/counterparts"),
-        new("breadcrumb", "Breadcrumb", "demo/new-components"),
-        new("stepper", "Stepper Control", "demo/pickers"),
+        new("breadcrumb", "Breadcrumb", "demo/new-components#content"),
+        new("stepper", "Stepper Control", "demo/pickers#steps"),
         new("carousel", "Carousel", "demo/new-components")
     ];
 
     private readonly DirectoryItem[] _feedback =
     [
-        new("dialog", "Modal Dialog", "demo/dialog"),
+        new("dialog", "Modal Dialog", "demo/dialog#modal"),
         new("toast", "Toast Notifications", "demo/notifications"),
-        new("toast", "Context Alert Banners", "demo/new-components"),
-        new("badge", "Status Badges", "demo/new-components"),
+        new("toast", "Context Alert Banners", "demo/new-components#status"),
+        new("badge", "Status Badges", "demo/new-components#status"),
         new("progress", "Progress Bar", "demo/layout"),
-        new("skeleton", "Loading Skeleton", "demo/new-components")
+        new("skeleton", "Loading Skeleton", "demo/new-components#status")
     ];
 
     private readonly DirectoryItem[] _aiAssist =

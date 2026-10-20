@@ -154,36 +154,48 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
-        public const string Slider = @"<SliderControl @bind-Value=""_markup"" Min=""0"" Max=""50"" Step=""0.5""
-               ShowValue=""false"" aria-label=""Markup percent"" />
-<span>@_markup.ToString(""0.#"")%</span>
+        public const string Slider = @"<div class=""field"">
+    <span class=""field-label"">Markup</span>
+    <SliderControl @bind-Value=""_markup"" Min=""0"" Max=""50"" Step=""0.5"" ShowValue=""false"" aria-label=""Markup percent"" />
+    <span class=""readout"">@_markup.ToString(""0.#"")%</span>
+</div>
+<p class=""result"">Cost @_cost.ToString(""$#,##0"") + @_markup.ToString(""0.#"")% markup = <strong>@Sell.ToString(""$#,##0"")</strong></p>
+<div class=""field"">
+    <span class=""field-label"">Tax rate</span>
+    <SliderControl Value=""8.25"" Min=""0"" Max=""20"" Step=""0.25"" Disabled=""true"" aria-label=""Tax rate, fixed"" />
+</div>";
+        public const string SliderCs = @"// Slider
+private double _markup = 12.5;
 
-<p>Cost @_cost.ToString(""$#,##0"") + @_markup% markup = @Sell.ToString(""$#,##0"")</p>
-
-<SliderControl Value=""8.25"" Min=""0"" Max=""20"" Step=""0.25"" Disabled=""true"" aria-label=""Tax rate, fixed"" />";
-        public const string SliderCs = @"private double _markup = 12.5;
 private const double _cost = 10_000;
+
 private double Sell => _cost * (1 + _markup / 100);";
 
-        public const string Range = @"<RangeSliderControl @bind-Value=""_budget"" Min=""0"" Max=""2000"" Step=""50"" Format=""$#,##0""
-                    StartLabel=""At least"" EndLabel=""At most"" AriaLabel=""Budget"" />
+        public const string Range = @"<div class=""range-row"">
+    <RangeSliderControl @bind-Value=""_budget"" Min=""0"" Max=""2000"" Step=""50"" Format=""$#,##0""
+                        StartLabel=""At least"" EndLabel=""At most"" AriaLabel=""Budget"" />
+    <div class=""matches"">
+        <span class=""result"">@Matches.Count of @_options.Length options in budget</span>
+        <ul>
+            @foreach (var o in Matches)
+            {
+                <li><span>@o.Name</span><span class=""price"">@o.Price.ToString(""$#,##0"")</span></li>
+            }
+        </ul>
+    </div>
+</div>";
+        public const string RangeCs = @"// Range slider
+private NumericRange _budget = new(250, 1250);
 
-<ul>
-    @foreach (var o in Matches)
-    {
-        <li>@o.Name — @o.Price.ToString(""$#,##0"")</li>
-    }
-</ul>";
-        public const string RangeCs = @"private NumericRange _budget = new(250, 1250);   // record NumericRange(double Start, double End)
-
-private readonly record struct Option(string Name, double Price);
 private readonly Option[] _options =
 {
     new(""Under-cabinet lighting"", 220), new(""Tile backsplash"", 350), new(""Laminate counters"", 450),
     new(""Butcher-block counters"", 900), new(""Quartz counters"", 1600), new(""Granite counters"", 1850),
 };
+
 private List<Option> Matches => _options.Where(o => o.Price >= _budget.Start && o.Price <= _budget.End).ToList();";
     }
 }

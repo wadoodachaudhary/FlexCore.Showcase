@@ -3,109 +3,113 @@
 @using System.Diagnostics
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
-@* Retitled 2026-10-06 to match the site nav; copy unchanged. *@
+@using FlexCore.Showcase.Components.Shared
+@* Retitled 2026-10-06 to match the site nav.
+   2026-10-20: rebuilt on FeatureDemoLayout (developer meeting, point 2). The old copy claimed 50 columns, 2.5 million cells, a
+   dropdown editor, a hand-incremented render counter and unmeasured "silky-smooth" scrolling; the grid has 12 columns and the only
+   timing was list generation. Now: one example, the real column count, two timings the page takes itself (build, and the server's
+   first render after the swap) and counters fed by the grid's own events. The cell budget is switched off so the overscan choice
+   applies as written (with the default 900-cell budget and 12 columns, 260 would be capped at 75 rows). Facts checked against
+   GridControl.razor.cs (windowing comments around WindowOverscanRows), SelectionSettings.cs and GridControlEvents.cs. Edits are counted
+   with OnCellSave: GridControlEvents also declares CellSaved, but nothing in the library raises it. *@
 
 <PageTitle>50k rows — FlexCore Showcase</PageTitle>
 
-<SyncfusionDemoLayout Title="50k rows"
-                      Category="DataGrid"
-                      BadgeText="Stress Scale"
-                      RazorCode="@_razorSourceCode"
-                      CSharpCode="@_csharpSourceCode"
-                      CSharpTabName="SelectionRowModel.cs">
-    <Summary>
+<FeatureDemoLayout Title="50k rows" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
+                   Tagline="Twelve columns and up to fifty thousand generated rows: what the row window costs, measured on this page."
+                   SourcePath="Grid/GridControl.razor.cs;Grid/SelectionSettings.cs;Grid/GridControlEvents.cs">
+    <Overview>
         <p>
-            Designed after enterprise estimating matrices (such as HomeFront's <code>FAssembly gItems</code>), 
-            this benchmark tests the FlexCore DataGrid at extreme dimensions: <strong>50 columns across up to 50,000 rows</strong> (2.5 million potential cells).
+            <code>GridControl</code> renders only the rows in view plus an overscan band above and below; spacer rows stand in for the
+            rest, and a small scroll-position reader in the grid's script tells the server where the window is. Grouped grids are
+            windowed the same way unless <code>EnableGroupedRowWindowing</code> is turned off. <code>WindowOverscanRows</code> sets the
+            band; by default a cell budget (<code>WindowOverscanCellBudget</code>, 900 cells per side) shrinks it on wide grids, and this
+            page turns that budget off so the number you pick is the number you get.
         </p>
         <p>
-            Columns 1–6 are fully interactive (Numeric, Text, Dropdown, Checkbox), while Columns 7–50 serve as read-only enterprise fillers so every paint and scroll pass incurs the full 50-column overhead.
-            The benchmark demonstrates <strong>Grouped Row Windowing</strong>, configurable <strong>Window Overscan Buffers</strong> (60 vs 260 rows), and multi-row batch edit fan-out.
+            Two timings are taken here, both on the server with <code>Stopwatch</code>: how long it takes to build the list of rows in
+            C#, and how long the first render after a swap takes, from the click to the component's next <code>OnAfterRender</code>.
+            Browser layout and paint are not included, so the wait you see is a little longer than the second number. The selected and
+            edited counts come from the grid's own events.
         </p>
-    </Summary>
+    </Overview>
 
-    <DemoControls>
-        <div style="display:flex;gap:10px;align-items:center;font-size:12px;flex-wrap:wrap;">
-            <span><strong>Rows:</strong></span>
-            @foreach (var count in _rowCountChoices)
-            {
-                <button class="btn btn-sm @(count == _rowCount ? "btn-primary" : "btn-outline-secondary")"
-                        @onclick="() => SetRowCount(count)">@count.ToString("N0")</button>
-            }
-            <span class="ms-2"><strong>Buffer:</strong></span>
-            <button class="btn btn-sm @(_overscan == 260 ? "btn-dark" : "btn-outline-secondary")"
-                    @onclick="() => SetOverscan(260)">260</button>
-            <button class="btn btn-sm @(_overscan == 60 ? "btn-dark" : "btn-outline-secondary")"
-                    @onclick="() => SetOverscan(60)">60</button>
+    <Examples>
+        <DemoExample Id="rows" Title="Row count, overscan and grouping" RazorCode="@Code.Rows" CSharpCode="@Code.RowsCs">
+            <Description><p>Pick a row count: the page rebuilds the list and remounts the grid, and the line under the grid reports both timings. The overscan switch sets the band of rows rendered beyond the view on each side. Group by Category to see grouped rows windowed too, and turn Window grouped rows off to render every grouped row for comparison. Click rows and edit the Description, Category, Qty, Unit Cost and Active cells: the counts update from <code>SelectionChanged</code> and <code>OnCellSave</code>. With the grid focused, typing jumps to the first row whose active column starts with the typed text.</p></Description>
+            <Controls>
+                <ButtonGroupControl Items="_rowCountItems" Values="@(new[] { _rowCount.ToString() })" ValuesChanged="PickRowCount" Selection="ChoiceSelectionMode.Single" AriaLabel="Row count" />
+                <ButtonGroupControl Items="_overscanItems" Values="@(new[] { _overscan.ToString() })" ValuesChanged="PickOverscan" Selection="ChoiceSelectionMode.Single" AriaLabel="Overscan rows" />
+                <ToggleButtonControl Selected="@(_groupColumns.Count > 0)" SelectedChanged="SetGrouped">Group by Category</ToggleButtonControl>
+                <ToggleButtonControl Selected="@_groupedWindowing" SelectedChanged="SetGroupedWindowing">Window grouped rows</ToggleButtonControl>
+            </Controls>
+            <Demo>
+                <GridControl @key="@_mountGen"
+                             TValue="SRow"
+                             DataSource="@_rows"
+                             Height="480px"
+                             WindowOverscanRows="@_overscan"
+                             WindowOverscanCellBudget="0"
+                             AllowGrouping="true"
+                             GroupColumns="@_groupColumns"
+                             EnableGroupedRowWindowing="@_groupedWindowing"
+                             ShowGroupExpandCollapse="true"
+                             AllowSorting="true"
+                             AllowFiltering="true"
+                             AllowResizing="true"
+                             AllowColumnReorder="true"
+                             EnableTypeSearch="true"
+                             ShowRowSelectionEditColumnCue="true"
+                             ShowRowCountInFooter="true"
+                             SelectionSettingsRef="@_selection"
+                             EditSettingsRef="@_edit"
+                             EventsRef="@_events">
+                    <GridColumnsBase>
+                        <GridColumn Field="@nameof(SRow.Item)" HeaderText="Item Code" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Description)" HeaderText="Description" Width="220px" />
+                        <GridColumn Field="@nameof(SRow.Category)" HeaderText="Category" Width="130px" />
+                        <GridColumn Field="@nameof(SRow.Qty)" HeaderText="Qty" Width="85px" Type="ColumnType.Number" TextAlign="TextAlign.Right" SelectAllOnEdit="true" />
+                        <GridColumn Field="@nameof(SRow.UnitCost)" HeaderText="Unit Cost" Width="95px" Type="ColumnType.Number" Format="N2" TextAlign="TextAlign.Right" SelectAllOnEdit="true" />
+                        <GridColumn Field="@nameof(SRow.Active)" HeaderText="Active" Width="75px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
+                        <GridColumn Field="@nameof(SRow.C07)" HeaderText="C07 Spec" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.C08)" HeaderText="C08 Code" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.C09)" HeaderText="C09 Phase" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.C10)" HeaderText="C10 Lot" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.C11)" HeaderText="C11 Zone" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.C12)" HeaderText="C12 Bin" Width="100px" AllowEditing="false" />
+                    </GridColumnsBase>
+                </GridControl>
+                <p class="result">@Summary</p>
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-            <span class="ms-2"><strong>Group:</strong></span>
-            <button class="btn btn-sm @(_groupColumns.Count > 0 ? "btn-info text-white" : "btn-outline-secondary")"
-                    @onclick="ToggleGrouping">@(_groupColumns.Count > 0 ? "Grouped by Category" : "Ungrouped")</button>
-            <button class="btn btn-sm @(_groupedWindowing ? "btn-success" : "btn-outline-secondary")"
-                    @onclick="() => _groupedWindowing = !_groupedWindowing">Grouped Windowing @(_groupedWindowing ? "ON" : "OFF")</button>
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters used here" Rows="Vocab.Grid" />
+        <ApiTable Kind="ApiKind.Properties" Title="SelectionSettings, the two set here" Rows="Vocab.Selection" />
+        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents used here" Rows="Vocab.Events" />
+        <p>
+            Sorting, filtering, resizing, reordering, grouping and the grid's other parameters are documented on
+            <a href="demo/grid">Grid overview</a> and <a href="demo/grid/grouping">Grouping &amp; totals</a>; batch editing on
+            <a href="demo/grid/batch-editing">Batch editing</a>.
+        </p>
+    </Vocabulary>
 
-            <button class="btn btn-sm btn-outline-primary ms-2" @onclick="RefreshStats">Refresh Stats</button>
-            <span class="text-muted ms-2">Renders: <b>@_renders</b> | Build: <b>@_lastMs.ToString("0.0") ms</b> | Selected: <b>@_selectedCount</b> | Edits: <b>@_editCount</b></span>
-        </div>
-    </DemoControls>
-
-    <DemoContent>
-        <div style="width:100%;">
-            <GridControl @ref="_grid"
-                         ShowRowCountInFooter="true"
-                         @key="@($"{_rowCount}-{_overscan}-{_mountGen}-{(_groupColumns.Count > 0 ? "g" : "f")}-{_groupedWindowing}")"
-                         WindowOverscanRows="@_overscan"
-                         TValue="SRow"
-                         DataSource="@_rows"
-                         AllowSelection="true"
-                         AllowSorting="true"
-                         AllowResizing="true"
-                         AllowColumnReorder="true"
-                         AllowFiltering="true"
-                         AllowGrouping="true"
-                         GroupColumns="@_groupColumns"
-                         ShowGroupExpandCollapse="true"
-                         EnableGroupedRowWindowing="@_groupedWindowing"
-                         EnableTypeSearch="true"
-                         ShowRowSelectionEditColumnCue="true"
-                         Height="480px"
-                         EditSettingsRef="@_editSettings"
-                         SelectionSettingsRef="@_selectionSettings"
-                         EventsRef="@_events">
-                <GridColumnsBase>
-                    <GridColumn Field="@nameof(SRow.Item)" HeaderText="Item Code" Width="100px" AllowEditing="false" />
-                    <GridColumn Field="@nameof(SRow.Description)" HeaderText="Description" Width="220px" AllowEditing="true" />
-                    <GridColumn Field="@nameof(SRow.Category)" HeaderText="Category" Width="130px" AllowEditing="true" />
-                    <GridColumn Field="@nameof(SRow.Qty)" HeaderText="Qty" Width="85px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" />
-                    <GridColumn Field="@nameof(SRow.UnitCost)" HeaderText="Unit Cost" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" Format="$#,##0.00" />
-                    <GridColumn Field="@nameof(SRow.Active)" HeaderText="Active" Width="75px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" AllowEditing="true" />
-                    <GridColumn Field="@nameof(SRow.C07)" HeaderText="C07 Spec" Width="100px" AllowEditing="false" />
-                    <GridColumn Field="@nameof(SRow.C08)" HeaderText="C08 Code" Width="100px" AllowEditing="false" />
-                    <GridColumn Field="@nameof(SRow.C09)" HeaderText="C09 Phase" Width="100px" AllowEditing="false" />
-                    <GridColumn Field="@nameof(SRow.C10)" HeaderText="C10 Lot" Width="100px" AllowEditing="false" />
-                    <GridColumn Field="@nameof(SRow.C11)" HeaderText="C11 Zone" Width="100px" AllowEditing="false" />
-                    <GridColumn Field="@nameof(SRow.C12)" HeaderText="C12 Bin" Width="100px" AllowEditing="false" />
-                </GridColumnsBase>
-            </GridControl>
-        </div>
-    </DemoContent>
-
-    <DocumentationContent>
-        <h3>Stress Scale Benchmark Architecture</h3>
+    <Related>
         <ul>
-            <li><strong>Grouped Row Windowing:</strong> When grouping is active on large datasets, FlexCore's <code>EnableGroupedRowWindowing</code> feature restricts DOM generation strictly to visible group items and headers, avoiding DOM blowup when thousands of records are nested in collapsed groups.</li>
-            <li><strong>Buffer Tuning:</strong> Setting <code>WindowOverscanRows</code> to 260 ensures silky-smooth scrolling during rapid page-down gestures, while 60 minimizes memory usage for constrained environments.</li>
-            <li><strong>Selection State Stability:</strong> Selection state is tracked efficiently via composite primary keys, keeping memory linear with selected rows rather than total rows.</li>
+            <li><a href="demo/grid/virtualization-bench">Scroll vs paging</a>: the same window against a paged grid.</li>
+            <li><a href="demo/grid/scenarios">Four scenarios</a>: a hundred thousand rows in a working screen.</li>
+            <li><a href="demo/grid/grouping">Grouping &amp; totals</a>: what grouping adds to a grid.</li>
         </ul>
-    </DocumentationContent>
-</SyncfusionDemoLayout>
+    </Related>
+</FeatureDemoLayout>
 
 @code {
     public class SRow
     {
-        public string Item { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
+        public string Item { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Category { get; set; } = "";
         public decimal Qty { get; set; }
         public decimal UnitCost { get; set; }
         public bool Active { get; set; }
@@ -117,140 +121,171 @@
         public string C12 { get; set; } = "BIN-12";
     }
 
-    private GridControl<SRow>? _grid;
+    private readonly SelectionItem[] _rowCountItems = { new("1000", "1,000"), new("5000", "5,000"), new("20000", "20,000"), new("50000", "50,000") };
+    private readonly SelectionItem[] _overscanItems = { new("15", "15 rows"), new("60", "60 rows"), new("260", "260 rows") };
     private List<SRow> _rows = [];
-    private readonly int[] _rowCountChoices = [1000, 5000, 20000, 50000];
     private int _rowCount = 5000;
-    private int _overscan = 260;
-    private int _mountGen = 1;
-    private bool _groupedWindowing = true;
+    private int _overscan = 60;
     private List<string> _groupColumns = ["Category"];
+    private bool _groupedWindowing = true;
+    private int _mountGen;                       // @key: every switch remounts the grid, so each timing starts from an empty grid
 
-    private int _renders = 1;
-    private double _lastMs = 2.4;
-    private int _selectedCount = 0;
-    private int _editCount = 0;
-
-    private readonly EditSettings _editSettings = new()
-    {
-        AllowEditing = true,
-        Mode = EditMode.Batch
-    };
-
-    private readonly SelectionSettings _selectionSettings = new()
-    {
-        Mode = SelectionMode.Row,
-        Type = SelectionType.Multiple
-    };
-
+    private readonly SelectionSettings _selection = new() { Type = SelectionType.Multiple, Mode = SelectionMode.Row };
+    private readonly EditSettings _edit = new() { AllowEditing = true, Mode = EditMode.Batch };
     private readonly GridControlEvents<SRow> _events = new();
+
+    // Timings: build is the C# loop; render is from the click to the component's next OnAfterRender, i.e. the server side of
+    // the first render after the swap. Browser layout and paint are not included.
+    private readonly Stopwatch _swap = new();
+    private bool _swapPending;
+    private double _buildMs, _renderMs;
+    private int _selectedCount, _editCount;
+
+    private string Summary =>
+        $"{_rowCount:N0} rows built in {_buildMs:0.0} ms; first render after the swap took {_renderMs:0} ms on the server; " +
+        $"{_selectedCount} selected; {_editCount} edit{(_editCount == 1 ? "" : "s")} saved.";
 
     protected override void OnInitialized()
     {
-        _events.OnCellEdit = EventCallback.Factory.Create<CellEditArgs<SRow>>(this, args =>
-        {
-            _editCount++;
-            StateHasChanged();
-        });
-        _events.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<SRow>>(this, args =>
-        {
-            _selectedCount = _grid != null ? _grid.GetSelectedRecords().Count() : 0;
-            StateHasChanged();
-        });
-
-        GenerateRows();
+        _events.SelectionChanged = EventCallback.Factory.Create<int>(this, count => { _selectedCount = count; StateHasChanged(); });
+        _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<SRow>>(this, _ => { _editCount++; StateHasChanged(); });
+        Rebuild();
     }
 
-    private void GenerateRows()
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!_swapPending) return;
+        _swapPending = false;
+        _renderMs = _swap.Elapsed.TotalMilliseconds;
+        _ = InvokeAsync(StateHasChanged);   // show the number; this render has no pending swap, so it ends here
+    }
+
+    private void Rebuild()
     {
         var sw = Stopwatch.StartNew();
         var categories = new[] { "Foundation", "Framing", "Roofing", "Plumbing", "Electrical", "HVAC", "Interior", "Landscaping" };
-        var list = new List<SRow>(_rowCount);
         var rand = new Random(77);
-
-        for (int i = 1; i <= _rowCount; i++)
+        var list = new List<SRow>(_rowCount);
+        for (var i = 1; i <= _rowCount; i++)
         {
             var cat = categories[i % categories.Length];
             list.Add(new SRow
             {
-                Item = $"HF-{i:D6}",
-                Description = $"{cat} Component Item #{i}",
-                Category = cat,
-                Qty = rand.Next(1, 100),
-                UnitCost = Math.Round((decimal)(rand.NextDouble() * 180 + 12), 2),
-                Active = (i % 5 != 0)
+                Item = $"HF-{i:D6}", Description = $"{cat} Component Item #{i}", Category = cat,
+                Qty = rand.Next(1, 100), UnitCost = Math.Round((decimal)(rand.NextDouble() * 180 + 12), 2), Active = i % 5 != 0,
             });
         }
         _rows = list;
-        sw.Stop();
-        _lastMs = sw.Elapsed.TotalMilliseconds;
+        _buildMs = sw.Elapsed.TotalMilliseconds;
+        Remount();
     }
 
-    private void SetRowCount(int count)
+    private void Remount()
     {
-        _rowCount = count;
         _mountGen++;
-        _renders++;
-        GenerateRows();
+        _selectedCount = 0;
+        _swap.Restart();
+        _swapPending = true;
     }
 
-    private void SetOverscan(int overscan)
+    private void PickRowCount(IReadOnlyList<string> values)
     {
-        _overscan = overscan;
-        _mountGen++;
-        _renders++;
+        if (values.Count == 0) return;
+        _rowCount = int.Parse(values[0]);
+        Rebuild();
     }
 
-    private void ToggleGrouping()
+    private void PickOverscan(IReadOnlyList<string> values)
     {
-        if (_groupColumns.Count > 0)
-            _groupColumns = [];
-        else
-            _groupColumns = ["Category"];
-        _mountGen++;
-        _renders++;
+        if (values.Count == 0) return;
+        _overscan = int.Parse(values[0]);
+        Remount();
     }
 
-    private void RefreshStats()
+    private void SetGrouped(bool on) { _groupColumns = on ? ["Category"] : []; Remount(); }
+
+    private void SetGroupedWindowing(bool on) { _groupedWindowing = on; Remount(); }
+
+    // Documentation rows (2026-10-20), from GridControl.razor.cs, SelectionSettings.cs and GridControlEvents.cs.
+    private static class Vocab
     {
-        _renders++;
-        _selectedCount = _grid != null ? _grid.GetSelectedRecords().Count() : 0;
+        public static readonly ApiRow[] Grid =
+        {
+            new("WindowOverscanRows", "Rows rendered beyond the visible slice on each side, so a fast flick does not outrun the render. The ceiling when the cell budget is active.", "int", "60"),
+            new("WindowOverscanCellBudget", "Per-side overscan budget in cells (rows × visible columns). The effective overscan is the budget divided by the visible columns, clamped between min(15, WindowOverscanRows) and WindowOverscanRows. 0 turns the budget off, as on this page.", "int", "900"),
+            new("EnableGroupedRowWindowing", "Windows grouped grids too. Off renders every grouped row.", "bool", "true"),
+            new("MinimumRowsForWindowing", "Source row count below which the grid does not window. 0 windows at any size.", "int", "0"),
+            new("AllowGrouping", "Lets the user group by a column; the group drop area appears above the header.", "bool", "false"),
+            new("GroupColumns", "Initial group columns, by field name.", "List&lt;string&gt;?", "null"),
+            new("ShowGroupExpandCollapse", "Expand all / collapse all toggle in the group drop area.", "bool", "true"),
+            new("EnableTypeSearch", "With the grid focused, printable keys search the active column for the first row whose text starts with the typed buffer.", "bool", "false"),
+            new("ShowRowSelectionEditColumnCue", "In row-selection grids, highlights the editable target column across the selected rows.", "bool", "false"),
+            new("ShowRowCountInFooter", "A compact row count under the grid: the complete filtered result, not the rendered window.", "bool", "false"),
+            new("SelectionSettingsRef", "Selection options object; see the next table.", "SelectionSettings?", "null"),
+            new("EditSettingsRef", "Editing options object. Batch mode here, so edits are kept until the batch is saved.", "EditSettings?", "null"),
+            new("EventsRef", "Event callbacks object; two of them are wired here.", "GridControlEvents&lt;TValue&gt;?", "null"),
+        };
+        public static readonly ApiRow[] Selection =
+        {
+            new("Type", "Single or Multiple rows.", "SelectionType", "Single"),
+            new("Mode", "Row or Cell selection.", "SelectionMode", "Row"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("SelectionChanged", "After the selection changes, with the number of selected rows.", "int"),
+            new("OnCellSave", "After a cell's new value has been written to its row: a real change, or an editor the user touched. Carries the row, the column field and the value.", "CellSaveArgs&lt;TValue&gt;"),
+        };
     }
 
-    private const string _razorSourceCode = @"@using Fx.ControlKit
-@using Fx.ControlKit.Grid
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Rows = @"<ButtonGroupControl Items=""_rowCountItems"" Values=""@(new[] { _rowCount.ToString() })"" ValuesChanged=""PickRowCount"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Row count"" />
+<ButtonGroupControl Items=""_overscanItems"" Values=""@(new[] { _overscan.ToString() })"" ValuesChanged=""PickOverscan"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Overscan rows"" />
+<ToggleButtonControl Selected=""@(_groupColumns.Count > 0)"" SelectedChanged=""SetGrouped"">Group by Category</ToggleButtonControl>
+<ToggleButtonControl Selected=""@_groupedWindowing"" SelectedChanged=""SetGroupedWindowing"">Window grouped rows</ToggleButtonControl>
 
-<GridControl @key=""@($""{RowCount}-{Overscan}"")""
-             WindowOverscanRows=""@Overscan""
+<GridControl @key=""@_mountGen""
              TValue=""SRow""
-             DataSource=""@Rows""
-             AllowSelection=""true""
-             AllowSorting=""true""
-             AllowResizing=""true""
-             AllowColumnReorder=""true""
-             AllowFiltering=""true""
+             DataSource=""@_rows""
+             Height=""480px""
+             WindowOverscanRows=""@_overscan""
+             WindowOverscanCellBudget=""0""
              AllowGrouping=""true""
              GroupColumns=""@_groupColumns""
-             EnableGroupedRowWindowing=""true""
-             Height=""480px"">
+             EnableGroupedRowWindowing=""@_groupedWindowing""
+             ShowGroupExpandCollapse=""true""
+             AllowSorting=""true""
+             AllowFiltering=""true""
+             AllowResizing=""true""
+             AllowColumnReorder=""true""
+             EnableTypeSearch=""true""
+             ShowRowSelectionEditColumnCue=""true""
+             ShowRowCountInFooter=""true""
+             SelectionSettingsRef=""@_selection""
+             EditSettingsRef=""@_edit""
+             EventsRef=""@_events"">
     <GridColumnsBase>
         <GridColumn Field=""@nameof(SRow.Item)"" HeaderText=""Item Code"" Width=""100px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(SRow.Description)"" HeaderText=""Description"" Width=""220px"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(SRow.Category)"" HeaderText=""Category"" Width=""130px"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(SRow.Qty)"" HeaderText=""Qty"" Width=""85px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(SRow.UnitCost)"" HeaderText=""Unit Cost"" Width=""95px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" Format=""$#,##0.00"" />
-        <GridColumn Field=""@nameof(SRow.Active)"" HeaderText=""Active"" Width=""75px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" AllowEditing=""true"" />
-        <!-- Filler columns C07-C50 continue here -->
+        <GridColumn Field=""@nameof(SRow.Description)"" HeaderText=""Description"" Width=""220px"" />
+        <GridColumn Field=""@nameof(SRow.Category)"" HeaderText=""Category"" Width=""130px"" />
+        <GridColumn Field=""@nameof(SRow.Qty)"" HeaderText=""Qty"" Width=""85px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" SelectAllOnEdit=""true"" />
+        <GridColumn Field=""@nameof(SRow.UnitCost)"" HeaderText=""Unit Cost"" Width=""95px"" Type=""ColumnType.Number"" Format=""N2"" TextAlign=""TextAlign.Right"" SelectAllOnEdit=""true"" />
+        <GridColumn Field=""@nameof(SRow.Active)"" HeaderText=""Active"" Width=""75px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" />
+        <GridColumn Field=""@nameof(SRow.C07)"" HeaderText=""C07 Spec"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.C08)"" HeaderText=""C08 Code"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.C09)"" HeaderText=""C09 Phase"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.C10)"" HeaderText=""C10 Lot"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.C11)"" HeaderText=""C11 Zone"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.C12)"" HeaderText=""C12 Bin"" Width=""100px"" AllowEditing=""false"" />
     </GridColumnsBase>
-</GridControl>";
-
-    private const string _csharpSourceCode = @"namespace FlexCore.Showcase.Models;
-
-public class SRow
+</GridControl>
+<p class=""result"">@Summary</p>";
+        public const string RowsCs = @"public class SRow
 {
-    public string Item { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Category { get; set; } = string.Empty;
+    public string Item { get; set; } = """";
+    public string Description { get; set; } = """";
+    public string Category { get; set; } = """";
     public decimal Qty { get; set; }
     public decimal UnitCost { get; set; }
     public bool Active { get; set; }
@@ -260,5 +295,103 @@ public class SRow
     public string C10 { get; set; } = ""LOT-10"";
     public string C11 { get; set; } = ""ZN-11"";
     public string C12 { get; set; } = ""BIN-12"";
-}";
+}
+
+private readonly SelectionItem[] _rowCountItems = { new(""1000"", ""1,000""), new(""5000"", ""5,000""), new(""20000"", ""20,000""), new(""50000"", ""50,000"") };
+
+private readonly SelectionItem[] _overscanItems = { new(""15"", ""15 rows""), new(""60"", ""60 rows""), new(""260"", ""260 rows"") };
+
+private List<SRow> _rows = [];
+
+private int _rowCount = 5000;
+
+private int _overscan = 60;
+
+private List<string> _groupColumns = [""Category""];
+
+private bool _groupedWindowing = true;
+
+private int _mountGen;                       // @key: every switch remounts the grid, so each timing starts from an empty grid
+
+private readonly SelectionSettings _selection = new() { Type = SelectionType.Multiple, Mode = SelectionMode.Row };
+
+private readonly EditSettings _edit = new() { AllowEditing = true, Mode = EditMode.Batch };
+
+private readonly GridControlEvents<SRow> _events = new();
+
+// Timings: build is the C# loop; render is from the click to the component's next OnAfterRender, i.e. the server side of
+// the first render after the swap. Browser layout and paint are not included.
+private readonly Stopwatch _swap = new();
+
+private bool _swapPending;
+
+private double _buildMs, _renderMs;
+
+private int _selectedCount, _editCount;
+
+private string Summary =>
+    $""{_rowCount:N0} rows built in {_buildMs:0.0} ms; first render after the swap took {_renderMs:0} ms on the server; "" +
+    $""{_selectedCount} selected; {_editCount} edit{(_editCount == 1 ? """" : ""s"")} saved."";
+
+protected override void OnInitialized()
+{
+    _events.SelectionChanged = EventCallback.Factory.Create<int>(this, count => { _selectedCount = count; StateHasChanged(); });
+    _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<SRow>>(this, _ => { _editCount++; StateHasChanged(); });
+    Rebuild();
+}
+
+protected override void OnAfterRender(bool firstRender)
+{
+    if (!_swapPending) return;
+    _swapPending = false;
+    _renderMs = _swap.Elapsed.TotalMilliseconds;
+    _ = InvokeAsync(StateHasChanged);   // show the number; this render has no pending swap, so it ends here
+}
+
+private void Rebuild()
+{
+    var sw = Stopwatch.StartNew();
+    var categories = new[] { ""Foundation"", ""Framing"", ""Roofing"", ""Plumbing"", ""Electrical"", ""HVAC"", ""Interior"", ""Landscaping"" };
+    var rand = new Random(77);
+    var list = new List<SRow>(_rowCount);
+    for (var i = 1; i <= _rowCount; i++)
+    {
+        var cat = categories[i % categories.Length];
+        list.Add(new SRow
+        {
+            Item = $""HF-{i:D6}"", Description = $""{cat} Component Item #{i}"", Category = cat,
+            Qty = rand.Next(1, 100), UnitCost = Math.Round((decimal)(rand.NextDouble() * 180 + 12), 2), Active = i % 5 != 0,
+        });
+    }
+    _rows = list;
+    _buildMs = sw.Elapsed.TotalMilliseconds;
+    Remount();
+}
+
+private void Remount()
+{
+    _mountGen++;
+    _selectedCount = 0;
+    _swap.Restart();
+    _swapPending = true;
+}
+
+private void PickRowCount(IReadOnlyList<string> values)
+{
+    if (values.Count == 0) return;
+    _rowCount = int.Parse(values[0]);
+    Rebuild();
+}
+
+private void PickOverscan(IReadOnlyList<string> values)
+{
+    if (values.Count == 0) return;
+    _overscan = int.Parse(values[0]);
+    Remount();
+}
+
+private void SetGrouped(bool on) { _groupColumns = on ? [""Category""] : []; Remount(); }
+
+private void SetGroupedWindowing(bool on) { _groupedWindowing = on; Remount(); }";
+    }
 }

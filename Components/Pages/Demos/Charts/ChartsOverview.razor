@@ -3,7 +3,8 @@
 @using FlexCore.Showcase.Services
 @using FlexCore.Showcase.Components.Shared
 @* 2026-10-12: wrapped in FeatureDemoLayout as one example (the tabbed gallery, unchanged). "No JavaScript
-   dependencies" reworded per the claims rule. ChartControl parameter table pending (SC-264). *@
+   dependencies" reworded per the claims rule. ChartControl parameter table pending (SC-264).
+   2026-10-20: ?tab=<slug> opens the gallery on that tab (catalog row Sparkline Charts); slugs in TabSlugs. *@
 
 <PageTitle>Charts — FlexCore Showcase</PageTitle>
 
@@ -24,7 +25,7 @@
         <DemoExample Id="gallery" Title="Gallery by purpose" RazorCode="@Code.Gallery" CSharpCode="@Code.GalleryCs">
             <Description><p>Every chart here is the same control with a different <code>Type</code>. Series data is bound; titles, heights and palettes are parameters.</p></Description>
             <Demo>
-<TabControl>
+<TabControl @bind-SelectedIndex="_tab">
     <TabItem HeaderText="Comparison">
         <h2>Bar Charts</h2>
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })">
@@ -240,9 +241,133 @@
 </FeatureDemoLayout>
 
 @code {
+    /// <summary>Tab named in the address, e.g. demo/charts?tab=sparkline; read when the page loads, never written back.</summary>
+    [SupplyParameterFromQuery(Name = "tab")] public string? Tab { get; set; }
+    private int _tab;
+    private static readonly string[] TabSlugs =
+        ["comparison", "trend", "part-to-whole", "distribution", "correlation", "multivariate", "kpi-gauge", "statistical", "project", "heatmap", "sparkline"];
+
+    protected override void OnParametersSet()
+    {
+        var i = Array.IndexOf(TabSlugs, Tab?.Trim().ToLowerInvariant());
+        if (i >= 0) _tab = i;
+    }
+
+
+    List<ChartSeries> _groupedBarSeries = new()
+    {
+        new() { Name = "2024", DataPoints = new() { new("Q1", 120), new("Q2", 180), new("Q3", 240), new("Q4", 310) } },
+        new() { Name = "2025", DataPoints = new() { new("Q1", 150), new("Q2", 210), new("Q3", 280), new("Q4", 350) } }
+    };
+
+    List<ChartSeries> _lineSeries = new()
+    {
+        new() { Name = "Product A", DataPoints = new() { new("Jan", 30), new("Feb", 45), new("Mar", 38), new("Apr", 55), new("May", 62), new("Jun", 70) } },
+        new() { Name = "Product B", DataPoints = new() { new("Jan", 20), new("Feb", 25), new("Mar", 35), new("Apr", 40), new("May", 48), new("Jun", 52) } }
+    };
+
+    ChartSeries _pieSeries = new()
+    {
+        Name = "Market Share",
+        DataPoints = new() { new("Chrome", 65), new("Firefox", 12), new("Safari", 15), new("Edge", 5), new("Other", 3) }
+    };
+
+    ChartSeries _funnelSeries = new()
+    {
+        Name = "Conversion",
+        DataPoints = new() { new("Visitors", 10000), new("Leads", 4000), new("Qualified", 1800), new("Proposals", 800), new("Closed", 320) }
+    };
+
+    List<ChartSeries> _histogramSeries = new()
+    {
+        new() { Name = "Response Time (ms)", DataPoints = new() {
+            new("0-50", 12), new("50-100", 28), new("100-150", 45), new("150-200", 38),
+            new("200-250", 22), new("250-300", 15), new("300-350", 8), new("350-400", 4) } }
+    };
+
+    List<ChartSeries> _boxPlotSeries = new()
+    {
+        new() { Name = "Scores", DataPoints = new() {
+            new("Math", 45) { Value2 = 95, Value3 = 60, Value4 = 82, Value5 = 72 },
+            new("Science", 50) { Value2 = 90, Value3 = 62, Value4 = 80, Value5 = 70 },
+            new("English", 40) { Value2 = 88, Value3 = 55, Value4 = 78, Value5 = 68 },
+            new("History", 35) { Value2 = 92, Value3 = 58, Value4 = 85, Value5 = 74 }
+        }}
+    };
+
+    List<ChartSeries> _scatterSeries = new()
+    {
+        new() { Name = "Dataset A", DataPoints = new() {
+            new("", 10) { Value2 = 20 }, new("", 25) { Value2 = 45 },
+            new("", 35) { Value2 = 30 }, new("", 50) { Value2 = 60 },
+            new("", 65) { Value2 = 50 }, new("", 80) { Value2 = 75 },
+            new("", 40) { Value2 = 55 }, new("", 55) { Value2 = 40 }
+        }},
+        new() { Name = "Dataset B", DataPoints = new() {
+            new("", 15) { Value2 = 35 }, new("", 30) { Value2 = 55 },
+            new("", 45) { Value2 = 25 }, new("", 60) { Value2 = 70 },
+            new("", 75) { Value2 = 45 }, new("", 20) { Value2 = 60 }
+        }}
+    };
+
+    List<ChartSeries> _bubbleSeries = new()
+    {
+        new() { Name = "Companies", DataPoints = new() {
+            new("Apple", 80) { Value2 = 90, Value3 = 40 },
+            new("Google", 70) { Value2 = 85, Value3 = 35 },
+            new("Meta", 50) { Value2 = 60, Value3 = 25 },
+            new("Amazon", 90) { Value2 = 70, Value3 = 45 },
+            new("Netflix", 40) { Value2 = 55, Value3 = 20 }
+        }}
+    };
+
+    List<ChartSeries> _radarSeries = new()
+    {
+        new() { Name = "Developer A", DataPoints = new() {
+            new("C#", 90), new("JavaScript", 75), new("SQL", 85), new("Design", 60), new("DevOps", 70), new("Testing", 80) } },
+        new() { Name = "Developer B", DataPoints = new() {
+            new("C#", 70), new("JavaScript", 90), new("SQL", 65), new("Design", 85), new("DevOps", 55), new("Testing", 75) } }
+    };
+
+    List<ChartSeries> _waterfallSeries = new()
+    {
+        new() { Name = "P&L", DataPoints = new() {
+            new("Revenue", 500), new("COGS", -200), new("Gross Profit", 300),
+            new("OpEx", -150), new("Tax", -45), new("Net Income", 105) } }
+    };
+
+    List<ChartSeries> _paretoSeries = new()
+    {
+        new() { Name = "Defects", DataPoints = new() {
+            new("UI Bugs", 45), new("API Errors", 30), new("Perf", 15), new("Security", 8), new("Other", 2) } }
+    };
+
+    List<ChartSeries> _ganttSeries = new()
+    {
+        new() { Name = "Tasks", DataPoints = new() {
+            new("Design", 0) { Value2 = 3, Category = "Phase 1" },
+            new("Frontend", 2) { Value2 = 6, Category = "Phase 1" },
+            new("Backend", 3) { Value2 = 7, Category = "Phase 2" },
+            new("Testing", 6) { Value2 = 9, Category = "Phase 2" },
+            new("Deploy", 9) { Value2 = 10, Category = "Phase 3" }
+        }}
+    };
+
+    List<ChartSeries> _heatmapSeries = new()
+    {
+        new() { Name = "Mon", DataPoints = new() { new("9am", 2), new("10am", 5), new("11am", 8), new("12pm", 4), new("1pm", 3), new("2pm", 7), new("3pm", 9), new("4pm", 6) } },
+        new() { Name = "Tue", DataPoints = new() { new("9am", 3), new("10am", 6), new("11am", 9), new("12pm", 5), new("1pm", 4), new("2pm", 8), new("3pm", 7), new("4pm", 5) } },
+        new() { Name = "Wed", DataPoints = new() { new("9am", 4), new("10am", 7), new("11am", 6), new("12pm", 8), new("1pm", 5), new("2pm", 9), new("3pm", 8), new("4pm", 7) } },
+        new() { Name = "Thu", DataPoints = new() { new("9am", 5), new("10am", 8), new("11am", 7), new("12pm", 6), new("1pm", 7), new("2pm", 6), new("3pm", 5), new("4pm", 4) } },
+        new() { Name = "Fri", DataPoints = new() { new("9am", 6), new("10am", 4), new("11am", 5), new("12pm", 3), new("1pm", 2), new("2pm", 4), new("3pm", 3), new("4pm", 2) } }
+    };
+
+    SunburstNode _sunburstDemoNode = CovidDataService.GetCovidSunburstTree();
+
+    // Code tabs are verbatim
     private static class Code
     {
-        public const string Gallery = @"<TabControl>
+        public const string Gallery = @"<TabControl @bind-SelectedIndex=""_tab"">
     <TabItem HeaderText=""Comparison"">
         <h2>Bar Charts</h2>
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"">
@@ -441,7 +566,21 @@
         </div>
     </TabItem>
 </TabControl>";
-        public const string GalleryCs = @"List<ChartSeries> _groupedBarSeries = new()
+        public const string GalleryCs = @"/// <summary>Tab named in the address, e.g. demo/charts?tab=sparkline; read when the page loads, never written back.</summary>
+[SupplyParameterFromQuery(Name = ""tab"")] public string? Tab { get; set; }
+
+private int _tab;
+
+private static readonly string[] TabSlugs =
+    [""comparison"", ""trend"", ""part-to-whole"", ""distribution"", ""correlation"", ""multivariate"", ""kpi-gauge"", ""statistical"", ""project"", ""heatmap"", ""sparkline""];
+
+protected override void OnParametersSet()
+{
+    var i = Array.IndexOf(TabSlugs, Tab?.Trim().ToLowerInvariant());
+    if (i >= 0) _tab = i;
+}
+
+List<ChartSeries> _groupedBarSeries = new()
 {
     new() { Name = ""2024"", DataPoints = new() { new(""Q1"", 120), new(""Q2"", 180), new(""Q3"", 240), new(""Q4"", 310) } },
     new() { Name = ""2025"", DataPoints = new() { new(""Q1"", 150), new(""Q2"", 210), new(""Q3"", 280), new(""Q4"", 350) } }
@@ -551,114 +690,4 @@ List<ChartSeries> _heatmapSeries = new()
 
 SunburstNode _sunburstDemoNode = CovidDataService.GetCovidSunburstTree();";
     }
-
-    List<ChartSeries> _groupedBarSeries = new()
-    {
-        new() { Name = "2024", DataPoints = new() { new("Q1", 120), new("Q2", 180), new("Q3", 240), new("Q4", 310) } },
-        new() { Name = "2025", DataPoints = new() { new("Q1", 150), new("Q2", 210), new("Q3", 280), new("Q4", 350) } }
-    };
-
-    List<ChartSeries> _lineSeries = new()
-    {
-        new() { Name = "Product A", DataPoints = new() { new("Jan", 30), new("Feb", 45), new("Mar", 38), new("Apr", 55), new("May", 62), new("Jun", 70) } },
-        new() { Name = "Product B", DataPoints = new() { new("Jan", 20), new("Feb", 25), new("Mar", 35), new("Apr", 40), new("May", 48), new("Jun", 52) } }
-    };
-
-    ChartSeries _pieSeries = new()
-    {
-        Name = "Market Share",
-        DataPoints = new() { new("Chrome", 65), new("Firefox", 12), new("Safari", 15), new("Edge", 5), new("Other", 3) }
-    };
-
-    ChartSeries _funnelSeries = new()
-    {
-        Name = "Conversion",
-        DataPoints = new() { new("Visitors", 10000), new("Leads", 4000), new("Qualified", 1800), new("Proposals", 800), new("Closed", 320) }
-    };
-
-    List<ChartSeries> _histogramSeries = new()
-    {
-        new() { Name = "Response Time (ms)", DataPoints = new() {
-            new("0-50", 12), new("50-100", 28), new("100-150", 45), new("150-200", 38),
-            new("200-250", 22), new("250-300", 15), new("300-350", 8), new("350-400", 4) } }
-    };
-
-    List<ChartSeries> _boxPlotSeries = new()
-    {
-        new() { Name = "Scores", DataPoints = new() {
-            new("Math", 45) { Value2 = 95, Value3 = 60, Value4 = 82, Value5 = 72 },
-            new("Science", 50) { Value2 = 90, Value3 = 62, Value4 = 80, Value5 = 70 },
-            new("English", 40) { Value2 = 88, Value3 = 55, Value4 = 78, Value5 = 68 },
-            new("History", 35) { Value2 = 92, Value3 = 58, Value4 = 85, Value5 = 74 }
-        }}
-    };
-
-    List<ChartSeries> _scatterSeries = new()
-    {
-        new() { Name = "Dataset A", DataPoints = new() {
-            new("", 10) { Value2 = 20 }, new("", 25) { Value2 = 45 },
-            new("", 35) { Value2 = 30 }, new("", 50) { Value2 = 60 },
-            new("", 65) { Value2 = 50 }, new("", 80) { Value2 = 75 },
-            new("", 40) { Value2 = 55 }, new("", 55) { Value2 = 40 }
-        }},
-        new() { Name = "Dataset B", DataPoints = new() {
-            new("", 15) { Value2 = 35 }, new("", 30) { Value2 = 55 },
-            new("", 45) { Value2 = 25 }, new("", 60) { Value2 = 70 },
-            new("", 75) { Value2 = 45 }, new("", 20) { Value2 = 60 }
-        }}
-    };
-
-    List<ChartSeries> _bubbleSeries = new()
-    {
-        new() { Name = "Companies", DataPoints = new() {
-            new("Apple", 80) { Value2 = 90, Value3 = 40 },
-            new("Google", 70) { Value2 = 85, Value3 = 35 },
-            new("Meta", 50) { Value2 = 60, Value3 = 25 },
-            new("Amazon", 90) { Value2 = 70, Value3 = 45 },
-            new("Netflix", 40) { Value2 = 55, Value3 = 20 }
-        }}
-    };
-
-    List<ChartSeries> _radarSeries = new()
-    {
-        new() { Name = "Developer A", DataPoints = new() {
-            new("C#", 90), new("JavaScript", 75), new("SQL", 85), new("Design", 60), new("DevOps", 70), new("Testing", 80) } },
-        new() { Name = "Developer B", DataPoints = new() {
-            new("C#", 70), new("JavaScript", 90), new("SQL", 65), new("Design", 85), new("DevOps", 55), new("Testing", 75) } }
-    };
-
-    List<ChartSeries> _waterfallSeries = new()
-    {
-        new() { Name = "P&L", DataPoints = new() {
-            new("Revenue", 500), new("COGS", -200), new("Gross Profit", 300),
-            new("OpEx", -150), new("Tax", -45), new("Net Income", 105) } }
-    };
-
-    List<ChartSeries> _paretoSeries = new()
-    {
-        new() { Name = "Defects", DataPoints = new() {
-            new("UI Bugs", 45), new("API Errors", 30), new("Perf", 15), new("Security", 8), new("Other", 2) } }
-    };
-
-    List<ChartSeries> _ganttSeries = new()
-    {
-        new() { Name = "Tasks", DataPoints = new() {
-            new("Design", 0) { Value2 = 3, Category = "Phase 1" },
-            new("Frontend", 2) { Value2 = 6, Category = "Phase 1" },
-            new("Backend", 3) { Value2 = 7, Category = "Phase 2" },
-            new("Testing", 6) { Value2 = 9, Category = "Phase 2" },
-            new("Deploy", 9) { Value2 = 10, Category = "Phase 3" }
-        }}
-    };
-
-    List<ChartSeries> _heatmapSeries = new()
-    {
-        new() { Name = "Mon", DataPoints = new() { new("9am", 2), new("10am", 5), new("11am", 8), new("12pm", 4), new("1pm", 3), new("2pm", 7), new("3pm", 9), new("4pm", 6) } },
-        new() { Name = "Tue", DataPoints = new() { new("9am", 3), new("10am", 6), new("11am", 9), new("12pm", 5), new("1pm", 4), new("2pm", 8), new("3pm", 7), new("4pm", 5) } },
-        new() { Name = "Wed", DataPoints = new() { new("9am", 4), new("10am", 7), new("11am", 6), new("12pm", 8), new("1pm", 5), new("2pm", 9), new("3pm", 8), new("4pm", 7) } },
-        new() { Name = "Thu", DataPoints = new() { new("9am", 5), new("10am", 8), new("11am", 7), new("12pm", 6), new("1pm", 7), new("2pm", 6), new("3pm", 5), new("4pm", 4) } },
-        new() { Name = "Fri", DataPoints = new() { new("9am", 6), new("10am", 4), new("11am", 5), new("12pm", 3), new("1pm", 2), new("2pm", 4), new("3pm", 3), new("4pm", 2) } }
-    };
-
-    SunburstNode _sunburstDemoNode = CovidDataService.GetCovidSunburstTree();
 }

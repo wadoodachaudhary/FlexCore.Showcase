@@ -1,10 +1,15 @@
 @namespace FlexCore.Showcase.Components.Shared
 @inject IJSRuntime JS
+@inject NavigationManager Nav
 
 @* One example (2026-10-12): title with anchor, one-line description, then Example | Razor | C# | CSS
    tabs on TabStripControl inside a CardControl. The live markup stays mounted while a code tab is
-   shown, so demo state and @ref captures survive switching. Registers with FeatureDemoLayout. *@
-<section class="ex" id="@Id">
+   shown, so demo state and @ref captures survive switching. Registers with FeatureDemoLayout.
+   2026-10-20: a catalog link such as demo/checks#radio lands on this page from another page, and Blazor does not
+   scroll to the fragment on that navigation. The section is focusable (tabindex -1) and focuses itself on its first
+   interactive render when the fragment names it; the browser scrolls it into view (scroll-margin-top clears the
+   sticky header). Blazor's FocusAsync, no custom script. *@
+<section class="ex" id="@Id" tabindex="-1" @ref="_section">
     <CardControl Elevation="0" CssClass="ex-card">
         <HeaderContent>
             <div class="ex-head">
@@ -54,6 +59,7 @@
     private bool _copied;
     private int _tab;
     private string _path = "";
+    private ElementReference _section;
 
     protected override void OnInitialized()
     {
@@ -71,6 +77,16 @@
         {
             if (string.IsNullOrEmpty(code)) return;
             _tabs.Add(new TabStripItem(name)); _codes.Add(code);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        var fragment = new Uri(Nav.Uri).Fragment;
+        if (fragment == "#" + Id)
+        {
+            try { await _section.FocusAsync(); } catch { /* element gone before the circuit focused it */ }
         }
     }
 

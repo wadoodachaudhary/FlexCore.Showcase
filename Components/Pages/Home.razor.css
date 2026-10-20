@@ -1157,3 +1157,6 @@
         align-items: stretch;
     }
 }
+
+/* 2026-10-20: ?tab=ribbon#live-showcase (catalog row Office Ribbon) scrolls here; keep the section under the sticky header. */
+.showcase-section { scroll-margin-top: 76px; }

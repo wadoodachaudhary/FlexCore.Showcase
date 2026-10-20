@@ -58,15 +58,15 @@
         </DemoExample>
 
         <DemoExample Id="rating" Title="Rating" RazorCode="@Code.Rating" CSharpCode="@Code.RatingCs">
-            <Description><p>Hover previews a value, a click sets it. <code>ReadOnly</code> shows a value without letting it change; <code>MaxStars</code> sets the count.</p></Description>
+            <Description><p>Hover previews a value; a click sets it and counts as one more review, so the read-only rating below moves with the running average. <code>ReadOnly</code> shows a value without letting it change (whole stars, so the average is rounded for the stars and printed exactly beside them); <code>MaxStars</code> sets the count.</p></Description>
             <Demo>
                 <div class="demo-row">
-                    <RatingControl @bind-Value="_stars" />
+                    <RatingControl Value="@_stars" ValueChanged="Rate" />
                     <span class="result inline">@Stars</span>
                 </div>
                 <div class="demo-row mt">
-                    <RatingControl Value="4" ReadOnly="true" />
-                    <span class="field-label">Average of 38 reviews</span>
+                    <RatingControl Value="@((int)Math.Round(Average))" ReadOnly="true" />
+                    <span class="field-label">Average @Average.ToString("0.0") of @_reviews reviews</span>
                 </div>
             </Demo>
         </DemoExample>
@@ -128,8 +128,11 @@
     private bool _signature = true, _insure;
     private string Delivery => $"{_deliveryItems.First(i => i.Value == _delivery).Text}; signature {(_signature ? "required" : "not required")}; {(_insure ? "insured" : "not insured")}; tracked.";
 
-    // Rating
+    // Rating: each click is one more review (Baaria, 2026-10-20)
     private int _stars = 3;
+    private int _reviews = 38, _sum = 152;                 // 38 reviews averaging 4.0 to start
+    private double Average => (double)_sum / _reviews;
+    private void Rate(int value) { _stars = value; _reviews++; _sum += value; }
     private string Stars => _stars switch
     {
         0 => "Not rated",
@@ -216,6 +219,7 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
         public const string Checks = @"<div class=""stack"">
@@ -228,9 +232,13 @@
     </div>
 </div>
 <p class=""result"">@Included</p>";
-        public const string ChecksCs = @"private bool _tax = true, _labour = true, _permits;
-private bool AllChecked  => _tax && _labour && _permits;
+        public const string ChecksCs = @"// Check boxes
+private bool _tax = true, _labour = true, _permits;
+
+private bool AllChecked => _tax && _labour && _permits;
+
 private bool SomeChecked => !AllChecked && (_tax || _labour || _permits);
+
 private void SetAll(bool value) => _tax = _labour = _permits = value;
 
 private string Included
@@ -257,24 +265,34 @@ private string Included
     </div>
 </div>
 <p class=""result"">@Delivery</p>";
-        public const string RadioCs = @"// RadioGroupItem<TValue>(Value, Text, Disabled = false)
+        public const string RadioCs = @"// Radio group and switches
 private readonly RadioGroupItem<string>[] _deliveryItems =
 {
     new(""standard"", ""Standard, 5 days""), new(""express"", ""Express, next day""), new(""courier"", ""Courier, same day"", true),
 };
+
 private string? _delivery = ""standard"";
+
 private bool _signature = true, _insure;
 
 private string Delivery => $""{_deliveryItems.First(i => i.Value == _delivery).Text}; signature {(_signature ? ""required"" : ""not required"")}; {(_insure ? ""insured"" : ""not insured"")}; tracked."";";
         public const string Rating = @"<div class=""demo-row"">
-    <RatingControl @bind-Value=""_stars"" />
+    <RatingControl Value=""@_stars"" ValueChanged=""Rate"" />
     <span class=""result inline"">@Stars</span>
 </div>
 <div class=""demo-row mt"">
-    <RatingControl Value=""4"" ReadOnly=""true"" />
-    <span class=""field-label"">Average of 38 reviews</span>
+    <RatingControl Value=""@((int)Math.Round(Average))"" ReadOnly=""true"" />
+    <span class=""field-label"">Average @Average.ToString(""0.0"") of @_reviews reviews</span>
 </div>";
-        public const string RatingCs = @"private int _stars = 3;
+        public const string RatingCs = @"// Rating: each click is one more review (Baaria, 2026-10-20)
+private int _stars = 3;
+
+private int _reviews = 38, _sum = 152;                 // 38 reviews averaging 4.0 to start
+
+private double Average => (double)_sum / _reviews;
+
+private void Rate(int value) { _stars = value; _reviews++; _sum += value; }
+
 private string Stars => _stars switch
 {
     0 => ""Not rated"",

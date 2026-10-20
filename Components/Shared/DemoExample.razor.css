@@ -14,3 +14,6 @@
 .ex ::deep .ex-copy { position: absolute; top: 8px; right: 8px; }
 .ex-pre { margin: 0; padding: 14px 16px; background: #1e1e1e; color: #d4d4d4; border-radius: 8px;
           font: 12.5px/1.6 Consolas, Monaco, "Courier New", monospace; overflow-x: auto; tab-size: 4; }
+
+/* 2026-10-20: a fragment link from another page focuses the section (see the .razor comment); the scroll margin above keeps it under the header. */
+.ex:focus { outline: none; }

@@ -4,7 +4,9 @@
 @* 2026-10-12: on FeatureDemoLayout. Two examples (variants/icons/sizes with the pill subclass, dropdown);
    theming is the CSS tab of the first. Toggle, button group and split button moved to their own pages; busy/focus, form types, BareStyle,
    Save/Cancel and Toolbar demos removed, their parameters stay in the vocabulary. Uses only CSS
-   shipped in FlexCore 0.2.48. *@
+   shipped in FlexCore 0.2.48.
+   2026-10-20: code tabs generated from this file (gencode). The CSS tab that showed a .classic/.compact retheme was dropped:
+   nothing in the example used it, so it did not match the markup; a retheme example is a follow-up. *@
 
 <PageTitle>Buttons — FlexCore Showcase</PageTitle>
 
@@ -20,8 +22,8 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="variants" Title="Variants, icons and sizes" RazorCode="@Code.Variants" CssCode="@Code.ThemeCss">
-            <Description><p>The default look comes from the theme variables; add one <code>btn-*</code> class for a semantic color. <code>IconCss</code> renders a leading icon, a trailing icon is ordinary content, and <code>btn-sm</code> / <code>btn-lg</code> change the size. Icon-only buttons need <code>Title</code> and <code>aria-label</code>. <code>RoundedButtonControl</code> is a pill-shaped subclass with four <code>Variant</code> colors. The CSS tab shows how a region is rethemed through <code>--fx-btn-*</code>.</p></Description>
+        <DemoExample Id="variants" Title="Variants, icons and sizes" RazorCode="@Code.Variants">
+            <Description><p>The default look comes from the theme variables; add one <code>btn-*</code> class for a semantic color. <code>IconCss</code> renders a leading icon, a trailing icon is ordinary content, and <code>btn-sm</code> / <code>btn-lg</code> change the size. Icon-only buttons need <code>Title</code> and <code>aria-label</code>. <code>RoundedButtonControl</code> is a pill-shaped subclass with four <code>Variant</code> colors. The <code>--fx-btn-*</code> variables in the table below retheme any region that sets them.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <ButtonControl>Default</ButtonControl>
@@ -150,54 +152,50 @@
         };
     }
 
-    // Code shown under each example: what the card renders, minus demo chrome.
+    // Code tabs are verbatim
     private static class Code
     {
-        public const string Variants = @"<ButtonControl>Default</ButtonControl>
-<ButtonControl CssClass=""btn-primary"">Primary</ButtonControl>
-<ButtonControl CssClass=""btn-secondary"">Secondary</ButtonControl>
-<ButtonControl CssClass=""btn-success"">Success</ButtonControl>
-<ButtonControl CssClass=""btn-danger"">Danger</ButtonControl>
-<ButtonControl CssClass=""btn-outline-primary"">Outline</ButtonControl>
-<ButtonControl CssClass=""btn-primary"" Disabled=""true"">Disabled</ButtonControl>
+        public const string Variants = @"<div class=""demo-row"">
+    <ButtonControl>Default</ButtonControl>
+    <ButtonControl CssClass=""btn-primary"">Primary</ButtonControl>
+    <ButtonControl CssClass=""btn-secondary"">Secondary</ButtonControl>
+    <ButtonControl CssClass=""btn-success"">Success</ButtonControl>
+    <ButtonControl CssClass=""btn-danger"">Danger</ButtonControl>
+    <ButtonControl CssClass=""btn-outline-primary"">Outline</ButtonControl>
+    <ButtonControl CssClass=""btn-primary"" Disabled=""true"">Disabled</ButtonControl>
+</div>
+<div class=""demo-row mt"">
+    <ButtonControl CssClass=""btn-primary btn-sm"" IconCss=""bi bi-plus"">Small</ButtonControl>
+    <ButtonControl CssClass=""btn-primary"" IconCss=""bi bi-plus-lg"">New</ButtonControl>
+    <ButtonControl CssClass=""btn-primary btn-lg"" IconCss=""bi bi-plus"">Large</ButtonControl>
+    <ButtonControl CssClass=""btn-outline-primary"">Next <span class=""bi bi-arrow-right""></span></ButtonControl>
+    <ButtonControl CssClass=""btn-secondary"" IconCss=""bi bi-gear"" Title=""Settings"" aria-label=""Settings"" />
+</div>
+@* #pill is a catalog target *@
+<div class=""demo-row mt"" id=""pill"">
+    <RoundedButtonControl Variant=""accent"">accent</RoundedButtonControl>
+    <RoundedButtonControl Variant=""muted"">muted</RoundedButtonControl>
+    <RoundedButtonControl Variant=""success"" IconCss=""bi bi-check2"">success</RoundedButtonControl>
+    <RoundedButtonControl Variant=""danger"" IconCss=""bi bi-exclamation-triangle"">danger</RoundedButtonControl>
+</div>";
 
-<ButtonControl CssClass=""btn-primary btn-sm"" IconCss=""bi bi-plus"">Small</ButtonControl>
-<ButtonControl CssClass=""btn-primary"" IconCss=""bi bi-plus-lg"">New</ButtonControl>
-<ButtonControl CssClass=""btn-primary btn-lg"" IconCss=""bi bi-plus"">Large</ButtonControl>
-<ButtonControl CssClass=""btn-outline-primary"">Next <span class=""bi bi-arrow-right""></span></ButtonControl>
-<ButtonControl CssClass=""btn-secondary"" IconCss=""bi bi-gear"" Title=""Settings"" aria-label=""Settings"" />
+        public const string Dropdown = @"<div class=""demo-row"">
+    <ButtonControl @ref=""_export"" CssClass=""btn-primary"" IconCss=""bi bi-download"" DropDownCssClass=""menu"">
+        <ChildContent>Export <span class=""bi bi-caret-down-fill dd-caret""></span></ChildContent>
+        <DropDownContent>
+            @foreach (var fmt in new[] { ""Excel (.xlsx)"", ""CSV"", ""PDF"" })
+            {
+                <ButtonControl BareStyle=""true"" CssClass=""menu-item"" OnClick=""@(() => Pick(fmt))"">@fmt</ButtonControl>
+            }
+        </DropDownContent>
+    </ButtonControl>
+    @if (_picked is not null) { <span class=""result"">Exporting as @_picked</span> }
+</div>";
+        public const string DropdownCs = @"// Dropdown
+private ButtonControl? _export;
 
-<RoundedButtonControl Variant=""accent"">accent</RoundedButtonControl>
-<RoundedButtonControl Variant=""muted"">muted</RoundedButtonControl>
-<RoundedButtonControl Variant=""success"" IconCss=""bi bi-check2"">success</RoundedButtonControl>
-<RoundedButtonControl Variant=""danger"" IconCss=""bi bi-exclamation-triangle"">danger</RoundedButtonControl>";
+private string? _picked;
 
-        public const string Dropdown = @"<ButtonControl @ref=""_export"" CssClass=""btn-primary"" IconCss=""bi bi-download"" DropDownCssClass=""menu"">
-    <ChildContent>Export</ChildContent>
-    <DropDownContent>
-        <ButtonControl BareStyle=""true"" CssClass=""menu-item"" OnClick=""@(() => Pick(""CSV""))"">CSV</ButtonControl>
-        <ButtonControl BareStyle=""true"" CssClass=""menu-item"" OnClick=""@(() => Pick(""PDF""))"">PDF</ButtonControl>
-    </DropDownContent>
-</ButtonControl>";
-        public const string DropdownCs = @"private ButtonControl? _export;
-private void Pick(string format)
-{
-    // start the export, then close the panel
-    _export?.CloseDropDown();
-}";
-
-        public const string ThemeCss = @"/* Retheme a region: every default ButtonControl inside .classic reads these (Win32 look). */
-.classic {
-    --fx-btn-bg: #e6e6e6;
-    --fx-btn-color: #000;
-    --fx-btn-border: 1px solid;
-    --fx-btn-border-color: #fff #404040 #404040 #fff;   /* Win32 bevel */
-    --fx-btn-radius: 0;
-    --fx-btn-hover-bg: #e6e6e6;
-    --fx-btn-active-bg: #b6b6b6;
-}
-
-/* Scale every FlexCore control in a region (ZoomService sets this app-wide). */
-.compact { --fx-zoom: 0.85; }";
+private void Pick(string format) { _picked = format; _export?.CloseDropDown(); }";
     }
 }

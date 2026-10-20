@@ -263,58 +263,117 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
-        public const string Shell = @"<PageLayoutControl Height=""340px"">
-    <LeftPanelControl Width=""170px"" Collapsible=""true"" @bind-Collapsed=""_leftCollapsed"">
-        @foreach (var sec in _data.Keys)
-        {
-            <ButtonControl BareStyle=""true"" CssClass=""@(sec == _section ? ""nav-item active"" : ""nav-item"")"" OnClick=""@(() => Go(sec))"">@sec</ButtonControl>
-        }
-    </LeftPanelControl>
-    <CenterPanelControl>
-        <SplitterControl Height=""100%"" @bind-PrimarySize=""_listSize"" MinPrimary=""140px"" MaxPrimary=""60%"" MinSecondary=""200px""
-                         OnResizeCommitted=""Persist"" Title=""Resize the list"">
-            <PrimaryContent>
-                @foreach (var it in _data[_section])
-                {
-                    <ButtonControl BareStyle=""true"" CssClass=""nav-item"" OnClick=""@(() => _selected = it)"">@it.Title</ButtonControl>
-                }
-            </PrimaryContent>
-            <SecondaryContent>
-                <h4>@_selected.Title</h4>
-                <TooltipControl Text=""@(_leftCollapsed ? ""Show navigation"" : ""Hide navigation"")"" Placement=""PopupPlacement.BottomEnd"">
-                    <ToggleButtonControl @bind-Selected=""_leftCollapsed"" IconCss=""bi bi-layout-sidebar"" aria-label=""Toggle navigation"" />
-                </TooltipControl>
-                <TooltipControl Text=""@(_rightCollapsed ? ""Show properties"" : ""Hide properties"")"" Placement=""PopupPlacement.BottomEnd"">
-                    <ToggleButtonControl @bind-Selected=""_rightCollapsed"" IconCss=""bi bi-layout-sidebar-reverse"" aria-label=""Toggle properties"" />
-                </TooltipControl>
-                <p>@_selected.Summary</p>
-            </SecondaryContent>
-        </SplitterControl>
-    </CenterPanelControl>
-    <RightPanelControl Width=""190px"" Collapsible=""true"" @bind-Collapsed=""_rightCollapsed"">
-        <dl>@foreach (var (key, value) in _selected.Props) { <dt>@key</dt><dd>@value</dd> }</dl>
-    </RightPanelControl>
-</PageLayoutControl>";
+        public const string Shell = @"<div class=""frame"">
+    <PageLayoutControl Height=""340px"">
+        <LeftPanelControl Width=""170px"" Collapsible=""true"" @bind-Collapsed=""_leftCollapsed"">
+            <div class=""pane"">
+                <h4>Navigation</h4>
+                <ul class=""nav"">
+                    @foreach (var sec in _data.Keys)
+                    {
+                        <li><ButtonControl BareStyle=""true"" CssClass=""@($""nav-item {(sec == _section ? ""active"" : """")}"")"" OnClick=""@(() => Go(sec))"">@sec</ButtonControl></li>
+                    }
+                </ul>
+            </div>
+        </LeftPanelControl>
+        <CenterPanelControl>
+            <SplitterControl Height=""100%"" @bind-PrimarySize=""_listSize"" MinPrimary=""140px"" MaxPrimary=""60%"" MinSecondary=""200px""
+                             OnResizeCommitted=""@(_ => _commits++)"" Title=""Resize the list"">
+                <PrimaryContent>
+                    <div class=""pane"">
+                        <h4>@_section</h4>
+                        <ul class=""nav"">
+                            @foreach (var it in _data[_section])
+                            {
+                                <li><ButtonControl BareStyle=""true"" CssClass=""@($""nav-item {(it == _selected ? ""active"" : """")}"")"" OnClick=""@(() => _selected = it)"">@it.Title</ButtonControl></li>
+                            }
+                        </ul>
+                    </div>
+                </PrimaryContent>
+                <SecondaryContent>
+                    <div class=""pane"">
+                        @* Sidebar toggles the way editors do them: icon buttons, pressed while hidden, tooltip for the words. *@
+                        <div class=""pane-head"">
+                            <h4>@_selected.Title</h4>
+                            <div class=""icon-row"">
+                                <TooltipControl Text=""@(_leftCollapsed ? ""Show navigation"" : ""Hide navigation"")"" Placement=""PopupPlacement.BottomEnd"">
+                                    <ToggleButtonControl @bind-Selected=""_leftCollapsed"" IconCss=""bi bi-layout-sidebar"" aria-label=""Toggle navigation"" />
+                                </TooltipControl>
+                                <TooltipControl Text=""@(_rightCollapsed ? ""Show properties"" : ""Hide properties"")"" Placement=""PopupPlacement.BottomEnd"">
+                                    <ToggleButtonControl @bind-Selected=""_rightCollapsed"" IconCss=""bi bi-layout-sidebar-reverse"" aria-label=""Toggle properties"" />
+                                </TooltipControl>
+                            </div>
+                        </div>
+                        <p>@_selected.Summary</p>
+                    </div>
+                </SecondaryContent>
+            </SplitterControl>
+        </CenterPanelControl>
+        <RightPanelControl Width=""190px"" Collapsible=""true"" @bind-Collapsed=""_rightCollapsed"">
+            <div class=""pane"">
+                <h4>Properties</h4>
+                <dl class=""props"">
+                    @foreach (var (key, value) in _selected.Props)
+                    {
+                        <dt>@key</dt><dd>@value</dd>
+                    }
+                </dl>
+            </div>
+        </RightPanelControl>
+    </PageLayoutControl>
+</div>
+<span class=""result"">List pane @_listSize.ToString(""0"") px, @_commits @(_commits == 1 ? ""commit"" : ""commits"") · navigation @(_leftCollapsed ? ""hidden"" : ""shown""), properties @(_rightCollapsed ? ""hidden"" : ""shown"")</span>";
         public const string ShellCs = @"private bool _leftCollapsed, _rightCollapsed;
-private double _listSize = 200;                            // bound two ways so re-renders keep the dragged size
-private Task Persist(double size) => Task.CompletedTask;   // save the user's layout here, once per gesture
 
-private record Item(string Title, string Summary, (string Key, string Value)[] Props);
-private readonly Dictionary<string, Item[]> _data = new() { [""Estimates""] = ..., [""Vendors""] = ..., [""Settings""] = ... };
+private double _listSize = 200;
+
+private int _commits;
+
+// Shell data: three sections, each a short list; the detail pane and properties follow the selection.
+private sealed record Item(string Title, string Summary, (string Key, string Value)[] Props);
+
+private readonly Dictionary<string, Item[]> _data = new()
+{
+    [""Estimates""] = new[]
+    {
+        new Item(""EST-2041 Northwind"", ""9 lines · Sent · $12,480"", new[] { (""Customer"", ""Northwind""), (""Status"", ""Sent""), (""Lines"", ""9""), (""Total"", ""$12,480"") }),
+        new Item(""EST-2042 Contoso"", ""14 lines · Draft · $18,240 · last saved today 09:12"", new[] { (""Customer"", ""Contoso""), (""Status"", ""Draft""), (""Lines"", ""14""), (""Total"", ""$18,240"") }),
+        new Item(""EST-2043 Fabrikam"", ""22 lines · Won · $41,900"", new[] { (""Customer"", ""Fabrikam""), (""Status"", ""Won""), (""Lines"", ""22""), (""Total"", ""$41,900"") }),
+    },
+    [""Vendors""] = new[]
+    {
+        new Item(""Acme Lumber"", ""Net 30 · 3 open purchase orders"", new[] { (""Contact"", ""J. Ortiz""), (""Terms"", ""Net 30""), (""Open POs"", ""3"") }),
+        new Item(""Bolt & Nut Co"", ""Net 15 · 1 open purchase order"", new[] { (""Contact"", ""P. Reyes""), (""Terms"", ""Net 15""), (""Open POs"", ""1"") }),
+        new Item(""Cascade Concrete"", ""COD · no open orders"", new[] { (""Contact"", ""M. Chen""), (""Terms"", ""COD""), (""Open POs"", ""0"") }),
+    },
+    [""Settings""] = new[]
+    {
+        new Item(""Company"", ""Contoso Builders · USD · fiscal year starts in July"", new[] { (""Currency"", ""USD""), (""Fiscal year"", ""July""), (""Users"", ""12"") }),
+        new Item(""Numbering"", ""Estimates EST-####, purchase orders PO-####"", new[] { (""Estimates"", ""EST-####""), (""Purchase orders"", ""PO-####"") }),
+    },
+};
+
 private string _section = ""Estimates"";
-private Item _selected;
-private void Go(string section) { _section = section; _selected = _data[section][0]; }";
 
-        public const string Dashboard = @"<DashboardLayoutControl Columns=""3"" CellSpacing=""@(new double[] { 12, 12 })"" CellAspectRatio=""0.35"">
+private Item _selected = null!;
+
+private void Go(string section) { _section = section; _selected = _data[section][0]; }
+
+protected override void OnInitialized() { _selected = _data[""Estimates""][1]; Layout(); }";
+
+        public const string Dashboard = @"@* .dash is the page-scoped ancestor that ::deep rules below need *@
+<div class=""dash"">
+<DashboardLayoutControl Columns=""3"" CellSpacing=""@(new double[] { 12, 12 })"" CellAspectRatio=""0.35"">
     <DashboardLayoutPanels>
         @foreach (var k in _kpis)
         {
             var t = _place[k.Key];
             <DashboardLayoutPanel @key=""k.Key"" Row=""t.Row"" Column=""t.Col"" SizeX=""t.SizeX"" SizeY=""t.SizeY"">
                 <TooltipControl Text=""@k.Detail"" CssClass=""tile-anchor"" Placement=""PopupPlacement.BottomStart"">
-                    <div @onclick=""() => Toggle(k.Key)"">
+                    <div class=""tile @(_focus == k.Key ? ""focused"" : """")"" @onclick=""() => Toggle(k.Key)"" title=""Click to expand"">
                         <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.KpiCard"" KpiValue=""@k.Value"" KpiLabel=""@k.Label"" KpiTrend=""@k.Trend"" Height=""100px"" /></CardControl>
                     </div>
                 </TooltipControl>
@@ -327,23 +386,46 @@ private void Go(string section) { _section = section; _selected = _data[section]
             <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Donut"" Title=""Sources"" Height=""200px"" InnerRadius=""0.5"" Series=""_sources"" /></CardControl>
         </DashboardLayoutPanel>
     </DashboardLayoutPanels>
-</DashboardLayoutControl>";
-        public const string DashboardCs = @"private record Kpi(string Key, string Value, string Label, string Trend, string Detail);
-private readonly Kpi[] _kpis = { new(""orders"", ""1,234"", ""Orders"", ""+5.2%"", ""1,234 this week, 1,173 last week""), /* ... */ };
+</DashboardLayoutControl>
+</div>
+<span class=""result"">@(_focus is null ? ""Three KPI cards on row 0, charts on rows 2–4."" : $""{_kpis.First(k => k.Key == _focus).Label} spans the row; the others moved down."")</span>";
+        public const string DashboardCs = @"// Dashboard: placements come from state so a click re-flows the grid.
+private sealed record Kpi(string Key, string Value, string Label, string Trend, string Detail);
+
+private readonly Kpi[] _kpis =
+{
+    new(""orders"", ""1,234"", ""Orders"", ""+5.2%"", ""1,234 this week, 1,173 last week""),
+    new(""revenue"", ""$89K"", ""Revenue"", ""+12%"", ""$89K this week, $79K last week""),
+    new(""uptime"", ""98.5%"", ""Uptime"", ""+0.1%"", ""98.5% over 30 days, 2 incidents""),
+};
 
 private string? _focus;
+
 private Dictionary<string, (int Row, int Col, int SizeX, int SizeY)> _place = new();
-private int ChartsRow => _focus is null ? 2 : 4;
-protected override void OnInitialized() => Layout();
+
+private int ChartsRow => _focus is null ? 2 : 4;   // KPI rows 0–1, or 0–3 while one is expanded
+
+protected override void OnInitialized() { _selected = _data[""Estimates""][1]; Layout(); }
+
 private void Toggle(string key) { _focus = _focus == key ? null : key; Layout(); }
 
 private void Layout()
 {
     _place.Clear();
     var col = 0;
-    if (_focus is not null) _place[_focus] = (0, 0, 3, 2);          // expanded card takes the whole first row
+    if (_focus is not null) _place[_focus] = (0, 0, 3, 2);            // expanded card takes the whole first row
     foreach (var k in _kpis.Where(k => k.Key != _focus))
-        _place[k.Key] = (_focus is null ? 0 : 2, col++, 1, 2);      // the rest line up below it
-}";
+        _place[k.Key] = (_focus is null ? 0 : 2, col++, 1, 2);        // the rest line up below it
+}
+
+private readonly List<ChartSeries> _traffic = new()
+{
+    new() { Name = ""Visits"", DataPoints = new() { new(""Mon"", 120), new(""Tue"", 180), new(""Wed"", 210), new(""Thu"", 190), new(""Fri"", 250), new(""Sat"", 140), new(""Sun"", 100) } }
+};
+
+private readonly List<ChartSeries> _sources = new()
+{
+    new() { Name = ""Traffic"", DataPoints = new() { new(""Organic"", 55), new(""Paid"", 25), new(""Referral"", 15), new(""Direct"", 5) } }
+};";
     }
 }

@@ -129,7 +129,10 @@
     private string? _winWidth = "480px", _winHeight = "240px";
     private DialogPosition? _winPos;
 
-    // Service and message box
+    // Service and message box. Set-up, once per app: Program.cs registers
+    //   builder.Services.AddScoped<Fx.ControlKit.Dialogs.DialogService>();
+    //   builder.Services.AddScoped<Fx.ControlKit.Dialogs.IDialogService>(sp => sp.GetRequiredService<Fx.ControlKit.Dialogs.DialogService>());
+    // and MainLayout.razor hosts <DialogHostControl />. This page has @inject IDialogService Dialogs at the top.
     private MessageBoxControl? _box;
     private string? _answer;
     private async Task Confirm() => _answer = await Dialogs.ConfirmAsync("Delete 3 rows?", "Confirm") ? "Yes" : "No";
@@ -235,73 +238,85 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
-        public const string Modal = @"<ButtonControl CssClass=""btn-primary"" OnClick=""@(() => _archiveOpen = true)"">Open dialog</ButtonControl>
+        public const string Modal = @"<ToggleButtonControl @bind-Selected=""_classic"">Classic look</ToggleButtonControl>
 
-<!-- classic look: add CssClass=""fx-dialog-classic"" ShowWindowIcon=""true"" and use fx-button-classic buttons -->
-<DialogControl @bind-Visible=""_archiveOpen"" Header=""Archive project"" Width=""440px"" OnEnter=""Archive"">
-    <ChildContent>
-        <p>Archive <strong>Northwind rewrite</strong>? Members keep read access; nothing is deleted.</p>
-    </ChildContent>
-    <FooterContent>
-        <ButtonControl CssClass=""btn-primary"" OnClick=""Archive"">Archive</ButtonControl>
-        <ButtonControl CssClass=""btn-secondary"" OnClick=""@(() => _archiveOpen = false)"">Cancel</ButtonControl>
-    </FooterContent>
-</DialogControl>";
-        public const string ModalCs = @"private bool _archiveOpen;
-private void Archive()
-{
-    _archiveOpen = false;
-    // ... archive the project ...
-}";
+<div class=""demo-row"">
+    <ButtonControl CssClass=""btn-primary"" OnClick=""@(() => _archiveOpen = true)"">Open dialog</ButtonControl>
+    <span class=""result"">@_archiveResult</span>
+</div>
+@* Classic: the frame class, the window icon, classic buttons; .dlg-host lets page CSS grey the footer. *@
+<div class=""dlg-host"">
+    <DialogControl @bind-Visible=""_archiveOpen"" Header=""Archive project"" Width=""440px"" OnEnter=""Archive""
+                   CssClass=""@(_classic ? ""fx-dialog-classic"" : null)"" ShowWindowIcon=""@_classic"">
+        <ChildContent>
+            <p class=""dlg-text"">Archive <strong>Northwind rewrite</strong>? Members keep read access; nothing is deleted.</p>
+        </ChildContent>
+        <FooterContent>
+            <ButtonControl CssClass=""@(_classic ? ""fx-button-classic"" : ""btn-primary"")"" OnClick=""Archive"">Archive</ButtonControl>
+            <ButtonControl CssClass=""@(_classic ? ""fx-button-classic"" : ""btn-secondary"")"" OnClick=""@(() => _archiveOpen = false)"">Cancel</ButtonControl>
+        </FooterContent>
+    </DialogControl>
+</div>";
+        public const string ModalCs = @"// Modal
+private bool _archiveOpen, _classic;
 
-        public const string Window = @"<ButtonControl CssClass=""btn-primary"" OnClick=""@(() => _winOpen = true)"">Open window</ButtonControl>
+private string? _archiveResult;
 
+private void Archive() { _archiveOpen = false; _archiveResult = $""Archived at {DateTime.Now:HH:mm:ss}""; }";
+
+        public const string Window = @"<div class=""demo-row"">
+    <ButtonControl CssClass=""btn-primary"" OnClick=""@(() => _winOpen = true)"">Open window</ButtonControl>
+    <ButtonControl OnClick=""@(() => _pageClicks++)"">Page click (@_pageClicks)</ButtonControl>
+    <span class=""result"">@_winWidth × @_winHeight, @(_winPos is null ? ""centred"" : $""moved {_winPos.X:0}, {_winPos.Y:0}"")</span>
+</div>
 <DialogControl @bind-Visible=""_winOpen"" Header=""Inspector"" IsModal=""false"" ShowWindowIcon=""true""
                @bind-Width=""_winWidth"" @bind-Height=""_winHeight"" @bind-Position=""_winPos""
                MinResizeWidth=""360"" MinResizeHeight=""200"">
-    <p>Drag the title bar, resize from any edge or corner, right-click the title for the window menu.</p>
+    <p class=""dlg-text"">Drag the title bar, resize from any edge or corner, right-click the title for the window menu. The page behind stays clickable.</p>
 </DialogControl>";
-        public const string WindowCs = @"private bool _winOpen;
+        public const string WindowCs = @"// Window
+private bool _winOpen;
+
+private int _pageClicks;
+
 private string? _winWidth = ""480px"", _winHeight = ""240px"";
-private DialogPosition? _winPos;   // offset from centre after a drag; null until moved";
 
-        public const string Service = @"@using Fx.ControlKit.Dialogs
-@inject IDialogService Dialogs
+private DialogPosition? _winPos;";
 
-<ButtonControl OnClick=""Confirm"">Confirm</ButtonControl>
-<ButtonControl OnClick=""Prompt"">Prompt</ButtonControl>
-<ButtonControl OnClick=""Alert"">Alert</ButtonControl>
-
-<!-- page-owned box for icons, the .NET look, or a confirmation checkbox -->
-<ButtonControl OnClick=""AskDotNet"">Yes / No / Cancel, .NET look</ButtonControl>
-<ButtonControl CssClass=""btn-danger"" OnClick=""GatedDelete"">Gated delete</ButtonControl>
+        public const string Service = @"<div class=""demo-row"">
+    <ButtonControl OnClick=""Confirm"">Confirm</ButtonControl>
+    <ButtonControl OnClick=""Prompt"">Prompt</ButtonControl>
+    <ButtonControl OnClick=""Alert"">Alert</ButtonControl>
+    <ButtonControl OnClick=""AskDotNet"">Yes / No / Cancel, .NET look</ButtonControl>
+    <ButtonControl CssClass=""btn-danger"" OnClick=""GatedDelete"">Gated delete</ButtonControl>
+    <span class=""result"">@_answer</span>
+</div>
 <MessageBoxControl @ref=""_box"" />";
-        public const string ServiceCs = @"// Program.cs, once:
-builder.Services.AddScoped<DialogService>();
-builder.Services.AddScoped<IDialogService>(sp => sp.GetRequiredService<DialogService>());
-// MainLayout.razor, once:   <DialogHostControl />
+        public const string ServiceCs = @"// Service and message box. Set-up, once per app: Program.cs registers
+//   builder.Services.AddScoped<Fx.ControlKit.Dialogs.DialogService>();
+//   builder.Services.AddScoped<Fx.ControlKit.Dialogs.IDialogService>(sp => sp.GetRequiredService<Fx.ControlKit.Dialogs.DialogService>());
+// and MainLayout.razor hosts <DialogHostControl />. This page has @inject IDialogService Dialogs at the top.
+private MessageBoxControl? _box;
 
-private async Task Confirm() =>
-    _answer = await Dialogs.ConfirmAsync(""Delete 3 rows?"", ""Confirm"") ? ""Yes"" : ""No"";
+private string? _answer;
+
+private async Task Confirm() => _answer = await Dialogs.ConfirmAsync(""Delete 3 rows?"", ""Confirm"") ? ""Yes"" : ""No"";
 
 private async Task Prompt()
 {
     var name = await Dialogs.PromptAsync(""Project name:"", ""New project"", ""Untitled"");
-    _answer = name is null ? ""Cancelled"" : $""Named {name}"";
+    _answer = name is null ? ""Cancelled"" : $""Named \""{name}\"""";
 }
 
 private Task Alert() => Dialogs.AlertAsync(""Export finished. 240 rows written."", ""Export"");
 
-private MessageBoxControl? _box;
 private async Task AskDotNet() =>
-    _answer = (await _box!.ShowAsync(""Save changes to Report.docx?"", ""Editor"",
-        MessageBoxButtons.YesNoCancel, ""question"", MessageBoxLook.DotNet)).ToString();
+    _answer = (await _box!.ShowAsync(""Save changes to Report.docx?"", ""Editor"", MessageBoxButtons.YesNoCancel, ""question"", MessageBoxLook.DotNet)).ToString();
 
 private async Task GatedDelete() =>
-    _answer = (await _box!.ShowAsync(""Delete the project and its 14 files?"", ""Delete project"",
-        MessageBoxButtons.OkCancel, ""warning"", null,
-        ""I understand this cannot be undone"")).ToString();";
+    _answer = (await _box!.ShowAsync(""Delete the project and its 14 files?"", ""Delete project"", MessageBoxButtons.OkCancel, ""warning"", null, ""I understand this cannot be undone"")).ToString();";
     }
 }

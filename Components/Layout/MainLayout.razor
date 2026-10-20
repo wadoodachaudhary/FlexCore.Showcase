@@ -150,5 +150,11 @@
     // Nav data lives in Components/Shared/SiteNav.cs (shared with the footer, drawer and overview pages).
     private static NavGroup[] _groups => SiteNav.Groups;
 
-    private bool IsActive(NavGroup g) => SiteNav.IsActive(g, Nav.ToBaseRelativePath(Nav.Uri));
+    /// <summary>One group is active at a time: the first in menu order whose links include the page. Four scenarios is linked from
+    /// Data Grid and from Performance, and both were underlined (Baaria, 2026-10-20).</summary>
+    private bool IsActive(NavGroup g) => ReferenceEquals(g, ActiveGroup);
+    private NavGroup? ActiveGroup
+    {
+        get { var path = Nav.ToBaseRelativePath(Nav.Uri); return SiteNav.Groups.FirstOrDefault(x => SiteNav.IsActive(x, path)); }
+    }
 }

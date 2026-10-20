@@ -35,7 +35,7 @@
 
     <Vocabulary>
         <ApiTable Kind="ApiKind.Parameters" Title="SecurityCodeControl parameters" Rows="Vocab.Params" />
-        <ApiTable Kind="ApiKind.Properties" Title="SecurityCodeType (nested enum)" Rows="Vocab.Types" />
+        <ApiTable Kind="ApiKind.Values" Title="SecurityCodeType (nested enum)" Rows="Vocab.Types" />
         <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
         <p>Colors are fixed in the control's stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
     </Vocabulary>
@@ -94,8 +94,8 @@
         };
         public static readonly ApiRow[] Types =
         {
-            new("Numeric", "Digits 0–9; other characters are ignored.", "", null),
-            new("AlphaNumeric", "Any single character per box; no case folding.", "", null),
+            new("Numeric", "Digits 0–9; other characters are ignored."),
+            new("AlphaNumeric", "Any single character per box; no case folding."),
         };
         public static readonly ApiRow[] Css =
         {
@@ -111,23 +111,34 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
-        public const string Verify = @"<SecurityCodeControl @bind-Value=""_code"" Length=""6"" OnComplete=""Check"" />
-<ButtonControl CssClass=""btn-sm"" OnClick=""Clear"">Clear</ButtonControl>
-<p>@Status</p>";
+        public const string Verify = @"<p class=""lead"">We sent a code to +1 (425) ••• 0142. Enter it to continue.</p>
+<div class=""code-row"">
+    <SecurityCodeControl @bind-Value=""_code"" Length=""6"" OnComplete=""Check"" />
+    <ButtonControl CssClass=""btn-sm"" OnClick=""Clear"">Clear</ButtonControl>
+</div>
+<p class=""result @(_accepted == true ? ""ok"" : _accepted == false ? ""bad"" : null)"">@Status</p>";
         public const string VerifyCs = @"private const string Expected = ""492018"";
+
 private string? _code = """";
+
 private bool? _accepted;
 
 private string Status => _accepted switch
 {
-    true  => ""Code accepted. Signing you in…"",
+    true => ""Code accepted. Signing you in…"",
     false => ""That code does not match. Clear and try again."",
-    _     => $""{(_code ?? """").Replace("" "", """").Length} of 6 digits entered"",
+    _ => $""{(_code ?? """").Replace("" "", """").Length} of 6 digits entered"",
 };
 
 private void Check(string code) => _accepted = code == Expected;
-private void Clear() { _code = """"; _accepted = null; }";
+
+private void Clear()
+{
+    _code = """";
+    _accepted = null;
+}";
     }
 }

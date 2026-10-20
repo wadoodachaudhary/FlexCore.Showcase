@@ -6,7 +6,8 @@
 
 @* 2026-10-12: moved onto FeatureDemoLayout. One example (the explorer with its inspector); folder style and
    VB6 lines are switches in the card header on FlexCore controls instead of Bootstrap buttons. Parameter
-   table written from TreeViewControl.Appearance.cs and TreeViewControl.Operations.cs (0.2.48). *@
+   table written from TreeViewControl.Appearance.cs and TreeViewControl.Operations.cs (0.2.48).
+   2026-10-20: code tabs generated from this file (gencode), replacing hand-written constants that had drifted from the markup. *@
 
 <PageTitle>Tree view — FlexCore Showcase</PageTitle>
 
@@ -24,7 +25,7 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="explorer" Title="Project explorer with a node inspector" RazorCode="@_razorSourceCode" CSharpCode="@_csharpSourceCode">
+        <DemoExample Id="explorer" Title="Project explorer with a node inspector" RazorCode="@Code.Explorer" CSharpCode="@Code.ExplorerCs">
             <Description><p>Click a node to select it and read its properties on the right; click a folder to expand it. The switches change the folder icons and the connector lines.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_styleItems" @bind-Values="_styleValues" Selection="ChoiceSelectionMode.Single" AriaLabel="Folder style" />
@@ -196,28 +197,122 @@
         };
     }
 
-    private const string _razorSourceCode = @"<TreeViewControl Nodes=""@_treeNodes""
-                 SelectedNode=""@_selectedNode""
-                 SelectedNodeChanged=""HandleNodeSelected""
-                 ToggleOnNodeClick=""true""
-                 ShowIcons=""true""
-                 UseVb6TreeStyle=""true""
-                 FolderStyle=""TreeFolderStyle.Yellow""
-                 TreeIndentPixels=""16""
-                 Height=""100%"" />";
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Explorer = @"<ButtonGroupControl Items=""_styleItems"" @bind-Values=""_styleValues"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Folder style"" />
+<ToggleButtonControl @bind-Selected=""_useVb6Style"">VB6 lines</ToggleButtonControl>
 
-    private const string _csharpSourceCode = @"private List<TreeNode> _treeNodes = new();
+<div class=""explorer"">
+    <div class=""tree"">
+        <TreeViewControl Nodes=""@_treeNodes""
+                         SelectedNode=""@_selectedNode""
+                         SelectedNodeChanged=""HandleNodeSelected""
+                         ToggleOnNodeClick=""true""
+                         ShowIcons=""true""
+                         UseVb6TreeStyle=""@_useVb6Style""
+                         FolderStyle=""@FolderStyle""
+                         TreeIndentPixels=""16""
+                         Height=""100%"" />
+    </div>
+    <div class=""inspector"">
+        <h4>Selected node</h4>
+        @if (_selectedNode is not null)
+        {
+            <dl class=""props"">
+                <dt>Id</dt><dd><code>@_selectedNode.Id</code></dd>
+                <dt>Text</dt><dd>@_selectedNode.Text</dd>
+                <dt>Children</dt><dd>@_selectedNode.Children.Count</dd>
+                <dt>Expanded</dt><dd>@(_selectedNode.IsExpanded ? ""yes"" : ""no"")</dd>
+                <dt>Tag</dt><dd>@(_selectedNode.Tag?.ToString() ?? ""none"")</dd>
+            </dl>
+        }
+        else
+        {
+            <p class=""muted"">Click a node to inspect it.</p>
+        }
+    </div>
+</div>";
+        public const string ExplorerCs = @"private List<TreeNode> _treeNodes = [];
+
 private TreeNode? _selectedNode;
+
+private bool _useVb6Style = true;
+
+// Folder style switch: a ButtonGroupControl bound to the enum's name.
+private readonly SelectionItem[] _styleItems = { new(""Yellow"", ""Yellow folders""), new(""Grey"", ""Grey folders""), new(""None"", ""No icons"") };
+
+private IReadOnlyList<string> _styleValues = new[] { ""Yellow"" };
+
+private TreeFolderStyle FolderStyle => Enum.Parse<TreeFolderStyle>(_styleValues[0]);
+
+protected override void OnInitialized()
+{
+    _treeNodes = BuildSampleTree();
+    _selectedNode = _treeNodes.FirstOrDefault();
+}
+
 private void HandleNodeSelected(TreeNode node) => _selectedNode = node;
 
-// Fx.ControlKit.Navigation.TreeNode: Id, Text, IconCss, ExpandedIconCss, IsExpanded, IsSelected,
-// IsChecked, IsDisabled, IsBold, Children, Tag
-_treeNodes = new()
+private static List<TreeNode> BuildSampleTree()
 {
-    new TreeNode { Text = ""Projects"", IsExpanded = true, Children =
-    {
-        new TreeNode { Text = ""Northwind rewrite"", Tag = ""EST-2041"" },
-        new TreeNode { Text = ""Contoso warehouse"", Tag = ""EST-2042"" },
-    }},
-};";
+    return
+    [
+        new TreeNode
+        {
+            Id = ""root-1"",
+            Text = ""Highland Estates Project"",
+            IsExpanded = true,
+            Tag = ""Project Root"",
+            Children =
+            [
+                new TreeNode
+                {
+                    Id = ""site-dev"",
+                    Text = ""Site Development"",
+                    IsExpanded = true,
+                    Children =
+                    [
+                        new TreeNode { Id = ""clearing"", Text = ""Clearing & Grubbing"", Tag = ""Status: Completed"" },
+                        new TreeNode { Id = ""rough-grade"", Text = ""Rough Grading & Drainage"", Tag = ""Status: In Progress"" },
+                        new TreeNode { Id = ""utilities"", Text = ""Underground Utilities (Wet/Dry)"", Tag = ""Status: Pending"" }
+                    ]
+                },
+                new TreeNode
+                {
+                    Id = ""phase-1"",
+                    Text = ""Phase 1 - Single Family Lots (1-50)"",
+                    IsExpanded = false,
+                    Children =
+                    [
+                        new TreeNode { Id = ""foundations"", Text = ""Foundations & Slabs"", Tag = ""42 of 50 Poured"" },
+                        new TreeNode { Id = ""framing"", Text = ""Structural Framing"", Tag = ""28 Active Crews"" },
+                        new TreeNode { Id = ""roofing"", Text = ""Dry-In & Roofing"", Tag = ""18 Completed"" }
+                    ]
+                },
+                new TreeNode
+                {
+                    Id = ""phase-2"",
+                    Text = ""Phase 2 - Commercial Center"",
+                    Children =
+                    [
+                        new TreeNode { Id = ""retail-a"", Text = ""Building A (Anchor Grocery)"" },
+                        new TreeNode { Id = ""retail-b"", Text = ""Building B (Shops & Dining)"" }
+                    ]
+                }
+            ]
+        },
+        new TreeNode
+        {
+            Id = ""root-2"",
+            Text = ""Corporate Standards & Specifications"",
+            Children =
+            [
+                new TreeNode { Id = ""safety"", Text = ""Safety Protocols 2026"" },
+                new TreeNode { Id = ""subcontractor-guidelines"", Text = ""Subcontractor Master Agreement"" }
+            ]
+        }
+    ];
+}";
+    }
 }

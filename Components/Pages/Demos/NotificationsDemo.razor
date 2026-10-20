@@ -108,23 +108,28 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
-        public const string Levels = @"@inject NotificationService Notifications
+        public const string Levels = @"<div class=""demo-row"">
+    <ButtonControl CssClass=""btn-primary"" OnClick=""@(() => Notifications.Info(""File uploaded"", ""report-q3.xlsx, 2.1 MB""))"">Info</ButtonControl>
+    <ButtonControl CssClass=""btn-success"" OnClick=""@(() => Notifications.Success(""Quote 1042 saved"", ""3 lines updated""))"">Success</ButtonControl>
+    <ButtonControl CssClass=""btn-warning"" OnClick=""@(() => Notifications.Warning(""Price list expires in 3 days"", ""Renew it under Settings, Vendors""))"">Warning</ButtonControl>
+    <ButtonControl CssClass=""btn-danger"" OnClick=""@(() => Notifications.Error(""Could not save quote 1042"", ""SQL timeout after 30 s""))"">Error</ButtonControl>
+    <ButtonControl CssClass=""btn-outline-primary"" OnClick=""@(() => Notifications.Error(""Sync failed"", ""Stays until you close it"", durationMs: 0))"">Sticky error</ButtonControl>
+    <ButtonControl OnClick=""@(() => Notifications.Clear())"">Clear all</ButtonControl>
+    <span class=""result"">@(_count == 0 ? ""No toasts showing."" : $""{_count} showing, newest on top."")</span>
+</div>";
+        public const string LevelsCs = @"private int _count;
 
-<ButtonControl CssClass=""btn-primary"" OnClick=""@(() => Notifications.Info(""File uploaded"", ""report-q3.xlsx, 2.1 MB""))"">Info</ButtonControl>
-<ButtonControl CssClass=""btn-success"" OnClick=""@(() => Notifications.Success(""Quote 1042 saved"", ""3 lines updated""))"">Success</ButtonControl>
-<ButtonControl CssClass=""btn-warning"" OnClick=""@(() => Notifications.Warning(""Price list expires in 3 days"", ""Renew it under Settings, Vendors""))"">Warning</ButtonControl>
-<ButtonControl CssClass=""btn-danger"" OnClick=""@(() => Notifications.Error(""Could not save quote 1042"", ""SQL timeout after 30 s""))"">Error</ButtonControl>
-<ButtonControl CssClass=""btn-outline-primary"" OnClick=""@(() => Notifications.Error(""Sync failed"", ""Stays until you close it"", durationMs: 0))"">Sticky error</ButtonControl>
-<ButtonControl OnClick=""@(() => Notifications.Clear())"">Clear all</ButtonControl>";
-        public const string LevelsCs = @"// Program.cs, once:
-builder.Services.AddScoped<NotificationService>();
+protected override void OnInitialized()
+{
+    Notifications.OnChange += HandleChange;   // auto-dismiss fires off the render thread
+    _count = Notifications.Notifications.Count;
+}
 
-// MainLayout.razor, once, anywhere in the markup:
-// <NotificationDisplayControl />
+private void HandleChange() => _ = InvokeAsync(() => { _count = Notifications.Notifications.Count; StateHasChanged(); });
 
-// Any component or service can then inject NotificationService and call
-// Info / Success / Warning / Error (message, detail, durationMs).";
+public void Dispose() => Notifications.OnChange -= HandleChange;";
     }
 }

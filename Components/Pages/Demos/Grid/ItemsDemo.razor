@@ -1,5 +1,7 @@
 @page "/demo/grid/items"
 @page "/demo/grid/grouping"
+@page "/demo/grid/assembly"
+@page "/demo/grid/vendor-prices"
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Components.Shared
 
@@ -12,19 +14,24 @@
    2026-10-18: vocabulary written from GridControl.razor.cs (grouping parameters, AddGroup/RemoveGroup/ClearAllGroupsAsync, the public
    group methods, ComputeAggregates, FormatAggregateValue, the caption and footer renderers), GridControl.AdvancedFeatures.cs,
    GridColumn.cs, GridModels.cs (AggregateRow, AggregateColumn, GroupEventArgs), GridControlEvents.cs and GridEnums.cs; rows checked with
-   scratchpad/vocabcheck.py. Declared-but-unused members are named as such; library notes in SC-253. *@
+   scratchpad/vocabcheck.py. Declared-but-unused members are named as such; library notes in SC-253.
+   2026-10-20 (meeting point 2): the unlisted Assembly and Vendor prices pages fold in here. Vendor prices repeated this page's
+   configuration (grouped by one column, average and count in captions and footers) on other data, so it is gone; Assembly becomes
+   the second example, because it shows the one thing the catalog does not: sums in the grid footer with no initial grouping. Both
+   old routes now open this page. *@
 
 <PageTitle>Grouping &amp; totals — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Grouping &amp; totals" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Group rows by a column, with averages and counts in the group captions and footers."
+                   Tagline="Group rows by a column, with averages, counts and sums in the group captions, group footers and the grid footer."
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridModels.cs;Grid/GridControlEvents.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
             <code>GroupColumns</code> opens the grid already grouped; with <code>AllowGrouping</code> the user regroups by dragging a header
             into the bar above the grid. <code>AggregateRows</code> lists what to compute per group: each <code>AggregateColumn</code> names a
             field, an <code>AggregateType</code> and a format, and its <code>GroupCaptionTemplate</code> and <code>GroupFooterTemplate</code>
-            decide where the value is printed and how. <code>ShowSearchBar</code> adds a search box to the grid toolbar.
+            decide where the value is printed and how; <code>ShowInFooter</code> prints the same values once more under the whole grid.
+            <code>ShowSearchBar</code> adds a search box to the grid toolbar.
         </p>
     </Overview>
 
@@ -61,6 +68,38 @@
                 </div>
             </Demo>
         </DemoExample>
+        <DemoExample Id="assembly" Title="Line items with sums in the footer, grouped on demand" RazorCode="@Code.Assembly" CSharpCode="@Code.AssemblyCs">
+            <Description><p>Sixty assembly lines, not grouped to start with. The grid footer sums <code>Qty</code> and <code>Total</code>; drag <strong>PO Index</strong> or <strong>Vendor</strong> into the bar above the grid and every group gets the same sums in its footer, while the grid footer keeps the overall total. <code>ShowInGroupFooter</code> and <code>ShowInFooter</code> are both on; there is no caption aggregate here.</p></Description>
+            <Demo>
+                <div class="catalog">
+                <GridControl TValue="AssemblyItem"
+                             DataSource="@_lines"
+                             AllowSelection="true"
+                             AllowSorting="true"
+                             AllowFiltering="true"
+                             AllowGrouping="true"
+                             AllowResizing="true"
+                             AllowColumnReorder="true"
+                             ShowSearchBar="true"
+                             Height="420px"
+                             AggregateRows="_sums">
+                    <GridColumnsBase>
+                        <GridColumn Field="@nameof(AssemblyItem.PriceLevel)"  HeaderText="Price Level" Width="150px" />
+                        <GridColumn Field="@nameof(AssemblyItem.Vendor)"      HeaderText="Vendor"      Width="170px" />
+                        <GridColumn Field="@nameof(AssemblyItem.POIndex)"     HeaderText="PO Index"    Width="110px" />
+                        <GridColumn Field="@nameof(AssemblyItem.Description)" HeaderText="Description" Width="230px" />
+                        <GridColumn Field="@nameof(AssemblyItem.Qty)"         HeaderText="Qty"         Width="80px"
+                                    Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(AssemblyItem.UOM)"         HeaderText="UOM"         Width="70px" />
+                        <GridColumn Field="@nameof(AssemblyItem.Price)"       HeaderText="Unit Price"  Width="110px"
+                                    Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(AssemblyItem.Total)"       HeaderText="Total"       Width="120px"
+                                    Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+                    </GridColumnsBase>
+                </GridControl>
+                </div>
+            </Demo>
+        </DemoExample>
     </Examples>
 
     <Vocabulary>
@@ -83,7 +122,7 @@
         <ul>
             <li><a href="demo/grid">Grid overview</a>: the core flags on a small list.</li>
             <li><a href="demo/pivot">Pivot tables</a>: totals as a cross-tab instead of groups.</li>
-            <li>Further grid pages not in the menu: <a href="demo/grid/assembly">Assembly</a> and <a href="demo/grid/vendor-prices">Vendor prices</a>.</li>
+            <li><a href="demo/grid/provider-enterprise">On-demand loading</a>: the same captions and footers, with the values supplied by a provider.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
@@ -109,10 +148,74 @@
         }
     };
 
+    // Assembly lines (moved here from the Assembly page, 2026-10-20): sums in group footers and the grid footer, no initial group.
+    private List<AssemblyItem> _lines = DemoData.GenerateAssemblyItems(60);
+
+    private List<AggregateRow> _sums = new()
+    {
+        new AggregateRow
+        {
+            ShowInGroupFooter = true,
+            ShowInFooter = true,
+            Columns = new()
+            {
+                new AggregateColumn { Field = nameof(AssemblyItem.Qty),   Type = AggregateType.Sum, Format = "N0", FooterTemplate = "Σ {value}", GroupFooterTemplate = "Σ {value}" },
+                new AggregateColumn { Field = nameof(AssemblyItem.Total), Type = AggregateType.Sum, Format = "C2", FooterTemplate = "Σ {value}", GroupFooterTemplate = "Σ {value}" },
+            }
+        }
+    };
+
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed); the C# tab also carries the
     // CatalogItem record from Data/DemoData.cs.
     private static class Code
     {
+        public const string Assembly = @"<div class=""catalog"">
+<GridControl TValue=""AssemblyItem""
+             DataSource=""@_lines""
+             AllowSelection=""true""
+             AllowSorting=""true""
+             AllowFiltering=""true""
+             AllowGrouping=""true""
+             AllowResizing=""true""
+             AllowColumnReorder=""true""
+             ShowSearchBar=""true""
+             Height=""420px""
+             AggregateRows=""_sums"">
+    <GridColumnsBase>
+        <GridColumn Field=""@nameof(AssemblyItem.PriceLevel)""  HeaderText=""Price Level"" Width=""150px"" />
+        <GridColumn Field=""@nameof(AssemblyItem.Vendor)""      HeaderText=""Vendor""      Width=""170px"" />
+        <GridColumn Field=""@nameof(AssemblyItem.POIndex)""     HeaderText=""PO Index""    Width=""110px"" />
+        <GridColumn Field=""@nameof(AssemblyItem.Description)"" HeaderText=""Description"" Width=""230px"" />
+        <GridColumn Field=""@nameof(AssemblyItem.Qty)""         HeaderText=""Qty""         Width=""80px""
+                    Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(AssemblyItem.UOM)""         HeaderText=""UOM""         Width=""70px"" />
+        <GridColumn Field=""@nameof(AssemblyItem.Price)""       HeaderText=""Unit Price""  Width=""110px""
+                    Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(AssemblyItem.Total)""       HeaderText=""Total""       Width=""120px""
+                    Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
+    </GridColumnsBase>
+</GridControl>
+</div>";
+        public const string AssemblyCs = @"// Assembly lines (moved here from the Assembly page, 2026-10-20): sums in group footers and the grid footer, no initial group.
+private List<AssemblyItem> _lines = DemoData.GenerateAssemblyItems(60);
+
+private List<AggregateRow> _sums = new()
+{
+    new AggregateRow
+    {
+        ShowInGroupFooter = true,
+        ShowInFooter = true,
+        Columns = new()
+        {
+            new AggregateColumn { Field = nameof(AssemblyItem.Qty),   Type = AggregateType.Sum, Format = ""N0"", FooterTemplate = ""Σ {value}"", GroupFooterTemplate = ""Σ {value}"" },
+            new AggregateColumn { Field = nameof(AssemblyItem.Total), Type = AggregateType.Sum, Format = ""C2"", FooterTemplate = ""Σ {value}"", GroupFooterTemplate = ""Σ {value}"" },
+        }
+    }
+};
+
+// Data/DemoData.cs
+public record AssemblyItem(string PriceLevel, string Vendor, string POIndex, string Description,
+    int Qty, string UOM, string ItemType, decimal Price, decimal Total);";
         public const string Catalog = @"<div class=""catalog"">
 <GridControl TValue=""CatalogItem""
              DataSource=""@_items""

@@ -238,14 +238,20 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
-        public const string Appointment = @"<DatePickerControl @bind-Value=""_date"" MinDate=""DateTime.Today"" ShowCalendarSidebar=""true"" AriaLabel=""Appointment date"" />
-<TimePickerControl @bind-Value=""_time"" Min=""@(new TimeOnly(8, 0))"" Max=""@(new TimeOnly(18, 0))"" Width=""150px"" AriaLabel=""Appointment time"" />
-<TimeSpanPickerControl @bind-Value=""_duration"" />
-<p>@Appointment</p>";
-        public const string AppointmentCs = @"private DateTime? _date = DateTime.Today.AddDays(1);
+        public const string Appointment = @"<div class=""fields"">
+    <div class=""field""><span class=""field-label"">Date</span><DatePickerControl @bind-Value=""_date"" MinDate=""DateTime.Today"" ShowCalendarSidebar=""true"" AriaLabel=""Appointment date"" /></div>
+    <div class=""field""><span class=""field-label"">Start</span><TimePickerControl @bind-Value=""_time"" Min=""@(new TimeOnly(8, 0))"" Max=""@(new TimeOnly(18, 0))"" Width=""150px"" AriaLabel=""Appointment time"" /></div>
+    <div class=""field""><span class=""field-label"">Duration</span><TimeSpanPickerControl @bind-Value=""_duration"" /></div>
+</div>
+<p class=""result"">@Appointment</p>";
+        public const string AppointmentCs = @"// Appointment
+private DateTime? _date = DateTime.Today.AddDays(1);
+
 private TimeOnly? _time = new(9, 30);
+
 private TimeSpan? _duration = TimeSpan.FromMinutes(90);
 
 private string Appointment => _date is { } d && _time is { } t
@@ -253,22 +259,26 @@ private string Appointment => _date is { } d && _time is { } t
     : ""Pick a date and a start time."";";
 
         public const string Range = @"<DateRangePickerControl @bind-Value=""_hire"" Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(180)"" AriaLabel=""Crane hire"" />
-<p>@Hire</p>";
-        public const string RangeCs = @"private CalendarRange _hire = new(DateTime.Today.AddDays(7), DateTime.Today.AddDays(10));   // record CalendarRange(DateTime? Start, DateTime? End)
+<p class=""result"">@Hire</p>";
+        public const string RangeCs = @"// Date range
+private CalendarRange _hire = new(DateTime.Today.AddDays(7), DateTime.Today.AddDays(10));
 
 private string Hire => _hire is { Start: { } s, End: { } e } && e >= s
     ? $""{(e - s).Days} day hire, {s:ddd d MMM} to {e:ddd d MMM}""
     : ""Pick a start and an end date."";";
 
-        public const string Calendar = @"<CalendarControl @bind-Values=""_visits"" SelectionMode=""CalendarSelectionMode.Multiple""
-                 Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(90)""
-                 DisabledDate=""Weekend"" FirstDayOfWeek=""DayOfWeek.Monday"" />
-<p>@Visits</p>";
-        public const string CalendarCs = @"private IReadOnlyList<DateTime> _visits = new[] { /* three weekdays */ };
+        public const string Calendar = @"<div class=""cal-row"">
+    <CalendarControl @bind-Values=""_visits"" SelectionMode=""CalendarSelectionMode.Multiple"" Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(90)""
+                     DisabledDate=""Weekend"" FirstDayOfWeek=""DayOfWeek.Monday"" />
+    <p class=""result visits"">@Visits</p>
+</div>";
+        public const string CalendarCs = @"// Calendar
+private IReadOnlyList<DateTime> _visits = Weekdays(DateTime.Today.AddDays(1), 5).Where((_, i) => i % 2 == 0).ToArray();
+
 private static bool Weekend(DateTime d) => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
 
 private string Visits => _visits.Count == 0
     ? ""No site visits picked.""
-    : $""{_visits.Count} site visits: {string.Join("", "", _visits.OrderBy(d => d).Select(d => d.ToString(""ddd d MMM"")))}"";";
+    : $""{_visits.Count} site visit{(_visits.Count == 1 ? """" : ""s"")}: {string.Join("", "", _visits.OrderBy(d => d).Select(d => d.ToString(""ddd d MMM"")))}"";";
     }
 }

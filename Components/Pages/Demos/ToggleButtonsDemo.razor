@@ -153,30 +153,42 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
-        public const string Toggle = @"<ToggleButtonControl @bind-Selected=""_bold"" IconCss=""bi bi-type-bold"" Title=""Bold"" aria-label=""Bold"" />
-<ToggleButtonControl @bind-Selected=""_italic"" IconCss=""bi bi-type-italic"" Title=""Italic"" aria-label=""Italic"" />
-<ToggleButtonControl @bind-Selected=""_underline"" IconCss=""bi bi-type-underline"" Title=""Underline"" aria-label=""Underline"" />
-<ToggleButtonControl @bind-Selected=""_notify"">Notifications @(_notify ? ""on"" : ""off"")</ToggleButtonControl>
-<ToggleButtonControl Selected=""true"" Enabled=""false"">Locked</ToggleButtonControl>";
-        public const string ToggleCs = @"private bool _bold, _italic, _underline, _notify = true;";
+        public const string Toggle = @"<div class=""demo-row"">
+    <ToggleButtonControl @bind-Selected=""_bold"" IconCss=""bi bi-type-bold"" Title=""Bold"" aria-label=""Bold"" />
+    <ToggleButtonControl @bind-Selected=""_italic"" IconCss=""bi bi-type-italic"" Title=""Italic"" aria-label=""Italic"" />
+    <ToggleButtonControl @bind-Selected=""_underline"" IconCss=""bi bi-type-underline"" Title=""Underline"" aria-label=""Underline"" />
+    <ToggleButtonControl @bind-Selected=""_notify"">Notifications @(_notify ? ""on"" : ""off"")</ToggleButtonControl>
+    <ToggleButtonControl Selected=""true"" Enabled=""false"">Locked</ToggleButtonControl>
+    <span class=""result"">@FormatState</span>
+</div>";
+        public const string ToggleCs = @"// Toggle
+private bool _bold, _italic, _underline, _notify = true;
 
-        public const string Group = @"<ButtonGroupControl Items=""_alignItems"" @bind-Values=""_align""
-                    Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Text alignment"" />
+private string FormatState => string.Join("" "", new[] { (_bold, ""B""), (_italic, ""I""), (_underline, ""U"") }.Where(t => t.Item1).Select(t => t.Item2)) is { Length: > 0 } s ? $""Format: {s}"" : ""Format: none"";";
 
-<ButtonGroupControl Items=""_dayItems"" @bind-Values=""_days""
-                    Selection=""ChoiceSelectionMode.Multiple""
-                    Orientation=""FlexOrientation.Vertical""
-                    AllowEmpty=""true"" AriaLabel=""Working days"" />";
-        public const string GroupCs = @"// SelectionItem(Value, Text, Disabled, IconCss)
+        public const string Group = @"<div class=""demo-row top"">
+    <div class=""stack"">
+        <ButtonGroupControl Items=""_alignItems"" @bind-Values=""_align"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Text alignment"" />
+        <span class=""result"">@_align[0]</span>
+    </div>
+    <div class=""stack"">
+        <ButtonGroupControl Items=""_dayItems"" @bind-Values=""_days"" Selection=""ChoiceSelectionMode.Multiple""
+                            Orientation=""FlexOrientation.Vertical"" AllowEmpty=""true"" AriaLabel=""Working days"" />
+        <span class=""result"">@(_days.Count == 0 ? ""none"" : string.Join("", "", _days))</span>
+    </div>
+</div>";
+        public const string GroupCs = @"// Group
 private readonly SelectionItem[] _alignItems =
 {
-    new(""left"",    """", IconCss: ""bi bi-text-left""),
-    new(""center"",  """", IconCss: ""bi bi-text-center""),
-    new(""right"",   """", IconCss: ""bi bi-text-right""),
+    new(""left"", """", IconCss: ""bi bi-text-left""),
+    new(""center"", """", IconCss: ""bi bi-text-center""),
+    new(""right"", """", IconCss: ""bi bi-text-right""),
     new(""justify"", """", IconCss: ""bi bi-justify""),
 };
+
 private IReadOnlyList<string> _align = new[] { ""left"" };
 
 private readonly SelectionItem[] _dayItems =
@@ -184,6 +196,7 @@ private readonly SelectionItem[] _dayItems =
     new(""mon"", ""Monday""), new(""tue"", ""Tuesday""), new(""wed"", ""Wednesday""),
     new(""thu"", ""Thursday""), new(""fri"", ""Friday""), new(""sat"", ""Saturday"", Disabled: true),
 };
+
 private IReadOnlyList<string> _days = new[] { ""mon"", ""tue"", ""wed"", ""thu"", ""fri"" };";
     }
 }

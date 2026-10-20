@@ -4,285 +4,355 @@
 @using System.Diagnostics
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
-@* Retitled 2026-10-06 to match the site nav; copy unchanged. *@
+@using FlexCore.Showcase.Components.Shared
+@* Retitled 2026-10-06 to match the site nav. The second route is the retired optimizer page's address.
+   2026-10-20: rebuilt on FeatureDemoLayout (developer meeting, point 2; the old file is docs/retired-pages/VirtualizationBenchDemo.razor.txt).
+   Gone: a constant "1.2 ms", a render counter incremented by hand, "60 FPS", "near-zero memory", "zero external JavaScript",
+   a dropdown editor that did not exist, a Pivot mode (Pivot tables has its own page) and a documentation table with the wrong
+   defaults. Now: one example with a three-way switch (scroll, 25 per page, 100 per page), the same two timings as 50k rows,
+   the edit count from OnCellSave and the page from PageChanged. Facts checked against GridControl.razor.cs (PageSize, PageSizes,
+   AllowPaging, BatchEditBehavior, GoToPageAsync), GridControl.PresentationFeatures.cs (PagerPosition), GridControlEvents.cs and
+   GridModels.cs (PageChangeEventArgs). *@
 
 <PageTitle>Scroll vs paging — FlexCore Showcase</PageTitle>
 
-<SyncfusionDemoLayout Title="Scroll vs paging"
-                      Category="DataGrid"
-                      BadgeText="High Performance"
-                      RazorCode="@_razorSourceCode"
-                      CSharpCode="@_csharpSourceCode"
-                      CSharpTabName="VRowModel.cs">
-    <Summary>
+<FeatureDemoLayout Title="Scroll vs paging" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
+                   Tagline="The same thousand rows scrolled through a row window or paged: what each costs on the server, measured here."
+                   SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.PresentationFeatures.cs;Grid/GridControlEvents.cs">
+    <Overview>
         <p>
-            The <strong>Row Virtualization</strong> engine allows the FlexCore DataGrid to smoothly render and navigate thousands of records with near-zero memory footprint.
-            Unlike conventional DOM renderers that instantiate all elements, FlexCore renders only the rows actively within the viewport plus a calibrated buffer window.
+            Without paging the grid scrolls: it renders the rows in view plus an overscan band and lets spacer rows stand in for the rest,
+            so a thousand rows or fifty thousand cost about the same per frame (the window parameters are on
+            <a href="demo/grid/row-selection-50k">50k rows</a>). With <code>AllowPaging</code> it renders one page of <code>PageSize</code>
+            rows and a pager, placed by <code>PagerPosition</code>, that also offers the <code>PageSizes</code>. Sorting, filtering, grouping,
+            the search box and batch editing work the same way in both.
         </p>
         <p>
-            This benchmark demonstrates <strong>1,000 fully editable records</strong> featuring diverse editor types (numeric, text, dropdown, checkbox), 
-            <strong>multi-edit batching</strong> (select multiple rows and modify one cell to fan out changes across all selected rows), 
-            live search bar filtering, type-to-search keyboard navigation, and interactive column grouping.
+            Two timings are taken here, both on the server with <code>Stopwatch</code>: building the thousand rows in C#, and the first render
+            after a switch, from the click to the component's next <code>OnAfterRender</code>. The line under the grid keeps the latest value
+            for each mode so they can be compared. Browser layout and paint are not included, so the wait you see is a little longer.
         </p>
-    </Summary>
+    </Overview>
 
-    <DemoControls>
-        <div style="display:flex;gap:8px;align-items:center;font-size:13px;flex-wrap:wrap;">
-            <strong>Grid Mode:</strong>
-            <button class="btn btn-sm @(_mode == GridMode.Virtualized ? "btn-primary" : "btn-outline-secondary")"
-                    @onclick="() => SetMode(GridMode.Virtualized)">Virtualized (1,000 rows)</button>
-            <button class="btn btn-sm @(_mode == GridMode.Paging ? "btn-primary" : "btn-outline-secondary")"
-                    @onclick="() => SetMode(GridMode.Paging)">Paging (25 / page)</button>
-            <button class="btn btn-sm @(_mode == GridMode.Pivot ? "btn-primary" : "btn-outline-secondary")"
-                    @onclick="() => SetMode(GridMode.Pivot)">Pivot Engine</button>
-            <span class="text-muted ms-2">Renders: <b>@_renderCount</b> | Last build: <b>@_lastBuildMs.ToString("0.0") ms</b></span>
-        </div>
-    </DemoControls>
+    <Examples>
+        <DemoExample Id="modes" Title="One grid, three ways to show a thousand rows" RazorCode="@Code.Modes" CSharpCode="@Code.ModesCs">
+            <Description><p>Switch between scrolling, 25 per page and 100 per page; each switch remounts the grid and records its first render time. Sort, filter, group by Category or type in the search box in any mode. Select several rows with Ctrl or Shift and edit one Quantity: the grid's default <code>MultiRow</code> batch behaviour writes the value to every selected row, and the count of saved cells comes from <code>OnCellSave</code>. In a paged mode the current page comes from <code>PageChanged</code>.</p></Description>
+            <Controls>
+                <ButtonGroupControl Items="_modeItems" Values="@(new[] { _modeKey })" ValuesChanged="PickMode" Selection="ChoiceSelectionMode.Single" AriaLabel="Scroll or page" />
+            </Controls>
+            <Demo>
+                <GridControl @key="@_mountGen"
+                             TValue="VRow"
+                             DataSource="@_rows"
+                             Height="460px"
+                             AllowPaging="@_paging"
+                             PageSize="@_pageSize"
+                             PageSizes="@(new[] { 25, 100 })"
+                             AllowSelection="true"
+                             AllowSorting="true"
+                             AllowFiltering="true"
+                             AllowGrouping="true"
+                             AllowResizing="true"
+                             AllowColumnReorder="true"
+                             ShowSearchBar="true"
+                             EnableTypeSearch="true"
+                             ShowRowSelectionEditColumnCue="true"
+                             ShowRowCountInFooter="true"
+                             SelectionSettingsRef="@_selection"
+                             EditSettingsRef="@_edit"
+                             EventsRef="@_events">
+                    <GridColumnsBase>
+                        <GridColumn Field="@nameof(VRow.Code)" HeaderText="Code" Width="95px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(VRow.Description)" HeaderText="Description" Width="260px" />
+                        <GridColumn Field="@nameof(VRow.Category)" HeaderText="Category" Width="140px" />
+                        <GridColumn Field="@nameof(VRow.Qty)" HeaderText="Quantity" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right" SelectAllOnEdit="true" />
+                        <GridColumn Field="@nameof(VRow.Price)" HeaderText="Unit Price" Width="110px" Type="ColumnType.Number" Format="N2" TextAlign="TextAlign.Right" SelectAllOnEdit="true" />
+                        <GridColumn Field="@nameof(VRow.Total)" HeaderText="Total Cost" Width="120px" Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" AllowEditing="false" />
+                        <GridColumn Field="@nameof(VRow.InStock)" HeaderText="In Stock" Width="85px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
+                    </GridColumnsBase>
+                </GridControl>
+                <p class="result">@Summary</p>
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-    <DemoContent>
-        <div style="width:100%;">
-            <GridControl @ref="_grid"
-                         ShowRowCountInFooter="true"
-                         TValue="VRow"
-                         DataSource="@_rows"
-                         AllowSelection="true"
-                         AllowSorting="true"
-                         AllowResizing="true"
-                         AllowColumnReorder="true"
-                         AllowFiltering="true"
-                         AllowGrouping="true"
-                         ShowGroupCount="true"
-                         ShowSearchBar="true"
-                         Height="460px"
-                         AllowPaging="@(_mode == GridMode.Paging)"
-                         PageSize="@(_mode == GridMode.Paging ? 25 : 1000)"
-                         AllowPivoting="@(_mode == GridMode.Pivot)"
-                         ShowPivotPanelButton="@(_mode == GridMode.Pivot)"
-                         ShowGridOptionsRail="@(_mode == GridMode.Pivot)"
-                         EnableTypeSearch="true"
-                         ShowRowSelectionEditColumnCue="true"
-                         EditSettingsRef="@_editSettings"
-                         SelectionSettingsRef="@_selectionSettings"
-                         EventsRef="@_events">
-                <GridColumnsBase>
-                    <GridColumn Field="@nameof(VRow.Code)" HeaderText="Code" Width="95px" AllowEditing="false" />
-                    <GridColumn Field="@nameof(VRow.Description)" HeaderText="Description" Width="260px" AllowEditing="true" />
-                    <GridColumn Field="@nameof(VRow.Category)" HeaderText="Category" Width="140px" AllowEditing="true" />
-                    <GridColumn Field="@nameof(VRow.Qty)" HeaderText="Quantity" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" />
-                    <GridColumn Field="@nameof(VRow.Price)" HeaderText="Unit Price" Width="110px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" Format="$#,##0.00" />
-                    <GridColumn Field="@nameof(VRow.Total)" HeaderText="Total Cost" Width="120px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="false" Format="$#,##0.00" />
-                    <GridColumn Field="@nameof(VRow.InStock)" HeaderText="In Stock" Width="85px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" AllowEditing="true" />
-                </GridColumnsBase>
-            </GridControl>
-        </div>
-    </DemoContent>
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters used here" Rows="Vocab.Grid" />
+        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents used here" Rows="Vocab.Events" />
+        <ApiTable Kind="ApiKind.Methods" Title="Paging method" Rows="Vocab.Methods" />
+        <p>
+            The row window's own parameters (<code>WindowOverscanRows</code>, <code>WindowOverscanCellBudget</code>,
+            <code>EnableGroupedRowWindowing</code>) are documented on <a href="demo/grid/row-selection-50k">50k rows</a>; selection and
+            editing options on <a href="demo/grid/batch-editing">Batch editing</a>.
+        </p>
+    </Vocabulary>
 
-    <DocumentationContent>
-        <h3>Key Virtualization Features Demonstrated</h3>
+    <Related>
         <ul>
-            <li><strong>DOM Windowing:</strong> Maintains consistent 60 FPS scrolling regardless of whether the dataset contains 100 rows or 50,000 rows.</li>
-            <li><strong>Multi-Edit Fan-Out:</strong> Select multiple rows via Shift+Click or Ctrl+Click, then edit any value in the Quantity, Category, or In Stock columns. The change immediately batches across all selected records.</li>
-            <li><strong>Zero External JS Footprint:</strong> Virtualization calculations run purely on .NET 10 WebAssembly or Blazor Server circuit with zero third-party JavaScript dependencies.</li>
+            <li><a href="demo/grid/row-selection-50k">50k rows</a>: the same window at fifty times the size, with the overscan switch.</li>
+            <li><a href="demo/grid/batch-editing">Batch editing</a>: the editing side of <code>EditSettings</code>.</li>
+            <li><a href="demo/grid">Grid overview</a>: the core flags on a small list.</li>
         </ul>
-
-        <h3>Core Configuration Properties</h3>
-        <table class="sf-param-table">
-            <thead>
-                <tr>
-                    <th>Property</th>
-                    <th>Type</th>
-                    <th>Default</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>Height</code></td>
-                    <td>string</td>
-                    <td>"auto"</td>
-                    <td>Explicit pixel or percentage height that activates row virtualization windowing.</td>
-                </tr>
-                <tr>
-                    <td><code>WindowOverscanRows</code></td>
-                    <td>int</td>
-                    <td>260</td>
-                    <td>Buffer rows maintained above and below the visible viewport to guarantee blank-free scrolling.</td>
-                </tr>
-                <tr>
-                    <td><code>EnableTypeSearch</code></td>
-                    <td>bool</td>
-                    <td>true</td>
-                    <td>Allows the operator to focus any non-editable column and immediately type characters to jump to matching records.</td>
-                </tr>
-                <tr>
-                    <td><code>ShowSearchBar</code></td>
-                    <td>bool</td>
-                    <td>false</td>
-                    <td>Enables the built-in search filter input to quickly query all columns simultaneously.</td>
-                </tr>
-            </tbody>
-        </table>
-    </DocumentationContent>
-</SyncfusionDemoLayout>
+    </Related>
+</FeatureDemoLayout>
 
 @code {
-    private enum GridMode { Virtualized, Paging, Pivot }
-
     public class VRow
     {
-        public string Code { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
+        public string Code { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Category { get; set; } = "";
         public decimal Qty { get; set; }
         public decimal Price { get; set; }
         public decimal Total => Qty * Price;
         public bool InStock { get; set; }
     }
 
-    private GridControl<VRow>? _grid;
+    private readonly SelectionItem[] _modeItems = { new("scroll", "Scroll"), new("page25", "25 per page"), new("page100", "100 per page") };
     private List<VRow> _rows = [];
-    private GridMode _mode = GridMode.Virtualized;
-    private int _renderCount = 1;
-    private double _lastBuildMs = 1.2;
+    private string _modeKey = "scroll";
+    private bool _paging;
+    private int _pageSize = 25;
+    private int _mountGen;                       // @key: every switch remounts the grid, so each timing starts from an empty grid
 
-    private readonly EditSettings _editSettings = new()
-    {
-        AllowEditing = true,
-        Mode = EditMode.Batch
-    };
-
-    private readonly SelectionSettings _selectionSettings = new()
-    {
-        Mode = SelectionMode.Row,
-        Type = SelectionType.Multiple
-    };
-
+    private readonly SelectionSettings _selection = new() { Type = SelectionType.Multiple, Mode = SelectionMode.Row };
+    private readonly EditSettings _edit = new() { AllowEditing = true, Mode = EditMode.Batch };
     private readonly GridControlEvents<VRow> _events = new();
+
+    // Timings: build is the C# loop; render is from the switch to the component's next OnAfterRender, i.e. the server side of
+    // the first render after the swap, kept per mode. Browser layout and paint are not included.
+    private readonly Stopwatch _swap = new();
+    private bool _swapPending;
+    private double _buildMs;
+    private readonly Dictionary<string, double> _renderMs = new();
+    private int _editCount, _page;
+
+    private string Summary
+    {
+        get
+        {
+            string Ms(string key) => _renderMs.TryGetValue(key, out var ms) ? $"{ms:0} ms" : "not yet";
+            var page = _paging && _page > 0 ? $" Page {_page}." : "";
+            return $"{_rows.Count:N0} rows built in {_buildMs:0.0} ms. First render after the switch, on the server: "
+                 + $"scroll {Ms("scroll")} · 25 per page {Ms("page25")} · 100 per page {Ms("page100")}. "
+                 + $"{_editCount} cell{(_editCount == 1 ? "" : "s")} saved.{page}";
+        }
+    }
 
     protected override void OnInitialized()
     {
-        _events.OnCellEdit = EventCallback.Factory.Create<CellEditArgs<VRow>>(this, args =>
-        {
-            _renderCount++;
-            StateHasChanged();
-        });
+        _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<VRow>>(this, _ => { _editCount++; StateHasChanged(); });
+        _events.PageChanged = EventCallback.Factory.Create<PageChangeEventArgs>(this, e => { _page = e.CurrentPage; StateHasChanged(); });
 
+        var sw = Stopwatch.StartNew();
         var categories = new[] { "Structural", "Mechanical", "Electrical", "Finishing", "Plumbing", "Masonry" };
-        var list = new List<VRow>(1000);
         var rand = new Random(101);
-
-        for (int i = 1; i <= 1000; i++)
+        var list = new List<VRow>(1000);
+        for (var i = 1; i <= 1000; i++)
         {
             var cat = categories[i % categories.Length];
-            var qty = rand.Next(1, 150);
-            var price = Math.Round((decimal)(rand.NextDouble() * 320 + 8.5), 2);
             list.Add(new VRow
             {
-                Code = $"V-{i:D4}",
-                Description = $"{cat} Material Component #{i}",
-                Category = cat,
-                Qty = qty,
-                Price = price,
-                InStock = (i % 3 != 0)
+                Code = $"V-{i:D4}", Description = $"{cat} Material Component #{i}", Category = cat,
+                Qty = rand.Next(1, 150), Price = Math.Round((decimal)(rand.NextDouble() * 320 + 8.5), 2), InStock = i % 3 != 0,
             });
         }
         _rows = list;
+        _buildMs = sw.Elapsed.TotalMilliseconds;
+        Remount();
     }
 
-    private void SetMode(GridMode mode)
+    protected override void OnAfterRender(bool firstRender)
     {
-        var sw = Stopwatch.StartNew();
-        _mode = mode;
-        _renderCount++;
-        sw.Stop();
-        _lastBuildMs = sw.Elapsed.TotalMilliseconds;
+        if (!_swapPending) return;
+        _swapPending = false;
+        _renderMs[_modeKey] = _swap.Elapsed.TotalMilliseconds;
+        _ = InvokeAsync(StateHasChanged);   // show the number; this render has no pending swap, so it ends here
     }
 
-    private const string _razorSourceCode = @"@using Fx.ControlKit
-@using Fx.ControlKit.Grid
+    private void PickMode(IReadOnlyList<string> values)
+    {
+        if (values.Count == 0 || values[0] == _modeKey) return;
+        _modeKey = values[0];
+        _paging = _modeKey != "scroll";
+        _pageSize = _modeKey == "page100" ? 100 : 25;
+        _page = 0;
+        Remount();
+    }
 
-<GridControl TValue=""VRow""
-             DataSource=""@Rows""
+    private void Remount()
+    {
+        _mountGen++;
+        _swap.Restart();
+        _swapPending = true;
+    }
+
+    // Documentation rows (2026-10-20), from GridControl.razor.cs, GridControl.PresentationFeatures.cs, GridControlEvents.cs, GridModels.cs.
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Grid =
+        {
+            new("AllowPaging", "Renders one page of rows and a pager instead of the scrolling window.", "bool", "false"),
+            new("PageSize", "Rows per page.", "int", "50"),
+            new("PageSizes", "Page sizes offered in the pager.", "int[]", "25, 50, 100, 200"),
+            new("PagerPosition", "Where the pager sits: Bottom, Top or Both.", "GridPagerPosition", "Bottom"),
+            new("BatchEditBehavior", "MultiRow: a single click enters edit and the committed value fans out to the selected rows. SingleCell: a click edits one cell and typed keys commit to it on Enter.", "GridBatchEditBehavior", "MultiRow"),
+            new("ShowRowSelectionEditColumnCue", "In row-selection grids, highlights the editable target column across the selected rows.", "bool", "false"),
+            new("ShowRowCountInFooter", "A compact row count under the grid: the complete filtered result, not the rendered window or page.", "bool", "false"),
+            new("ShowSearchBar", "A search box in the grid toolbar.", "bool", "false"),
+            new("EnableTypeSearch", "With the grid focused, printable keys search the active column for the first row whose text starts with the typed buffer.", "bool", "false"),
+            new("AllowGrouping", "Lets the user group by a column; the group drop area appears above the header.", "bool", "false"),
+            new("SelectionSettingsRef", "Selection options object: Multiple rows here.", "SelectionSettings?", "null"),
+            new("EditSettingsRef", "Editing options object: batch mode here.", "EditSettings?", "null"),
+            new("EventsRef", "Event callbacks object; two of them are wired here.", "GridControlEvents&lt;TValue&gt;?", "null"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("PageChanging", "Before the page changes; PreviousPage, CurrentPage, and Cancel to stay.", "PageChangeEventArgs"),
+            new("PageChanged", "After the page changed; PreviousPage and CurrentPage.", "PageChangeEventArgs"),
+            new("OnCellSave", "After a cell's new value has been written to its row: a real change, or an editor the user touched.", "CellSaveArgs&lt;TValue&gt;"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("GoToPageAsync(int page)", "Moves the pager to a page.", "Task"),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Modes = @"<ButtonGroupControl Items=""_modeItems"" Values=""@(new[] { _modeKey })"" ValuesChanged=""PickMode"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Scroll or page"" />
+
+<GridControl @key=""@_mountGen""
+             TValue=""VRow""
+             DataSource=""@_rows""
+             Height=""460px""
+             AllowPaging=""@_paging""
+             PageSize=""@_pageSize""
+             PageSizes=""@(new[] { 25, 100 })""
              AllowSelection=""true""
              AllowSorting=""true""
-             AllowResizing=""true""
-             AllowColumnReorder=""true""
              AllowFiltering=""true""
              AllowGrouping=""true""
+             AllowResizing=""true""
+             AllowColumnReorder=""true""
              ShowSearchBar=""true""
-             Height=""460px""
              EnableTypeSearch=""true""
              ShowRowSelectionEditColumnCue=""true""
-             EditSettingsRef=""@_editSettings""
-             SelectionSettingsRef=""@_selectionSettings"">
+             ShowRowCountInFooter=""true""
+             SelectionSettingsRef=""@_selection""
+             EditSettingsRef=""@_edit""
+             EventsRef=""@_events"">
     <GridColumnsBase>
         <GridColumn Field=""@nameof(VRow.Code)"" HeaderText=""Code"" Width=""95px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(VRow.Description)"" HeaderText=""Description"" Width=""260px"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(VRow.Category)"" HeaderText=""Category"" Width=""140px"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(VRow.Qty)"" HeaderText=""Quantity"" Width=""95px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(VRow.Price)"" HeaderText=""Unit Price"" Width=""110px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" Format=""$#,##0.00"" />
-        <GridColumn Field=""@nameof(VRow.Total)"" HeaderText=""Total Cost"" Width=""120px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""false"" Format=""$#,##0.00"" />
-        <GridColumn Field=""@nameof(VRow.InStock)"" HeaderText=""In Stock"" Width=""85px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(VRow.Description)"" HeaderText=""Description"" Width=""260px"" />
+        <GridColumn Field=""@nameof(VRow.Category)"" HeaderText=""Category"" Width=""140px"" />
+        <GridColumn Field=""@nameof(VRow.Qty)"" HeaderText=""Quantity"" Width=""95px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" SelectAllOnEdit=""true"" />
+        <GridColumn Field=""@nameof(VRow.Price)"" HeaderText=""Unit Price"" Width=""110px"" Type=""ColumnType.Number"" Format=""N2"" TextAlign=""TextAlign.Right"" SelectAllOnEdit=""true"" />
+        <GridColumn Field=""@nameof(VRow.Total)"" HeaderText=""Total Cost"" Width=""120px"" Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(VRow.InStock)"" HeaderText=""In Stock"" Width=""85px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" />
     </GridColumnsBase>
 </GridControl>
-
-@code {
-    private List<VRow> Rows { get; set; } = new();
-
-    private readonly GridEditSettings _editSettings = new()
-    {
-        AllowEditing = true,
-        Mode = GridEditMode.Batch,
-        BatchEditBehavior = GridBatchEditBehavior.SingleCell,
-        AllowSingleCellColumnMassEdit = true
-    };
-
-    private readonly GridSelectionSettings _selectionSettings = new()
-    {
-        Mode = GridSelectionMode.Row,
-        Type = GridSelectionType.Multiple
-    };
-
-    protected override void OnInitialized()
-    {
-        Rows = VRowModel.GenerateData(1000);
-    }
-}";
-
-    private const string _csharpSourceCode = @"namespace FlexCore.Showcase.Models;
-
-public class VRow
+<p class=""result"">@Summary</p>";
+        public const string ModesCs = @"public class VRow
 {
-    public string Code { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Category { get; set; } = string.Empty;
+    public string Code { get; set; } = """";
+    public string Description { get; set; } = """";
+    public string Category { get; set; } = """";
     public decimal Qty { get; set; }
     public decimal Price { get; set; }
     public decimal Total => Qty * Price;
     public bool InStock { get; set; }
+}
 
-    public static List<VRow> GenerateData(int count)
+private readonly SelectionItem[] _modeItems = { new(""scroll"", ""Scroll""), new(""page25"", ""25 per page""), new(""page100"", ""100 per page"") };
+
+private List<VRow> _rows = [];
+
+private string _modeKey = ""scroll"";
+
+private bool _paging;
+
+private int _pageSize = 25;
+
+private int _mountGen;                       // @key: every switch remounts the grid, so each timing starts from an empty grid
+
+private readonly SelectionSettings _selection = new() { Type = SelectionType.Multiple, Mode = SelectionMode.Row };
+
+private readonly EditSettings _edit = new() { AllowEditing = true, Mode = EditMode.Batch };
+
+private readonly GridControlEvents<VRow> _events = new();
+
+// Timings: build is the C# loop; render is from the switch to the component's next OnAfterRender, i.e. the server side of
+// the first render after the swap, kept per mode. Browser layout and paint are not included.
+private readonly Stopwatch _swap = new();
+
+private bool _swapPending;
+
+private double _buildMs;
+
+private readonly Dictionary<string, double> _renderMs = new();
+
+private int _editCount, _page;
+
+private string Summary
+{
+    get
     {
-        var categories = new[] { ""Structural"", ""Mechanical"", ""Electrical"", ""Finishing"", ""Plumbing"", ""Masonry"" };
-        var list = new List<VRow>(count);
-        var rand = new Random(42);
-
-        for (int i = 1; i <= count; i++)
-        {
-            var cat = categories[i % categories.Length];
-            var qty = rand.Next(1, 150);
-            var price = Math.Round((decimal)(rand.NextDouble() * 320 + 8.5), 2);
-            list.Add(new VRow
-            {
-                Code = $""V-{i:D4}"",
-                Description = $""{cat} Material Component #{i}"",
-                Category = cat,
-                Qty = qty,
-                Price = price,
-                InStock = (i % 3 != 0)
-            });
-        }
-        return list;
+        string Ms(string key) => _renderMs.TryGetValue(key, out var ms) ? $""{ms:0} ms"" : ""not yet"";
+        var page = _paging && _page > 0 ? $"" Page {_page}."" : """";
+        return $""{_rows.Count:N0} rows built in {_buildMs:0.0} ms. First render after the switch, on the server: ""
+             + $""scroll {Ms(""scroll"")} · 25 per page {Ms(""page25"")} · 100 per page {Ms(""page100"")}. ""
+             + $""{_editCount} cell{(_editCount == 1 ? """" : ""s"")} saved.{page}"";
     }
+}
+
+protected override void OnInitialized()
+{
+    _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<VRow>>(this, _ => { _editCount++; StateHasChanged(); });
+    _events.PageChanged = EventCallback.Factory.Create<PageChangeEventArgs>(this, e => { _page = e.CurrentPage; StateHasChanged(); });
+
+    var sw = Stopwatch.StartNew();
+    var categories = new[] { ""Structural"", ""Mechanical"", ""Electrical"", ""Finishing"", ""Plumbing"", ""Masonry"" };
+    var rand = new Random(101);
+    var list = new List<VRow>(1000);
+    for (var i = 1; i <= 1000; i++)
+    {
+        var cat = categories[i % categories.Length];
+        list.Add(new VRow
+        {
+            Code = $""V-{i:D4}"", Description = $""{cat} Material Component #{i}"", Category = cat,
+            Qty = rand.Next(1, 150), Price = Math.Round((decimal)(rand.NextDouble() * 320 + 8.5), 2), InStock = i % 3 != 0,
+        });
+    }
+    _rows = list;
+    _buildMs = sw.Elapsed.TotalMilliseconds;
+    Remount();
+}
+
+protected override void OnAfterRender(bool firstRender)
+{
+    if (!_swapPending) return;
+    _swapPending = false;
+    _renderMs[_modeKey] = _swap.Elapsed.TotalMilliseconds;
+    _ = InvokeAsync(StateHasChanged);   // show the number; this render has no pending swap, so it ends here
+}
+
+private void PickMode(IReadOnlyList<string> values)
+{
+    if (values.Count == 0 || values[0] == _modeKey) return;
+    _modeKey = values[0];
+    _paging = _modeKey != ""scroll"";
+    _pageSize = _modeKey == ""page100"" ? 100 : 25;
+    _page = 0;
+    Remount();
+}
+
+private void Remount()
+{
+    _mountGen++;
+    _swap.Restart();
+    _swapPending = true;
 }";
+    }
 }

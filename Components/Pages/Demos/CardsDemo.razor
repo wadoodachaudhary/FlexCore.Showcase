@@ -133,6 +133,7 @@
         };
     }
 
+    // Code tabs are verbatim
     private static class Code
     {
         public const string Card = @"<div class=""demo-row"">
@@ -149,10 +150,17 @@
     </CardControl>
 </div>
 <p class=""result"">@(_opened == 0 ? ""Open has not been clicked."" : $""Open clicked {_opened} time{(_opened == 1 ? """" : ""s"")}."")</p>";
-        public const string CardCs = @"private int _elevation = 2;
+        public const string CardCs = @"// Card
+private int _elevation = 2;
+
 private int _opened;
+
 private readonly SelectionItem[] _elevationItems = { new(""0"", ""None""), new(""1"", ""1""), new(""2"", ""2""), new(""3"", ""3"") };
-private void PickElevation(IReadOnlyList<string> values) => _elevation = int.Parse(values[0]);";
+
+private void PickElevation(IReadOnlyList<string> values)
+{
+    if (values.Count > 0) _elevation = int.Parse(values[0]);
+}";
         public const string Group = @"<CardGroupControl>
     @foreach (var e in _estimates)
     {
@@ -163,12 +171,14 @@ private void PickElevation(IReadOnlyList<string> values) => _elevation = int.Par
         </CardControl>
     }
 </CardGroupControl>";
-        public const string GroupCs = @"private sealed record Estimate(string Name, string Icon, string Summary, string Status, BadgeVariant Variant);
+        public const string GroupCs = @"// Card group
+private sealed record Estimate(string Name, string Icon, string Summary, string Status, BadgeVariant Variant);
+
 private readonly Estimate[] _estimates =
 {
-    new(""EST-2042 Contoso"",   ""bi bi-house"",    ""Kitchen, 14 lines, $12,480."",        ""In progress"",       BadgeVariant.Success),
-    new(""EST-2043 Fabrikam"",  ""bi bi-building"", ""Office fit-out, 22 lines, $48,900."", ""Awaiting approval"", BadgeVariant.Warning),
-    new(""EST-2044 Northwind"", ""bi bi-shop"",     ""Storefront, 9 lines, $7,150."",       ""Draft"",             BadgeVariant.Secondary),
+    new(""EST-2042 Contoso"", ""bi bi-house"", ""Kitchen, 14 lines, $12,480."", ""In progress"", BadgeVariant.Success),
+    new(""EST-2043 Fabrikam"", ""bi bi-building"", ""Office fit-out, 22 lines, $48,900."", ""Awaiting approval"", BadgeVariant.Warning),
+    new(""EST-2044 Northwind"", ""bi bi-shop"", ""Storefront, 9 lines, $7,150."", ""Draft"", BadgeVariant.Secondary),
 };";
     }
 }

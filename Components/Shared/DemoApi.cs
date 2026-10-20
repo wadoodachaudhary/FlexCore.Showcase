@@ -9,7 +9,8 @@ public enum ApiKind
     Methods,      // Method | Returns | Description
     CssClasses,   // Class | Effect
     CssVariables, // Variable | Fallback | Purpose
-    Keyboard      // Key | Action
+    Keyboard,     // Key | Action
+    Values        // Value | Description (enum members, 2026-10-20: they had been shown as Properties with an empty Type and a dash Default)
 }
 
 /// <summary>One documentation row. <paramref name="Description"/> may hold inline HTML such as &lt;code&gt;.
