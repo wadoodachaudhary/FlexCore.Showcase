@@ -70,6 +70,7 @@ public static class SiteNav
         {
             new("Financial & gauges", "demo/advanced-charts"),
             new("Sunburst", "demo/charts/sunburst"),
+            new("Map story", "demo/charts/map-story"),
             new("Gantt chart", "demo/gantt"),                    // own page since 2026-10-19; was a Control tour tab
             new("Gauges & stock chart", "demo/gauges"),          // own page since 2026-10-19; was the tour's Charts tab
         }),
