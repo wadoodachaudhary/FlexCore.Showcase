@@ -1,90 +1,431 @@
 @page "/demo/layout"
+@using FlexCore.Showcase.Components.Shared
 
-<PageTitle>Layout Controls — FlexCore</PageTitle>
+@* 2026-10-12: rebuilt on FeatureDemoLayout (was two framed demos and a static snippet). Two examples: an
+   application shell (page layout + splitter, collapse buttons inside the demo) and the dashboard grid. Splitter added: the catalog already pointed here and no page rendered it. Facts checked
+   against Layout/PageLayoutControl, Left/Center/RightPanelControl, DashboardLayoutControl, DashboardLayoutPanel
+   and SplitterControl.razor in FlexCore 0.2.48. *@
 
-<h1>Layout Controls</h1>
-<p>FlexCore provides structural layout components: <code>PageLayoutControl</code>, <code>LeftPanelControl</code>, <code>CenterPanelControl</code>, <code>RightPanelControl</code>, and <code>DashboardLayoutControl</code>.</p>
+<PageTitle>Page layouts — FlexCore Showcase</PageTitle>
 
-<h2>Page Layout with Panels</h2>
-<div class="demo-frame" style="height:350px;">
-    <PageLayoutControl Height="100%">
-        <LeftPanelControl Width="180px" Collapsible="true" Collapsed="@_leftCollapsed" CollapsedChanged="@(v => _leftCollapsed = v)">
-            <div style="padding:12px;">
-                <h4 style="margin:0 0 8px; font-size:14px;">Navigation</h4>
-                <ul style="list-style:none; padding:0; margin:0; font-size:13px;">
-                    <li style="padding:4px 0;">Dashboard</li>
-                    <li style="padding:4px 0;">Reports</li>
-                    <li style="padding:4px 0;">Settings</li>
+<FeatureDemoLayout Title="Page layouts" Category="Components" ControlName="PageLayoutControl · SplitterControl · DashboardLayoutControl"
+                   Tagline="An application shell with collapsible side panels and a splitter, and a dashboard grid."
+                   SourcePath="Layout/PageLayoutControl.razor; SplitterControl.razor; Layout/DashboardLayoutControl.razor">
+    <Overview>
+        <p>
+            Three ways to divide a page. <code>PageLayoutControl</code> is a flex row of <code>LeftPanelControl</code>,
+            <code>CenterPanelControl</code> and <code>RightPanelControl</code>; the side panels collapse to a 20px tab.
+            <code>SplitterControl</code> puts a draggable bar between two panes, in pixels or as a share of the container,
+            with keyboard resizing. <code>DashboardLayoutControl</code> is a CSS grid of panels placed by row, column and span; change those values and the grid re-flows.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="shell" Title="Application shell: panels and a splitter" RazorCode="@Code.Shell" CSharpCode="@Code.ShellCs">
+            <Description><p><code>PageLayoutControl</code> rows up a navigation panel, the centre and a properties panel; each side panel collapses from its own tab or from the icon buttons in the centre, because <code>Collapsed</code> binds two ways. The centre holds a <code>SplitterControl</code>: drag the bar, or Tab to it and use the arrow keys, Home and End; double-click restores the first size. Bind <code>PrimarySize</code> two ways and persist from <code>OnResizeCommitted</code>, which fires once per gesture. The navigation, list and properties are wired together, so click around.</p></Description>
+            <Demo>
+                <div class="frame">
+                    <PageLayoutControl Height="340px">
+                        <LeftPanelControl Width="170px" Collapsible="true" @bind-Collapsed="_leftCollapsed">
+                            <div class="pane">
+                                <h4>Navigation</h4>
+                                <ul class="nav">
+                                    @foreach (var sec in _data.Keys)
+                                    {
+                                        <li><ButtonControl BareStyle="true" CssClass="@($"nav-item {(sec == _section ? "active" : "")}")" OnClick="@(() => Go(sec))">@sec</ButtonControl></li>
+                                    }
+                                </ul>
+                            </div>
+                        </LeftPanelControl>
+                        <CenterPanelControl>
+                            <SplitterControl Height="100%" @bind-PrimarySize="_listSize" MinPrimary="140px" MaxPrimary="60%" MinSecondary="200px"
+                                             OnResizeCommitted="@(_ => _commits++)" Title="Resize the list">
+                                <PrimaryContent>
+                                    <div class="pane">
+                                        <h4>@_section</h4>
+                                        <ul class="nav">
+                                            @foreach (var it in _data[_section])
+                                            {
+                                                <li><ButtonControl BareStyle="true" CssClass="@($"nav-item {(it == _selected ? "active" : "")}")" OnClick="@(() => _selected = it)">@it.Title</ButtonControl></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </PrimaryContent>
+                                <SecondaryContent>
+                                    <div class="pane">
+                                        @* Sidebar toggles the way editors do them: icon buttons, pressed while hidden, tooltip for the words. *@
+                                        <div class="pane-head">
+                                            <h4>@_selected.Title</h4>
+                                            <div class="icon-row">
+                                                <TooltipControl Text="@(_leftCollapsed ? "Show navigation" : "Hide navigation")" Placement="PopupPlacement.BottomEnd">
+                                                    <ToggleButtonControl @bind-Selected="_leftCollapsed" IconCss="bi bi-layout-sidebar" aria-label="Toggle navigation" />
+                                                </TooltipControl>
+                                                <TooltipControl Text="@(_rightCollapsed ? "Show properties" : "Hide properties")" Placement="PopupPlacement.BottomEnd">
+                                                    <ToggleButtonControl @bind-Selected="_rightCollapsed" IconCss="bi bi-layout-sidebar-reverse" aria-label="Toggle properties" />
+                                                </TooltipControl>
+                                            </div>
+                                        </div>
+                                        <p>@_selected.Summary</p>
+                                    </div>
+                                </SecondaryContent>
+                            </SplitterControl>
+                        </CenterPanelControl>
+                        <RightPanelControl Width="190px" Collapsible="true" @bind-Collapsed="_rightCollapsed">
+                            <div class="pane">
+                                <h4>Properties</h4>
+                                <dl class="props">
+                                    @foreach (var (key, value) in _selected.Props)
+                                    {
+                                        <dt>@key</dt><dd>@value</dd>
+                                    }
+                                </dl>
+                            </div>
+                        </RightPanelControl>
+                    </PageLayoutControl>
+                </div>
+                <span class="result">List pane @_listSize.ToString("0") px, @_commits @(_commits == 1 ? "commit" : "commits") · navigation @(_leftCollapsed ? "hidden" : "shown"), properties @(_rightCollapsed ? "hidden" : "shown")</span>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="dashboard" Title="Dashboard grid" RazorCode="@Code.Dashboard" CSharpCode="@Code.DashboardCs">
+            <Description><p><code>Columns</code> sets the grid; each panel takes <code>Row</code>, <code>Column</code>, <code>SizeX</code> and <code>SizeY</code>, here from page state. Click a KPI card to expand it across the row and back; hover one for its comparison. A panel is exactly its grid box, so spans are chosen to fit the cards. No script.</p></Description>
+            <Demo>
+                @* .dash is the page-scoped ancestor that ::deep rules below need *@
+                <div class="dash">
+                <DashboardLayoutControl Columns="3" CellSpacing="@(new double[] { 12, 12 })" CellAspectRatio="0.35">
+                    <DashboardLayoutPanels>
+                        @foreach (var k in _kpis)
+                        {
+                            var t = _place[k.Key];
+                            <DashboardLayoutPanel @key="k.Key" Row="t.Row" Column="t.Col" SizeX="t.SizeX" SizeY="t.SizeY">
+                                <TooltipControl Text="@k.Detail" CssClass="tile-anchor" Placement="PopupPlacement.BottomStart">
+                                    <div class="tile @(_focus == k.Key ? "focused" : "")" @onclick="() => Toggle(k.Key)" title="Click to expand">
+                                        <CardControl Elevation="0" CssClass="dash-card"><ChartControl Type="ChartType.KpiCard" KpiValue="@k.Value" KpiLabel="@k.Label" KpiTrend="@k.Trend" Height="100px" /></CardControl>
+                                    </div>
+                                </TooltipControl>
+                            </DashboardLayoutPanel>
+                        }
+                        <DashboardLayoutPanel Row="ChartsRow" Column="0" SizeX="2" SizeY="3">
+                            <CardControl Elevation="0" CssClass="dash-card"><ChartControl Type="ChartType.Line" Title="Traffic" Height="200px" Series="_traffic" /></CardControl>
+                        </DashboardLayoutPanel>
+                        <DashboardLayoutPanel Row="ChartsRow" Column="2" SizeY="3">
+                            <CardControl Elevation="0" CssClass="dash-card"><ChartControl Type="ChartType.Donut" Title="Sources" Height="200px" InnerRadius="0.5" Series="_sources" /></CardControl>
+                        </DashboardLayoutPanel>
+                    </DashboardLayoutPanels>
+                </DashboardLayoutControl>
+                </div>
+                <span class="result">@(_focus is null ? "Three KPI cards on row 0, charts on rows 2–4." : $"{_kpis.First(k => k.Key == _focus).Label} spans the row; the others moved down.")</span>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="PageLayoutControl and panels" Rows="Vocab.PageLayout" />
+        <ApiTable Kind="ApiKind.Parameters" Title="SplitterControl" Rows="Vocab.Splitter" />
+        <ApiTable Kind="ApiKind.Parameters" Title="DashboardLayoutControl and DashboardLayoutPanel" Rows="Vocab.Dashboard" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>Panel collapse tabs are native buttons titled "Collapse panel" / "Expand panel"; their only text is an arrow glyph.</li>
+            <li>The splitter bar is a native button with <code>role="separator"</code>, <code>aria-orientation</code> and the <code>Title</code> as its name. Arrow keys move it by <code>KeyboardStep</code>, Home and End go to the limits, double-click resets.</li>
+            <li>The splitter imports the library's own <code>splitter-control.js</code> for the drag guide and measuring. No third-party script. Page layout and dashboard are CSS only.</li>
+            <li>Dashboard panels are plain grid items with no landmarks or headings of their own; give each panel's content a heading.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>Dockable, floating panes: <code>DockManagerControl</code> in the <a href="demo/counterparts?tab=docking">Control tour</a>. Tabbed MDI: <a href="demo/workspace/page-control-bench">PageControl</a>.</li>
+            <li>Smaller helpers in the same namespace: <code>GridLayoutControl</code> (CSS grid with <code>Columns</code>, <code>Rows</code>, <code>Gap</code>, collapses on small screens) and <code>StackLayoutControl</code> (flex row or column with <code>Gap</code> and <code>Wrap</code>). The Control tour's forms use <code>GridLayoutControl</code>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    private bool _leftCollapsed, _rightCollapsed;
+    private double _listSize = 200;
+    private int _commits;
+
+    // Shell data: three sections, each a short list; the detail pane and properties follow the selection.
+    private sealed record Item(string Title, string Summary, (string Key, string Value)[] Props);
+    private readonly Dictionary<string, Item[]> _data = new()
+    {
+        ["Estimates"] = new[]
+        {
+            new Item("EST-2041 Northwind", "9 lines · Sent · $12,480", new[] { ("Customer", "Northwind"), ("Status", "Sent"), ("Lines", "9"), ("Total", "$12,480") }),
+            new Item("EST-2042 Contoso", "14 lines · Draft · $18,240 · last saved today 09:12", new[] { ("Customer", "Contoso"), ("Status", "Draft"), ("Lines", "14"), ("Total", "$18,240") }),
+            new Item("EST-2043 Fabrikam", "22 lines · Won · $41,900", new[] { ("Customer", "Fabrikam"), ("Status", "Won"), ("Lines", "22"), ("Total", "$41,900") }),
+        },
+        ["Vendors"] = new[]
+        {
+            new Item("Acme Lumber", "Net 30 · 3 open purchase orders", new[] { ("Contact", "J. Ortiz"), ("Terms", "Net 30"), ("Open POs", "3") }),
+            new Item("Bolt & Nut Co", "Net 15 · 1 open purchase order", new[] { ("Contact", "P. Reyes"), ("Terms", "Net 15"), ("Open POs", "1") }),
+            new Item("Cascade Concrete", "COD · no open orders", new[] { ("Contact", "M. Chen"), ("Terms", "COD"), ("Open POs", "0") }),
+        },
+        ["Settings"] = new[]
+        {
+            new Item("Company", "Contoso Builders · USD · fiscal year starts in July", new[] { ("Currency", "USD"), ("Fiscal year", "July"), ("Users", "12") }),
+            new Item("Numbering", "Estimates EST-####, purchase orders PO-####", new[] { ("Estimates", "EST-####"), ("Purchase orders", "PO-####") }),
+        },
+    };
+    private string _section = "Estimates";
+    private Item _selected = null!;
+    private void Go(string section) { _section = section; _selected = _data[section][0]; }
+
+    // Dashboard: placements come from state so a click re-flows the grid.
+    private sealed record Kpi(string Key, string Value, string Label, string Trend, string Detail);
+    private readonly Kpi[] _kpis =
+    {
+        new("orders", "1,234", "Orders", "+5.2%", "1,234 this week, 1,173 last week"),
+        new("revenue", "$89K", "Revenue", "+12%", "$89K this week, $79K last week"),
+        new("uptime", "98.5%", "Uptime", "+0.1%", "98.5% over 30 days, 2 incidents"),
+    };
+    private string? _focus;
+    private Dictionary<string, (int Row, int Col, int SizeX, int SizeY)> _place = new();
+    private int ChartsRow => _focus is null ? 2 : 4;   // KPI rows 0–1, or 0–3 while one is expanded
+    protected override void OnInitialized() { _selected = _data["Estimates"][1]; Layout(); }
+    private void Toggle(string key) { _focus = _focus == key ? null : key; Layout(); }
+    private void Layout()
+    {
+        _place.Clear();
+        var col = 0;
+        if (_focus is not null) _place[_focus] = (0, 0, 3, 2);            // expanded card takes the whole first row
+        foreach (var k in _kpis.Where(k => k.Key != _focus))
+            _place[k.Key] = (_focus is null ? 0 : 2, col++, 1, 2);        // the rest line up below it
+    }
+
+    private readonly List<ChartSeries> _traffic = new()
+    {
+        new() { Name = "Visits", DataPoints = new() { new("Mon", 120), new("Tue", 180), new("Wed", 210), new("Thu", 190), new("Fri", 250), new("Sat", 140), new("Sun", 100) } }
+    };
+    private readonly List<ChartSeries> _sources = new()
+    {
+        new() { Name = "Traffic", DataPoints = new() { new("Organic", 55), new("Paid", 25), new("Referral", 15), new("Direct", 5) } }
+    };
+
+    // Vocabulary rows, one per public member (0.2.48).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] PageLayout =
+        {
+            new("PageLayoutControl.Height", "Height of the flex row; panels fill it.", "string?", "\"100%\""),
+            new("PageLayoutControl.CssClass", "Extra classes on the row.", "string?", "null"),
+            new("Left/RightPanelControl.Width", "Panel width when open.", "string?", "\"250px\""),
+            new("Left/RightPanelControl.Collapsible", "Shows the 20px tab that collapses the panel.", "bool", "false"),
+            new("Left/RightPanelControl.Collapsed", "Collapsed state. Two-way with <code>@bind-Collapsed</code>.", "bool", "false"),
+            new("CenterPanelControl", "Takes the remaining width. Only <code>CssClass</code> and content.", "", null),
+        };
+        public static readonly ApiRow[] Splitter =
+        {
+            new("PrimaryContent / SecondaryContent", "The two panes. Primary is left or top.", "RenderFragment?"),
+            new("Vertical", "true: vertical bar, panes side by side. false: horizontal bar, panes stacked.", "bool", "true"),
+            new("PrimarySize", "Primary pane size in px, or percent in Proportional mode. Bind it two ways: a parent re-render otherwise resets the pane to the parameter value.", "double", "240"),
+            new("SizeMode", "<code>Pixel</code> keeps the size through container resizes; <code>Proportional</code> keeps the ratio, pure CSS.", "SplitterSizeMode", "Pixel"),
+            new("OnResizeCommitted", "Fires once when a drag or key press finishes. Persist from here.", "EventCallback&lt;double&gt;"),
+            new("ResizeOnRelease", "Guide while dragging, panes resize on release. false resizes live through the server.", "bool", "true"),
+            new("MinPrimarySize / MaxPrimarySize", "Pixel limits.", "double", "80 / 1200"),
+            new("MinPrimary / MaxPrimary / MinSecondary", "Limits that also take a percentage; they win over the pixel ones.", "string?", "null"),
+            new("ShrinkPrimaryToContent", "Caps the primary pane at its content size.", "bool", "false"),
+            new("DefaultPrimarySize / ResetOnDoubleClick", "Size restored by a double-click; defaults to the first size seen.", "double? / bool", "null / true"),
+            new("KeyboardStep", "Arrow-key step in px, or percentage points in Proportional mode.", "double", "16"),
+            new("SplitterSize", "Bar thickness in px.", "double", "6"),
+            new("Disabled", "Bar cannot be dragged or focused.", "bool", "false"),
+            new("Height / Width", "Container size.", "string?", "null"),
+            new("Title", "Bar tooltip and accessible name.", "string", "\"Resize\""),
+            new("CssClass / Style", "On the container.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Dashboard =
+        {
+            new("Columns", "Grid columns, equal width.", "int", "1"),
+            new("CellSpacing", "Column and row gap in px, as a two-element array.", "double[]?", "null (0, 0)"),
+            new("CellAspectRatio", "Height of one cell relative to its width; 1 is square. A panel is exactly its grid box and does not grow for tall content.", "double", "1"),
+            new("CssClass", "Extra classes on the grid.", "string?", "null"),
+            new("Panel.Row / Panel.Column", "Zero-based placement.", "int", "0"),
+            new("Panel.SizeX / Panel.SizeY", "Column and row span.", "int", "1"),
+            new("Panel.ContentTemplate / ChildContent", "Panel content; the template wins when both are set.", "RenderFragment?"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-page-layout · fx-left-panel · fx-center-panel · fx-right-panel", "Flex row and its panels. Side panels: grey, bordered, scroll their own content; <code>.fx-panel-collapsed</code> at zero width."),
+            new("fx-panel-toggle · -left · -right", "The 20×40px collapse tab, hung outside the panel edge."),
+            new("fx-splitter · -vertical · -horizontal · -disabled", "Container and orientation."),
+            new("fx-splitter-pane · -primary · -secondary · fx-splitter-bar · fx-splitter-grip", "Panes, the bar and its grip."),
+            new("fx-splitter-overlay · fx-splitter-guide · fx-splitter-server-guide", "Drag-time overlay and the guide line."),
+            new("fx-dashboard-layout · fx-dashboard-panels · fx-dashboard-panel", "The grid, a <code>display: contents</code> wrapper, and each item with its grid placement and aspect ratio inline."),
+        };
+        public static readonly ApiRow[] Vars =
+        {
+            new("--fx-splitter-size", "Bar thickness; set by <code>SplitterSize</code>.", "6px"),
+            new("--fx-zoom", "Scales the collapse-tab glyph.", "1"),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Shell = @"<div class=""frame"">
+    <PageLayoutControl Height=""340px"">
+        <LeftPanelControl Width=""170px"" Collapsible=""true"" @bind-Collapsed=""_leftCollapsed"">
+            <div class=""pane"">
+                <h4>Navigation</h4>
+                <ul class=""nav"">
+                    @foreach (var sec in _data.Keys)
+                    {
+                        <li><ButtonControl BareStyle=""true"" CssClass=""@($""nav-item {(sec == _section ? ""active"" : """")}"")"" OnClick=""@(() => Go(sec))"">@sec</ButtonControl></li>
+                    }
                 </ul>
             </div>
         </LeftPanelControl>
         <CenterPanelControl>
-            <div style="padding:16px;">
-                <h3 style="margin:0 0 8px;">Main Content Area</h3>
-                <p style="font-size:13px; color:#6b7280;">This center panel fills the remaining horizontal space. The left and right panels can be collapsed.</p>
-                <ProgressBarControl Value="65" Title="Task Progress" Status="65% complete" />
-            </div>
+            <SplitterControl Height=""100%"" @bind-PrimarySize=""_listSize"" MinPrimary=""140px"" MaxPrimary=""60%"" MinSecondary=""200px""
+                             OnResizeCommitted=""@(_ => _commits++)"" Title=""Resize the list"">
+                <PrimaryContent>
+                    <div class=""pane"">
+                        <h4>@_section</h4>
+                        <ul class=""nav"">
+                            @foreach (var it in _data[_section])
+                            {
+                                <li><ButtonControl BareStyle=""true"" CssClass=""@($""nav-item {(it == _selected ? ""active"" : """")}"")"" OnClick=""@(() => _selected = it)"">@it.Title</ButtonControl></li>
+                            }
+                        </ul>
+                    </div>
+                </PrimaryContent>
+                <SecondaryContent>
+                    <div class=""pane"">
+                        @* Sidebar toggles the way editors do them: icon buttons, pressed while hidden, tooltip for the words. *@
+                        <div class=""pane-head"">
+                            <h4>@_selected.Title</h4>
+                            <div class=""icon-row"">
+                                <TooltipControl Text=""@(_leftCollapsed ? ""Show navigation"" : ""Hide navigation"")"" Placement=""PopupPlacement.BottomEnd"">
+                                    <ToggleButtonControl @bind-Selected=""_leftCollapsed"" IconCss=""bi bi-layout-sidebar"" aria-label=""Toggle navigation"" />
+                                </TooltipControl>
+                                <TooltipControl Text=""@(_rightCollapsed ? ""Show properties"" : ""Hide properties"")"" Placement=""PopupPlacement.BottomEnd"">
+                                    <ToggleButtonControl @bind-Selected=""_rightCollapsed"" IconCss=""bi bi-layout-sidebar-reverse"" aria-label=""Toggle properties"" />
+                                </TooltipControl>
+                            </div>
+                        </div>
+                        <p>@_selected.Summary</p>
+                    </div>
+                </SecondaryContent>
+            </SplitterControl>
         </CenterPanelControl>
-        <RightPanelControl Width="200px" Collapsible="true" Collapsed="@_rightCollapsed" CollapsedChanged="@(v => _rightCollapsed = v)">
-            <div style="padding:12px;">
-                <h4 style="margin:0 0 8px; font-size:14px;">Properties</h4>
-                <p style="font-size:12px; color:#6b7280;">Selected item details would appear here.</p>
+        <RightPanelControl Width=""190px"" Collapsible=""true"" @bind-Collapsed=""_rightCollapsed"">
+            <div class=""pane"">
+                <h4>Properties</h4>
+                <dl class=""props"">
+                    @foreach (var (key, value) in _selected.Props)
+                    {
+                        <dt>@key</dt><dd>@value</dd>
+                    }
+                </dl>
             </div>
         </RightPanelControl>
     </PageLayoutControl>
 </div>
+<span class=""result"">List pane @_listSize.ToString(""0"") px, @_commits @(_commits == 1 ? ""commit"" : ""commits"") · navigation @(_leftCollapsed ? ""hidden"" : ""shown""), properties @(_rightCollapsed ? ""hidden"" : ""shown"")</span>";
+        public const string ShellCs = @"private bool _leftCollapsed, _rightCollapsed;
 
-<h2>Dashboard Grid</h2>
-<div class="demo-frame">
-    <DashboardLayoutControl Columns="3" CellSpacing="@(new double[] { 12, 12 })">
-        <DashboardLayoutPanels>
-            <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                <div class="dash-card">
-                    <ChartControl Type="ChartType.KpiCard" KpiValue="1,234" KpiLabel="Orders" KpiTrend="+5.2%" Height="100px" />
-                </div>
+private double _listSize = 200;
+
+private int _commits;
+
+// Shell data: three sections, each a short list; the detail pane and properties follow the selection.
+private sealed record Item(string Title, string Summary, (string Key, string Value)[] Props);
+
+private readonly Dictionary<string, Item[]> _data = new()
+{
+    [""Estimates""] = new[]
+    {
+        new Item(""EST-2041 Northwind"", ""9 lines · Sent · $12,480"", new[] { (""Customer"", ""Northwind""), (""Status"", ""Sent""), (""Lines"", ""9""), (""Total"", ""$12,480"") }),
+        new Item(""EST-2042 Contoso"", ""14 lines · Draft · $18,240 · last saved today 09:12"", new[] { (""Customer"", ""Contoso""), (""Status"", ""Draft""), (""Lines"", ""14""), (""Total"", ""$18,240"") }),
+        new Item(""EST-2043 Fabrikam"", ""22 lines · Won · $41,900"", new[] { (""Customer"", ""Fabrikam""), (""Status"", ""Won""), (""Lines"", ""22""), (""Total"", ""$41,900"") }),
+    },
+    [""Vendors""] = new[]
+    {
+        new Item(""Acme Lumber"", ""Net 30 · 3 open purchase orders"", new[] { (""Contact"", ""J. Ortiz""), (""Terms"", ""Net 30""), (""Open POs"", ""3"") }),
+        new Item(""Bolt & Nut Co"", ""Net 15 · 1 open purchase order"", new[] { (""Contact"", ""P. Reyes""), (""Terms"", ""Net 15""), (""Open POs"", ""1"") }),
+        new Item(""Cascade Concrete"", ""COD · no open orders"", new[] { (""Contact"", ""M. Chen""), (""Terms"", ""COD""), (""Open POs"", ""0"") }),
+    },
+    [""Settings""] = new[]
+    {
+        new Item(""Company"", ""Contoso Builders · USD · fiscal year starts in July"", new[] { (""Currency"", ""USD""), (""Fiscal year"", ""July""), (""Users"", ""12"") }),
+        new Item(""Numbering"", ""Estimates EST-####, purchase orders PO-####"", new[] { (""Estimates"", ""EST-####""), (""Purchase orders"", ""PO-####"") }),
+    },
+};
+
+private string _section = ""Estimates"";
+
+private Item _selected = null!;
+
+private void Go(string section) { _section = section; _selected = _data[section][0]; }
+
+protected override void OnInitialized() { _selected = _data[""Estimates""][1]; Layout(); }";
+
+        public const string Dashboard = @"@* .dash is the page-scoped ancestor that ::deep rules below need *@
+<div class=""dash"">
+<DashboardLayoutControl Columns=""3"" CellSpacing=""@(new double[] { 12, 12 })"" CellAspectRatio=""0.35"">
+    <DashboardLayoutPanels>
+        @foreach (var k in _kpis)
+        {
+            var t = _place[k.Key];
+            <DashboardLayoutPanel @key=""k.Key"" Row=""t.Row"" Column=""t.Col"" SizeX=""t.SizeX"" SizeY=""t.SizeY"">
+                <TooltipControl Text=""@k.Detail"" CssClass=""tile-anchor"" Placement=""PopupPlacement.BottomStart"">
+                    <div class=""tile @(_focus == k.Key ? ""focused"" : """")"" @onclick=""() => Toggle(k.Key)"" title=""Click to expand"">
+                        <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.KpiCard"" KpiValue=""@k.Value"" KpiLabel=""@k.Label"" KpiTrend=""@k.Trend"" Height=""100px"" /></CardControl>
+                    </div>
+                </TooltipControl>
             </DashboardLayoutPanel>
-            <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
-                <div class="dash-card">
-                    <ChartControl Type="ChartType.KpiCard" KpiValue="$89K" KpiLabel="Revenue" KpiTrend="+12%" Height="100px" />
-                </div>
-            </DashboardLayoutPanel>
-            <DashboardLayoutPanel Row="0" Column="2" SizeX="1" SizeY="1">
-                <div class="dash-card">
-                    <ChartControl Type="ChartType.KpiCard" KpiValue="98.5%" KpiLabel="Uptime" KpiTrend="+0.1%" Height="100px" />
-                </div>
-            </DashboardLayoutPanel>
-            <DashboardLayoutPanel Row="1" Column="0" SizeX="2" SizeY="1">
-                <div class="dash-card">
-                    <ChartControl Type="ChartType.Line" Title="Traffic" Height="200px"
-                                  Series="@(new List<ChartSeries> { new() { Name = "Visits", DataPoints = new() {
-                                      new("Mon", 120), new("Tue", 180), new("Wed", 210), new("Thu", 190), new("Fri", 250), new("Sat", 140), new("Sun", 100) } } })" />
-                </div>
-            </DashboardLayoutPanel>
-            <DashboardLayoutPanel Row="1" Column="2" SizeX="1" SizeY="1">
-                <div class="dash-card">
-                    <ChartControl Type="ChartType.Donut" Title="Sources" Height="200px" InnerRadius="0.5"
-                                  Series="@(new List<ChartSeries> { new() { Name = "Traffic", DataPoints = new() {
-                                      new("Organic", 55), new("Paid", 25), new("Referral", 15), new("Direct", 5) } } })" />
-                </div>
-            </DashboardLayoutPanel>
-        </DashboardLayoutPanels>
-    </DashboardLayoutControl>
+        }
+        <DashboardLayoutPanel Row=""ChartsRow"" Column=""0"" SizeX=""2"" SizeY=""3"">
+            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Line"" Title=""Traffic"" Height=""200px"" Series=""_traffic"" /></CardControl>
+        </DashboardLayoutPanel>
+        <DashboardLayoutPanel Row=""ChartsRow"" Column=""2"" SizeY=""3"">
+            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Donut"" Title=""Sources"" Height=""200px"" InnerRadius=""0.5"" Series=""_sources"" /></CardControl>
+        </DashboardLayoutPanel>
+    </DashboardLayoutPanels>
+</DashboardLayoutControl>
 </div>
+<span class=""result"">@(_focus is null ? ""Three KPI cards on row 0, charts on rows 2–4."" : $""{_kpis.First(k => k.Key == _focus).Label} spans the row; the others moved down."")</span>";
+        public const string DashboardCs = @"// Dashboard: placements come from state so a click re-flows the grid.
+private sealed record Kpi(string Key, string Value, string Label, string Trend, string Detail);
 
-<h2>Markup</h2>
-<pre><code>&lt;PageLayoutControl Height="100%"&gt;
-    &lt;LeftPanelControl Width="200px" Collapsible="true"&gt;
-        &lt;!-- Navigation --&gt;
-    &lt;/LeftPanelControl&gt;
-    &lt;CenterPanelControl&gt;
-        &lt;!-- Main content --&gt;
-    &lt;/CenterPanelControl&gt;
-    &lt;RightPanelControl Width="250px" Collapsible="true"&gt;
-        &lt;!-- Properties/details --&gt;
-    &lt;/RightPanelControl&gt;
-&lt;/PageLayoutControl&gt;</code></pre>
+private readonly Kpi[] _kpis =
+{
+    new(""orders"", ""1,234"", ""Orders"", ""+5.2%"", ""1,234 this week, 1,173 last week""),
+    new(""revenue"", ""$89K"", ""Revenue"", ""+12%"", ""$89K this week, $79K last week""),
+    new(""uptime"", ""98.5%"", ""Uptime"", ""+0.1%"", ""98.5% over 30 days, 2 incidents""),
+};
 
-@code {
-    bool _leftCollapsed;
-    bool _rightCollapsed;
+private string? _focus;
+
+private Dictionary<string, (int Row, int Col, int SizeX, int SizeY)> _place = new();
+
+private int ChartsRow => _focus is null ? 2 : 4;   // KPI rows 0–1, or 0–3 while one is expanded
+
+protected override void OnInitialized() { _selected = _data[""Estimates""][1]; Layout(); }
+
+private void Toggle(string key) { _focus = _focus == key ? null : key; Layout(); }
+
+private void Layout()
+{
+    _place.Clear();
+    var col = 0;
+    if (_focus is not null) _place[_focus] = (0, 0, 3, 2);            // expanded card takes the whole first row
+    foreach (var k in _kpis.Where(k => k.Key != _focus))
+        _place[k.Key] = (_focus is null ? 0 : 2, col++, 1, 2);        // the rest line up below it
+}
+
+private readonly List<ChartSeries> _traffic = new()
+{
+    new() { Name = ""Visits"", DataPoints = new() { new(""Mon"", 120), new(""Tue"", 180), new(""Wed"", 210), new(""Thu"", 190), new(""Fri"", 250), new(""Sat"", 140), new(""Sun"", 100) } }
+};
+
+private readonly List<ChartSeries> _sources = new()
+{
+    new() { Name = ""Traffic"", DataPoints = new() { new(""Organic"", 55), new(""Paid"", 25), new(""Referral"", 15), new(""Direct"", 5) } }
+};";
+    }
 }

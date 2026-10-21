@@ -1,0 +1,17 @@
+/* 2026-10-13: sign-up page. No Bootstrap names (row, form-*, btn) as class names in here. */
+.signup-page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 56px; }
+.signup-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 520px); gap: 40px; align-items: start; }
+@media (max-width: 860px) { .signup-grid { grid-template-columns: minmax(0, 1fr); } }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0284c7; margin: 0 0 8px; }
+.signup-intro h1 { font-size: 30px; line-height: 1.2; margin: 0 0 14px; color: #0f172a; }
+.signup-intro h2 { font-size: 16px; margin: 22px 0 8px; color: #0f172a; }
+.signup-intro p, .signup-intro li { font-size: 15px; line-height: 1.55; color: #334155; }
+.signup-intro ul { padding-left: 20px; margin: 0; }
+.fine { font-size: 13px; color: #64748b; }
+.signup-form { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06); }
+.signup-form ::deep .fx-form-item label { font-size: 13px; font-weight: 600; color: #334155; }
+.signup-form ::deep .fx-form-item small { font-size: 12px; color: #64748b; }
+.signup-form ::deep .fx-form > button, .signup-form ::deep .fx-form ::deep button[type="submit"] { margin-top: 14px; }
+.status { font-size: 13px; color: #b91c1c; margin: 10px 0 0; }
+/* honeypot: off-screen, not display:none, so a naive bot still fills it */
+.hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }

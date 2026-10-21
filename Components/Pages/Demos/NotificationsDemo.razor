@@ -1,29 +1,135 @@
 @page "/demo/notifications"
+@using FlexCore.Showcase.Components.Shared
 @inject NotificationService Notifications
+@implements IDisposable
 
-<PageTitle>Notifications — FlexCore</PageTitle>
+@* 2026-10-12: rebuilt on FeatureDemoLayout (was four buttons and two static snippets). One example, per
+   the one-good-example rule. Facts checked against Notifications/NotificationService.cs and
+   NotificationDisplayControl.razor(.css) in FlexCore 0.2.48. NotificationDisplayControl is rendered once
+   by MainLayout; a copy here showed every toast twice (removed 2026-10-06). *@
 
-<h1>NotificationService</h1>
-<p>Toast-style notifications with auto-dismiss. Uses FlexCore's <code>NotificationService</code> + <code>NotificationDisplayControl</code>.</p>
+<PageTitle>Toasts — FlexCore Showcase</PageTitle>
 
-<div class="demo-frame demo-buttons">
-    <ButtonControl CssClass="btn-primary" OnClick="@(() => Notifications.Info("Just so you know — file uploaded."))">Info</ButtonControl>
-    <ButtonControl CssClass="btn-success" OnClick="@(() => Notifications.Success("Saved!"))">Success</ButtonControl>
-    <ButtonControl CssClass="btn-warning" OnClick="@(() => Notifications.Warning("This will be deprecated soon."))">Warning</ButtonControl>
-    <ButtonControl CssClass="btn-danger" OnClick="@(() => Notifications.Error("Couldn't connect to server."))">Error</ButtonControl>
-</div>
+<FeatureDemoLayout Title="Toasts" Category="Components" ControlName="NotificationService · NotificationDisplayControl"
+                   Tagline="Call the service from anywhere; toasts stack in the top-right corner and dismiss themselves."
+                   SourcePath="Notifications/NotificationService.cs; NotificationDisplayControl.razor">
+    <Overview>
+        <p>
+            <code>NotificationService</code> is a scoped, per-circuit service with four methods: <code>Info</code>, <code>Success</code>,
+            <code>Warning</code> and <code>Error</code>. Each takes a message, an optional detail line and a duration in milliseconds;
+            zero keeps the toast until the user closes it. <code>NotificationDisplayControl</code>, rendered once in the layout, shows the
+            queue fixed to the top-right corner, newest first, twenty at most, each sliding in from the right. No JavaScript.
+        </p>
+    </Overview>
 
-<NotificationDisplayControl />
+    <Examples>
+        <DemoExample Id="levels" Title="Levels, detail and duration" RazorCode="@Code.Levels" CSharpCode="@Code.LevelsCs">
+            <Description><p>One call per level. The second argument is the smaller detail line. Defaults: info 5 s, success 4 s, warning 8 s, error 10 s. Pass <code>durationMs: 0</code> for a toast that stays.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <ButtonControl CssClass="btn-primary" OnClick="@(() => Notifications.Info("File uploaded", "report-q3.xlsx, 2.1 MB"))">Info</ButtonControl>
+                    <ButtonControl CssClass="btn-success" OnClick="@(() => Notifications.Success("Quote 1042 saved", "3 lines updated"))">Success</ButtonControl>
+                    <ButtonControl CssClass="btn-warning" OnClick="@(() => Notifications.Warning("Price list expires in 3 days", "Renew it under Settings, Vendors"))">Warning</ButtonControl>
+                    <ButtonControl CssClass="btn-danger" OnClick="@(() => Notifications.Error("Could not save quote 1042", "SQL timeout after 30 s"))">Error</ButtonControl>
+                    <ButtonControl CssClass="btn-outline-primary" OnClick="@(() => Notifications.Error("Sync failed", "Stays until you close it", durationMs: 0))">Sticky error</ButtonControl>
+                    <ButtonControl OnClick="@(() => Notifications.Clear())">Clear all</ButtonControl>
+                    <span class="result">@(_count == 0 ? "No toasts showing." : $"{_count} showing, newest on top.")</span>
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-<h2>Markup</h2>
-<pre><code>@@inject NotificationService Notifications
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Methods" Title="NotificationService" Rows="Vocab.Service" />
+        <ApiTable Kind="ApiKind.Properties" Title="Notification" Rows="Vocab.Item" />
+        <p class="note"><code>NotificationDisplayControl</code> has no parameters. It reads the service, re-renders on <code>OnChange</code>, and scales with <code>--fx-zoom</code> when a <code>ZoomService</code> is registered. Position, widths and colors are fixed in its stylesheet.</p>
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+    </Vocabulary>
 
-&lt;ButtonControl CssClass="btn-primary"
-    OnClick="@@(() =&gt; Notifications.Info("Message"))"&gt;Info&lt;/ButtonControl&gt;
+    <Accessibility>
+        <ul>
+            <li>The close button is a native <code>&lt;button&gt;</code>; its only text is <code>×</code>, so screen readers announce it as "times" or "multiplication sign".</li>
+            <li>The container is a plain <code>&lt;div&gt;</code> with no <code>aria-live</code> region, so a new toast is not announced. Put important outcomes in the page as well, or use a <a href="demo/dialog">dialog</a>.</li>
+            <li>Toasts slide in over 0.25 s with no <code>prefers-reduced-motion</code> check.</li>
+            <li>The container ignores pointer events except on the toasts themselves, so it never blocks the page underneath.</li>
+        </ul>
+    </Accessibility>
 
-&lt;!-- Place once near root layout --&gt;
-&lt;NotificationDisplayControl /&gt;</code></pre>
+    <Related>
+        <ul>
+            <li>Messages that block until answered: <a href="demo/dialog">Dialogs</a>.</li>
+            <li>Inline banners that stay in the page: <code>AlertControl</code> in <a href="demo/new-components">UI elements</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
 
-<h2>Service registration</h2>
-<pre><code>// Program.cs
-builder.Services.AddScoped&lt;NotificationService&gt;();</code></pre>
+@code {
+    private int _count;
+
+    protected override void OnInitialized()
+    {
+        Notifications.OnChange += HandleChange;   // auto-dismiss fires off the render thread
+        _count = Notifications.Notifications.Count;
+    }
+    private void HandleChange() => _ = InvokeAsync(() => { _count = Notifications.Notifications.Count; StateHasChanged(); });
+    public void Dispose() => Notifications.OnChange -= HandleChange;
+
+    // Vocabulary rows, one per public member (0.2.48).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Service =
+        {
+            new("Info(message, detail?, durationMs = 5000)", "Blue toast.", "void"),
+            new("Success(message, detail?, durationMs = 4000)", "Green toast.", "void"),
+            new("Warning(message, detail?, durationMs = 8000)", "Yellow toast.", "void"),
+            new("Error(message, detail?, durationMs = 10000)", "Red toast. <code>durationMs: 0</code> keeps it until dismissed.", "void"),
+            new("Dismiss(id)", "Removes one toast.", "void"),
+            new("Clear()", "Removes every toast.", "void"),
+            new("Notifications", "Current toasts, newest first, at most 20.", "IReadOnlyList&lt;Notification&gt;"),
+            new("OnChange", "Raised after every add, dismiss or clear. Auto-dismiss raises it from a timer thread; marshal with <code>InvokeAsync</code>.", "event Action"),
+            new("(setup)", "<code>builder.Services.AddScoped&lt;NotificationService&gt;()</code> and one <code>&lt;NotificationDisplayControl /&gt;</code> in the layout. This site has both.", ""),
+        };
+        public static readonly ApiRow[] Item =
+        {
+            new("Id", "Key for <code>Dismiss</code>.", "Guid"),
+            new("Level", "Info, Success, Warning or Error.", "NotificationLevel"),
+            new("Message", "Bold first line.", "string"),
+            new("Detail", "Smaller second line.", "string?", "null"),
+            new("Timestamp", "When it was added.", "DateTime"),
+            new("DurationMs", "Auto-dismiss delay; 0 means sticky.", "int"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-notification-container", "Fixed 12px from the top-right, 320–420px wide, z-index 10000, column with 8px gaps."),
+            new("fx-notification · .fx-notification-info / -success / -warning / -error", "One toast; the level class sets the tinted background, text color and 4px left border."),
+            new("fx-notification-icon · fx-notification-body · fx-notification-message · fx-notification-detail", "Icon glyph, text column, bold message, 11px detail at 80% opacity."),
+            new("fx-notification-close", "The × button, 50% opacity until hovered."),
+            new("fx-slide-in", "0.25s slide from the right on entry."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Levels = @"<div class=""demo-row"">
+    <ButtonControl CssClass=""btn-primary"" OnClick=""@(() => Notifications.Info(""File uploaded"", ""report-q3.xlsx, 2.1 MB""))"">Info</ButtonControl>
+    <ButtonControl CssClass=""btn-success"" OnClick=""@(() => Notifications.Success(""Quote 1042 saved"", ""3 lines updated""))"">Success</ButtonControl>
+    <ButtonControl CssClass=""btn-warning"" OnClick=""@(() => Notifications.Warning(""Price list expires in 3 days"", ""Renew it under Settings, Vendors""))"">Warning</ButtonControl>
+    <ButtonControl CssClass=""btn-danger"" OnClick=""@(() => Notifications.Error(""Could not save quote 1042"", ""SQL timeout after 30 s""))"">Error</ButtonControl>
+    <ButtonControl CssClass=""btn-outline-primary"" OnClick=""@(() => Notifications.Error(""Sync failed"", ""Stays until you close it"", durationMs: 0))"">Sticky error</ButtonControl>
+    <ButtonControl OnClick=""@(() => Notifications.Clear())"">Clear all</ButtonControl>
+    <span class=""result"">@(_count == 0 ? ""No toasts showing."" : $""{_count} showing, newest on top."")</span>
+</div>";
+        public const string LevelsCs = @"private int _count;
+
+protected override void OnInitialized()
+{
+    Notifications.OnChange += HandleChange;   // auto-dismiss fires off the render thread
+    _count = Notifications.Notifications.Count;
+}
+
+private void HandleChange() => _ = InvokeAsync(() => { _count = Notifications.Notifications.Count; StateHasChanged(); });
+
+public void Dispose() => Notifications.OnChange -= HandleChange;";
+    }
+}

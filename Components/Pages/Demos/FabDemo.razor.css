@@ -1,0 +1,15 @@
+.result { display: block; margin-top: 10px; font-size: 13px; color: #475569; }
+.note { font-size: 13.5px; color: #475569; margin: -8px 0 14px; }
+.note code { font-size: 12.5px; background: #f1f5f9; padding: 1px 4px; border-radius: 4px; color: #334155; }
+
+/* Stage: pins the fixed-position control inside the card. The host goes static so the backdrop's
+   containing block is the stage; isolation keeps the control's z-indexes under the site nav. */
+.fab-stage { position: relative; isolation: isolate; height: 320px; border-radius: 8px; background: #f1f5f9; overflow: hidden;
+             display: flex; justify-content: flex-end; align-items: flex-end; padding: 1rem; box-sizing: border-box; }
+.fab-stage.short { height: 240px; }
+.fab-stage ::deep .fx-fab-host { position: static; }
+.fab-stage ::deep .fx-fab-backdrop { position: absolute; }
+
+.stage-lines { position: absolute; inset: 0; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.stage-lines span { display: block; height: 10px; border-radius: 5px; background: #e2e8f0; }
+.fab-note { background: #fff; color: #334155; font-size: 12px; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,.15); }

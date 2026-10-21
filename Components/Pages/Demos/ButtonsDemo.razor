@@ -1,48 +1,201 @@
 @page "/demo/buttons"
+@using FlexCore.Showcase.Components.Shared
 
-<PageTitle>Buttons — FlexCore</PageTitle>
+@* 2026-10-12: on FeatureDemoLayout. Two examples (variants/icons/sizes with the pill subclass, dropdown);
+   theming is the CSS tab of the first. Toggle, button group and split button moved to their own pages; busy/focus, form types, BareStyle,
+   Save/Cancel and Toolbar demos removed, their parameters stay in the vocabulary. Uses only CSS
+   shipped in FlexCore 0.2.48.
+   2026-10-20: code tabs generated from this file (gencode). The CSS tab that showed a .classic/.compact retheme was dropped:
+   nothing in the example used it, so it did not match the markup; a retheme example is a follow-up. *@
 
-<h1>Buttons</h1>
-<p>FlexCore's <code>ButtonControl</code> supports icons, disabled states, bare-style mode, and click propagation control.</p>
+<PageTitle>Buttons — FlexCore Showcase</PageTitle>
 
-<h2>Standard Variants</h2>
-<div class="demo-frame demo-buttons">
-    <ButtonControl CssClass="btn-primary">Primary</ButtonControl>
-    <ButtonControl CssClass="btn-secondary">Secondary</ButtonControl>
-    <ButtonControl CssClass="btn-accent">Accent</ButtonControl>
-    <ButtonControl CssClass="btn-success">Success</ButtonControl>
-    <ButtonControl CssClass="btn-warning">Warning</ButtonControl>
-    <ButtonControl CssClass="btn-danger">Danger</ButtonControl>
-    <ButtonControl CssClass="btn-primary" Disabled="true">Disabled</ButtonControl>
-</div>
+<FeatureDemoLayout Title="Buttons" Category="Components" ControlName="ButtonControl"
+                   Tagline="One native button, styled through CSS variables, with an optional dropdown."
+                   SourcePath="ButtonControl.razor">
+    <Overview>
+        <p>
+            <code>ButtonControl</code> renders one <code>&lt;button&gt;</code>. Variants are CSS classes, colors come
+            from <code>--fx-btn-*</code> variables, and any attribute it does not recognise is forwarded to the element.
+            Give it <code>DropDownContent</code> and it becomes a popup trigger that closes on click-away without JavaScript.
+        </p>
+    </Overview>
 
-<h2>With Icons</h2>
-<div class="demo-frame demo-buttons">
-    <ButtonControl CssClass="btn-primary" IconCss="bi bi-plus-circle">Add Item</ButtonControl>
-    <ButtonControl CssClass="btn-secondary" IconCss="bi bi-pencil">Edit</ButtonControl>
-    <ButtonControl CssClass="btn-danger" IconCss="bi bi-trash">Delete</ButtonControl>
-</div>
+    <Examples>
+        <DemoExample Id="variants" Title="Variants, icons and sizes" RazorCode="@Code.Variants">
+            <Description><p>The default look comes from the theme variables; add one <code>btn-*</code> class for a semantic color. <code>IconCss</code> renders a leading icon, a trailing icon is ordinary content, and <code>btn-sm</code> / <code>btn-lg</code> change the size. Icon-only buttons need <code>Title</code> and <code>aria-label</code>. <code>RoundedButtonControl</code> is a pill-shaped subclass with four <code>Variant</code> colors. The <code>--fx-btn-*</code> variables in the table below retheme any region that sets them.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <ButtonControl>Default</ButtonControl>
+                    <ButtonControl CssClass="btn-primary">Primary</ButtonControl>
+                    <ButtonControl CssClass="btn-secondary">Secondary</ButtonControl>
+                    <ButtonControl CssClass="btn-success">Success</ButtonControl>
+                    <ButtonControl CssClass="btn-danger">Danger</ButtonControl>
+                    <ButtonControl CssClass="btn-outline-primary">Outline</ButtonControl>
+                    <ButtonControl CssClass="btn-primary" Disabled="true">Disabled</ButtonControl>
+                </div>
+                <div class="demo-row mt">
+                    <ButtonControl CssClass="btn-primary btn-sm" IconCss="bi bi-plus">Small</ButtonControl>
+                    <ButtonControl CssClass="btn-primary" IconCss="bi bi-plus-lg">New</ButtonControl>
+                    <ButtonControl CssClass="btn-primary btn-lg" IconCss="bi bi-plus">Large</ButtonControl>
+                    <ButtonControl CssClass="btn-outline-primary">Next <span class="bi bi-arrow-right"></span></ButtonControl>
+                    <ButtonControl CssClass="btn-secondary" IconCss="bi bi-gear" Title="Settings" aria-label="Settings" />
+                </div>
+                @* #pill is a catalog target *@
+                <div class="demo-row mt" id="pill">
+                    <RoundedButtonControl Variant="accent">accent</RoundedButtonControl>
+                    <RoundedButtonControl Variant="muted">muted</RoundedButtonControl>
+                    <RoundedButtonControl Variant="success" IconCss="bi bi-check2">success</RoundedButtonControl>
+                    <RoundedButtonControl Variant="danger" IconCss="bi bi-exclamation-triangle">danger</RoundedButtonControl>
+                </div>
+            </Demo>
+        </DemoExample>
 
-<h2>BareStyle Mode</h2>
-<p>When <code>BareStyle="true"</code>, the default <code>.fx-button</code> class is suppressed — the host owns all styling.</p>
-<div class="demo-frame demo-buttons">
-    <ButtonControl BareStyle="true" CssClass="btn-primary">Host-Styled</ButtonControl>
-    <ButtonControl BareStyle="true" CssClass="btn-accent">Custom Class Only</ButtonControl>
-</div>
+        <DemoExample Id="dropdown" Title="Dropdown button" RazorCode="@Code.Dropdown" CSharpCode="@Code.DropdownCs">
+            <Description><p>Set <code>DropDownContent</code> and the button toggles a panel beneath itself. A backdrop element closes it on click-away. Call <code>CloseDropDown()</code> after a pick.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <ButtonControl @ref="_export" CssClass="btn-primary" IconCss="bi bi-download" DropDownCssClass="menu">
+                        <ChildContent>Export <span class="bi bi-caret-down-fill dd-caret"></span></ChildContent>
+                        <DropDownContent>
+                            @foreach (var fmt in new[] { "Excel (.xlsx)", "CSV", "PDF" })
+                            {
+                                <ButtonControl BareStyle="true" CssClass="menu-item" OnClick="@(() => Pick(fmt))">@fmt</ButtonControl>
+                            }
+                        </DropDownContent>
+                    </ButtonControl>
+                    @if (_picked is not null) { <span class="result">Exporting as @_picked</span> }
+                </div>
+            </Demo>
+        </DemoExample>
 
-<h2>Interactive</h2>
-<div class="demo-frame">
-    <ButtonControl CssClass="btn-primary" OnClick="@HandleClick">Click Me (@_clickCount)</ButtonControl>
-    <p style="margin-top:8px; font-size:13px; color:#6b7280;">Click count: @_clickCount</p>
-</div>
+    </Examples>
 
-<h2>Markup</h2>
-<pre><code>&lt;ButtonControl CssClass="btn-primary" IconCss="bi bi-plus-circle"&gt;Add Item&lt;/ButtonControl&gt;
-&lt;ButtonControl CssClass="btn-danger" Disabled="true"&gt;Disabled&lt;/ButtonControl&gt;
-&lt;ButtonControl BareStyle="true" CssClass="my-class"&gt;Host-Styled&lt;/ButtonControl&gt;
-&lt;ButtonControl CssClass="btn-primary" OnClick="@@HandleClick"&gt;Click Me&lt;/ButtonControl&gt;</code></pre>
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
+        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>Renders a real <code>&lt;button&gt;</code>: Space and Enter activate it, it takes part in forms, and screen readers announce its role.</li>
+            <li>Icon-only buttons need <code>Title</code> plus <code>aria-label</code>; the icon span carries no text.</li>
+            <li>Dropdown mode sets <code>aria-haspopup</code> and <code>aria-expanded</code>.</li>
+            <li>Inside <code>DialogControl</code>, Enter fires the default button through <code>DefaultButtonScope</code>; a control that needs Enter for itself calls <code>ConsumeEnter()</code>.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>Own pages: <a href="demo/split-button">Split button</a>, <a href="demo/toggle-buttons">Toggle buttons</a> (ToggleButtonControl and ButtonGroupControl), <a href="demo/fab">Floating action button</a>.</li>
+            <li><code>SaveButtonControl</code> and <code>CancelButtonControl</code> are presets of this control.</li>
+            <li><code>ToolbarControl</code> and <code>ToolbarButtonControl</code>: <a href="demo/counterparts?tab=docking">Control tour</a>.</li>
+            <li>Default button on Enter: <a href="demo/dialog">Dialogs</a>.</li>
+            <li><code>RibbonControl</code>: <a href="">home page</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
 
 @code {
-    int _clickCount;
-    void HandleClick() => _clickCount++;
+    // Dropdown
+    private ButtonControl? _export;
+    private string? _picked;
+    private void Pick(string format) { _picked = format; _export?.CloseDropDown(); }
+
+    // Vocabulary rows, one per public member of ButtonControl.razor (0.2.48).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Parameters =
+        {
+            new("ChildContent", "Button label or any markup.", "RenderFragment?"),
+            new("CssClass", "Appended after <code>fx-button</code>. Variant and size classes go here.", "string?", "null"),
+            new("IconCss", "Class list for a leading icon span. Any icon font works.", "string?", "null"),
+            new("Disabled", "Sets the native <code>disabled</code> attribute; hover and active styles are suppressed.", "bool", "false"),
+            new("OnClick", "Click handler. In dropdown mode it fires before the panel toggles.", "EventCallback&lt;MouseEventArgs&gt;"),
+            new("ButtonType", "Native <code>type</code>: button, submit or reset.", "string", "\"button\""),
+            new("Title", "Native tooltip. Required on icon-only buttons.", "string?", "null"),
+            new("Style", "Inline style. Useful for per-button CSS variables.", "string?", "null"),
+            new("TabIndex", "Native <code>tabindex</code>.", "int?", "null"),
+            new("AutoFocus", "Focuses the button once after first render, unless disabled.", "bool", "false"),
+            new("BareStyle", "Omits the <code>fx-button</code> base class so host CSS owns the look.", "bool", "false"),
+            new("StopPropagation", "Stops the click bubbling to ancestors that also handle clicks.", "bool", "false"),
+            new("PreventMouseDownDefault", "Keeps focus where it was on mousedown. For editor formatting buttons.", "bool", "false"),
+            new("DropDownContent", "When set, the button toggles a popup panel beneath itself.", "RenderFragment?", "null"),
+            new("DropDownCssClass", "Extra class on the popup panel.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the button: <code>id</code>, <code>name</code>, <code>form</code>, <code>accesskey</code>, <code>aria-*</code>, <code>data-*</code>. Explicit parameters win.", "Dictionary&lt;string,object&gt;"),
+            new("RoundedButtonControl.Variant", "Pill subclass only: <code>accent</code>, <code>muted</code>, <code>success</code> or <code>danger</code>.", "string", "\"muted\""),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("FocusAsync()", "Focuses the element without scrolling. Capture the component with <code>@ref</code>.", "ValueTask"),
+            new("CloseDropDown()", "Closes the popup, for example after a menu item is picked.", "void"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("btn-primary · btn-secondary · btn-success · btn-warning · btn-danger", "Filled semantic colors."),
+            new("btn-outline-primary", "Transparent fill, blue border and text; fills on hover."),
+            new("btn-sm · btn-lg", "Compact and large padding and font size."),
+            new("fx-button-classic", "Win32 3D bevel, MS Sans Serif, square corners. For migrated VB6 forms."),
+            new("mini-btn · fx-dialog-btn", "Compact grid-cell button; dialog footer padding."),
+        };
+        public static readonly ApiRow[] Vars =
+        {
+            new("--fx-btn-bg / --fx-btn-color", "Resting fill and text.", "#f7f7f7 / #333"),
+            new("--fx-btn-border / --fx-btn-border-color", "Border shorthand and per-side color (Win32 bevel).", "1px solid #c9c9c9"),
+            new("--fx-btn-radius", "Corner radius.", "4px"),
+            new("--fx-btn-hover-bg / --fx-btn-hover-border", "Hover state.", "#e6e6e6 / the --fx-btn-border value"),
+            new("--fx-btn-active-bg", "Pressed state.", "#b6b6b6"),
+            new("--fx-btn-shadow", "Box shadow.", "none"),
+            new("--fx-font-size × --fx-zoom", "Font size; zoom scales every FlexCore control together.", "13px × 1"),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Variants = @"<div class=""demo-row"">
+    <ButtonControl>Default</ButtonControl>
+    <ButtonControl CssClass=""btn-primary"">Primary</ButtonControl>
+    <ButtonControl CssClass=""btn-secondary"">Secondary</ButtonControl>
+    <ButtonControl CssClass=""btn-success"">Success</ButtonControl>
+    <ButtonControl CssClass=""btn-danger"">Danger</ButtonControl>
+    <ButtonControl CssClass=""btn-outline-primary"">Outline</ButtonControl>
+    <ButtonControl CssClass=""btn-primary"" Disabled=""true"">Disabled</ButtonControl>
+</div>
+<div class=""demo-row mt"">
+    <ButtonControl CssClass=""btn-primary btn-sm"" IconCss=""bi bi-plus"">Small</ButtonControl>
+    <ButtonControl CssClass=""btn-primary"" IconCss=""bi bi-plus-lg"">New</ButtonControl>
+    <ButtonControl CssClass=""btn-primary btn-lg"" IconCss=""bi bi-plus"">Large</ButtonControl>
+    <ButtonControl CssClass=""btn-outline-primary"">Next <span class=""bi bi-arrow-right""></span></ButtonControl>
+    <ButtonControl CssClass=""btn-secondary"" IconCss=""bi bi-gear"" Title=""Settings"" aria-label=""Settings"" />
+</div>
+@* #pill is a catalog target *@
+<div class=""demo-row mt"" id=""pill"">
+    <RoundedButtonControl Variant=""accent"">accent</RoundedButtonControl>
+    <RoundedButtonControl Variant=""muted"">muted</RoundedButtonControl>
+    <RoundedButtonControl Variant=""success"" IconCss=""bi bi-check2"">success</RoundedButtonControl>
+    <RoundedButtonControl Variant=""danger"" IconCss=""bi bi-exclamation-triangle"">danger</RoundedButtonControl>
+</div>";
+
+        public const string Dropdown = @"<div class=""demo-row"">
+    <ButtonControl @ref=""_export"" CssClass=""btn-primary"" IconCss=""bi bi-download"" DropDownCssClass=""menu"">
+        <ChildContent>Export <span class=""bi bi-caret-down-fill dd-caret""></span></ChildContent>
+        <DropDownContent>
+            @foreach (var fmt in new[] { ""Excel (.xlsx)"", ""CSV"", ""PDF"" })
+            {
+                <ButtonControl BareStyle=""true"" CssClass=""menu-item"" OnClick=""@(() => Pick(fmt))"">@fmt</ButtonControl>
+            }
+        </DropDownContent>
+    </ButtonControl>
+    @if (_picked is not null) { <span class=""result"">Exporting as @_picked</span> }
+</div>";
+        public const string DropdownCs = @"// Dropdown
+private ButtonControl? _export;
+
+private string? _picked;
+
+private void Pick(string format) { _picked = format; _export?.CloseDropDown(); }";
+    }
 }

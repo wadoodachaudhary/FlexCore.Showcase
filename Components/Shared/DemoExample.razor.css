@@ -1,0 +1,19 @@
+.ex { margin: 0 0 24px; scroll-margin-top: 76px; }
+.ex ::deep .fx-card { overflow: visible; }   /* dropdown panels must escape the card */
+.ex-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.ex-title { margin: 0; font-size: 16px; font-weight: 600; color: #0f172a; }
+.ex-anchor { color: #cbd5e1; text-decoration: none; margin-right: 6px; font-weight: 400; }
+.ex-title:hover .ex-anchor { color: #2563eb; }
+.ex-controls { font-size: 13px; color: #475569; }
+.ex-desc { margin-top: 4px; font-size: 13.5px; color: #475569; max-width: 75ch; }
+.ex-desc ::deep p { margin: 0; }
+.ex-desc ::deep code, .ex-live ::deep code { color: #334155; font-size: 12.5px; background: #f1f5f9; padding: 1px 4px; border-radius: 4px; }
+.ex ::deep .ex-tabs { margin: -1rem -1.15rem 14px; }   /* flush with the header; card body pads 1rem 1.15rem */
+.ex-live { padding: 2px 0 4px; }
+.ex-code-pane { position: relative; }
+.ex ::deep .ex-copy { position: absolute; top: 8px; right: 8px; }
+.ex-pre { margin: 0; padding: 14px 16px; background: #1e1e1e; color: #d4d4d4; border-radius: 8px;
+          font: 12.5px/1.6 Consolas, Monaco, "Courier New", monospace; overflow-x: auto; tab-size: 4; }
+
+/* 2026-10-20: a fragment link from another page focuses the section (see the .razor comment); the scroll margin above keeps it under the header. */
+.ex:focus { outline: none; }

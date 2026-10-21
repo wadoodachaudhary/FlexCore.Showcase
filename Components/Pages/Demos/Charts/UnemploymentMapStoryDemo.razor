@@ -1,0 +1,90 @@
+@page "/demo/charts/map-story"
+@rendermode InteractiveServer
+@using Fx.ControlKit.Maps
+
+<PageTitle>Map story — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Map story" Category="Charts" CategoryHref="demo/charts" ControlName="MapStoryControl"
+                   Tagline="A drill-down choropleth: world, then continent, then province, state, or region."
+                   SourcePath="Maps/MapStoryControl.razor;Maps/ChoroplethLayout.cs;Maps/MapStory.cs">
+    <Overview>
+        <p>
+            <code>MapStory</code> is a declarative report: levels, region values, a color scale, callouts and the source line.
+            Define it in C# or load the same shape from JSON with <code>MapStory.Load</code>.
+            <code>MapStoryControl</code> draws each level on the existing <code>MapControl</code> choropleth.
+            Click a region to open the next map. Back and the breadcrumb return upward.
+            <code>MapStory.RenderSvg</code> writes the same graphic as static SVG for a report or an export.
+            The story below is unemployment. Continent figures are labour-force-weighted averages of ILO modelled national rates (World Bank, 2025).
+            Europe uses the August 2026 rates from the reference graphic. Provincial maps use Eurostat NUTS-2 for 2024, and the United States uses BLS statewide rates for September 2026.
+            No figure on this page is sample data. A country without a provincial series opens “Regional data not available”.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="story" Title="Unemployment, world to province" RazorCode="@_razor" CSharpCode="@_csharp">
+            <Description>
+                <p>Start at the world. Open Europe, then Spain, France, Germany, Italy or Finland. From North America, open the United States. Other countries stop at the national rate.</p>
+            </Description>
+            <Demo>
+                <MapStoryControl Story="_story" Width="960" Height="640" />
+            </Demo>
+        </DemoExample>
+        <DemoExample Id="svg" Title="The same Europe graphic as static SVG">
+            <Description>
+                <p><code>RenderSvg</code> does not need a circuit. A report host can place this markup the way it places other SVG.</p>
+            </Description>
+            <Demo>
+                <div class="map-story-static">@((MarkupString)_europeSvg)</div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ul>
+            <li><code>MapStory</code>, <code>MapStoryLevel</code>, <code>MapStoryRegion</code>: the report. A region’s <code>ChildLevelId</code> is the map that opens next.</li>
+            <li><code>ChoroplethScale</code>: sequential stops. The default runs from <code>#F6E27A</code> to <code>#5A1228</code>. Missing values use <code>#C5C6C4</code>.</li>
+            <li><code>MapStoryLevel.SampleData</code> and <code>MapStoryRegion.Sample</code>: the graphic prints “Sample data” instead of presenting a stand-in number as published.</li>
+            <li><code>MapGeographyCatalog.Bundled</code>: Natural Earth 1:110m countries (public domain) and simplified NUTS-2 / US state boundaries, embedded with the control. No tile server.</li>
+            <li>Sources for this story live in <code>wwwroot/maps/stories/unemployment.json</code>.</li>
+        </ul>
+    </Vocabulary>
+
+    <Accessibility>
+        <p>
+            Each region is a button. Enter or Space opens the next map. The breadcrumb is a list of buttons, and the current level is marked <code>aria-current="page"</code>.
+            The title, legend range, source line and the “no regional data” message are in the page for assistive technology. Hover shows the same rate as the button name.
+        </p>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li><a href="demo/charts/sunburst">Sunburst</a>: the other drill-down graphic, for a hierarchy rather than a map.</li>
+            <li><a href="demo/charts">Charts</a>: the rest of the SVG chart gallery.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+<style>
+    .map-story-static svg { width: 100%; height: auto; display: block; }
+</style>
+
+@code {
+    MapStory _story = null!;
+    string _europeSvg = "";
+
+    protected override void OnInitialized()
+    {
+        _story = MapStory.LoadBundledUnemployment();
+        _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), "europe");
+    }
+
+    const string _razor = """
+        <MapStoryControl Story="_story" Width="960" Height="640" />
+        """;
+
+    const string _csharp = """
+        // wwwroot/maps/stories/unemployment.json, or any story a host authors.
+        _story = MapStory.LoadBundledUnemployment();
+        var svg = _story.RenderSvg(MapGeographyCatalog.Bundled(), "europe");
+        """;
+}

@@ -1,0 +1,7 @@
+/* 2026-10-12: Date & time page. No Bootstrap names in here. */
+.fields { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: 12px; color: #64748b; }
+.result { font-size: 13px; color: #475569; margin: 12px 0 0; }
+.cal-row { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+.cal-row .visits { margin: 0; max-width: 260px; }

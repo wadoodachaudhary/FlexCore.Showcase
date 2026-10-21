@@ -1,0 +1,130 @@
+@namespace FlexCore.Showcase.Components.Shared
+@inject NavigationManager Nav
+
+@* Page frame for one feature (2026-10-12): header → Overview → Examples → Documentation →
+   Keyboard and accessibility → Related, plus an "On this page" list filled by the DemoExamples.
+   Breadcrumb is BreadCrumbControl; the two-column frame has no FlexCore equivalent.
+   2026-10-18 (Baaria's review): "Vocabulary" became "Documentation"; the source files moved from the header to the rail under
+   "On this page" and are listed without links, because whether the full source stays public is still an open decision.
+   2026-10-20 (developer meeting): the rail shows an Examples entry with the example titles nested under it. *@
+<CascadingValue Value="this" IsFixed="true">
+<div class="fd-shell">
+    <header class="fd-header">
+        <BreadCrumbControl Items="_crumbs" />
+        <div class="fd-title-row">
+            <h1 class="fd-title">@Title</h1>
+            @if (!string.IsNullOrEmpty(ControlName))
+            {
+                <code class="fd-control">@ControlName</code>
+            }
+        </div>
+        @if (!string.IsNullOrEmpty(Tagline))
+        {
+            <p class="fd-tagline">@Tagline</p>
+        }
+        @if (Vocabulary is not null)
+        {
+            <div class="fd-links">
+                <a href="@($"{PagePath}#documentation")">Documentation</a>
+            </div>
+        }
+    </header>
+
+    <div class="fd-body">
+        <div class="fd-main">
+            <section class="fd-section" id="overview">
+                <h2>Overview</h2>
+                <div class="fd-prose">@Overview</div>
+            </section>
+
+            <section class="fd-section" id="examples">
+                <h2>Examples</h2>
+                @Examples
+            </section>
+
+            @if (Vocabulary is not null)
+            {
+                <section class="fd-section" id="documentation">
+                    <h2>Documentation</h2>
+                    @Vocabulary
+                </section>
+            }
+
+            @if (Accessibility is not null)
+            {
+                <section class="fd-section" id="accessibility">
+                    <h2>Keyboard and accessibility</h2>
+                    <div class="fd-prose">@Accessibility</div>
+                </section>
+            }
+
+            @if (Related is not null)
+            {
+                <section class="fd-section" id="related">
+                    <h2>Related</h2>
+                    <div class="fd-prose">@Related</div>
+                </section>
+            }
+        </div>
+
+        <aside class="fd-toc" aria-label="On this page">
+            <div class="fd-toc-title">On this page</div>
+            <a href="@($"{PagePath}#overview")">Overview</a>
+            <a href="@($"{PagePath}#examples")">Examples</a>
+            @foreach (var (id, title) in _examples)
+            {
+                <a class="fd-toc-ex" href="@($"{PagePath}#{id}")">@title</a>
+            }
+            @if (Vocabulary is not null) { <a href="@($"{PagePath}#documentation")">Documentation</a> }
+            @if (Accessibility is not null) { <a href="@($"{PagePath}#accessibility")">Keyboard and accessibility</a> }
+            @if (Related is not null) { <a href="@($"{PagePath}#related")">Related</a> }
+            @if (SourcePaths.Length > 0)
+            {
+                <div class="fd-toc-title fd-toc-sources-title">Source files</div>
+                @foreach (var p in SourcePaths)
+                {
+                    <span class="fd-toc-source">@p</span>
+                }
+            }
+        </aside>
+    </div>
+</div>
+</CascadingValue>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    /// <summary>Breadcrumb group, e.g. Components. <see cref="CategoryHref"/> is where it links.</summary>
+    [Parameter, EditorRequired] public string Category { get; set; } = "";
+    [Parameter] public string CategoryHref { get; set; } = "components";
+    /// <summary>Type name shown beside the title, e.g. ButtonControl.</summary>
+    [Parameter] public string? ControlName { get; set; }
+    [Parameter] public string? Tagline { get; set; }
+    /// <summary>Repo-relative path(s) of the control's source, ';'-separated; listed in the rail, not linked.</summary>
+    [Parameter] public string? SourcePath { get; set; }
+    private string[] SourcePaths => (SourcePath ?? "").Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    [Parameter, EditorRequired] public RenderFragment? Overview { get; set; }
+    /// <summary>One or more DemoExample components.</summary>
+    [Parameter, EditorRequired] public RenderFragment? Examples { get; set; }
+    /// <summary>The Documentation section (tables and notes). The slot keeps its original name so pages need no change.</summary>
+    [Parameter] public RenderFragment? Vocabulary { get; set; }
+    [Parameter] public RenderFragment? Accessibility { get; set; }
+    [Parameter] public RenderFragment? Related { get; set; }
+
+    /// <summary>Current path without query or fragment, so anchors stay on this page.</summary>
+    public string PagePath => Nav.ToBaseRelativePath(Nav.Uri).Split('#')[0].Split('?')[0];
+
+    private List<BreadCrumbItem> _crumbs = new();
+    private readonly List<(string Id, string Title)> _examples = new();
+
+    protected override void OnParametersSet() =>
+        _crumbs = new() { new("Home", ""), new(Category, CategoryHref), new(Title) };
+
+    /// <summary>Called by each DemoExample on init; feeds the "On this page" list.</summary>
+    public void Register(string id, string title)
+    {
+        if (_examples.Any(e => e.Id == id)) return;
+        _examples.Add((id, title));
+        _ = InvokeAsync(StateHasChanged);   // children init after the parent's first render
+    }
+}

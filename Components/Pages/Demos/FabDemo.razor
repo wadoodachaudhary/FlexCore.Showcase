@@ -1,0 +1,203 @@
+@page "/demo/fab"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-12: new page on FeatureDemoLayout. Facts checked against FabMenuControl.razor, FabMenuItem.cs,
+   FabMenuControl.razor.css and BadgeModels.cs (FlexCore 0.2.48). The control is position:fixed; each card
+   pins its instance inside a stage with two scoped overrides (CSS tab of the first example) so two can show. *@
+
+<PageTitle>Floating action button — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Floating action button" Category="Components" ControlName="FabMenuControl"
+                   Tagline="A round button fixed to the corner of the screen that fans out a menu of actions."
+                   SourcePath="FabMenuControl.razor">
+    <Overview>
+        <p>
+            <code>FabMenuControl</code> renders a 56px round trigger fixed 2rem from the bottom-right of the viewport. Clicking it dims
+            the page behind a backdrop and slides up one labelled round button per <code>FabMenuItem</code>, first item nearest the
+            trigger. That open state is what other libraries call a speed dial. Picking an action closes the menu and runs the item's
+            <code>OnClick</code>. No JavaScript.
+        </p>
+        <p>On this page each example pins its instance inside a grey stage so two can be shown at once. In an app, leave the position alone.</p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="menu" Title="Action menu" RazorCode="@Code.Menu" CSharpCode="@Code.MenuCs" CssCode="@Code.MenuCss">
+            <Description><p>Each item carries a label, an icon and a colour. The plus turns into a close cross while open. The switch on the right sets <code>Disabled</code>.</p></Description>
+            <Controls>
+                <ToggleButtonControl @bind-Selected="_disabled">Disabled</ToggleButtonControl>
+            </Controls>
+            <Demo>
+                <div class="fab-stage">
+                    <div class="stage-lines"><span style="width:38%"></span><span style="width:72%"></span><span style="width:55%"></span><span style="width:64%"></span></div>
+                    <FabMenuControl Items="_actions" Disabled="@_disabled" Title="Create" />
+                </div>
+                <span class="result">@(_last is null ? "Open the menu and pick an action." : $"Picked: {_last}")</span>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="custom" Title="Trigger icon and extra content" RazorCode="@Code.Custom" CSharpCode="@Code.CustomCs">
+            <Description><p><code>IconCss</code> replaces the plus. <code>ChildContent</code> renders in the fan after the items, for markup that is not an action.</p></Description>
+            <Demo>
+                <div class="fab-stage short">
+                    <FabMenuControl IconCss="bi bi-chat-dots" Items="_support" Title="Support">
+                        <div class="fab-note">Replies within a day</div>
+                    </FabMenuControl>
+                </div>
+                <span class="result">@(_contact is null ? "" : $"Picked: {_contact}")</span>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
+        <ApiTable Kind="ApiKind.Properties" Title="FabMenuItem" Rows="Vocab.Item" />
+        <p class="note">Colours, sizes and the 2rem corner offset are fixed in the control's stylesheet; it reads no <code>--fx-*</code> variables. There are no public methods.</p>
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>The trigger is a native <code>&lt;button&gt;</code> with <code>aria-expanded</code>. Its default icon is an unlabelled SVG, so set <code>Title</code> to give it a name.</li>
+            <li>Each action is a native button named by its <code>title</code> attribute; the visible label chip is a separate span.</li>
+            <li>Enter or Space on the trigger opens and closes the menu. The action buttons come before the trigger in the DOM, so after opening use Shift+Tab to reach them. There is no arrow-key or Escape handling, and the backdrop is not focusable.</li>
+            <li>The fan slides in over 0.2s with no <code>prefers-reduced-motion</code> check.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>A menu on a button in the page flow: <a href="demo/buttons#dropdown">ButtonControl dropdown mode</a> or <a href="demo/split-button">Split button</a>.</li>
+            <li>Pressed-state buttons: <a href="demo/toggle-buttons">Toggle buttons</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    private bool _disabled;
+    private string? _last, _contact;
+    private List<FabMenuItem> _actions = new(), _support = new();
+
+    protected override void OnInitialized()
+    {
+        _actions = new()
+        {
+            Action("New document", "bi bi-file-earmark-plus", BadgeVariant.Primary, t => _last = t),
+            Action("Upload", "bi bi-upload", BadgeVariant.Success, t => _last = t),
+            Action("Share", "bi bi-share", BadgeVariant.Info, t => _last = t),
+            Action("Delete", "bi bi-trash", BadgeVariant.Danger, t => _last = t),
+        };
+        _support = new()
+        {
+            Action("Chat with us", "bi bi-chat-text", BadgeVariant.Primary, t => _contact = t),
+            Action("Email", "bi bi-envelope", BadgeVariant.Secondary, t => _contact = t),
+        };
+    }
+
+    // FabMenuItem(title, iconCss, color); OnClick is a settable EventCallback.
+    private FabMenuItem Action(string title, string icon, BadgeVariant color, Action<string> pick) =>
+        new(title, icon, color) { OnClick = EventCallback.Factory.Create(this, () => pick(title)) };
+
+    // Vocabulary rows, one per public member (0.2.48). Base-class parameters marked (base).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Parameters =
+        {
+            new("Items", "Actions shown when open, first nearest the trigger.", "IList&lt;FabMenuItem&gt;?", "null"),
+            new("IconCss", "Trigger icon. Default is a plus that rotates into a cross while open; a custom icon rotates too.", "string?", "null"),
+            new("ChildContent", "Extra markup rendered in the fan after the items. Clicks inside it do not close the menu.", "RenderFragment?", "null"),
+            new("Disabled", "Disables the trigger; the menu cannot open.", "bool", "false"),
+            new("Title (base)", "Tooltip and accessible name of the trigger.", "string?", "null"),
+            new("CssClass / Style (base)", "On the host element.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the host <code>&lt;div&gt;</code>.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Item =
+        {
+            new("Title", "Label chip beside the button and the button's tooltip.", "string", "\"\""),
+            new("IconCss", "Icon in the round button; a dot when empty.", "string?", "null"),
+            new("Color", "Fill: Primary, Secondary, Success, Danger, Warning, Info or Dark. <code>Light</code> has no rule in the stylesheet and renders with no fill.", "BadgeVariant", "Primary"),
+            new("OnClick", "Runs after the menu closes.", "EventCallback", "none"),
+            new("ctor", "<code>new(title, iconCss, color)</code>; set <code>OnClick</code> in an initializer.", "", null),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-fab-host · .fx-fab-open", "Fixed 2rem from the bottom-right, z-index 1050. <code>fx-fab-open</code> while the menu is showing."),
+            new("fx-fab-trigger", "56px blue circle with a shadow; grows 5% on hover."),
+            new("fx-fab-backdrop", "Full-screen 25% black layer; click closes the menu."),
+            new("fx-fab-actions", "Column of actions above the trigger; slides in over 0.2s."),
+            new("fx-fab-action-row · fx-fab-action-label · fx-fab-action-btn", "One action: white label chip plus a 42px circle that grows 10% on hover."),
+            new("fx-fab-color-primary … fx-fab-color-dark", "Seven fills, one per <code>BadgeVariant</code> except Light."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Menu = @"<ToggleButtonControl @bind-Selected=""_disabled"">Disabled</ToggleButtonControl>
+
+<div class=""fab-stage"">
+    <div class=""stage-lines""><span style=""width:38%""></span><span style=""width:72%""></span><span style=""width:55%""></span><span style=""width:64%""></span></div>
+    <FabMenuControl Items=""_actions"" Disabled=""@_disabled"" Title=""Create"" />
+</div>
+<span class=""result"">@(_last is null ? ""Open the menu and pick an action."" : $""Picked: {_last}"")</span>";
+        public const string MenuCs = @"private bool _disabled;
+
+private string? _last, _contact;
+
+private List<FabMenuItem> _actions = new(), _support = new();
+
+protected override void OnInitialized()
+{
+    _actions = new()
+    {
+        Action(""New document"", ""bi bi-file-earmark-plus"", BadgeVariant.Primary, t => _last = t),
+        Action(""Upload"", ""bi bi-upload"", BadgeVariant.Success, t => _last = t),
+        Action(""Share"", ""bi bi-share"", BadgeVariant.Info, t => _last = t),
+        Action(""Delete"", ""bi bi-trash"", BadgeVariant.Danger, t => _last = t),
+    };
+    _support = new()
+    {
+        Action(""Chat with us"", ""bi bi-chat-text"", BadgeVariant.Primary, t => _contact = t),
+        Action(""Email"", ""bi bi-envelope"", BadgeVariant.Secondary, t => _contact = t),
+    };
+}
+
+// FabMenuItem(title, iconCss, color); OnClick is a settable EventCallback.
+private FabMenuItem Action(string title, string icon, BadgeVariant color, Action<string> pick) =>
+    new(title, icon, color) { OnClick = EventCallback.Factory.Create(this, () => pick(title)) };";
+        public const string MenuCss = @"/* Demo only: pin the control inside a panel instead of the viewport corner. */
+.fab-stage { position: relative; isolation: isolate; height: 320px; padding: 1rem;
+             display: flex; justify-content: flex-end; align-items: flex-end; }
+.fab-stage ::deep .fx-fab-host { position: static; }
+.fab-stage ::deep .fx-fab-backdrop { position: absolute; }   /* covers the stage, not the page */";
+
+        public const string Custom = @"<div class=""fab-stage short"">
+    <FabMenuControl IconCss=""bi bi-chat-dots"" Items=""_support"" Title=""Support"">
+        <div class=""fab-note"">Replies within a day</div>
+    </FabMenuControl>
+</div>
+<span class=""result"">@(_contact is null ? """" : $""Picked: {_contact}"")</span>";
+        public const string CustomCs = @"private string? _last, _contact;
+
+private List<FabMenuItem> _actions = new(), _support = new();
+
+protected override void OnInitialized()
+{
+    _actions = new()
+    {
+        Action(""New document"", ""bi bi-file-earmark-plus"", BadgeVariant.Primary, t => _last = t),
+        Action(""Upload"", ""bi bi-upload"", BadgeVariant.Success, t => _last = t),
+        Action(""Share"", ""bi bi-share"", BadgeVariant.Info, t => _last = t),
+        Action(""Delete"", ""bi bi-trash"", BadgeVariant.Danger, t => _last = t),
+    };
+    _support = new()
+    {
+        Action(""Chat with us"", ""bi bi-chat-text"", BadgeVariant.Primary, t => _contact = t),
+        Action(""Email"", ""bi bi-envelope"", BadgeVariant.Secondary, t => _contact = t),
+    };
+}
+
+// FabMenuItem(title, iconCss, color); OnClick is a settable EventCallback.
+private FabMenuItem Action(string title, string icon, BadgeVariant color, Action<string> pick) =>
+    new(title, icon, color) { OnClick = EventCallback.Factory.Create(this, () => pick(title)) };";
+    }
+}

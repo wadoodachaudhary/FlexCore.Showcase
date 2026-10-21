@@ -3,7 +3,7 @@
 <section class="popular-components-section">
     <h2 class="popular-title">Most Popular UI components</h2>
     <div class="popular-cards-grid">
-        <a href="demo/grid/ag-grid-showcase" class="popular-card">
+        <a href="demo/grid" class="popular-card">
             <div class="popular-icon-box pink">
                 <span class="bi bi-table"></span>
             </div>
@@ -24,11 +24,11 @@
             <span class="popular-name">Sunburst Chart</span>
         </a>
 
-        <a href="demo/counterparts" class="popular-card">
+        <a href="demo/dialog" class="popular-card">
             <div class="popular-icon-box indigo">
-                <span class="bi bi-calendar3"></span>
+                <span class="bi bi-window"></span>
             </div>
-            <span class="popular-name">Scheduler &amp; Gantt</span>
+            <span class="popular-name">Dialogs</span>
         </a>
 
         <a href="demo/reports/model-costs" class="popular-card">
@@ -38,11 +38,11 @@
             <span class="popular-name">Reports &amp; Writer</span>
         </a>
 
-        <a href="demo/tree/tree-load-bench" class="popular-card">
+        <a href="demo/buttons" class="popular-card">
             <div class="popular-icon-box green">
-                <span class="bi bi-diagram-2"></span>
+                <span class="bi bi-hand-index-thumb"></span>
             </div>
-            <span class="popular-name">Tree Grid</span>
+            <span class="popular-name">Buttons</span>
         </a>
     </div>
 </section>
@@ -52,7 +52,7 @@
     <div class="directory-header">
         <h2 class="directory-title">Blazor UI &amp; Data Visualization Components</h2>
         <p class="directory-subtitle">
-            The FlexCore Blazor components library is an enterprise-grade suite engineered for high-throughput applications and legacy desktop modernizations. It contains 70+ high-performance, lightweight, and responsive UI controls with <strong>zero JavaScript dependencies</strong>.
+            The FlexCore Blazor components library is an enterprise-grade suite engineered for high-throughput applications and legacy desktop modernizations. It contains 70+ high-performance, lightweight, and responsive UI controls with <strong>no third-party JavaScript</strong>.
         </p>
 
         <div class="catalog-search-wrapper">
@@ -74,7 +74,7 @@
         <div class="directory-col">
             @if (MatchesCategory("DATA MANAGEMENT", _dataManagement))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-data">
                     <h3 class="cat-title">DATA MANAGEMENT</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_dataManagement))
@@ -87,7 +87,7 @@
 
             @if (MatchesCategory("FILE VIEWERS & EDITORS", _fileViewers))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-files">
                     <h3 class="cat-title">FILE VIEWERS &amp; EDITORS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_fileViewers))
@@ -100,7 +100,7 @@
 
             @if (MatchesCategory("LAYOUT & WORKSPACE", _layoutWorkspace))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-layout">
                     <h3 class="cat-title">LAYOUT &amp; WORKSPACE</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_layoutWorkspace))
@@ -116,7 +116,7 @@
         <div class="directory-col">
             @if (MatchesCategory("DATA VISUALIZATION", _dataVis))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-viz">
                     <h3 class="cat-title">DATA VISUALIZATION</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_dataVis))
@@ -129,7 +129,7 @@
 
             @if (MatchesCategory("DIAGRAMS & WORKFLOWS", _diagrams))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-diagrams">
                     <h3 class="cat-title">DIAGRAMS &amp; WORKFLOWS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_diagrams))
@@ -142,7 +142,7 @@
 
             @if (MatchesCategory("BUTTONS & ACTIONS", _buttonsActions))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-buttons">
                     <h3 class="cat-title">BUTTONS &amp; ACTIONS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_buttonsActions))
@@ -158,7 +158,7 @@
         <div class="directory-col">
             @if (MatchesCategory("SCHEDULING & CALENDARS", _scheduling))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-scheduling">
                     <h3 class="cat-title">SCHEDULING &amp; CALENDARS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_scheduling))
@@ -171,7 +171,7 @@
 
             @if (MatchesCategory("INPUTS & EDITORS", _inputs))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-inputs">
                     <h3 class="cat-title">INPUTS &amp; EDITORS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_inputs))
@@ -184,7 +184,7 @@
 
             @if (MatchesCategory("FORMS & VALIDATION", _forms))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-forms">
                     <h3 class="cat-title">FORMS &amp; VALIDATION</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_forms))
@@ -200,7 +200,7 @@
         <div class="directory-col">
             @if (MatchesCategory("DROPDOWNS & SELECTORS", _dropdowns))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-dropdowns">
                     <h3 class="cat-title">DROPDOWNS &amp; SELECTORS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_dropdowns))
@@ -213,7 +213,7 @@
 
             @if (MatchesCategory("NAVIGATION & COMMANDS", _navigation))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-nav">
                     <h3 class="cat-title">NAVIGATION &amp; COMMANDS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_navigation))
@@ -226,7 +226,7 @@
 
             @if (MatchesCategory("FEEDBACK & NOTIFICATIONS", _feedback))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-feedback">
                     <h3 class="cat-title">FEEDBACK &amp; NOTIFICATIONS</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_feedback))
@@ -239,7 +239,7 @@
 
             @if (MatchesCategory("INTERACTIVE AI & ASSIST", _aiAssist))
             {
-                <div class="cat-group">
+                <div class="cat-group" id="cat-ai">
                     <h3 class="cat-title">INTERACTIVE AI &amp; ASSIST</h3>
                     <ul class="comp-list">
                         @foreach (var item in FilterItems(_aiAssist))
@@ -258,33 +258,35 @@
 
     record DirectoryItem(string Icon, string Name, string Href);
 
+    // Href rule (developer meeting, 2026-10-19): a control with its own page links to the page; a control that is one
+    // example on a shared page links to that example's anchor (the DemoExample Id). Rows whose control has no demo
+    // yet keep their old target (Baaria, 2026-10-20).
+
     private readonly DirectoryItem[] _dataManagement =
     [
         new("grid", "Data Grid", "demo/grid"),
-        new("ag-grid", "AG Grid (4-in-1 Suite)", "demo/grid/ag-grid-showcase"),
-        new("tree-grid", "Tree Grid", "demo/tree/tree-load-bench"),
-        new("pivot", "Pivot Table", "demo/pivot-formulas"),
+        new("ag-grid", "Four Grid Scenarios", "demo/grid/scenarios"),
+        new("tree-grid", "Tree Grid", "demo/grid/tree-grid"),
+        new("pivot", "Pivot Table", "demo/pivot"),
         new("data-control", "Data Control", "demo/data-control"),
-        new("virtualization", "50K Virtualization", "demo/grid/virtualization-bench"),
-        new("selection", "50K Row Selection", "demo/grid/row-selection-50k"),
+        new("virtualization", "Scroll vs Paging", "demo/grid/virtualization-bench"),
+        new("selection", "50k Rows", "demo/grid/row-selection-50k"),
         new("frozen", "Frozen Columns", "demo/grid/advanced"),
-        new("col-virt", "Column Virtualization", "demo/grid/column-virtualization"),
-        new("col-swap", "Dynamic Column Swap", "demo/grid/column-swap"),
-        new("batch-edit", "In-Place Batch Edit", "demo/grid/edit-items-db"),
-        new("sqlite", "SQLite ItemsProvider", "demo/grid/items-provider-db"),
-        new("master-detail", "Master-Detail PM Entry", "demo/grid/pm-entry"),
-        new("picklist", "Picklist Churn", "demo/grid/picklist-churn"),
-        new("veto", "Veto Selection & Dirty", "demo/grid/fdbgrid-veto"),
-        new("optimizer", "Server Optimizer", "demo/grid/blazor-optimizer"),
-        new("dual-list", "Dual-List Transfer", "demo/grid/userperms-lists"),
-        new("reorder", "Reordering Grid", "demo/grid/reordering"),
-        new("pager", "Pager Control", "demo/grid")
+        new("col-virt", "Wide Grids", "demo/grid/column-virtualization"),
+        new("col-swap", "Column Sets", "demo/grid/column-swap"),
+        new("batch-edit", "Batch Editing", "demo/grid/batch-editing"),
+        new("sqlite", "On-Demand Items Provider", "demo/grid/provider-enterprise#search"),
+        new("master-detail", "Typing Modes", "demo/grid/typing-modes"),
+        new("picklist", "Dynamic Columns", "demo/grid/dynamic-columns#dynamic"),
+        new("veto", "Unsaved-Row Lock", "demo/grid/unsaved-row-lock"),
+        new("dual-list", "Master-Detail", "demo/grid/master-detail"),
+        new("reorder", "Column Reorder", "demo/grid/reordering")
     ];
 
     private readonly DirectoryItem[] _fileViewers =
     [
         new("editor", "Rich Text Editor", "demo/counterparts"),
-        new("pdf", "PDF Viewer", "demo/counterparts"),
+        new("pdf", "PDF Viewer", "demo/pdf-viewer"),
         new("report", "Report Writer Control", "demo/reports/model-costs"),
         new("report-param", "Report Parameter Dialog", "demo/reports/model-costs"),
         new("format", "Format Control", "demo/counterparts")
@@ -292,30 +294,30 @@
 
     private readonly DirectoryItem[] _layoutWorkspace =
     [
-        new("page-control", "PageControl / Tabbed MDI", "demo/workspace/page-control-bench"),
-        new("dock", "Dock Manager", "demo/counterparts"),
-        new("splitter", "Splitter Control", "demo/layout"),
-        new("dashboard", "Dashboard Layout", "demo/layout"),
+        new("page-control", "PageControl", "demo/page-navigation"),
+        new("dock", "Dock Manager", "demo/dock-manager"),
+        new("splitter", "Splitter Control", "demo/layout#shell"),
+        new("dashboard", "Dashboard Layout", "demo/layout#dashboard"),
         new("grid", "Grid Layout", "demo/counterparts"),
-        new("card", "Card Control", "demo/new-components"),
-        new("card-group", "Card Group", "demo/new-components"),
-        new("timeline", "Timeline", "demo/new-components")
+        new("card", "Card Control", "demo/cards#card"),
+        new("card-group", "Card Group", "demo/cards#group"),
+        new("timeline", "Timeline", "demo/new-components#content")
     ];
 
     private readonly DirectoryItem[] _dataVis =
     [
         new("chart-bar", "30+ SVG Charts Gallery", "demo/charts"),
         new("sunburst", "COVID-19 Sunburst", "demo/charts/sunburst"),
-        new("stock", "Stock & Financial Chart", "demo/counterparts"),
-        new("gauge-circular", "Circular Gauge", "demo/counterparts"),
-        new("gauge-linear", "Linear Gauge", "demo/counterparts"),
-        new("gauge-radial", "Radial Gauge", "demo/counterparts"),
-        new("gauge-arc", "Arc Gauge", "demo/counterparts"),
-        new("sparkline", "Sparkline Charts", "demo/grid"),
-        new("barcode", "Barcode Generator", "demo/new-components"),
-        new("qrcode", "QR Code Generator", "demo/new-components"),
-        new("chart-bar", "Advanced Charts Suite", "demo/advanced-charts"),
-        new("stock", "Financial Navigator", "demo/counterparts")
+        new("map-story", "Unemployment map story", "demo/charts/map-story"),
+        new("stock", "Stock & Financial Chart", "demo/gauges#stock"),
+        new("gauge-circular", "Circular Gauge", "demo/gauges#gauges"),
+        new("gauge-linear", "Linear Gauge", "demo/gauges#gauges"),
+        new("gauge-radial", "Radial Gauge", "demo/gauges#gauges"),
+        new("gauge-arc", "Arc Gauge", "demo/gauges#gauges"),
+        new("sparkline", "Sparkline Charts", "demo/charts?tab=sparkline#gallery"),
+        new("barcode", "Barcode Generator", "demo/barcodes#barcode"),
+        new("qrcode", "QR Code Generator", "demo/barcodes#qr"),
+        new("chart-bar", "Financial & Gauges", "demo/advanced-charts")
     ];
 
     private readonly DirectoryItem[] _diagrams =
@@ -325,86 +327,86 @@
         new("property-grid", "Property Grid", "demo/counterparts")
     ];
 
+    // Pill deep-links to the Button page's Themes and pill variants example; Split and Toggle have their own pages (2026-10-12).
     private readonly DirectoryItem[] _buttonsActions =
     [
         new("button", "Button Control", "demo/buttons"),
-        new("split-button", "Split Button", "demo/new-components"),
-        new("toggle-button", "Toggle Button", "demo/counterparts"),
-        new("fab", "Floating Action Button (FAB)", "demo/new-components"),
-        new("speed-dial", "Speed Dial Menu", "demo/new-components"),
-        new("button", "Rounded Pill Buttons", "demo/buttons")
+        new("split-button", "Split Button", "demo/split-button"),
+        new("toggle-button", "Toggle Button", "demo/toggle-buttons"),
+        new("fab", "Floating Action Button (FAB)", "demo/fab#menu"),
+        new("speed-dial", "Speed Dial Menu", "demo/fab#menu"),          // same control, open state
+        new("button", "Rounded Pill Buttons", "demo/buttons#variants")
     ];
 
     private readonly DirectoryItem[] _scheduling =
     [
-        new("gantt", "Gantt Chart", "demo/counterparts"),
+        new("gantt", "Gantt Chart", "demo/gantt"),
         new("scheduler", "Scheduler", "demo/counterparts"),
-        new("calendar", "Calendar", "demo/counterparts"),
-        new("datepicker", "DatePicker", "demo/counterparts"),
-        new("timepicker", "TimePicker", "demo/counterparts"),
-        new("timespan", "TimeSpan Picker", "demo/new-components")
+        new("calendar", "Calendar", "demo/date-time#calendar"),
+        new("datepicker", "DatePicker", "demo/date-time#appointment"),
+        new("timepicker", "TimePicker", "demo/date-time#appointment"),
+        new("timespan", "TimeSpan Picker", "demo/date-time#appointment")
     ];
 
     private readonly DirectoryItem[] _inputs =
     [
-        new("input-number", "Numeric TextBox", "demo/counterparts"),
-        new("input-text", "TextBox", "demo/counterparts"),
-        new("textarea", "TextArea", "demo/counterparts"),
-        new("otp", "OTP / Security Code", "demo/new-components"),
-        new("slider", "Range Slider", "demo/new-components"),
-        new("checkbox", "Checkbox", "demo/counterparts"),
-        new("radio", "Radio Group", "demo/counterparts"),
-        new("switch", "Toggle Switch", "demo/new-components"),
-        new("palette", "Color Palette", "demo/counterparts"),
-        new("rating", "Star Rating", "demo/new-components")
+        new("input-number", "Numeric TextBox", "demo/forms#generated"),
+        new("input-text", "TextBox", "demo/forms#generated"),
+        new("textarea", "TextArea", "demo/forms#handbuilt"),
+        new("otp", "OTP / Security Code", "demo/security-code"),
+        new("slider", "Slider & Range Slider", "demo/sliders"),
+        new("checkbox", "Checkbox", "demo/checks#checks"),
+        new("radio", "Radio Group", "demo/checks#radio"),
+        new("switch", "Toggle Switch", "demo/checks#radio"),
+        new("palette", "Color Palette", "demo/pickers#palette"),
+        new("rating", "Star Rating", "demo/checks#rating")
     ];
 
     private readonly DirectoryItem[] _forms =
     [
-        new("form", "Form Control", "demo/counterparts"),
-        new("form-item", "Form Item Control", "demo/counterparts"),
-        new("form-group", "Form Group Control", "demo/counterparts"),
-        new("validation", "Validation Summary", "demo/counterparts"),
-        new("validation", "Validation Message", "demo/counterparts"),
-        new("validation", "Validation Tooltip", "demo/counterparts")
+        new("form", "Form Control", "demo/forms#generated"),
+        new("form-item", "Form Item Control", "demo/forms#handbuilt"),
+        new("form-group", "Form Group Control", "demo/forms#handbuilt"),
+        new("validation", "Validation Summary", "demo/forms#generated"),
+        new("validation", "Validation Message", "demo/forms#generated"),
+        new("validation", "Validation Tooltip", "demo/forms#handbuilt")
     ];
 
     private readonly DirectoryItem[] _dropdowns =
     [
-        new("dropdown", "DropDownList", "demo/counterparts"),
+        new("dropdown", "DropDownList", "demo/forms#generated"),
         new("dropdowngrid", "DropDownGrid Control", "demo/grid"),
-        new("autocomplete", "AutoComplete", "demo/counterparts"),
+        new("autocomplete", "AutoComplete", "demo/pickers#suggest"),
         new("listbox", "ListBox", "demo/counterparts"),
-        new("dual-list", "MultiSelect Dual List", "demo/grid/userperms-lists"),
-        new("picklist", "Picklist Dropdown", "demo/grid/picklist-churn")
+        new("picklist", "Picklist Dropdown", "demo/grid/dynamic-columns#dynamic")
     ];
 
     private readonly DirectoryItem[] _navigation =
     [
-        new("ribbon", "Office Ribbon", "demo/buttons"),
-        new("toolbar", "Toolbar Control", "demo/buttons"),
-        new("tab", "Tab Control", "demo/workspace/page-control-bench"),
-        new("accordion", "Accordion Control", "demo/new-components"),
+        new("ribbon", "Office Ribbon", "?tab=ribbon#live-showcase"),   // the home hero, opened on its Ribbon tab (base href is the site root)
+        new("toolbar", "Toolbar Control", "demo/counterparts"),
+        new("tab", "Tab Control", "demo/tabs-accordion#tabs"),
+        new("accordion", "Accordion Control", "demo/tabs-accordion#accordion"),
         new("appbar", "AppBar Control", "demo/counterparts"),
-        new("breadcrumb", "Breadcrumb", "demo/new-components"),
-        new("stepper", "Stepper Control", "demo/counterparts"),
+        new("breadcrumb", "Breadcrumb", "demo/new-components#content"),
+        new("stepper", "Stepper Control", "demo/pickers#steps"),
         new("carousel", "Carousel", "demo/new-components")
     ];
 
     private readonly DirectoryItem[] _feedback =
     [
-        new("dialog", "Modal Dialog", "demo/dialog"),
+        new("dialog", "Modal Dialog", "demo/dialog#modal"),
         new("toast", "Toast Notifications", "demo/notifications"),
-        new("toast", "Context Alert Banners", "demo/new-components"),
-        new("badge", "Status Badges", "demo/new-components"),
-        new("progress", "Progress Bar", "demo/counterparts"),
-        new("skeleton", "Loading Skeleton", "demo/new-components")
+        new("toast", "Context Alert Banners", "demo/new-components#status"),
+        new("badge", "Status Badges", "demo/new-components#status"),
+        new("progress", "Progress Bar", "demo/layout"),
+        new("skeleton", "Loading Skeleton", "demo/new-components#status")
     ];
 
     private readonly DirectoryItem[] _aiAssist =
     [
-        new("ai-prompt", "AI Prompt Control", "demo/counterparts"),
-        new("ai-prompt", "LLM Result Card", "demo/counterparts")
+        new("ai-prompt", "AI Prompt Control", "demo/counterparts?tab=ai-prompt"),
+        new("ai-prompt", "LLM Result Card", "demo/counterparts?tab=ai-prompt")
     ];
 
     private bool MatchesCategory(string catName, DirectoryItem[] items)

@@ -1,0 +1,4 @@
+/* 2026-10-17: Grouping & totals page. GridControl.razor.css styles the caption aggregates (.fx-group-caption-agg: margin,
+   padding, pill background) but the rule is scoped CSS and the spans are built in GridControl.razor.cs without the scope
+   attribute, so nothing applies and "avg $x" runs into "(n items)". This puts a gap between them until the library fix (SC-253). */
+.catalog ::deep .fx-group-caption-agg + .fx-group-caption-agg { margin-left: 6px; }

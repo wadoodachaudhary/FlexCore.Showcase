@@ -1,0 +1,201 @@
+@page "/demo/sliders"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-12: new page on FeatureDemoLayout; two examples (slider, range slider). Facts checked against SliderControl.razor(.css),
+   RangeSliderControl.razor(.css), NumericRange.cs and FlexControlBase.cs (FlexCore 0.2.48). SliderControl was moved here from UI elements. *@
+
+<PageTitle>Sliders — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Sliders" Category="Components" ControlName="SliderControl · RangeSliderControl"
+                   Tagline="Pick one number, or a lower and upper bound, by dragging or with the arrow keys."
+                   SourcePath="SliderControl.razor; RangeSliderControl.razor">
+    <Overview>
+        <p>
+            <code>SliderControl</code> is a styled native <code>&lt;input type="range"&gt;</code>: <code>Min</code>, <code>Max</code> and
+            <code>Step</code> map straight onto the input, and <code>Value</code> binds two ways. <code>ValueChanged</code> fires while the
+            thumb is dragged and once more on release, so a bound page updates live. <code>RangeSliderControl</code> stacks two sliders for a
+            <code>NumericRange</code> and keeps <code>Start</code> at or below <code>End</code>.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="slider" Title="Slider" RazorCode="@Code.Slider" CSharpCode="@Code.SliderCs">
+            <Description><p><code>Step="0.5"</code> gives half-percent markup. <code>ShowValue="false"</code> hides the built-in readout so the page can format its own; the disabled slider keeps the default readout. Unmatched attributes such as <code>aria-label</code> land on the input.</p></Description>
+            <Demo>
+                <div class="field">
+                    <span class="field-label">Markup</span>
+                    <SliderControl @bind-Value="_markup" Min="0" Max="50" Step="0.5" ShowValue="false" aria-label="Markup percent" />
+                    <span class="readout">@_markup.ToString("0.#")%</span>
+                </div>
+                <p class="result">Cost @_cost.ToString("$#,##0") + @_markup.ToString("0.#")% markup = <strong>@Sell.ToString("$#,##0")</strong></p>
+                <div class="field">
+                    <span class="field-label">Tax rate</span>
+                    <SliderControl Value="8.25" Min="0" Max="20" Step="0.25" Disabled="true" aria-label="Tax rate, fixed" />
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="range" Title="Range slider" RazorCode="@Code.Range" CSharpCode="@Code.RangeCs">
+            <Description><p>One <code>NumericRange</code> binds both thumbs. <code>Format</code> shapes the readout; <code>StartLabel</code> and <code>EndLabel</code> name the two inputs. Dragging the start past the end stops at the end, and the other way round. The list below filters as the range moves.</p></Description>
+            <Demo>
+                <div class="range-row">
+                    <RangeSliderControl @bind-Value="_budget" Min="0" Max="2000" Step="50" Format="$#,##0"
+                                        StartLabel="At least" EndLabel="At most" AriaLabel="Budget" />
+                    <div class="matches">
+                        <span class="result">@Matches.Count of @_options.Length options in budget</span>
+                        <ul>
+                            @foreach (var o in Matches)
+                            {
+                                <li><span>@o.Name</span><span class="price">@o.Price.ToString("$#,##0")</span></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="SliderControl parameters" Rows="Vocab.Slider" />
+        <ApiTable Kind="ApiKind.Parameters" Title="RangeSliderControl parameters" Rows="Vocab.Range" />
+        <ApiTable Kind="ApiKind.Properties" Title="NumericRange" Rows="Vocab.RangeType" />
+        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <p>Neither stylesheet reads a <code>--fx-*</code> variable: the track is <code>#e2e8f0</code> and the thumb <code>#2563eb</code>. Recolour with <code>CssClass</code> and a scoped <code>::deep</code> rule on <code>.fx-slider-range</code>.</p>
+    </Vocabulary>
+
+    <Accessibility>
+        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard (native range input)" Rows="Vocab.Keys" />
+        <ul>
+            <li>The slider is a native range input, so the browser exposes <code>role="slider"</code> with the current, minimum and maximum values. Name it with <code>aria-label</code>, which passes through to the input.</li>
+            <li>The <code>ShowValue</code> readout is plain text next to the input; it is not linked with <code>aria-describedby</code>.</li>
+            <li><code>RangeSliderControl</code> renders <code>role="group"</code> with <code>AriaLabel</code>; each thumb is named by <code>StartLabel</code> or <code>EndLabel</code>.</li>
+            <li><code>Disabled</code> sets the input's <code>disabled</code> attribute and adds <code>pointer-events: none</code> to the host, so a disabled slider is skipped by Tab.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>Typed numbers with a spinner: <code>NumericTextBoxControl</code> in the <a href="demo/counterparts?tab=forms">Control tour</a>.</li>
+            <li>Other small inputs (switch, rating, security code, time span): <a href="demo/new-components">UI elements</a>. Pressed-state choices: <a href="demo/toggle-buttons">Toggle buttons</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Slider
+    private double _markup = 12.5;
+    private const double _cost = 10_000;
+    private double Sell => _cost * (1 + _markup / 100);
+
+    // Range slider
+    private NumericRange _budget = new(250, 1250);
+    private readonly record struct Option(string Name, double Price);
+    private readonly Option[] _options =
+    {
+        new("Under-cabinet lighting", 220), new("Tile backsplash", 350), new("Laminate counters", 450),
+        new("Butcher-block counters", 900), new("Quartz counters", 1600), new("Granite counters", 1850),
+    };
+    private List<Option> Matches => _options.Where(o => o.Price >= _budget.Start && o.Price <= _budget.End).ToList();
+
+    // Vocabulary rows, one per public member (0.2.48). Base-class parameters marked (base).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Slider =
+        {
+            new("Value", "Current number. Two-way with <code>@bind-Value</code>.", "double", "0"),
+            new("ValueChanged", "Fires on every <code>input</code> event while dragging and again on <code>change</code> at release.", "EventCallback&lt;double&gt;"),
+            new("Min / Max", "Bounds, written to the input's <code>min</code> and <code>max</code>.", "double", "0 / 100"),
+            new("Step", "Increment for dragging and the arrow keys.", "double", "1"),
+            new("ShowValue", "Renders the raw <code>Value</code> after the track. No format option; hide it to format your own.", "bool", "true"),
+            new("Disabled", "Disables the input and dims the host. The base <code>Enabled</code> is not read by this control.", "bool", "false"),
+            new("CssClass / Style (base)", "On the host element. The base <code>Visible</code> is not applied; hide the host yourself.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the <code>&lt;input&gt;</code>: <code>aria-label</code>, <code>name</code>, <code>data-*</code>.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Range =
+        {
+            new("Value", "Start and end. Two-way with <code>@bind-Value</code>. Must lie inside <code>Min</code>..<code>Max</code> with <code>Start &lt;= End</code>, or the control throws <code>ArgumentException</code> on render.", "NumericRange", "(25, 75)"),
+            new("ValueChanged", "Fires after either thumb moves, with the whole range.", "EventCallback&lt;NumericRange&gt;"),
+            new("ValueExpression", "Set by <code>@bind-Value</code> inside an <code>EditForm</code>; the field is marked changed on the cascaded <code>EditContext</code>.", "Expression&lt;Func&lt;NumericRange&gt;&gt;?", "null"),
+            new("Min / Max", "Bounds for both thumbs. <code>Min</code> must be below <code>Max</code>.", "double", "0 / 100"),
+            new("Step", "Increment; values snap to the nearest step from <code>Min</code>. Must be positive.", "double", "1"),
+            new("ReadOnly", "Disables both inner sliders without the read-only look of a text box.", "bool", "false"),
+            new("ShowValue", "Renders <code>Start – End</code> in an <code>&lt;output&gt;</code> under the sliders.", "bool", "true"),
+            new("Format", "Numeric format for the readout, current culture.", "string", "\"0.##\""),
+            new("StartLabel / EndLabel", "Visible label and <code>aria-label</code> of each slider.", "string", "\"Range start\" / \"Range end\""),
+            new("AriaLabel", "Accessible name of the group.", "string", "\"Range\""),
+            new("Enabled (base)", "false disables both sliders.", "bool", "true"),
+            new("Visible (base)", "false hides the group with <code>display:none</code>.", "bool", "true"),
+            new("CssClass / Style (base)", "On the group element.", "string?", "null"),
+        };
+        public static readonly ApiRow[] RangeType =
+        {
+            new("Start", "Lower bound.", "double"),
+            new("End", "Upper bound.", "double"),
+            new("ctor", "<code>new(start, end)</code>; a positional record with value equality, so an unchanged range does not raise <code>ValueChanged</code>.", "", null),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("RangeSliderControl.SetValueAsync(range)", "Sets both bounds at once, raises <code>ValueChanged</code> and notifies the <code>EditContext</code>. Ignored when disabled, read-only or unchanged; throws <code>ArgumentOutOfRangeException</code> outside <code>Min</code>..<code>Max</code>.", "Task"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-slider-host · .fx-slider-disabled", "Inline flex row, full width, 120px minimum; <code>disabled</code> adds opacity 0.5 and <code>pointer-events: none</code>."),
+            new("fx-slider-range", "The input: 6px track, 18px round thumb that scales on hover."),
+            new("fx-slider-value", "The readout: bold, right-aligned, 32px minimum width."),
+            new("fx-range-slider", "Grid of two labelled rows (95px label column) and the <code>&lt;output&gt;</code> readout; 220px minimum width."),
+        };
+        public static readonly ApiRow[] Keys =
+        {
+            new("Arrow Right / Arrow Up", "Increase by one <code>Step</code>."),
+            new("Arrow Left / Arrow Down", "Decrease by one <code>Step</code>."),
+            new("Home / End", "Jump to <code>Min</code> / <code>Max</code>."),
+            new("Page Up / Page Down", "Larger jump; the size is chosen by the browser."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Slider = @"<div class=""field"">
+    <span class=""field-label"">Markup</span>
+    <SliderControl @bind-Value=""_markup"" Min=""0"" Max=""50"" Step=""0.5"" ShowValue=""false"" aria-label=""Markup percent"" />
+    <span class=""readout"">@_markup.ToString(""0.#"")%</span>
+</div>
+<p class=""result"">Cost @_cost.ToString(""$#,##0"") + @_markup.ToString(""0.#"")% markup = <strong>@Sell.ToString(""$#,##0"")</strong></p>
+<div class=""field"">
+    <span class=""field-label"">Tax rate</span>
+    <SliderControl Value=""8.25"" Min=""0"" Max=""20"" Step=""0.25"" Disabled=""true"" aria-label=""Tax rate, fixed"" />
+</div>";
+        public const string SliderCs = @"// Slider
+private double _markup = 12.5;
+
+private const double _cost = 10_000;
+
+private double Sell => _cost * (1 + _markup / 100);";
+
+        public const string Range = @"<div class=""range-row"">
+    <RangeSliderControl @bind-Value=""_budget"" Min=""0"" Max=""2000"" Step=""50"" Format=""$#,##0""
+                        StartLabel=""At least"" EndLabel=""At most"" AriaLabel=""Budget"" />
+    <div class=""matches"">
+        <span class=""result"">@Matches.Count of @_options.Length options in budget</span>
+        <ul>
+            @foreach (var o in Matches)
+            {
+                <li><span>@o.Name</span><span class=""price"">@o.Price.ToString(""$#,##0"")</span></li>
+            }
+        </ul>
+    </div>
+</div>";
+        public const string RangeCs = @"// Range slider
+private NumericRange _budget = new(250, 1250);
+
+private readonly Option[] _options =
+{
+    new(""Under-cabinet lighting"", 220), new(""Tile backsplash"", 350), new(""Laminate counters"", 450),
+    new(""Butcher-block counters"", 900), new(""Quartz counters"", 1600), new(""Granite counters"", 1850),
+};
+
+private List<Option> Matches => _options.Where(o => o.Price >= _budget.Start && o.Price <= _budget.End).ToList();";
+    }
+}

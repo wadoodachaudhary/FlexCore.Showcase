@@ -1,0 +1,10 @@
+.demo-row {   /* not .row: Bootstrap owns that name */ display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.result { font-size: 13px; color: #475569; }
+.dd-caret { font-size: .7em; margin-left: 4px; }
+
+/* dropdown panel and its items are rendered by ButtonControl */
+::deep .menu { min-width: 160px; padding: 4px 0; border-radius: 6px; }
+::deep .menu-item { display: block; width: 100%; text-align: left; padding: 6px 14px; background: none; border: 0; font-size: 13px; cursor: pointer; }
+::deep .menu-item:hover { background: #eef2f7; }
+
+.mt { margin-top: 12px; }

@@ -1,79 +1,80 @@
 @page "/demo/reports/model-costs"
-
+@rendermode InteractiveServer
+@using Fx.ControlKit
 @using Fx.ControlKit.Reports
 @using FlexCore.Showcase.Data
-
+@using FlexCore.Showcase.Components.Shared
 @inject IWebHostEnvironment Env
-@inject ILogger<ModelCostsDemo> Logger
 
-<PageTitle>Model Costs Report — FlexCore</PageTitle>
+@* 2026-10-18: moved onto FeatureDemoLayout (Saturday list). Same report, same auto-run on first paint. Changes, closing SC-220 to
+   SC-223 and SC-225: the copy says four group levels (the XML defines Community, Model, Group and Phase; the old intro said four
+   and the bullet list said three); "HomeFront's real Crystal Report", "@DivisionID" and the stub class names left the copy, which
+   now says what the control does before how this page wires it; the logger and its typo went; title, h1 and menu label all read
+   "Report writer". The model and community pickers are DropDownListControls and Run is a ButtonControl; the inline <style> block
+   became a scoped stylesheet.
+   2026-10-18: vocabulary written from ReportWriterControl.razor (the six parameters, public state, the public methods and their doc
+   comments, the @inject list, the toolbar export items), ReportNativeExport.cs, ReportOptions.cs and the five host interfaces; rows
+   checked with scratchpad/vocabcheck.py. ShowReportAsync seeds a literal "DivisionID" from the session context (lines ~1317 and ~1549),
+   a host name inside the library; noted in SC-253. *@
 
-<h1>Reports — Model Costs</h1>
-<p>
-    A paginated, XML-driven Crystal-style report rendered by <code>ReportWriterControl</code>.
-    Pick a model + community below, hit <strong>Run</strong>, and FlexCore's
-    <code>CrystalXmlReportLoader</code> parses the bundled
-    <code>wwwroot/reports/Model&nbsp;Costs&nbsp;v1.xml</code> into a SQL definition,
-    routes it through <code>IReportDataExecutor</code> (here, a showcase stub that
-    synthesizes rows from <code>DemoData</code>), and lays out the result with
-    4 levels of group footers and per-group sums.
-</p>
+<PageTitle>Report writer — FlexCore Showcase</PageTitle>
 
-<div class="demo-controls">
-    <label>
-        Model
-        <select @bind="_model">
-            @foreach (var m in DemoData.HouseModels)
-            {
-                <option value="@m.Name">@m.Name &nbsp;·&nbsp; @m.Bedrooms bd / @m.SqFt sf</option>
-            }
-        </select>
-    </label>
-    <label>
-        Community
-        <select @bind="_community">
-            <option value="Showcase Estates">Showcase Estates</option>
-            <option value="Riverbend Hills">Riverbend Hills</option>
-            <option value="Northbrook Crossing">Northbrook Crossing</option>
-        </select>
-    </label>
-    <button class="btn-primary" @onclick="RunReport" disabled="@_running">
-        @(_running ? "Running…" : "Run")
-    </button>
-</div>
+<FeatureDemoLayout Title="Report writer" Category="Reports" CategoryHref="demo/reports/model-costs" ControlName="ReportWriterControl"
+                   Tagline="Paginated, grouped reports from a Crystal-style XML definition, with a group tree, search, print and export."
+                   SourcePath="Reports/ReportWriterControl.razor;Reports/CrystalXmlReportLoader.cs;Reports/ReportOptions.cs;Reports/IReportDataExecutor.cs;Reports/IReportSessionContext.cs;Reports/IReportPickListProvider.cs;Reports/IReportExporter.cs;Reports/IReportViewerSettings.cs">
+    <Overview>
+        <p>
+            <code>ReportWriterControl</code> renders a <code>ReportDefinition</code> as paginated HTML pages with Crystal-style group headers
+            and footers, a clickable group tree and drill-down tabs. The definition is built in code or loaded from a Crystal XML export by
+            <code>CrystalXmlReportLoader</code>, which reads the tables, joins, groups, formulas and field placement. The control has no data
+            access of its own: the host registers <code>IReportDataExecutor</code>, <code>IReportSessionContext</code> and
+            <code>IReportPickListProvider</code> in dependency injection, and optionally an <code>IReportExporter</code>. The toolbar prints,
+            exports, searches the report text and zooms the pages.
+        </p>
+    </Overview>
 
-<div class="demo-frame report-frame">
-    <ReportWriterControl @ref="_writer" />
-</div>
+    <Examples>
+        <DemoExample Id="report" Title="Model costs by community, model, group and phase" RazorCode="@Code.Report" CSharpCode="@Code.ReportCs">
+            <Description><p>The bundled XML defines four group levels, each with a sum in its footer. Pick a model and a community and press Run; the report loads on arrival too. This site's data executor ignores the SQL in the definition and synthesises rows from the demo data, so every choice returns a report. Open the group tree on the left to jump between groups, or search the report text from the toolbar.</p></Description>
+            <Controls>
+                <DropDownListControl TItem="string" TValue="string" DataSource="@_models" @bind-Value="_model" AriaLabel="Model" Width="160px" />
+                <DropDownListControl TItem="string" TValue="string" DataSource="@_communities" @bind-Value="_community" AriaLabel="Community" Width="200px" />
+                <ButtonControl CssClass="btn-sm" OnClick="RunReport" Disabled="@_running">@(_running ? "Running…" : "Run")</ButtonControl>
+            </Controls>
+            <Demo>
+                <div class="report-frame">
+                    <ReportWriterControl @ref="_writer" />
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-<h2>What's happening</h2>
-<ul>
-    <li><strong>XML loaded:</strong> <code>wwwroot/reports/Model Costs v1.xml</code> — a stripped, fictionalized version of HomeFront's real Crystal Report.</li>
-    <li><strong>Loader:</strong> <code>CrystalXmlReportLoader.Load(path)</code> parses tables, joins, groups, formulas, and field placement into a <code>ReportDefinition</code>.</li>
-    <li><strong>Data executor:</strong> <code>ShowcaseReportDataExecutor</code> ignores the SQL and emits rows from <code>DemoData</code> — wired in <code>Program.cs</code> via <code>IReportDataExecutor</code>.</li>
-    <li><strong>Session context:</strong> <code>ShowcaseReportSessionContext</code> auto-injects <code>DivisionID</code> when the SQL references <code>@@DivisionID</code> but the caller didn't pass it.</li>
-    <li><strong>Renderer:</strong> <code>ReportWriterControl</code> applies adaptive column widths from the XML, computes per-group sums, and splits to landscape pages with <code>Sum(Amount)</code> in three group footers (Phase / Group / Model).</li>
-</ul>
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="ReportWriterControl parameters" Rows="Vocab.Params" />
+        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+        <ApiTable Kind="ApiKind.Properties" Title="State" Rows="Vocab.State" />
+        <ApiTable Kind="ApiKind.Properties" Title="Host services, resolved from dependency injection" Rows="Vocab.Services" />
+        <p>
+            The toolbar's Print / Save as PDF uses the browser's print dialog, and its HTML, CSV and Excel data exports are the control's own
+            (<code>ReportNativeExport</code>), so none of them need <code>IReportExporter</code>. This site registers
+            <code>ReportOptions</code> with an empty schema prefix and DivisionID and UserId as session parameters, its own data executor and
+            session context, the empty pick-list provider, the in-memory viewer settings and a no-op exporter.
+        </p>
+    </Vocabulary>
 
-<h2>Markup</h2>
-<pre><code>&lt;ReportWriterControl @@ref="_writer" /&gt;
-
-@@code {
-    private ReportWriterControl? _writer;
-
-    async Task RunReport()
-    {
-        var path = Path.Combine(Env.WebRootPath, "reports", "Model Costs v1.xml");
-        await _writer!.ShowXmlReport(path, new Dictionary&lt;string, object&gt;
-        {
-            ["Model"]     = _model,
-            ["Community"] = _community,
-        });
-    }
-}</code></pre>
+    <Related>
+        <ul>
+            <li><a href="demo/counterparts?tab=pdf">Control tour</a>: <code>PdfViewerControl</code> for finished PDFs.</li>
+            <li><a href="demo/grid/enterprise-suite">Export &amp; templates</a>: the grid's own CSV and Excel export.</li>
+            <li><a href="demo/grid/grouping">Grouping &amp; totals</a>: group sums in a grid instead of a report.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
 
 @code {
     private ReportWriterControl? _writer;
+    private readonly string[] _models = DemoData.HouseModels.Select(m => m.Name).ToArray();
+    private readonly string[] _communities = { "Showcase Estates", "Riverbend Hills", "Northbrook Crossing" };
     private string _model = DemoData.HouseModels[0].Name;
     private string _community = "Showcase Estates";
     private bool _running;
@@ -82,7 +83,7 @@
     {
         if (firstRender)
         {
-            // Auto-run on first paint so visitors land on a populated report.
+            // Run on first paint so visitors land on a populated report.
             await RunReport();
         }
     }
@@ -95,10 +96,9 @@
         try
         {
             var path = Path.Combine(Env.WebRootPath, "reports", "Model Costs v1.xml");
-            Logger.LogInformation("Loading demi report: {Path}", path);
             await _writer.ShowXmlReport(path, new Dictionary<string, object>
             {
-                ["Model"]     = _model,
+                ["Model"] = _model,
                 ["Community"] = _community,
             });
         }
@@ -108,42 +108,104 @@
             StateHasChanged();
         }
     }
+
+    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed). The data executor this site
+    // registers is Services/ShowcaseReportDataExecutor.cs; Program.cs shows the registrations.
+    private static class Code
+    {
+        public const string Report = @"<div class=""report-frame"">
+    <ReportWriterControl @ref=""_writer"" />
+</div>";
+        public const string ReportCs = @"private ReportWriterControl? _writer;
+
+private readonly string[] _models = DemoData.HouseModels.Select(m => m.Name).ToArray();
+
+private readonly string[] _communities = { ""Showcase Estates"", ""Riverbend Hills"", ""Northbrook Crossing"" };
+
+private string _model = DemoData.HouseModels[0].Name;
+
+private string _community = ""Showcase Estates"";
+
+private bool _running;
+
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    if (firstRender)
+    {
+        // Run on first paint so visitors land on a populated report.
+        await RunReport();
+    }
 }
 
-<style>
-    .demo-controls {
-        display: flex;
-        gap: 1rem;
-        align-items: flex-end;
-        margin-bottom: 1rem;
-        flex-wrap: wrap;
+private async Task RunReport()
+{
+    if (_writer is null) return;
+    _running = true;
+    StateHasChanged();
+    try
+    {
+        var path = Path.Combine(Env.WebRootPath, ""reports"", ""Model Costs v1.xml"");
+        await _writer.ShowXmlReport(path, new Dictionary<string, object>
+        {
+            [""Model""] = _model,
+            [""Community""] = _community,
+        });
     }
-    .demo-controls label {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        font-size: 0.85rem;
-        color: #4b5563;
+    finally
+    {
+        _running = false;
+        StateHasChanged();
     }
-    .demo-controls select {
-        padding: 0.35rem 0.5rem;
-        border: 1px solid #cbd5e1;
-        border-radius: 4px;
-        min-width: 220px;
+}";
     }
-    .demo-controls .btn-primary {
-        padding: 0.45rem 1rem;
-        border: 1px solid #2563eb;
-        background: #2563eb;
-        color: white;
-        border-radius: 4px;
-        cursor: pointer;
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Params =
+        {
+            new("ShowChrome", "Toolbar, group tree, tabs and the parameter dialog. False drops the bare page area into a host that has its own UI.", "bool", "true"),
+            new("UsePositionedLayout", "Renders with the Crystal band and object geometry instead of table columns, in <code>ShowReportAsync</code>, the parameter dialog and refresh.", "bool", "false"),
+            new("PdfViewerComponentType", "The PDF viewer component used for .rpt output, for trimmed hosts that bring the Documents package.", "Type?", "null"),
+            new("PromptOptionalParameters", "Includes optional parameters in the parameter dialog.", "bool", "false"),
+            new("OnClose", "The toolbar's Close button. Unset with <code>ShowChrome</code> on, the button is still there and does nothing.", "EventCallback"),
+            new("OnPageTitleChanged", "Raised by <code>ShowReportAsync</code> with the report's file name without extension, for a host's title bar.", "EventCallback&lt;string&gt;"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("ShowXmlReport(string xmlFilePath, Dictionary&lt;string, object&gt;? parameters = null, bool positioned = false)", "Loads a Crystal XML export through <code>CrystalXmlReportLoader</code>, runs it with the given values and renders it; <code>positioned</code> keeps the band geometry. What this page calls.", "Task"),
+            new("ShowReportAsync(string file, IReadOnlyDictionary&lt;string, string&gt;? seedParameters = null)", "The unified load for an .rpt or .xml path: prompts for required parameters the seeds do not supply, raises <code>OnPageTitleChanged</code>, seeds a parameter named DivisionID from the session context, and treats seeds named <code>Filter:Table.Field</code> as field filters.", "Task"),
+            new("ShowSqlReport(ReportDefinition definition, Dictionary&lt;string, object&gt;? parameterValues = null, …)", "Executes a definition built in code through <code>IReportDataExecutor</code> and renders it. Session parameters listed in <code>ReportOptions</code> are filled in when the SQL names them and the caller did not.", "Task"),
+            new("ShowDataTableReport(string title, DataTable data, ReportOrientation orientation = ReportOrientation.Portrait)", "Renders a table you already have as a report.", "Task"),
+            new("ShowCrystalReport(string rptFilePath, …)", "A native .rpt file: needs <code>IReportExporter</code>, which renders it to PDF for the viewer. Logs a warning and shows nothing without one.", "Task"),
+            new("ShowDesignerReport(ReportDesignerDocument document, Dictionary&lt;string, object&gt;? parameters = null)", "Runs a designer document as a snapshot, subreports included, without saving it.", "Task"),
+            new("ExportCrystalReport(string format)", "The loaded .rpt as PDF, Excel, Word, RTF or CSV bytes through <code>IReportExporter</code>; null when none is registered.", "Task&lt;byte[]?&gt;"),
+            new("Print()", "Opens the browser's print dialog for the rendered report.", "Task"),
+            new("Clear()", "Clears the report and its tabs.", "void"),
+            new("GoToPage(int pageNum)", "Shows that page, 1-based, of the active tab.", "void"),
+            new("SwitchTab(int tabIndex)", "Makes that tab active.", "void"),
+            new("CloseTab(int tabIndex)", "Closes a drill-down tab; the main report at index 0 cannot be closed.", "void"),
+            new("OpenDrillDown(FxGroupNode node, List&lt;DrillDownFilter&gt; fullPath)", "Opens, or switches to, a tab that re-queries with the node's path as an extra filter and shows the detail columns.", "Task"),
+            new("SetXmlSource(string xmlFilePath)", "Tells the control which XML a definition came from, so drill-down tabs can re-parse it. Needed only before a direct <code>ShowSqlReport</code>.", "void"),
+        };
+        public static readonly ApiRow[] State =
+        {
+            new("IsLoading", "True while a report is being loaded or run.", "bool", "false"),
+            new("ReportLoaded", "True once a report has rendered.", "bool", "false"),
+            new("StatusMessage", "The text in the status area.", "string", "\"Ready\""),
+            new("ErrorMessage", "The last failure, shown in place of the pages.", "string?", "null"),
+            new("Tabs", "Open tabs; index 0 is the main report, drill-downs follow.", "List&lt;ReportTab&gt;", "new()"),
+            new("ActiveTabIndex", "The tab on display.", "int", "0"),
+            new("GroupTree", "The active tab's group tree.", "List&lt;FxGroupNode&gt;"),
+            new("DefinitionPostProcessor", "Settable. Runs on every definition the control builds for a drill-down tab, so a host repeats there what it did to the main definition.", "Action&lt;ReportDefinition&gt;?", "null"),
+        };
+        public static readonly ApiRow[] Services =
+        {
+            new("IReportDataExecutor", "Runs the SQL the loader builds and returns a <code>DataTable</code>. The host decides the data layer.", "DataTable Execute(string sql, IDictionary&lt;string, object&gt;? parameters)", "required"),
+            new("IReportSessionContext", "Turns a session parameter name into a value, for the names listed in <code>ReportOptions.SessionAutoInjectParameters</code>.", "object? Get(string parameterName)", "required"),
+            new("IReportPickListProvider", "Pick-list values for the parameter dialog, by <code>ReportParameter</code> (preferred, runs its <code>PickListSql</code>) or by name. <code>EmptyReportPickListProvider</code> ships for hosts without lists.", "GetPickList(ReportParameter) / GetPickList(string) / HasPickList(string)", "required"),
+            new("IReportViewerSettings", "Per-user zoom persistence; <code>InMemoryReportViewerSettings</code> ships as the default.", "Task&lt;int&gt; GetZoomLevelAsync() / Task SetZoomLevelAsync(int)", "required"),
+            new("IReportExporter", "A Crystal Reports engine for native .rpt files only. Blazor cannot inject a missing service, so a host without Crystal registers a no-op.", "LoadReport, SetParameters, ExportToPdf / ExportToExcel / ExportToWord / ExportToRtf / ExportToCsv", "registered"),
+            new("ReportOptions", "Singleton settings: <code>SchemaPrefix</code> (default dbo), <code>SessionAutoInjectParameters</code>, <code>MaxRowsPerReport</code> (100,000; 0 is unlimited), <code>EagerGroupColumnsInMainQuery</code>.", "class", "singleton"),
+        };
     }
-    .demo-controls .btn-primary:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-    .report-frame {
-        min-height: 720px;
-    }
-</style>
+}

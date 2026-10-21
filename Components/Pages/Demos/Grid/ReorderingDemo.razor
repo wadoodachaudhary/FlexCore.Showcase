@@ -1,68 +1,92 @@
 @page "/demo/grid/reordering"
+@using Fx.ControlKit.Grid
+@using FlexCore.Showcase.Components.Shared
 
-<PageTitle>Grid — Reordering Grid — FlexCore</PageTitle>
+@* 2026-10-17: moved onto FeatureDemoLayout (row 5 of the Data Grid list). Same twelve rows and nine columns. Changes, closing SC-181
+   and SC-182: the QA-checklist copy ("validate first-drop reorder", "reload the page and repeat") became a description of what the
+   user does; the reorder-pipe colour picker went (a test knob; the parameter is named in the overview instead); the "Other Grid
+   Demos" list went (the menu and Related cover it). OnLayoutChanged (GridSettings snapshot, fired from the header drop handler,
+   GridControl.razor.cs ~12931) feeds a line under the grid with the new column order, so a drop has a visible result and the hook
+   for saving user layouts is on show.
+   2026-10-18: vocabulary written from GridControl.razor.cs (AllowColumnReorder ~675, ColumnReorderPipeColor ~713,
+   OnLayoutChanged ~781, PersistenceKey ~794) and GridSettings.cs; rows checked against the source with scratchpad/vocabcheck.py.
+   Library doc gaps found on the way are in SC-253 (owner-gated). *@
 
-<h1>Reordering Grid</h1>
-<p>
-    Focused demo for column drag-and-drop behavior. Use this page to validate
-    first-drop reorder, left/right drop positioning, and repeated reorder cycles.
-</p>
+<PageTitle>Column reorder — FlexCore Showcase</PageTitle>
 
-<div style="display:flex; align-items:center; gap:10px; margin:10px 0 14px;">
-    <label for="reorderPipeColor" style="font-weight:600;">Reorder pipe color</label>
-    <input id="reorderPipeColor" type="color" @bind="_reorderPipeColor" />
-    <input type="text" @bind="_reorderPipeColor" style="width:110px;" />
-</div>
+<FeatureDemoLayout Title="Column reorder" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
+                   Tagline="Drag a header sideways and drop it where the column should go."
+                   SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs;Grid/GridSettings.cs">
+    <Overview>
+        <p>
+            <code>AllowColumnReorder</code> is on by default: every header is draggable, and while a header is being dragged the grid shows a
+            vertical pipe at the position where the column would land. Drop to the left half of a header to land before it, to the right
+            half to land after it. <code>ColumnReorderPipeColor</code> takes any CSS colour for the pipe; the default is a dark grey. After a drop the grid raises
+            <code>OnLayoutChanged</code> with a <code>GridSettings</code> snapshot whose <code>ColumnOrder</code> lists the fields in their new
+            order, which is what a host saves to restore a user's layout later.
+        </p>
+    </Overview>
 
-<div class="demo-frame">
-    <GridControl TValue="ReorderingRow"
-                 DataSource="@_rows"
-                 AllowSelection="true"
-                 AllowSorting="true"
-                 AllowFiltering="true"
-                 AllowGrouping="false"
-                 AllowResizing="true"
-                 AllowColumnReorder="true"
-                 ColumnReorderPipeColor="@_reorderPipeColor"
-                 EnableHover="true"
-                 ShowSearchBar="true"
-                 Height="520px">
-        <GridColumnsBase>
-            <GridColumn Field="@nameof(ReorderingRow.Model)"       HeaderText="Model"        Width="130px" />
-            <GridColumn Field="@nameof(ReorderingRow.Community)"   HeaderText="Community"    Width="150px" />
-            <GridColumn Field="@nameof(ReorderingRow.Phase)"       HeaderText="Phase"        Width="120px" />
-            <GridColumn Field="@nameof(ReorderingRow.Task)"        HeaderText="Task"         Width="220px" />
-            <GridColumn Field="@nameof(ReorderingRow.Owner)"       HeaderText="Owner"        Width="150px" />
-            <GridColumn Field="@nameof(ReorderingRow.Priority)"    HeaderText="Priority"     Width="100px" />
-            <GridColumn Field="@nameof(ReorderingRow.Hours)"       HeaderText="Hours"        Width="90px"
-                        Type="ColumnType.Number" Format="N1" TextAlign="TextAlign.Right" />
-            <GridColumn Field="@nameof(ReorderingRow.Cost)"        HeaderText="Cost"         Width="120px"
-                        Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
-            <GridColumn Field="@nameof(ReorderingRow.LastUpdated)" HeaderText="Last Updated" Width="130px"
-                        Type="ColumnType.Date" Format="d" />
-        </GridColumnsBase>
-    </GridControl>
-</div>
+    <Examples>
+        <DemoExample Id="reorder" Title="Move columns by dragging headers" RazorCode="@Code.Reorder" CSharpCode="@Code.ReorderCs">
+            <Description><p>Drag <strong>Priority</strong> in front of <strong>Model</strong>, or <strong>Owner</strong> to the right of <strong>Cost</strong>. Only the dragged column moves; sorting, filtering and the search box keep working on the new order.</p></Description>
+            <Demo>
+                <GridControl TValue="ReorderingRow"
+                             DataSource="@_rows"
+                             AllowSelection="true"
+                             AllowSorting="true"
+                             AllowFiltering="true"
+                             AllowGrouping="false"
+                             AllowResizing="true"
+                             AllowColumnReorder="true"
+                             EnableHover="true"
+                             ShowSearchBar="true"
+                             Height="520px"
+                             OnLayoutChanged="LayoutChanged">
+                    <GridColumnsBase>
+                        <GridColumn Field="@nameof(ReorderingRow.Model)"       HeaderText="Model"        Width="130px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Community)"   HeaderText="Community"    Width="150px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Phase)"       HeaderText="Phase"        Width="120px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Task)"        HeaderText="Task"         Width="220px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Owner)"       HeaderText="Owner"        Width="150px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Priority)"    HeaderText="Priority"     Width="100px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Hours)"       HeaderText="Hours"        Width="90px"
+                                    Type="ColumnType.Number" Format="N1" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(ReorderingRow.Cost)"        HeaderText="Cost"         Width="120px"
+                                    Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(ReorderingRow.LastUpdated)" HeaderText="Last Updated" Width="130px"
+                                    Type="ColumnType.Date" Format="d" />
+                    </GridColumnsBase>
+                </GridControl>
+                <p class="result">@(_order is null ? "Drop a header to see the new order here." : $"Order: {_order}")</p>
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-<h2>Things to try</h2>
-<ul>
-    <li>Drag <strong>Priority</strong> before <strong>Model</strong> and confirm first drop reorders immediately.</li>
-    <li>Drag <strong>Owner</strong> to the right half of <strong>Cost</strong> and verify it lands after Cost.</li>
-    <li>Perform 4-5 sequential reorders and confirm only the dragged column moves each time.</li>
-    <li>Reload the page and repeat to validate consistent behavior from a fresh state.</li>
-</ul>
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters for reordering and layout" Rows="Vocab.Grid" />
+        <ApiTable Kind="ApiKind.Properties" Title="GridSettings" Rows="Vocab.Settings" />
+        <ApiTable Kind="ApiKind.Methods" Title="IGridSettingsStore" Rows="Vocab.Store" />
+        <p>
+            The host registers one <code>IGridSettingsStore</code>, scoped or singleton; with none registered the grid does not persist. There is no
+            public method that returns or applies a <code>GridSettings</code> on its own; <code>GetState()</code> and <code>SetStateAsync()</code>
+            round-trip the wider <code>GridState</code>, which includes the column layout, and <code>EndUpdateAsync</code> or
+            <code>SuspendRedraw</code> take a final column order (see <a href="demo/grid/column-swap">Column sets</a>). Besides dragging, the
+            header menu's Choose Columns dialog moves a column with its Move Up and Move Down buttons. There is no per-column switch, so a host
+            that must keep one column in place has to turn <code>AllowColumnReorder</code> off.
+        </p>
+    </Vocabulary>
 
-<h2>Other Grid Demos</h2>
-<ul>
-    <li><a href="/demo/grid">Basic Grid</a></li>
-    <li><a href="/demo/grid/assembly">Assembly</a></li>
-    <li><a href="/demo/grid/vendor-prices">Vendor Prices</a></li>
-    <li><a href="/demo/grid/items">Items Catalog</a></li>
-</ul>
+    <Related>
+        <ul>
+            <li><a href="demo/grid">Grid overview</a>: the core flags on a small list.</li>
+            <li><a href="demo/grid/column-swap">Column sets</a>: the host swaps whole column sets instead of the user dragging.</li>
+            <li><a href="demo/grid/advanced">Frozen columns</a>: columns pinned to an edge.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
 
-    @code {
-    private string _reorderPipeColor = "#2b2b2b";
-
+@code {
     private record ReorderingRow(
         string Model,
         string Community,
@@ -73,6 +97,10 @@
         decimal Hours,
         decimal Cost,
         DateTime LastUpdated);
+
+    private string? _order;
+
+    private void LayoutChanged(GridSettings layout) => _order = string.Join(" · ", layout.ColumnOrder ?? []);
 
     private readonly List<ReorderingRow> _rows = new()
     {
@@ -89,4 +117,92 @@
         new("F610", "Stone Creek", "Landscape",  "Irrigation valve map",     "Luca Romano",   "Low",    1.0m,  140.00m, new(2026, 1, 18)),
         new("F610", "Stone Creek", "Final",      "Warranty turnover packet", "Grace Mitchell","Medium", 2.8m,  360.00m, new(2026, 1, 19)),
     };
+
+    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    private static class Code
+    {
+        public const string Reorder = @"<GridControl TValue=""ReorderingRow""
+             DataSource=""@_rows""
+             AllowSelection=""true""
+             AllowSorting=""true""
+             AllowFiltering=""true""
+             AllowGrouping=""false""
+             AllowResizing=""true""
+             AllowColumnReorder=""true""
+             EnableHover=""true""
+             ShowSearchBar=""true""
+             Height=""520px""
+             OnLayoutChanged=""LayoutChanged"">
+    <GridColumnsBase>
+        <GridColumn Field=""@nameof(ReorderingRow.Model)""       HeaderText=""Model""        Width=""130px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Community)""   HeaderText=""Community""    Width=""150px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Phase)""       HeaderText=""Phase""        Width=""120px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Task)""        HeaderText=""Task""         Width=""220px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Owner)""       HeaderText=""Owner""        Width=""150px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Priority)""    HeaderText=""Priority""     Width=""100px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Hours)""       HeaderText=""Hours""        Width=""90px""
+                    Type=""ColumnType.Number"" Format=""N1"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Cost)""        HeaderText=""Cost""         Width=""120px""
+                    Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(ReorderingRow.LastUpdated)"" HeaderText=""Last Updated"" Width=""130px""
+                    Type=""ColumnType.Date"" Format=""d"" />
+    </GridColumnsBase>
+</GridControl>
+<p class=""result"">@(_order is null ? ""Drop a header to see the new order here."" : $""Order: {_order}"")</p>";
+        public const string ReorderCs = @"private record ReorderingRow(
+    string Model,
+    string Community,
+    string Phase,
+    string Task,
+    string Owner,
+    string Priority,
+    decimal Hours,
+    decimal Cost,
+    DateTime LastUpdated);
+
+private string? _order;
+
+private void LayoutChanged(GridSettings layout) => _order = string.Join("" · "", layout.ColumnOrder ?? []);
+
+private readonly List<ReorderingRow> _rows = new()
+{
+    new(""A100"", ""North Ridge"", ""Frame"",      ""Rough carpentry review"",   ""Alex Nguyen"",   ""High"",   6.5m,  845.50m, new(2026, 1, 8)),
+    new(""A100"", ""North Ridge"", ""Electrical"", ""Panel schedule update"",    ""Sana Patel"",    ""High"",   4.0m,  620.00m, new(2026, 1, 9)),
+    new(""A200"", ""Maple Hills"", ""Plumbing"",   ""Fixture coordination"",     ""Marcus Lee"",    ""Medium"", 3.0m,  410.25m, new(2026, 1, 10)),
+    new(""B150"", ""Oak View"",    ""Drywall"",    ""Shear wall punch list"",    ""Diana Ortiz"",   ""Low"",    2.5m,  275.00m, new(2026, 1, 11)),
+    new(""C300"", ""Willow Park"", ""Paint"",      ""Color board approval"",     ""Jonah Kim"",     ""Medium"", 1.5m,  190.00m, new(2026, 1, 12)),
+    new(""C300"", ""Willow Park"", ""Final"",      ""QC closeout walk"",         ""Aisha Brown"",   ""High"",   5.0m,  700.00m, new(2026, 1, 13)),
+    new(""D410"", ""River Bend"",  ""Concrete"",   ""Slab tolerance check"",     ""Noah Garcia"",   ""Medium"", 3.5m,  535.75m, new(2026, 1, 14)),
+    new(""D410"", ""River Bend"",  ""Roof"",       ""Flashing detail review"",   ""Priya Menon"",   ""Low"",    2.0m,  260.00m, new(2026, 1, 15)),
+    new(""E520"", ""Cedar Grove"", ""HVAC"",       ""Duct reroute approval"",    ""Ethan Walker"",  ""High"",   4.5m,  655.40m, new(2026, 1, 16)),
+    new(""E520"", ""Cedar Grove"", ""Trim"",       ""Cabinet filler alignment"", ""Mina Hassan"",   ""Medium"", 2.0m,  285.30m, new(2026, 1, 17)),
+    new(""F610"", ""Stone Creek"", ""Landscape"",  ""Irrigation valve map"",     ""Luca Romano"",   ""Low"",    1.0m,  140.00m, new(2026, 1, 18)),
+    new(""F610"", ""Stone Creek"", ""Final"",      ""Warranty turnover packet"", ""Grace Mitchell"",""Medium"", 2.8m,  360.00m, new(2026, 1, 19)),
+};";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Grid =
+        {
+            new("AllowColumnReorder", "Lets a header be dragged onto another header. When off, headers stay draggable only for grouping (with <code>AllowGrouping</code> on) and a drop on a header does nothing.", "bool", "true"),
+            new("ColumnReorderPipeColor", "Colour of the vertical pipe that marks where the column will land; any CSS colour, written to the grid's <code>--fx-grid-reorder-pipe-color</code> variable. Blank falls back to the default.", "string", "\"#2b2b2b\""),
+            new("OnLayoutChanged", "Fires after a layout change the grid can persist: a header drop, the end of a column or row resize, fit-to-grid and auto-fit, a group added or removed, the header menu's rename, lock and hide commands, a column shown or hidden from the options panel, and OK in the Choose Columns dialog. The argument is a <code>GridSettings</code> snapshot of the whole layout, not just the part that changed; save it to restore the layout later.", "EventCallback&lt;GridSettings&gt;"),
+            new("PersistenceKey", "Opt-in persistence. When set and an <code>IGridSettingsStore</code> is registered in DI, the grid loads the saved snapshot once it has its columns and saves a new one at every change that raises <code>OnLayoutChanged</code>.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Settings =
+        {
+            new("ColumnOrder", "Fields in display order. Fields missing from the list go to the end.", "List&lt;string&gt;?", "null"),
+            new("Visibility", "Per-field visibility; overrides the column's <code>Visible</code> parameter.", "Dictionary&lt;string, bool&gt;?", "null"),
+            new("Widths", "Per-field pixel width from the user's last resize.", "Dictionary&lt;string, double&gt;?", "null"),
+            new("FrozenPositions", "Per-field lock: Left or Right pins the column, a null value leaves it scrollable. A null dictionary keeps the markup's layout (settings written by older builds).", "Dictionary&lt;string, FrozenColumnPosition?&gt;?", "null"),
+            new("HeaderOverrides", "Per-field header text from the header menu's rename command.", "Dictionary&lt;string, string&gt;?", "null"),
+            new("GroupColumns", "Fields grouped on, in the order they were dropped on the grouping bar.", "List&lt;string&gt;?", "null"),
+        };
+        public static readonly ApiRow[] Store =
+        {
+            new("LoadAsync(string key)", "Returns the saved snapshot for the key, or null when nothing has been saved.", "Task&lt;GridSettings?&gt;"),
+            new("SaveAsync(string key, GridSettings settings)", "Overwrites whatever was saved under the key.", "Task"),
+        };
+    }
 }

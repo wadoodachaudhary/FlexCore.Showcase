@@ -1,0 +1,202 @@
+@page "/demo/toggle-buttons"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-12: new page on FeatureDemoLayout; two examples (toggle button, button group) per the 1–2 examples rule. Facts checked against ToggleButtonControl.razor,
+   ButtonGroupControl.razor, their stylesheets, FlexControlBase.cs and ContentModels.cs (FlexCore 0.2.48). *@
+
+<PageTitle>Toggle buttons — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Toggle buttons" Category="Components" ControlName="ToggleButtonControl · ButtonGroupControl"
+                   Tagline="A button that stays pressed, and a group that picks one value or many."
+                   SourcePath="ToggleButtonControl.razor; ButtonGroupControl.razor">
+    <Overview>
+        <p>
+            <code>ToggleButtonControl</code> is a <a href="demo/buttons">ButtonControl</a> with a pressed state: <code>Selected</code> binds
+            two ways and the button reports <code>aria-pressed</code>. <code>ButtonGroupControl</code> lines up several such buttons from a
+            list of <code>SelectionItem</code>s and keeps the selection for you: one value or many, horizontal or vertical, with Arrow,
+            Home and End moving focus between them.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="toggle" Title="Toggle button" RazorCode="@Code.Toggle" CSharpCode="@Code.ToggleCs">
+            <Description><p><code>@@bind-Selected</code> holds the state. Icon-only toggles need <code>Title</code> and <code>aria-label</code>. <code>Enabled="false"</code> disables; there is no <code>Disabled</code> parameter on this control.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <ToggleButtonControl @bind-Selected="_bold" IconCss="bi bi-type-bold" Title="Bold" aria-label="Bold" />
+                    <ToggleButtonControl @bind-Selected="_italic" IconCss="bi bi-type-italic" Title="Italic" aria-label="Italic" />
+                    <ToggleButtonControl @bind-Selected="_underline" IconCss="bi bi-type-underline" Title="Underline" aria-label="Underline" />
+                    <ToggleButtonControl @bind-Selected="_notify">Notifications @(_notify ? "on" : "off")</ToggleButtonControl>
+                    <ToggleButtonControl Selected="true" Enabled="false">Locked</ToggleButtonControl>
+                    <span class="result">@FormatState</span>
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="group" Title="Button group" RazorCode="@Code.Group" CSharpCode="@Code.GroupCs">
+            <Description><p><code>Selection="Single"</code> replaces the selection; <code>Multiple</code> toggles each value. <code>Orientation="Vertical"</code> stacks the buttons. <code>AllowEmpty</code> lets the last value go; a disabled item stays in place and is skipped by the arrow keys.</p></Description>
+            <Demo>
+                <div class="demo-row top">
+                    <div class="stack">
+                        <ButtonGroupControl Items="_alignItems" @bind-Values="_align" Selection="ChoiceSelectionMode.Single" AriaLabel="Text alignment" />
+                        <span class="result">@_align[0]</span>
+                    </div>
+                    <div class="stack">
+                        <ButtonGroupControl Items="_dayItems" @bind-Values="_days" Selection="ChoiceSelectionMode.Multiple"
+                                            Orientation="FlexOrientation.Vertical" AllowEmpty="true" AriaLabel="Working days" />
+                        <span class="result">@(_days.Count == 0 ? "none" : string.Join(", ", _days))</span>
+                    </div>
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="ToggleButtonControl parameters" Rows="Vocab.Toggle" />
+        <ApiTable Kind="ApiKind.Parameters" Title="ButtonGroupControl parameters" Rows="Vocab.Group" />
+        <ApiTable Kind="ApiKind.Properties" Title="SelectionItem" Rows="Vocab.Item" />
+        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>Both render <code>ButtonControl</code>, so every button is a native <code>&lt;button&gt;</code>: Space and Enter toggle it.</li>
+            <li>Every button carries <code>aria-pressed</code>. The group has <code>role="group"</code> and the <code>AriaLabel</code> text.</li>
+            <li>In a group, Arrow Right or Down moves focus to the next button, Arrow Left or Up to the previous, Home and End to the first and last. Focus wraps and skips disabled items. Arrows move focus only; Space or Enter selects.</li>
+            <li>Icon-only toggles need <code>Title</code> plus <code>aria-label</code>.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>Plain and dropdown buttons: <a href="demo/buttons">Buttons</a>. Default action with alternatives: <a href="demo/split-button">Split button</a>.</li>
+            <li>A labelled on/off setting: <code>SwitchControl</code> in <a href="demo/new-components">UI elements</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Toggle
+    private bool _bold, _italic, _underline, _notify = true;
+    private string FormatState => string.Join(" ", new[] { (_bold, "B"), (_italic, "I"), (_underline, "U") }.Where(t => t.Item1).Select(t => t.Item2)) is { Length: > 0 } s ? $"Format: {s}" : "Format: none";
+
+    // Group
+    private readonly SelectionItem[] _alignItems =
+    {
+        new("left", "", IconCss: "bi bi-text-left"),
+        new("center", "", IconCss: "bi bi-text-center"),
+        new("right", "", IconCss: "bi bi-text-right"),
+        new("justify", "", IconCss: "bi bi-justify"),
+    };
+    private IReadOnlyList<string> _align = new[] { "left" };
+
+    private readonly SelectionItem[] _dayItems =
+    {
+        new("mon", "Monday"), new("tue", "Tuesday"), new("wed", "Wednesday"),
+        new("thu", "Thursday"), new("fri", "Friday"), new("sat", "Saturday", Disabled: true),
+    };
+    private IReadOnlyList<string> _days = new[] { "mon", "tue", "wed", "thu", "fri" };
+
+    // Vocabulary rows, one per public member (0.2.48). Base-class parameters marked (base).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Toggle =
+        {
+            new("Selected", "Pressed state. Two-way with <code>@bind-Selected</code>.", "bool", "false"),
+            new("SelectedChanged", "Fires after each toggle with the new state.", "EventCallback&lt;bool&gt;"),
+            new("ChildContent", "Label or any markup.", "RenderFragment?"),
+            new("IconCss", "Leading icon.", "string?", "null"),
+            new("OnClick", "Fires after the toggle and after <code>SelectedChanged</code>.", "EventCallback&lt;MouseEventArgs&gt;"),
+            new("Enabled (base)", "false disables the button. There is no <code>Disabled</code> parameter.", "bool", "true"),
+            new("Title (base)", "Native tooltip. Required on icon-only toggles.", "string?", "null"),
+            new("CssClass / Style (base)", "Appended to the inner button's classes; inline style.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the inner <code>&lt;button&gt;</code>: <code>aria-*</code>, <code>data-*</code>, <code>id</code>.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Group =
+        {
+            new("Items", "Buttons, in order. Values must be unique or the control throws.", "IReadOnlyList&lt;SelectionItem&gt;", "empty"),
+            new("Values", "Selected values. Two-way with <code>@bind-Values</code>.", "IReadOnlyList&lt;string&gt;", "empty"),
+            new("ValuesChanged", "Fires after each change with the full selection.", "EventCallback&lt;IReadOnlyList&lt;string&gt;&gt;"),
+            new("Selection", "<code>Single</code> replaces the selection; <code>Multiple</code> toggles the value.", "ChoiceSelectionMode", "Single"),
+            new("Orientation", "<code>Horizontal</code> or <code>Vertical</code>.", "FlexOrientation", "Horizontal"),
+            new("AllowEmpty", "When false the last selected value cannot be cleared.", "bool", "false"),
+            new("AriaLabel", "Accessible name of the group.", "string", "\"Button group\""),
+            new("Enabled (base)", "false disables every button.", "bool", "true"),
+            new("Visible (base)", "false renders nothing.", "bool", "true"),
+            new("CssClass / Style (base)", "On the group element.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Item =
+        {
+            new("Value", "Key reported in <code>Values</code>. Unique within the group.", "string"),
+            new("Text", "Label. Empty for icon-only buttons.", "string"),
+            new("Disabled", "Rendered disabled and skipped by the arrow keys.", "bool", "false"),
+            new("IconCss", "Leading icon.", "string?", "null"),
+            new("ctor", "<code>new(value, text, disabled, iconCss)</code>; it is a positional record.", "", null),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("ButtonGroupControl.SelectAsync(value)", "Same as a click on that button: applies the current mode and raises <code>ValuesChanged</code>. Ignored when disabled or unknown.", "Task"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-toggle-button · .selected", "The toggle's button; <code>selected</code> fills it with the accent color and an inset shadow."),
+            new("fx-button-group · .vertical", "Inline flex row of buttons with no gap; <code>vertical</code> stacks them."),
+            new("fx-selected", "A selected button inside a group: accent fill, white text."),
+            new("fx-button-group button", "Square corners, 28px minimum height, 2px focus ring on keyboard focus."),
+        };
+        public static readonly ApiRow[] Vars =
+        {
+            new("--fx-accent", "Pressed fill. The two stylesheets fall back to different blues.", "#1c6ebf (toggle) · #2465b9 (group)"),
+            new("--fx-btn-*", "Resting look, inherited from ButtonControl. See <a href=\"demo/buttons#documentation\">Buttons</a>.", "—"),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Toggle = @"<div class=""demo-row"">
+    <ToggleButtonControl @bind-Selected=""_bold"" IconCss=""bi bi-type-bold"" Title=""Bold"" aria-label=""Bold"" />
+    <ToggleButtonControl @bind-Selected=""_italic"" IconCss=""bi bi-type-italic"" Title=""Italic"" aria-label=""Italic"" />
+    <ToggleButtonControl @bind-Selected=""_underline"" IconCss=""bi bi-type-underline"" Title=""Underline"" aria-label=""Underline"" />
+    <ToggleButtonControl @bind-Selected=""_notify"">Notifications @(_notify ? ""on"" : ""off"")</ToggleButtonControl>
+    <ToggleButtonControl Selected=""true"" Enabled=""false"">Locked</ToggleButtonControl>
+    <span class=""result"">@FormatState</span>
+</div>";
+        public const string ToggleCs = @"// Toggle
+private bool _bold, _italic, _underline, _notify = true;
+
+private string FormatState => string.Join("" "", new[] { (_bold, ""B""), (_italic, ""I""), (_underline, ""U"") }.Where(t => t.Item1).Select(t => t.Item2)) is { Length: > 0 } s ? $""Format: {s}"" : ""Format: none"";";
+
+        public const string Group = @"<div class=""demo-row top"">
+    <div class=""stack"">
+        <ButtonGroupControl Items=""_alignItems"" @bind-Values=""_align"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Text alignment"" />
+        <span class=""result"">@_align[0]</span>
+    </div>
+    <div class=""stack"">
+        <ButtonGroupControl Items=""_dayItems"" @bind-Values=""_days"" Selection=""ChoiceSelectionMode.Multiple""
+                            Orientation=""FlexOrientation.Vertical"" AllowEmpty=""true"" AriaLabel=""Working days"" />
+        <span class=""result"">@(_days.Count == 0 ? ""none"" : string.Join("", "", _days))</span>
+    </div>
+</div>";
+        public const string GroupCs = @"// Group
+private readonly SelectionItem[] _alignItems =
+{
+    new(""left"", """", IconCss: ""bi bi-text-left""),
+    new(""center"", """", IconCss: ""bi bi-text-center""),
+    new(""right"", """", IconCss: ""bi bi-text-right""),
+    new(""justify"", """", IconCss: ""bi bi-justify""),
+};
+
+private IReadOnlyList<string> _align = new[] { ""left"" };
+
+private readonly SelectionItem[] _dayItems =
+{
+    new(""mon"", ""Monday""), new(""tue"", ""Tuesday""), new(""wed"", ""Wednesday""),
+    new(""thu"", ""Thursday""), new(""fri"", ""Friday""), new(""sat"", ""Saturday"", Disabled: true),
+};
+
+private IReadOnlyList<string> _days = new[] { ""mon"", ""tue"", ""wed"", ""thu"", ""fri"" };";
+    }
+}

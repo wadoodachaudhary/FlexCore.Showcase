@@ -1,0 +1,6 @@
+/* 2026-10-12: Security code page. No Bootstrap names in here. */
+.lead { font-size: 14px; color: #334155; margin: 0 0 12px; }
+.code-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.result { font-size: 13px; color: #475569; margin: 12px 0 0; }
+.result.ok { color: #15803d; font-weight: 600; }
+.result.bad { color: #b91c1c; }

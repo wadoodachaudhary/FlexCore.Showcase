@@ -3,94 +3,92 @@
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Data
+@using FlexCore.Showcase.Components.Shared
 @inject FlexCore.Showcase.Services.BenchDataStore BenchData
 
-<PageTitle>Enterprise Grid Feature Suite — FlexCore DataGrid</PageTitle>
+@* 2026-10-17: moved onto FeatureDemoLayout (one-example-plus-code push, row 2 of the Data Grid list). Same 250 rows and columns.
+   Changes, closing SC-019 and SC-141 to SC-145: the "Show Filter Row" button went (GridControl has no filter-row parameter); the
+   "Selected" readout went (it never refreshed); AllowEditing left the columns (no EditSettings, nothing was editable); grouping,
+   group count and type search left the grid (off-topic here); the Excel button now calls ExportToXlsxAsync (ExportToExcelAsync is the
+   .xls HTML alias, so the old .xlsx file was HTML); the status badge is BadgeControl instead of Bootstrap classes; the buttons are
+   ButtonControls. Copy dropped: "zero external JavaScript dependencies", "complete parity with high-end desktop data grids",
+   ClosedXML (the grid's xlsx writer is the library's own, GridExportModels.cs BuildXlsx), multi-column sorting, checklist
+   filtering and frozen columns (none configured here). Parameter tables are a later pass (SC-278). *@
 
-<SyncfusionDemoLayout Title="FlexCore Enterprise Grid Feature Suite"
-                      Category="DataGrid"
-                      BadgeText="Enterprise Ready"
-                      RazorCode="@_razorSourceCode"
-                      CSharpCode="@_csharpSourceCode"
-                      CSharpTabName="EnterpriseRow.cs">
-    <Summary>
+<PageTitle>Export &amp; templates — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Export &amp; templates" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
+                   Tagline="Export the rows you see to CSV or a real .xlsx workbook, and render a column through your own markup."
+                   SourcePath="Grid/GridControl.razor.cs;Grid/GridExportModels.cs;Grid/GridColumn.cs">
+    <Overview>
         <p>
-            The <strong>FlexCore Enterprise Grid</strong> is built to satisfy demanding corporate line-of-business workflows.
-            It provides complete parity with high-end desktop data grids while running with <strong>zero external JavaScript dependencies</strong>.
+            The grid exports itself: <code>ExportToCsvAsync</code>, <code>ExportToXlsxAsync</code> and the other <code>ExportTo…Async</code>
+            methods take the rows as currently filtered and sorted and the columns as currently visible, build the file on the server with
+            the library's own writers, and hand it to the browser. Where the File System Access API exists a save dialog opens; elsewhere
+            the file downloads. A <code>GridColumn</code> with a <code>Template</code> renders whatever markup you put inside it for each row,
+            with <code>context</code> as the row object; the Status column here renders a <code>BadgeControl</code>.
         </p>
-        <p>
-            This showcase demonstrates key enterprise capabilities: 
-            multi-column sorting, interactive filter row, Excel-style popup checklist filtering, template columns with status badges, 
-            frozen left columns, and instant client-side Excel (.xlsx via ClosedXML) and CSV export.
-        </p>
-    </Summary>
+    </Overview>
 
-    <DemoControls>
-        <div style="display:flex;gap:10px;align-items:center;font-size:13px;flex-wrap:wrap;">
-            <button class="btn btn-sm btn-outline-success" @onclick="ExportCsv">📥 Export CSV</button>
-            <button class="btn btn-sm btn-outline-success" @onclick="ExportExcel">📊 Export Excel (XLSX)</button>
-            <button class="btn btn-sm btn-outline-primary" @onclick="ToggleFilterRow">
-                @(_showFilterRow ? "Hide Filter Row" : "Show Filter Row")
-            </button>
-            <span class="text-muted ms-2">
-                Rows: <b>@_displayRows.Count</b> | 
-                Selected: <b>@(_grid != null ? _grid.GetSelectedRecords().Count() : 0)</b>
-            </span>
-        </div>
-    </DemoControls>
+    <Examples>
+        <DemoExample Id="export" Title="Export the rows you see" RazorCode="@Code.Export" CSharpCode="@Code.ExportCs">
+            <Description><p>Two hundred and fifty estimate lines. Search, filter or sort first, then export: the file holds exactly the rows and columns on screen, in the same order. When the export is done the grid shows the row count in a status pill.</p></Description>
+            <Controls>
+                <ButtonControl CssClass="btn-sm" OnClick="ExportCsv">Export CSV</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="ExportExcel">Export Excel (.xlsx)</ButtonControl>
+            </Controls>
+            <Demo>
+                <GridControl @ref="_grid"
+                             TValue="EnterpriseRow"
+                             DataSource="@_displayRows"
+                             ShowRowCountInFooter="true"
+                             AllowSorting="true"
+                             AllowSelection="true"
+                             AllowResizing="true"
+                             AllowFiltering="true"
+                             ShowSearchBar="true"
+                             Height="420px"
+                             CssClass="fx-grid-compact">
+                    <GridColumnsBase>
+                        <GridColumn Field="@nameof(EnterpriseRow.Code)" HeaderText="Item Code" Width="100px" />
+                        <GridColumn Field="@nameof(EnterpriseRow.Description)" HeaderText="Description" Width="260px" />
+                        <GridColumn Field="@nameof(EnterpriseRow.Category)" HeaderText="Trade Category" Width="140px" />
+                        <GridColumn Field="@nameof(EnterpriseRow.Status)" HeaderText="Status" Width="120px" TextAlign="TextAlign.Center">
+                            <Template>
+                                @{
+                                    var row = (EnterpriseRow)context;
+                                    var variant = row.Status switch
+                                    {
+                                        "Approved" => BadgeVariant.Success,
+                                        "Pending" => BadgeVariant.Warning,
+                                        "Review" => BadgeVariant.Info,
+                                        _ => BadgeVariant.Secondary
+                                    };
+                                }
+                                <BadgeControl Text="@row.Status" Variant="@variant" Size="BadgeSize.Small" />
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(EnterpriseRow.Qty)" HeaderText="Takeoff Qty" Width="100px" Type="ColumnType.Number" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(EnterpriseRow.UnitPrice)" HeaderText="Unit Price" Width="110px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
+                        <GridColumn Field="@nameof(EnterpriseRow.TotalCost)" HeaderText="Total Cost" Width="120px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
+                    </GridColumnsBase>
+                </GridControl>
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-    <DemoContent>
-        <div style="width:100%;">
-            <GridControl @ref="_grid"
-                         ShowRowCountInFooter="true"
-                         TValue="EnterpriseRow"
-                         DataSource="@_displayRows"
-                         AllowSorting="true"
-                         AllowSelection="true"
-                         AllowResizing="true"
-                         AllowFiltering="true"
-                         AllowGrouping="true"
-                         ShowGroupCount="true"
-                         ShowSearchBar="true"
-                         Height="420px"
-                         EnableTypeSearch="true"
-                         CssClass="fx-grid-compact">
-                <GridColumnsBase>
-                    <GridColumn Field="@nameof(EnterpriseRow.Code)" HeaderText="Item Code" Width="100px" AllowEditing="false" />
-                    <GridColumn Field="@nameof(EnterpriseRow.Description)" HeaderText="Description" Width="260px" AllowEditing="true" />
-                    <GridColumn Field="@nameof(EnterpriseRow.Category)" HeaderText="Trade Category" Width="140px" AllowEditing="true" />
-                    <GridColumn Field="@nameof(EnterpriseRow.Status)" HeaderText="Status" Width="120px" TextAlign="TextAlign.Center">
-                        <Template>
-                            @{
-                                var row = (EnterpriseRow)context;
-                                var badgeClass = row.Status switch
-                                {
-                                    "Approved" => "bg-success",
-                                    "Pending" => "bg-warning text-dark",
-                                    "Review" => "bg-info text-dark",
-                                    _ => "bg-secondary"
-                                };
-                            }
-                            <span class="badge @badgeClass" style="font-size:11px;">@row.Status</span>
-                        </Template>
-                    </GridColumn>
-                    <GridColumn Field="@nameof(EnterpriseRow.Qty)" HeaderText="Takeoff Qty" Width="100px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" />
-                    <GridColumn Field="@nameof(EnterpriseRow.UnitPrice)" HeaderText="Unit Price" Width="110px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" Format="$#,##0.00" />
-                    <GridColumn Field="@nameof(EnterpriseRow.TotalCost)" HeaderText="Total Cost" Width="120px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
-                </GridColumnsBase>
-            </GridControl>
-        </div>
-    </DemoContent>
+    <Vocabulary>
+        <p class="fd-pending">The export methods and <code>GridExportFormat</code>, and the <code>Template</code> parameter of <code>GridColumn</code>, are still to be written from <code>Grid/GridControl.razor.cs</code>, <code>Grid/GridExportModels.cs</code> and <code>Grid/GridColumn.cs</code>.</p>
+    </Vocabulary>
 
-    <DocumentationContent>
-        <h3>Enterprise Grid Capabilities</h3>
+    <Related>
         <ul>
-            <li><strong>Column Templates:</strong> Embed custom Razor markup, status badges, dropdowns, sparklines, or action buttons seamlessly inside cell templates.</li>
-            <li><strong>Built-In Excel Export:</strong> Integrates directly with <code>ClosedXML</code> to stream formatted, native .xlsx workbooks with column headers, widths, and number formats preserved.</li>
-            <li><strong>Multi-Column Sorting &amp; Grouping:</strong> Hold Shift while clicking column headers to build hierarchical sort chains across multiple fields.</li>
+            <li><a href="demo/grid">Grid overview</a>: the core flags on a small list.</li>
+            <li><a href="demo/grid/advanced">Frozen columns</a>: another template column, with a working button in it.</li>
+            <li><a href="demo/new-components">UI elements</a>: <code>BadgeControl</code> on its own.</li>
         </ul>
-    </DocumentationContent>
-</SyncfusionDemoLayout>
+    </Related>
+</FeatureDemoLayout>
 
 @code {
     public class EnterpriseRow
@@ -106,7 +104,6 @@
 
     private GridControl<EnterpriseRow>? _grid;
     private List<EnterpriseRow> _displayRows = [];
-    private bool _showFilterRow = false;
 
     protected override void OnInitialized()
     {
@@ -124,56 +121,49 @@
         }).ToList();
     }
 
-    private void ToggleFilterRow()
+    private Task ExportCsv() => _grid?.ExportToCsvAsync("estimate-items.csv") ?? Task.CompletedTask;
+
+    private Task ExportExcel() => _grid?.ExportToXlsxAsync("estimate-items.xlsx") ?? Task.CompletedTask;
+
+    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    private static class Code
     {
-        _showFilterRow = !_showFilterRow;
-        StateHasChanged();
-    }
-
-    private async Task ExportCsv()
-    {
-        if (_grid != null)
-        {
-            await _grid.ExportToCsvAsync("Enterprise_Estimating_Export.csv");
-        }
-    }
-
-    private async Task ExportExcel()
-    {
-        if (_grid != null)
-        {
-            await _grid.ExportToExcelAsync("Enterprise_Estimating_Export.xlsx");
-        }
-    }
-
-    private const string _razorSourceCode = @"@using Fx.ControlKit
-@using Fx.ControlKit.Grid
-
-<GridControl TValue=""EnterpriseRow""
-             DataSource=""@Rows""
+        public const string Export = @"<GridControl @ref=""_grid""
+             TValue=""EnterpriseRow""
+             DataSource=""@_displayRows""
+             ShowRowCountInFooter=""true""
              AllowSorting=""true""
              AllowSelection=""true""
+             AllowResizing=""true""
              AllowFiltering=""true""
-             AllowGrouping=""true""
-             Height=""420px"">
+             ShowSearchBar=""true""
+             Height=""420px""
+             CssClass=""fx-grid-compact"">
     <GridColumnsBase>
         <GridColumn Field=""@nameof(EnterpriseRow.Code)"" HeaderText=""Item Code"" Width=""100px"" />
         <GridColumn Field=""@nameof(EnterpriseRow.Description)"" HeaderText=""Description"" Width=""260px"" />
         <GridColumn Field=""@nameof(EnterpriseRow.Category)"" HeaderText=""Trade Category"" Width=""140px"" />
         <GridColumn Field=""@nameof(EnterpriseRow.Status)"" HeaderText=""Status"" Width=""120px"" TextAlign=""TextAlign.Center"">
             <Template>
-                @{ var row = (EnterpriseRow)context; }
-                <span class=""badge bg-success"">@row.Status</span>
+                @{
+                    var row = (EnterpriseRow)context;
+                    var variant = row.Status switch
+                    {
+                        ""Approved"" => BadgeVariant.Success,
+                        ""Pending"" => BadgeVariant.Warning,
+                        ""Review"" => BadgeVariant.Info,
+                        _ => BadgeVariant.Secondary
+                    };
+                }
+                <BadgeControl Text=""@row.Status"" Variant=""@variant"" Size=""BadgeSize.Small"" />
             </Template>
         </GridColumn>
-        <GridColumn Field=""@nameof(EnterpriseRow.UnitPrice)"" HeaderText=""Unit Price"" Width=""110px"" Format=""$#,##0.00"" />
-        <GridColumn Field=""@nameof(EnterpriseRow.TotalCost)"" HeaderText=""Total Cost"" Width=""120px"" Format=""$#,##0.00"" />
+        <GridColumn Field=""@nameof(EnterpriseRow.Qty)"" HeaderText=""Takeoff Qty"" Width=""100px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(EnterpriseRow.UnitPrice)"" HeaderText=""Unit Price"" Width=""110px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""$#,##0.00"" />
+        <GridColumn Field=""@nameof(EnterpriseRow.TotalCost)"" HeaderText=""Total Cost"" Width=""120px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""$#,##0.00"" />
     </GridColumnsBase>
 </GridControl>";
-
-    private const string _csharpSourceCode = @"namespace FlexCore.Showcase.Data;
-
-public class EnterpriseRow
+        public const string ExportCs = @"public class EnterpriseRow
 {
     public string Code { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -182,5 +172,30 @@ public class EnterpriseRow
     public decimal Qty { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal TotalCost => Qty * UnitPrice;
-}";
+}
+
+private GridControl<EnterpriseRow>? _grid;
+
+private List<EnterpriseRow> _displayRows = [];
+
+protected override void OnInitialized()
+{
+    var statuses = new[] { ""Approved"", ""Pending"", ""Review"", ""Completed"" };
+    var categories = new[] { ""Foundation"", ""Framing"", ""Mechanical"", ""Electrical"", ""Plumbing"", ""Interior"" };
+
+    _displayRows = BenchData.EstimatingItems.Take(250).Select((item, idx) => new EnterpriseRow
+    {
+        Code = item.Item ?? $""ITM-{idx:D4}"",
+        Description = item.ItemDesc ?? ""Construction Assembly Item"",
+        Category = categories[idx % categories.Length],
+        Status = statuses[idx % statuses.Length],
+        Qty = (idx % 25) + 1,
+        UnitPrice = item.Price ?? 45.00m
+    }).ToList();
+}
+
+private Task ExportCsv() => _grid?.ExportToCsvAsync(""estimate-items.csv"") ?? Task.CompletedTask;
+
+private Task ExportExcel() => _grid?.ExportToXlsxAsync(""estimate-items.xlsx"") ?? Task.CompletedTask;";
+    }
 }

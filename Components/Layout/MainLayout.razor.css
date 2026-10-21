@@ -67,7 +67,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    overflow-x: auto;
+    overflow: visible; /* was overflow-x:auto; that clipped MenuDropDownControl's absolute panel into a horizontal scroll strip */
 }
 
 .nav-menu-item {
@@ -107,6 +107,7 @@
 }
 
 .btn-nav-primary {
+    white-space: nowrap;   /* keeps 'Quick Start' on one line next to the wider menu items (2026-10-13) */
     background: #0284c7;
     color: #ffffff;
     font-size: 13px;
@@ -211,14 +212,66 @@
     top: 0.5rem;
 }
 
+
+/* ── FlexCore MenuBarControl restyled for the site header.
+   The library's scoped rules are Win32-flavoured (Tahoma 11px, bevel). These ::deep overrides
+   win on specificity (.top-nav-menu[scope] .x  >  .x[scope]) and leave behaviour untouched. ── */
+.top-nav-menu ::deep .site-menubar { border: 0; background: transparent; padding: 0; gap: 4px; font: inherit; }
+.top-nav-menu ::deep .site-dd .nav-menu-item { height: auto; font-family: inherit; font-size: 13.5px; gap: 8px; padding: 7px 12px; white-space: nowrap; }   /* the library button is not in this file's scope, so the gap above does not reach it (2026-10-13) */
+.top-nav-menu ::deep .site-dd .nav-menu-item:hover { background: #f1f5f9; border-color: transparent; color: #0284c7; }
+/* Two states, two looks (2026-10-19, Baaria: "why are they both clicked?"). The open panel's trigger gets the
+   filled pill (the library adds .active while IsOpen); the current section only gets blue semibold text and a
+   2px bar underneath, so the two never read as the same thing. */
+.top-nav-menu ::deep .site-dd .nav-menu-item.active { background: #e0f2fe; border-color: transparent; color: #0284c7; }
+.top-nav-menu ::deep .site-dd.active .nav-menu-item { color: #0284c7; font-weight: 600; box-shadow: inset 0 -2px 0 #0284c7; }
+.top-nav-menu ::deep .site-dd.active .nav-menu-item.active { box-shadow: none; }
+.top-nav-menu ::deep .site-dd .nav-menu-item:focus-visible { outline: 2px solid #0284c7; outline-offset: 2px; }
+.top-nav-menu ::deep .nav-caret { font-size: 10px; margin-left: -2px; transition: transform .15s ease; }
+.top-nav-menu ::deep .nav-menu-item.active .nav-caret { transform: rotate(180deg); }
+/* 2026-10-20 (Baaria, after the Radzen comparison): the open panel must read as a menu, not as page content.
+   Stronger shadow and border, a brand-blue top edge, roomier items, and the control's backdrop button tints the page. */
+.top-nav-menu ::deep .site-panel { min-width: 260px; padding: 8px; border-radius: 10px; top: calc(100% + 8px);
+                                   border: 1px solid #cbd5e1; border-top: 3px solid #0284c7; background: #fff;
+                                   box-shadow: 0 18px 44px rgba(15, 23, 42, 0.22), 0 2px 6px rgba(15, 23, 42, 0.08); }
+.top-nav-menu ::deep .fx-menu-backdrop { background: rgba(15, 23, 42, 0.08); }
+.top-nav-menu ::deep .site-panel.wide { min-width: 520px; columns: 2; column-gap: 6px; }
+.top-nav-menu ::deep .site-panel.wide > * { break-inside: avoid; }
+.nav-dd-link { display: block; padding: 8px 12px; border-radius: 6px; font-size: 13.5px; color: #334155; text-decoration: none; white-space: nowrap; }
+.nav-dd-link:hover, .nav-dd-link:focus-visible { background: #f1f5f9; color: #0284c7; outline: none; }
+.nav-dd-all { font-weight: 600; color: #0f172a; border-bottom: 1px solid #f1f5f9; border-radius: 6px 6px 0 0; margin-bottom: 4px; }
+.nav-dd-head { padding: 8px 10px 2px; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; }
+
+/* ── Phone drawer (hard-coded: no FlexCore off-canvas control yet) ── */
+.nav-toggle { position: absolute; opacity: 0; pointer-events: none; }
+.nav-burger { display: none; cursor: pointer; }
+.nav-drawer { display: none; }
+
 @media (max-width: 992px) {
-    .top-nav-bar {
-        padding: 0 16px;
+    .top-nav-bar { padding: 0 16px; }
+    .top-nav-menu { display: none; }
+    .btn-nav-primary { display: none; }                 /* lives in the drawer on phones */
+    .nav-burger { display: inline-flex; }
+    .main-body-container { padding: 16px 16px 48px; }
+
+    /* Drawer opens when the checkbox in the header is checked. */
+    .top-nav-bar:has(.nav-toggle:checked) + .nav-drawer { display: block; }
+    .nav-drawer {
+        position: sticky; top: 60px; z-index: 999; background: #fff;
+        border-bottom: 1px solid #e2e8f0; padding: 8px 12px 12px; max-height: calc(100vh - 60px); overflow-y: auto;
     }
-    .top-nav-menu {
-        display: none;
+    .nav-drawer-top, .nav-drawer-group > summary {
+        display: flex; align-items: center; gap: 8px; padding: 10px 8px; font-size: 15px; font-weight: 500;
+        color: #0f172a; text-decoration: none; cursor: pointer; list-style: none; border-radius: 6px;
     }
-    .main-body-container {
-        padding: 16px 16px 48px;
-    }
+    .nav-drawer-group > summary::-webkit-details-marker { display: none; }
+    .nav-drawer-group > summary::after { content: "\\203A"; margin-left: auto; color: #94a3b8; transition: transform .15s; }
+    .nav-drawer-group[open] > summary::after { transform: rotate(90deg); }
+    .nav-drawer-link { display: block; padding: 8px 8px 8px 34px; font-size: 14px; color: #334155; text-decoration: none; border-radius: 6px; }
+    .nav-drawer-link:hover { background: #f1f5f9; }
+    .nav-drawer-head { padding: 8px 8px 0 34px; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; }
 }
+
+/* Preview banner above the sticky top bar (2026-10-13). AlertControl supplies the look; this only flattens it to a strip. */
+.preview-banner ::deep .fx-alert { margin: 0; border-radius: 0; border-width: 0 0 1px; padding: 7px 24px; justify-content: center; align-items: center; font-size: 13px; }
+.preview-banner ::deep .fx-alert-content { flex-grow: 0; }
+.preview-banner ::deep .fx-alert a { color: inherit; text-decoration: underline; font-weight: 600; }

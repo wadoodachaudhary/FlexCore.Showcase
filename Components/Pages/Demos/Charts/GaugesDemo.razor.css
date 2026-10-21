@@ -1,0 +1,6 @@
+/* 2026-10-19: Gauges & stock chart page. No Bootstrap names in here. */
+.four { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.pane-title { font-size: 13px; font-weight: 600; color: #334155; margin: 0 0 6px; text-align: center; }
+.ring-value { font-size: 15px; color: #0f766e; }
+.result { font-size: 13px; color: #475569; margin: 8px 0 0; }
+@media (max-width: 900px) { .four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

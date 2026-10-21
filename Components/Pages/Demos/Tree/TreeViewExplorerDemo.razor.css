@@ -1,0 +1,9 @@
+.explorer { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 16px; }
+.tree { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #fff; overflow: auto; max-height: 420px; min-height: 320px; }
+.inspector { border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; background: #f8fafc; font-size: 13px; }
+.inspector h4 { margin: 0 0 10px; font-size: 13px; font-weight: 600; color: #0f172a; }
+.props { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; }
+.props dt { color: #64748b; }
+.props dd { margin: 0; }
+.muted { color: #64748b; margin: 0; }
+@media (max-width: 760px) { .explorer { grid-template-columns: 1fr; } }

@@ -1,0 +1,12 @@
+/* 2026-10-12: Sliders page. No Bootstrap names (row, label) in here. */
+.field { display: grid; grid-template-columns: 90px minmax(160px, 420px) 60px; align-items: center; gap: 12px; }
+.field + .field, .result { margin-top: 12px; }
+.field-label { font-size: 13px; color: #334155; }
+.readout { font-size: 13px; font-weight: 600; color: #1e293b; text-align: right; }
+.result { font-size: 13px; color: #475569; margin-bottom: 0; }
+.range-row { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
+.range-row ::deep .fx-range-slider { width: 360px; max-width: 100%; }
+.matches { min-width: 240px; }
+.matches ul { list-style: none; margin: 8px 0 0; padding: 0; font-size: 13px; }
+.matches li { display: flex; justify-content: space-between; gap: 16px; padding: 4px 0; border-top: 1px solid #e2e8f0; }
+.price { font-variant-numeric: tabular-nums; color: #334155; }

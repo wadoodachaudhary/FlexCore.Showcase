@@ -1,0 +1,169 @@
+@page "/demo/split-button"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-12: new page on FeatureDemoLayout; two examples per the 1–2 rule (Item values dropped, Value stays in the table). Facts checked against SplitButtonControl.razor,
+   SplitButtonItem.cs and SplitButtonControl.razor.css in FlexCore 0.2.48. *@
+
+<PageTitle>Split button — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Split button" Category="Components" ControlName="SplitButtonControl"
+                   Tagline="A default action, with its alternatives behind the caret."
+                   SourcePath="SplitButtonControl.razor">
+    <Overview>
+        <p>
+            <code>SplitButtonControl</code> renders two native buttons side by side. The main half fires <code>OnClick</code>;
+            the caret half opens a menu built from <code>Items</code>, followed by any markup in <code>MenuContent</code>.
+            A click-away backdrop closes the menu; no JavaScript. Use it when one action is the default and the others are
+            variants of it. When there is no default action, use <a href="demo/buttons#dropdown">ButtonControl's dropdown mode</a>.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="basic" Title="Default action with alternatives" RazorCode="@Code.Basic" CSharpCode="@Code.BasicCs">
+            <Description><p><code>Text</code> and <code>IconCss</code> label the main half. A disabled item renders but does not fire. <code>Disabled</code> greys out both halves.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <SplitButtonControl Text="Save" IconCss="bi bi-save" Items="_saveItems"
+                                        OnClick="@(() => _saved = "Saved")" OnItemClick="@(i => _saved = i.Text)" />
+                    <SplitButtonControl Text="Save" IconCss="bi bi-save" Items="_saveItems" Disabled="true" />
+                    @if (_saved is not null) { <span class="result">@_saved</span> }
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="menu-content" Title="Custom menu content" RazorCode="@Code.MenuContent" CSharpCode="@Code.MenuContentCs">
+            <Description><p><code>MenuContent</code> renders after the items. Clicks inside it do not close the menu, so it suits options that stay open; click-away closes it.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <SplitButtonControl Text="Publish" IconCss="bi bi-cloud-upload" Items="_publishItems"
+                                        OnClick="@(() => Publish("now"))" OnItemClick="@(i => Publish(i.Text))">
+                        <MenuContent>
+                            <div class="menu-options">
+                                <CheckBoxControl @bind-Checked="_notify" Label="Notify subscribers" />
+                                <CheckBoxControl @bind-Checked="_pin" Label="Pin to top" />
+                            </div>
+                        </MenuContent>
+                    </SplitButtonControl>
+                    @if (_published is not null) { <span class="result">@_published</span> }
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
+        <ApiTable Kind="ApiKind.Properties" Title="SplitButtonItem" Rows="Vocab.Item" />
+        <p class="note">Colors are fixed in the control's stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>Both halves are native <code>&lt;button&gt;</code>s: Tab reaches each, Space and Enter activate.</li>
+            <li>The caret half sets <code>aria-haspopup</code> and <code>aria-expanded</code>.</li>
+            <li>Menu entries are native buttons: Tab moves through them, Enter or Space picks. There is no arrow-key or Escape handling; a pick or click-away closes the menu.</li>
+            <li><code>Disabled</code> sets the native <code>disabled</code> attribute on both halves and ignores pointer events on the host.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>One button with a menu and no default action: <a href="demo/buttons#dropdown">ButtonControl dropdown mode</a>.</li>
+            <li><code>ToolbarButtonControl</code> with <code>HasDropdown</code>: <a href="demo/counterparts">Control tour</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Basic
+    private readonly List<SplitButtonItem> _saveItems = new()
+    {
+        new("Save as…", "bi bi-file-earmark"),
+        new("Save a copy", "bi bi-files"),
+        new("Save and close", "bi bi-box-arrow-right"),
+        new("Save as template", "bi bi-file-earmark-lock", disabled: true),
+    };
+    private string? _saved;
+
+    // Menu content
+    private readonly List<SplitButtonItem> _publishItems = new() { new("Schedule…", "bi bi-calendar-event") };
+    private bool _notify = true, _pin;
+    private string? _published;
+    private void Publish(string how) => _published = $"Publish {how} (notify {(_notify ? "on" : "off")}, pin {(_pin ? "on" : "off")})";
+
+    // Vocabulary rows, one per public member (0.2.48).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Parameters =
+        {
+            new("Text", "Label of the main half. Wins over <code>ChildContent</code> when set.", "string?", "null"),
+            new("IconCss", "Leading icon on the main half.", "string?", "null"),
+            new("ChildContent", "Main-half markup, used when <code>Text</code> is not set.", "RenderFragment?"),
+            new("Items", "Menu entries, in order.", "IList&lt;SplitButtonItem&gt;?", "null"),
+            new("MenuContent", "Extra markup rendered after the items inside the menu.", "RenderFragment?", "null"),
+            new("Disabled", "Disables both halves; the host fades and ignores pointer events.", "bool", "false"),
+            new("OnClick", "Main half clicked. No arguments.", "EventCallback"),
+            new("OnItemClick", "Menu entry picked. The menu closes first.", "EventCallback&lt;SplitButtonItem&gt;"),
+            new("CssClass / Style", "Appended to, and inline style on, the host element.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the host <code>&lt;div&gt;</code>, not to the buttons.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Item =
+        {
+            new("Text", "Entry label.", "string", "\"\""),
+            new("IconCss", "Leading icon.", "string?", "null"),
+            new("Value", "Any payload; read it in <code>OnItemClick</code> instead of matching on <code>Text</code>.", "object?", "null"),
+            new("Disabled", "Rendered greyed; clicks ignored.", "bool", "false"),
+            new("ctor", "<code>new(text, iconCss, value, disabled)</code>, all but text optional.", "", null),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-split-button-host", "Inline-flex wrapper; the menu is positioned against it. Gets <code>fx-split-button-disabled</code> when disabled."),
+            new("fx-split-button-main · fx-split-button-toggle", "The two halves. Blue fill, shared border, rounded outer corners."),
+            new("fx-split-button-dropdown", "The menu: white panel under the control, right-aligned, 150px minimum."),
+            new("fx-split-button-item", "One entry; <code>.disabled</code> halves its opacity."),
+            new("fx-split-button-backdrop", "Full-screen transparent layer that closes the menu on click."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Basic = @"<div class=""demo-row"">
+    <SplitButtonControl Text=""Save"" IconCss=""bi bi-save"" Items=""_saveItems""
+                        OnClick=""@(() => _saved = ""Saved"")"" OnItemClick=""@(i => _saved = i.Text)"" />
+    <SplitButtonControl Text=""Save"" IconCss=""bi bi-save"" Items=""_saveItems"" Disabled=""true"" />
+    @if (_saved is not null) { <span class=""result"">@_saved</span> }
+</div>";
+        public const string BasicCs = @"// Basic
+private readonly List<SplitButtonItem> _saveItems = new()
+{
+    new(""Save as…"", ""bi bi-file-earmark""),
+    new(""Save a copy"", ""bi bi-files""),
+    new(""Save and close"", ""bi bi-box-arrow-right""),
+    new(""Save as template"", ""bi bi-file-earmark-lock"", disabled: true),
+};
+
+private string? _saved;";
+
+        public const string MenuContent = @"<div class=""demo-row"">
+    <SplitButtonControl Text=""Publish"" IconCss=""bi bi-cloud-upload"" Items=""_publishItems""
+                        OnClick=""@(() => Publish(""now""))"" OnItemClick=""@(i => Publish(i.Text))"">
+        <MenuContent>
+            <div class=""menu-options"">
+                <CheckBoxControl @bind-Checked=""_notify"" Label=""Notify subscribers"" />
+                <CheckBoxControl @bind-Checked=""_pin"" Label=""Pin to top"" />
+            </div>
+        </MenuContent>
+    </SplitButtonControl>
+    @if (_published is not null) { <span class=""result"">@_published</span> }
+</div>";
+        public const string MenuContentCs = @"// Menu content
+private readonly List<SplitButtonItem> _publishItems = new() { new(""Schedule…"", ""bi bi-calendar-event"") };
+
+private bool _notify = true, _pin;
+
+private string? _published;
+
+private void Publish(string how) => _published = $""Publish {how} (notify {(_notify ? ""on"" : ""off"")}, pin {(_pin ? ""on"" : ""off"")})"";";
+    }
+}

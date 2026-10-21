@@ -109,7 +109,8 @@ public sealed class SecurityGroup
 }
 
 /// <summary>
-/// User list item for permissions benches.
+/// A user on the Master-detail page. <see cref="GroupID"/> is the <see cref="SecurityGroup.GroupID"/> the user belongs to
+/// (added 2026-10-18 so the detail grid filters on a real relation).
 /// </summary>
 public sealed class UserListItem
 {
@@ -117,6 +118,7 @@ public sealed class UserListItem
     public string UserName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public bool Active { get; set; } = true;
+    public int GroupID { get; set; }
 }
 
 /// <summary>

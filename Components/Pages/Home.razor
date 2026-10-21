@@ -9,7 +9,7 @@
     <div class="top-hero-compact">
         <div class="hero-tagline-badge">
             <span class="badge-pulse"></span>
-            <span>FlexCore v0.2.31 Enterprise Suite &bull; .NET 10 &bull; 100% Pure C# &amp; SVG &bull; Zero JavaScript Overhead</span>
+            <span>FlexCore v@_flexCoreVersion Enterprise Suite &bull; .NET 10 &bull; C# and SVG rendering &bull; No npm or third-party JavaScript</span>
         </div>
         <h1 class="hero-oneliner">
             High-throughput enterprise Blazor data grid with sub-millisecond 60 FPS virtualization, instant in-grid editing, and native ClosedXML Excel export.
@@ -28,10 +28,10 @@
                 </div>
                 <div class="window-title">
                     <span class="bi bi-window-sidebar"></span>
-                    <span>Inbox — Custom Quotes (HomeFront Precision Estimating)</span>
+                    <span>Inbox — Custom Quotes</span>
                 </div>
                 <div class="window-tags">
-                    <span>FlexCore Grid v0.2.31 • .NET 10 • 1,000 Rows Virtualized</span>
+                    <span>FlexCore Grid v@_flexCoreVersion • .NET 10 • 1,000 Rows Virtualized</span>
                 </div>
             </div>
 
@@ -127,7 +127,7 @@
                             <span class="perf-badge-icon">⌨️</span>
                             <div class="perf-badge-text">
                                 <strong>Instant In-Grid Typing</strong>
-                                <span>Click any Estimate cell to type directly — zero JS latency</span>
+                                <span>Click any Estimate cell to type directly — keystrokes stay in the browser until commit</span>
                             </div>
                         </div>
                         <div class="perf-badge-item">
@@ -491,9 +491,9 @@
 
             <div class="pillar-card">
                 <div class="pillar-icon purple">🛡️</div>
-                <h3 class="pillar-title">Zero JavaScript Dependencies</h3>
+                <h3 class="pillar-title">No Third-Party JavaScript</h3>
                 <p class="pillar-desc">
-                    Built 100% in C# and pure SVG. No npm packages, no webpack pipelines, and no fragile JS-interop serialization bottlenecks to slow down your circuits.
+                    Rendering is C# and SVG. No npm packages or webpack. The library ships its own interop scripts for focus, scrolling and clipboard, loaded on demand.
                 </p>
             </div>
 
@@ -554,7 +554,7 @@
                 <tbody>
                     <tr>
                         <td><strong>Core Engine</strong></td>
-                        <td class="col-flexcore">100% Pure C# &amp; SVG</td>
+                        <td class="col-flexcore">C# &amp; SVG rendering, own interop scripts</td>
                         <td>Wrapped JavaScript (npm)</td>
                         <td>Basic HTML5 Elements</td>
                     </tr>
@@ -590,7 +590,7 @@
                     </tr>
                     <tr>
                         <td><strong>Licensing &amp; Per-Seat Fees</strong></td>
-                        <td class="col-flexcore"><strong>Host-Agnostic &amp; Free</strong></td>
+                        <td class="col-flexcore"><strong>MIT license on NuGet</strong>; a Community edition is coming by email (<a href="signup">sign up</a>)</td>
                         <td>$1,200+ / dev / year</td>
                         <td>Varies</td>
                     </tr>
@@ -621,15 +621,26 @@
             <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" class="btn-hero-secondary">
                 <span class="bi bi-github"></span> View Source on GitHub
             </a>
-            <a href="downloads/FlexCore.zip" class="btn-hero-secondary">
-                <span class="bi bi-download"></span> Download Package (.ZIP)
-            </a>
         </div>
     </div>
 </div>
 
 @code {
+    // Library version read from the FlexCore assembly so the badge cannot drift (was a hard-coded v0.2.31).
+    private static readonly string _flexCoreVersion =
+        typeof(Fx.ControlKit.ButtonControl).Assembly.GetName().Version is { } v ? $"{v.Major}.{v.Minor}.{v.Build}" : "";
+
     private string _activeTab = "grid";
+    private static readonly string[] HeroTabs = ["grid", "charts", "ribbon", "reports"];
+
+    /// <summary>Hero tab named in the address, e.g. ?tab=ribbon (catalog row Office Ribbon); read on load, never written back.</summary>
+    [SupplyParameterFromQuery(Name = "tab")] public string? Tab { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        var tab = Tab?.Trim().ToLowerInvariant();
+        if (tab is not null && HeroTabs.Contains(tab)) _activeTab = tab;
+    }
     private bool _showCode = false;
     private bool _copiedInstall = false;
     private bool _copiedCode = false;
@@ -1176,7 +1187,7 @@
             </Template>
         </GridColumn>
 
-        <!-- ── IN-GRID FAST TYPING CELL (Direct cell typing with zero JS lag) ── -->
+        <!-- ── IN-GRID FAST TYPING CELL (Typed in the browser, committed on blur) ── -->
         <GridColumn Field=""EstimateAmount"" HeaderText=""Estimate (Fast Typing)"" Width=""140px""
                     Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right""
                     AllowEditing=""true"" SelectAllOnEdit=""true"" />

@@ -1,0 +1,278 @@
+@page "/demo/tabs-accordion"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-12: new page on FeatureDemoLayout; three examples (tab control, tab strip, accordion). Facts checked against Navigation/TabControl.razor,
+   Navigation/TabItem.razor, TabStripControl.razor, TabStripModels.cs, AccordionControl.razor, AccordionItemControl.razor and their stylesheets
+   (FlexCore 0.2.48). The accordion moved here from UI elements. *@
+
+<PageTitle>Tabs & accordion — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Tabs & accordion" Category="Components" ControlName="TabControl · TabStripControl · AccordionControl"
+                   Tagline="Three ways to show one section at a time: tabs with their own panes, a bare tab strip you wire up yourself, and stacked headers that expand."
+                   SourcePath="Navigation/TabControl.razor; TabStripControl.razor; AccordionControl.razor">
+    <Overview>
+        <p>
+            <code>TabControl</code> owns its content: each <code>TabItem</code> declares a header and a pane, and <code>SelectedIndex</code> binds
+            two ways. <code>TabStripControl</code> is the header row alone, driven by a list of <code>TabStripItem</code>s with icons, disabled
+            and closable tabs, for cases where the content lives elsewhere, such as open documents or routes. <code>AccordionControl</code> stacks
+            <code>AccordionItemControl</code> headers and expands one at a time, or several with <code>Multiple</code>.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs">
+            <Description><p>Panes are declared inline; only the selected one renders, so the Lines table is not in the page until its tab is chosen. The <code>TabItems</code> wrapper is optional.</p></Description>
+            <Demo>
+                <TabControl @bind-SelectedIndex="_tab">
+                    <TabItems>
+                        <TabItem HeaderText="Summary">
+                            <dl class="summary">
+                                <dt>Estimate</dt><dd>EST-2042 Contoso kitchen</dd>
+                                <dt>Status</dt><dd>Draft, 14 lines</dd>
+                                <dt>Total</dt><dd>$12,480</dd>
+                            </dl>
+                        </TabItem>
+                        <TabItem HeaderText="Lines">
+                            <table class="lines">
+                                <thead><tr><th>Item</th><th>Qty</th><th class="num">Amount</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Quartz counters</td><td>24 ft</td><td class="num">$4,800</td></tr>
+                                    <tr><td>Cabinet install</td><td>18 hr</td><td class="num">$2,340</td></tr>
+                                    <tr><td>Tile backsplash</td><td>36 sq ft</td><td class="num">$1,260</td></tr>
+                                </tbody>
+                            </table>
+                        </TabItem>
+                        <TabItem HeaderText="Notes">
+                            <p class="m0">Quote valid 30 days. Crane access confirmed for the week of the 20th; site contact is the foreman.</p>
+                        </TabItem>
+                    </TabItems>
+                </TabControl>
+                <p class="result">Tab @(_tab + 1) of 3 selected</p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="strip" Title="Tab strip" RazorCode="@Code.Strip" CSharpCode="@Code.StripCs">
+            <Description><p>The strip renders headers only; the page shows the selected item's <code>Tag</code> underneath. Closable tabs raise <code>OnTabClose</code> with the index and the page removes the item. A disabled tab ignores clicks.</p></Description>
+            <Demo>
+                <TabStripControl Items="_docs" @bind-SelectedIndex="_doc" OnTabClose="CloseDoc" />
+                <div class="strip-pane">@(_docs.Count == 0 ? "No documents open." : _docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag)</div>
+                <div class="strip-actions">
+                    <ButtonControl CssClass="btn-sm" OnClick="Reopen" Disabled="@(_closed.Count == 0)">Reopen last closed</ButtonControl>
+                    <span class="result">@_docs.Count open, @_closed.Count closed</span>
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="accordion" Title="Accordion" RazorCode="@Code.Accordion">
+            <Description><p><code>Multiple="true"</code> lets several sections stay open; without it, opening one closes the rest. <code>InitiallyExpanded</code> opens a section on first render and <code>Disabled</code> greys its header.</p></Description>
+            <Demo>
+                <div class="acc">
+                    <AccordionControl Multiple="true">
+                        <AccordionItemControl Title="Customer" IconCss="bi bi-person" InitiallyExpanded="true">Contoso Ltd, account 10420, net 30.</AccordionItemControl>
+                        <AccordionItemControl Title="Delivery" IconCss="bi bi-truck">Site address in Redmond; crane access confirmed.</AccordionItemControl>
+                        <AccordionItemControl Title="Notes" IconCss="bi bi-sticky">Quote valid 30 days.</AccordionItemControl>
+                        <AccordionItemControl Title="Attachments (none)" IconCss="bi bi-paperclip" Disabled="true">—</AccordionItemControl>
+                    </AccordionControl>
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="TabControl parameters" Rows="Vocab.TabControl" />
+        <ApiTable Kind="ApiKind.Parameters" Title="TabItem parameters" Rows="Vocab.TabItem" />
+        <ApiTable Kind="ApiKind.Parameters" Title="TabStripControl parameters" Rows="Vocab.Strip" />
+        <ApiTable Kind="ApiKind.Properties" Title="TabStripItem" Rows="Vocab.StripItem" />
+        <ApiTable Kind="ApiKind.Parameters" Title="AccordionControl parameters" Rows="Vocab.Accordion" />
+        <ApiTable Kind="ApiKind.Parameters" Title="AccordionItemControl parameters" Rows="Vocab.AccordionItem" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables (TabStripControl only)" Rows="Vocab.Vars" />
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li><code>TabControl</code> headers are native buttons: Tab moves between them and Enter or Space selects. There are no <code>tablist</code>, <code>tab</code> or <code>tabpanel</code> roles and no arrow-key handling.</li>
+            <li><code>TabStripControl</code> tabs are <code>&lt;div&gt;</code>s with click handlers only; they are not keyboard-focusable. Use <code>TabControl</code> where keyboard access matters.</li>
+            <li>Each accordion header is a button with <code>aria-expanded</code>; the body is a <code>role="region"</code>. A disabled header is a disabled button.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>Tabbed document workspaces with closable pages and a tab well: <code>PageControl</code> in <a href="demo/workspace/page-control-bench">the page control bench</a>.</li>
+            <li>Side-by-side and collapsible regions: <a href="demo/layout">Page layouts</a>. A navigation tree: <a href="demo/tree/treeview-explorer">Tree view</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Tab control
+    private int _tab;
+
+    // Tab strip
+    private int _doc;
+    private readonly List<TabStripItem> _docs = new()
+    {
+        new("Estimate", "bi bi-file-earmark-text", closable: true) { Tag = "EST-2042 Contoso kitchen, 14 lines, draft." },
+        new("Drawings", "bi bi-image", closable: true) { Tag = "Plan view and two elevations, revision B." },
+        new("Photos", "bi bi-camera", closable: true) { Tag = "Six site photos from the survey visit." },
+        new("Invoice", "bi bi-receipt") { Disabled = true, Tag = "Not issued yet." },
+    };
+    private readonly Stack<TabStripItem> _closed = new();
+
+    private void CloseDoc(int index)
+    {
+        _closed.Push(_docs[index]);
+        _docs.RemoveAt(index);
+        // Keep the same document selected when one before it closes; fall back a step when the last one closes.
+        if (index < _doc || _doc >= _docs.Count) _doc = Math.Max(0, _doc - 1);
+    }
+
+    private void Reopen()
+    {
+        if (_closed.Count == 0) return;
+        _docs.Add(_closed.Pop());
+        _doc = _docs.Count - 1;
+    }
+
+    // Vocabulary rows, one per public member (0.2.48).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] TabControl =
+        {
+            new("SelectedIndex", "Index of the visible pane. Two-way with <code>@bind-SelectedIndex</code>.", "int", "0"),
+            new("SelectedIndexChanged", "Fires when a different header is clicked.", "EventCallback&lt;int&gt;"),
+            new("ChildContent", "<code>TabItem</code>s, optionally inside a <code>TabItems</code> wrapper. Order follows declaration.", "RenderFragment?"),
+            new("CssClass", "Appended to the <code>fx-tabs</code> root. There is no <code>Style</code>; this control does not derive from <code>FlexControlBase</code>.", "string?", "null"),
+        };
+        public static readonly ApiRow[] TabItem =
+        {
+            new("HeaderText", "Header button label.", "string", "\"\""),
+            new("Content", "Pane markup; takes precedence over child content.", "RenderFragment?", "null"),
+            new("ChildContent", "Pane markup when <code>Content</code> is not set.", "RenderFragment?", "null"),
+        };
+        public static readonly ApiRow[] Strip =
+        {
+            new("Items", "Tabs, in order.", "List&lt;TabStripItem&gt;", "empty"),
+            new("SelectedIndex", "Active tab. Two-way with <code>@bind-SelectedIndex</code>. Not clamped when items are removed; clamp it yourself.", "int", "0"),
+            new("SelectedIndexChanged", "Fires on a click on an enabled tab.", "EventCallback&lt;int&gt;"),
+            new("OnTabClose", "Fires with the index when a closable tab's × is clicked. The strip does not remove the item.", "EventCallback&lt;int&gt;"),
+            new("CssClass", "Appended to the <code>fx-tabstrip</code> root. Not a <code>FlexControlBase</code> control.", "string?", "null"),
+        };
+        public static readonly ApiRow[] StripItem =
+        {
+            new("Text", "Label.", "string", "\"\""),
+            new("IconCss", "Leading icon classes.", "string?", "null"),
+            new("Closable", "Shows the × button.", "bool", "false"),
+            new("Disabled", "Greys the tab and ignores clicks.", "bool", "false"),
+            new("Tag", "Anything the page wants to carry with the tab.", "object?", "null"),
+            new("ctor", "<code>new(text, iconCss, closable)</code> or an object initialiser.", "", null),
+        };
+        public static readonly ApiRow[] Accordion =
+        {
+            new("Multiple", "true keeps several items open; false closes the others when one opens.", "bool", "false"),
+            new("ChildContent", "<code>AccordionItemControl</code>s.", "RenderFragment?"),
+            new("CssClass / Style (base)", "On the <code>fx-accordion</code> root.", "string?", "null"),
+        };
+        public static readonly ApiRow[] AccordionItem =
+        {
+            new("Title", "Header text when <code>HeaderContent</code> is not set.", "string?", "null"),
+            new("IconCss", "Icon before the title.", "string?", "null"),
+            new("Disabled", "Disables the header button.", "bool", "false"),
+            new("InitiallyExpanded", "Open on first render. In single mode the last such item wins.", "bool", "false"),
+            new("HeaderContent", "Replaces icon and title inside the header button; the arrow stays.", "RenderFragment?", "null"),
+            new("ChildContent", "Body, rendered only while expanded.", "RenderFragment?", "null"),
+            new("Expanded (read-only)", "Current state, asked of the parent.", "bool"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-tabs · fx-tab-headers · fx-tab-button (.active) · fx-tab-content", "Tab control root, header row, header buttons and the bordered pane."),
+            new("fx-tabstrip · fx-tabstrip-tab (-active, -disabled) · fx-tabstrip-icon · fx-tabstrip-text · fx-tabstrip-close", "Strip row with a bottom border, each tab with a 2px active underline, its icon, text and × button."),
+            new("fx-accordion · fx-accordion-item (.fx-accordion-expanded, .fx-accordion-disabled)", "Rounded bordered stack and each item; the expanded class rotates the arrow."),
+            new("fx-accordion-header · -icon · -title · -arrow · -body", "Header button and its parts; the body carries the padding."),
+        };
+        public static readonly ApiRow[] Vars =
+        {
+            new("--fx-tab-bg · --fx-tab-color · --fx-text-color", "Strip background, resting and hover text.", "#f9fafb · #6b7280 · #1f2937"),
+            new("--fx-tab-active-color · --fx-tab-active-border-color · --fx-tab-active-bg", "Active tab text, underline and fill.", "#1b6ec2 · #1b6ec2 · transparent"),
+            new("--fx-border-color · --fx-sidebar-item-hover-bg · --fx-text-muted", "Strip bottom border, hover fill, disabled text.", "#e5e7eb · #f3f4f6 · #d1d5db"),
+            new("--fx-font-size · --fx-zoom", "Tab font size and zoom factor.", "13px · 1"),
+            new("(none)", "<code>TabControl</code> and the accordion read no variables; their colours are fixed in the stylesheets.", "—"),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Tabs = @"<TabControl @bind-SelectedIndex=""_tab"">
+    <TabItems>
+        <TabItem HeaderText=""Summary"">
+            <dl class=""summary"">
+                <dt>Estimate</dt><dd>EST-2042 Contoso kitchen</dd>
+                <dt>Status</dt><dd>Draft, 14 lines</dd>
+                <dt>Total</dt><dd>$12,480</dd>
+            </dl>
+        </TabItem>
+        <TabItem HeaderText=""Lines"">
+            <table class=""lines"">
+                <thead><tr><th>Item</th><th>Qty</th><th class=""num"">Amount</th></tr></thead>
+                <tbody>
+                    <tr><td>Quartz counters</td><td>24 ft</td><td class=""num"">$4,800</td></tr>
+                    <tr><td>Cabinet install</td><td>18 hr</td><td class=""num"">$2,340</td></tr>
+                    <tr><td>Tile backsplash</td><td>36 sq ft</td><td class=""num"">$1,260</td></tr>
+                </tbody>
+            </table>
+        </TabItem>
+        <TabItem HeaderText=""Notes"">
+            <p class=""m0"">Quote valid 30 days. Crane access confirmed for the week of the 20th; site contact is the foreman.</p>
+        </TabItem>
+    </TabItems>
+</TabControl>
+<p class=""result"">Tab @(_tab + 1) of 3 selected</p>";
+        public const string TabsCs = @"// Tab control
+private int _tab;";
+
+        public const string Strip = @"<TabStripControl Items=""_docs"" @bind-SelectedIndex=""_doc"" OnTabClose=""CloseDoc"" />
+<div class=""strip-pane"">@(_docs.Count == 0 ? ""No documents open."" : _docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag)</div>
+<div class=""strip-actions"">
+    <ButtonControl CssClass=""btn-sm"" OnClick=""Reopen"" Disabled=""@(_closed.Count == 0)"">Reopen last closed</ButtonControl>
+    <span class=""result"">@_docs.Count open, @_closed.Count closed</span>
+</div>";
+        public const string StripCs = @"// Tab strip
+private int _doc;
+
+private readonly List<TabStripItem> _docs = new()
+{
+    new(""Estimate"", ""bi bi-file-earmark-text"", closable: true) { Tag = ""EST-2042 Contoso kitchen, 14 lines, draft."" },
+    new(""Drawings"", ""bi bi-image"", closable: true) { Tag = ""Plan view and two elevations, revision B."" },
+    new(""Photos"", ""bi bi-camera"", closable: true) { Tag = ""Six site photos from the survey visit."" },
+    new(""Invoice"", ""bi bi-receipt"") { Disabled = true, Tag = ""Not issued yet."" },
+};
+
+private readonly Stack<TabStripItem> _closed = new();
+
+private void CloseDoc(int index)
+{
+    _closed.Push(_docs[index]);
+    _docs.RemoveAt(index);
+    // Keep the same document selected when one before it closes; fall back a step when the last one closes.
+    if (index < _doc || _doc >= _docs.Count) _doc = Math.Max(0, _doc - 1);
+}
+
+private void Reopen()
+{
+    if (_closed.Count == 0) return;
+    _docs.Add(_closed.Pop());
+    _doc = _docs.Count - 1;
+}";
+
+        public const string Accordion = @"<div class=""acc"">
+    <AccordionControl Multiple=""true"">
+        <AccordionItemControl Title=""Customer"" IconCss=""bi bi-person"" InitiallyExpanded=""true"">Contoso Ltd, account 10420, net 30.</AccordionItemControl>
+        <AccordionItemControl Title=""Delivery"" IconCss=""bi bi-truck"">Site address in Redmond; crane access confirmed.</AccordionItemControl>
+        <AccordionItemControl Title=""Notes"" IconCss=""bi bi-sticky"">Quote valid 30 days.</AccordionItemControl>
+        <AccordionItemControl Title=""Attachments (none)"" IconCss=""bi bi-paperclip"" Disabled=""true"">—</AccordionItemControl>
+    </AccordionControl>
+</div>";
+    }
+}

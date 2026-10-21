@@ -1,0 +1,306 @@
+@page "/demo/dock-manager"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using Fx.ControlKit.Docking
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-19: new page (Baaria approved the Control tour split; fifth page; the SC-032 idea of folding the dock manager into
+   Page layouts was dropped for a page of its own, the frame controls AppBar/Toolbar/GridLayout still go to Page layouts). The
+   tour's Docking tab moved here and was removed there. Documentation written from Docking/DockManagerControl.razor,
+   DockNodeView.razor, DockPanelActions.razor and DockModels.cs; rows checked with scratchpad/vocabcheck.py; behaviour sentences
+   read from OnParametersSet, PublishAsync, DockAsync, FloatAsync, UnpinAsync, CloseAsync, DockLayoutState.Validate and the two
+   child views. *@
+
+<PageTitle>Dock manager — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Dock manager" Category="Components" CategoryHref="components" ControlName="DockManagerControl"
+                   Tagline="Tabbed panes the user can split, float, unpin and close, with the whole arrangement saved as one JSON document."
+                   SourcePath="Docking/DockManagerControl.razor;Docking/DockNodeView.razor;Docking/DockPanelActions.razor;Docking/DockModels.cs">
+    <Overview>
+        <p>
+            <code>DockManagerControl</code> takes a list of <code>DockPanel</code>s, each a key, a title and a render fragment, and arranges them in
+            a tree of tab groups and two-pane splits. The user drags a tab onto another group and chooses Tab, Left, Right, Top or Bottom, or
+            uses each pane's Dock… menu to do the same without dragging. A pane can float as a non-modal window, unpin into a strip along the top
+            that opens as a drawer, or close into a "Closed panes" menu that brings it back. Splits are <code>SplitterControl</code>s and keep their
+            ratio. The arrangement is a <code>DockLayoutState</code>: the control reports it after every change, accepts one as its starting point, and
+            saves or restores it as JSON.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="workspace" Title="A four-pane workspace" RazorCode="@Code.Workspace" CSharpCode="@Code.WorkspaceCs">
+            <Description><p>Explorer on the left, Document and Output as tabs in the middle, Properties on the right, from a <code>State</code> built in code. Document cannot be closed and Output cannot float, so those buttons are missing on their action bars. Drag a tab onto another group and drop it on one of the five targets, resize a split, float Properties, unpin Explorer and open it from the strip, close Output and bring it back from Closed panes. Save keeps the current layout as JSON, Restore applies it again, Reset hands the control a fresh starting state. The line below is fed by <code>StateChanged</code>.</p></Description>
+            <Controls>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _json = _dock!.SaveLayout()">Save layout</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _dock!.RestoreLayoutAsync(_json!)" Disabled="@(_json is null)">Restore layout</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _state = Workspace()">Reset layout</ButtonControl>
+            </Controls>
+            <Demo>
+                <DockManagerControl @ref="_dock" Panels="@_panels" State="@_state" StateChanged="s => _summary = Summarize(s)" Height="460px" />
+                <p class="result">@_summary</p>
+                @if (_json is not null)
+                {
+                    <details class="json"><summary>Saved layout, @_json.Length characters of JSON</summary><pre>@_json</pre></details>
+                }
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="methods" Title="Driving it from code" RazorCode="@Code.Methods" CSharpCode="@Code.MethodsCs">
+            <Description><p>Three panes that start as one tab group, the default when no <code>State</code> is given. The buttons call the public methods: Float, Unpin, Close and a Dock that puts every pane back into the first group as a tab. Log is not closable, so closing it is ignored and the counts do not move. The group's id for <code>DockAsync</code> is read from the layout the control saves.</p></Description>
+            <Controls>
+                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.FloatAsync("chart")'>Float Chart</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.UnpinAsync("log")'>Unpin Log</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.CloseAsync("notes")'>Close Notes</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.CloseAsync("log")'>Close Log</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="DockAllAsync">Dock everything back</ButtonControl>
+            </Controls>
+            <Demo>
+                <DockManagerControl @ref="_tools" Panels="@_toolPanels" StateChanged="s => _toolSummary = Summarize(s)" Height="320px" />
+                <p class="result">@_toolSummary</p>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="DockManagerControl parameters" Rows="Vocab.Params" />
+        <ApiTable Kind="ApiKind.Events" Title="DockManagerControl events" Rows="Vocab.Events" />
+        <ApiTable Kind="ApiKind.Methods" Title="DockManagerControl methods" Rows="Vocab.Methods" />
+        <p>
+            <code>DockPanel(string Key, string Title, RenderFragment Content, bool Closable = true, bool Floatable = true)</code> is a record;
+            <code>DockPosition</code> is <code>Tab</code>, <code>Left</code>, <code>Right</code>, <code>Top</code> or <code>Bottom</code>.
+            <code>CssClass</code>, <code>Style</code>, <code>Id</code>, <code>Visible</code>, <code>Enabled</code> and <code>AdditionalAttributes</code>
+            come from <code>FlexControlBase</code>; <code>Enabled="false"</code> disables every button, the tab drag and the methods.
+        </p>
+        <p>What the user can do, and where it comes from:</p>
+        <ul>
+            <li>Each group shows its panes as tabs; a click makes a pane active. The active pane gets an action bar with Dock…, Float (when floatable and not already floating), Unpin or Pin, and Close (when closable).</li>
+            <li>Dragging a tab shows Tab, Left, Right, Top and Bottom targets in every group; dropping on one, or clicking it, docks there. Dock… offers the same five positions for every group, including an empty one, so no drag is needed.</li>
+            <li>Docking as Tab, or into an empty group, appends the pane and makes it active. The other four positions split the target 50/50: Left and Right side by side, Top and Bottom stacked, the moved pane first for Left and Top.</li>
+            <li>Floating opens the pane in a non-modal <code>DialogControl</code>, 520 by 360 px, each further floating pane offset 20 px from the one before; it can be dragged and resized while the manager is enabled, and its close icon and Escape close it only when the pane is closable.</li>
+            <li>Unpinned panes sit in a strip above the groups; a click opens the pane as a drawer over the left side, and Pin docks it into the first group.</li>
+            <li>Closed panes gather in a "Closed panes" menu; choosing one docks it into the first group as a tab.</li>
+            <li>After every change empty splits are collapsed and the whole layout is validated before <code>StateChanged</code> is raised.</li>
+        </ul>
+        <ApiTable Kind="ApiKind.Properties" Title="DockLayoutState" Rows="Vocab.State" />
+        <ApiTable Kind="ApiKind.Methods" Title="DockLayoutState methods" Rows="Vocab.StateMethods" />
+        <ApiTable Kind="ApiKind.Properties" Title="DockNode" Rows="Vocab.Node" />
+        <ApiTable Kind="ApiKind.Properties" Title="DockFloatingPane" Rows="Vocab.Floating" />
+        <p>
+            <code>Validate</code> refuses a layout in which a panel key is unknown, missing or placed twice; a node that has both panels and
+            children or a child count other than 0 or 2; a ratio outside 5 to 95; a tree deeper than 30 levels or with a repeated node; an
+            active panel that is not in its group; or a floating position that is not finite. <code>State</code> is validated against the current
+            panel keys when it arrives, and so is the JSON given to <code>RestoreLayoutAsync</code>. When the panel list changes without a new
+            <code>State</code>, removed panels leave the layout and added ones join the first group.
+        </p>
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+    </Vocabulary>
+
+    <Accessibility>
+        <p>
+            Each group is a <code>tablist</code> of <code>tab</code> buttons with <code>aria-selected</code>, and its content a <code>tabpanel</code>
+            named after the pane. The unpinned strip is labelled "Unpinned panes", the drawer is a <code>section</code> labelled with the pane's title,
+            and floating panes are dialogs with the title as their header. Dragging is optional: the Dock… menu and the clickable drop targets reach
+            every position from the keyboard.
+        </p>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li><a href="demo/layout">Page layouts</a>: fixed page frames and splitters without user rearrangement.</li>
+            <li><a href="demo/dialog">Dialogs</a>: the window a floating pane is made of.</li>
+            <li><a href="demo/tabs-accordion">Tabs &amp; accordion</a>: plain tabs when the user should not move them.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    private DockManagerControl? _dock;
+    private DockLayoutState _state = Workspace();
+    private string _summary = "No changes yet.";
+    private string? _json;
+    private readonly IReadOnlyList<DockPanel> _panels =
+    [
+        new("explorer", "Explorer", b => b.AddMarkupContent(0, "<ul><li>src/</li><li>tests/</li><li>docs/</li><li>README.md</li></ul>")),
+        new("document", "Document", b => b.AddMarkupContent(0, "<p>The document pane cannot be closed, so its action bar has no Close button.</p>"), Closable: false),
+        new("properties", "Properties", b => b.AddMarkupContent(0, "<dl><dt>Name</dt><dd>README.md</dd><dt>Size</dt><dd>2.1 KB</dd><dt>Modified</dt><dd>Today</dd></dl>")),
+        new("output", "Output", b => b.AddMarkupContent(0, "<pre>Build started…\nBuild succeeded.</pre><p>The output pane cannot float.</p>"), Floatable: false),
+    ];
+
+    private static DockLayoutState Workspace() => new()
+    {
+        Root = new()
+        {
+            Vertical = true, Ratio = 25,
+            Children =
+            [
+                new() { Panels = ["explorer"], ActivePanel = "explorer" },
+                new()
+                {
+                    Vertical = true, Ratio = 70,
+                    Children =
+                    [
+                        new() { Panels = ["document", "output"], ActivePanel = "document" },
+                        new() { Panels = ["properties"], ActivePanel = "properties" },
+                    ],
+                },
+            ],
+        },
+    };
+
+    private static string Summarize(DockLayoutState s) =>
+        $"{s.Nodes().Count(n => n.Children.Count == 0)} groups, {s.Floating.Count} floating, {s.AutoHidden.Count} unpinned, {s.Closed.Count} closed.";
+
+    private DockManagerControl? _tools;
+    private string _toolSummary = "No changes yet.";
+    private readonly IReadOnlyList<DockPanel> _toolPanels =
+    [
+        new("chart", "Chart", b => b.AddMarkupContent(0, "<p>A floatable pane.</p>")),
+        new("log", "Log", b => b.AddMarkupContent(0, "<p>Not closable: Close Log is ignored.</p>"), Closable: false),
+        new("notes", "Notes", b => b.AddMarkupContent(0, "<p>Closable and floatable.</p>")),
+    ];
+
+    private async Task DockAllAsync()
+    {
+        foreach (var key in new[] { "chart", "log", "notes" })
+        {
+            var layout = DockLayoutState.FromJson(_tools!.SaveLayout());
+            var group = layout.Nodes().First(n => n.Children.Count == 0).Id;
+            await _tools.DockAsync(key, group, DockPosition.Tab);
+        }
+    }
+
+    // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
+    private static class Code
+    {
+        public const string Workspace = @"<DockManagerControl @ref=""_dock"" Panels=""@_panels"" State=""@_state"" StateChanged=""s => _summary = Summarize(s)"" Height=""460px"" />
+<p class=""result"">@_summary</p>
+@if (_json is not null)
+{
+    <details class=""json""><summary>Saved layout, @_json.Length characters of JSON</summary><pre>@_json</pre></details>
+}";
+        public const string WorkspaceCs = @"private DockManagerControl? _dock;
+
+private DockLayoutState _state = Workspace();
+
+private string _summary = ""No changes yet."";
+
+private string? _json;
+
+private readonly IReadOnlyList<DockPanel> _panels =
+[
+    new(""explorer"", ""Explorer"", b => b.AddMarkupContent(0, ""<ul><li>src/</li><li>tests/</li><li>docs/</li><li>README.md</li></ul>"")),
+    new(""document"", ""Document"", b => b.AddMarkupContent(0, ""<p>The document pane cannot be closed, so its action bar has no Close button.</p>""), Closable: false),
+    new(""properties"", ""Properties"", b => b.AddMarkupContent(0, ""<dl><dt>Name</dt><dd>README.md</dd><dt>Size</dt><dd>2.1 KB</dd><dt>Modified</dt><dd>Today</dd></dl>"")),
+    new(""output"", ""Output"", b => b.AddMarkupContent(0, ""<pre>Build started…\nBuild succeeded.</pre><p>The output pane cannot float.</p>""), Floatable: false),
+];
+
+private static DockLayoutState Workspace() => new()
+{
+    Root = new()
+    {
+        Vertical = true, Ratio = 25,
+        Children =
+        [
+            new() { Panels = [""explorer""], ActivePanel = ""explorer"" },
+            new()
+            {
+                Vertical = true, Ratio = 70,
+                Children =
+                [
+                    new() { Panels = [""document"", ""output""], ActivePanel = ""document"" },
+                    new() { Panels = [""properties""], ActivePanel = ""properties"" },
+                ],
+            },
+        ],
+    },
+};
+
+private static string Summarize(DockLayoutState s) =>
+    $""{s.Nodes().Count(n => n.Children.Count == 0)} groups, {s.Floating.Count} floating, {s.AutoHidden.Count} unpinned, {s.Closed.Count} closed."";";
+        public const string Methods = @"<DockManagerControl @ref=""_tools"" Panels=""@_toolPanels"" StateChanged=""s => _toolSummary = Summarize(s)"" Height=""320px"" />
+<p class=""result"">@_toolSummary</p>";
+        public const string MethodsCs = @"private DockManagerControl? _tools;
+
+private string _toolSummary = ""No changes yet."";
+
+private readonly IReadOnlyList<DockPanel> _toolPanels =
+[
+    new(""chart"", ""Chart"", b => b.AddMarkupContent(0, ""<p>A floatable pane.</p>"")),
+    new(""log"", ""Log"", b => b.AddMarkupContent(0, ""<p>Not closable: Close Log is ignored.</p>""), Closable: false),
+    new(""notes"", ""Notes"", b => b.AddMarkupContent(0, ""<p>Closable and floatable.</p>"")),
+];
+
+private async Task DockAllAsync()
+{
+    foreach (var key in new[] { ""chart"", ""log"", ""notes"" })
+    {
+        var layout = DockLayoutState.FromJson(_tools!.SaveLayout());
+        var group = layout.Nodes().First(n => n.Children.Count == 0).Id;
+        await _tools.DockAsync(key, group, DockPosition.Tab);
+    }
+}
+
+private static string Summarize(DockLayoutState s) =>
+    $""{s.Nodes().Count(n => n.Children.Count == 0)} groups, {s.Floating.Count} floating, {s.AutoHidden.Count} unpinned, {s.Closed.Count} closed."";";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Params =
+        {
+            new("Panels", "The panes: unique, non-empty keys, a title, the content and the two permissions. Panes added later join the first group; removed ones leave the layout.", "IReadOnlyList&lt;DockPanel&gt;", "Array.Empty&lt;DockPanel&gt;()"),
+            new("State", "The starting arrangement. A new instance is validated against the keys and copied; null gives one group with every pane, the first active.", "DockLayoutState?", "null"),
+            new("Height", "Height of the manager.", "string", "\"500px\""),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("StateChanged", "After every change: tab click, split resize, dock, float, unpin, close, a floating pane moved or resized, or a restore. Carries a copy of the layout.", "DockLayoutState"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("SaveLayout()", "The current layout as JSON.", "string"),
+            new("RestoreLayoutAsync(string json)", "Applies a saved layout after validating it against the current panes; ignored while disabled.", "Task"),
+            new("DockAsync(string key, string targetNodeId, DockPosition position = DockPosition.Tab)", "Moves a pane into a group, as a tab or by splitting it. The target must be a group, not a split; the pane may come from anywhere, including floating, unpinned or closed.", "Task"),
+            new("FloatAsync(string key)", "Floats a pane; ignored when it is not floatable.", "Task"),
+            new("UnpinAsync(string key)", "Moves a pane to the unpinned strip.", "Task"),
+            new("CloseAsync(string key)", "Closes a pane; ignored when it is not closable.", "Task"),
+        };
+        public static readonly ApiRow[] State =
+        {
+            new("Root", "The tree of groups and splits.", "DockNode", "new()"),
+            new("Floating", "Panes shown as windows.", "List&lt;DockFloatingPane&gt;", "[]"),
+            new("AutoHidden", "Keys of the unpinned panes.", "List&lt;string&gt;", "[]"),
+            new("Closed", "Keys of the closed panes.", "List&lt;string&gt;", "[]"),
+        };
+        public static readonly ApiRow[] StateMethods =
+        {
+            new("Clone()", "A deep copy, made through JSON.", "DockLayoutState"),
+            new("ToJson()", "Serialises the layout.", "string"),
+            new("FromJson(string json)", "Static; parses a layout and throws for null.", "DockLayoutState"),
+            new("Nodes()", "Every node of the tree, root first.", "IEnumerable&lt;DockNode&gt;"),
+            new("Validate(IEnumerable&lt;string&gt; keys)", "Throws unless the layout places exactly these keys once each and the tree is well formed; see the rules below.", "void"),
+        };
+        public static readonly ApiRow[] Node =
+        {
+            new("Id", "Identifier used as the dock target.", "string", "Guid.NewGuid().ToString(\"N\")"),
+            new("Panels", "Keys of the panes in this group, in tab order. Empty for a split.", "List&lt;string&gt;", "[]"),
+            new("ActivePanel", "The selected tab; must be one of <code>Panels</code>.", "string?", "null"),
+            new("Children", "Empty for a group, exactly two for a split.", "List&lt;DockNode&gt;", "[]"),
+            new("Vertical", "True puts the two children side by side, false stacks them.", "bool", "true"),
+            new("Ratio", "Percentage of the split given to the first child, 5 to 95.", "double", "50"),
+        };
+        public static readonly ApiRow[] Floating =
+        {
+            new("Panel", "The pane's key.", "string", "\"\""),
+            new("Width", "Window width.", "string", "\"520px\""),
+            new("Height", "Window height.", "string", "\"360px\""),
+            new("Position", "Window position as <code>DialogPosition(X, Y)</code>.", "DialogPosition", "new(0,0)"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-dock-manager", "The root element."),
+            new("fx-dock-group", "A tab group; <code>fx-dock-tabs</code> is its tab strip, <code>fx-dock-actions</code> the action bar of the active pane, <code>fx-dock-targets</code> the drop targets shown while dragging."),
+            new("fx-dock-auto-hidden", "The strip of unpinned panes; <code>fx-dock-drawer</code> is the drawer one of them opens."),
+        };
+    }
+}

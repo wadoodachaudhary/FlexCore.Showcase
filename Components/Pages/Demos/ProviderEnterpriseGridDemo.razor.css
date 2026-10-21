@@ -1,8 +1,5 @@
-.provider-enterprise-demo {
-    max-width: 1500px;
-}
-
-.provider-enterprise-grid {
-    min-height: 620px;
-    overflow: hidden;
-}
+/* 2026-10-18: On-demand loading page. No Bootstrap names in here. */
+.result { font-size: 13px; color: #475569; margin: 8px 0 0; }
+/* The caption "(n items)" and "sum $x" spans are emitted from GridControl.razor.cs without the scope attribute, so the library's
+   .fx-group-count / .fx-group-caption-agg rules never match and the three parts run together. Spaced here until the library fix (SC-253). */
+.orders ::deep .fx-group-count, .orders ::deep .fx-group-caption-agg { margin-left: 6px; }

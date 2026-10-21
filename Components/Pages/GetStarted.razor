@@ -1,5 +1,8 @@
 @page "/get-started"
 
+@* 2026-10-17: "Register services" now matches Program.cs (dialog service, optional ZoomService) and a "Mount the hosts" step
+   was added: followed literally, the old steps produced no toasts or dialogs. A License section was added the same day. Tracker SC-284. *@
+
 <PageTitle>Get Started — FlexCore</PageTitle>
 
 <div class="docs-page">
@@ -7,24 +10,52 @@
 
     <section>
         <h2>Install</h2>
-        <p>Once published to NuGet:</p>
+        <p>From NuGet:</p>
         <pre><code>dotnet add package FlexCore</code></pre>
 
         <p>Or as a project reference (during development):</p>
         <pre><code>&lt;ProjectReference Include="..\path\to\FlexCore\FlexCore.csproj" /&gt;</code></pre>
 
-        <p>Or download the source as a zip:</p>
-        <p><a href="/downloads/FlexCore.zip" class="btn-primary">Download FlexCore.zip</a></p>
+        <p>Source: <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank">github.com/wadoodachaudhary/FlexCore</a></p>
+    </section>
+
+    <section>
+        <h2>License</h2>
+        <p>
+            The FlexCore package on NuGet is released under the <a href="https://github.com/wadoodachaudhary/FlexCore/blob/main/LICENSE" target="_blank">MIT license</a>.
+            A Community edition is in preparation and will be delivered as a download link by email; <a href="signup">sign up</a> to receive it or to ask a question.
+        </p>
     </section>
 
     <section>
         <h2>Register services</h2>
-        <p>In <code>Program.cs</code>:</p>
-        <pre><code>using Fx.ControlKit.Notifications;
+        <p>In <code>Program.cs</code>. These are the registrations this site uses (<code>Program.cs</code> in the Showcase repository):</p>
+        <pre><code>using Fx.ControlKit.Dialogs;
+using Fx.ControlKit.Notifications;
 
-builder.Services.AddScoped&lt;NotificationService&gt;();
-// ...register your own adapters for IReportDataExecutor, IReportSessionContext,
-// IReportExporter, IReportPickListProvider if you use the report writer.</code></pre>
+builder.Services.AddScoped&lt;NotificationService&gt;();                 // toasts
+builder.Services.AddScoped&lt;DialogService&gt;();                       // confirm / alert / prompt
+builder.Services.AddScoped&lt;IDialogService&gt;(sp =&gt; sp.GetRequiredService&lt;DialogService&gt;());
+builder.Services.AddScoped&lt;Fx.ControlKit.ZoomService&gt;();           // optional: text zoom shared by the controls; the hosts work without it
+// Report writer only: ReportOptions, CrystalXmlReportLoader and your own IReportDataExecutor,
+// IReportSessionContext, IReportExporter, IReportPickListProvider and IReportViewerSettings
+// (the Showcase Program.cs has a working set with stub adapters).</code></pre>
+    </section>
+
+    <section>
+        <h2>Mount the hosts</h2>
+        <p>
+            Toasts and service dialogs render through two host components. Put them once in your layout, or nothing will appear when you call
+            <code>NotificationService</code> or <code>IDialogService</code>. In <code>MainLayout.razor</code>:
+        </p>
+        <pre><code>&#64;using Fx.ControlKit.Dialogs
+&#64;using Fx.ControlKit.Notifications
+
+&lt;main&gt;&#64;Body&lt;/main&gt;
+
+&lt;NotificationDisplayControl /&gt;
+&lt;DialogHostControl /&gt;</code></pre>
+        <p>Controls load their own scripts and styles; there is nothing to add to <code>App.razor</code> beyond the usual Blazor script tag.</p>
     </section>
 
     <section>

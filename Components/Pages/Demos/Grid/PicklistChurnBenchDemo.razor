@@ -1,161 +1,378 @@
 @page "/demo/grid/picklist-churn"
+@page "/demo/grid/dynamic-columns"
 @rendermode InteractiveServer
-@using System.Diagnostics
 @using System.Dynamic
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
+@using System.ComponentModel
+@using System.ComponentModel.DataAnnotations
+@using FlexCore.Showcase.Components.Shared
 
-<PageTitle>PickList Opening Churn &amp; First Paint — FlexCore DataGrid</PageTitle>
+@* 2026-10-17: moved onto FeatureDemoLayout (row 8 of the Data Grid list) and made to match its menu label. The old page bound
+   ExpandoObject rows to five fixed columns and dressed that as a "modal opening benchmark" with typed-in numbers (SC-022, SC-159,
+   SC-160, SC-162); all of that went, with the "PickList"/"FPickList"/"HomeFront" names (SC-161) and the unused @ref (SC-163). Now
+   the columns are read from the keys of the first row, a switch adds a field to every row so a column appears, and the row count
+   is a ButtonGroupControl. Column-set changes go through the grid's SuspendRedraw scope with the columns keyed by field (see
+   SC-298 for why). Parameter tables are a later pass (SC-278). *@
 
-<SyncfusionDemoLayout Title="PickList Modal Opening Churn &amp; First-Paint Path"
-                      Category="DataGrid"
-                      BadgeText="Modal Performance"
-                      RazorCode="@_razorSourceCode"
-                      CSharpCode="@_csharpSourceCode"
-                      CSharpTabName="DynamicPickListRow.cs">
-    <Summary>
+<PageTitle>Dynamic columns — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Dynamic columns" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
+                   Tagline="Columns read from the rows' keys, or generated from the row type's attributes: a grid whose shape follows the data."
+                   SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.ColumnFeatures.cs;Grid/GridColumn.cs">
+    <Overview>
         <p>
-            Enterprise picklists (like HomeFront's <code>FPickList</code>) frequently open in popover modals to allow operators to select records from dynamic datasets with flexible schemas.
-            When opening such dialogs, traditional implementations incur multi-stage latency (modal mount, grid mount, data load, column sizing, first paint).
+            The grid reads a cell through the column's <code>Field</code>. When a row is an <code>IDictionary&lt;string, object&gt;</code>,
+            which is what <code>ExpandoObject</code> is, <code>Field</code> is the key, so ad-hoc query results bind without a model class.
+            On this page the columns come from the data too: a <code>@@foreach</code> over the keys of the first row declares one
+            <code>GridColumn</code> per key, numeric values get <code>ColumnType.Number</code> and a format, and when the key set changes the
+            swap runs inside <code>SuspendRedraw</code> so the grid converges the columns in place. With <code>AutoGenerateColumns</code>
+            the shape comes from the row type instead: <code>Display</code>, <code>DisplayName</code>, <code>DisplayFormat</code>,
+            <code>Editable</code> and <code>Key</code> attributes set the header, band, order, format and whether a cell can be edited.
         </p>
-        <p>
-            This benchmark evaluates the <strong>staged baseline opening path</strong> versus the <strong>first-paint optimized path</strong>,
-            measuring time-to-interactive and render cycles across dynamic <code>ExpandoObject</code> rows and dynamically keyed columns.
-        </p>
-    </Summary>
+    </Overview>
 
-    <DemoControls>
-        <div style="display:flex;gap:10px;align-items:center;font-size:13px;flex-wrap:wrap;">
-            <span><strong>Dataset Size:</strong></span>
-            <button class="btn btn-sm @(_rowCount == 50 ? "btn-primary" : "btn-outline-secondary")"
-                    @onclick="() => SetRowCount(50)">50 Rows</button>
-            <button class="btn btn-sm @(_rowCount == 500 ? "btn-primary" : "btn-outline-secondary")"
-                    @onclick="() => SetRowCount(500)">500 Rows</button>
-            <button class="btn btn-sm @(_rowCount == 2000 ? "btn-primary" : "btn-outline-secondary")"
-                    @onclick="() => SetRowCount(2000)">2,000 Rows</button>
+    <Examples>
+        <DemoExample Id="dynamic" Title="Columns read from the first row" RazorCode="@Code.Dynamic" CSharpCode="@Code.DynamicCs">
+            <Description><p>Five keys per row to start. Turn on the lead-time field and every row gains a key, so a sixth column appears; turn it off and the column goes. Change the row count to rebuild the list at a different size. Sorting, the filter icons and the search box work on the dynamic values; the line under the grid lists the columns the grid has right now.</p></Description>
+            <Controls>
+                <ButtonGroupControl Items="_sizes" Values="@(new[] { _rowCount.ToString() })"
+                                    ValuesChanged="@(v => SetRowCountAsync(v.Count > 0 ? int.Parse(v[0]) : 500))"
+                                    Selection="ChoiceSelectionMode.Single" AriaLabel="Row count" />
+                <SwitchControl Checked="@_leadTime" CheckedChanged="SetLeadTimeAsync" Label="Lead-time field" />
+            </Controls>
+            <Demo>
+                <GridControl @ref="_grid"
+                             TValue="ExpandoObject"
+                             DataSource="@_rows"
+                             Height="340px"
+                             AllowSelection="true"
+                             AllowSorting="true"
+                             AllowFiltering="true"
+                             ShowSearchBar="true"
+                             ShowRowCountInFooter="true">
+                    <GridColumnsBase>
+                        @foreach (var col in _columns)
+                        {
+                            <GridColumn @key="col.Field"
+                                        Field="@col.Field"
+                                        HeaderText="@col.Header"
+                                        Width="@(col.Field == "Description" ? "260px" : col.IsNumber ? "110px" : "130px")"
+                                        Type="@(col.IsNumber ? ColumnType.Number : ColumnType.Text)"
+                                        Format="@col.Format"
+                                        TextAlign="@(col.IsNumber ? TextAlign.Right : TextAlign.Left)" />
+                        }
+                    </GridColumnsBase>
+                </GridControl>
+                <p class="result">@_rows.Count.ToString("N0") rows · @_columns.Count columns: @string.Join(" · ", _columns.Select(c => c.Header))</p>
+            </Demo>
+        </DemoExample>
+        <DemoExample Id="annotations" Title="Columns from data annotations" RazorCode="@Code.Annotations" CSharpCode="@Code.AnnotationsCs">
+            <Description><p>No column markup: the grid builds its columns from the attributes on <code>AnnotatedGridItem</code>. <code>Display</code> gives Item #, SKU, Unit price and Extended their headers, order and bands; <code>DisplayName</code> labels the description; <code>DisplayFormat</code> formats the money; <code>Key</code> and <code>Editable(false)</code> keep Item # and Extended read-only; <code>AutoGenerateField = false</code> hides InternalCode.</p></Description>
+            <Demo>
+                <GridControl DataSource="@_annotatedRows"
+                             TValue="AnnotatedGridItem"
+                             AutoGenerateColumns="true"
+                             Height="300px"
+                             AllowSorting="true"
+                             AllowFiltering="true"
+                             EditSettingsRef="@_editSettings" />
+            </Demo>
+        </DemoExample>
+    </Examples>
 
-            <button class="btn btn-sm btn-outline-danger ms-2" @onclick="() => SimulateOpen(false)">⏱ Run Staged Baseline</button>
-            <button class="btn btn-sm btn-success" @onclick="() => SimulateOpen(true)">🚀 Run First-Paint Optimized</button>
-
-            <span class="text-muted ms-2">
-                Last Open: <b>@_lastOpenPath</b> (@_lastOpenDurationMs.ToString("0.0") ms) |
-                Renders: <b>@_renderCount</b>
-            </span>
-        </div>
-    </DemoControls>
-
-    <DemoContent>
-        <div style="width:100%;">
-            <GridControl @ref="_grid"
-                         TValue="ExpandoObject"
-                         DataSource="@_dynamicRows"
-                         Height="340px"
-                         AllowSelection="true"
-                         AllowSorting="true"
-                         AllowFiltering="true"
-                         ShowSearchBar="true"
-                         ShowRowCountInFooter="true">
-                <GridColumnsBase>
-                    <GridColumn Field="Code" HeaderText="Lookup Key" Width="120px" />
-                    <GridColumn Field="Description" HeaderText="Item / Trade Description" Width="260px" />
-                    <GridColumn Field="Group" HeaderText="Classification" Width="140px" />
-                    <GridColumn Field="Status" HeaderText="Status" Width="100px" TextAlign="TextAlign.Center" />
-                    <GridColumn Field="Rate" HeaderText="Standard Rate" Width="120px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
-                </GridColumnsBase>
-            </GridControl>
-        </div>
-    </DemoContent>
-
-    <DocumentationContent>
-        <h3>PickList First-Paint Architecture</h3>
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters" Rows="Vocab.Grid" />
+        <h3 class="api-title">What AutoGenerateColumns reads from the row type</h3>
         <ul>
-            <li><strong>Dynamic ExpandoObject Support:</strong> The FlexCore DataGrid natively binds to loosely typed dynamic objects, allowing custom SQL queries or ad-hoc picklists to bind without requiring a pre-compiled C# model class.</li>
-            <li><strong>Pre-Calculated Geometry:</strong> The optimized first-paint path initializes column pixel widths prior to DOM injection, preventing browser reflow cascades.</li>
-            <li><strong>Single-Pass Synchronization:</strong> Modal opening animations and grid data binding execute concurrently in a single circuit dispatch.</li>
+            <li><strong>Which properties:</strong> public instance properties with a public getter and no indexer. <code>[Display(AutoGenerateField = false)]</code> or <code>[ScaffoldColumn(false)]</code> leaves one out. A scalar row type such as <code>string</code> or <code>int</code> generates nothing.</li>
+            <li><strong>Order:</strong> <code>Display.Order</code>, then declaration order.</li>
+            <li><strong>Header:</strong> <code>Display.Name</code>, else <code>[DisplayName]</code>, else the property name. <code>Display.GroupName</code> becomes the column's <code>HeaderBand</code>.</li>
+            <li><strong>Format:</strong> <code>DisplayFormat.DataFormatString</code> with the <code>{0:…}</code> wrapper removed, so <code>{0:C2}</code> becomes <code>C2</code>.</li>
+            <li><strong>Read-only:</strong> <code>[Key]</code> (which also sets <code>IsPrimaryKey</code>), <code>[Editable(false)]</code>, <code>[ReadOnly(true)]</code>, or no public setter.</li>
+            <li><strong>Type:</strong> <code>[DataType(DataType.Password)]</code> gives Password; a DataType of Date, DateTime or Time gives Date; <code>bool</code> gives CheckBox; <code>DateTime</code>, <code>DateTimeOffset</code> and <code>DateOnly</code> give Date; the numeric types give Number; everything else is Text. Numbers and dates align right, check boxes centre.</li>
         </ul>
-    </DocumentationContent>
-</SyncfusionDemoLayout>
+        <p class="fd-pending"><code>GridColumn</code> (<code>Field</code>, <code>Type</code>, <code>Format</code>), dictionary-backed rows and <code>SuspendRedraw</code> / <code>EndUpdateAsync</code> are still to be written up from <code>Grid/GridColumn.cs</code>, <code>Grid/GridEnums.cs</code> and <code>Grid/GridControl.razor.cs</code>.</p>
+    </Vocabulary>
+
+    <Related>
+        <ul>
+            <li><a href="demo/grid/column-swap">Column sets</a>: the host picks between fixed column sets.</li>
+            <li><a href="demo/grid/provider-enterprise">On-demand loading</a>: rows fetched page by page from a provider.</li>
+            <li><a href="demo/grid">Grid overview</a>: the core flags on a small list.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
 
 @code {
+    private sealed record DynamicColumn(string Field, string Header, bool IsNumber, string? Format);
+
+    private readonly SelectionItem[] _sizes = { new("50", "50 rows"), new("500", "500 rows"), new("2000", "2,000 rows") };
     private GridControl<ExpandoObject>? _grid;
-    private List<ExpandoObject> _dynamicRows = [];
+    private List<ExpandoObject> _rows = [];
+    private List<DynamicColumn> _columns = [];
     private int _rowCount = 500;
-    private string _lastOpenPath = "Optimized";
-    private double _lastOpenDurationMs = 1.8;
-    private int _renderCount = 1;
+    private bool _leadTime;
 
     protected override void OnInitialized()
     {
-        GenerateDynamicRows();
+        _rows = BuildRows(_rowCount, _leadTime);
+        _columns = ColumnsFrom(_rows);
     }
 
-    private void SetRowCount(int count)
+    private Task SetRowCountAsync(int count)
     {
         _rowCount = count;
-        GenerateDynamicRows();
+        return ReloadAsync();
     }
 
-    private void GenerateDynamicRows()
+    private Task SetLeadTimeAsync(bool on)
     {
-        var list = new List<ExpandoObject>(_rowCount);
+        _leadTime = on;
+        return ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        var rows = BuildRows(_rowCount, _leadTime);
+        var columns = ColumnsFrom(rows);
+        if (_grid is null) { _rows = rows; _columns = columns; return; }
+        await using (_grid.SuspendRedraw(columns.Select(c => c.Field)))
+        {
+            _rows = rows;
+            _columns = columns;
+        }
+    }
+
+    private static List<ExpandoObject> BuildRows(int count, bool leadTime)
+    {
         var groups = new[] { "General", "Architectural", "Structural", "MEP", "Site" };
         var rand = new Random(55);
-
-        for (int i = 1; i <= _rowCount; i++)
+        var list = new List<ExpandoObject>(count);
+        for (int i = 1; i <= count; i++)
         {
             dynamic row = new ExpandoObject();
-            row.Code = $"PL-{(1000 + i):D4}";
-            row.Description = $"PickList Catalog Item #{i} - {groups[i % groups.Length]}";
+            row.Code = $"IT-{(1000 + i):D4}";
+            row.Description = $"Catalog item {i}, {groups[i % groups.Length].ToLowerInvariant()}";
             row.Group = groups[i % groups.Length];
             row.Status = (i % 4 == 0) ? "Pending" : "Active";
             row.Rate = Math.Round((decimal)(rand.NextDouble() * 250 + 20), 2);
+            if (leadTime) row.LeadTimeDays = 1 + (i * 7) % 30;
             list.Add(row);
         }
-        _dynamicRows = list;
+        return list;
     }
 
-    private void SimulateOpen(bool optimized)
+    private static List<DynamicColumn> ColumnsFrom(List<ExpandoObject> rows)
     {
-        var sw = Stopwatch.StartNew();
-        _lastOpenPath = optimized ? "First-Paint Optimized" : "Staged Baseline";
-        _renderCount += optimized ? 1 : 3;
-        GenerateDynamicRows();
-        sw.Stop();
-        _lastOpenDurationMs = optimized ? sw.Elapsed.TotalMilliseconds : sw.Elapsed.TotalMilliseconds + 35.0;
-        StateHasChanged();
+        if (rows.Count == 0) return [];
+        var first = (IDictionary<string, object?>)rows[0];
+        return first.Select(kv => new DynamicColumn(
+            kv.Key,
+            Humanize(kv.Key),
+            kv.Value is decimal or int or double,
+            kv.Value switch { decimal => "N2", int => "N0", _ => null })).ToList();
     }
 
-    private const string _razorSourceCode = @"@using System.Dynamic
-@using Fx.ControlKit
-@using Fx.ControlKit.Grid
+    private static string Humanize(string key)
+        => System.Text.RegularExpressions.Regex.Replace(key, "(?<=[a-z])(?=[A-Z])", " ");
 
-<!-- GridControl natively binds to dynamic ExpandoObject schema -->
-<GridControl TValue=""ExpandoObject""
-             DataSource=""@DynamicRows""
+    // Columns from data annotations (moved here from Frozen columns, 2026-10-20)
+    public sealed class AnnotatedGridItem
+    {
+        [Key]
+        [Display(Name = "Item #", Order = 0, GroupName = "Identity")]
+        public int Id { get; set; }
+
+        [Display(Name = "SKU", Order = 1, GroupName = "Identity")]
+        public string Code { get; set; } = "";
+
+        [DisplayName("Product description")]
+        public string Description { get; set; } = "";
+
+        [Display(Name = "Unit price", Order = 2, GroupName = "Amounts")]
+        [DisplayFormat(DataFormatString = "{0:C2}")]
+        public decimal UnitPrice { get; set; }
+
+        [Display(Name = "Extended", Order = 3, GroupName = "Amounts")]
+        [DisplayFormat(DataFormatString = "{0:C2}")]
+        [Editable(false)]
+        public decimal Total { get; set; }
+
+        [Display(AutoGenerateField = false)]
+        public string InternalCode { get; set; } = "";
+    }
+
+    private readonly EditSettings _editSettings = new() { AllowEditing = true, Mode = EditMode.Batch };
+    private List<AnnotatedGridItem> _annotatedRows = BuildAnnotated();
+
+    private static List<AnnotatedGridItem> BuildAnnotated() =>
+        Enumerable.Range(1, 12).Select(i =>
+        {
+            var price = 15.50m + (i % 25) * 4.25m;
+            return new AnnotatedGridItem
+            {
+                Id = i, Code = $"SKU-{i:D5}", Description = $"Material Item #{i}",
+                UnitPrice = price, Total = (10 + (i * 7) % 150) * price, InternalCode = $"INTERNAL-{i}"
+            };
+        }).ToList();
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Grid =
+        {
+            new("AutoGenerateColumns", "Builds one column per public readable property of <code>TValue</code>, as listed below. An explicit <code>GridColumn</code> with the same <code>Field</code> replaces the generated one; extra explicit columns follow the generated set.", "bool", "false"),
+        };
+    }
+
+    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    private static class Code
+    {
+        public const string Dynamic = @"<GridControl @ref=""_grid""
+             TValue=""ExpandoObject""
+             DataSource=""@_rows""
              Height=""340px""
              AllowSelection=""true""
              AllowSorting=""true""
              AllowFiltering=""true""
-             ShowSearchBar=""true"">
+             ShowSearchBar=""true""
+             ShowRowCountInFooter=""true"">
     <GridColumnsBase>
-        <GridColumn Field=""Code"" HeaderText=""Lookup Key"" Width=""120px"" />
-        <GridColumn Field=""Description"" HeaderText=""Item / Trade Description"" Width=""260px"" />
-        <GridColumn Field=""Group"" HeaderText=""Classification"" Width=""140px"" />
-        <GridColumn Field=""Status"" HeaderText=""Status"" Width=""100px"" TextAlign=""TextAlign.Center"" />
-        <GridColumn Field=""Rate"" HeaderText=""Standard Rate"" Width=""120px"" Format=""$#,##0.00"" />
+        @foreach (var col in _columns)
+        {
+            <GridColumn @key=""col.Field""
+                        Field=""@col.Field""
+                        HeaderText=""@col.Header""
+                        Width=""@(col.Field == ""Description"" ? ""260px"" : col.IsNumber ? ""110px"" : ""130px"")""
+                        Type=""@(col.IsNumber ? ColumnType.Number : ColumnType.Text)""
+                        Format=""@col.Format""
+                        TextAlign=""@(col.IsNumber ? TextAlign.Right : TextAlign.Left)"" />
+        }
     </GridColumnsBase>
-</GridControl>";
-
-    private const string _csharpSourceCode = @"// Dynamic row construction using ExpandoObject
-var dynamicRows = new List<ExpandoObject>();
-for (int i = 1; i <= rowCount; i++)
+</GridControl>
+<p class=""result"">@_rows.Count.ToString(""N0"") rows · @_columns.Count columns: @string.Join("" · "", _columns.Select(c => c.Header))</p>";
+        public const string Annotations = @"<GridControl DataSource=""@_annotatedRows""
+             TValue=""AnnotatedGridItem""
+             AutoGenerateColumns=""true""
+             Height=""300px""
+             AllowSorting=""true""
+             AllowFiltering=""true""
+             EditSettingsRef=""@_editSettings"" />";
+        public const string AnnotationsCs = @"// Columns from data annotations (moved here from Frozen columns, 2026-10-20)
+public sealed class AnnotatedGridItem
 {
-    dynamic row = new ExpandoObject();
-    row.Code = $""PL-{(1000 + i):D4}"";
-    row.Description = $""Catalog Item #{i}"";
-    row.Group = ""Structural"";
-    row.Status = ""Active"";
-    row.Rate = 125.50m;
-    dynamicRows.Add(row);
-}";
+    [Key]
+    [Display(Name = ""Item #"", Order = 0, GroupName = ""Identity"")]
+    public int Id { get; set; }
+
+    [Display(Name = ""SKU"", Order = 1, GroupName = ""Identity"")]
+    public string Code { get; set; } = """";
+
+    [DisplayName(""Product description"")]
+    public string Description { get; set; } = """";
+
+    [Display(Name = ""Unit price"", Order = 2, GroupName = ""Amounts"")]
+    [DisplayFormat(DataFormatString = ""{0:C2}"")]
+    public decimal UnitPrice { get; set; }
+
+    [Display(Name = ""Extended"", Order = 3, GroupName = ""Amounts"")]
+    [DisplayFormat(DataFormatString = ""{0:C2}"")]
+    [Editable(false)]
+    public decimal Total { get; set; }
+
+    [Display(AutoGenerateField = false)]
+    public string InternalCode { get; set; } = """";
+}
+
+private readonly EditSettings _editSettings = new() { AllowEditing = true, Mode = EditMode.Batch };
+
+private List<AnnotatedGridItem> _annotatedRows = BuildAnnotated();
+
+private static List<AnnotatedGridItem> BuildAnnotated() =>
+    Enumerable.Range(1, 12).Select(i =>
+    {
+        var price = 15.50m + (i % 25) * 4.25m;
+        return new AnnotatedGridItem
+        {
+            Id = i, Code = $""SKU-{i:D5}"", Description = $""Material Item #{i}"",
+            UnitPrice = price, Total = (10 + (i * 7) % 150) * price, InternalCode = $""INTERNAL-{i}""
+        };
+    }).ToList();";
+        public const string DynamicCs = @"private sealed record DynamicColumn(string Field, string Header, bool IsNumber, string? Format);
+
+private readonly SelectionItem[] _sizes = { new(""50"", ""50 rows""), new(""500"", ""500 rows""), new(""2000"", ""2,000 rows"") };
+
+private GridControl<ExpandoObject>? _grid;
+
+private List<ExpandoObject> _rows = [];
+
+private List<DynamicColumn> _columns = [];
+
+private int _rowCount = 500;
+
+private bool _leadTime;
+
+protected override void OnInitialized()
+{
+    _rows = BuildRows(_rowCount, _leadTime);
+    _columns = ColumnsFrom(_rows);
+}
+
+private Task SetRowCountAsync(int count)
+{
+    _rowCount = count;
+    return ReloadAsync();
+}
+
+private Task SetLeadTimeAsync(bool on)
+{
+    _leadTime = on;
+    return ReloadAsync();
+}
+
+private async Task ReloadAsync()
+{
+    var rows = BuildRows(_rowCount, _leadTime);
+    var columns = ColumnsFrom(rows);
+    if (_grid is null) { _rows = rows; _columns = columns; return; }
+    await using (_grid.SuspendRedraw(columns.Select(c => c.Field)))
+    {
+        _rows = rows;
+        _columns = columns;
+    }
+}
+
+private static List<ExpandoObject> BuildRows(int count, bool leadTime)
+{
+    var groups = new[] { ""General"", ""Architectural"", ""Structural"", ""MEP"", ""Site"" };
+    var rand = new Random(55);
+    var list = new List<ExpandoObject>(count);
+    for (int i = 1; i <= count; i++)
+    {
+        dynamic row = new ExpandoObject();
+        row.Code = $""IT-{(1000 + i):D4}"";
+        row.Description = $""Catalog item {i}, {groups[i % groups.Length].ToLowerInvariant()}"";
+        row.Group = groups[i % groups.Length];
+        row.Status = (i % 4 == 0) ? ""Pending"" : ""Active"";
+        row.Rate = Math.Round((decimal)(rand.NextDouble() * 250 + 20), 2);
+        if (leadTime) row.LeadTimeDays = 1 + (i * 7) % 30;
+        list.Add(row);
+    }
+    return list;
+}
+
+private static List<DynamicColumn> ColumnsFrom(List<ExpandoObject> rows)
+{
+    if (rows.Count == 0) return [];
+    var first = (IDictionary<string, object?>)rows[0];
+    return first.Select(kv => new DynamicColumn(
+        kv.Key,
+        Humanize(kv.Key),
+        kv.Value is decimal or int or double,
+        kv.Value switch { decimal => ""N2"", int => ""N0"", _ => null })).ToList();
+}
+
+private static string Humanize(string key)
+    => System.Text.RegularExpressions.Regex.Replace(key, ""(?<=[a-z])(?=[A-Z])"", "" "");";
+    }
 }
