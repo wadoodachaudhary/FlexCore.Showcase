@@ -1,6 +1,10 @@
 @page "/demo/charts/map-story"
 @rendermode InteractiveServer
 @using Fx.ControlKit.Maps
+@using FlexCore.Showcase.Components.Shared
+@* 2026-10-21: page added with the FlexKit 0.1.131 choropleth mirror (Cursor branch, merged by Wadood).
+   2026-10-23 (meeting point 3): code tabs generated from this file (gencode) instead of hand-written constants; the inline style block
+   moved to the page stylesheet; a parameter table for MapStoryControl written from Maps/MapStoryControl.razor. *@
 
 <PageTitle>Map story — FlexCore Showcase</PageTitle>
 
@@ -21,7 +25,7 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="story" Title="Unemployment, world to province" RazorCode="@_razor" CSharpCode="@_csharp">
+        <DemoExample Id="story" Title="Unemployment, world to province" RazorCode="@Code.Story" CSharpCode="@Code.StoryCs">
             <Description>
                 <p>Start at the world. Open Europe, then Spain, France, Germany, Italy or Finland. From North America, open the United States. Other countries stop at the national rate.</p>
             </Description>
@@ -29,7 +33,7 @@
                 <MapStoryControl Story="_story" Width="960" Height="640" />
             </Demo>
         </DemoExample>
-        <DemoExample Id="svg" Title="The same Europe graphic as static SVG">
+        <DemoExample Id="svg" Title="The same Europe graphic as static SVG" RazorCode="@Code.Svg" CSharpCode="@Code.SvgCs">
             <Description>
                 <p><code>RenderSvg</code> does not need a circuit. A report host can place this markup the way it places other SVG.</p>
             </Description>
@@ -40,6 +44,7 @@
     </Examples>
 
     <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="MapStoryControl parameters" Rows="Vocab.Params" />
         <ul>
             <li><code>MapStory</code>, <code>MapStoryLevel</code>, <code>MapStoryRegion</code>: the report. A region’s <code>ChildLevelId</code> is the map that opens next.</li>
             <li><code>ChoroplethScale</code>: sequential stops. The default runs from <code>#F6E27A</code> to <code>#5A1228</code>. Missing values use <code>#C5C6C4</code>.</li>
@@ -64,10 +69,6 @@
     </Related>
 </FeatureDemoLayout>
 
-<style>
-    .map-story-static svg { width: 100%; height: auto; display: block; }
-</style>
-
 @code {
     MapStory _story = null!;
     string _europeSvg = "";
@@ -78,13 +79,39 @@
         _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), "europe");
     }
 
-    const string _razor = """
-        <MapStoryControl Story="_story" Width="960" Height="640" />
-        """;
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Params =
+        {
+            new("Story", "The levels, regions, colour scale, callouts and source line to draw.", "MapStory?", "null"),
+            new("Geography", "Boundary catalog the levels are drawn on. The bundled Natural Earth and NUTS-2 / US set when null.", "MapGeographyCatalog?", "null"),
+            new("Width", "Drawing width in pixels.", "int", "960"),
+            new("Height", "Drawing height in pixels.", "int", "640"),
+        };
+    }
 
-    const string _csharp = """
-        // wwwroot/maps/stories/unemployment.json, or any story a host authors.
-        _story = MapStory.LoadBundledUnemployment();
-        var svg = _story.RenderSvg(MapGeographyCatalog.Bundled(), "europe");
-        """;
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Story = @"<MapStoryControl Story=""_story"" Width=""960"" Height=""640"" />";
+        public const string StoryCs = @"MapStory _story = null!;
+
+string _europeSvg = """";
+
+protected override void OnInitialized()
+{
+    _story = MapStory.LoadBundledUnemployment();
+    _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), ""europe"");
+}";
+        public const string Svg = @"<div class=""map-story-static"">@((MarkupString)_europeSvg)</div>";
+        public const string SvgCs = @"MapStory _story = null!;
+
+string _europeSvg = """";
+
+protected override void OnInitialized()
+{
+    _story = MapStory.LoadBundledUnemployment();
+    _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), ""europe"");
+}";
+    }
 }

@@ -10,13 +10,14 @@
    timing was list generation. Now: one example, the real column count, two timings the page takes itself (build, and the server's
    first render after the swap) and counters fed by the grid's own events. The cell budget is switched off so the overscan choice
    applies as written (with the default 900-cell budget and 12 columns, 260 would be capped at 75 rows). Facts checked against
+   2026-10-23: 100,000 joined the row-count switch and the page became "100k rows", absorbing the Four scenarios performance tab.
    GridControl.razor.cs (windowing comments around WindowOverscanRows), SelectionSettings.cs and GridControlEvents.cs. Edits are counted
    with OnCellSave: GridControlEvents also declares CellSaved, but nothing in the library raises it. *@
 
-<PageTitle>50k rows — FlexCore Showcase</PageTitle>
+<PageTitle>100k rows — FlexCore Showcase</PageTitle>
 
-<FeatureDemoLayout Title="50k rows" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Twelve columns and up to fifty thousand generated rows: what the row window costs, measured on this page."
+<FeatureDemoLayout Title="100k rows" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
+                   Tagline="Twelve columns and up to a hundred thousand generated rows: what the row window costs, measured on this page."
                    SourcePath="Grid/GridControl.razor.cs;Grid/SelectionSettings.cs;Grid/GridControlEvents.cs">
     <Overview>
         <p>
@@ -121,7 +122,7 @@
         public string C12 { get; set; } = "BIN-12";
     }
 
-    private readonly SelectionItem[] _rowCountItems = { new("1000", "1,000"), new("5000", "5,000"), new("20000", "20,000"), new("50000", "50,000") };
+    private readonly SelectionItem[] _rowCountItems = { new("1000", "1,000"), new("5000", "5,000"), new("20000", "20,000"), new("50000", "50,000"), new("100000", "100,000") };
     private readonly SelectionItem[] _overscanItems = { new("15", "15 rows"), new("60", "60 rows"), new("260", "260 rows") };
     private List<SRow> _rows = [];
     private int _rowCount = 5000;
@@ -297,7 +298,7 @@
     public string C12 { get; set; } = ""BIN-12"";
 }
 
-private readonly SelectionItem[] _rowCountItems = { new(""1000"", ""1,000""), new(""5000"", ""5,000""), new(""20000"", ""20,000""), new(""50000"", ""50,000"") };
+private readonly SelectionItem[] _rowCountItems = { new(""1000"", ""1,000""), new(""5000"", ""5,000""), new(""20000"", ""20,000""), new(""50000"", ""50,000""), new(""100000"", ""100,000"") };
 
 private readonly SelectionItem[] _overscanItems = { new(""15"", ""15 rows""), new(""60"", ""60 rows""), new(""260"", ""260 rows"") };
 

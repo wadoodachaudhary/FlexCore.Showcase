@@ -4,6 +4,7 @@
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Data
+@using FlexCore.Showcase.Services
 @using FlexCore.Showcase.Components.Shared
 
 @* 2026-10-17: moved onto FeatureDemoLayout (row 9 of the Data Grid list) and turned from a "first-load bench" into the plain tree
@@ -13,7 +14,9 @@
    "Windows/VB6 folder styles" and the three competing titles. fx-treegrid-dotted-lines stays: it is a Showcase style (wwwroot/app.css:1639),
    not a library one.
    Added: Expand all / Collapse all ButtonControls on the grid's ExpandAllAsync / CollapseAllAsync. Height="100%" became the 440px
-   the wrapper gave it. Parameter tables are a later pass (SC-278). *@
+   the wrapper gave it. Parameter tables are a later pass (SC-278).
+   2026-10-23: second example, the org chart from Four scenarios (department filter keeps the manager chain; RatingControl in a
+   column template). *@
 
 <PageTitle>Tree grid — FlexCore Showcase</PageTitle>
 
@@ -63,6 +66,44 @@
                     <TreeGridColumn Field="Budget" HeaderText="Budget" Width="140px" TextAlign="TextAlign.Right" Format="$#,##0.00" />
                 </TreeGridControl>
                 <p class="result">@_treeNodes.Count rows: @_groupCount divisions with @_phasesPerGroup phases each@(_last is null ? "" : $" · last {_last}")</p>
+            </Demo>
+        </DemoExample>
+        <DemoExample Id="org" Title="Org chart: who reports to whom" RazorCode="@Code.Org" CSharpCode="@Code.OrgCs">
+            <Description><p>Twenty-one people from the Four scenarios HR directory, each row carrying its manager's id. Pick a department: the people in it stay, together with the managers above them, so the tree never loses its root. Managers show how many people report to them, and the performance column is a read-only <code>RatingControl</code> inside a column template.</p></Description>
+            <Controls>
+                <ButtonGroupControl Items="_deptItems" Values="@(new[] { _dept })" ValuesChanged="ShowDepartment" Selection="ChoiceSelectionMode.Single" AriaLabel="Department" />
+            </Controls>
+            <Demo>
+                <TreeGridControl @key="_orgGeneration"
+                                 TValue="AgHrEmployeeRow"
+                                 DataSource="@_shown"
+                                 IdMapping="EmployeeID"
+                                 ParentIdMapping="ReportsToID"
+                                 TreeColumnIndex="0"
+                                 EnableCollapseAll="true"
+                                 AllowSelection="true"
+                                 ToggleOnRowClick="false"
+                                 InitialExpansionPredicate="@(_ => true)"
+                                 Height="440px">
+                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.FullName)" HeaderText="Name" Width="260px">
+                        <Template>
+                            @{ var person = (AgHrEmployeeRow)context; }
+                            <strong>@person.FullName</strong>@(person.IsManager ? $" · manages {person.SubordinatesCount}" : "")
+                        </Template>
+                    </TreeGridColumn>
+                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.JobTitle)" HeaderText="Title" Width="200px" />
+                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.Department)" HeaderText="Department" Width="130px" />
+                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.Office)" HeaderText="Office" Width="120px" />
+                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.Salary)" HeaderText="Salary" Width="110px" TextAlign="TextAlign.Right" Format="C0" />
+                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.Rating)" HeaderText="Performance" Width="130px">
+                        <Template>
+                            @{ var person = (AgHrEmployeeRow)context; }
+                            <RatingControl Value="@person.Rating" ReadOnly="true" />
+                        </Template>
+                    </TreeGridColumn>
+                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.HireDate)" HeaderText="Hired" Width="110px" TextAlign="TextAlign.Center" Format="yyyy-MM-dd" />
+                </TreeGridControl>
+                <p class="result">@OrgStatus</p>
             </Demo>
         </DemoExample>
     </Examples>
@@ -164,10 +205,125 @@
 
     private bool TreatAsParent(BenchTreeNode node) => node.IsGroup;
 
+    // Org chart (moved here from Four scenarios, 2026-10-23): a department filter keeps the manager chain so the tree stays rooted.
+    private readonly List<AgHrEmployeeRow> _people = BenchDataStore.GetHrHierarchy();
+    private List<AgHrEmployeeRow> _shown = BenchDataStore.GetHrHierarchy();
+    private readonly SelectionItem[] _deptItems = { new("All", "Everyone"), new("Engineering", "Engineering"), new("Executive", "Executive"), new("Human Resources", "HR"), new("Product", "Product"), new("Sales", "Sales") };
+    private string _dept = "All";
+    private int _orgGeneration = 1;   // @key: a new value remounts the tree grid when the list is swapped
+
+    private string OrgStatus => $"{_shown.Count} of {_people.Count} people shown; {_shown.Count(p => p.IsManager)} managers.";
+
+    private void ShowDepartment(IReadOnlyList<string> values)
+    {
+        if (values.Count == 0) return;
+        _dept = values[0];
+        if (_dept == "All")
+        {
+            _shown = _people.ToList();
+        }
+        else
+        {
+            var keep = _people.Where(p => p.Department == _dept).Select(p => p.EmployeeID).ToHashSet();
+            foreach (var id in keep.ToList())
+            {
+                var current = _people.FirstOrDefault(p => p.EmployeeID == id);
+                while (current?.ReportsToID is { } managerId && keep.Add(managerId))
+                    current = _people.FirstOrDefault(p => p.EmployeeID == managerId);
+            }
+            _shown = _people.Where(p => keep.Contains(p.EmployeeID)).ToList();
+        }
+        _orgGeneration++;
+    }
+
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed); the C# tab also carries
     // BenchTreeNode from Data/BenchModels.cs.
     private static class Code
     {
+        public const string Org = @"<ButtonGroupControl Items=""_deptItems"" Values=""@(new[] { _dept })"" ValuesChanged=""ShowDepartment"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Department"" />
+
+<TreeGridControl @key=""_orgGeneration""
+                 TValue=""AgHrEmployeeRow""
+                 DataSource=""@_shown""
+                 IdMapping=""EmployeeID""
+                 ParentIdMapping=""ReportsToID""
+                 TreeColumnIndex=""0""
+                 EnableCollapseAll=""true""
+                 AllowSelection=""true""
+                 ToggleOnRowClick=""false""
+                 InitialExpansionPredicate=""@(_ => true)""
+                 Height=""440px"">
+    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.FullName)"" HeaderText=""Name"" Width=""260px"">
+        <Template>
+            @{ var person = (AgHrEmployeeRow)context; }
+            <strong>@person.FullName</strong>@(person.IsManager ? $"" · manages {person.SubordinatesCount}"" : """")
+        </Template>
+    </TreeGridColumn>
+    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.JobTitle)"" HeaderText=""Title"" Width=""200px"" />
+    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.Department)"" HeaderText=""Department"" Width=""130px"" />
+    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.Office)"" HeaderText=""Office"" Width=""120px"" />
+    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.Salary)"" HeaderText=""Salary"" Width=""110px"" TextAlign=""TextAlign.Right"" Format=""C0"" />
+    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.Rating)"" HeaderText=""Performance"" Width=""130px"">
+        <Template>
+            @{ var person = (AgHrEmployeeRow)context; }
+            <RatingControl Value=""@person.Rating"" ReadOnly=""true"" />
+        </Template>
+    </TreeGridColumn>
+    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.HireDate)"" HeaderText=""Hired"" Width=""110px"" TextAlign=""TextAlign.Center"" Format=""yyyy-MM-dd"" />
+</TreeGridControl>
+<p class=""result"">@OrgStatus</p>";
+        public const string OrgCs = @"// Org chart (moved here from Four scenarios, 2026-10-23): a department filter keeps the manager chain so the tree stays rooted.
+private readonly List<AgHrEmployeeRow> _people = BenchDataStore.GetHrHierarchy();
+
+private List<AgHrEmployeeRow> _shown = BenchDataStore.GetHrHierarchy();
+
+private readonly SelectionItem[] _deptItems = { new(""All"", ""Everyone""), new(""Engineering"", ""Engineering""), new(""Executive"", ""Executive""), new(""Human Resources"", ""HR""), new(""Product"", ""Product""), new(""Sales"", ""Sales"") };
+
+private string _dept = ""All"";
+
+private int _orgGeneration = 1;   // @key: a new value remounts the tree grid when the list is swapped
+
+private string OrgStatus => $""{_shown.Count} of {_people.Count} people shown; {_shown.Count(p => p.IsManager)} managers."";
+
+private void ShowDepartment(IReadOnlyList<string> values)
+{
+    if (values.Count == 0) return;
+    _dept = values[0];
+    if (_dept == ""All"")
+    {
+        _shown = _people.ToList();
+    }
+    else
+    {
+        var keep = _people.Where(p => p.Department == _dept).Select(p => p.EmployeeID).ToHashSet();
+        foreach (var id in keep.ToList())
+        {
+            var current = _people.FirstOrDefault(p => p.EmployeeID == id);
+            while (current?.ReportsToID is { } managerId && keep.Add(managerId))
+                current = _people.FirstOrDefault(p => p.EmployeeID == managerId);
+        }
+        _shown = _people.Where(p => keep.Contains(p.EmployeeID)).ToList();
+    }
+    _orgGeneration++;
+}
+
+// Data/AgGridModels.cs
+public sealed class AgHrEmployeeRow
+{
+    public string EmployeeID { get; set; } = """";
+    public string? ReportsToID { get; set; }
+    public string FullName { get; set; } = """";
+    public string JobTitle { get; set; } = """";
+    public string Department { get; set; } = """"; // Engineering, Product, Sales, Marketing, Finance, HR
+    public string Office { get; set; } = """"; // New York, London, San Francisco, Tokyo, Sydney
+    public string EmploymentType { get; set; } = ""Full-Time"";
+    public DateTime HireDate { get; set; }
+    public decimal Salary { get; set; }
+    public int Rating { get; set; } // 1-5 stars
+    public string AvatarBg { get; set; } = ""#0284c7"";
+    public int SubordinatesCount { get; set; }
+    public bool IsManager => SubordinatesCount > 0;
+}";
         public const string Tree = @"<TreeGridControl @ref=""_tree""
                  @key=""_treeGeneration""
                  TValue=""BenchTreeNode""

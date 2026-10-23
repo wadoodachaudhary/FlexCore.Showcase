@@ -1,0 +1,10 @@
+/* 2026-10-23: Live updates. Cell styles for the templates; nothing here is Bootstrap. */
+.result { margin: 10px 0 0; font-size: 13px; color: #334155; }
+.ticker { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #0f172a; }
+.price { display: inline-block; padding: 1px 6px; border-radius: 4px; font-variant-numeric: tabular-nums; }
+.price.up { background: #dcfce7; color: #166534; }
+.price.down { background: #fee2e2; color: #991b1b; }
+.gain { color: #047857; font-weight: 600; font-variant-numeric: tabular-nums; }
+.loss { color: #b91c1c; font-weight: 600; font-variant-numeric: tabular-nums; }
+.spark { width: 110px; height: 24px; display: inline-block; vertical-align: middle; }
+.spark polyline { stroke: #2563eb; }

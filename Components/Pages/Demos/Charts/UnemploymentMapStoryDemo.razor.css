@@ -1,0 +1,2 @@
+/* 2026-10-23: moved out of an inline <style> block in the page. The SVG is raw markup, so ::deep reaches it. */
+.map-story-static ::deep svg { width: 100%; height: auto; display: block; }

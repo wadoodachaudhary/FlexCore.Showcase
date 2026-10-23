@@ -1,0 +1,424 @@
+@page "/demo/grid/live-updates"
+@rendermode InteractiveServer
+@implements IDisposable
+@using System.Diagnostics
+@using Fx.ControlKit
+@using Fx.ControlKit.Grid
+@using FlexCore.Showcase.Data
+@using FlexCore.Showcase.Services
+@using FlexCore.Showcase.Components.Shared
+@* 2026-10-23 (developer meeting, point 2): the finance ticker scenario from Four scenarios, on its own page. The grid is bound to one
+   list that a timer changes in place; the page calls StateHasChanged after each tick and the grid re-renders its window. What is
+   measured: ticks applied, rows changed per tick, and the server's render time per tick (Stopwatch from the tick to the component's
+   next OnAfterRender), kept as a running average. Facts checked against GridColumn.cs (Template is RenderFragment<object>) and
+   GridControl.razor.cs. Data: BenchDataStore.GetFinanceTickers (seeded, not live market data; the page says so). *@
+
+<PageTitle>Live updates — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Live updates" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
+                   Tagline="A grid whose rows change several times a second: templated cells, sorting while it moves, and the cost of each tick measured."
+                   SourcePath="Grid/GridControl.razor.cs;Grid/GridColumn.cs">
+    <Overview>
+        <p>
+            Nothing special is needed to bind a grid to data that changes: keep the same list, change the rows in place, and call
+            <code>StateHasChanged</code>. The grid renders only the rows in its window, so each pass re-renders those rows and the
+            cells Blazor finds changed. A column's <code>Template</code> is a <code>RenderFragment</code> over the row object, which is
+            how the price, change, trend and profit cells below draw colour, arrows and a small SVG from the row's values; sorting by
+            any column keeps working while rows move.
+        </p>
+        <p>
+            The simulated market below is seeded data, not a live feed: every tick changes three to seven instruments by up to 1.5
+            percent. Two numbers are measured on the server with <code>Stopwatch</code>: how long the tick's render took, from the tick
+            to the component's next <code>OnAfterRender</code>, and the running average over the last twenty ticks. Browser paint is
+            not included.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="ticker" Title="A portfolio that moves" RazorCode="@Code.Ticker" CSharpCode="@Code.TickerCs">
+            <Description><p>Start the stream and pick an interval; the status line counts ticks and rows changed and reports the render time per tick. Sort by Change while it runs to watch rows re-order, or click Tick once to step. Reset puts the prices back. The last movement tints the price cell up or down.</p></Description>
+            <Controls>
+                <ButtonControl CssClass="@(_streaming ? "btn-sm btn-danger" : "btn-sm btn-success")" OnClick="ToggleStreaming">@(_streaming ? "Pause" : "Start")</ButtonControl>
+                <ButtonGroupControl Items="_intervalItems" Values="@(new[] { _intervalMs.ToString() })" ValuesChanged="PickInterval" Selection="ChoiceSelectionMode.Single" AriaLabel="Tick interval" />
+                <ButtonControl CssClass="btn-sm" OnClick="Tick">Tick once</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="Reset">Reset</ButtonControl>
+            </Controls>
+            <Demo>
+                <GridControl TValue="AgFinanceTickerRow"
+                             DataSource="@_rows"
+                             Height="420px"
+                             AllowSorting="true"
+                             AllowSelection="true"
+                             AllowResizing="true"
+                             ShowRowCountInFooter="true">
+                    <GridColumnsBase>
+                        <GridColumn Field="@nameof(AgFinanceTickerRow.Ticker)" HeaderText="Ticker" Width="90px">
+                            <Template>
+                                @{ var row = (AgFinanceTickerRow)context; }
+                                <strong class="ticker">@row.Ticker</strong>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(AgFinanceTickerRow.Name)" HeaderText="Name" Width="170px" />
+                        <GridColumn Field="@nameof(AgFinanceTickerRow.Instrument)" HeaderText="Type" Width="80px" />
+                        <GridColumn Field="@nameof(AgFinanceTickerRow.Price)" HeaderText="Price" Width="110px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                            <Template>
+                                @{ var row = (AgFinanceTickerRow)context; }
+                                <span class="price @(row.TickDirection > 0 ? "up" : row.TickDirection < 0 ? "down" : "")">@row.Price.ToString("C2")</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(AgFinanceTickerRow.Delta)" HeaderText="Change" Width="105px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                            <Template>
+                                @{ var row = (AgFinanceTickerRow)context; }
+                                <span class="@(row.Delta >= 0 ? "gain" : "loss")">@(row.Delta > 0 ? "▲ +" : row.Delta < 0 ? "▼ " : "")@row.Delta.ToString("C2")</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(AgFinanceTickerRow.DeltaPercent)" HeaderText="Change %" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                            <Template>
+                                @{ var row = (AgFinanceTickerRow)context; }
+                                <span class="@(row.DeltaPercent >= 0 ? "gain" : "loss")">@(row.DeltaPercent > 0 ? "+" : "")@row.DeltaPercent.ToString("0.00")%</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(AgFinanceTickerRow.Ticker)" HeaderText="Trend" Width="130px" AllowSorting="false" TextAlign="TextAlign.Center">
+                            <Template>
+                                @{ var row = (AgFinanceTickerRow)context; }
+                                <svg class="spark" viewBox="0 0 110 24" aria-hidden="true"><polyline points="@Sparkline(row.Timeline)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(AgFinanceTickerRow.Quantity)" HeaderText="Holdings" Width="85px" Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(AgFinanceTickerRow.TotalValue)" HeaderText="Market value" Width="120px" Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(AgFinanceTickerRow.UnrealizedPL)" HeaderText="Unrealised P&amp;L" Width="125px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                            <Template>
+                                @{ var row = (AgFinanceTickerRow)context; }
+                                <span class="@(row.UnrealizedPL >= 0 ? "gain" : "loss")">@(row.UnrealizedPL > 0 ? "+" : "")@row.UnrealizedPL.ToString("C2")</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(AgFinanceTickerRow.LastUpdated)" HeaderText="Updated" Width="100px" Type="ColumnType.Date" Format="HH:mm:ss" TextAlign="TextAlign.Center" />
+                    </GridColumnsBase>
+                </GridControl>
+                <p class="result">@Status</p>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn parameters used here" Rows="Vocab.Column" />
+        <p>
+            The grid's own parameters on this page (<code>AllowSorting</code>, <code>AllowSelection</code>, <code>AllowResizing</code>,
+            <code>ShowRowCountInFooter</code>, <code>Height</code>) are documented on <a href="demo/grid">Grid overview</a>; the row window
+            on <a href="demo/grid/row-selection-50k">100k rows</a>.
+        </p>
+    </Vocabulary>
+
+    <Related>
+        <ul>
+            <li><a href="demo/grid/row-selection-50k">100k rows</a>: the row window the ticks re-render.</li>
+            <li><a href="demo/grid/enterprise-suite">Export &amp; templates</a>: more cell templates, on a list that stands still.</li>
+            <li><a href="demo/gauges">Gauges &amp; stock chart</a>: the same kind of series drawn as a chart.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    private readonly SelectionItem[] _intervalItems = { new("100", "100 ms"), new("250", "250 ms"), new("500", "500 ms"), new("1000", "1 s") };
+    private List<AgFinanceTickerRow> _rows = Load();
+    private System.Timers.Timer? _timer;
+    private bool _streaming;
+    private int _intervalMs = 500;
+
+    // Measured per tick: rows changed, and the server render time from the tick to the component's next OnAfterRender.
+    private readonly Stopwatch _tickWatch = new();
+    private readonly Queue<double> _recent = new();
+    private bool _renderPending;
+    private int _ticks, _lastChanged;
+    private double _lastMs;
+
+    private string Status
+    {
+        get
+        {
+            var avg = _recent.Count == 0 ? 0 : _recent.Average();
+            var state = _streaming ? $"Streaming every {_intervalMs} ms" : "Paused";
+            return _ticks == 0
+                ? $"{state}. {_rows.Count} instruments, no ticks yet."
+                : $"{state}. {_ticks} ticks; the last changed {_lastChanged} rows and rendered in {_lastMs:0.0} ms on the server (average {avg:0.0} ms over the last {_recent.Count}).";
+        }
+    }
+
+    private void ToggleStreaming()
+    {
+        if (_streaming) { _timer?.Stop(); _streaming = false; return; }
+        _streaming = true;
+        StartTimer();
+    }
+
+    private void PickInterval(IReadOnlyList<string> values)
+    {
+        if (values.Count == 0) return;
+        _intervalMs = int.Parse(values[0]);
+        if (_streaming) StartTimer();
+    }
+
+    private void StartTimer()
+    {
+        _timer?.Stop();
+        _timer?.Dispose();
+        _timer = new System.Timers.Timer(_intervalMs) { AutoReset = true };
+        _timer.Elapsed += async (_, _) => await InvokeAsync(Tick);   // back on the circuit before touching the rows
+        _timer.Start();
+    }
+
+    // One tick: three to seven instruments move by up to 1.5 percent; the rows are changed in place and the page re-renders.
+    private void Tick()
+    {
+        if (_rows.Count == 0) return;
+        _tickWatch.Restart();
+        var count = Random.Shared.Next(3, 8);
+        for (var i = 0; i < count; i++)
+        {
+            var row = _rows[Random.Shared.Next(_rows.Count)];
+            row.PreviousPrice = row.Price;
+            var change = Math.Round(row.Price * (decimal)((Random.Shared.NextDouble() - 0.49) * 0.03), 2);
+            if (change == 0) change = 0.05m;
+            row.Price = Math.Max(0.50m, row.Price + change);
+            row.TickDirection = row.Price > row.PreviousPrice ? 1 : -1;
+            row.LastUpdated = DateTime.Now;
+            row.Timeline.Add((double)row.Price);
+            if (row.Timeline.Count > 24) row.Timeline.RemoveAt(0);
+        }
+        _lastChanged = count;
+        _ticks++;
+        _renderPending = true;
+        StateHasChanged();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!_renderPending) return;
+        _renderPending = false;
+        _lastMs = _tickWatch.Elapsed.TotalMilliseconds;
+        _recent.Enqueue(_lastMs);
+        while (_recent.Count > 20) _recent.Dequeue();
+        _ = InvokeAsync(StateHasChanged);   // show the number; this render has no pending tick, so it ends here
+    }
+
+    private void Reset()
+    {
+        _rows = Load();
+        _ticks = 0; _lastChanged = 0; _lastMs = 0; _recent.Clear();
+    }
+
+    // Seeded portfolio; no instrument has moved yet, so no price cell is tinted until the first tick.
+    private static List<AgFinanceTickerRow> Load()
+    {
+        var rows = BenchDataStore.GetFinanceTickers();
+        foreach (var row in rows) { row.TickDirection = 0; row.PreviousPrice = row.Price; }
+        return rows;
+    }
+
+    private static string Sparkline(List<double> points)
+    {
+        if (points.Count < 2) return "0,12 110,12";
+        var min = points.Min(); var range = Math.Max(points.Max() - min, 0.001);
+        return string.Join(" ", points.Select((p, i) => $"{5 + i * 100.0 / (points.Count - 1):F1},{22 - (p - min) / range * 16:F1}"));
+    }
+
+    public void Dispose()
+    {
+        _timer?.Stop();
+        _timer?.Dispose();
+    }
+
+    // Documentation rows (2026-10-23) from Grid/GridColumn.cs.
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Column =
+        {
+            new("Field", "Property the column reads, and sorts by.", "string"),
+            new("HeaderText", "Header caption.", "string?"),
+            new("Template", "Markup for the cell, given the row object as context; used here for the price tint, the change arrows, the trend line and the profit colour.", "RenderFragment&lt;object&gt;?"),
+            new("Type", "Text, Number, Date or Boolean: decides editor, alignment default and sorting.", "ColumnType"),
+            new("Format", "Format string for the cell text when there is no template.", "string?"),
+            new("TextAlign", "Left, Right or Center; the type's default when null.", "TextAlign?", "null"),
+            new("Width", "CSS width of the column.", "string?"),
+            new("AllowSorting", "Off on the trend column, whose field only repeats the ticker.", "bool"),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Ticker = @"<ButtonControl CssClass=""@(_streaming ? ""btn-sm btn-danger"" : ""btn-sm btn-success"")"" OnClick=""ToggleStreaming"">@(_streaming ? ""Pause"" : ""Start"")</ButtonControl>
+<ButtonGroupControl Items=""_intervalItems"" Values=""@(new[] { _intervalMs.ToString() })"" ValuesChanged=""PickInterval"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Tick interval"" />
+<ButtonControl CssClass=""btn-sm"" OnClick=""Tick"">Tick once</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""Reset"">Reset</ButtonControl>
+
+<GridControl TValue=""AgFinanceTickerRow""
+             DataSource=""@_rows""
+             Height=""420px""
+             AllowSorting=""true""
+             AllowSelection=""true""
+             AllowResizing=""true""
+             ShowRowCountInFooter=""true"">
+    <GridColumnsBase>
+        <GridColumn Field=""@nameof(AgFinanceTickerRow.Ticker)"" HeaderText=""Ticker"" Width=""90px"">
+            <Template>
+                @{ var row = (AgFinanceTickerRow)context; }
+                <strong class=""ticker"">@row.Ticker</strong>
+            </Template>
+        </GridColumn>
+        <GridColumn Field=""@nameof(AgFinanceTickerRow.Name)"" HeaderText=""Name"" Width=""170px"" />
+        <GridColumn Field=""@nameof(AgFinanceTickerRow.Instrument)"" HeaderText=""Type"" Width=""80px"" />
+        <GridColumn Field=""@nameof(AgFinanceTickerRow.Price)"" HeaderText=""Price"" Width=""110px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
+            <Template>
+                @{ var row = (AgFinanceTickerRow)context; }
+                <span class=""price @(row.TickDirection > 0 ? ""up"" : row.TickDirection < 0 ? ""down"" : """")"">@row.Price.ToString(""C2"")</span>
+            </Template>
+        </GridColumn>
+        <GridColumn Field=""@nameof(AgFinanceTickerRow.Delta)"" HeaderText=""Change"" Width=""105px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
+            <Template>
+                @{ var row = (AgFinanceTickerRow)context; }
+                <span class=""@(row.Delta >= 0 ? ""gain"" : ""loss"")"">@(row.Delta > 0 ? ""▲ +"" : row.Delta < 0 ? ""▼ "" : """")@row.Delta.ToString(""C2"")</span>
+            </Template>
+        </GridColumn>
+        <GridColumn Field=""@nameof(AgFinanceTickerRow.DeltaPercent)"" HeaderText=""Change %"" Width=""95px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
+            <Template>
+                @{ var row = (AgFinanceTickerRow)context; }
+                <span class=""@(row.DeltaPercent >= 0 ? ""gain"" : ""loss"")"">@(row.DeltaPercent > 0 ? ""+"" : """")@row.DeltaPercent.ToString(""0.00"")%</span>
+            </Template>
+        </GridColumn>
+        <GridColumn Field=""@nameof(AgFinanceTickerRow.Ticker)"" HeaderText=""Trend"" Width=""130px"" AllowSorting=""false"" TextAlign=""TextAlign.Center"">
+            <Template>
+                @{ var row = (AgFinanceTickerRow)context; }
+                <svg class=""spark"" viewBox=""0 0 110 24"" aria-hidden=""true""><polyline points=""@Sparkline(row.Timeline)"" fill=""none"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" /></svg>
+            </Template>
+        </GridColumn>
+        <GridColumn Field=""@nameof(AgFinanceTickerRow.Quantity)"" HeaderText=""Holdings"" Width=""85px"" Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(AgFinanceTickerRow.TotalValue)"" HeaderText=""Market value"" Width=""120px"" Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(AgFinanceTickerRow.UnrealizedPL)"" HeaderText=""Unrealised P&amp;L"" Width=""125px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
+            <Template>
+                @{ var row = (AgFinanceTickerRow)context; }
+                <span class=""@(row.UnrealizedPL >= 0 ? ""gain"" : ""loss"")"">@(row.UnrealizedPL > 0 ? ""+"" : """")@row.UnrealizedPL.ToString(""C2"")</span>
+            </Template>
+        </GridColumn>
+        <GridColumn Field=""@nameof(AgFinanceTickerRow.LastUpdated)"" HeaderText=""Updated"" Width=""100px"" Type=""ColumnType.Date"" Format=""HH:mm:ss"" TextAlign=""TextAlign.Center"" />
+    </GridColumnsBase>
+</GridControl>
+<p class=""result"">@Status</p>";
+        public const string TickerCs = @"private readonly SelectionItem[] _intervalItems = { new(""100"", ""100 ms""), new(""250"", ""250 ms""), new(""500"", ""500 ms""), new(""1000"", ""1 s"") };
+
+private List<AgFinanceTickerRow> _rows = Load();
+
+private System.Timers.Timer? _timer;
+
+private bool _streaming;
+
+private int _intervalMs = 500;
+
+// Measured per tick: rows changed, and the server render time from the tick to the component's next OnAfterRender.
+private readonly Stopwatch _tickWatch = new();
+
+private readonly Queue<double> _recent = new();
+
+private bool _renderPending;
+
+private int _ticks, _lastChanged;
+
+private double _lastMs;
+
+private string Status
+{
+    get
+    {
+        var avg = _recent.Count == 0 ? 0 : _recent.Average();
+        var state = _streaming ? $""Streaming every {_intervalMs} ms"" : ""Paused"";
+        return _ticks == 0
+            ? $""{state}. {_rows.Count} instruments, no ticks yet.""
+            : $""{state}. {_ticks} ticks; the last changed {_lastChanged} rows and rendered in {_lastMs:0.0} ms on the server (average {avg:0.0} ms over the last {_recent.Count})."";
+    }
+}
+
+private void ToggleStreaming()
+{
+    if (_streaming) { _timer?.Stop(); _streaming = false; return; }
+    _streaming = true;
+    StartTimer();
+}
+
+private void PickInterval(IReadOnlyList<string> values)
+{
+    if (values.Count == 0) return;
+    _intervalMs = int.Parse(values[0]);
+    if (_streaming) StartTimer();
+}
+
+private void StartTimer()
+{
+    _timer?.Stop();
+    _timer?.Dispose();
+    _timer = new System.Timers.Timer(_intervalMs) { AutoReset = true };
+    _timer.Elapsed += async (_, _) => await InvokeAsync(Tick);   // back on the circuit before touching the rows
+    _timer.Start();
+}
+
+// One tick: three to seven instruments move by up to 1.5 percent; the rows are changed in place and the page re-renders.
+private void Tick()
+{
+    if (_rows.Count == 0) return;
+    _tickWatch.Restart();
+    var count = Random.Shared.Next(3, 8);
+    for (var i = 0; i < count; i++)
+    {
+        var row = _rows[Random.Shared.Next(_rows.Count)];
+        row.PreviousPrice = row.Price;
+        var change = Math.Round(row.Price * (decimal)((Random.Shared.NextDouble() - 0.49) * 0.03), 2);
+        if (change == 0) change = 0.05m;
+        row.Price = Math.Max(0.50m, row.Price + change);
+        row.TickDirection = row.Price > row.PreviousPrice ? 1 : -1;
+        row.LastUpdated = DateTime.Now;
+        row.Timeline.Add((double)row.Price);
+        if (row.Timeline.Count > 24) row.Timeline.RemoveAt(0);
+    }
+    _lastChanged = count;
+    _ticks++;
+    _renderPending = true;
+    StateHasChanged();
+}
+
+protected override void OnAfterRender(bool firstRender)
+{
+    if (!_renderPending) return;
+    _renderPending = false;
+    _lastMs = _tickWatch.Elapsed.TotalMilliseconds;
+    _recent.Enqueue(_lastMs);
+    while (_recent.Count > 20) _recent.Dequeue();
+    _ = InvokeAsync(StateHasChanged);   // show the number; this render has no pending tick, so it ends here
+}
+
+private void Reset()
+{
+    _rows = Load();
+    _ticks = 0; _lastChanged = 0; _lastMs = 0; _recent.Clear();
+}
+
+// Seeded portfolio; no instrument has moved yet, so no price cell is tinted until the first tick.
+private static List<AgFinanceTickerRow> Load()
+{
+    var rows = BenchDataStore.GetFinanceTickers();
+    foreach (var row in rows) { row.TickDirection = 0; row.PreviousPrice = row.Price; }
+    return rows;
+}
+
+private static string Sparkline(List<double> points)
+{
+    if (points.Count < 2) return ""0,12 110,12"";
+    var min = points.Min(); var range = Math.Max(points.Max() - min, 0.001);
+    return string.Join("" "", points.Select((p, i) => $""{5 + i * 100.0 / (points.Count - 1):F1},{22 - (p - min) / range * 16:F1}""));
+}
+
+public void Dispose()
+{
+    _timer?.Stop();
+    _timer?.Dispose();
+}";
+    }
+}
