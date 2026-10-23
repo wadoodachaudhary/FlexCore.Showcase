@@ -9,12 +9,21 @@
    written from Charts/GaugeControl.razor, GaugeControls.cs, GaugeVisualControl.razor, GaugeModels.cs, StockChartControl.razor,
    StockChartRange.cs and ChartModels.cs; rows checked with scratchpad/vocabcheck.py; the drawing and toolbar sentences read
    from GaugeVisualControl's markup and StockChartControl's SetRangeAsync/ZoomAsync/PanAsync/OnParametersSet. *@
+@* 2026-10-23 (developer meeting point 5, chart label clutter). Gauges: two to a row at Height 300px, so the 300-unit view box
+   renders at scale 1 and its 11-unit tick labels at 11 px (four 225 px tiles at 200px gave scale 0.667, 7.3 px); the linear gauge
+   gets 150px, where its 320 by 105 view box fills a 465 px tile. Stock chart: ChartControl's financial renderer writes a label
+   under every visible point (no thinning), and about sixteen "MMM d" labels are all that fit its 530-unit plot, so Start opens
+   the chart on the last fourteen trading days and the page's buttons offer five and fourteen; the old Last 30 days (22 points)
+   and Everything (90 points) buttons overlapped. Height 400px renders the 600 by 320 view box at scale 1.25 (12.5 px axis text)
+   instead of 1.0625. ShowNavigator is off: the navigator draws a 600 by 300 line chart 90 px high, scale 0.3, text at 3 px; it
+   returns when the library can draw its labels at a readable size. The range line counts the trading days in view so the
+   buttons, the chart and the text agree. *@
 
 <PageTitle>Gauges &amp; stock chart — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Gauges &amp; stock chart" Category="Charts" CategoryHref="demo/charts"
                    ControlName="ArcGaugeControl · CircularGaugeControl · RadialGaugeControl · LinearGaugeControl · StockChartControl"
-                   Tagline="Four gauges that share one set of parameters, and a candlestick chart with a date toolbar and a navigator."
+                   Tagline="Four gauges that share one set of parameters, and a candlestick chart with a date toolbar."
                    SourcePath="Charts/GaugeControl.razor;Charts/GaugeControls.cs;Charts/GaugeVisualControl.razor;Charts/GaugeModels.cs;Charts/StockChartControl.razor;Charts/StockChartRange.cs;Charts/ChartModels.cs">
     <Overview>
         <p>
@@ -37,28 +46,28 @@
             </Controls>
             <Demo>
                 <div class="four">
-                    <div><p class="pane-title">Arc</p><ArcGaugeControl Value="@_value" Ranges="@_ranges" AriaLabel="Utilisation" Height="200px" /></div>
+                    <div><p class="pane-title">Arc</p><ArcGaugeControl Value="@_value" Ranges="@_ranges" AriaLabel="Utilisation" Height="300px" /></div>
                     <div>
                         <p class="pane-title">Circular</p>
-                        <CircularGaugeControl Value="@_value" TickCount="10" Color="#0f766e" AriaLabel="Progress" Height="200px">
+                        <CircularGaugeControl Value="@_value" TickCount="10" Color="#0f766e" AriaLabel="Progress" Height="300px">
                             <ValueTemplate Context="g"><strong class="ring-value">@g.Value of @g.Max</strong></ValueTemplate>
                         </CircularGaugeControl>
                     </div>
-                    <div><p class="pane-title">Radial</p><RadialGaugeControl Value="@_value" Pointers="@_target" Color="#7c3aed" AriaLabel="Throughput" Height="200px" /></div>
-                    <div><p class="pane-title">Linear</p><LinearGaugeControl Value="@_value" Ranges="@_ranges" Pointers="@_target" LabelFormat="0'%'" ValueFormat="0'%'" AriaLabel="Capacity" Height="110px" /></div>
+                    <div><p class="pane-title">Radial</p><RadialGaugeControl Value="@_value" Pointers="@_target" Color="#7c3aed" AriaLabel="Throughput" Height="300px" /></div>
+                    <div><p class="pane-title">Linear</p><LinearGaugeControl Value="@_value" Ranges="@_ranges" Pointers="@_target" LabelFormat="0'%'" ValueFormat="0'%'" AriaLabel="Capacity" Height="150px" /></div>
                 </div>
             </Demo>
         </DemoExample>
 
         <DemoExample Id="stock" Title="Stock chart" RazorCode="@Code.Stock" CSharpCode="@Code.StockCs">
-            <Description><p>Ninety trading days of generated prices. The toolbar's pickers set the start and end and cannot cross each other or leave the data; Zoom in halves the visible span around its centre, Zoom out doubles it, Earlier and Later slide it by half, All shows everything. The navigator draws the closes and its two sliders move the same range. The buttons above call <code>SetRangeAsync</code> from the page and switch the chart type; the line below is fed by <code>RangeChanged</code>.</p></Description>
+            <Description><p>Ninety trading days of generated prices; <code>Start</code> opens the chart on the last fourteen. The toolbar's pickers set the start and end and cannot cross each other or leave the data; Zoom in halves the visible span around its centre, Zoom out doubles it, Earlier and Later slide it by half, All shows everything. The chart writes a date under every visible day, so once more than about sixteen are in view the labels run into each other: the page's buttons stay at five and fourteen trading days, and the navigator is off because its 90 px strip draws a 600 by 300 chart at three tenths of its size. The buttons above call <code>SetRangeAsync</code> from the page and switch the chart type; the line below is fed by <code>RangeChanged</code> and counts the trading days in view.</p></Description>
             <Controls>
-                <ButtonControl CssClass="btn-sm" OnClick="() => _stock!.SetRangeAsync(_lastDay.AddDays(-30), _lastDay)">Last 30 days</ButtonControl>
-                <ButtonControl CssClass="btn-sm" OnClick="() => _stock!.SetRangeAsync(null, null)">Everything</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _stock!.SetRangeAsync(_prices[^5].DateValue, null)">Last 5 trading days</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _stock!.SetRangeAsync(_firstShown, null)">Last 14 trading days</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _type = _type == ChartType.Candlestick ? ChartType.Ohlc : ChartType.Candlestick">Show as @(_type == ChartType.Candlestick ? "OHLC" : "candlesticks")</ButtonControl>
             </Controls>
             <Demo>
-                <StockChartControl @ref="_stock" DataSource="@_prices" Type="@_type" RangeChanged='r => _range = $"{r.Start:MMM d} to {r.End:MMM d}, {(r.End - r.Start).Days + 1} days."' />
+                <StockChartControl @ref="_stock" DataSource="@_prices" Type="@_type" Start="@_firstShown" Height="400px" ShowNavigator="false" RangeChanged="r => _range = Describe(r.Start, r.End)" />
                 <p class="result">Range: @_range</p>
             </Demo>
         </DemoExample>
@@ -101,7 +110,7 @@
             Each gauge is a <code>meter</code> named by <code>AriaLabel</code> with <code>aria-valuenow</code>, <code>aria-valuemin</code> and
             <code>aria-valuemax</code>; its SVG is hidden from assistive technology so the figures are not read twice. The stock chart's
             pickers are labelled "Stock chart start date" and "Stock chart end date", the navigator sliders "Navigator start" and
-            "Navigator end", and the empty state is a status message.
+            "Navigator end" (the navigator is off in the example above), and the empty state is a status message.
         </p>
     </Accessibility>
 
@@ -120,8 +129,8 @@
 
     private StockChartControl? _stock;
     private ChartType _type = ChartType.Candlestick;
-    private string _range = "everything.";
-    private readonly DateTime _lastDay;
+    private string _range;
+    private readonly DateTime _firstShown;
     private readonly ChartDataPoint[] _prices;
 
     public GaugesDemo()
@@ -144,37 +153,48 @@
             day = day.AddDays(1);
         }
         _prices = points.ToArray();
-        _lastDay = _prices[^1].DateValue!.Value;
+        _firstShown = _prices[^14].DateValue!.Value;
+        _range = Describe(_firstShown, _prices[^1].DateValue!.Value);
     }
+
+    private string Describe(DateTime start, DateTime end) =>
+        $"{start:MMM d} to {end:MMM d}, {_prices.Count(p => p.DateValue >= start && p.DateValue <= end)} trading days.";
 
     // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
     private static class Code
     {
-        public const string Gauges = @"<div class=""four"">
-    <div><p class=""pane-title"">Arc</p><ArcGaugeControl Value=""@_value"" Ranges=""@_ranges"" AriaLabel=""Utilisation"" Height=""200px"" /></div>
+        public const string Gauges = @"<ButtonControl CssClass=""btn-sm"" OnClick=""() => _value = Math.Max(0, _value - 10)"" Disabled=""@(_value <= 0)"">−10</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""() => _value = Math.Min(100, _value + 10)"" Disabled=""@(_value >= 100)"">+10</ButtonControl>
+
+<div class=""four"">
+    <div><p class=""pane-title"">Arc</p><ArcGaugeControl Value=""@_value"" Ranges=""@_ranges"" AriaLabel=""Utilisation"" Height=""300px"" /></div>
     <div>
         <p class=""pane-title"">Circular</p>
-        <CircularGaugeControl Value=""@_value"" TickCount=""10"" Color=""#0f766e"" AriaLabel=""Progress"" Height=""200px"">
+        <CircularGaugeControl Value=""@_value"" TickCount=""10"" Color=""#0f766e"" AriaLabel=""Progress"" Height=""300px"">
             <ValueTemplate Context=""g""><strong class=""ring-value"">@g.Value of @g.Max</strong></ValueTemplate>
         </CircularGaugeControl>
     </div>
-    <div><p class=""pane-title"">Radial</p><RadialGaugeControl Value=""@_value"" Pointers=""@_target"" Color=""#7c3aed"" AriaLabel=""Throughput"" Height=""200px"" /></div>
-    <div><p class=""pane-title"">Linear</p><LinearGaugeControl Value=""@_value"" Ranges=""@_ranges"" Pointers=""@_target"" LabelFormat=""0'%'"" ValueFormat=""0'%'"" AriaLabel=""Capacity"" Height=""110px"" /></div>
+    <div><p class=""pane-title"">Radial</p><RadialGaugeControl Value=""@_value"" Pointers=""@_target"" Color=""#7c3aed"" AriaLabel=""Throughput"" Height=""300px"" /></div>
+    <div><p class=""pane-title"">Linear</p><LinearGaugeControl Value=""@_value"" Ranges=""@_ranges"" Pointers=""@_target"" LabelFormat=""0'%'"" ValueFormat=""0'%'"" AriaLabel=""Capacity"" Height=""150px"" /></div>
 </div>";
         public const string GaugesCs = @"private double _value = 65;
 
 private readonly IReadOnlyList<GaugeRange> _ranges = [new(0, 40, ""#16a34a"", ""Healthy""), new(40, 75, ""#f59e0b"", ""Busy""), new(75, 100, ""#dc2626"", ""Saturated"")];
 
 private readonly IReadOnlyList<GaugePointer> _target = [new(80, ""#dc2626"", ""Target"")];";
-        public const string Stock = @"<StockChartControl @ref=""_stock"" DataSource=""@_prices"" Type=""@_type"" RangeChanged='r => _range = $""{r.Start:MMM d} to {r.End:MMM d}, {(r.End - r.Start).Days + 1} days.""' />
+        public const string Stock = @"<ButtonControl CssClass=""btn-sm"" OnClick=""() => _stock!.SetRangeAsync(_prices[^5].DateValue, null)"">Last 5 trading days</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""() => _stock!.SetRangeAsync(_firstShown, null)"">Last 14 trading days</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""() => _type = _type == ChartType.Candlestick ? ChartType.Ohlc : ChartType.Candlestick"">Show as @(_type == ChartType.Candlestick ? ""OHLC"" : ""candlesticks"")</ButtonControl>
+
+<StockChartControl @ref=""_stock"" DataSource=""@_prices"" Type=""@_type"" Start=""@_firstShown"" Height=""400px"" ShowNavigator=""false"" RangeChanged=""r => _range = Describe(r.Start, r.End)"" />
 <p class=""result"">Range: @_range</p>";
         public const string StockCs = @"private StockChartControl? _stock;
 
 private ChartType _type = ChartType.Candlestick;
 
-private string _range = ""everything."";
+private string _range;
 
-private readonly DateTime _lastDay;
+private readonly DateTime _firstShown;
 
 private readonly ChartDataPoint[] _prices;
 
@@ -198,8 +218,12 @@ public GaugesDemo()
         day = day.AddDays(1);
     }
     _prices = points.ToArray();
-    _lastDay = _prices[^1].DateValue!.Value;
-}";
+    _firstShown = _prices[^14].DateValue!.Value;
+    _range = Describe(_firstShown, _prices[^1].DateValue!.Value);
+}
+
+private string Describe(DateTime start, DateTime end) =>
+    $""{start:MMM d} to {end:MMM d}, {_prices.Count(p => p.DateValue >= start && p.DateValue <= end)} trading days."";";
     }
 
     private static class Vocab

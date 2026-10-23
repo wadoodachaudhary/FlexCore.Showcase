@@ -2,6 +2,11 @@
 @inject IJSRuntime JS
 @inject NotificationService Notifications
 
+@* 2026-10-23 (developer meeting point 5, chart label clutter): the Inventory Allocation pie has four slices instead of five so its
+   legend, an HTML flex row of 12 px entries about 100 px wide with 12 px gaps, stays on one line in the 575 px column at 1280 px
+   ("Finishes (8%)" wrapped to a second row); the shares are rebalanced to 40/25/20/15. The pie draws no slice labels, so the
+   share stays in the legend text. The "charts" string in the code tab below is kept by hand and still matches the markup. *@
+
 <PageTitle>FlexCore — Enterprise Blazor Component Suite for .NET</PageTitle>
 
 <div class="landing-container">
@@ -1070,11 +1075,10 @@
             Type = ChartType.Pie,
             DataPoints = new()
             {
-                new("Structural (35%)", 35, "#0284c7"),
+                new("Structural (40%)", 40, "#0284c7"),
                 new("Electrical (25%)", 25, "#7c3aed"),
                 new("Plumbing (20%)", 20, "#107c41"),
-                new("Mechanical (12%)", 12, "#d97706"),
-                new("Finishes (8%)", 8, "#e11d48")
+                new("Mechanical (15%)", 15, "#d97706")
             }
         }
     };

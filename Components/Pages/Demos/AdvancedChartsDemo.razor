@@ -4,7 +4,14 @@
 @using FlexCore.Showcase.Components.Shared
 
 @* 2026-10-12: moved onto FeatureDemoLayout; six Bootstrap cards became three examples with the same charts.
-   Parameter table pending (SC-264). C# tabs added 2026-10-17: the series fields, verbatim (SC-277). *@
+   Parameter table pending (SC-264). C# tabs added 2026-10-17: the series fields, verbatim (SC-277).
+   2026-10-23 (developer meeting, point 5: chart labels too small): every SVG chart type draws on a fixed viewBox (600x320 Candlestick
+   and OHLC, 600x300 RangeColumn, 650x340 Sankey, 600 x rows*60 Bullet, 300x300 radial gauge, 320x105 linear gauge) and scales to
+   min(tile width / viewBox width, Height / viewBox height), so label size follows tile width and a Height above the width-bound value
+   only adds a blank band. Comparisons re-laid out: Bullet alone at its 600x240 design size, RangeColumn and Sankey two-up; every
+   Height set to the width-bound value for a 465 px tile; RangeColumn labels kept to 8 characters because the renderer cuts longer
+   ones; the Sankey data given one flow per node because the renderer draws a node and label per flow (a shared source prints once per
+   link); the radial gauge tile widened to its 300 px design size and the linear gauge raised to its 105 px. *@
 
 <PageTitle>Financial &amp; gauges — FlexCore Showcase</PageTitle>
 
@@ -23,8 +30,8 @@
             <Description><p>Both read the same series; <code>Candlestick</code> fills the body, <code>Ohlc</code> draws ticks.</p></Description>
             <Demo>
                 <div class="two">
-                    <ChartControl Type="ChartType.Candlestick" Title="Candlestick" Series="_candlestickSeries" Height="280px" />
-                    <ChartControl Type="ChartType.Ohlc" Title="OHLC" Series="_candlestickSeries" Height="280px" />
+                    <ChartControl Type="ChartType.Candlestick" Title="Candlestick" Series="_candlestickSeries" Height="248px" />
+                    <ChartControl Type="ChartType.Ohlc" Title="OHLC" Series="_candlestickSeries" Height="248px" />
                 </div>
             </Demo>
         </DemoExample>
@@ -32,10 +39,12 @@
         <DemoExample Id="comparisons" Title="Bullet, range and Sankey" RazorCode="@Code.Comparisons" CSharpCode="@Code.ComparisonsCs">
             <Description><p><code>Bullet</code> shows actual against target bands, <code>RangeColumn</code> floats a minimum to maximum bar, <code>Sankey</code> draws weighted flows between nodes.</p></Description>
             <Demo>
-                <div class="three">
+                <div class="stack">
                     <ChartControl Type="ChartType.Bullet" Title="Actual vs target" Series="_bulletSeries" Height="240px" />
-                    <ChartControl Type="ChartType.RangeColumn" Title="Min to max" Series="_rangeSeries" Height="240px" />
-                    <ChartControl Type="ChartType.Sankey" Title="Flow" Series="_sankeySeries" Height="280px" />
+                    <div class="two">
+                        <ChartControl Type="ChartType.RangeColumn" Title="Min to max" Series="_rangeSeries" Height="232px" />
+                        <ChartControl Type="ChartType.Sankey" Title="Flow" Series="_sankeySeries" Height="243px" />
+                    </div>
                 </div>
             </Demo>
         </DemoExample>
@@ -44,8 +53,8 @@
             <Description><p>One series, two gauge types. The standalone <code>ArcGaugeControl</code>, <code>CircularGaugeControl</code>, <code>RadialGaugeControl</code> and <code>LinearGaugeControl</code> have <a href="demo/gauges">a page of their own</a>.</p></Description>
             <Demo>
                 <div class="gauges">
-                    <ChartControl Type="ChartType.RadialGauge" Title="Radial" Series="_gaugeSeries" Height="180px" />
-                    <ChartControl Type="ChartType.LinearGauge" Title="Linear" Series="_gaugeSeries" Height="90px" />
+                    <ChartControl Type="ChartType.RadialGauge" Title="Radial" Series="_gaugeSeries" Height="300px" />
+                    <ChartControl Type="ChartType.LinearGauge" Title="Linear" Series="_gaugeSeries" Height="105px" />
                 </div>
             </Demo>
         </DemoExample>
@@ -87,11 +96,11 @@
     {
         new ChartSeries("Salary Ranges", ChartType.RangeColumn, new[]
         {
-            ChartDataPoint.Range("Junior Dev", 60, 85),
-            ChartDataPoint.Range("Mid Dev", 85, 120),
-            ChartDataPoint.Range("Senior Dev", 120, 165),
-            ChartDataPoint.Range("Lead Architect", 160, 210),
-            ChartDataPoint.Range("Principal", 200, 260)
+            ChartDataPoint.Range("Junior", 60, 85),
+            ChartDataPoint.Range("Mid", 85, 120),
+            ChartDataPoint.Range("Senior", 120, 165),
+            ChartDataPoint.Range("Lead", 160, 210),
+            ChartDataPoint.Range("Director", 200, 260)
         })
     };
 
@@ -99,11 +108,11 @@
     {
         new ChartSeries("Budget Flow", ChartType.Sankey, new[]
         {
-            ChartDataPoint.Sankey("Revenue", "Engineering", 120),
-            ChartDataPoint.Sankey("Revenue", "Marketing", 60),
-            ChartDataPoint.Sankey("Revenue", "Operations", 40),
-            ChartDataPoint.Sankey("Investment", "R&D", 80),
-            ChartDataPoint.Sankey("Investment", "Expansion", 50)
+            ChartDataPoint.Sankey("Sales", "Payroll", 120),
+            ChartDataPoint.Sankey("Services", "Marketing", 60),
+            ChartDataPoint.Sankey("Licences", "Operations", 40),
+            ChartDataPoint.Sankey("Grants", "R&D", 80),
+            ChartDataPoint.Sankey("Loans", "Expansion", 50)
         })
     };
 
@@ -119,8 +128,8 @@
     private static class Code
     {
         public const string Financial = @"<div class=""two"">
-    <ChartControl Type=""ChartType.Candlestick"" Title=""Candlestick"" Series=""_candlestickSeries"" Height=""280px"" />
-    <ChartControl Type=""ChartType.Ohlc"" Title=""OHLC"" Series=""_candlestickSeries"" Height=""280px"" />
+    <ChartControl Type=""ChartType.Candlestick"" Title=""Candlestick"" Series=""_candlestickSeries"" Height=""248px"" />
+    <ChartControl Type=""ChartType.Ohlc"" Title=""OHLC"" Series=""_candlestickSeries"" Height=""248px"" />
 </div>";
         public const string FinancialCs = @"private List<ChartSeries> _candlestickSeries = new()
 {
@@ -135,10 +144,12 @@
         ChartDataPoint.Financial(""Day 7"", 137, 150, 136, 149)
     })
 };";
-        public const string Comparisons = @"<div class=""three"">
+        public const string Comparisons = @"<div class=""stack"">
     <ChartControl Type=""ChartType.Bullet"" Title=""Actual vs target"" Series=""_bulletSeries"" Height=""240px"" />
-    <ChartControl Type=""ChartType.RangeColumn"" Title=""Min to max"" Series=""_rangeSeries"" Height=""240px"" />
-    <ChartControl Type=""ChartType.Sankey"" Title=""Flow"" Series=""_sankeySeries"" Height=""280px"" />
+    <div class=""two"">
+        <ChartControl Type=""ChartType.RangeColumn"" Title=""Min to max"" Series=""_rangeSeries"" Height=""232px"" />
+        <ChartControl Type=""ChartType.Sankey"" Title=""Flow"" Series=""_sankeySeries"" Height=""243px"" />
+    </div>
 </div>";
         public const string ComparisonsCs = @"private List<ChartSeries> _bulletSeries = new()
 {
@@ -155,11 +166,11 @@ private List<ChartSeries> _rangeSeries = new()
 {
     new ChartSeries(""Salary Ranges"", ChartType.RangeColumn, new[]
     {
-        ChartDataPoint.Range(""Junior Dev"", 60, 85),
-        ChartDataPoint.Range(""Mid Dev"", 85, 120),
-        ChartDataPoint.Range(""Senior Dev"", 120, 165),
-        ChartDataPoint.Range(""Lead Architect"", 160, 210),
-        ChartDataPoint.Range(""Principal"", 200, 260)
+        ChartDataPoint.Range(""Junior"", 60, 85),
+        ChartDataPoint.Range(""Mid"", 85, 120),
+        ChartDataPoint.Range(""Senior"", 120, 165),
+        ChartDataPoint.Range(""Lead"", 160, 210),
+        ChartDataPoint.Range(""Director"", 200, 260)
     })
 };
 
@@ -167,16 +178,16 @@ private List<ChartSeries> _sankeySeries = new()
 {
     new ChartSeries(""Budget Flow"", ChartType.Sankey, new[]
     {
-        ChartDataPoint.Sankey(""Revenue"", ""Engineering"", 120),
-        ChartDataPoint.Sankey(""Revenue"", ""Marketing"", 60),
-        ChartDataPoint.Sankey(""Revenue"", ""Operations"", 40),
-        ChartDataPoint.Sankey(""Investment"", ""R&D"", 80),
-        ChartDataPoint.Sankey(""Investment"", ""Expansion"", 50)
+        ChartDataPoint.Sankey(""Sales"", ""Payroll"", 120),
+        ChartDataPoint.Sankey(""Services"", ""Marketing"", 60),
+        ChartDataPoint.Sankey(""Licences"", ""Operations"", 40),
+        ChartDataPoint.Sankey(""Grants"", ""R&D"", 80),
+        ChartDataPoint.Sankey(""Loans"", ""Expansion"", 50)
     })
 };";
         public const string Gauges = @"<div class=""gauges"">
-    <ChartControl Type=""ChartType.RadialGauge"" Title=""Radial"" Series=""_gaugeSeries"" Height=""180px"" />
-    <ChartControl Type=""ChartType.LinearGauge"" Title=""Linear"" Series=""_gaugeSeries"" Height=""90px"" />
+    <ChartControl Type=""ChartType.RadialGauge"" Title=""Radial"" Series=""_gaugeSeries"" Height=""300px"" />
+    <ChartControl Type=""ChartType.LinearGauge"" Title=""Linear"" Series=""_gaugeSeries"" Height=""105px"" />
 </div>";
         public const string GaugesCs = @"private List<ChartSeries> _gaugeSeries = new()
 {

@@ -1,4 +1,5 @@
+/* 2026-10-23: chart text scales with tile width (fixed viewBoxes), so no chart with labels sits in a tile under about 450 px at 1280. */
+.stack { display: grid; gap: 16px; }
 .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-.three { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-.gauges { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; align-items: center; }
+.gauges { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; align-items: center; }
 @media (max-width: 640px) { .gauges { grid-template-columns: 1fr; } }

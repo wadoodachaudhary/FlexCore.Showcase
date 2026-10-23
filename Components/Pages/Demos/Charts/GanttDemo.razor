@@ -9,6 +9,14 @@
    documentation written from Gantt/GanttControl.razor and Gantt/GanttModels.cs, rows checked with scratchpad/vocabcheck.py and
    every behaviour sentence read from its code path (OnParametersSet clone, ChangeAsync, GanttSchedule.Validate, BeginDrag /
    PreviewDrag / MoveDate, SetViewAsync, the DayWidth and Ticks switches, Recalculate). *@
+@* 2026-10-23 (developer meeting point 5, chart label clutter). The three examples open in the Month view, 8 px a day, on a plan
+   stretched to Nov 2 to Dec 26: the timeline (earliest start to two days after the latest end, 56 days) is 448 px and sits beside
+   the tree grid's 460 px of fixed columns (Task 240, Start 110, End 110) inside the 943 px scroller without a horizontal scroll;
+   the Week view drew the old 42-day plan at 32 px a day, 1344 px, with Build, Test and Launch off-screen. The bar label is 11 px,
+   nowrap and clipped by the bar's overflow, with 8 px of padding each side, so every task is long enough for its title at 8 px a
+   day: Wireframes 11 days (88 px for about 74), Visual design 14 (112 for 82), Front end 11 (88 for 64), Content 21, Test 7
+   (56 for 38), Launch 8 (64 for 52); the Week view would have needed a 13-day dependency chain in a 15-day budget. One Plan()
+   still serves all three examples; Day and Week now scroll, which the Views example says. *@
 
 <PageTitle>Gantt chart — FlexCore Showcase</PageTitle>
 
@@ -32,15 +40,15 @@
 
     <Examples>
         <DemoExample Id="schedule" Title="Project schedule" RazorCode="@Code.Schedule" CSharpCode="@Code.ScheduleCs">
-            <Description><p>Nine tasks in two phases with dependencies between them. Add opens the dialog for a new task; select a row and Edit or Delete act on it, as does a double-click on the row. Drag a bar to move its task, drag either end to change its length, or put the focus on an end handle and press the arrow keys. A change that breaks a rule (an end before its start, a task starting before a predecessor finishes, a delete while other tasks still point at the task) is refused with a message under the toolbar. The line under the chart is built from the list <code>TasksChanged</code> delivers.</p></Description>
+            <Description><p>Nine tasks in two phases with dependencies between them. Add opens the dialog for a new task; select a row and Edit or Delete act on it, as does a double-click on the row. Drag a bar to move its task, drag either end to change its length, or put the focus on an end handle and press the arrow keys. A change that breaks a rule (an end before its start, a task starting before a predecessor finishes, a delete while other tasks still point at the task) is refused with a message under the toolbar. The line under the chart is built from the list <code>TasksChanged</code> delivers. The chart opens in the Month view, 8 px a day, so the whole plan is in sight without scrolling; the timescale dropdown switches to the wider views.</p></Description>
             <Demo>
-                <GanttControl Tasks="@_tasks" TasksChanged="t => _tasks = t" Height="380px" />
+                <GanttControl Tasks="@_tasks" TasksChanged="t => _tasks = t" View="GanttView.Month" Height="380px" />
                 <p class="result">@Summary</p>
             </Demo>
         </DemoExample>
 
         <DemoExample Id="views" Title="Read-only timeline with a task template" RazorCode="@Code.Views" CSharpCode="@Code.ViewsCs">
-            <Description><p>The same plan with <code>AllowEditing</code> off: Add, Edit and Delete are disabled, the dialog and the drag handles are gone, while Expand all, Collapse all and the timescale still work. The Task column uses <code>TaskTemplate</code> to add the progress figure. <code>View</code> is bound both ways: the buttons set it from the page and the toolbar's dropdown reports back through <code>ViewChanged</code>.</p></Description>
+            <Description><p>The same plan with <code>AllowEditing</code> off: Add, Edit and Delete are disabled, the dialog and the drag handles are gone, while Expand all, Collapse all and the timescale still work. The Task column uses <code>TaskTemplate</code> to add the progress figure. <code>View</code> is bound both ways: the buttons set it from the page and the toolbar's dropdown reports back through <code>ViewChanged</code>. Month fits the plan in the card; Day and Week are wider than it and scroll, and Year shrinks the bars below their titles.</p></Description>
             <Controls>
                 @foreach (var v in Enum.GetValues<GanttView>())
                 {
@@ -60,7 +68,7 @@
         <DemoExample Id="veto" Title="Vetoing a change" RazorCode="@Code.Veto" CSharpCode="@Code.VetoCs">
             <Description><p><code>TaskChanging</code> sees every create, update and delete after the control's own validation has passed, with the action, the proposed task and the stored one. Here finished tasks are locked and nothing can be deleted: drag the Wireframes bar a day to the left, or select Launch and press Delete, and the guard refuses. The control shows no message for a refusal (a refused drag snaps back, a refused delete closes its prompt, a refused edit leaves the dialog open), so the line under the chart reports the decision. A delete of a task that others still depend on, Wireframes for one, never reaches the guard: the control's own rule refuses it first with its message under the toolbar.</p></Description>
             <Demo>
-                <GanttControl Tasks="@_guarded" TasksChanged="t => _guarded = t" TaskChanging="Guard" Height="380px" />
+                <GanttControl Tasks="@_guarded" TasksChanged="t => _guarded = t" TaskChanging="Guard" View="GanttView.Month" Height="380px" />
                 <p class="result">@_decision</p>
             </Demo>
         </DemoExample>
@@ -122,15 +130,15 @@
 
     private static GanttTask[] Plan() =>
     [
-        new() { Id = "design", Title = "Design", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 90, Color = "#0f766e" },
-        new() { Id = "wire", Title = "Wireframes", Start = new(2026, 11, 2), End = new(2026, 11, 6), Progress = 100, ParentId = "design" },
-        new() { Id = "visual", Title = "Visual design", Start = new(2026, 11, 6), End = new(2026, 11, 13), Progress = 80, ParentId = "design", Predecessors = "wire" },
-        new() { Id = "build", Title = "Build", Start = new(2026, 11, 13), End = new(2026, 12, 4), Progress = 35, Color = "#0f766e" },
-        new() { Id = "front", Title = "Front end", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 40, ParentId = "build", Predecessors = "visual" },
-        new() { Id = "api", Title = "API", Start = new(2026, 11, 13), End = new(2026, 12, 4), Progress = 30, ParentId = "build", Predecessors = "wire" },
-        new() { Id = "content", Title = "Content", Start = new(2026, 11, 9), End = new(2026, 11, 27), Progress = 60 },
-        new() { Id = "qa", Title = "Test", Start = new(2026, 12, 4), End = new(2026, 12, 11), Predecessors = "front,api" },
-        new() { Id = "launch", Title = "Launch", Start = new(2026, 12, 11), End = new(2026, 12, 12), Predecessors = "qa,content", Color = "#dc2626" },
+        new() { Id = "design", Title = "Design", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = "#0f766e" },
+        new() { Id = "wire", Title = "Wireframes", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = "design" },
+        new() { Id = "visual", Title = "Visual design", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = "design", Predecessors = "wire" },
+        new() { Id = "build", Title = "Build", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = "#0f766e" },
+        new() { Id = "front", Title = "Front end", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = "build", Predecessors = "visual" },
+        new() { Id = "api", Title = "API", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = "build", Predecessors = "wire" },
+        new() { Id = "content", Title = "Content", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60 },
+        new() { Id = "qa", Title = "Test", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = "front,api" },
+        new() { Id = "launch", Title = "Launch", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = "qa,content", Color = "#dc2626" },
     ];
 
     private readonly IReadOnlyList<GanttTask> _plan = Plan();
@@ -153,7 +161,7 @@
     // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
     private static class Code
     {
-        public const string Schedule = @"<GanttControl Tasks=""@_tasks"" TasksChanged=""t => _tasks = t"" Height=""380px"" />
+        public const string Schedule = @"<GanttControl Tasks=""@_tasks"" TasksChanged=""t => _tasks = t"" View=""GanttView.Month"" Height=""380px"" />
 <p class=""result"">@Summary</p>";
         public const string ScheduleCs = @"private IReadOnlyList<GanttTask> _tasks = Plan();
 
@@ -163,17 +171,22 @@ private string Summary => _tasks.Count == 0
 
 private static GanttTask[] Plan() =>
 [
-    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 90, Color = ""#0f766e"" },
-    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 6), Progress = 100, ParentId = ""design"" },
-    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 6), End = new(2026, 11, 13), Progress = 80, ParentId = ""design"", Predecessors = ""wire"" },
-    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 13), End = new(2026, 12, 4), Progress = 35, Color = ""#0f766e"" },
-    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 40, ParentId = ""build"", Predecessors = ""visual"" },
-    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 13), End = new(2026, 12, 4), Progress = 30, ParentId = ""build"", Predecessors = ""wire"" },
-    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 27), Progress = 60 },
-    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 4), End = new(2026, 12, 11), Predecessors = ""front,api"" },
-    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 11), End = new(2026, 12, 12), Predecessors = ""qa,content"", Color = ""#dc2626"" },
+    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = ""#0f766e"" },
+    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = ""design"" },
+    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = ""design"", Predecessors = ""wire"" },
+    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = ""#0f766e"" },
+    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = ""build"", Predecessors = ""visual"" },
+    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = ""build"", Predecessors = ""wire"" },
+    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60 },
+    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = ""front,api"" },
+    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = ""qa,content"", Color = ""#dc2626"" },
 ];";
-        public const string Views = @"<GanttControl Tasks=""@_plan"" AllowEditing=""false"" View=""@_view"" ViewChanged=""v => _view = v"" Height=""380px"">
+        public const string Views = @"@foreach (var v in Enum.GetValues<GanttView>())
+{
+    <ButtonControl CssClass=""btn-sm"" Disabled=""@(_view == v)"" OnClick=""() => _view = v"">@v</ButtonControl>
+}
+
+<GanttControl Tasks=""@_plan"" AllowEditing=""false"" View=""@_view"" ViewChanged=""v => _view = v"" Height=""380px"">
     <TaskTemplate Context=""task"">
         <span>@task.Title</span> <span class=""pct"">@task.Progress%</span>
     </TaskTemplate>
@@ -185,17 +198,17 @@ private GanttView _view = GanttView.Month;
 
 private static GanttTask[] Plan() =>
 [
-    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 90, Color = ""#0f766e"" },
-    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 6), Progress = 100, ParentId = ""design"" },
-    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 6), End = new(2026, 11, 13), Progress = 80, ParentId = ""design"", Predecessors = ""wire"" },
-    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 13), End = new(2026, 12, 4), Progress = 35, Color = ""#0f766e"" },
-    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 40, ParentId = ""build"", Predecessors = ""visual"" },
-    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 13), End = new(2026, 12, 4), Progress = 30, ParentId = ""build"", Predecessors = ""wire"" },
-    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 27), Progress = 60 },
-    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 4), End = new(2026, 12, 11), Predecessors = ""front,api"" },
-    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 11), End = new(2026, 12, 12), Predecessors = ""qa,content"", Color = ""#dc2626"" },
+    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = ""#0f766e"" },
+    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = ""design"" },
+    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = ""design"", Predecessors = ""wire"" },
+    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = ""#0f766e"" },
+    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = ""build"", Predecessors = ""visual"" },
+    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = ""build"", Predecessors = ""wire"" },
+    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60 },
+    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = ""front,api"" },
+    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = ""qa,content"", Color = ""#dc2626"" },
 ];";
-        public const string Veto = @"<GanttControl Tasks=""@_guarded"" TasksChanged=""t => _guarded = t"" TaskChanging=""Guard"" Height=""380px"" />
+        public const string Veto = @"<GanttControl Tasks=""@_guarded"" TasksChanged=""t => _guarded = t"" TaskChanging=""Guard"" View=""GanttView.Month"" Height=""380px"" />
 <p class=""result"">@_decision</p>";
         public const string VetoCs = @"private IReadOnlyList<GanttTask> _guarded = Plan();
 
@@ -214,15 +227,15 @@ private void Guard(GanttTaskChangingArgs args)
 
 private static GanttTask[] Plan() =>
 [
-    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 90, Color = ""#0f766e"" },
-    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 6), Progress = 100, ParentId = ""design"" },
-    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 6), End = new(2026, 11, 13), Progress = 80, ParentId = ""design"", Predecessors = ""wire"" },
-    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 13), End = new(2026, 12, 4), Progress = 35, Color = ""#0f766e"" },
-    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 40, ParentId = ""build"", Predecessors = ""visual"" },
-    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 13), End = new(2026, 12, 4), Progress = 30, ParentId = ""build"", Predecessors = ""wire"" },
-    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 27), Progress = 60 },
-    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 4), End = new(2026, 12, 11), Predecessors = ""front,api"" },
-    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 11), End = new(2026, 12, 12), Predecessors = ""qa,content"", Color = ""#dc2626"" },
+    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = ""#0f766e"" },
+    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = ""design"" },
+    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = ""design"", Predecessors = ""wire"" },
+    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = ""#0f766e"" },
+    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = ""build"", Predecessors = ""visual"" },
+    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = ""build"", Predecessors = ""wire"" },
+    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60 },
+    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = ""front,api"" },
+    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = ""qa,content"", Color = ""#dc2626"" },
 ];";
     }
 

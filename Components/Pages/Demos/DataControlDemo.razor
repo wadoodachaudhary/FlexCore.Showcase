@@ -12,7 +12,13 @@
    filter and a sort applied to the frame and every view following. Facts checked against Data/DataControl.cs: DataFrame, ConvertDtypes
    and InferDtypes (bool, int, long, decimal, DateTime, in that order, only when every value parses), Filter/Sort (DataView
    expressions), Query, SortBy, GroupBy, Find, ToGridRows/ToExpandoRows, ToChartSeries/ToChartBars, ToReportColumns/ToReportDefinition,
-   ToCsv/ToJson/SaveAs. *@
+   ToCsv/ToJson/SaveAs.
+   2026-10-23 (developer meeting, point 5: chart labels too small): the SVG bar chart draws on a fixed 600x300 viewBox and scales to
+   min(tile width / 600, Height / 300), so the chart tile was widened to half the row (.views 1fr/1fr, about 465 px at 1280) and Height
+   set to the width-bound 232px. ShowValues and ValueFormat were dropped: only the legacy Bars mode and the gauges read them, the SVG
+   renderer never did, so they drew nothing. YAxis gets Max 4000 with five ticks so the axis reads 0, 1000 ... 4000 instead of
+   multiples of 858 (GetNiceRange takes 1.1 x the data maximum and GetTicks divides evenly); the fixed Max keeps the scale the same
+   under every filter. *@
 
 <PageTitle>Data control — FlexCore Showcase</PageTitle>
 
@@ -58,7 +64,7 @@
                             }
                         </GridColumnsBase>
                     </GridControl>
-                    <ChartControl Type="ChartType.Bar" Title="Amount by order" Series="@_series" ShowValues="true" ValueFormat="C0" Height="260px" />
+                    <ChartControl Type="ChartType.Bar" Title="Amount by order" Series="@_series" YAxis="_amountAxis" Height="232px" />
                 </div>
                 <pre class="csv">@_csv</pre>
                 <p class="result @(_error is null ? null : "bad")">@Status</p>
@@ -109,6 +115,7 @@
     private string? _error;
     private List<ExpandoObject> _rows = [];
     private List<ChartSeries> _series = [];
+    private readonly ChartAxis _amountAxis = new() { Max = 4000, TickCount = 5 };   // 0, 1000 ... 4000 whatever the filter leaves in view
     private string _csv = "";
 
     private string Status => _error is not null
@@ -212,7 +219,7 @@
             }
         </GridColumnsBase>
     </GridControl>
-    <ChartControl Type=""ChartType.Bar"" Title=""Amount by order"" Series=""@_series"" ShowValues=""true"" ValueFormat=""C0"" Height=""260px"" />
+    <ChartControl Type=""ChartType.Bar"" Title=""Amount by order"" Series=""@_series"" YAxis=""_amountAxis"" Height=""232px"" />
 </div>
 <pre class=""csv"">@_csv</pre>
 <p class=""result @(_error is null ? null : ""bad"")"">@Status</p>";
@@ -240,6 +247,8 @@ private string? _error;
 private List<ExpandoObject> _rows = [];
 
 private List<ChartSeries> _series = [];
+
+private readonly ChartAxis _amountAxis = new() { Max = 4000, TickCount = 5 };   // 0, 1000 ... 4000 whatever the filter leaves in view
 
 private string _csv = """";
 
