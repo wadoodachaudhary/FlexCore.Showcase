@@ -4,6 +4,7 @@
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Data
+@using FlexCore.Showcase.Services
 @using FlexCore.Showcase.Components.Shared
 @inject FlexCore.Showcase.Services.BenchDataStore BenchData
 
@@ -17,13 +18,20 @@
    raise RowSelecting/RowSelected, SelectFirstVisibleRowAsync, the public Select*/Clear* methods and NotifySelectionChangedAsync),
    GridControl.KeyboardSelection.cs, GridControlEvents.cs, SelectionSettings.cs and GridModels.cs; rows checked with
    scratchpad/vocabcheck.py. Members the grid declares but never raises or reads (RowDeselecting, RowDeselected, EnableToggle,
-   PersistSelection) are listed as such; the library note is in SC-253. *@
+   PersistSelection) are listed as such; the library note is in SC-253.
+   2026-10-23 (developer meeting, point 2; SC-338, SC-115): the inventory scenario from Four scenarios is the second example, rebuilt on
+   the grid's own detail rows: DetailTemplate with a second GridControl inside, ExpandMode.Single, RowExpand/RowCollapse, and
+   CollapseRow when a filter hides the open product. The old page drew the detail as an HTML table. Model types renamed from
+   AgInventoryProductRow/AgWarehouseStockDetail to InventoryProduct/WarehouseStock (the Ag prefix was the competitor's name, SC-048);
+   the categories on the buttons come from the data (the old page offered Networking, Displays and Peripherals, which no product has).
+   Detail-row vocabulary from GridControl.AdvancedFeatures.cs and the expand column / detail row markup in GridControl.razor and
+   GridControl.razor.cs; checked with scratchpad/vocabcheck.py. *@
 
 <PageTitle>Master-detail — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Master-detail" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Two grids, one selection: pick a row in the first and the second shows what belongs to it."
-                   SourcePath="Grid/GridControl.razor.cs;Grid/GridControlEvents.cs;Grid/SelectionSettings.cs;Grid/GridModels.cs">
+                   Tagline="Pick a row and see what belongs to it: in a second grid, or in a detail row that opens under it."
+                   SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.AdvancedFeatures.cs;Grid/GridControlEvents.cs;Grid/SelectionSettings.cs;Grid/GridModels.cs">
     <Overview>
         <p>
             A master-detail screen is two ordinary grids and one event. The master grid raises <code>RowSelected</code> (a
@@ -33,6 +41,11 @@
             <code>AutoSelectFirstRow</code> selects the first row as soon as the grid has rows and raises <code>RowSelected</code> for it, so
             the detail fills on arrival. <code>RowSelecting</code> can refuse a move while the detail has unsaved edits; the
             <a href="demo/grid/unsaved-row-lock">Unsaved-row lock</a> page shows that.
+        </p>
+        <p>
+            When the detail is short, one grid will do. A <code>DetailTemplate</code> renders under the row that owns it, behind an arrow
+            column the grid adds on the left; the grid keeps track of which rows are open and tells the page through <code>RowExpand</code>
+            and <code>RowCollapse</code>. Anything can go in the template. The second example puts a second <code>GridControl</code> there.
         </p>
     </Overview>
 
@@ -76,6 +89,65 @@
                 <p class="result">@_members.Count members of @(_selectedGroup?.Description ?? "no group"), @_members.Count(u => !u.Active) inactive.</p>
             </Demo>
         </DemoExample>
+
+        <DemoExample Id="warehouses" Title="Products and their warehouse stock" RazorCode="@Code.Warehouses" CSharpCode="@Code.WarehousesCs" CssCode="@Code.WarehousesCss">
+            <Description><p>Fifteen products in one grid. The arrow at the left of a row opens a second grid under it with that product's stock per warehouse; <code>ExpandMode.Single</code> keeps one open at a time. Receive the next shipment or reserve stock inside the detail and the product row above recalculates on hand, available and valuation. The category buttons filter the products; when the filter hides the open product the page closes it with <code>CollapseRow</code>.</p></Description>
+            <Controls>
+                <ButtonGroupControl Items="CategoryItems" Values="@(new[] { _category })" ValuesChanged="Filter" Selection="ChoiceSelectionMode.Single" AriaLabel="Category" />
+            </Controls>
+            <Demo>
+                <GridControl @ref="_grid"
+                             TValue="InventoryProduct"
+                             DataSource="@Shown"
+                             Height="400px"
+                             AllowSorting="true"
+                             ShowRowCountInFooter="true"
+                             ExpandMode="GridExpandMode.Single"
+                             RowExpand="Opened"
+                             RowCollapse="Closed">
+                    <ChildContent>
+                        <GridColumnsBase>
+                            <GridColumn Field="@nameof(InventoryProduct.SKU)" HeaderText="SKU" Width="100px" />
+                            <GridColumn Field="@nameof(InventoryProduct.ProductName)" HeaderText="Product" Width="220px" />
+                            <GridColumn Field="@nameof(InventoryProduct.Category)" HeaderText="Category" Width="120px" />
+                            <GridColumn Field="@nameof(InventoryProduct.TotalOnHand)" HeaderText="On hand" Width="90px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
+                            <GridColumn Field="@nameof(InventoryProduct.TotalReserved)" HeaderText="Reserved" Width="90px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
+                            <GridColumn Field="@nameof(InventoryProduct.AvailableStock)" HeaderText="Available" Width="90px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                                <Template>
+                                    @{ var p = (InventoryProduct)context; }
+                                    <span class="@(p.AvailableStock <= 0 ? "out" : p.AvailableStock <= p.ReorderPoint ? "low" : "")">@p.AvailableStock.ToString("#,##0")</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(InventoryProduct.ReorderPoint)" HeaderText="Reorder at" Width="90px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
+                            <GridColumn Field="@nameof(InventoryProduct.InventoryValuation)" HeaderText="Valuation" Width="110px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="C0" />
+                        </GridColumnsBase>
+                    </ChildContent>
+                    <DetailTemplate Context="product">
+                        <div class="detail">
+                            <div class="detail-bar">
+                                <span>@product.WarehouseDetails.Count warehouses hold @product.TotalOnHand.ToString("#,##0") on hand, @product.TotalReserved.ToString("#,##0") reserved, @product.WarehouseDetails.Sum(w => w.IncomingShipmentQty).ToString("#,##0") incoming.</span>
+                                <ButtonControl CssClass="btn-sm" OnClick="() => Receive(product)">Receive next shipment</ButtonControl>
+                                <ButtonControl CssClass="btn-sm" OnClick="() => Reserve(product)">Reserve 10</ButtonControl>
+                            </div>
+                            <GridControl TValue="WarehouseStock" DataSource="@product.WarehouseDetails" AllowSorting="true">
+                                <GridColumnsBase>
+                                    <GridColumn Field="@nameof(WarehouseStock.WarehouseCode)" HeaderText="Code" Width="80px" />
+                                    <GridColumn Field="@nameof(WarehouseStock.WarehouseName)" HeaderText="Warehouse" Width="160px" />
+                                    <GridColumn Field="@nameof(WarehouseStock.LocationBin)" HeaderText="Bin" Width="120px" />
+                                    <GridColumn Field="@nameof(WarehouseStock.QuantityOnHand)" HeaderText="On hand" Width="85px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
+                                    <GridColumn Field="@nameof(WarehouseStock.ReservedQuantity)" HeaderText="Reserved" Width="85px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
+                                    <GridColumn Field="@nameof(WarehouseStock.AvailableQuantity)" HeaderText="Available" Width="85px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
+                                    <GridColumn Field="@nameof(WarehouseStock.IncomingShipmentQty)" HeaderText="Incoming" Width="85px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
+                                    <GridColumn Field="@nameof(WarehouseStock.NextDeliveryDate)" HeaderText="Next delivery" Width="105px" Type="ColumnType.Date" Format="yyyy-MM-dd" />
+                                    <GridColumn Field="@nameof(WarehouseStock.BatchLotNumber)" HeaderText="Lot" Width="120px" />
+                                </GridColumnsBase>
+                            </GridControl>
+                        </div>
+                    </DetailTemplate>
+                </GridControl>
+                <p class="result">@Shown.Count products worth @Shown.Sum(p => p.InventoryValuation).ToString("C0") on hand@(_open is null ? "; no detail open." : $"; {_open.SKU} open.")</p>
+            </Demo>
+        </DemoExample>
     </Examples>
 
     <Vocabulary>
@@ -84,11 +156,15 @@
         <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, selection" Rows="Vocab.Events" />
         <ApiTable Kind="ApiKind.Properties" Title="RowSelectEventArgs&lt;TValue&gt;" Rows="Vocab.Args" />
         <ApiTable Kind="ApiKind.Methods" Title="Selection methods" Rows="Vocab.Methods" />
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl detail-row parameters" Rows="Vocab.Detail" />
+        <ApiTable Kind="ApiKind.Events" Title="Detail-row events" Rows="Vocab.DetailEvents" />
+        <ApiTable Kind="ApiKind.Methods" Title="Detail-row methods" Rows="Vocab.DetailMethods" />
         <p>
             <code>GridControlEvents</code> also carries the sorting, filtering, paging, editing, grouping, resizing, reordering and cell
             events; those belong with the pages that use them. The methods above change the selection without raising
             <code>RowSelecting</code> or <code>RowSelected</code>; they raise <code>SelectionChanged</code> with the source
-            <code>Programmatic</code>.
+            <code>Programmatic</code>. A detail template turns off the grid's row windowing, so the grid renders every row of the current
+            page; keep a master list to pages or a few hundred rows.
         </p>
     </Vocabulary>
 
@@ -97,6 +173,7 @@
             <li><a href="demo/grid">Grid overview</a>: the core flags on a small list.</li>
             <li><a href="demo/grid/unsaved-row-lock">Unsaved-row lock</a>: <code>RowSelecting</code> refusing a move while a row has unsaved edits.</li>
             <li><a href="demo/grid/grouping">Grouping &amp; totals</a>: one grid with nested groups instead of two grids.</li>
+            <li><a href="demo/grid/tree-grid">Tree grid</a>: parent and child rows of the same type in one grid.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
@@ -122,6 +199,47 @@
     {
         _selectedGroup = group;
         _members = group is null ? [] : _users.Where(u => u.GroupID == group.GroupID).ToList();
+    }
+
+    private GridControl<InventoryProduct>? _grid;
+    private readonly List<InventoryProduct> _products = BenchDataStore.GetInventoryProducts();
+    private List<InventoryProduct>? _shown;
+    private List<InventoryProduct> Shown => _shown ??= _products.ToList();
+    private SelectionItem[]? _categoryItems;
+    private SelectionItem[] CategoryItems => _categoryItems ??= [new("All", "All"), .. _products.Select(p => p.Category).Distinct().Select(c => new SelectionItem(c, c))];
+    private string _category = "All";
+    private InventoryProduct? _open;
+
+    private async Task Filter(IReadOnlyList<string> values)
+    {
+        if (values.Count == 0) return;
+        _category = values[0];
+        _shown = _category == "All" ? _products.ToList() : _products.Where(p => p.Category == _category).ToList();
+        if (_open is not null && !_shown.Contains(_open) && _grid is not null) await _grid.CollapseRow(_open);
+    }
+
+    private void Opened(InventoryProduct product) => _open = product;
+
+    private void Closed(InventoryProduct product)
+    {
+        if (ReferenceEquals(_open, product)) _open = null;
+    }
+
+    private static void Receive(InventoryProduct product)
+    {
+        var stock = product.WarehouseDetails.MaxBy(w => w.IncomingShipmentQty);
+        if (stock is null || stock.IncomingShipmentQty == 0) return;
+        stock.QuantityOnHand += stock.IncomingShipmentQty;
+        product.TotalOnHand += stock.IncomingShipmentQty;
+        stock.IncomingShipmentQty = 0;
+    }
+
+    private static void Reserve(InventoryProduct product)
+    {
+        var stock = product.WarehouseDetails.FirstOrDefault(w => w.AvailableQuantity >= 10);
+        if (stock is null) return;
+        stock.ReservedQuantity += 10;
+        product.TotalReserved += 10;
     }
 
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
@@ -205,6 +323,142 @@ public sealed class UserListItem
     public bool Active { get; set; } = true;
     public int GroupID { get; set; }
 }";
+        public const string WarehousesCss = @".detail { display: grid; gap: 6px; padding: 2px 4px 4px; }
+/* A GridControl with no Height sizes its scroll area with flex-basis 0, which inside a table cell collapses to the
+   scrollbar; this lets the nested grid grow to its rows instead. */
+.detail ::deep .fx-grid-content { flex: 0 0 auto; }
+.detail-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: #334155; }
+.detail-bar span { margin-right: auto; }
+.low { color: #b45309; font-weight: 600; }
+.out { color: #b91c1c; font-weight: 600; }";
+        public const string Warehouses = @"<ButtonGroupControl Items=""CategoryItems"" Values=""@(new[] { _category })"" ValuesChanged=""Filter"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Category"" />
+
+<GridControl @ref=""_grid""
+             TValue=""InventoryProduct""
+             DataSource=""@Shown""
+             Height=""400px""
+             AllowSorting=""true""
+             ShowRowCountInFooter=""true""
+             ExpandMode=""GridExpandMode.Single""
+             RowExpand=""Opened""
+             RowCollapse=""Closed"">
+    <ChildContent>
+        <GridColumnsBase>
+            <GridColumn Field=""@nameof(InventoryProduct.SKU)"" HeaderText=""SKU"" Width=""100px"" />
+            <GridColumn Field=""@nameof(InventoryProduct.ProductName)"" HeaderText=""Product"" Width=""220px"" />
+            <GridColumn Field=""@nameof(InventoryProduct.Category)"" HeaderText=""Category"" Width=""120px"" />
+            <GridColumn Field=""@nameof(InventoryProduct.TotalOnHand)"" HeaderText=""On hand"" Width=""90px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0"" />
+            <GridColumn Field=""@nameof(InventoryProduct.TotalReserved)"" HeaderText=""Reserved"" Width=""90px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0"" />
+            <GridColumn Field=""@nameof(InventoryProduct.AvailableStock)"" HeaderText=""Available"" Width=""90px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
+                <Template>
+                    @{ var p = (InventoryProduct)context; }
+                    <span class=""@(p.AvailableStock <= 0 ? ""out"" : p.AvailableStock <= p.ReorderPoint ? ""low"" : """")"">@p.AvailableStock.ToString(""#,##0"")</span>
+                </Template>
+            </GridColumn>
+            <GridColumn Field=""@nameof(InventoryProduct.ReorderPoint)"" HeaderText=""Reorder at"" Width=""90px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0"" />
+            <GridColumn Field=""@nameof(InventoryProduct.InventoryValuation)"" HeaderText=""Valuation"" Width=""110px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""C0"" />
+        </GridColumnsBase>
+    </ChildContent>
+    <DetailTemplate Context=""product"">
+        <div class=""detail"">
+            <div class=""detail-bar"">
+                <span>@product.WarehouseDetails.Count warehouses hold @product.TotalOnHand.ToString(""#,##0"") on hand, @product.TotalReserved.ToString(""#,##0"") reserved, @product.WarehouseDetails.Sum(w => w.IncomingShipmentQty).ToString(""#,##0"") incoming.</span>
+                <ButtonControl CssClass=""btn-sm"" OnClick=""() => Receive(product)"">Receive next shipment</ButtonControl>
+                <ButtonControl CssClass=""btn-sm"" OnClick=""() => Reserve(product)"">Reserve 10</ButtonControl>
+            </div>
+            <GridControl TValue=""WarehouseStock"" DataSource=""@product.WarehouseDetails"" AllowSorting=""true"">
+                <GridColumnsBase>
+                    <GridColumn Field=""@nameof(WarehouseStock.WarehouseCode)"" HeaderText=""Code"" Width=""80px"" />
+                    <GridColumn Field=""@nameof(WarehouseStock.WarehouseName)"" HeaderText=""Warehouse"" Width=""160px"" />
+                    <GridColumn Field=""@nameof(WarehouseStock.LocationBin)"" HeaderText=""Bin"" Width=""120px"" />
+                    <GridColumn Field=""@nameof(WarehouseStock.QuantityOnHand)"" HeaderText=""On hand"" Width=""85px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0"" />
+                    <GridColumn Field=""@nameof(WarehouseStock.ReservedQuantity)"" HeaderText=""Reserved"" Width=""85px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0"" />
+                    <GridColumn Field=""@nameof(WarehouseStock.AvailableQuantity)"" HeaderText=""Available"" Width=""85px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0"" />
+                    <GridColumn Field=""@nameof(WarehouseStock.IncomingShipmentQty)"" HeaderText=""Incoming"" Width=""85px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0"" />
+                    <GridColumn Field=""@nameof(WarehouseStock.NextDeliveryDate)"" HeaderText=""Next delivery"" Width=""105px"" Type=""ColumnType.Date"" Format=""yyyy-MM-dd"" />
+                    <GridColumn Field=""@nameof(WarehouseStock.BatchLotNumber)"" HeaderText=""Lot"" Width=""120px"" />
+                </GridColumnsBase>
+            </GridControl>
+        </div>
+    </DetailTemplate>
+</GridControl>
+<p class=""result"">@Shown.Count products worth @Shown.Sum(p => p.InventoryValuation).ToString(""C0"") on hand@(_open is null ? ""; no detail open."" : $""; {_open.SKU} open."")</p>";
+        public const string WarehousesCs = @"private GridControl<InventoryProduct>? _grid;
+
+private readonly List<InventoryProduct> _products = BenchDataStore.GetInventoryProducts();
+
+private List<InventoryProduct>? _shown;
+
+private List<InventoryProduct> Shown => _shown ??= _products.ToList();
+
+private SelectionItem[]? _categoryItems;
+
+private SelectionItem[] CategoryItems => _categoryItems ??= [new(""All"", ""All""), .. _products.Select(p => p.Category).Distinct().Select(c => new SelectionItem(c, c))];
+
+private string _category = ""All"";
+
+private InventoryProduct? _open;
+
+private async Task Filter(IReadOnlyList<string> values)
+{
+    if (values.Count == 0) return;
+    _category = values[0];
+    _shown = _category == ""All"" ? _products.ToList() : _products.Where(p => p.Category == _category).ToList();
+    if (_open is not null && !_shown.Contains(_open) && _grid is not null) await _grid.CollapseRow(_open);
+}
+
+private void Opened(InventoryProduct product) => _open = product;
+
+private void Closed(InventoryProduct product)
+{
+    if (ReferenceEquals(_open, product)) _open = null;
+}
+
+private static void Receive(InventoryProduct product)
+{
+    var stock = product.WarehouseDetails.MaxBy(w => w.IncomingShipmentQty);
+    if (stock is null || stock.IncomingShipmentQty == 0) return;
+    stock.QuantityOnHand += stock.IncomingShipmentQty;
+    product.TotalOnHand += stock.IncomingShipmentQty;
+    stock.IncomingShipmentQty = 0;
+}
+
+private static void Reserve(InventoryProduct product)
+{
+    var stock = product.WarehouseDetails.FirstOrDefault(w => w.AvailableQuantity >= 10);
+    if (stock is null) return;
+    stock.ReservedQuantity += 10;
+    product.TotalReserved += 10;
+}
+
+// Data/ScenarioModels.cs
+public sealed class InventoryProduct
+{
+    public string SKU { get; set; } = """";
+    public string ProductName { get; set; } = """";
+    public string Category { get; set; } = """";
+    public int TotalOnHand { get; set; }
+    public int TotalReserved { get; set; }
+    public int AvailableStock => TotalOnHand - TotalReserved;
+    public int ReorderPoint { get; set; }
+    public decimal UnitCost { get; set; }
+    public decimal InventoryValuation => TotalOnHand * UnitCost;
+    public string StockStatus => AvailableStock <= 0 ? ""Out of Stock"" : AvailableStock <= ReorderPoint ? ""Low Stock"" : ""In Stock"";
+    public List<WarehouseStock> WarehouseDetails { get; set; } = new();
+
+// Data/ScenarioModels.cs
+public sealed class WarehouseStock
+{
+    public string WarehouseCode { get; set; } = """";
+    public string WarehouseName { get; set; } = """";
+    public string LocationBin { get; set; } = """";
+    public int QuantityOnHand { get; set; }
+    public int ReservedQuantity { get; set; }
+    public int AvailableQuantity => QuantityOnHand - ReservedQuantity;
+    public int IncomingShipmentQty { get; set; }
+    public DateTime NextDeliveryDate { get; set; }
+    public string BatchLotNumber { get; set; } = """";
+}";
     }
 
     private static class Vocab
@@ -252,6 +506,27 @@ public sealed class UserListItem
             new("SelectAndRevealRowAsync(TValue item, bool clearExistingSelection = false)", "Selects the row and scrolls it into view when it is off-screen, in one paint.", "Task"),
             new("ClearSelection()", "Clears rows and cells.", "void"),
             new("ClearSelectionAsync()", "<code>ClearSelection</code> as a task.", "Task"),
+        };
+        public static readonly ApiRow[] Detail =
+        {
+            new("DetailTemplate", "Content for a full-width row under a data row while that row is open; <code>context</code> is the row. With a template set the grid renders every row of the current page rather than a scrolling window, and a flat <code>ItemsProvider</code> throws at start-up.", "RenderFragment&lt;TValue&gt;?", "null"),
+            new("ExpandMode", "<code>Multiple</code> keeps any number of rows open. <code>Single</code> closes the open row when another opens, without raising <code>RowCollapse</code> for it.", "GridExpandMode", "GridExpandMode.Multiple"),
+            new("ShowExpandColumn", "The 36 px arrow column at the left of every row. False leaves opening and closing to the methods.", "bool", "true"),
+            new("ShowExpandAll", "An arrow in the header of that column that opens or closes every row of the page; shown only with <code>Multiple</code>.", "bool", "false"),
+        };
+        public static readonly ApiRow[] DetailEvents =
+        {
+            new("RowExpand", "After a row opens by its arrow, <code>ExpandRow</code> or <code>ToggleRowExpand</code>. Not raised by <code>ExpandAll</code> or the header arrow.", "TValue"),
+            new("RowCollapse", "After a row closes by its arrow, <code>CollapseRow</code> or <code>ToggleRowExpand</code>. Not raised by <code>CollapseAll</code>, the header arrow, or <code>Single</code> mode replacing the open row.", "TValue"),
+        };
+        public static readonly ApiRow[] DetailMethods =
+        {
+            new("ExpandRow(TValue item)", "Opens the row; in <code>Single</code> mode the open row closes first.", "Task"),
+            new("CollapseRow(TValue item)", "Closes the row.", "Task"),
+            new("ToggleRowExpand(TValue item)", "One or the other, by the row's state.", "Task"),
+            new("ExpandAll() / CollapseAll() / ToggleExpandAll()", "Every row of the current page, without the row events.", "void"),
+            new("IsRowExpanded(TValue item)", "Whether the row is open.", "bool"),
+            new("AllRowsExpanded", "Property: every row of the current page is open.", "bool"),
         };
     }
 }

@@ -469,7 +469,7 @@
                 </div>
 
                 <GridControl @ref="_inventoryGrid"
-                             TValue="AgInventoryProductRow"
+                             TValue="InventoryProduct"
                              DataSource="@_displayedInventoryProducts"
                              AllowSorting="true"
                              AllowSelection="true"
@@ -483,7 +483,7 @@
                         <GridColumn HeaderText="Inspect" Width="80px" TextAlign="TextAlign.Center">
                             <Template>
                                 @{
-                                    var prod = (AgInventoryProductRow)context;
+                                    var prod = (InventoryProduct)context;
                                     var isSel = _selectedInventoryProduct?.SKU == prod.SKU;
                                 }
                                 <button type="button"
@@ -494,34 +494,34 @@
                                 </button>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(AgInventoryProductRow.SKU)" HeaderText="SKU" Width="110px">
+                        <GridColumn Field="@nameof(InventoryProduct.SKU)" HeaderText="SKU" Width="110px">
                             <Template>
                                 @{
-                                    var prod = (AgInventoryProductRow)context;
+                                    var prod = (InventoryProduct)context;
                                 }
                                 <span style="font-family: monospace; font-weight: 700; color: #0284c7;">@prod.SKU</span>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(AgInventoryProductRow.ProductName)" HeaderText="Product Name" Width="230px" />
-                        <GridColumn Field="@nameof(AgInventoryProductRow.Category)" HeaderText="Category" Width="130px" />
-                        <GridColumn Field="@nameof(AgInventoryProductRow.AvailableStock)" HeaderText="Available Stock" Width="115px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                        <GridColumn Field="@nameof(InventoryProduct.ProductName)" HeaderText="Product Name" Width="230px" />
+                        <GridColumn Field="@nameof(InventoryProduct.Category)" HeaderText="Category" Width="130px" />
+                        <GridColumn Field="@nameof(InventoryProduct.AvailableStock)" HeaderText="Available Stock" Width="115px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
                             <Template>
                                 @{
-                                    var prod = (AgInventoryProductRow)context;
+                                    var prod = (InventoryProduct)context;
                                     var color = prod.AvailableStock <= 0 ? "#dc2626" : prod.AvailableStock <= prod.ReorderPoint ? "#d97706" : "#059669";
                                 }
                                 <strong style="color: @color;">@prod.AvailableStock.ToString("N0")</strong>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(AgInventoryProductRow.TotalOnHand)" HeaderText="On Hand" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
-                        <GridColumn Field="@nameof(AgInventoryProductRow.TotalReserved)" HeaderText="Reserved" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
-                        <GridColumn Field="@nameof(AgInventoryProductRow.ReorderPoint)" HeaderText="Reorder Lvl" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
-                        <GridColumn Field="@nameof(AgInventoryProductRow.UnitCost)" HeaderText="Unit Cost" Width="100px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
-                        <GridColumn Field="@nameof(AgInventoryProductRow.InventoryValuation)" HeaderText="Valuation" Width="120px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
-                        <GridColumn Field="@nameof(AgInventoryProductRow.StockStatus)" HeaderText="Status" Width="115px" TextAlign="TextAlign.Center">
+                        <GridColumn Field="@nameof(InventoryProduct.TotalOnHand)" HeaderText="On Hand" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
+                        <GridColumn Field="@nameof(InventoryProduct.TotalReserved)" HeaderText="Reserved" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
+                        <GridColumn Field="@nameof(InventoryProduct.ReorderPoint)" HeaderText="Reorder Lvl" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
+                        <GridColumn Field="@nameof(InventoryProduct.UnitCost)" HeaderText="Unit Cost" Width="100px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
+                        <GridColumn Field="@nameof(InventoryProduct.InventoryValuation)" HeaderText="Valuation" Width="120px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
+                        <GridColumn Field="@nameof(InventoryProduct.StockStatus)" HeaderText="Status" Width="115px" TextAlign="TextAlign.Center">
                             <Template>
                                 @{
-                                    var prod = (AgInventoryProductRow)context;
+                                    var prod = (InventoryProduct)context;
                                     var badge = prod.StockStatus switch
                                     {
                                         "In Stock" => "bg-success text-white",
@@ -690,11 +690,11 @@
     private int _hrGenerationKey = 1;
 
     // Inventory Demo State
-    private GridControl<AgInventoryProductRow>? _inventoryGrid;
-    private readonly GridControlEvents<AgInventoryProductRow> _inventoryEvents = new();
-    private List<AgInventoryProductRow> _inventoryProducts = new();
-    private List<AgInventoryProductRow> _displayedInventoryProducts = new();
-    private AgInventoryProductRow? _selectedInventoryProduct;
+    private GridControl<InventoryProduct>? _inventoryGrid;
+    private readonly GridControlEvents<InventoryProduct> _inventoryEvents = new();
+    private List<InventoryProduct> _inventoryProducts = new();
+    private List<InventoryProduct> _displayedInventoryProducts = new();
+    private InventoryProduct? _selectedInventoryProduct;
     private string _inventoryCategoryFilter = "All";
 
     protected override void OnInitialized()
@@ -715,7 +715,7 @@
         _selectedInventoryProduct = _displayedInventoryProducts.FirstOrDefault();
 
         // Bind inventory selection event
-        _inventoryEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<AgInventoryProductRow>>(this, args =>
+        _inventoryEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<InventoryProduct>>(this, args =>
         {
             if (args.Data != null)
             {
@@ -932,7 +932,7 @@
         }
     }
 
-    private void SelectInventoryProduct(AgInventoryProductRow product)
+    private void SelectInventoryProduct(InventoryProduct product)
     {
         _selectedInventoryProduct = product;
     }
@@ -1098,7 +1098,7 @@ public sealed class AgHrEmployeeRow
     public bool IsManager => SubordinatesCount > 0;
 }
 
-public sealed class AgInventoryProductRow
+public sealed class InventoryProduct
 {
     public string SKU { get; set; } = """";
     public string ProductName { get; set; } = """";
@@ -1110,6 +1110,6 @@ public sealed class AgInventoryProductRow
     public decimal UnitCost { get; set; }
     public decimal InventoryValuation => TotalOnHand * UnitCost;
     public string StockStatus => AvailableStock <= 0 ? ""Out of Stock"" : AvailableStock <= ReorderPoint ? ""Low Stock"" : ""In Stock"";
-    public List<AgWarehouseStockDetail> WarehouseDetails { get; set; } = new();
+    public List<WarehouseStock> WarehouseDetails { get; set; } = new();
 }";
 }

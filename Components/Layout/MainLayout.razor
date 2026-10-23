@@ -150,8 +150,8 @@
     // Nav data lives in Components/Shared/SiteNav.cs (shared with the footer, drawer and overview pages).
     private static NavGroup[] _groups => SiteNav.Groups;
 
-    /// <summary>One group is active at a time: the first in menu order whose links include the page. Four scenarios is linked from
-    /// Data Grid and from Performance, and both were underlined (Baaria, 2026-10-20).</summary>
+    /// <summary>One group is active at a time: the first in menu order whose links include the page. 100k rows is linked from
+    /// Data Grid and from Performance, and both used to be underlined (Baaria, 2026-10-20, then about Four scenarios).</summary>
     private bool IsActive(NavGroup g) => ReferenceEquals(g, ActiveGroup);
     private NavGroup? ActiveGroup
     {

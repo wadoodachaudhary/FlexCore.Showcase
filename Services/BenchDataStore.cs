@@ -315,46 +315,7 @@ public sealed class BenchDataStore
     // ── AG GRID SHOWCASE DATA GENERATORS ──────────────────────────────────
     // ══════════════════════════════════════════════════════════════════════
 
-    public static List<AgPerformanceRow> GeneratePerformanceRows(int count)
-    {
-        var list = new List<AgPerformanceRow>(count);
-        var projects = new[] { "Skyline Tower Phase II", "Metropolitan Transit Hub", "Apex Data Center", "Harborview Condominiums", "Summit Medical Facility", "Riverfront Esplanade" };
-        var tasks = new[] { "Structural Steel Erection", "HVAC Ductwork & Chiller Install", "Foundation Pour & Post-Tension", "Underground Utility Tie-Ins", "Curtain Wall Glazing", "Drywall & Fire-Rating", "Final Inspection & Commissioning", "Electrical Substation Wiring" };
-        var assignees = new[] { "Marcus Vance", "Elena Rostova", "Devon Chen", "Sarah Jenkins", "Liam O'Connor", "Priya Patel", "Gabriel Santos", "Chloe Dubois" };
-        var priorities = new[] { "Critical", "High", "Medium", "Low" };
-        var statuses = new[] { "In Progress", "Completed", "On Hold", "Review Needed", "Approved" };
-        var riskLevels = new[] { "Low", "Moderate", "High", "Critical" };
-        var baseDate = new DateTime(2026, 1, 15);
-        var rand = new Random(42);
-
-        for (int i = 1; i <= count; i++)
-        {
-            var budget = 10000m + (decimal)(rand.Next(50, 850) * 100);
-            var varianceRatio = (decimal)(rand.NextDouble() * 0.4 - 0.2); // -20% to +20%
-            var actual = Math.Round(budget * (1m + varianceRatio), 2);
-            var duration = rand.Next(14, 180);
-            var start = baseDate.AddDays(rand.Next(0, 90));
-
-            list.Add(new AgPerformanceRow
-            {
-                Id = i,
-                Project = projects[rand.Next(projects.Length)],
-                Task = $"{tasks[rand.Next(tasks.Length)]} #{i:D4}",
-                Assignee = assignees[rand.Next(assignees.Length)],
-                Priority = priorities[rand.Next(priorities.Length)],
-                Status = statuses[rand.Next(statuses.Length)],
-                Progress = rand.Next(5, 101),
-                StartDate = start,
-                DueDate = start.AddDays(duration),
-                Budget = budget,
-                ActualCost = actual,
-                RiskLevel = riskLevels[rand.Next(riskLevels.Length)]
-            });
-        }
-        return list;
-    }
-
-    public static List<AgFinanceTickerRow> GetFinanceTickers()
+    public static List<TickerRow> GetFinanceTickers()
     {
         var rand = new Random(101);
         var assets = new (string Ticker, string Name, string Instrument, decimal Price, int Qty)[]
@@ -383,7 +344,7 @@ public sealed class BenchDataStore
             ("NFLX", "Netflix Inc.", "Stock", 685.40m, 60)
         };
 
-        var list = new List<AgFinanceTickerRow>();
+        var list = new List<TickerRow>();
         foreach (var a in assets)
         {
             var timeline = new List<double>(24);
@@ -398,7 +359,7 @@ public sealed class BenchDataStore
             var delta = a.Price - prev;
             var purchase = Math.Round(a.Price * (decimal)(0.85 + rand.NextDouble() * 0.25), 2);
 
-            list.Add(new AgFinanceTickerRow
+            list.Add(new TickerRow
             {
                 Ticker = a.Ticker,
                 Name = a.Name,
@@ -414,46 +375,46 @@ public sealed class BenchDataStore
         return list;
     }
 
-    public static List<AgHrEmployeeRow> GetHrHierarchy()
+    public static List<EmployeeRow> GetHrHierarchy()
     {
         return
         [
             // CEO & Executive
-            new AgHrEmployeeRow { EmployeeID = "EMP-001", ReportsToID = null, FullName = "Arthur Pendelton", JobTitle = "Chief Executive Officer", Department = "Executive", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2014, 3, 1), Salary = 385000m, Rating = 5, AvatarBg = "#0f172a", SubordinatesCount = 4 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-002", ReportsToID = "EMP-001", FullName = "Claire Sterling", JobTitle = "VP of Engineering", Department = "Engineering", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2016, 6, 15), Salary = 265000m, Rating = 5, AvatarBg = "#0284c7", SubordinatesCount = 5 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-003", ReportsToID = "EMP-001", FullName = "Marcus Vance", JobTitle = "VP of Product", Department = "Product", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2017, 2, 10), Salary = 245000m, Rating = 4, AvatarBg = "#7c3aed", SubordinatesCount = 3 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-004", ReportsToID = "EMP-001", FullName = "Helena Zhang", JobTitle = "VP of Sales & Growth", Department = "Sales", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2018, 9, 1), Salary = 250000m, Rating = 5, AvatarBg = "#059669", SubordinatesCount = 3 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-005", ReportsToID = "EMP-001", FullName = "Devon Montgomery", JobTitle = "VP of People & Culture", Department = "Human Resources", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 1, 20), Salary = 210000m, Rating = 4, AvatarBg = "#d97706", SubordinatesCount = 2 },
+            new EmployeeRow { EmployeeID = "EMP-001", ReportsToID = null, FullName = "Arthur Pendelton", JobTitle = "Chief Executive Officer", Department = "Executive", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2014, 3, 1), Salary = 385000m, Rating = 5, AvatarBg = "#0f172a", SubordinatesCount = 4 },
+            new EmployeeRow { EmployeeID = "EMP-002", ReportsToID = "EMP-001", FullName = "Claire Sterling", JobTitle = "VP of Engineering", Department = "Engineering", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2016, 6, 15), Salary = 265000m, Rating = 5, AvatarBg = "#0284c7", SubordinatesCount = 5 },
+            new EmployeeRow { EmployeeID = "EMP-003", ReportsToID = "EMP-001", FullName = "Marcus Vance", JobTitle = "VP of Product", Department = "Product", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2017, 2, 10), Salary = 245000m, Rating = 4, AvatarBg = "#7c3aed", SubordinatesCount = 3 },
+            new EmployeeRow { EmployeeID = "EMP-004", ReportsToID = "EMP-001", FullName = "Helena Zhang", JobTitle = "VP of Sales & Growth", Department = "Sales", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2018, 9, 1), Salary = 250000m, Rating = 5, AvatarBg = "#059669", SubordinatesCount = 3 },
+            new EmployeeRow { EmployeeID = "EMP-005", ReportsToID = "EMP-001", FullName = "Devon Montgomery", JobTitle = "VP of People & Culture", Department = "Human Resources", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 1, 20), Salary = 210000m, Rating = 4, AvatarBg = "#d97706", SubordinatesCount = 2 },
 
             // Engineering Directors & Leads
-            new AgHrEmployeeRow { EmployeeID = "EMP-010", ReportsToID = "EMP-002", FullName = "Julian Becker", JobTitle = "Director of Core Infrastructure", Department = "Engineering", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2018, 4, 12), Salary = 205000m, Rating = 5, AvatarBg = "#2563eb", SubordinatesCount = 4 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-011", ReportsToID = "EMP-002", FullName = "Aisha Khan", JobTitle = "Director of Frontend Architecture", Department = "Engineering", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 7, 8), Salary = 198000m, Rating = 5, AvatarBg = "#4f46e5", SubordinatesCount = 3 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-012", ReportsToID = "EMP-002", FullName = "Carlos Mendez", JobTitle = "Lead Data Architect", Department = "Engineering", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 2, 15), Salary = 185000m, Rating = 4, AvatarBg = "#0891b2", SubordinatesCount = 2 },
+            new EmployeeRow { EmployeeID = "EMP-010", ReportsToID = "EMP-002", FullName = "Julian Becker", JobTitle = "Director of Core Infrastructure", Department = "Engineering", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2018, 4, 12), Salary = 205000m, Rating = 5, AvatarBg = "#2563eb", SubordinatesCount = 4 },
+            new EmployeeRow { EmployeeID = "EMP-011", ReportsToID = "EMP-002", FullName = "Aisha Khan", JobTitle = "Director of Frontend Architecture", Department = "Engineering", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 7, 8), Salary = 198000m, Rating = 5, AvatarBg = "#4f46e5", SubordinatesCount = 3 },
+            new EmployeeRow { EmployeeID = "EMP-012", ReportsToID = "EMP-002", FullName = "Carlos Mendez", JobTitle = "Lead Data Architect", Department = "Engineering", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 2, 15), Salary = 185000m, Rating = 4, AvatarBg = "#0891b2", SubordinatesCount = 2 },
 
             // Engineering Staff
-            new AgHrEmployeeRow { EmployeeID = "EMP-020", ReportsToID = "EMP-010", FullName = "Dmitri Volkov", JobTitle = "Principal Distributed Systems Engineer", Department = "Engineering", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 8, 1), Salary = 175000m, Rating = 5, AvatarBg = "#0369a1", SubordinatesCount = 0 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-021", ReportsToID = "EMP-010", FullName = "Seraphina Lin", JobTitle = "Senior Site Reliability Engineer", Department = "Engineering", Office = "Tokyo", EmploymentType = "Full-Time", HireDate = new DateTime(2021, 3, 22), Salary = 158000m, Rating = 4, AvatarBg = "#0284c7", SubordinatesCount = 0 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-022", ReportsToID = "EMP-011", FullName = "Liam Gallagher", JobTitle = "Senior Blazor Specialist", Department = "Engineering", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2021, 5, 14), Salary = 162000m, Rating = 5, AvatarBg = "#6366f1", SubordinatesCount = 0 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-023", ReportsToID = "EMP-011", FullName = "Maya Takahashi", JobTitle = "Design Systems Engineer", Department = "Engineering", Office = "Tokyo", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 1, 10), Salary = 145000m, Rating = 4, AvatarBg = "#8b5cf6", SubordinatesCount = 0 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-024", ReportsToID = "EMP-012", FullName = "Kofi Mensah", JobTitle = "Database Performance Specialist", Department = "Engineering", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 6, 1), Salary = 152000m, Rating = 4, AvatarBg = "#06b6d4", SubordinatesCount = 0 },
+            new EmployeeRow { EmployeeID = "EMP-020", ReportsToID = "EMP-010", FullName = "Dmitri Volkov", JobTitle = "Principal Distributed Systems Engineer", Department = "Engineering", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 8, 1), Salary = 175000m, Rating = 5, AvatarBg = "#0369a1", SubordinatesCount = 0 },
+            new EmployeeRow { EmployeeID = "EMP-021", ReportsToID = "EMP-010", FullName = "Seraphina Lin", JobTitle = "Senior Site Reliability Engineer", Department = "Engineering", Office = "Tokyo", EmploymentType = "Full-Time", HireDate = new DateTime(2021, 3, 22), Salary = 158000m, Rating = 4, AvatarBg = "#0284c7", SubordinatesCount = 0 },
+            new EmployeeRow { EmployeeID = "EMP-022", ReportsToID = "EMP-011", FullName = "Liam Gallagher", JobTitle = "Senior Blazor Specialist", Department = "Engineering", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2021, 5, 14), Salary = 162000m, Rating = 5, AvatarBg = "#6366f1", SubordinatesCount = 0 },
+            new EmployeeRow { EmployeeID = "EMP-023", ReportsToID = "EMP-011", FullName = "Maya Takahashi", JobTitle = "Design Systems Engineer", Department = "Engineering", Office = "Tokyo", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 1, 10), Salary = 145000m, Rating = 4, AvatarBg = "#8b5cf6", SubordinatesCount = 0 },
+            new EmployeeRow { EmployeeID = "EMP-024", ReportsToID = "EMP-012", FullName = "Kofi Mensah", JobTitle = "Database Performance Specialist", Department = "Engineering", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 6, 1), Salary = 152000m, Rating = 4, AvatarBg = "#06b6d4", SubordinatesCount = 0 },
 
             // Product & Design
-            new AgHrEmployeeRow { EmployeeID = "EMP-030", ReportsToID = "EMP-003", FullName = "Sophie Dubois", JobTitle = "Head of Enterprise UX", Department = "Product", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 11, 4), Salary = 175000m, Rating = 5, AvatarBg = "#9333ea", SubordinatesCount = 2 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-031", ReportsToID = "EMP-003", FullName = "Lucas Moretti", JobTitle = "Staff Product Manager", Department = "Product", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 5, 18), Salary = 168000m, Rating = 4, AvatarBg = "#a855f7", SubordinatesCount = 0 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-032", ReportsToID = "EMP-030", FullName = "Emma Watson", JobTitle = "Senior UI Designer", Department = "Product", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 9, 1), Salary = 132000m, Rating = 4, AvatarBg = "#c084fc", SubordinatesCount = 0 },
+            new EmployeeRow { EmployeeID = "EMP-030", ReportsToID = "EMP-003", FullName = "Sophie Dubois", JobTitle = "Head of Enterprise UX", Department = "Product", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 11, 4), Salary = 175000m, Rating = 5, AvatarBg = "#9333ea", SubordinatesCount = 2 },
+            new EmployeeRow { EmployeeID = "EMP-031", ReportsToID = "EMP-003", FullName = "Lucas Moretti", JobTitle = "Staff Product Manager", Department = "Product", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 5, 18), Salary = 168000m, Rating = 4, AvatarBg = "#a855f7", SubordinatesCount = 0 },
+            new EmployeeRow { EmployeeID = "EMP-032", ReportsToID = "EMP-030", FullName = "Emma Watson", JobTitle = "Senior UI Designer", Department = "Product", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 9, 1), Salary = 132000m, Rating = 4, AvatarBg = "#c084fc", SubordinatesCount = 0 },
 
             // Sales & Growth
-            new AgHrEmployeeRow { EmployeeID = "EMP-040", ReportsToID = "EMP-004", FullName = "Jack Reynolds", JobTitle = "Director of Strategic Accounts", Department = "Sales", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 8, 15), Salary = 190000m, Rating = 5, AvatarBg = "#15803d", SubordinatesCount = 2 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-041", ReportsToID = "EMP-004", FullName = "Ananya Sharma", JobTitle = "EMEA Regional Enterprise Lead", Department = "Sales", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 10, 1), Salary = 172000m, Rating = 4, AvatarBg = "#16a34a", SubordinatesCount = 0 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-042", ReportsToID = "EMP-040", FullName = "Tyler Brooks", JobTitle = "Senior Account Executive", Department = "Sales", Office = "Sydney", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 2, 1), Salary = 140000m, Rating = 4, AvatarBg = "#22c55e", SubordinatesCount = 0 },
+            new EmployeeRow { EmployeeID = "EMP-040", ReportsToID = "EMP-004", FullName = "Jack Reynolds", JobTitle = "Director of Strategic Accounts", Department = "Sales", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 8, 15), Salary = 190000m, Rating = 5, AvatarBg = "#15803d", SubordinatesCount = 2 },
+            new EmployeeRow { EmployeeID = "EMP-041", ReportsToID = "EMP-004", FullName = "Ananya Sharma", JobTitle = "EMEA Regional Enterprise Lead", Department = "Sales", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 10, 1), Salary = 172000m, Rating = 4, AvatarBg = "#16a34a", SubordinatesCount = 0 },
+            new EmployeeRow { EmployeeID = "EMP-042", ReportsToID = "EMP-040", FullName = "Tyler Brooks", JobTitle = "Senior Account Executive", Department = "Sales", Office = "Sydney", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 2, 1), Salary = 140000m, Rating = 4, AvatarBg = "#22c55e", SubordinatesCount = 0 },
 
             // HR & Talent
-            new AgHrEmployeeRow { EmployeeID = "EMP-050", ReportsToID = "EMP-005", FullName = "Hannah Kim", JobTitle = "Head of Global Talent Acquisition", Department = "Human Resources", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 3, 9), Salary = 155000m, Rating = 5, AvatarBg = "#ea580c", SubordinatesCount = 1 },
-            new AgHrEmployeeRow { EmployeeID = "EMP-051", ReportsToID = "EMP-050", FullName = "Noah Campbell", JobTitle = "Technical Recruiter", Department = "Human Resources", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2023, 4, 15), Salary = 108000m, Rating = 4, AvatarBg = "#f97316", SubordinatesCount = 0 }
+            new EmployeeRow { EmployeeID = "EMP-050", ReportsToID = "EMP-005", FullName = "Hannah Kim", JobTitle = "Head of Global Talent Acquisition", Department = "Human Resources", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 3, 9), Salary = 155000m, Rating = 5, AvatarBg = "#ea580c", SubordinatesCount = 1 },
+            new EmployeeRow { EmployeeID = "EMP-051", ReportsToID = "EMP-050", FullName = "Noah Campbell", JobTitle = "Technical Recruiter", Department = "Human Resources", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2023, 4, 15), Salary = 108000m, Rating = 4, AvatarBg = "#f97316", SubordinatesCount = 0 }
         ];
     }
 
-    public static List<AgInventoryProductRow> GetInventoryProducts()
+    public static List<InventoryProduct> GetInventoryProducts()
     {
         var warehouses = new[]
         {
@@ -484,12 +445,12 @@ public sealed class BenchDataStore
         };
 
         var rand = new Random(33);
-        var list = new List<AgInventoryProductRow>();
+        var list = new List<InventoryProduct>();
         var baseDelivery = DateTime.UtcNow.Date.AddDays(3);
 
         foreach (var p in products)
         {
-            var details = new List<AgWarehouseStockDetail>();
+            var details = new List<WarehouseStock>();
             int totalOnHand = 0;
             int totalReserved = 0;
 
@@ -504,7 +465,7 @@ public sealed class BenchDataStore
                 totalOnHand += onHand;
                 totalReserved += reserved;
 
-                details.Add(new AgWarehouseStockDetail
+                details.Add(new WarehouseStock
                 {
                     WarehouseCode = wh.Item1,
                     WarehouseName = wh.Item2,
@@ -517,7 +478,7 @@ public sealed class BenchDataStore
                 });
             }
 
-            list.Add(new AgInventoryProductRow
+            list.Add(new InventoryProduct
             {
                 SKU = p.SKU,
                 ProductName = p.Name,
@@ -526,7 +487,6 @@ public sealed class BenchDataStore
                 TotalReserved = totalReserved,
                 ReorderPoint = p.Reorder,
                 UnitCost = p.Cost,
-                IsExpanded = false,
                 WarehouseDetails = details
             });
         }

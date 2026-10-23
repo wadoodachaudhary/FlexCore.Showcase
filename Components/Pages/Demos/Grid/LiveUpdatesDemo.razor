@@ -1,4 +1,6 @@
 @page "/demo/grid/live-updates"
+@page "/demo/grid/scenarios"
+@page "/demo/grid/ag-grid-showcase"
 @rendermode InteractiveServer
 @implements IDisposable
 @using System.Diagnostics
@@ -7,7 +9,8 @@
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Services
 @using FlexCore.Showcase.Components.Shared
-@* 2026-10-23 (developer meeting, point 2): the finance ticker scenario from Four scenarios, on its own page. The grid is bound to one
+@* 2026-10-23 (developer meeting, point 2): the finance ticker scenario from Four scenarios, on its own page. Four scenarios was retired
+   the same day (SC-338) and both of its addresses stay as aliases here. The grid is bound to one
    list that a timer changes in place; the page calls StateHasChanged after each tick and the grid re-renders its window. What is
    measured: ticks applied, rows changed per tick, and the server's render time per tick (Stopwatch from the tick to the component's
    next OnAfterRender), kept as a running average. Facts checked against GridColumn.cs (Template is RenderFragment<object>) and
@@ -44,7 +47,7 @@
                 <ButtonControl CssClass="btn-sm" OnClick="Reset">Reset</ButtonControl>
             </Controls>
             <Demo>
-                <GridControl TValue="AgFinanceTickerRow"
+                <GridControl TValue="TickerRow"
                              DataSource="@_rows"
                              Height="420px"
                              AllowSorting="true"
@@ -52,47 +55,47 @@
                              AllowResizing="true"
                              ShowRowCountInFooter="true">
                     <GridColumnsBase>
-                        <GridColumn Field="@nameof(AgFinanceTickerRow.Ticker)" HeaderText="Ticker" Width="90px">
+                        <GridColumn Field="@nameof(TickerRow.Ticker)" HeaderText="Ticker" Width="90px">
                             <Template>
-                                @{ var row = (AgFinanceTickerRow)context; }
+                                @{ var row = (TickerRow)context; }
                                 <strong class="ticker">@row.Ticker</strong>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(AgFinanceTickerRow.Name)" HeaderText="Name" Width="170px" />
-                        <GridColumn Field="@nameof(AgFinanceTickerRow.Instrument)" HeaderText="Type" Width="80px" />
-                        <GridColumn Field="@nameof(AgFinanceTickerRow.Price)" HeaderText="Price" Width="110px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                        <GridColumn Field="@nameof(TickerRow.Name)" HeaderText="Name" Width="170px" />
+                        <GridColumn Field="@nameof(TickerRow.Instrument)" HeaderText="Type" Width="80px" />
+                        <GridColumn Field="@nameof(TickerRow.Price)" HeaderText="Price" Width="110px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
                             <Template>
-                                @{ var row = (AgFinanceTickerRow)context; }
+                                @{ var row = (TickerRow)context; }
                                 <span class="price @(row.TickDirection > 0 ? "up" : row.TickDirection < 0 ? "down" : "")">@row.Price.ToString("C2")</span>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(AgFinanceTickerRow.Delta)" HeaderText="Change" Width="105px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                        <GridColumn Field="@nameof(TickerRow.Delta)" HeaderText="Change" Width="105px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
                             <Template>
-                                @{ var row = (AgFinanceTickerRow)context; }
+                                @{ var row = (TickerRow)context; }
                                 <span class="@(row.Delta >= 0 ? "gain" : "loss")">@(row.Delta > 0 ? "▲ +" : row.Delta < 0 ? "▼ " : "")@row.Delta.ToString("C2")</span>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(AgFinanceTickerRow.DeltaPercent)" HeaderText="Change %" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                        <GridColumn Field="@nameof(TickerRow.DeltaPercent)" HeaderText="Change %" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
                             <Template>
-                                @{ var row = (AgFinanceTickerRow)context; }
+                                @{ var row = (TickerRow)context; }
                                 <span class="@(row.DeltaPercent >= 0 ? "gain" : "loss")">@(row.DeltaPercent > 0 ? "+" : "")@row.DeltaPercent.ToString("0.00")%</span>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(AgFinanceTickerRow.Ticker)" HeaderText="Trend" Width="130px" AllowSorting="false" TextAlign="TextAlign.Center">
+                        <GridColumn Field="@nameof(TickerRow.Ticker)" HeaderText="Trend" Width="130px" AllowSorting="false" TextAlign="TextAlign.Center">
                             <Template>
-                                @{ var row = (AgFinanceTickerRow)context; }
+                                @{ var row = (TickerRow)context; }
                                 <svg class="spark" viewBox="0 0 110 24" aria-hidden="true"><polyline points="@Sparkline(row.Timeline)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(AgFinanceTickerRow.Quantity)" HeaderText="Holdings" Width="85px" Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(AgFinanceTickerRow.TotalValue)" HeaderText="Market value" Width="120px" Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(AgFinanceTickerRow.UnrealizedPL)" HeaderText="Unrealised P&amp;L" Width="125px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                        <GridColumn Field="@nameof(TickerRow.Quantity)" HeaderText="Holdings" Width="85px" Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(TickerRow.TotalValue)" HeaderText="Market value" Width="120px" Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(TickerRow.UnrealizedPL)" HeaderText="Unrealised P&amp;L" Width="125px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
                             <Template>
-                                @{ var row = (AgFinanceTickerRow)context; }
+                                @{ var row = (TickerRow)context; }
                                 <span class="@(row.UnrealizedPL >= 0 ? "gain" : "loss")">@(row.UnrealizedPL > 0 ? "+" : "")@row.UnrealizedPL.ToString("C2")</span>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(AgFinanceTickerRow.LastUpdated)" HeaderText="Updated" Width="100px" Type="ColumnType.Date" Format="HH:mm:ss" TextAlign="TextAlign.Center" />
+                        <GridColumn Field="@nameof(TickerRow.LastUpdated)" HeaderText="Updated" Width="100px" Type="ColumnType.Date" Format="HH:mm:ss" TextAlign="TextAlign.Center" />
                     </GridColumnsBase>
                 </GridControl>
                 <p class="result">@Status</p>
@@ -120,7 +123,7 @@
 
 @code {
     private readonly SelectionItem[] _intervalItems = { new("100", "100 ms"), new("250", "250 ms"), new("500", "500 ms"), new("1000", "1 s") };
-    private List<AgFinanceTickerRow> _rows = Load();
+    private List<TickerRow> _rows = Load();
     private System.Timers.Timer? _timer;
     private bool _streaming;
     private int _intervalMs = 500;
@@ -208,7 +211,7 @@
     }
 
     // Seeded portfolio; no instrument has moved yet, so no price cell is tinted until the first tick.
-    private static List<AgFinanceTickerRow> Load()
+    private static List<TickerRow> Load()
     {
         var rows = BenchDataStore.GetFinanceTickers();
         foreach (var row in rows) { row.TickDirection = 0; row.PreviousPrice = row.Price; }
@@ -252,7 +255,7 @@
 <ButtonControl CssClass=""btn-sm"" OnClick=""Tick"">Tick once</ButtonControl>
 <ButtonControl CssClass=""btn-sm"" OnClick=""Reset"">Reset</ButtonControl>
 
-<GridControl TValue=""AgFinanceTickerRow""
+<GridControl TValue=""TickerRow""
              DataSource=""@_rows""
              Height=""420px""
              AllowSorting=""true""
@@ -260,53 +263,53 @@
              AllowResizing=""true""
              ShowRowCountInFooter=""true"">
     <GridColumnsBase>
-        <GridColumn Field=""@nameof(AgFinanceTickerRow.Ticker)"" HeaderText=""Ticker"" Width=""90px"">
+        <GridColumn Field=""@nameof(TickerRow.Ticker)"" HeaderText=""Ticker"" Width=""90px"">
             <Template>
-                @{ var row = (AgFinanceTickerRow)context; }
+                @{ var row = (TickerRow)context; }
                 <strong class=""ticker"">@row.Ticker</strong>
             </Template>
         </GridColumn>
-        <GridColumn Field=""@nameof(AgFinanceTickerRow.Name)"" HeaderText=""Name"" Width=""170px"" />
-        <GridColumn Field=""@nameof(AgFinanceTickerRow.Instrument)"" HeaderText=""Type"" Width=""80px"" />
-        <GridColumn Field=""@nameof(AgFinanceTickerRow.Price)"" HeaderText=""Price"" Width=""110px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
+        <GridColumn Field=""@nameof(TickerRow.Name)"" HeaderText=""Name"" Width=""170px"" />
+        <GridColumn Field=""@nameof(TickerRow.Instrument)"" HeaderText=""Type"" Width=""80px"" />
+        <GridColumn Field=""@nameof(TickerRow.Price)"" HeaderText=""Price"" Width=""110px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
             <Template>
-                @{ var row = (AgFinanceTickerRow)context; }
+                @{ var row = (TickerRow)context; }
                 <span class=""price @(row.TickDirection > 0 ? ""up"" : row.TickDirection < 0 ? ""down"" : """")"">@row.Price.ToString(""C2"")</span>
             </Template>
         </GridColumn>
-        <GridColumn Field=""@nameof(AgFinanceTickerRow.Delta)"" HeaderText=""Change"" Width=""105px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
+        <GridColumn Field=""@nameof(TickerRow.Delta)"" HeaderText=""Change"" Width=""105px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
             <Template>
-                @{ var row = (AgFinanceTickerRow)context; }
+                @{ var row = (TickerRow)context; }
                 <span class=""@(row.Delta >= 0 ? ""gain"" : ""loss"")"">@(row.Delta > 0 ? ""▲ +"" : row.Delta < 0 ? ""▼ "" : """")@row.Delta.ToString(""C2"")</span>
             </Template>
         </GridColumn>
-        <GridColumn Field=""@nameof(AgFinanceTickerRow.DeltaPercent)"" HeaderText=""Change %"" Width=""95px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
+        <GridColumn Field=""@nameof(TickerRow.DeltaPercent)"" HeaderText=""Change %"" Width=""95px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
             <Template>
-                @{ var row = (AgFinanceTickerRow)context; }
+                @{ var row = (TickerRow)context; }
                 <span class=""@(row.DeltaPercent >= 0 ? ""gain"" : ""loss"")"">@(row.DeltaPercent > 0 ? ""+"" : """")@row.DeltaPercent.ToString(""0.00"")%</span>
             </Template>
         </GridColumn>
-        <GridColumn Field=""@nameof(AgFinanceTickerRow.Ticker)"" HeaderText=""Trend"" Width=""130px"" AllowSorting=""false"" TextAlign=""TextAlign.Center"">
+        <GridColumn Field=""@nameof(TickerRow.Ticker)"" HeaderText=""Trend"" Width=""130px"" AllowSorting=""false"" TextAlign=""TextAlign.Center"">
             <Template>
-                @{ var row = (AgFinanceTickerRow)context; }
+                @{ var row = (TickerRow)context; }
                 <svg class=""spark"" viewBox=""0 0 110 24"" aria-hidden=""true""><polyline points=""@Sparkline(row.Timeline)"" fill=""none"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" /></svg>
             </Template>
         </GridColumn>
-        <GridColumn Field=""@nameof(AgFinanceTickerRow.Quantity)"" HeaderText=""Holdings"" Width=""85px"" Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(AgFinanceTickerRow.TotalValue)"" HeaderText=""Market value"" Width=""120px"" Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(AgFinanceTickerRow.UnrealizedPL)"" HeaderText=""Unrealised P&amp;L"" Width=""125px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
+        <GridColumn Field=""@nameof(TickerRow.Quantity)"" HeaderText=""Holdings"" Width=""85px"" Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(TickerRow.TotalValue)"" HeaderText=""Market value"" Width=""120px"" Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(TickerRow.UnrealizedPL)"" HeaderText=""Unrealised P&amp;L"" Width=""125px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
             <Template>
-                @{ var row = (AgFinanceTickerRow)context; }
+                @{ var row = (TickerRow)context; }
                 <span class=""@(row.UnrealizedPL >= 0 ? ""gain"" : ""loss"")"">@(row.UnrealizedPL > 0 ? ""+"" : """")@row.UnrealizedPL.ToString(""C2"")</span>
             </Template>
         </GridColumn>
-        <GridColumn Field=""@nameof(AgFinanceTickerRow.LastUpdated)"" HeaderText=""Updated"" Width=""100px"" Type=""ColumnType.Date"" Format=""HH:mm:ss"" TextAlign=""TextAlign.Center"" />
+        <GridColumn Field=""@nameof(TickerRow.LastUpdated)"" HeaderText=""Updated"" Width=""100px"" Type=""ColumnType.Date"" Format=""HH:mm:ss"" TextAlign=""TextAlign.Center"" />
     </GridColumnsBase>
 </GridControl>
 <p class=""result"">@Status</p>";
         public const string TickerCs = @"private readonly SelectionItem[] _intervalItems = { new(""100"", ""100 ms""), new(""250"", ""250 ms""), new(""500"", ""500 ms""), new(""1000"", ""1 s"") };
 
-private List<AgFinanceTickerRow> _rows = Load();
+private List<TickerRow> _rows = Load();
 
 private System.Timers.Timer? _timer;
 
@@ -401,7 +404,7 @@ private void Reset()
 }
 
 // Seeded portfolio; no instrument has moved yet, so no price cell is tinted until the first tick.
-private static List<AgFinanceTickerRow> Load()
+private static List<TickerRow> Load()
 {
     var rows = BenchDataStore.GetFinanceTickers();
     foreach (var row in rows) { row.TickDirection = 0; row.PreviousPrice = row.Price; }

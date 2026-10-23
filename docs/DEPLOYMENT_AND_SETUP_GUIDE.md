@@ -14,7 +14,7 @@ The FlexCore solution is composed of two primary repositories:
    - **GitHub**: [https://github.com/wadoodachaudhary/FlexCore](https://github.com/wadoodachaudhary/FlexCore)
 
 2. **`FlexCore.Showcase`**: The interactive Blazor Server Web Application.
-   - **Characteristics**: Targets .NET 10 (`net10.0`), provides real-time benchmarks (e.g. 50K/100K row virtualization, AG Grid 4-in-1 suite, in-grid fast typing, ClosedXML Excel exports, Syncfusion-style component catalog).
+   - **Characteristics**: Targets .NET 10 (`net10.0`), provides real-time benchmarks (e.g. 100K row virtualization, live grid updates, in-grid fast typing, ClosedXML Excel exports, Syncfusion-style component catalog).
    - **Project Dependency**: References `FlexCore` directly via local project references:
      ```xml
      <ProjectReference Include="..\FlexCore\FlexCore.csproj" />
@@ -159,7 +159,7 @@ info: Microsoft.Hosting.Lifetime[14]
 Open [http://localhost:5002](http://localhost:5002) in your browser:
 - **Homepage (`/`)**: Displays the interactive Data Grid with 1,000 rows, fast in-grid typing, DropDownGrid, sparkline charts, and ClosedXML export, followed by the Popular UI Components and Component Directory.
 - **Component Catalog (`/components`)**: Displays the complete 13-category directory with real-time reactive search filtering and miniature vector icons (`MiniIcon`).
-- **AG Grid 4-in-1 Suite (`/demo/grid/ag-grid-showcase`)**: 100K performance benchmark, live financial tickers, HR directory tree, and inventory master-detail.
+- **Grid scenarios**: Live updates (`/demo/grid/live-updates`), org chart (`/demo/grid/tree-grid#org`), warehouse detail (`/demo/grid/master-detail#warehouses`) and 100k rows (`/demo/grid/row-selection-50k`).
 - **COVID-19 Sunburst (`/demo/charts/sunburst`)**: Interactive drill-down Sunburst chart with country search and continent filters.
 
 ### 5.4 Hot Reload & Live Editing

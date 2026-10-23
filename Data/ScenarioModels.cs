@@ -1,29 +1,9 @@
 namespace FlexCore.Showcase.Data;
 
 /// <summary>
-/// High-density record for AG Grid Performance stress-test benchmark (up to 100k rows).
+/// One instrument of the Live updates ticker; Timeline is the sparkline history.
 /// </summary>
-public sealed class AgPerformanceRow
-{
-    public int Id { get; set; }
-    public string Project { get; set; } = "";
-    public string Task { get; set; } = "";
-    public string Assignee { get; set; } = "";
-    public string Priority { get; set; } = "";
-    public string Status { get; set; } = "";
-    public int Progress { get; set; }
-    public DateTime StartDate { get; set; }
-    public DateTime DueDate { get; set; }
-    public decimal Budget { get; set; }
-    public decimal ActualCost { get; set; }
-    public decimal Variance => Budget - ActualCost;
-    public string RiskLevel { get; set; } = "Low";
-}
-
-/// <summary>
-/// Financial ticker row with live price updates and sparkline price history.
-/// </summary>
-public sealed class AgFinanceTickerRow
+public sealed class TickerRow
 {
     public string Ticker { get; set; } = "";
     public string Name { get; set; } = "";
@@ -42,9 +22,9 @@ public sealed class AgFinanceTickerRow
 }
 
 /// <summary>
-/// Organizational hierarchy employee row for AG Grid HR Tree Data demo.
+/// One person of the org chart on the Tree grid page; ReportsToID names the manager.
 /// </summary>
-public sealed class AgHrEmployeeRow
+public sealed class EmployeeRow
 {
     public string EmployeeID { get; set; } = "";
     public string? ReportsToID { get; set; }
@@ -62,9 +42,9 @@ public sealed class AgHrEmployeeRow
 }
 
 /// <summary>
-/// Master inventory product row with expandable warehouse breakdown details.
+/// One product of the warehouse detail example on Master-detail; WarehouseDetails is the detail grid.
 /// </summary>
-public sealed class AgInventoryProductRow
+public sealed class InventoryProduct
 {
     public string SKU { get; set; } = "";
     public string ProductName { get; set; } = "";
@@ -76,14 +56,13 @@ public sealed class AgInventoryProductRow
     public decimal UnitCost { get; set; }
     public decimal InventoryValuation => TotalOnHand * UnitCost;
     public string StockStatus => AvailableStock <= 0 ? "Out of Stock" : AvailableStock <= ReorderPoint ? "Low Stock" : "In Stock";
-    public bool IsExpanded { get; set; }
-    public List<AgWarehouseStockDetail> WarehouseDetails { get; set; } = new();
+    public List<WarehouseStock> WarehouseDetails { get; set; } = new();
 }
 
 /// <summary>
-/// Child record detailing stock levels across individual warehouses.
+/// Stock of one product at one warehouse.
 /// </summary>
-public sealed class AgWarehouseStockDetail
+public sealed class WarehouseStock
 {
     public string WarehouseCode { get; set; } = "";
     public string WarehouseName { get; set; } = "";

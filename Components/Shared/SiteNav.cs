@@ -47,10 +47,11 @@ public static class SiteNav
         }),
         new("Data Grid", "bi-grid-3x3-gap-fill", "demo/grid", "Grid overview", new NavItem[]
         {
-            new("Scenarios", null),
-            new("Four scenarios", "demo/grid/scenarios"),
-            new("Live updates", "demo/grid/live-updates"),                // finance ticker scenario, own page since 2026-10-23
-            new("Org chart", "demo/grid/tree-grid#org"),                  // HR tree scenario, on Tree grid since 2026-10-23
+            new("Scenarios", null),                                       // the four use cases of the retired Four scenarios page (2026-10-23)
+            new("Live updates", "demo/grid/live-updates"),
+            new("Org chart", "demo/grid/tree-grid#org"),
+            new("Warehouse detail", "demo/grid/master-detail#warehouses"),
+            new("100k rows", "demo/grid/row-selection-50k"),              // also under Performance; the top bar underlines Data Grid, the first group that lists it
             new("Batch editing", "demo/grid/batch-editing"),
             new("Features", null),
             new("Frozen columns", "demo/grid/advanced"),
@@ -83,8 +84,9 @@ public static class SiteNav
         // Only pages that measure something and say how. Tree grid load joins when it times the real load.
         new("Performance", "bi-speedometer2", null, "", new NavItem[]
         {
-                        new("100k rows", "demo/grid/row-selection-50k"),
+            new("100k rows", "demo/grid/row-selection-50k"),
             new("Scroll vs paging", "demo/grid/virtualization-bench"),
+            new("Live updates", "demo/grid/live-updates"),                // also under Data Grid; measures server render per tick
         }),
     };
 

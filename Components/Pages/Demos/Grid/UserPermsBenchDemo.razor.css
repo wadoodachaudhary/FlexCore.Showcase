@@ -3,3 +3,12 @@
 .pane-title { font-size: 13px; font-weight: 600; color: #334155; margin: 0 0 6px; }
 .result { font-size: 13px; color: #475569; margin: 8px 0 0; }
 @media (max-width: 900px) { .pair { grid-template-columns: 1fr; } }
+/* 2026-10-23: detail rows (second example). The detail cell itself is the grid's. */
+.detail { display: grid; gap: 6px; padding: 2px 4px 4px; }
+/* A GridControl with no Height sizes its scroll area with flex-basis 0, which inside a table cell collapses to the
+   scrollbar; this lets the nested grid grow to its rows instead. */
+.detail ::deep .fx-grid-content { flex: 0 0 auto; }
+.detail-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: #334155; }
+.detail-bar span { margin-right: auto; }
+.low { color: #b45309; font-weight: 600; }
+.out { color: #b91c1c; font-weight: 600; }

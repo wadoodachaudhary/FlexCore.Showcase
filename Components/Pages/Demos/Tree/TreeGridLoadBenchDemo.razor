@@ -69,13 +69,13 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="org" Title="Org chart: who reports to whom" RazorCode="@Code.Org" CSharpCode="@Code.OrgCs">
-            <Description><p>Twenty-one people from the Four scenarios HR directory, each row carrying its manager's id. Pick a department: the people in it stay, together with the managers above them, so the tree never loses its root. Managers show how many people report to them, and the performance column is a read-only <code>RatingControl</code> inside a column template.</p></Description>
+            <Description><p>Twenty-one people of an HR directory, each row carrying its manager's id. Pick a department: the people in it stay, together with the managers above them, so the tree never loses its root. Managers show how many people report to them, and the performance column is a read-only <code>RatingControl</code> inside a column template.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_deptItems" Values="@(new[] { _dept })" ValuesChanged="ShowDepartment" Selection="ChoiceSelectionMode.Single" AriaLabel="Department" />
             </Controls>
             <Demo>
                 <TreeGridControl @key="_orgGeneration"
-                                 TValue="AgHrEmployeeRow"
+                                 TValue="EmployeeRow"
                                  DataSource="@_shown"
                                  IdMapping="EmployeeID"
                                  ParentIdMapping="ReportsToID"
@@ -85,23 +85,23 @@
                                  ToggleOnRowClick="false"
                                  InitialExpansionPredicate="@(_ => true)"
                                  Height="440px">
-                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.FullName)" HeaderText="Name" Width="260px">
+                    <TreeGridColumn Field="@nameof(EmployeeRow.FullName)" HeaderText="Name" Width="260px">
                         <Template>
-                            @{ var person = (AgHrEmployeeRow)context; }
+                            @{ var person = (EmployeeRow)context; }
                             <strong>@person.FullName</strong>@(person.IsManager ? $" · manages {person.SubordinatesCount}" : "")
                         </Template>
                     </TreeGridColumn>
-                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.JobTitle)" HeaderText="Title" Width="200px" />
-                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.Department)" HeaderText="Department" Width="130px" />
-                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.Office)" HeaderText="Office" Width="120px" />
-                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.Salary)" HeaderText="Salary" Width="110px" TextAlign="TextAlign.Right" Format="C0" />
-                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.Rating)" HeaderText="Performance" Width="130px">
+                    <TreeGridColumn Field="@nameof(EmployeeRow.JobTitle)" HeaderText="Title" Width="200px" />
+                    <TreeGridColumn Field="@nameof(EmployeeRow.Department)" HeaderText="Department" Width="130px" />
+                    <TreeGridColumn Field="@nameof(EmployeeRow.Office)" HeaderText="Office" Width="120px" />
+                    <TreeGridColumn Field="@nameof(EmployeeRow.Salary)" HeaderText="Salary" Width="110px" TextAlign="TextAlign.Right" Format="C0" />
+                    <TreeGridColumn Field="@nameof(EmployeeRow.Rating)" HeaderText="Performance" Width="130px">
                         <Template>
-                            @{ var person = (AgHrEmployeeRow)context; }
+                            @{ var person = (EmployeeRow)context; }
                             <RatingControl Value="@person.Rating" ReadOnly="true" />
                         </Template>
                     </TreeGridColumn>
-                    <TreeGridColumn Field="@nameof(AgHrEmployeeRow.HireDate)" HeaderText="Hired" Width="110px" TextAlign="TextAlign.Center" Format="yyyy-MM-dd" />
+                    <TreeGridColumn Field="@nameof(EmployeeRow.HireDate)" HeaderText="Hired" Width="110px" TextAlign="TextAlign.Center" Format="yyyy-MM-dd" />
                 </TreeGridControl>
                 <p class="result">@OrgStatus</p>
             </Demo>
@@ -206,8 +206,8 @@
     private bool TreatAsParent(BenchTreeNode node) => node.IsGroup;
 
     // Org chart (moved here from Four scenarios, 2026-10-23): a department filter keeps the manager chain so the tree stays rooted.
-    private readonly List<AgHrEmployeeRow> _people = BenchDataStore.GetHrHierarchy();
-    private List<AgHrEmployeeRow> _shown = BenchDataStore.GetHrHierarchy();
+    private readonly List<EmployeeRow> _people = BenchDataStore.GetHrHierarchy();
+    private List<EmployeeRow> _shown = BenchDataStore.GetHrHierarchy();
     private readonly SelectionItem[] _deptItems = { new("All", "Everyone"), new("Engineering", "Engineering"), new("Executive", "Executive"), new("Human Resources", "HR"), new("Product", "Product"), new("Sales", "Sales") };
     private string _dept = "All";
     private int _orgGeneration = 1;   // @key: a new value remounts the tree grid when the list is swapped
@@ -243,7 +243,7 @@
         public const string Org = @"<ButtonGroupControl Items=""_deptItems"" Values=""@(new[] { _dept })"" ValuesChanged=""ShowDepartment"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Department"" />
 
 <TreeGridControl @key=""_orgGeneration""
-                 TValue=""AgHrEmployeeRow""
+                 TValue=""EmployeeRow""
                  DataSource=""@_shown""
                  IdMapping=""EmployeeID""
                  ParentIdMapping=""ReportsToID""
@@ -253,29 +253,29 @@
                  ToggleOnRowClick=""false""
                  InitialExpansionPredicate=""@(_ => true)""
                  Height=""440px"">
-    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.FullName)"" HeaderText=""Name"" Width=""260px"">
+    <TreeGridColumn Field=""@nameof(EmployeeRow.FullName)"" HeaderText=""Name"" Width=""260px"">
         <Template>
-            @{ var person = (AgHrEmployeeRow)context; }
+            @{ var person = (EmployeeRow)context; }
             <strong>@person.FullName</strong>@(person.IsManager ? $"" · manages {person.SubordinatesCount}"" : """")
         </Template>
     </TreeGridColumn>
-    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.JobTitle)"" HeaderText=""Title"" Width=""200px"" />
-    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.Department)"" HeaderText=""Department"" Width=""130px"" />
-    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.Office)"" HeaderText=""Office"" Width=""120px"" />
-    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.Salary)"" HeaderText=""Salary"" Width=""110px"" TextAlign=""TextAlign.Right"" Format=""C0"" />
-    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.Rating)"" HeaderText=""Performance"" Width=""130px"">
+    <TreeGridColumn Field=""@nameof(EmployeeRow.JobTitle)"" HeaderText=""Title"" Width=""200px"" />
+    <TreeGridColumn Field=""@nameof(EmployeeRow.Department)"" HeaderText=""Department"" Width=""130px"" />
+    <TreeGridColumn Field=""@nameof(EmployeeRow.Office)"" HeaderText=""Office"" Width=""120px"" />
+    <TreeGridColumn Field=""@nameof(EmployeeRow.Salary)"" HeaderText=""Salary"" Width=""110px"" TextAlign=""TextAlign.Right"" Format=""C0"" />
+    <TreeGridColumn Field=""@nameof(EmployeeRow.Rating)"" HeaderText=""Performance"" Width=""130px"">
         <Template>
-            @{ var person = (AgHrEmployeeRow)context; }
+            @{ var person = (EmployeeRow)context; }
             <RatingControl Value=""@person.Rating"" ReadOnly=""true"" />
         </Template>
     </TreeGridColumn>
-    <TreeGridColumn Field=""@nameof(AgHrEmployeeRow.HireDate)"" HeaderText=""Hired"" Width=""110px"" TextAlign=""TextAlign.Center"" Format=""yyyy-MM-dd"" />
+    <TreeGridColumn Field=""@nameof(EmployeeRow.HireDate)"" HeaderText=""Hired"" Width=""110px"" TextAlign=""TextAlign.Center"" Format=""yyyy-MM-dd"" />
 </TreeGridControl>
 <p class=""result"">@OrgStatus</p>";
         public const string OrgCs = @"// Org chart (moved here from Four scenarios, 2026-10-23): a department filter keeps the manager chain so the tree stays rooted.
-private readonly List<AgHrEmployeeRow> _people = BenchDataStore.GetHrHierarchy();
+private readonly List<EmployeeRow> _people = BenchDataStore.GetHrHierarchy();
 
-private List<AgHrEmployeeRow> _shown = BenchDataStore.GetHrHierarchy();
+private List<EmployeeRow> _shown = BenchDataStore.GetHrHierarchy();
 
 private readonly SelectionItem[] _deptItems = { new(""All"", ""Everyone""), new(""Engineering"", ""Engineering""), new(""Executive"", ""Executive""), new(""Human Resources"", ""HR""), new(""Product"", ""Product""), new(""Sales"", ""Sales"") };
 
@@ -307,8 +307,8 @@ private void ShowDepartment(IReadOnlyList<string> values)
     _orgGeneration++;
 }
 
-// Data/AgGridModels.cs
-public sealed class AgHrEmployeeRow
+// Data/ScenarioModels.cs
+public sealed class EmployeeRow
 {
     public string EmployeeID { get; set; } = """";
     public string? ReportsToID { get; set; }

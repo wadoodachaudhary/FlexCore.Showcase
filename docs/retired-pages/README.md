@@ -12,4 +12,5 @@ them too). Each was replaced by an example on a FeatureDemoLayout page or droppe
 | `SqliteProviderBenchDemo.razor.txt` | second example on On-demand loading (`/demo/grid/provider-enterprise`) |
 | `NavMenu.razor.txt` | nothing; the side menu had no references |
 | `PageControlBenchDemo.razor.txt` | `/demo/page-navigation` (the old address forwards): the library's PageControl is a keyboard navigation region, not a tab control, so the page became its page |
+| `AgGridSuiteDemo.razor.txt` | retired 2026-10-23 (SC-338): its four scenarios became Live updates (`/demo/grid/live-updates`), the org chart on Tree grid (`#org`), the warehouse detail on Master-detail (`#warehouses`) and the 100,000 setting on 100k rows; both old addresses forward to Live updates |
 | `DataControlDemo.razor.txt` | `/demo/data-control` rebuilt as one example (grid, chart and CSV from one frame) with documentation tables |
