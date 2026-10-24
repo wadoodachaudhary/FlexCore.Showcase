@@ -1,6 +1,7 @@
 @page "/demo/advanced-charts"
 @rendermode InteractiveServer
 @using Fx.ControlKit.Charts
+@using FlexCore.Showcase.Components.Pages.Demos.Charts
 @using FlexCore.Showcase.Components.Shared
 
 @* 2026-10-12: moved onto FeatureDemoLayout; six Bootstrap cards became three examples with the same charts.
@@ -11,13 +12,14 @@
    only adds a blank band. Comparisons re-laid out: Bullet alone at its 600x240 design size, RangeColumn and Sankey two-up; every
    Height set to the width-bound value for a 465 px tile; RangeColumn labels kept to 8 characters because the renderer cuts longer
    ones; the Sankey data given one flow per node because the renderer draws a node and label per flow (a shared source prints once per
-   link); the radial gauge tile widened to its 300 px design size and the linear gauge raised to its 105 px. *@
+   link); the radial gauge tile widened to its 300 px design size and the linear gauge raised to its 105 px. 
+   2026-10-24: Documentation: the page's seven ChartType rows and the ChartDataPoint table from ChartsVocab (shared with the Charts page). *@
 
 <PageTitle>Financial &amp; gauges — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Financial &amp; gauges" Category="Charts" CategoryHref="demo/charts" ControlName="ChartControl"
                    Tagline="Candlestick and OHLC, bullet and range comparisons, a Sankey flow, and two gauges."
-                   SourcePath="Charts/ChartControl.razor">
+                   SourcePath="Charts/ChartControl.razor;Charts/ChartModels.cs">
     <Overview>
         <p>
             The same <code>ChartControl</code> as the <a href="demo/charts">gallery</a>, with the types a finance or operations screen
@@ -61,7 +63,13 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>ChartControl</code> and <code>ChartSeries</code> tables are still to be written from source; see the <a href="demo/charts">gallery</a>.</p>
+        <p>
+            The seven types on this page and what each reads from a <code>ChartDataPoint</code>; the full <code>ChartControl</code>,
+            <code>ChartSeries</code>, <code>ChartAxis</code> and <code>ChartLegend</code> tables are on the <a href="demo/charts">Charts</a> page.
+            The financial, bullet, range and Sankey points are built with the static factories listed under <code>ChartDataPoint</code>.
+        </p>
+        <ApiTable Kind="ApiKind.Values" Title="Chart types on this page" Rows="@ChartsVocab.TypesNamed("Candlestick", "Ohlc", "Bullet", "RangeColumn", "Sankey", "RadialGauge", "LinearGauge")" />
+        <ApiTable Kind="ApiKind.Properties" Title="ChartDataPoint" Rows="ChartsVocab.Point" />
     </Vocabulary>
 </FeatureDemoLayout>
 

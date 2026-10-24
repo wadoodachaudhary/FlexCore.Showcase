@@ -16,13 +16,15 @@
    drawn as further increases. Funnel values and stage names chosen so each label fits its segment. Heatmap legend
    hidden (it repeated the row labels). Gantt has 8 tasks so the rows fill the plot (rowH is capped at 30 units).
    YAxis Max/TickCount set where the default 1.1 x max gave ragged tick values. HorizontalBar has no renderer (draws
-   as Bar) and is not used. The Stacked Area title and the Sunburst itself are untouched. *@
+   as Bar) and is not used. The Stacked Area title and the Sunburst itself are untouched. 
+   2026-10-24: Documentation written as eleven tables from Charts/ChartControl.razor, ChartModels.cs, ChartEnums.cs, ChartControl.razor.css and
+   ChartSvg.cs (rows in ChartsVocab.*.cs, checked with scratchpad/vocabcheck.py; read sites, not just declarations). *@
 
 <PageTitle>Charts — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Charts" Category="Charts" CategoryHref="demo/charts" ControlName="ChartControl"
                    Tagline="One control, thirty-plus chart types, drawn in SVG from C#."
-                   SourcePath="Charts/ChartControl.razor">
+                   SourcePath="Charts/ChartControl.razor;Charts/ChartModels.cs;Charts/ChartEnums.cs;Charts/ChartControl.razor.css;Charts/ChartSvg.cs">
     <Overview>
         <p>
             <code>ChartControl</code> takes a <code>ChartType</code> and a list of <code>ChartSeries</code> and draws the result as SVG;
@@ -245,7 +247,30 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>ChartControl</code>, <code>ChartSeries</code> and <code>ChartDataPoint</code> tables are still to be written from <code>Charts/ChartControl.razor</code>.</p>
+        <p>
+            One control, one data shape. <code>Type</code> picks the renderer; <code>Series</code> carries the data as
+            <code>ChartSeries</code> of <code>ChartDataPoint</code>, whose <code>Value2</code> to <code>Value5</code> mean different things
+            per type; <code>XAxis</code>, <code>YAxis</code> and <code>Legend</code> hold the optional axis and legend settings. Every SVG
+            type draws on a fixed canvas (600 by 300 units for most types) scaled to fit the width it is given, and its label text is a
+            fixed size in that drawing, so a chart in a narrow tile has small labels and a wide one has large labels. Each row below says
+            which types read the setting; a row marked never read is declared in the library but has no effect yet.
+        </p>
+        <ApiTable Kind="ApiKind.Parameters" Title="ChartControl parameters" Rows="ChartsVocab.Params" />
+        <ApiTable Kind="ApiKind.Parameters" Title="Gauge and KPI parameters" Rows="ChartsVocab.GaugeKpi" />
+        <ApiTable Kind="ApiKind.Values" Title="ChartType" Rows="ChartsVocab.Types" />
+        <ApiTable Kind="ApiKind.Properties" Title="ChartSeries" Rows="ChartsVocab.Series" />
+        <ApiTable Kind="ApiKind.Properties" Title="ChartDataPoint" Rows="ChartsVocab.Point" />
+        <ApiTable Kind="ApiKind.Properties" Title="ChartAxis" Rows="ChartsVocab.Axis" />
+        <ApiTable Kind="ApiKind.Properties" Title="ChartLegend" Rows="ChartsVocab.Legend" />
+        <ApiTable Kind="ApiKind.Properties" Title="ChartControl.ChartBar, the legacy bar list" Rows="ChartsVocab.Bar" />
+        <ApiTable Kind="ApiKind.Methods" Title="ChartSvg, the same renderer as a string" Rows="ChartsVocab.Methods" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="ChartsVocab.Css" />
+        <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="ChartsVocab.CssVars" />
+        <p>
+            <code>ChartControl</code> raises no events and has no public methods. <code>GaugeRange</code> and <code>GaugePointer</code>,
+            used by <code>GaugeRanges</code> and <code>GaugePointers</code>, are documented on the <a href="demo/gauges">Gauges &amp; stock chart</a>
+            page; <code>SunburstChartControl</code>, which the <code>Sunburst</code> type delegates to, on the <a href="demo/charts/sunburst">Sunburst</a> page.
+        </p>
     </Vocabulary>
 
     <Related>
