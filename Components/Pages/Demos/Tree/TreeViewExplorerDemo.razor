@@ -7,13 +7,17 @@
 @* 2026-10-12: moved onto FeatureDemoLayout. One example (the explorer with its inspector); folder style and
    VB6 lines are switches in the card header on FlexCore controls instead of Bootstrap buttons. Parameter
    table written from TreeViewControl.Appearance.cs and TreeViewControl.Operations.cs (0.2.48).
-   2026-10-20: code tabs generated from this file (gencode), replacing hand-written constants that had drifted from the markup. *@
+   2026-10-20: code tabs generated from this file (gencode), replacing hand-written constants that had drifted from the markup.
+   2026-10-24: Keyboard and ARIA tables written from TreeViewControl.razor (markup), HandleKeyDown in TreeViewControl.Operations.cs and
+   treeKeyboard in wwwroot/browser-capabilities.js; Parameters and TreeNode rows re-read against TreeViewControl.Appearance.cs,
+   TreeViewControl.Operations.cs, TreeViewModels.cs and TreeViewData.cs (FolderStyle and Children defaults, TreeIndentPixels and ShowIcons
+   descriptions corrected; search, display-mode, focus and Outline node members added; mixed-type grouped rows split). *@
 
 <PageTitle>Tree view — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Tree view" Category="Components" ControlName="TreeViewControl"
                    Tagline="A hierarchical tree with folder icons, checkboxes, editing, drag and drop, and a classic VB6 look."
-                   SourcePath="TreeViewControl.razor; TreeViewModels.cs">
+                   SourcePath="TreeViewControl.razor;TreeViewControl.Appearance.cs;TreeViewControl.Operations.cs;TreeViewModels.cs;TreeViewData.cs;wwwroot/browser-capabilities.js">
     <Overview>
         <p>
             <code>TreeViewControl</code> renders a list of <code>TreeNode</code>s with nested <code>Children</code>. Nodes expand on click,
@@ -69,10 +73,19 @@
     <Vocabulary>
         <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
         <ApiTable Kind="ApiKind.Properties" Title="TreeNode" Rows="Vocab.Node" />
+        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="ARIA output" Rows="Vocab.Aria" />
     </Vocabulary>
 
     <Accessibility>
-        <p class="fd-pending">Keyboard model and ARIA output are still to be checked against the source; the control exposes <code>AriaLabel</code> (default "Tree") and <code>TabIndex</code>.</p>
+        <p>
+            One tab stop: the root <code>div</code> has <code>role="tree"</code>, <code>tabindex</code> from <code>TabIndex</code>,
+            <code>aria-label</code> from <code>AriaLabel</code> (default "Tree") and <code>aria-activedescendant</code> naming the current row,
+            which is outlined while the tree has focus. Rows are flat <code>role="treeitem"</code> elements carrying <code>aria-level</code>,
+            <code>aria-posinset</code> and <code>aria-setsize</code>; there is no nested <code>role="group"</code>. Arrows and checkboxes are
+            not focusable, so the Keyboard table under Documentation is the whole model. A row's accessible name is its <code>Text</code>
+            only; Outline captions, secondary lines and badges are visible but not read as part of the name.
+        </p>
     </Accessibility>
 
     <Related>
@@ -162,38 +175,93 @@
         ];
     }
 
-    // Vocabulary rows from the two partial classes (0.2.48). Advanced features are listed, not described, until a page shows them.
+    // Vocabulary rows from the partial classes and models. 2026-10-24: every row re-read against the source; grouped rows keep one
+    // declared type each so Type and Default are exact; Keys and Aria come from HandleKeyDown and the markup.
     private static class Vocab
     {
         public static readonly ApiRow[] Parameters =
         {
-            new("Nodes", "Root nodes; each carries its <code>Children</code>.", "List&lt;TreeNode&gt;?", "null"),
-            new("SelectedNode / SelectedNodeChanged", "Single selection, two-way.", "TreeNode?"),
-            new("SelectedNodeIds / CheckedNodeIds / ExpandedNodeIds", "Id lists for selection, checks and expansion, each with a <code>…Changed</code> callback.", "IReadOnlyList&lt;string&gt;?", "null"),
-            new("OnNodeClick / OnNodeDoubleClick / OnNodeActivated / OnNodeExpand", "Node events.", "EventCallback&lt;TreeNode&gt;"),
-            new("ToggleOnNodeClick", "A click on a parent expands or collapses it.", "bool", "true"),
-            new("ShowIcons", "Folder and leaf icons.", "bool", "true"),
-            new("FolderStyle", "<code>Yellow</code>, <code>Grey</code> or <code>None</code>.", "TreeFolderStyle", "Yellow"),
-            new("UseVb6TreeStyle", "Dotted connector lines and plus/minus boxes, as in the Windows common control.", "bool", "false"),
-            new("TreeIndentPixels", "Indent per level.", "int", "16"),
-            new("ShowCheckboxes / AutoCheck", "A checkbox per node; AutoCheck ties parents and children.", "bool", "false"),
-            new("AllowMultiSelect", "More than one selected node.", "bool", "false"),
-            new("Height / CssClass / TabIndex / AriaLabel", "Size, extra classes, tab order, accessible name.", "", "AriaLabel \"Tree\""),
-            new("AllowEditing · NodeEditing · NodeEditCommitting · NodeEdited", "Inline rename, with veto and commit events. Not shown on this page.", "", null),
-            new("AllowDragAndDrop · CanDrop · NodeMoving · NodeMoved", "Drag a node to a new parent, with veto. Not shown on this page.", "", null),
-            new("EnableVirtualization · ItemSize", "Row windowing for large trees; ItemSize is the row height in px.", "bool / float", "false / 32"),
-            new("LoadChildren", "Async child loader for lazy trees.", "Func&lt;TreeNode, CancellationToken, Task&lt;IReadOnlyList&lt;TreeNode&gt;&gt;&gt;?", "null"),
-            new("NodeTemplate · FilterText · NodeComparer · NodesChanged · Error", "Custom node markup, text filter, sort order, change and error callbacks.", "", null),
+            new("Nodes", "Root nodes; each carries its <code>Children</code>. A null list is replaced by an empty one on first use. Ids must be non-empty and unique across the tree, or the control throws.", "List&lt;TreeNode&gt;?", "null"),
+            new("SelectedNode / SelectedNodeChanged", "The primary selected node, two-way. Setting it selects the node with that <code>Id</code> and clears the others unless <code>AllowMultiSelect</code> is on. Ignored while <code>SelectedNodeIds</code> is set, which then supplies it.", "TreeNode?", "null"),
+            new("SelectedNodeIds / CheckedNodeIds / ExpandedNodeIds", "Id lists that drive selection, checks and expansion, each with a <code>…Changed</code> callback. Applied when the sequence changes; null leaves the node flags alone.", "IReadOnlyList&lt;string&gt;?", "null"),
+            new("OnNodeClick / OnNodeDoubleClick / OnNodeActivated / OnNodeExpand", "<code>OnNodeClick</code> follows a click, after the selection. <code>OnNodeDoubleClick</code> follows a double-click, and Enter when <code>OnNodeActivated</code> has no handler; <code>OnNodeActivated</code> is raised by Enter only. <code>OnNodeExpand</code> is raised when a node becomes expanded, after any lazy load.", "EventCallback&lt;TreeNode&gt;"),
+            new("ToggleOnNodeClick", "A plain click on a parent expands or collapses it before selecting it; a Ctrl, Cmd or Shift click only selects. The expander arrow toggles regardless.", "bool", "true"),
+            new("ShowIcons", "Draws each node's <code>IconCss</code> (<code>ExpandedIconCss</code> while expanded). With the VB6 style a parent without its own icon gets a folder in <code>FolderStyle</code> and a leaf a spacer; the Standard style draws nothing for a node without <code>IconCss</code>.", "bool", "true"),
+            new("FolderStyle", "<code>Yellow</code>, <code>Grey</code> or <code>None</code>. Read only when the VB6 style is on; it picks the root modifier class and the folder icon.", "TreeFolderStyle", "TreeFolderStyle.Yellow"),
+            new("UseVb6TreeStyle", "Dotted connector lines and plus/minus boxes, as in the Windows common control. A <code>CssClass</code> containing <code>fx-treeview-vb6</code> turns it on too.", "bool", "false"),
+            new("TreeIndentPixels", "Indent per level in the VB6 and Outline styles. The Standard style without VB6 lines ignores it and indents 20px per level.", "int", "16"),
+            new("ShowCheckboxes / AutoCheck", "A checkbox per node; Space toggles the focused one. <code>AutoCheck</code> cascades a check down to the children and sets each parent checked or indeterminate from its children.", "bool", "false"),
+            new("AllowMultiSelect", "Ctrl-click toggles a node, Shift-click selects the visible range from the last node selected without Shift, Ctrl+A selects every visible node. Off, a click or Space selects one node.", "bool", "false"),
+            new("Height / CssClass", "<code>Height</code> sizes the root with <code>overflow:auto</code>; <code>CssClass</code> is appended to the root element.", "string?", "null"),
+            new("TabIndex", "The <code>tabindex</code> of the root element, the tree's only tab stop.", "int", "0"),
+            new("AriaLabel", "The <code>aria-label</code> of the root element.", "string", "\"Tree\""),
+            new("FocusOnSelection", "After a selection or a reveal the root element takes focus again, without scrolling. Turn off when the page must keep focus in another input.", "bool", "true"),
+            new("DisplayMode", "<code>Standard</code> is the classic tree. <code>Outline</code> draws status circles and dots, a connector rail, the node's <code>Caption</code>, <code>SecondaryText</code>, <code>SecondaryIcon</code> and <code>BadgeText</code>, and a chevron on the right.", "TreeViewDisplayMode", "TreeViewDisplayMode.Standard"),
+            new("ShowSearchBox", "Shows a search box above the tree whose text filters the nodes as you type. <code>FilterText</code> wins when both are set.", "bool", "false"),
+            new("SearchPlaceholder", "Placeholder and <code>aria-label</code> of the search box.", "string", "\"Search\""),
+            new("SearchText / SearchTextChanged", "The search box text, two-way; it filters even while the box is hidden. A node stays visible when its <code>Text</code> contains the filter, ignoring case (current culture), or when a descendant does; the branches above a match are shown expanded whatever their <code>IsExpanded</code>. Whitespace only means no filter.", "string?", "null"),
+            new("FilterText", "A filter set by the page. It takes precedence over the search box text and matches the same way.", "string?", "null"),
+            new("EmptyFilterText", "Shown in a status region under the tree when a filter matches nothing.", "string", "\"No matches\""),
+            new("AllowEditing", "F2 or a double-click opens an inline rename with Save and Cancel buttons; Enter commits, Escape cancels, an empty name is refused. Not shown on this page.", "bool", "false"),
+            new("NodeEditing / NodeEditCommitting / NodeEdited", "Before the editor opens, before the new text is applied, and after it. <code>Cancel</code> vetoes the first two; <code>Error</code> on the second shows the message instead of committing.", "EventCallback&lt;TreeNodeEditEventArgs&gt;"),
+            new("AllowDragAndDrop", "Nodes become draggable; dropping one on another moves it inside that node as its last child. Not shown on this page.", "bool", "false"),
+            new("CanDrop", "Asked before <code>NodeMoving</code>; false refuses the move without raising it.", "Func&lt;TreeNodeMoveEventArgs, bool&gt;?", "null"),
+            new("NodeMoving / NodeMoved", "Before and after a move, by drop or by <code>MoveNodeAsync</code>; <code>Cancel</code> on the first vetoes it.", "EventCallback&lt;TreeNodeMoveEventArgs&gt;"),
+            new("EnableVirtualization", "Row windowing through <code>Virtualize</code> with four rows of overscan; every row is forced to <code>ItemSize</code> high.", "bool", "false"),
+            new("ItemSize", "Row height in px, used for virtualization and for scrolling a revealed row into view. Below 20 the control throws.", "float", "32"),
+            new("LoadChildren", "Called the first time a node with <code>HasUnloadedChildren</code> expands, and for such nodes that start expanded; the result replaces its <code>Children</code>. A failure collapses the node and reports through <code>Error</code>.", "Func&lt;TreeNode, CancellationToken, Task&lt;IReadOnlyList&lt;TreeNode&gt;&gt;&gt;?", "null"),
+            new("NodeTemplate", "Replaces the node text; key presses inside it do not reach the tree.", "RenderFragment&lt;TreeNode&gt;?", "null"),
+            new("NodeComparer", "Sorts the siblings at every level.", "IComparer&lt;TreeNode&gt;?", "null"),
+            new("NodesChanged", "Raised with the root list after an expand or collapse, a committed rename, and <code>AddNodeAsync</code>, <code>RemoveNodeAsync</code> or <code>MoveNodeAsync</code>.", "EventCallback&lt;List&lt;TreeNode&gt;&gt;"),
+            new("Error", "Raised with the message of a failed lazy load, rename or move; the same message appears in an alert under the tree.", "EventCallback&lt;string&gt;"),
         };
         public static readonly ApiRow[] Node =
         {
-            new("Id", "Key; defaults to a random 8-character string.", "string"),
-            new("Text", "Label.", "string", "\"\""),
+            new("Id", "Key; defaults to a random 8-character string. Must be non-empty and unique in the tree.", "string"),
+            new("Text", "Label. It is also the row's accessible name and what the filter and type-ahead match.", "string", "\"\""),
             new("IconCss / ExpandedIconCss", "Leaf or folder icon classes; the second is used while expanded.", "string?", "null"),
-            new("IsExpanded / IsSelected / IsChecked / IsDisabled / IsBold", "State flags; <code>IsIndeterminate</code> is set by the control.", "bool", "false"),
-            new("Children", "Child nodes. <code>HasChildren</code> is true when there are any, or when children are still to load.", "List&lt;TreeNode&gt;", "empty"),
+            new("IsExpanded / IsSelected / IsChecked / IsDisabled / IsBold", "State flags. A disabled node is skipped by the keyboard and cannot be selected, checked, renamed or moved. <code>IsIndeterminate</code> is set by the control.", "bool", "false"),
+            new("Children", "Child nodes. <code>HasChildren</code> is true when there are any, or when children are still to load.", "List&lt;TreeNode&gt;", "new()"),
             new("HasUnloadedChildren", "Marks a node whose children come from <code>LoadChildren</code> on first expand; cleared once loaded.", "bool", "false"),
             new("Tag", "Your own payload.", "object?", "null"),
+            new("Status", "Outline mode only; starts as <code>None</code>, which draws no mark. <code>NotStarted</code>, <code>InProgress</code> and <code>Complete</code> draw a circle on a group and a dot on the rail of an item. <code>TreeViewData.RollUpStatus</code> sets parents from their children.", "TreeNodeStatus"),
+            new("Caption", "Outline mode only: a small line above the text.", "string?", "null"),
+            new("SecondaryText / SecondaryIcon", "Outline mode only: a second line under the text, with an icon before it given as a <code>FlexIcons</code> name or raw SVG path data.", "string?", "null"),
+            new("BadgeText", "Outline mode only: a right-aligned label after the text. <code>RollUpStatus</code> with <code>setBadges</code> writes a done/total count here.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Keys =
+        {
+            new("Tab", "Enters or leaves the tree. The root element is the single tab stop; the current node is named through <code>aria-activedescendant</code> and outlined while the tree has focus. Expander arrows and checkboxes are not tab stops."),
+            new("Down / Up arrow", "Moves to the next or previous visible enabled node and selects it. With Ctrl or Cmd only the focus moves; with Shift and <code>AllowMultiSelect</code> the selection extends."),
+            new("Right arrow", "On a collapsed parent, expands it. On an expanded parent, moves to its first child. On a leaf, nothing."),
+            new("Left arrow", "On an expanded node, collapses it. Otherwise moves to the parent; on a collapsed root it stays."),
+            new("Home / End", "First or last visible node, selected unless Ctrl or Cmd is held."),
+            new("Space", "With <code>ShowCheckboxes</code>, toggles the focused node's check (an indeterminate node becomes checked). Otherwise selects the focused node with the Ctrl and Shift rules of a click."),
+            new("Enter", "Raises <code>OnNodeActivated</code>, or <code>OnNodeDoubleClick</code> when no activated handler is set. It does not expand the node or start a rename."),
+            new("F2", "Starts an inline rename when <code>AllowEditing</code> is on; otherwise nothing."),
+            new("Ctrl+A / Cmd+A", "With <code>AllowMultiSelect</code>, selects every visible enabled node."),
+            new("A printable character", "Type-ahead: moves to the next visible node after the current one whose <code>Text</code> starts with that character, ignoring case, wrapping to the top, and selects it. One character at a time, no multi-character buffer. With Ctrl or Alt held the key is ignored."),
+            new("Enter / Escape in the rename box", "Commit or cancel the rename. While the box is open the tree ignores every other key."),
+            new("Escape, asterisk", "Not handled by the tree; the asterisk is treated as a type-ahead character."),
+        };
+        public static readonly ApiRow[] Aria =
+        {
+            new("role tree", "The root <code>div</code>, with <code>tabindex</code> from <code>TabIndex</code>, <code>aria-label</code> from <code>AriaLabel</code> and <code>aria-multiselectable</code> true or false from <code>AllowMultiSelect</code>. The key handler is here."),
+            new("aria-activedescendant", "On the root: the element id of the current node, so one tab stop serves the whole tree. Omitted only when no enabled node is visible."),
+            new("role treeitem", "Every visible row. The rows are flat children of the tree, not nested. The row's <code>aria-label</code> is the node <code>Text</code>, so a template, caption, secondary line or badge is not part of its name."),
+            new("aria-level / aria-posinset / aria-setsize", "On every row: depth from 1, position among the siblings from 1, and the sibling count. They carry the hierarchy, since the rows are not nested."),
+            new("aria-expanded", "true or false on a row with children, or with children still to load; omitted on a leaf. While a filter is active it reflects the filtered view, not <code>IsExpanded</code>."),
+            new("aria-selected", "true or false on every row, from <code>IsSelected</code>."),
+            new("aria-checked", "Only with <code>ShowCheckboxes</code>: mixed, true or false on the row. The checkbox input inside repeats it and has <code>tabindex</code> -1."),
+            new("aria-disabled", "true or false on every row, from <code>IsDisabled</code>."),
+            new("aria-busy", "true on a row while <code>LoadChildren</code> runs for it, with a <code>role status</code> span reading Loading… in the row; omitted otherwise."),
+            new("role button", "The expander arrow of a parent in Standard mode and the chevron in Outline mode, labelled Expand or Collapse plus the node text. Neither is focusable; they are mouse targets. A leaf's arrow is <code>aria-hidden</code>."),
+            new("aria-hidden", "Node icons, status circles and dots, the rail and leaf arrows."),
+            new("role search", "The wrapper of the built-in search box; the input is <code>type=search</code> with <code>aria-label</code> from <code>SearchPlaceholder</code>."),
+            new("role status", "The <code>EmptyFilterText</code> message when a filter matches nothing, and the Loading… span of a lazy row."),
+            new("role alert", "The <code>AlertControl</code> that shows an <code>Error</code> message under the tree."),
+            new("Rename box", "The inline editor's input is labelled Rename node; Save and Cancel are buttons."),
+            new("Not emitted", "No <code>role group</code> around children and no <code>aria-owns</code>; the hierarchy is in the level, posinset and setsize attributes only. No <code>aria-describedby</code> or <code>aria-current</code>."),
         };
     }
 

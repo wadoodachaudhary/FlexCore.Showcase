@@ -10,13 +10,16 @@
    was removed per the claims rule. Parameter table pending (SC-264). Code tabs 2026-10-17 (SC-277): Razor and C# are
    verbatim excerpts covering the two FlexCore controls and the members they bind; the comment in each tab says what is left out.
    2026-10-20: code tabs generated from this file (gencode, every member); the earlier tabs were hand-written excerpts. The Razor tab is the
-   whole example, 284 lines, because the example is the whole dashboard. *@
+   whole example, 284 lines, because the example is the whole dashboard.
+   2026-10-24: Documentation tables (SC-264 closed) written from Charts/SunburstChartControl.razor, SunburstChartControl.razor.css and
+   SunburstModels.cs, with ChartControl.razor for the mapping paragraph; every row checked against its declaration and its read site by
+   vocabcheck.py plus grep. *@
 
 <PageTitle>Sunburst — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Sunburst" Category="Charts" CategoryHref="demo/charts" ControlName="SunburstChartControl"
                    Tagline="A drill-down hierarchy chart on a real dataset: 210 countries in 6 continents."
-                   SourcePath="Charts/SunburstChartControl.razor">
+                   SourcePath="Charts/SunburstChartControl.razor;Charts/SunburstChartControl.razor.css;Charts/SunburstModels.cs;Charts/ChartControl.razor">
     <Overview>
         <p>
             <code>SunburstChartControl</code> draws a <code>SunburstNode</code> tree as concentric rings. Click a ring segment to drill into it,
@@ -320,7 +323,41 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>SunburstChartControl</code> table still to be written from source. Parameters used here: <code>RootNode</code>, <code>MetricName</code>, <code>SecondaryMetricName</code>, <code>CenterTitle</code>, <code>CenterColor</code>, <code>ValueFormat</code>, <code>EnableDrilldown</code>, <code>ShowBreadcrumb</code>, <code>ShowLabels</code>, <code>HighlightedNodeId</code>, <code>OnNodeClick</code>, <code>OnNodeHover</code>, <code>Height</code>.</p>
+        <p>
+            Written from <code>SunburstChartControl.razor</code>, its scoped CSS and <code>SunburstModels.cs</code>. The control has no public
+            methods: its surface is the parameters and two events below plus the <code>SunburstNode</code> tree it is given. Build that tree
+            with <code>AddChild</code>, because the drawing reads <code>Parent</code>, <code>Depth</code> and the two totals rather than
+            <code>Value</code> directly. There is no JavaScript interop in the control; hover and the tooltip position come from Blazor mouse
+            events on the container.
+        </p>
+        <ApiTable Kind="ApiKind.Parameters" Title="SunburstChartControl parameters" Rows="Vocab.Params" />
+        <ApiTable Kind="ApiKind.Events" Title="SunburstChartControl events" Rows="Vocab.Events" />
+        <p>How the control draws, from the markup:</p>
+        <ul>
+            <li>The view box is 700 by 700 units with a drawing radius of 325. The hub takes <code>CenterRadiusRatio</code> of that radius; ring 1 takes one level's share of the rest, by the depth below the current root, and ring 2 takes what remains. Only those two rings are drawn; levels further down appear after a drill-down.</li>
+            <li>Segments run clockwise from 12 o'clock, each as wide as its share of its siblings' <code>TotalValue</code>; ring 2 splits its parent's span the same way among the grandchildren.</li>
+            <li>While a segment is hovered, segments that are neither its ancestors nor its descendants are dimmed and a tooltip follows the pointer, 16 px right and 20 px up, clamped at 10 to 850 px across and 10 to 750 px down. It lists the name, a regions badge when the node has children, the two totals, the share of the parent for depth 2 nodes, and the share of <code>RootNode</code>, always labelled % of World.</li>
+            <li>Some text is fixed in the markup: the breadcrumb root carries a globe before <code>RootNode.Name</code>; at the root the hub shows Across the World under the value while nothing is hovered, and below the root a Click to zoom out hint; the tooltip badge counts regions and its drill hint says Click continent to drill down.</li>
+        </ul>
+        <ApiTable Kind="ApiKind.Properties" Title="SunburstNode" Rows="Vocab.Node" />
+        <ApiTable Kind="ApiKind.Methods" Title="SunburstNode methods" Rows="Vocab.NodeMethods" />
+        <p>
+            <code>SunburstNode</code> has three constructors: empty, <code>(string name, double value, string? color = null)</code> and
+            <code>(string name, double value, double secondaryValue, string? color = null)</code>. <code>SunburstArc</code>, also public in
+            <code>SunburstModels.cs</code>, is the segment geometry the control computes for itself; no parameter or event exposes it.
+        </p>
+        <ApiTable Kind="ApiKind.Methods" Title="SunburstColorHelper, static" Rows="Vocab.ColorHelper" />
+        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <p>
+            <code>ChartControl</code> with <code>ChartType.Sunburst</code> renders this control. It builds the tree from its first series: a root
+            named after the chart <code>Title</code>, or Total, with <code>Value</code> 0; one child per distinct <code>ChartDataPoint.Category</code>,
+            or General when the category is empty, coloured from the series palette; and under each, one leaf per point with <code>Label</code>,
+            <code>Value</code>, <code>Value2 ?? 0</code> as the secondary value and <code>Color</code>, or the category colour darkened 8 percent.
+            It passes <code>RootNode</code>, <code>EnableDrilldown</code> and <code>ShowBreadcrumb</code> as true, and <code>Height</code> as its
+            own <code>Height</code>, 360px when that is null, which this control never reads. Nothing else is passed, so the hub says TOTAL CASES
+            and the tooltip says Total Cases and Total Deaths whatever the data is, and because every leaf gets a secondary value the Total
+            Deaths line shows even when no point has a <code>Value2</code>. Use <code>SunburstChartControl</code> directly when those labels matter.
+        </p>
     </Vocabulary>
 </FeatureDemoLayout>
 
@@ -888,5 +925,69 @@ private void HandleNodeHover(SunburstNode? node)
         _selectedOrHoveredNode = node;
     }
 }";
+    }
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Params =
+        {
+            new("RootNode", "The tree to draw; ring 1 is its children, ring 2 their children, and deeper levels appear after a drill-down. A new tree that does not contain the node drilled into resets the view to its root; otherwise the drill position is kept. Nothing is drawn when the root is null, has no children, or their totals sum to zero.", "SunburstNode?", "null"),
+            new("Title", "Text in a <code>fx-sunburst-title</code> line above the breadcrumb; nothing is rendered when empty.", "string?", "null"),
+            new("Width", "Inline width of the root element, capped at 100 percent; the drawing inside is capped again at 680 px square by <code>fx-sunburst-viewport</code>.", "string", "\"100%\""),
+            new("Height", "Declared, but never read: the drawing is square and sized by its width. This page passes <code>620px</code> and it has no effect.", "string", "\"620px\""),
+            new("CenterRadiusRatio", "Radius of the centre hub as a share of the 325-unit drawing radius, clamped to 0.15 to 0.45; the rings share what is left.", "double", "0.28"),
+            new("ValueFormat", "Numeric format of the hub value and of the two totals in the tooltip, in the current culture.", "string", "\"N0\""),
+            new("MetricName", "Label of the first total in the tooltip, as <code>Total Cases:</code>. Used nowhere else.", "string", "\"Cases\""),
+            new("SecondaryMetricName", "Label of the second total in the tooltip, shown only when the node has a <code>SecondaryValue</code> or its <code>TotalSecondaryValue</code> is above zero.", "string", "\"Deaths\""),
+            new("CenterTitle", "Upper line of the hub while the view is at <code>RootNode</code>; after a drill-down the hub shows the current node's <code>Name</code> upper-cased instead.", "string", "\"TOTAL CASES\""),
+            new("CenterColor", "Fill of the hub when the current node, the root included, has no <code>Color</code>; a node with a colour wins. Hovering a hub that can zoom out darkens the fill 15 percent.", "string", "\"#56abf6\""),
+            new("EnableDrilldown", "True: clicking a segment that has children makes it the current root, clicking the hub goes up one level, and the tooltip adds a drill hint. False: segment clicks still raise <code>OnNodeClick</code> and the hub does nothing. The breadcrumb buttons navigate either way.", "bool", "true"),
+            new("ShowBreadcrumb", "Renders the pill above the drawing: a root button with <code>RootNode.Name</code>, or World, then one button per ancestor down to the current node. Each button jumps there, with or without <code>EnableDrilldown</code>.", "bool", "true"),
+            new("ShowLabels", "Writes each node's <code>Name</code> along its segment, rotated to the mid angle and turned to stay readable on the left half. Segments under 0.045 radians get no label, 0.065 on ring 2; longer names are cut to about one character per 7.5 units of arc, three at least, with an ellipsis.", "bool", "true"),
+            new("HighlightedNodeId", "The segment whose node <code>Id</code> matches gets the <code>highlighted</code> class, a white stroke and the glow, and every other segment is dimmed while it is set. The control never changes it; an id that matches nothing dims the whole chart.", "string?", "null"),
+            new("CssClass", "Extra classes on the root <code>fx-sunburst-container</code> element.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("OnNodeClick", "A click on a ring segment, with that segment's node, before any drill-down. Not raised by the hub or the breadcrumb.", "SunburstNode"),
+            new("OnNodeHover", "The node when the pointer enters a segment, then <code>null</code> when it leaves that segment. Not raised for the hub or the breadcrumb; the pointer leaving the whole control clears the tooltip without a callback.", "SunburstNode?"),
+        };
+        public static readonly ApiRow[] Node =
+        {
+            new("Id", "Identity of the node: what <code>HighlightedNodeId</code> matches and how the hovered segment is recognised. A fresh GUID per node unless you set it, so a rebuilt tree has new ids.", "string", "Guid.NewGuid().ToString(\"N\")"),
+            new("Name", "Segment label, tooltip title, breadcrumb button text, and the hub title after a drill-down.", "string", "string.Empty"),
+            new("Value", "The node's own measure; see <code>TotalValue</code> for what the rings use.", "double", "0"),
+            new("SecondaryValue", "Second measure; feeds <code>TotalSecondaryValue</code> and the second tooltip total.", "double?", "null"),
+            new("Color", "Segment fill, and the hub fill while the node is the current root. Null on ring 1 takes the next of eight palette colours; null on ring 2 takes one of five shades of the parent's colour, cycling by position.", "string?", "null"),
+            new("Description", "Declared, but the control never reads it.", "string?", "null"),
+            new("Parent", "Set by <code>AddChild</code>, never by the control. Drives <code>Depth</code>, the breadcrumb path, the zoom-out target, the tooltip's share of parent and the dimming of unrelated segments; a tree built with <code>Children.Add</code> loses all of those.", "SunburstNode?", "null"),
+            new("Children", "The next ring. Add through <code>AddChild</code> so <code>Parent</code> is set.", "List&lt;SunburstNode&gt;", "new()"),
+            new("CustomAttributes", "Case-insensitive bag for your own data; the control never reads it. This page keeps the ISO code and the continent name here.", "Dictionary&lt;string, object?&gt;", "new(StringComparer.OrdinalIgnoreCase)"),
+            new("IsLeaf", "True when <code>Children</code> is empty. Read-only; the control never reads it.", "bool"),
+            new("Depth", "0 at the node with no <code>Parent</code>, then one more per level. Read-only; the tooltip shows the share of parent only at depth 2.", "int"),
+            new("TotalValue", "What the rings and the hub value use. A leaf gives <code>Value</code>, floored at 0; a node with children gives <code>Value</code> when it is positive, else the sum of its children's totals. Read-only.", "double"),
+            new("TotalSecondaryValue", "The same rule applied to <code>SecondaryValue</code>; the tooltip's second total. Read-only.", "double"),
+        };
+        public static readonly ApiRow[] NodeMethods =
+        {
+            new("AddChild(SunburstNode child)", "Sets the child's <code>Parent</code> to this node and appends it to <code>Children</code>.", "void"),
+            new("GetAncestors()", "The chain from the top of the tree down to this node's parent. The control walks the breadcrumb itself and never calls it.", "IEnumerable&lt;SunburstNode&gt;"),
+            new("Flatten()", "This node, then every descendant depth-first. This page uses it to find a country by name for the leaderboard and the search box.", "IEnumerable&lt;SunburstNode&gt;"),
+        };
+        public static readonly ApiRow[] ColorHelper =
+        {
+            new("AdjustLightness(string hex, double factor)", "A 7- or 4-character hex colour scaled towards black for a factor under 1 and towards white for a factor over 1; anything else comes back unchanged.", "string"),
+            new("Darken(string hex, double percent)", "<code>AdjustLightness(hex, 1 - percent)</code>. The hub uses 0.15 while hovered; <code>ChartControl</code> uses 0.08 for the leaf colours of its Sunburst type.", "string"),
+            new("Lighten(string hex, double percent)", "<code>AdjustLightness(hex, 1 + percent)</code>.", "string"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-sunburst-container", "The root element: a centred flex column with <code>user-select: none</code>; <code>CssClass</code> is added here and <code>Width</code> is its inline width. <code>fx-sunburst-title</code> is the optional title line."),
+            new("fx-sunburst-breadcrumbs", "The breadcrumb pill; <code>fx-breadcrumb-btn</code> is each button, <code>active</code> marks the current node, <code>fx-breadcrumb-sep</code> the separators."),
+            new("fx-sunburst-viewport", "The square drawing area, <code>max-width: 680px</code> with <code>aspect-ratio: 1 / 1</code>; it holds the <code>fx-sunburst-svg</code>, a 700 by 700 view box, and the tooltip."),
+            new("fx-sunburst-slice", "Each ring segment; <code>hovered</code>, <code>highlighted</code> with a 3 px white stroke, and <code>dimmed</code> at opacity 0.35 come and go with the pointer and <code>HighlightedNodeId</code>."),
+            new("fx-sunburst-label", "A segment label, 10 px; <code>level-1</code> makes the inner ring 11 px bold. Labels take no pointer events."),
+            new("fx-sunburst-center-circle", "The hub; <code>drilldown-active</code> while below the root. Its text is <code>fx-center-sub</code> for the title, <code>fx-center-val</code> for the value, <code>fx-center-hint</code> for the zoom-out hint and <code>fx-center-subtitle</code> for the root subtitle."),
+            new("fx-sunburst-tooltip", "The floating card, 12 px on a dark translucent background; inside are <code>fx-tooltip-title</code>, <code>fx-tooltip-badge</code>, <code>fx-tooltip-stat</code> rows of <code>fx-stat-lbl</code> and <code>fx-stat-val</code>, and <code>fx-tooltip-hint</code>."),
+        };
     }
 }

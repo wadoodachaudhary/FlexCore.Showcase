@@ -5,15 +5,23 @@
 
 @* 2026-10-12: moved onto FeatureDemoLayout. The four Bootstrap cards became three examples; the existing
    demos were kept, a breadcrumb was added (the catalog listed one here), the split button moved to its own
-   page, and copy that made library claims was replaced with neutral sample text. Vocabulary pending (SC-264). Code tabs added 2026-10-13. *@
+   page, and copy that made library claims was replaced with neutral sample text. Vocabulary pending (SC-264). Code tabs added 2026-10-13.
+   2026-10-24: Documentation written from BadgeControl.razor, BadgeModels.cs, AlertControl.razor, AlertModels.cs, SkeletonControl.razor,
+   SkeletonModels.cs, TimelineControl.razor, TimelineItemControl.razor, TimelineModels.cs, BreadCrumbControl.razor, BreadCrumbItem.cs and
+   FlexControlBase.cs, with the five .razor.css files for what each class does; rows checked with scratchpad/vocabcheck.py (enum members and
+   the OnClose payload by grep). Two example facts are stated in the tables: the dot badge's Title is never read, and the Home crumb's empty
+   Href renders as text (SC-264). 
+   2026-10-24 (later): the dot badge lost a Title attribute the control never reads (no tooltip rendered), and the Home crumb got a real
+   href (an empty one renders as text, not a link); the Overview no longer says the tables follow later. Tabs regenerated. *@
 
 <PageTitle>UI elements — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="UI elements" Category="Components"
-                   Tagline="The small parts: badges, alerts, skeletons, timeline and breadcrumb.">
+                   Tagline="The small parts: badges, alerts, skeletons, timeline and breadcrumb."
+                   SourcePath="BadgeControl.razor;BadgeModels.cs;AlertControl.razor;AlertModels.cs;SkeletonControl.razor;SkeletonModels.cs;TimelineControl.razor;TimelineItemControl.razor;TimelineModels.cs;BreadCrumbControl.razor;BreadCrumbItem.cs;FlexControlBase.cs">
     <Overview>
         <p>
-            Five small controls that have no page of their own yet, grouped by what they do: status and feedback, and content. Each is shown with the parameters it is usually given. Tables for each control follow later.
+            Five small controls that have no page of their own yet, grouped by what they do: status and feedback, and content. Each is shown with the parameters it is usually given; the tables under Documentation list every parameter, with what it changes.
         </p>
     </Overview>
 
@@ -30,7 +38,7 @@
                     <BadgeControl Text="Dark" Variant="BadgeVariant.Dark" />
                     <BadgeControl Text="Small" Size="BadgeSize.Small" Variant="BadgeVariant.Secondary" />
                     <BadgeControl Text="Large" Size="BadgeSize.Large" Variant="BadgeVariant.Primary" />
-                    <BadgeControl IsDot="true" Variant="BadgeVariant.Success" Title="Online" />
+                    <BadgeControl IsDot="true" Variant="BadgeVariant.Success" />
                 </div>
                 <div class="stack mt">
                     <AlertControl Severity="AlertSeverity.Success" Title="Import finished" Text="1,204 vendor rows loaded; 3 skipped as duplicates." AllowClose="true" />
@@ -64,7 +72,34 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending">Parameter tables for these five controls are still to be written from source (<code>BadgeControl</code>, <code>AlertControl</code>, <code>SkeletonControl</code>, <code>TimelineControl</code>, <code>BreadCrumbControl</code>).</p>
+        <p>
+            Read from the six component files and their stylesheets. <code>BadgeControl</code>, <code>AlertControl</code>, <code>SkeletonControl</code>,
+            <code>TimelineControl</code> and <code>BreadCrumbControl</code> inherit <code>FlexControlBase</code>; its <code>CssClass</code>, <code>Style</code>
+            and unmatched attributes land on each root element and are listed once, in the last table, together with the base parameters these controls
+            never read. <code>TimelineItemControl</code> does not inherit it: it has no <code>CssClass</code> or <code>Style</code>, and an attribute it
+            does not declare is a runtime error.
+        </p>
+        <ApiTable Kind="ApiKind.Parameters" Title="BadgeControl" Rows="Vocab.Badge" />
+        <ApiTable Kind="ApiKind.Values" Title="BadgeVariant" Rows="Vocab.BadgeVariants" />
+        <ApiTable Kind="ApiKind.Values" Title="BadgeSize" Rows="Vocab.BadgeSizes" />
+        <ApiTable Kind="ApiKind.Parameters" Title="AlertControl" Rows="Vocab.Alert" />
+        <ApiTable Kind="ApiKind.Events" Title="AlertControl events" Rows="Vocab.AlertEvents" />
+        <ApiTable Kind="ApiKind.Values" Title="AlertSeverity" Rows="Vocab.AlertSeverities" />
+        <ApiTable Kind="ApiKind.Parameters" Title="SkeletonControl" Rows="Vocab.Skeleton" />
+        <ApiTable Kind="ApiKind.Values" Title="SkeletonVariant" Rows="Vocab.SkeletonVariants" />
+        <ApiTable Kind="ApiKind.Values" Title="SkeletonAnimation" Rows="Vocab.SkeletonAnimations" />
+        <ApiTable Kind="ApiKind.Parameters" Title="TimelineControl" Rows="Vocab.Timeline" />
+        <ApiTable Kind="ApiKind.Values" Title="TimelineOrientation" Rows="Vocab.TimelineOrientations" />
+        <ApiTable Kind="ApiKind.Values" Title="TimelinePosition" Rows="Vocab.TimelinePositions" />
+        <ApiTable Kind="ApiKind.Parameters" Title="TimelineItemControl" Rows="Vocab.TimelineItem" />
+        <ApiTable Kind="ApiKind.Parameters" Title="BreadCrumbControl" Rows="Vocab.BreadCrumb" />
+        <ApiTable Kind="ApiKind.Properties" Title="BreadCrumbItem" Rows="Vocab.CrumbItem" />
+        <p>
+            <code>BreadCrumbItem</code> has a parameterless constructor and <code>BreadCrumbItem(string text, string? href = null, string? iconCss = null)</code>.
+            The example passes an empty string as the Home crumb's <code>Href</code>, which the control treats like no <code>Href</code>: Home renders as
+            text, not as a link.
+        </p>
+        <ApiTable Kind="ApiKind.Parameters" Title="Inherited from FlexControlBase" Rows="Vocab.FlexBase" />
     </Vocabulary>
 
     <Related>
@@ -77,7 +112,7 @@
 </FeatureDemoLayout>
 
 @code {
-    private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", ""), new("Estimates", "demo/layout"), new("EST-2042 Contoso") };
+    private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", "/"), new("Estimates", "demo/layout"), new("EST-2042 Contoso") };
 
     // Code tabs are verbatim copies of the Demo blocks above (2026-10-13).
     private static class Code
@@ -91,7 +126,7 @@
     <BadgeControl Text=""Dark"" Variant=""BadgeVariant.Dark"" />
     <BadgeControl Text=""Small"" Size=""BadgeSize.Small"" Variant=""BadgeVariant.Secondary"" />
     <BadgeControl Text=""Large"" Size=""BadgeSize.Large"" Variant=""BadgeVariant.Primary"" />
-    <BadgeControl IsDot=""true"" Variant=""BadgeVariant.Success"" Title=""Online"" />
+    <BadgeControl IsDot=""true"" Variant=""BadgeVariant.Success"" />
 </div>
 <div class=""stack mt"">
     <AlertControl Severity=""AlertSeverity.Success"" Title=""Import finished"" Text=""1,204 vendor rows loaded; 3 skipped as duplicates."" AllowClose=""true"" />
@@ -114,6 +149,127 @@
 <div class=""demo-row mt"">
     <BreadCrumbControl Items=""_crumbs"" />
 </div>";
-        public const string ContentCs = @"private readonly List<BreadCrumbItem> _crumbs = new() { new(""Home"", """"), new(""Estimates"", ""demo/layout""), new(""EST-2042 Contoso"") };";
+        public const string ContentCs = @"private readonly List<BreadCrumbItem> _crumbs = new() { new(""Home"", ""/""), new(""Estimates"", ""demo/layout""), new(""EST-2042 Contoso"") };";
+    }
+
+    // Documentation rows (2026-10-24), written from the FlexCore sources named in the header comment.
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Badge =
+        {
+            new("Text", "Content of the span when not empty; <code>ChildContent</code> is then ignored.", "string?", "null"),
+            new("ChildContent", "Rendered only when <code>Text</code> is null or empty.", "RenderFragment?", "null"),
+            new("Variant", "Picks the colour class, <code>fx-badge-primary</code> to <code>fx-badge-dark</code>; see the values below. An unknown value falls back to <code>fx-badge-primary</code>.", "BadgeVariant", "BadgeVariant.Primary"),
+            new("Size", "Picks <code>fx-badge-sm</code>, <code>fx-badge-md</code> or <code>fx-badge-lg</code>: font size and padding.", "BadgeSize", "BadgeSize.Medium"),
+            new("IsPill", "Adds <code>fx-badge-pill</code>: fully rounded ends and wider side padding. False keeps the 4px corners of <code>fx-badge</code>.", "bool", "true"),
+            new("IsDot", "Adds <code>fx-badge-dot</code>: an 8px circle with no padding. <code>Text</code> and <code>ChildContent</code> are still rendered inside it, so give a dot neither.", "bool", "false"),
+            new("Title", "Inherited from <code>FlexControlBase</code>. Declared, but <code>BadgeControl</code> never reads it, and because it binds to a parameter it is not passed through as a <code>title</code> attribute either: the dot badge above renders nothing for its <code>Title</code>.", "string?", "null"),
+        };
+        public static readonly ApiRow[] BadgeVariants =
+        {
+            new("Primary", "Blue, white text (<code>fx-badge-primary</code>); the default."),
+            new("Secondary", "Slate grey, white text."),
+            new("Success", "Green, white text."),
+            new("Danger", "Red, white text."),
+            new("Warning", "Amber, white text."),
+            new("Info", "Sky blue, white text."),
+            new("Light", "Light grey, dark text, 1px border."),
+            new("Dark", "Dark slate, white text."),
+        };
+        public static readonly ApiRow[] BadgeSizes =
+        {
+            new("Small", "<code>fx-badge-sm</code>: 0.65rem text, 0.2em 0.4em padding."),
+            new("Medium", "<code>fx-badge-md</code>: 0.75rem text, 0.25em 0.55em padding; the default."),
+            new("Large", "<code>fx-badge-lg</code>: 0.85rem text, 0.35em 0.7em padding."),
+        };
+        public static readonly ApiRow[] Alert =
+        {
+            new("Title", "Inherited from <code>FlexControlBase</code>; rendered as an <code>h6.fx-alert-title</code> when not empty.", "string?", "null"),
+            new("Text", "Rendered in <code>div.fx-alert-text</code> under the title when not empty.", "string?", "null"),
+            new("ChildContent", "Rendered after <code>Title</code> and <code>Text</code> inside the content column; all three can be present.", "RenderFragment?", "null"),
+            new("Severity", "Picks the colour class (<code>fx-alert-info</code>, <code>-success</code>, <code>-warning</code>, <code>-error</code>) and which of the four inline SVG icons is drawn.", "AlertSeverity", "AlertSeverity.Info"),
+            new("ShowIcon", "Renders the <code>fx-alert-icon</code> column with the severity's icon.", "bool", "true"),
+            new("AllowClose", "Renders the close button (<code>fx-alert-close</code>, <code>aria-label</code> Close). Clicking it sets a private flag that removes the whole alert from the render tree, then raises <code>OnClose</code>. No parameter shows it again; a new component instance does.", "bool", "false"),
+        };
+        public static readonly ApiRow[] AlertEvents =
+        {
+            new("OnClose", "After the close button has hidden the alert. No argument; invoked only when a delegate is set. Nothing else hides the alert, so nothing else raises it.", "EventCallback"),
+        };
+        public static readonly ApiRow[] AlertSeverities =
+        {
+            new("Info", "Light blue, i-in-circle icon; the default and the fallback for any other value."),
+            new("Success", "Light green, tick-in-circle icon."),
+            new("Warning", "Light amber, triangle icon."),
+            new("Error", "Light red, cross-in-circle icon."),
+        };
+        public static readonly ApiRow[] Skeleton =
+        {
+            new("Variant", "The control is a single empty <code>div</code>; this picks its shape class, <code>fx-skeleton-text</code>, <code>fx-skeleton-circular</code> or <code>fx-skeleton-rectangular</code>. See the values below.", "SkeletonVariant", "SkeletonVariant.Text"),
+            new("Animation", "Picks <code>fx-skeleton-pulse</code>, <code>fx-skeleton-wave</code> or <code>fx-skeleton-none</code>.", "SkeletonAnimation", "SkeletonAnimation.Pulse"),
+            new("Width", "Any CSS length. Appended to the style attribute after <code>Style</code> as <code>width</code>, so it overrides the variant's width.", "string?", "null"),
+            new("Height", "Any CSS length. Appended after <code>Width</code> as <code>height</code>, overriding the variant's height.", "string?", "null"),
+        };
+        public static readonly ApiRow[] SkeletonVariants =
+        {
+            new("Text", "A 1.2em-tall bar, full width, 4px corners, 0.5em bottom margin; the default."),
+            new("Circular", "A 40px circle."),
+            new("Rectangular", "Full width, 120px tall, 4px corners."),
+        };
+        public static readonly ApiRow[] SkeletonAnimations =
+        {
+            new("Pulse", "Opacity fades to 0.4 and back every 1.5s; the default."),
+            new("Wave", "A translucent highlight sweeps left to right every 1.6s (an <code>::after</code> gradient)."),
+            new("None", "Adds <code>fx-skeleton-none</code>, which has no stylesheet rule: the block is static."),
+        };
+        public static readonly ApiRow[] Timeline =
+        {
+            new("ChildContent", "The items, rendered inside <code>div.fx-timeline</code>. The control cascades itself to them (<code>IsFixed</code>), but <code>TimelineItemControl</code> keeps that value in a private cascading parameter it never reads.", "RenderFragment?", "null"),
+            new("Orientation", "Adds <code>fx-timeline-vertical</code> or <code>fx-timeline-horizontal</code> to the root. Neither class has a rule in <code>TimelineControl.razor.css</code>, so the layout is the vertical flex column either way.", "TimelineOrientation", "TimelineOrientation.Vertical"),
+            new("Position", "Adds <code>fx-timeline-pos-left</code>, <code>-right</code> or <code>-alternate</code>. No stylesheet rule reads them: content always sits to the right of the axis.", "TimelinePosition", "TimelinePosition.Left"),
+        };
+        public static readonly ApiRow[] TimelineOrientations =
+        {
+            new("Vertical", "<code>fx-timeline-vertical</code>; the default."),
+            new("Horizontal", "<code>fx-timeline-horizontal</code>. Class name only: no rule styles it, so items still stack vertically."),
+        };
+        public static readonly ApiRow[] TimelinePositions =
+        {
+            new("Left", "<code>fx-timeline-pos-left</code>; the default."),
+            new("Right", "<code>fx-timeline-pos-right</code>. Class name only; no rule styles it."),
+            new("Alternate", "<code>fx-timeline-pos-alternate</code>. Class name only; no rule styles it."),
+        };
+        public static readonly ApiRow[] TimelineItem =
+        {
+            new("Title", "<code>div.fx-timeline-title</code> (bold) under the time, when not empty.", "string?", "null"),
+            new("Time", "<code>div.fx-timeline-time</code>, the small grey line at the top of the item, when not empty. Plain text; nothing parses or formats it.", "string?", "null"),
+            new("IconCss", "Classes of a <code>span</code> rendered inside the 14px point when <code>PointContent</code> is null and this is not empty.", "string?", "null"),
+            new("PointColor", "Adds <code>fx-timeline-item-point-</code> plus the lower-cased value to the item. The stylesheet colours the point for <code>Success</code>, <code>Danger</code>, <code>Warning</code>, <code>Info</code>, <code>Secondary</code> and <code>Dark</code>; <code>Primary</code> and <code>Light</code> have no rule and keep the point's default blue.", "BadgeVariant", "BadgeVariant.Primary"),
+            new("PointContent", "Replaces the point's content; wins over <code>IconCss</code>.", "RenderFragment?", "null"),
+            new("ChildContent", "Body text in <code>div.fx-timeline-body</code> under the title; the div is rendered even when empty.", "RenderFragment?", "null"),
+        };
+        public static readonly ApiRow[] BreadCrumb =
+        {
+            new("Items", "Rendered in order as <code>li.fx-breadcrumb-item</code>; the separator between items is CSS. An item renders as a link (<code>a.fx-breadcrumb-link</code>) only when it is not the last, has a non-empty <code>Href</code> and is not <code>Disabled</code>; otherwise as <code>span.fx-breadcrumb-text</code>. The last item also gets the class <code>active</code>, which no stylesheet rule uses. Null renders an empty list.", "IList&lt;BreadCrumbItem&gt;?", "null"),
+            new("ChildContent", "Rendered inside the <code>ol</code> after the generated items.", "RenderFragment?", "null"),
+        };
+        public static readonly ApiRow[] CrumbItem =
+        {
+            new("Text", "The crumb's visible text, inside the link or the span.", "string", "\"\""),
+            new("Href", "Link target. Null or empty renders the crumb as text, as the example's Home crumb shows.", "string?", "null"),
+            new("IconCss", "Classes of a <code>span.fx-breadcrumb-icon</code> placed before the text, in both the link and the text form.", "string?", "null"),
+            new("Disabled", "Adds the class <code>disabled</code> to the item (grey, <code>pointer-events: none</code>) and renders it as text even when it has an <code>Href</code>.", "bool", "false"),
+        };
+        public static readonly ApiRow[] FlexBase =
+        {
+            new("CssClass", "Appended after the generated classes on the root element of the five inheriting controls.", "string?", "null"),
+            new("Style", "The root element's <code>style</code> attribute, as given; <code>SkeletonControl</code> appends its <code>Width</code> and <code>Height</code> to it. None of the five uses the base's <code>ResolvedStyle</code>.", "string?", "null"),
+            new("AdditionalAttributes", "Attributes that match no parameter, splatted onto the same root element. A <code>Title</code> attribute is not among them: it binds to the <code>Title</code> parameter.", "Dictionary&lt;string, object&gt;?", "null"),
+            new("Title", "Read by <code>AlertControl</code> only, as its heading. The other four never read it.", "string?", "null"),
+            new("Visible", "Declared, but none of the five reads it or uses <code>ResolvedStyle</code>, so false does not hide them.", "bool", "true"),
+            new("Enabled", "Declared, but none of the five reads it.", "bool", "true"),
+            new("Id", "Declared, but none of the five reads it, so it never reaches the element.", "string?", "null"),
+            new("Tag / Data", "Declared, but none of the five reads them.", "string?", "null"),
+            new("Parent", "Declared, but none of the five reads it.", "FlexControlBase?", "null"),
+        };
     }
 }

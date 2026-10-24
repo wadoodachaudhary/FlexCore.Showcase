@@ -16,21 +16,28 @@
    Added: Expand all / Collapse all ButtonControls on the grid's ExpandAllAsync / CollapseAllAsync. Height="100%" became the 440px
    the wrapper gave it. Parameter tables are a later pass (SC-278).
    2026-10-23: second example, the org chart from Four scenarios (department filter keeps the manager chain; RatingControl in a
-   column template). *@
+   column template).
+   2026-10-24: Documentation tables (SC-278) written from Grid/TreeGridControl.razor, Grid/TreeGridControl.razor.cs and its Checking,
+   Editing, Frozen, Loading, Moving and Query partials, Grid/TreeGridColumn.cs, Grid/TreeGridMutationModels.cs, Grid/TreeGridQuery.cs,
+   Grid/GridModels.cs, Grid/GridToolbarModels.cs and Grid/GridEnums.cs; every row run through vocabcheck.py against those files, with
+   event payloads, read-only properties and async returns checked by grep. The control has 97 [Parameter] declarations (74 plain, 23
+   EventCallbacks), not the 92 the placeholder counted. 
+   2026-10-24 (later): three Overview sentences corrected from the source read (EnableCollapseAll vs InitialExpansionPredicate, keyboard
+   toggling, ExpandAllAsync/CollapseAllAsync raise no events). *@
 
 <PageTitle>Tree grid — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Tree grid" Category="Data Grid" CategoryHref="demo/grid" ControlName="TreeGridControl"
                    Tagline="A flat list with Id and ParentId columns, shown as a collapsible hierarchy."
-                   SourcePath="Grid/TreeGridControl.razor;Grid/TreeGridControl.razor.cs;Grid/TreeGridColumn.cs">
+                   SourcePath="Grid/TreeGridControl.razor;Grid/TreeGridControl.razor.cs;Grid/TreeGridControl.Checking.cs;Grid/TreeGridControl.Editing.cs;Grid/TreeGridControl.Frozen.cs;Grid/TreeGridControl.Loading.cs;Grid/TreeGridControl.Moving.cs;Grid/TreeGridControl.Query.cs;Grid/TreeGridColumn.cs;Grid/TreeGridMutationModels.cs;Grid/TreeGridQuery.cs;Grid/GridModels.cs;Grid/GridToolbarModels.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
             <code>TreeGridControl</code> builds the hierarchy from two property names on a flat list: <code>IdMapping</code> names the key and
             <code>ParentIdMapping</code> the parent key, null or empty for a root. <code>TreatAsParent</code> marks rows as expandable even
             before their children are in the list, <code>TreeColumnIndex</code> picks the column that carries the indentation and icons, <code>NodeExpandIconStyle</code> is
-            <code>PlusMinus</code> or <code>Triangle</code>, <code>EnableCollapseAll</code> starts with every node collapsed, and
-            <code>ToggleOnRowClick="false"</code> limits toggling to the icon. <code>Expanded</code> and <code>Collapsed</code> report the node
-            and its level; <code>ExpandAllAsync</code> and <code>CollapseAllAsync</code> do the same from code.
+            <code>PlusMinus</code> or <code>Triangle</code>, <code>EnableCollapseAll</code> starts with every node collapsed unless an
+            <code>InitialExpansionPredicate</code> says otherwise, and <code>ToggleOnRowClick="false"</code> limits mouse toggling to the icon; the keyboard still toggles. <code>Expanded</code> and <code>Collapsed</code> report the node
+            and its level; <code>ExpandAllAsync</code> and <code>CollapseAllAsync</code> change the state from code without raising those events.
         </p>
     </Overview>
 
@@ -109,7 +116,40 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>TreeGridControl</code> (92 parameters), <code>TreeGridColumn</code> and <code>TreeNodeEventArgs</code> are still to be written up from <code>Grid/TreeGridControl.razor.cs</code> and <code>Grid/TreeGridColumn.cs</code>.</p>
+        <p>
+            <code>TreeGridControl</code> renders its own table: it is not a <code>GridControl</code> wrapper and forwards no parameter. It shares
+            <code>GridControl</code>'s best-fit engine (<code>ColumnAutoFit</code>), sort pipeline, exporter and toolbar item model, and takes its
+            events as direct parameters rather than an <code>EventsRef</code> object. One row is selected at a time. The 97 parameters are
+            grouped by purpose: 74 in the tables below, the 23 <code>EventCallback</code>s under Events.
+        </p>
+        <ApiTable Kind="ApiKind.Parameters" Title="Data and hierarchy" Rows="Vocab.Data" />
+        <ApiTable Kind="ApiKind.Parameters" Title="Expansion" Rows="Vocab.Expansion" />
+        <ApiTable Kind="ApiKind.Parameters" Title="Expand icons and indentation" Rows="Vocab.Icons" />
+        <ApiTable Kind="ApiKind.Parameters" Title="Selection, keyboard and focus" Rows="Vocab.Selection" />
+        <ApiTable Kind="ApiKind.Parameters" Title="Checkboxes" Rows="Vocab.Checking" />
+        <ApiTable Kind="ApiKind.Parameters" Title="Editing and moving rows" Rows="Vocab.Editing" />
+        <ApiTable Kind="ApiKind.Parameters" Title="Sorting, filtering and paging" Rows="Vocab.Query" />
+        <ApiTable Kind="ApiKind.Parameters" Title="Columns and toolbar" Rows="Vocab.Columns" />
+        <ApiTable Kind="ApiKind.Parameters" Title="Display and layout" Rows="Vocab.Display" />
+        <ApiTable Kind="ApiKind.Parameters" Title="TreeGridColumn" Rows="Vocab.Column" />
+        <ApiTable Kind="ApiKind.Events" Title="TreeGridColumn events" Rows="Vocab.ColumnEvents" />
+        <ApiTable Kind="ApiKind.Events" Title="Events" Rows="Vocab.Events" />
+        <ApiTable Kind="ApiKind.Properties" Title="TreeRowSelectEventArgs&lt;TValue&gt; and TreeRowClickEventArgs&lt;TValue&gt;" Rows="Vocab.RowArgs" />
+        <ApiTable Kind="ApiKind.Properties" Title="TreeNodeEventArgs&lt;TValue&gt;" Rows="Vocab.NodeArgs" />
+        <ApiTable Kind="ApiKind.Properties" Title="TreeGridEditEventArgs&lt;T&gt;" Rows="Vocab.EditArgs" />
+        <ApiTable Kind="ApiKind.Properties" Title="TreeGridDataChangeEventArgs&lt;T&gt;" Rows="Vocab.ChangeArgs" />
+        <ApiTable Kind="ApiKind.Properties" Title="TreeGridRowMoveEventArgs&lt;T&gt;" Rows="Vocab.MoveArgs" />
+        <ApiTable Kind="ApiKind.Properties" Title="ResizeEventArgs" Rows="Vocab.ResizeArgs" />
+        <ApiTable Kind="ApiKind.Properties" Title="GridToolbarClickEventArgs" Rows="Vocab.ToolbarArgs" />
+        <ApiTable Kind="ApiKind.Methods" Title="Hierarchy and selection methods" Rows="Vocab.Methods" />
+        <ApiTable Kind="ApiKind.Methods" Title="Checkbox, editing and moving methods" Rows="Vocab.EditMethods" />
+        <ApiTable Kind="ApiKind.Methods" Title="Column, query, state and export methods" Rows="Vocab.QueryMethods" />
+        <ApiTable Kind="ApiKind.Properties" Title="Read-only properties" Rows="Vocab.Props" />
+        <p>
+            Three <code>[JSInvokable]</code> methods and <code>DisposeAsync</code> are entry points for the browser and the renderer, not for a
+            page. <code>ExpandAllAsync</code>, <code>CollapseAllAsync</code> and the level methods set the state without raising
+            <code>Expanded</code> or <code>Collapsed</code>, which is why the Expand all button above the first example leaves its readout alone.
+        </p>
     </Vocabulary>
 
     <Related>
@@ -445,5 +485,288 @@ public sealed class BenchTreeNode
     public int PhaseCount { get; set; }
     public decimal Budget { get; set; }
 }";
+    }
+
+    // Documentation rows (2026-10-24). Line references are into the library files named in SourcePath; the Types and Defaults are
+    // the declarations verbatim, with < > written as &lt; &gt; because ApiTable renders them as markup.
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Data =
+        {
+            new("DataSource", "The flat list of rows. The hierarchy is rebuilt when a different list instance is assigned, not when the same list is mutated; both examples build a new list and remount with <code>@key</code>. Keys must be non-null and unique and parent links acyclic, or an <code>ArgumentException</code> is thrown.", "IEnumerable&lt;TValue&gt;?", "null"),
+            new("ChildContent", "The <code>TreeGridColumn</code> declarations. They render into a hidden element and register themselves with the control, which draws from that list.", "RenderFragment?", "null"),
+            new("IdMapping", "Name of the public property that holds each row's key, read by reflection. Empty builds no rows; a name that is not a property throws.", "string", "\"\""),
+            new("ParentIdMapping", "Name of the property that holds the parent's key. Null, or a key no row has, makes the row a root.", "string", "\"\""),
+            new("TreatAsParent", "Marks a row expandable although no child is in the list, until a <code>LoadChildren</code> call for it has completed. Without <code>LoadChildren</code> such a row only gains the icon and the <code>Expanded</code> / <code>Collapsed</code> events; the first example passes it for rows that already have children.", "Func&lt;TValue, bool&gt;?", "null"),
+            new("LoadChildren", "Lazy loading: called the first time a <code>TreatAsParent</code> row opens, with the row and a token cancelled on dispose, and must return that row's direct children (parent key equal to its key, else <code>ArgumentException</code>). The children join the tree and stay until a new <code>DataSource</code> instance arrives; a failure raises <code>LoadFailed</code>.", "Func&lt;TValue, CancellationToken, Task&lt;IReadOnlyList&lt;TValue&gt;&gt;&gt;?", "null"),
+            new("TreeColumnIndex", "Index, in the declared column list, of the column that carries the indent, the expand icon and the folder icon. A hidden column there falls back to the same index among the visible columns.", "int", "0"),
+        };
+        public static readonly ApiRow[] Expansion =
+        {
+            new("EnableCollapseAll", "False builds every parent open, true every parent closed. Ignored when <code>InitialExpansionPredicate</code> is set: the org chart sets both and the predicate wins.", "bool", "false"),
+            new("InitialExpansionPredicate", "Decides each parent's state when the tree is built: true open, false closed. Set, it replaces <code>EnableCollapseAll</code>. It runs again on every rebuild; <code>PreserveExpansionOnDataChange</code> then restores the states kept from the previous list.", "Func&lt;TValue, bool&gt;?", "null"),
+            new("PreserveExpansionOnDataChange", "When a new list arrives, parents keep the state they had under the previous list, matched by key; new keys take their initial state. False gives every parent its initial state.", "bool", "true"),
+            new("ToggleOnRowClick", "A click anywhere on a parent row toggles it as well as selecting it. False leaves toggling to the icon, the keyboard and the methods; both examples turn it off.", "bool", "true"),
+            new("SpaceTogglesExpansion", "Space on the selected parent toggles it. False frees Space for <code>OnHostKeyDown</code>. With <code>ShowCheckboxes</code>, Space toggles the row's checkbox and never reaches this.", "bool", "true"),
+        };
+        public static readonly ApiRow[] Icons =
+        {
+            new("IndentPerLevel", "Pixels of indent per level in the tree column, before the icon. With <code>fx-treegrid-dotted-lines</code> in <code>CssClass</code> each level is drawn as a connector segment of this width.", "int", "16"),
+            new("NodeExpandIconStyle", "<code>PlusMinus</code>: a bordered + or − box, leaf rows getting a blank placeholder of the same width. <code>Triangle</code>: a folder image in place of the box (closed, or open with <code>ChangeNodeIconOnExpand</code>); its ▶ / ▼ glyphs appear only once <code>CollapsedGlyph</code> or <code>ExpandedGlyph</code> moves the row onto the glyph path.", "GroupExpandIconStyle", "GroupExpandIconStyle.PlusMinus"),
+            new("CollapsedGlyph", "Glyph of a closed parent in place of the preset's. Setting it, or <code>ExpandedGlyph</code>, puts a <code>Triangle</code> tree on the glyph path too.", "string?", "null"),
+            new("ExpandedGlyph", "Glyph of an open parent in place of the preset's.", "string?", "null"),
+            new("LeafGlyph", "Glyph for leaf rows in place of the blank placeholder.", "string?", "null"),
+            new("ExpandIconStyle", "Inline style of the parent icon span; null uses the PlusMinus box style, or nothing for <code>Triangle</code>.", "string?", "null"),
+            new("LeafIconStyle", "Inline style of the leaf placeholder or glyph span.", "string?", "null"),
+            new("ExpandIconTemplate", "Replaces the whole parent icon; receives true when the row shows as open (while a filter is active, that means a child the filter keeps). The template handles the click itself; the control binds none.", "RenderFragment&lt;bool&gt;?", "null"),
+            new("LeafIconTemplate", "Replaces the leaf placeholder.", "RenderFragment?", "null"),
+            new("GetNodeIcon", "Returns an image URL for a row, or null for none, and is used instead of the folder images; the bool is true only for an open parent with <code>ChangeNodeIconOnExpand</code>. Leaf rows ask it only with <code>ShowLeafNodeIcons</code>.", "Func&lt;TValue, bool, string?&gt;?", "null"),
+            new("ChangeNodeIconOnExpand", "Lets the folder image, or <code>GetNodeIcon</code>, switch to the open form while the parent is open. False keeps it stable and leaves the state to the glyph.", "bool", "false"),
+            new("ShowLeafNodeIcons", "False drops the folder or <code>GetNodeIcon</code> image on leaf rows; the alignment placeholder stays. Leaves show an image only with <code>GetNodeIcon</code>, a folder class in <code>CssClass</code> or the <code>Triangle</code> preset.", "bool", "true"),
+        };
+        public static readonly ApiRow[] Selection =
+        {
+            new("AllowSelection", "False: no row is ever selected, so no band is painted, <code>RowSelected</code> never fires and the arrow keys have no current row to move from. Row clicks still toggle parents and raise <code>RowClicked</code>.", "bool", "true"),
+            new("SelectionMode", "<code>Row</code> paints the whole row. <code>Cell</code> highlights one cell and Left / Right move that cursor across the columns (on the tree column they still close or open the row); the root gets <code>fx-treegrid-select-cell</code>. One row is selected either way: the tree has no multi-select.", "SelectionMode", "SelectionMode.Row"),
+            new("RetainFocusOnActivation", "After Enter raises <code>RowActivated</code> the tree takes focus back. False lets the handler move focus to an editor.", "bool", "true"),
+            new("TabIndex", "tabindex of the root element, the tree's single Tab stop; rows are tabindex -1 and are focused by the keyboard handling.", "int", "0"),
+        };
+        public static readonly ApiRow[] Checking =
+        {
+            new("ShowCheckboxes", "Adds a 36 px checkbox column with a check-all box in the header (loaded rows only); Space toggles the selected row's box. Checks are independent of the selection.", "bool", "false"),
+            new("AutoCheckHierarchy", "Checking a parent checks its enabled descendants; a parent with some descendants checked shows mixed and becomes checked when all are. False keeps every box independent.", "bool", "true"),
+            new("CanCheckRow", "False disables the row's box and, through it, every descendant's.", "Func&lt;TValue, bool&gt;?", "null"),
+            new("CheckedItems", "The checked rows set by the host, matched by key and re-read whenever the set of keys changes; pair with <code>CheckedItemsChanged</code> for <code>@bind-CheckedItems</code>.", "IReadOnlyList&lt;TValue&gt;?", "null"),
+        };
+        public static readonly ApiRow[] Editing =
+        {
+            new("EditSettingsRef", "Turns on the built-in editing: <code>AllowAdding</code>, <code>AllowEditing</code>, <code>AllowDeleting</code>, <code>Mode</code> Inline, Dialog or Batch, entry by double-click, Enter or a click on the active cell. The key and parent key columns are never editable. With it set, cell clicks take the editing path and <code>RowClicked</code> is not raised. Null leaves only the per-column <code>CellEditTemplate</code>.", "EditSettings?", "null"),
+            new("NewItemFactory", "Creates the record for the toolbar's Add root and Add child; without it <code>Activator.CreateInstance</code>. The record must carry a key no row has.", "Func&lt;TValue&gt;?", "null"),
+            new("CloneFactory", "Returns an independent copy of a record for its edit draft; without it the record is round-tripped through <code>System.Text.Json</code>. Records must be reference types.", "Func&lt;TValue, TValue&gt;?", "null"),
+            new("Validator", "Extra validation of a draft, run with the data annotations before a commit; its results join the row's messages.", "Func&lt;TValue, IEnumerable&lt;ValidationResult&gt;&gt;?", "null"),
+            new("ShowEditToolbar", "The Add root / Add child / Edit row / Delete / Save changes / Cancel changes and Indent / Outdent / Move row buttons above the grid; rendered only with <code>EditSettingsRef</code> or <code>AllowRowDragAndDrop</code>.", "bool", "true"),
+            new("EditValidatorTemplate", "Rendered with the draft's <code>EditContext</code> above the validation summary of the editing row or dialog.", "RenderFragment&lt;EditContext&gt;?", "null"),
+            new("AllowRowDragAndDrop", "Rows can be dragged onto Before / Inside / After drop zones of another row, Ctrl+Left and Ctrl+Right outdent and indent the selected row, and the toolbar and header menu gain move commands. Blocked while edits are pending.", "bool", "false"),
+            new("CanDrop", "Vetoes a move before <code>RowMoving</code>; false rejects it with an error message.", "Func&lt;TreeGridRowMoveEventArgs&lt;TValue&gt;, bool&gt;?", "null"),
+        };
+        public static readonly ApiRow[] Query =
+        {
+            new("AllowSorting", "Header clicks sort the siblings under each parent, so the hierarchy stays; Shift+click adds a level, and the header menu gains Custom sort and Clear sorting. Columns opt out with their own <code>AllowSorting</code>.", "bool", "false"),
+            new("AllowMultiSorting", "False limits Shift+click, the sort dialog and <code>SetSortsAsync</code> to one level.", "bool", "true"),
+            new("AllowFiltering", "Adds the header filter button and its popup (two conditions joined by And / Or). Matching rows show with their ancestors and descendants per <code>FilterHierarchyMode</code>; while a filter is active the open state shown is the filter's, not the user's.", "bool", "false"),
+            new("FilterHierarchyMode", "<code>None</code> shows matching rows only, <code>Parent</code> adds their ancestors, <code>Child</code> their descendants, <code>Both</code> both.", "TreeGridFilterHierarchyMode", "TreeGridFilterHierarchyMode.Both"),
+            new("FilterMatchCase", "Case-sensitive text matching.", "bool", "false"),
+            new("ShowHeaderFilterIcon", "False hides the header filter buttons; <code>SetFilterAsync</code> still works.", "bool", "true"),
+            new("AllowPaging", "Pages the visible rows (after expansion and filtering) by <code>PageSize</code>, with a Previous / Next pager under the grid; selecting a row moves to its page.", "bool", "false"),
+            new("PageSize", "Rows per page; must be positive or <code>OnParametersSet</code> throws.", "int", "50"),
+        };
+        public static readonly ApiRow[] Columns =
+        {
+            new("WidthMode", "<code>FillAvailable</code> stretches the table to the host and shares the width out; <code>FitColumns</code> sizes the table to the sum of the column widths, leaving slack or a horizontal scrollbar, and a resize moves only that column.", "GridWidthMode", "GridWidthMode.FillAvailable"),
+            new("AllowResizing", "Drag grips on the headers; a drag that changes the width raises <code>ColumnResized</code>, a double-click on the grip best-fits the column.", "bool", "false"),
+            new("AllowColumnAutoFit", "Best fit by grip double-click, the header menu (Best Fit, Best Fit All Columns, Best Fit to Grid) and the AutoFit methods, with <code>GridControl</code>'s <code>ColumnAutoFit</code> engine. False removes all of them.", "bool", "true"),
+            new("AutoFitSampleSize", "Rows measured for a best fit; the constant is 50.", "int", "ColumnAutoFit.DefaultSampleSize"),
+            new("AutoFitMinWidth", "Floor in px for a best-fit width; the constant is 40.", "double", "ColumnAutoFit.DefaultMinWidth"),
+            new("AutoFitMaxWidth", "Ceiling in px for a best-fit width; 0 uses the scroll surface's width.", "double", "0"),
+            new("AutoFitUseDomMeasurement", "Measures the rendered cells through grid-control.js; false estimates from the cell text.", "bool", "true"),
+            new("FrozenColumns", "The first n visible columns stick to the left edge. Columns can also freeze themselves (<code>IsFrozen</code>) or be frozen from the header menu and <code>FreezeColumnAsync</code>.", "int", "0"),
+            new("ShowColumnHeaders", "False drops the header row and with it header sorting, filtering, resizing and the header menu.", "bool", "true"),
+            new("ShowHeaderContextMenu", "Right-click on a header opens the menu: freeze, best fit, move, Expand all / Collapse all, sorting and Clear filters. False lets the browser menu through.", "bool", "true"),
+            new("ShowColumnOptionsButton", "Enables the Columns panel (show or hide, with a search box), opened by a toolbar item with the Columns action or, with <code>ShowGridOptionsRail</code>, by a rail button. The last visible column cannot be hidden.", "bool", "false"),
+            new("ShowGridOptionsRail", "The rail button that opens the Columns panel; needs <code>ShowColumnOptionsButton</code>.", "bool", "false"),
+            new("Toolbar", "Toolbar items by text. ExpandAll, CollapseAll, ToggleExpandCollapse, Columns and ClearFilters (and a few aliases) run built-in actions; Refresh only gets its icon and title, and any other text is a custom key.", "List&lt;string&gt;?", "null"),
+            new("ToolbarItems", "Toolbar items with icon, title, action, disabled state, separators and a drop-down <code>Items</code> list; listed before the <code>Toolbar</code> texts.", "IReadOnlyList&lt;GridToolbarItem&gt;?", "null"),
+            new("ShowGridToolbar", "Null shows the toolbar when it has items; true or false forces it.", "bool?", "null"),
+        };
+        public static readonly ApiRow[] Display =
+        {
+            new("Height", "CSS height of the root; the rows scroll inside it. Both examples use 440px.", "string?", "null"),
+            new("Width", "CSS width of the root.", "string?", "null"),
+            new("CssClass", "Classes added to the root. The control reads four of them: <code>fx-treegrid-compact</code> (14 px rows), <code>fx-treegrid-yellow-folder</code> and <code>fx-treegrid-blue-leaf-folder</code> (folder images beside the glyph), <code>fx-treegrid-dotted-lines</code> (connector segments per level, styled by the library stylesheet).", "string?", "null"),
+            new("EnableHover", "Adds <code>fx-treegrid-hover</code> to every row for the hover tint.", "bool", "true"),
+            new("RowCssClassSelector", "Extra class for a row, from its record and display index; an exception from it is swallowed.", "Func&lt;TValue, int, string?&gt;?", "null"),
+            new("RowDetailsTemplate", "Content under an open row, spanning every column. A row with details counts as a parent and gets the expand icon even without children; mouse and keyboard events inside the details do not reach the row.", "RenderFragment&lt;TValue&gt;?", "null"),
+            new("RowDetailsPredicate", "Limits the details to the rows it accepts; null gives them to every row.", "Func&lt;TValue, bool&gt;?", "null"),
+            new("AriaLabel", "aria-label of the table, which has role treegrid.", "string", "\"Tree grid\""),
+            new("ShowLegacyScrollBar", "Replaces the native vertical scrollbar with a DOM-drawn Win9x-style one that can be styled and right-clicked.", "bool", "false"),
+            new("EnableLegacyScrollBarMenu", "The Scroll Here / Top / Bottom / Page Up / Page Down / Scroll Up / Scroll Down menu on the legacy bar's right-click.", "bool", "true"),
+            new("LegacyScrollLineHeight", "Pixels per line for the legacy bar's arrow buttons and its Scroll Up / Scroll Down commands.", "double", "17"),
+        };
+        public static readonly ApiRow[] Column =
+        {
+            new("Field", "Property name on <code>TValue</code>, read by reflection; also the column's key for widths, filters and state. A column without a field is display-only: it cannot sort, filter or be hidden from the panel.", "string", "\"\""),
+            new("HeaderText", "Header caption; empty shows the field name.", "string", "\"\""),
+            new("Width", "CSS width; a px value is also the starting width for resizing and best fit.", "string?", "null"),
+            new("MinWidth", "CSS min-width; a px value floors a resize (otherwise 32 px) and a best fit.", "string?", "null"),
+            new("MaxWidth", "Upper bound for best fit; unset uses <code>AutoFitMaxWidth</code> or the pane width.", "string?", "null"),
+            new("AllowAutoFit", "False keeps the column out of Best Fit and Best Fit All Columns; Best Fit to Grid still scales it.", "bool", "true"),
+            new("Type", "Text, Password, Number, Date, Boolean or CheckBox. Picks the default filter operator (Contains for Text, Equals otherwise), the typed filter matching, the numeric best fit and the Date alignment default.", "ColumnType", "ColumnType.Text"),
+            new("TextAlign", "Cell and header alignment; unset is Right for Date columns and Left otherwise.", "TextAlign?", "null"),
+            new("Format", "Format string for <code>IFormattable</code> values, in the current culture; the examples use $#,##0.00, C0 and yyyy-MM-dd.", "string?", "null"),
+            new("Visible", "False hides the column; the Columns panel can override it per field.", "bool", "true"),
+            new("IsFrozen", "Sticks the column to the <code>FrozenPosition</code> edge; the header menu or <code>FreezeColumnAsync</code> override it.", "bool", "false"),
+            new("FrozenPosition", "Edge for <code>IsFrozen</code>.", "FrozenColumnPosition", "FrozenColumnPosition.Left"),
+            new("IsPrimaryKey", "Keeps the column out of the built-in editors.", "bool", "false"),
+            new("AllowEditing", "False keeps the column out of the built-in editors; key columns and read-only properties are out anyway.", "bool", "true"),
+            new("AllowSorting", "False keeps the column out of header-click sorting, the sort dialog and <code>SetSortsAsync</code>.", "bool", "true"),
+            new("AllowFiltering", "False removes the column's filter button and makes <code>SetFilterAsync</code> throw for it.", "bool", "true"),
+            new("AllowResizing", "False removes the column's resize grip.", "bool", "true"),
+            new("Template", "Cell content; <code>context</code> is the row as <code>object</code>, cast it to <code>TValue</code> as the org chart does. In the tree column it follows the indent and icons; with a <code>CellEditTemplate</code> it becomes the display inside the click target.", "RenderFragment&lt;object&gt;?", "null"),
+            new("HeaderTemplate", "Replaces the header caption.", "RenderFragment?", "null"),
+            new("HeaderIconKind", "<code>ExpandAll</code> or <code>CollapseAll</code> draws the matching library icon as a header button. The button only raises <code>HeaderIconClicked</code>; the host performs the action.", "TreeGridHeaderIconKind", "TreeGridHeaderIconKind.None"),
+            new("HeaderIconSrc", "Image URL of the header icon button, overriding the kind's icon.", "string?", "null"),
+            new("HeaderIconAlt", "alt text of the header icon, and the button's aria-label when set.", "string?", "null"),
+            new("HeaderIconTitle", "Tooltip of the header icon button, and its aria-label when there is no alt.", "string?", "null"),
+            new("HeaderIconCssClass", "Extra class on the header icon button.", "string?", "null"),
+            new("HeaderIconVisible", "False hides the header icon button.", "bool", "true"),
+            new("HeaderToolbarItems", "A toolbar inside the header cell with the grid toolbar's item model; built-in actions run after <code>HeaderToolbarItemClicked</code> unless it cancels.", "IReadOnlyList&lt;GridToolbarItem&gt;?", "null"),
+            new("EditTemplate", "Replaces the built-in <code>FormItemControl</code> editor of this column during an <code>EditSettingsRef</code> edit; <code>context</code> is the draft. Enter, Escape and Tab are handled by the control around it.", "RenderFragment&lt;object&gt;?", "null"),
+            new("CellEditTemplate", "In-cell editor independent of <code>EditSettingsRef</code>: the cell shows its display inside a click target, a click on the current cell swaps the editor in, and F2, Enter, F4 or typing start it from the keyboard. The context also cascades as <code>ICellEditorHost</code>.", "RenderFragment&lt;TreeGridCellEditContext&gt;?", "null"),
+            new("CellEditPredicate", "Rows that offer the <code>CellEditTemplate</code>; the others render plain.", "Func&lt;object, bool&gt;?", "null"),
+            new("CellEditDisplayCssClass", "Extra class on the click target, whose base class is fx-treegrid-cell-edit-display.", "string?", "null"),
+        };
+        public static readonly ApiRow[] ColumnEvents =
+        {
+            new("HeaderIconClicked", "The header icon button was clicked; the control takes no action of its own."),
+            new("HeaderToolbarItemClicked", "A header toolbar item was clicked, before its built-in action; <code>Cancel</code> skips the action. <code>IsHeaderToolbar</code> is true and <code>ColumnField</code> / <code>ColumnHeader</code> name the column.", "GridToolbarClickEventArgs"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("RowSelected", "After a row becomes selected: click, expand-icon click, arrow keys, Home / End, a subscribed right-click, <code>SelectRecordAsync</code>, or a property grid taking focus. Raised again by a click on the already selected row; never with <code>AllowSelection</code> off.", "TreeRowSelectEventArgs&lt;TValue&gt;"),
+            new("RowDeselected", "Before <code>RowSelected</code> whenever one selection replaces another, and from <code>ClearSelectionAsync</code> and <code>SelectRecordAsync(null)</code>. The payload carries <code>Data</code>; only <code>ClearSelectionAsync</code> sets <code>RowIndex</code>. <code>GridControl</code> declares this event and never raises it; the tree does.", "TreeRowSelectEventArgs&lt;TValue&gt;"),
+            new("RowClicked", "A pointer click on a row, after selection and focus, with the <code>MouseEventArgs</code>; raised even with <code>AllowSelection</code> off. Not raised when <code>EditSettingsRef</code> is set, because cell clicks then stop at the editing path.", "TreeRowClickEventArgs&lt;TValue&gt;"),
+            new("RowDoubleClicked", "Double-click on a row. With <code>EditSettingsRef.AllowEditing</code> and <code>AllowEditOnDblClick</code> the double-click starts an edit instead. Also Enter's fallback when <code>RowActivated</code> has no handler.", "TreeRowSelectEventArgs&lt;TValue&gt;"),
+            new("RowRightClicked", "Right-click: the row is selected first, then the event fires; the browser contextmenu event still bubbles. Without a handler a right-click changes nothing.", "TreeRowSelectEventArgs&lt;TValue&gt;"),
+            new("RowActivated", "Enter on the selected row, which keeps its state; with no selection Enter selects the first row instead. Not raised when Enter is an edit key: <code>EditSettingsRef</code> with <code>EditOnEnterKey</code> (its default), or a <code>CellEditTemplate</code> on the current cell.", "TreeRowSelectEventArgs&lt;TValue&gt;"),
+            new("OnHostKeyDown", "Every keydown on the root while no editor is open, before the built-in navigation. Keys the control consumes first (F2, Enter into an editor, Space on a checkbox row, Ctrl+Left / Ctrl+Right with drag-and-drop) do not reach it.", "KeyboardEventArgs"),
+            new("Expanded", "After a parent opens by icon, row click, Space, Right, <code>SetExpandedAsync</code> or a finished child load. Not raised by <code>ExpandAllAsync</code>, <code>ExpandAtLevelAsync</code>, <code>RestoreStateAsync</code> or the toolbar's expand actions, which set the state directly.", "TreeNodeEventArgs&lt;TValue&gt;"),
+            new("Collapsed", "After a parent closes by icon, row click, Space, Left or <code>SetExpandedAsync</code>; the same exclusions as <code>Expanded</code>.", "TreeNodeEventArgs&lt;TValue&gt;"),
+            new("CheckedItemsChanged", "The checked rows (mixed parents excluded) after a box or Space, <code>CheckAllAsync</code>, <code>SetRowCheckedAsync</code>, a commit, a child load or <code>RestoreStateAsync</code>.", "IReadOnlyList&lt;TValue&gt;"),
+            new("LoadFailed", "The exception message when <code>LoadChildren</code> throws; the node closes again and an alert under the grid shows the same text.", "string"),
+            new("EditStarting", "Before a row enters editing or a new row is added: <code>Original</code> (null for a new row), the <code>Draft</code> and its <code>EditContext</code>; <code>Cancel</code> refuses.", "TreeGridEditEventArgs&lt;TValue&gt;"),
+            new("DataChanging", "Before a save or a move replaces the records, with the list of Add / Update / Delete / Move changes. <code>Cancel</code>, or an <code>Error</code> text, aborts and shows the error.", "TreeGridDataChangeEventArgs&lt;TValue&gt;"),
+            new("DataChanged", "After the records are replaced, with the same args.", "TreeGridDataChangeEventArgs&lt;TValue&gt;"),
+            new("DataSourceChanged", "The new full record list after a commit, for <code>@bind-DataSource</code>; a list handed back this way is recognised as the control's own publication and does not reset its editing state.", "IEnumerable&lt;TValue&gt;"),
+            new("RowMoving", "Before a move is committed (drag, Indent / Outdent, the Move row dialog, <code>MoveRowAsync</code>), after <code>CanDrop</code>; <code>Cancel</code> or <code>Error</code> aborts.", "TreeGridRowMoveEventArgs&lt;TValue&gt;"),
+            new("RowMoved", "After the move, with the moved record and its target.", "TreeGridRowMoveEventArgs&lt;TValue&gt;"),
+            new("SortChanged", "After <code>SetSortsAsync</code>, which header clicks, the sort dialog and Clear sorting go through; the full ordered list.", "IReadOnlyList&lt;GridSortDescriptor&gt;"),
+            new("PageChanged", "After <code>GoToPageAsync</code> (the pager, <code>RestoreStateAsync</code>), with the 1-based page. A selection or an edit that lands on another page changes the page without raising it.", "int"),
+            new("ColumnResized", "After a grip drag that changed a width, and once per column a best fit changed: <code>Field</code>, <code>OldWidth</code> and <code>NewWidth</code> in px.", "ResizeEventArgs"),
+            new("ToolbarItemClicked", "A grid toolbar click, before its built-in action; <code>Cancel</code> skips the action. Header toolbar clicks go to the column's <code>HeaderToolbarItemClicked</code> instead.", "GridToolbarClickEventArgs"),
+            new("OnToolbarItemClick", "After the action, with the item's <code>Key</code>; grid toolbar only.", "string"),
+            new("LegacyScrollBarRightClicked", "Right-click on the legacy scrollbar, before its own menu.", "MouseEventArgs"),
+        };
+        public static readonly ApiRow[] RowArgs =
+        {
+            new("Data", "The row.", "TValue?", "null"),
+            new("RowIndex", "Index in the current display order, all pages counted.", "int", "0"),
+            new("Level", "Depth, 0 for a root.", "int", "0"),
+            new("HasChildren", "The row is a parent: children present, <code>TreatAsParent</code>, or a details template.", "bool", "false"),
+            new("IsExpanded", "The row's open state at the time of the event.", "bool", "false"),
+            new("MouseEvent", "<code>TreeRowClickEventArgs</code> only: the click's <code>MouseEventArgs</code>.", "MouseEventArgs", "new()"),
+        };
+        public static readonly ApiRow[] NodeArgs =
+        {
+            new("Data", "The parent that opened or closed.", "TValue?", "null"),
+            new("Level", "Its depth, 0 for a root; the first example prints both.", "int", "0"),
+        };
+        public static readonly ApiRow[] EditArgs =
+        {
+            new("Original", "The record being edited; null for a new row.", "T?"),
+            new("Draft", "The copy the editors bind to.", "T"),
+            new("EditContext", "The draft's form context, with data annotations enabled.", "EditContext"),
+            new("IsNew", "True for Add root, Add child and <code>AddRecordAsync</code>.", "bool"),
+            new("Cancel", "Set in <code>EditStarting</code> to refuse the edit.", "bool", "false"),
+        };
+        public static readonly ApiRow[] ChangeArgs =
+        {
+            new("Changes", "One <code>TreeGridRowChange</code> per row: <code>Kind</code> Add, Update, Delete or Move, <code>Original</code> and <code>Data</code>.", "IReadOnlyList&lt;TreeGridRowChange&lt;T&gt;&gt;"),
+            new("Cancel", "Set in <code>DataChanging</code> to abort; ignored by <code>DataChanged</code>.", "bool", "false"),
+            new("Error", "Message shown under the grid when the change is refused; setting it aborts on its own.", "string?", "null"),
+        };
+        public static readonly ApiRow[] MoveArgs =
+        {
+            new("Item", "The row being moved.", "T"),
+            new("Target", "The row it is dropped on.", "T"),
+            new("Position", "<code>Before</code>, <code>Inside</code> or <code>After</code> the target.", "TreeDropPosition"),
+            new("Cancel", "Set in <code>RowMoving</code> to refuse; ignored by <code>RowMoved</code>.", "bool", "false"),
+            new("Error", "Message shown when the move is refused; setting it aborts on its own.", "string?", "null"),
+        };
+        public static readonly ApiRow[] ResizeArgs =
+        {
+            new("Field", "The column key: its field, or its header for a field-less column.", "string", "\"\""),
+            new("OldWidth", "Width in px before the change.", "double", "0"),
+            new("NewWidth", "Width in px after it.", "double", "0"),
+            new("Cancel", "Declared, but <code>TreeGridControl</code> never reads it.", "bool", "false"),
+        };
+        public static readonly ApiRow[] ToolbarArgs =
+        {
+            new("Key", "The item's key: its text, or the action name, when none was given.", "string", "\"\""),
+            new("Action", "The resolved built-in action, or <code>Custom</code>.", "GridToolbarAction", "GridToolbarAction.Custom"),
+            new("Item", "The item as resolved for rendering.", "GridToolbarItem?", "null"),
+            new("IsHeaderToolbar", "True for a column header toolbar.", "bool", "false"),
+            new("ColumnField", "The header toolbar's column field; null for the grid toolbar.", "string?", "null"),
+            new("ColumnHeader", "The header toolbar's column caption.", "string?", "null"),
+            new("Cancel", "Set to skip the built-in action; <code>OnToolbarItemClick</code> is then not raised either.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("GetVisibleRecords()", "Rows in display order: expansion, sorting and filtering applied, all pages.", "IReadOnlyList&lt;TValue&gt;"),
+            new("SetExpandedAsync(TValue? item, bool expanded)", "Opens or closes one parent, loading its children first when needed; raises <code>Expanded</code> or <code>Collapsed</code>.", "Task"),
+            new("ExpandAllAsync()", "Opens every parent in one pass without raising <code>Expanded</code>; lazy parents load after the render. A pending built-in edit must validate first. Wired to the Expand all button.", "Task"),
+            new("CollapseAllAsync()", "Closes every parent without raising <code>Collapsed</code>; wired to the Collapse all button.", "Task"),
+            new("ExpandAtLevelAsync(int level)", "Opens the parents at 0-based levels up to and including <code>level</code>, without events.", "Task"),
+            new("CollapseAtLevelAsync(int level)", "Closes the parents at that level and deeper, without events.", "Task"),
+            new("GetSelectedRecord()", "The selected row, or default.", "TValue?"),
+            new("SelectRecordAsync(TValue? item)", "Selects a row from code (null clears), raising <code>RowDeselected</code> and, when the item is in the tree, <code>RowSelected</code>. Does not scroll to it or open its ancestors.", "Task"),
+            new("ClearSelectionAsync()", "Clears the selection; <code>RowDeselected</code> carries the row and its index.", "Task"),
+            new("FocusAsync(bool preventScroll = true)", "Focuses the root element.", "Task"),
+            new("ClearActiveCellEdit()", "Ends an open <code>CellEditTemplate</code> edit; a no-op in the cursor phase.", "void"),
+            new("RenameNodeAsync(object id, string field, string text)", "Writes a string property of a loaded record in place, without a rebuild, events or validation. False when the row is gone, being edited or deleted; throws for a key column or a non-string field.", "Task&lt;bool&gt;"),
+        };
+        public static readonly ApiRow[] EditMethods =
+        {
+            new("GetCheckedRecords()", "The checked rows; mixed parents are not included.", "IReadOnlyList&lt;TValue&gt;"),
+            new("SetRowCheckedAsync(object id, bool value)", "Checks or unchecks a row by key, cascading per <code>AutoCheckHierarchy</code>; raises <code>CheckedItemsChanged</code>.", "Task"),
+            new("CheckAllAsync(bool value = true)", "Checks or unchecks every loaded row, collapsed, filtered and paged ones included; disabled branches are skipped.", "Task"),
+            new("GetCurrentRecords()", "The loaded records, lazily loaded children included, as last committed; pending drafts and deletions are not applied.", "IReadOnlyList&lt;TValue&gt;"),
+            new("BeginEditAsync(object id, string? field = null)", "Starts the built-in edit of a visible row, in the first editable column when <code>field</code> is null. False when editing is off, the row is hidden or <code>EditStarting</code> cancels.", "Task&lt;bool&gt;"),
+            new("AddRecordAsync(TValue item, object? parentId = null)", "Adds a draft under <code>parentId</code> (null: a root) and opens its editor; the item's key must be new.", "Task&lt;bool&gt;"),
+            new("SaveChangesAsync()", "Validates every draft, raises <code>DataChanging</code>, replaces the records and raises <code>DataSourceChanged</code> and <code>DataChanged</code>. False on a validation error or a cancel.", "Task&lt;bool&gt;"),
+            new("CancelChangesAsync()", "Discards every draft and pending deletion.", "Task"),
+            new("CancelEditAsync()", "Discards the draft of the row being edited only.", "Task"),
+            new("DeleteRecordsAsync(IEnumerable&lt;object&gt; ids)", "Deletes the rows and their descendants: at once, or as pending changes in Batch mode.", "Task&lt;bool&gt;"),
+            new("MoveRowAsync(object sourceId, object targetId, TreeDropPosition position = TreeDropPosition.Inside)", "Moves a row and its branch before, inside or after another. Needs <code>AllowRowDragAndDrop</code>, no pending edits and, for reordering siblings, no sort; raises <code>RowMoving</code>, the data events and <code>RowMoved</code>.", "Task&lt;bool&gt;"),
+            new("IndentAsync(object id)", "Moves the row inside its previous sibling.", "Task&lt;bool&gt;"),
+            new("OutdentAsync(object id)", "Moves the row after its parent.", "Task&lt;bool&gt;"),
+        };
+        public static readonly ApiRow[] QueryMethods =
+        {
+            new("AddColumn(TreeGridColumn column) / RemoveColumn(TreeGridColumn column)", "Column registration; <code>TreeGridColumn</code> calls them itself when it initialises and disposes.", "void"),
+            new("FreezeColumnAsync(string field, FrozenColumnPosition? position)", "Freezes a column left or right, or unfreezes it with null; throws for an unknown field.", "Task"),
+            new("AutoFitColumnsAsync()", "Best-fits every visible column to its content.", "Task"),
+            new("AutoFitColumnAsync(string field)", "Best-fits one column, by field or by header for a field-less column.", "Task"),
+            new("FitColumnsToGridAsync()", "Scales the visible columns proportionally so together they fill the width exactly.", "Task"),
+            new("GetSorts()", "The sort levels in priority order.", "IReadOnlyList&lt;GridSortDescriptor&gt;"),
+            new("SetSortsAsync(IEnumerable&lt;GridSortDescriptor&gt; sorts)", "Replaces the sort levels (empty clears) and raises <code>SortChanged</code>. Throws for a repeated or non-sortable field, or several levels with <code>AllowMultiSorting</code> off.", "Task"),
+            new("OpenSortDialogAsync()", "Opens the Custom sort dialog; needs <code>AllowSorting</code>.", "Task"),
+            new("GetFilters()", "The active filters, one per column.", "IReadOnlyList&lt;TreeGridFilter&gt;"),
+            new("SetFilterAsync(TreeGridFilter filter)", "Sets one column's filter (field, operator, value, optional second condition and And / Or) and returns to page 1; throws for a non-filterable field.", "Task"),
+            new("ClearFiltersAsync()", "Clears every column filter.", "Task"),
+            new("GoToPageAsync(int page)", "Moves to a page, clamped to the range, and raises <code>PageChanged</code>.", "Task"),
+            new("CaptureState()", "Sorts, filters, expanded and selected keys, filter mode and case, page and page size, column visibility and widths, frozen columns and checked keys, with keys as invariant strings.", "TreeGridViewState"),
+            new("RestoreStateAsync(TreeGridViewState state)", "Applies a captured state: sorts are validated first, then filters, expansion, selection, columns, checks and the page, which raises <code>PageChanged</code>.", "Task"),
+            new("Export()", "The visible rows of every page or, with <code>allLoaded</code>, every loaded row, in the chosen <code>GridExportFormat</code>, with a Level column first and parents in bold. Children not yet loaded are not fetched.", "GridExportResult", null, "GridExportFormat format<br>string fileName = &quot;Tree&quot;<br>bool allLoaded = false"),
+            new("DownloadAsync()", "<code>Export</code>, then hands the file to the browser.", "Task", null, "GridExportFormat format<br>string fileName = &quot;Tree&quot;<br>bool allLoaded = false"),
+        };
+        public static readonly ApiRow[] Props =
+        {
+            new("HasExpandableNodes", "Any parent in the tree.", "bool"),
+            new("AreAllExpandableNodesExpanded", "Every parent is open; drives the toolbar's ToggleExpandCollapse icon.", "bool"),
+            new("HasPendingChanges", "Drafts or pending deletions exist.", "bool"),
+            new("CurrentEditContext", "The <code>EditContext</code> of the row being edited, or null.", "EditContext?"),
+            new("CurrentPage", "The 1-based page, clamped to <code>PageCount</code>.", "int"),
+            new("PageCount", "Pages of visible rows at the current <code>PageSize</code>; at least 1.", "int"),
+        };
     }
 }
