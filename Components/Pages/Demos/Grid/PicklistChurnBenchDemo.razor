@@ -13,13 +13,22 @@
    SC-160, SC-162); all of that went, with the "PickList"/"FPickList"/"HomeFront" names (SC-161) and the unused @ref (SC-163). Now
    the columns are read from the keys of the first row, a switch adds a field to every row so a column appears, and the row count
    is a ButtonGroupControl. Column-set changes go through the grid's SuspendRedraw scope with the columns keyed by field (see
-   SC-298 for why). Parameter tables are a later pass (SC-278). *@
+   SC-298 for why). Parameter tables are a later pass (SC-278).
+   2026-10-24 (SC-278): Documentation tables written from Grid/GridColumn.cs (Field, HeaderText, Type, Format, DisplayFormatter,
+   DisplayField, Formula, IsPrimaryKey, AllowEditing), Grid/GridEnums.cs (ColumnType), Grid/GridControl.razor.cs (GetPropertyValue
+   and TryGetDictionaryValue for the row shapes, GetCellDisplayValue, GetSortKeyValue and GridSortKeyComparer, BeginUpdate /
+   EndUpdateAsync / SuspendRedraw / ColumnUpdateScope, SyncPendingColumnStructure, PruneColumnStatesToCurrentFields and the
+   OnAfterRenderAsync completion), Grid/GridColumnsBase.cs (AddColumn dedup, RemoveColumn, ReorderColumns),
+   Grid/GridControl.ColumnFeatures.cs (AutoGenerateColumns, AvailableColumns fallback, ColumnHeaderBands) and the ColumnType read
+   sites in Grid/GridControl.Filtering.cs, Grid/GridControl.RowEditing.cs and Grid/GridControl.MultiSort.cs. Column, Grid and
+   Methods rows checked with scratchpad/vocabcheck.py; the ColumnType members and the row-shape rows by grep, which the script
+   cannot parse. The Vocab class moved below the Code class to match the other pages. *@
 
 <PageTitle>Dynamic columns — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Dynamic columns" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
                    Tagline="Columns read from the rows' keys, or generated from the row type's attributes: a grid whose shape follows the data."
-                   SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.ColumnFeatures.cs;Grid/GridColumn.cs">
+                   SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.ColumnFeatures.cs;Grid/GridColumnsBase.cs;Grid/GridColumn.cs;Grid/GridEnums.cs;Grid/GridControl.Filtering.cs;Grid/GridControl.RowEditing.cs;Grid/GridControl.MultiSort.cs">
     <Overview>
         <p>
             The grid reads a cell through the column's <code>Field</code>. When a row is an <code>IDictionary&lt;string, object&gt;</code>,
@@ -82,6 +91,15 @@
     </Examples>
 
     <Vocabulary>
+        <p>
+            This page covers the data side of <code>GridColumn</code>: how a <code>Field</code> is resolved against each row shape, what
+            <code>Type</code> and <code>Format</code> change, and what the update scope does when a column is added or removed at run time.
+            The layout parameters (<code>Width</code>, <code>HeaderBand</code>, <code>IsFrozen</code>, <code>Visible</code> and the rest) and
+            the same three methods used on fixed column sets are on <a href="demo/grid/column-swap">Column sets</a>.
+        </p>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn data parameters" Rows="Vocab.Column" />
+        <ApiTable Kind="ApiKind.Values" Title="ColumnType" Rows="Vocab.ColumnTypes" />
+        <ApiTable Kind="ApiKind.Values" Title="Row shapes and how Field is resolved" Rows="Vocab.RowShapes" />
         <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters" Rows="Vocab.Grid" />
         <h3 class="api-title">What AutoGenerateColumns reads from the row type</h3>
         <ul>
@@ -90,9 +108,21 @@
             <li><strong>Header:</strong> <code>Display.Name</code>, else <code>[DisplayName]</code>, else the property name. <code>Display.GroupName</code> becomes the column's <code>HeaderBand</code>.</li>
             <li><strong>Format:</strong> <code>DisplayFormat.DataFormatString</code> with the <code>{0:…}</code> wrapper removed, so <code>{0:C2}</code> becomes <code>C2</code>.</li>
             <li><strong>Read-only:</strong> <code>[Key]</code> (which also sets <code>IsPrimaryKey</code>), <code>[Editable(false)]</code>, <code>[ReadOnly(true)]</code>, or no public setter.</li>
-            <li><strong>Type:</strong> <code>[DataType(DataType.Password)]</code> gives Password; a DataType of Date, DateTime or Time gives Date; <code>bool</code> gives CheckBox; <code>DateTime</code>, <code>DateTimeOffset</code> and <code>DateOnly</code> give Date; the numeric types give Number; everything else is Text. Numbers and dates align right, check boxes centre.</li>
+            <li><strong>Type:</strong> <code>Nullable&lt;T&gt;</code> is unwrapped first. <code>[DataType(DataType.Password)]</code> gives Password; a DataType of Date, DateTime or Time gives Date; <code>bool</code> gives CheckBox; <code>DateTime</code>, <code>DateTimeOffset</code> and <code>DateOnly</code> give Date; the numeric types give Number; everything else is Text. Numbers and dates align right, check boxes centre, headers included.</li>
         </ul>
-        <p class="fd-pending"><code>GridColumn</code> (<code>Field</code>, <code>Type</code>, <code>Format</code>), dictionary-backed rows and <code>SuspendRedraw</code> / <code>EndUpdateAsync</code> are still to be written up from <code>Grid/GridColumn.cs</code>, <code>Grid/GridEnums.cs</code> and <code>Grid/GridControl.razor.cs</code>.</p>
+        <ApiTable Kind="ApiKind.Methods" Title="Run-time column methods" Rows="Vocab.Methods" />
+        <p>
+            Inside the window a <code>GridColumn</code> that initialises registers with the container and one that disposes unregisters, but the
+            grid's column-driven render is held. The flush render runs <code>SyncPendingColumnStructure</code> at the top of the pass: when every
+            field in the final order is registered it reorders the container, and whenever a column was added or removed it clears the
+            selected cells, the active cell and any batch edit (selected rows stay), drops the sort and filter state and the sort priority of
+            fields that are no longer present, and invalidates the display caches. A same-<code>Field</code> replacement (the <code>@@key</code>
+            dedup) only invalidates the caches and carries the user's drag-resized width forward. After the paint, auto widths are measured
+            again and the awaited task completes; an order that names a field no column registered is discarded at that point. Before the
+            first render <code>_grid</code> is null, so the page assigns the lists directly. <code>GridControl.Columns</code> returns the
+            effective set: the generated columns merged with the explicit ones when <code>AutoGenerateColumns</code> is on, otherwise the
+            container's list.
+        </p>
     </Vocabulary>
 
     <Related>
@@ -216,14 +246,6 @@
                 UnitPrice = price, Total = (10 + (i * 7) % 150) * price, InternalCode = $"INTERNAL-{i}"
             };
         }).ToList();
-
-    private static class Vocab
-    {
-        public static readonly ApiRow[] Grid =
-        {
-            new("AutoGenerateColumns", "Builds one column per public readable property of <code>TValue</code>, as listed below. An explicit <code>GridColumn</code> with the same <code>Field</code> replaces the generated one; extra explicit columns follow the generated set.", "bool", "false"),
-        };
-    }
 
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
     private static class Code
@@ -374,5 +396,54 @@ private static List<DynamicColumn> ColumnsFrom(List<ExpandoObject> rows)
 
 private static string Humanize(string key)
     => System.Text.RegularExpressions.Regex.Replace(key, ""(?<=[a-z])(?=[A-Z])"", "" "");";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Column =
+        {
+            new("Field", "The key the grid reads a cell by. On an <code>IDictionary&lt;string, object&gt;</code> or <code>IDictionary&lt;string, object?&gt;</code> row it is the entry key, matched exactly first and then case-insensitively; on any other row it is a public instance property matched case-insensitively through a cached compiled getter. There is no nested-path support, so <code>A.B</code> is looked up as one name and reads as null. It is also the header when <code>HeaderText</code> is null, the key of the column's sort and filter state, and the identity used when columns are added, removed or replaced.", "string", "\"\""),
+            new("HeaderText", "The caption. Null shows <code>Field</code> itself (<code>DisplayHeader</code>); an empty string is an intentional blank header.", "string?", "null"),
+            new("Type", "Picks the editor, the filter-row operators and their comparison, the sort-dialog labels, the plain-number and password display and the best-fit measure; the values are below. It does not change how a sort compares: <code>GridSortKeyComparer</code> compares the raw values by their own runtime type. Only <code>Date</code> and <code>CheckBox</code> change the default alignment, so a <code>Number</code> column stays left-aligned unless <code>TextAlign</code> is set, which is why the example sets it.", "ColumnType", "ColumnType.Text"),
+            new("Format", "A .NET format string applied with the current culture when the raw value is <code>IFormattable</code> (<code>N2</code>, <code>C2</code>, <code>yyyy-MM-dd</code>). Without it a <code>Number</code> cell shows the plain invariant digits with no grouping, and a <code>Date</code> editor uses <code>MM/dd/yyyy</code>. Also the format of the aggregate footer, of the date picker in a row editor, and the number format of an exported xlsx cell.", "string?", "null"),
+            new("DisplayFormatter", "Text for a non-null cell value. When set it is the display text, the search and filter text and the exported value, ahead of <code>Format</code> and <code>Type</code>; sorting still compares the raw value.", "Func&lt;object, string&gt;?", "null"),
+            new("DisplayField", "A second field read through the same accessor. Its value stands in for the raw value in the display, search and filter text unless it is null, <code>DBNull</code> or blank; sorting still reads <code>Field</code>.", "string?", "null"),
+            new("Formula", "A per-row expression evaluated instead of reading <code>Field</code>. Bracketed names such as <code>[Qty] * [UnitPrice]</code> go through the field accessor; bare names are matched against the row's dictionary keys or public properties. The result feeds the display text, the filter text and the export.", "string?", "null"),
+            new("IsPrimaryKey", "Set by <code>AutoGenerateColumns</code> for a <code>[Key]</code> property. A generated row editor disables the cell for it.", "bool", "false"),
+            new("AllowEditing", "<code>AutoGenerateColumns</code> sets it false for a <code>[Key]</code>, <code>[Editable(false)]</code> or <code>[ReadOnly(true)]</code> property and for one without a public setter; that is what keeps Item # and Extended read-only in the batch example.", "bool", "true"),
+        };
+        public static readonly ApiRow[] ColumnTypes =
+        {
+            new("Text", "The default. The cell shows the value's <code>ToString</code>; the filter row defaults to <code>Contains</code> and offers the full text operator list; the editor is a text box; the sort dialog offers A to Z."),
+            new("Password", "Shown as one <code>*</code> per character; the row editor uses a password input; filters treat it as text."),
+            new("Number", "Without <code>Format</code> the cell shows the plain invariant digits with no grouping. The filter row offers <code>Equals</code>, <code>DoesNotEqual</code>, the four comparisons, <code>IsEmpty</code> and <code>IsNotEmpty</code> and compares as <code>decimal</code>; the editor uses <code>inputmode=decimal</code> and a native number input only with <code>ShowNumericSpinner</code>; best fit measures the column as numeric. The default alignment is still Left."),
+            new("Date", "Right-aligned by default. The row editor is a <code>DatePickerControl</code> with <code>Format</code> or <code>MM/dd/yyyy</code>, the batch editor an input of type <code>date</code>; the filter row offers the <code>Number</code> operator set and compares as dates; the sort dialog offers Oldest to Newest."),
+            new("Boolean", "Edited with a <code>CheckBoxControl</code> in the row editor and without an in-cell text editor in batch mode; the filter row offers <code>Equals</code>, <code>DoesNotEqual</code>, <code>IsEmpty</code> and <code>IsNotEmpty</code> and compares as <code>bool</code>. The display cell has no special case, so it shows True or False as text, left-aligned."),
+            new("CheckBox", "Renders a check box in the cell, and a click on an editable cell toggles the value in place. Centred by default; only an explicit <code>TextAlign.Right</code> overrides that. Exports write 1 or 0. Filters and editors behave as <code>Boolean</code>. A <code>CheckBox</code> column with an empty <code>Field</code> is the selection check-box column."),
+        };
+        public static readonly ApiRow[] RowShapes =
+        {
+            new("IDictionary&lt;string, object&gt; / IDictionary&lt;string, object?&gt;", "Tried first: <code>TryGetValue</code> with the exact key, then a scan of the entries with a case-insensitive key match. Sorting, filtering, search and export all read through the same accessor. An edit writes <code>row[Field] = value</code>; on the non-nullable shape a null is stored as an empty string. A row-editor clone copies the entries rather than properties."),
+            new("ExpandoObject", "Is an <code>IDictionary&lt;string, object?&gt;</code>, so it takes the dictionary path. A key missing on a row, as <code>LeadTimeDays</code> is before the switch is on, reads as null and shows an empty cell. A typed batch edit stores the editor's string as the entry: there is no property type to convert to."),
+            new("Class or record with public properties", "A public instance property named <code>Field</code>, case-insensitive, no indexers, read through a compiled getter cached per row type and field. An edit converts the text to the property type before writing. A getter that throws reads as null."),
+            new("Nested path (<code>Address.City</code>)", "Not supported. The whole string is looked up as one key or property name and reads as null. Flatten the row or use a <code>Template</code>."),
+            new("DataRow / DataRowView", "No special handling. A <code>DataRow</code> is neither a dictionary nor a type with a property per column, so every <code>Field</code> reads as null. Project the table into dictionaries or objects first."),
+        };
+        public static readonly ApiRow[] Grid =
+        {
+            new("AutoGenerateColumns", "Builds one column per public readable property of <code>TValue</code>, as listed below, once per grid instance. An explicit <code>GridColumn</code> with the same <code>Field</code> replaces the generated one; extra explicit columns follow the generated set.", "bool", "false"),
+            new("ColumnHeaderBands", "Band descriptors for the one-level parent header. A band that lists a field in <code>Fields</code> wins over that column's own <code>HeaderBand</code>.", "IReadOnlyList&lt;GridColumnHeaderBand&gt;?", "null"),
+            new("AvailableColumns", "With <code>AutoGenerateColumns</code> off and no <code>GridColumn</code> declared, each descriptor with a <code>Field</code> becomes a transient column (<code>Field</code>, <code>Header</code>, <code>Visible</code>) so the header row is not empty. Otherwise it is the schema of the Choose Columns dialog.", "IEnumerable&lt;ChooseColumnDescriptor&gt;?", "null"),
+            new("DataSource", "The rows. The example swaps the list inside the update scope together with the column list, so the flush render reads both.", "IEnumerable&lt;TValue&gt;?", "null"),
+            new("EditSettingsRef", "The editing settings object. The annotations example sets <code>AllowEditing</code> and <code>Mode = Batch</code>, so the generated columns whose <code>AllowEditing</code> stayed true edit in the cell.", "EditSettings?", "null"),
+            new("AllowCellFormulas", "With it on, a string cell value that starts with <code>=</code> is evaluated as a formula when the cell is read.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("BeginUpdate()", "Increments the update depth. While it is above zero the column-registration channel drops its renders, so columns registering or disposing inside the window do not paint; input, selection and batch-edit renders are not gated. Nesting counts, and a <code>BeginUpdate</code> without its <code>EndUpdateAsync</code> keeps column renders suppressed until the grid is disposed.", "void"),
+            new("EndUpdateAsync(IEnumerable&lt;string&gt;? finalColumnOrder = null)", "At depth zero it returns at once. Otherwise it decrements, and only the outermost call flushes: it stores <code>finalColumnOrder</code>, cancels a pending one-shot render suppression, marks auto widths pending, queues one render and awaits a completion that <code>OnAfterRenderAsync</code> sets once no column render is queued at depth zero. Without an order, new fields append and fields not listed keep their relative order after the listed ones.", "Task"),
+            new("SuspendRedraw(IEnumerable&lt;string&gt;? finalColumnOrder = null)", "Calls <code>BeginUpdate</code> and returns a scope whose <code>DisposeAsync</code> calls <code>EndUpdateAsync(finalColumnOrder)</code>, so <code>await using</code> balances the pair even when the mutation throws. The page passes the new field list every time, so an added column lands where the first row's key order puts it.", "ColumnUpdateScope"),
+            new("ColumnUpdateScope.DisposeAsync()", "Wraps <code>EndUpdateAsync(order)</code> in a <code>ValueTask</code>. The scope has no other member; a second disposal reaches the depth-zero no-op.", "ValueTask"),
+        };
     }
 }

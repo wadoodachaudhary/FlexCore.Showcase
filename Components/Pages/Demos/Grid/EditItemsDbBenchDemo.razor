@@ -14,13 +14,19 @@
    counter now counts saves (OnCellSave) rather than edit starts (OnCellEdit) and names the last one. SelectAllOnEdit stays on the
    two numeric columns but the copy no longer claims it: in the browser the editor opened with the caret at the end on both
    double-click and Enter entry (SC-253 note). The data is BenchDataStore's
-   in-memory list (5,000 generated rows when the JSON file is absent) and the copy says so. Parameter tables are a later pass (SC-278). *@
+   in-memory list (5,000 generated rows when the JSON file is absent) and the copy says so. Parameter tables are a later pass (SC-278).
+   2026-10-24 (SC-278): Documentation tables written from Grid/EditSettings.cs, Grid/GridEnums.cs, Grid/GridColumn.cs,
+   Grid/GridControlEvents.cs, Grid/GridModels.cs and the read and raise sites in Grid/GridControl.razor.cs, GridControl.razor,
+   GridControl.DeleteConfirmation.cs, GridControl.RowEditing.cs and GridControl.Validation.cs; rows checked with scratchpad/vocabcheck.py.
+   Members the library declares but never reads or raises (CellSaved, OnActionComplete, PreferCellEditOnDoubleClick, ValidationRules,
+   DefaultValue) are listed as such. The CellEditButtonArgs, CellValueTruncatedArgs and TypeAheadCommitArgs payloads are described in
+   the closing paragraph rather than in tables of their own, being off this page's topic. *@
 
 <PageTitle>Batch editing — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Batch editing" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
                    Tagline="Double-click a cell, type, press Enter: cell-by-cell editing on a 5,000-row list, written straight to the bound objects."
-                   SourcePath="Grid/EditSettings.cs;Grid/GridControl.razor.cs;Grid/GridControlEvents.cs">
+                   SourcePath="Grid/EditSettings.cs;Grid/GridEnums.cs;Grid/GridColumn.cs;Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/GridControl.razor.cs;Grid/GridControl.razor;Grid/GridControl.DeleteConfirmation.cs;Grid/GridControl.RowEditing.cs;Grid/GridControl.Validation.cs">
     <Overview>
         <p>
             <code>EditSettings</code> turns editing on and picks the mode. In <code>EditMode.Batch</code> a double-click on an editable cell,
@@ -64,7 +70,33 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>EditSettings</code>, <code>EditMode</code>, the editing parameters of <code>GridColumn</code> and the edit events on <code>GridControlEvents</code> are still to be written from <code>Grid/EditSettings.cs</code>, <code>Grid/GridColumn.cs</code> and <code>Grid/GridControlEvents.cs</code>.</p>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl editing parameters" Rows="Vocab.Grid" />
+        <ApiTable Kind="ApiKind.Properties" Title="EditSettings" Rows="Vocab.Settings" />
+        <ApiTable Kind="ApiKind.Values" Title="EditMode" Rows="Vocab.Modes" />
+        <ApiTable Kind="ApiKind.Values" Title="GridBatchEditBehavior" Rows="Vocab.Behaviors" />
+        <p>
+            The <code>GridColumn</code> parameters that bear on editing follow; the column's other parameters are on the
+            <a href="demo/grid/column-swap">Column sets</a> and <a href="demo/grid/dynamic-columns">Dynamic columns</a> pages.
+        </p>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn editing parameters" Rows="Vocab.Column" />
+        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn dropdown, picker and date parameters" Rows="Vocab.ColumnEditors" />
+        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, editing" Rows="Vocab.Events" />
+        <ApiTable Kind="ApiKind.Properties" Title="CellEditArgs&lt;TValue&gt;" Rows="Vocab.EditArgs" />
+        <ApiTable Kind="ApiKind.Properties" Title="CellSaveArgs&lt;TValue&gt;" Rows="Vocab.SaveArgs" />
+        <ApiTable Kind="ApiKind.Properties" Title="RowEditEventArgs&lt;TValue&gt;" Rows="Vocab.RowArgs" />
+        <ApiTable Kind="ApiKind.Methods" Title="Editing methods" Rows="Vocab.Methods" />
+        <p>
+            The other payloads: <code>CellEditButtonArgs&lt;TValue&gt;</code> carries <code>Data</code>, <code>ColumnName</code> and the
+            <code>GridColumn</code> itself as <code>Column</code>; <code>CellValueTruncatedArgs&lt;TValue&gt;</code> carries <code>Data</code>,
+            <code>ColumnName</code>, <code>HeaderText</code>, <code>PastedLength</code> and <code>MaxLength</code>;
+            <code>TypeAheadCommitArgs&lt;TValue&gt;</code> carries <code>SelectedItems</code>, <code>ColumnName</code> and the typed
+            <code>Value</code>. Beyond <code>EndEditAsync</code> there is no public commit or cancel for a batch cell: Escape abandons the
+            open editor, and Enter, Tab or a click elsewhere commits it. A commit converts the text to the property's type, runs
+            <code>ValidationSettings</code> (data annotations and a custom validator) and on failure keeps the editor open with the
+            message; only then is the value written and <code>OnCellSave</code> raised. The toolbar items named above come from the
+            grid's <code>Toolbar</code> parameter, a list of names with Add, Edit and Delete among them; a column's <code>Commands</code>
+            give per-row edit, delete, save and cancel buttons for the row editor.
+        </p>
     </Vocabulary>
 
     <Related>
@@ -181,5 +213,112 @@ public sealed class EstimatingItemRecord
     public string? PartNumber { get; set; }
     public string? Formula { get; set; }
 }";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Grid =
+        {
+            new("EditSettingsRef", "The settings object below. Null leaves every cell read-only: each way into an editor first checks <code>AllowEditing</code> on it.", "EditSettings?", "null"),
+            new("EventsRef", "The object that holds the callbacks below; the grid has no separate parameters for the edit events.", "GridControlEvents&lt;TValue&gt;?", "null"),
+            new("BatchEditBehavior", "Picks one of the two batch behaviours in the table below.", "GridBatchEditBehavior", "GridBatchEditBehavior.MultiRow"),
+            new("EditOnSingleClick", "A plain click on an editable batch cell opens its editor at once, instead of only selecting the cell.", "bool", "false"),
+            new("CellEditablePredicate", "Per-row veto, called with the row and the field before a cell opens and again for each row a multi-row commit fans out to. A false answer leaves that cell read-only without raising <code>OnCellEdit</code>.", "Func&lt;TValue, string, bool&gt;?", "null"),
+            new("NewItemFactory", "Builds the row for <code>AppendRow</code>, <code>InsertRow</code> and the Inline or Dialog add editor. Without it the grid calls <code>Activator.CreateInstance&lt;TValue&gt;()</code>.", "Func&lt;TValue&gt;?", "null"),
+            new("AllowSingleCellColumnMassEdit", "With <code>SingleCell</code> and cell selection, Ctrl or Shift can select several cells of one column, and a typed value commits to all of them.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Settings =
+        {
+            new("AllowEditing", "Master switch. Double-click, Enter, F2, the click options, type-ahead commits and <code>BeginEditCellAsync</code> all check it first, and the editable-cell cue is drawn only while it is on.", "bool", "false"),
+            new("AllowAdding", "Read only by the trailing-new-row features, <code>EnsureTrailingNewRow</code> and <code>AddNewRowOnLastCellExit</code>. The toolbar Add item, <code>AppendRow</code> and <code>InsertRow</code> do not consult it.", "bool", "false"),
+            new("AllowDeleting", "Gate for the toolbar Delete item and a column's delete command, which run the confirm step and raise <code>RowDeleting</code> and <code>RowDeleted</code>. <code>DeleteRecordAsync</code> does not consult it.", "bool", "false"),
+            new("Mode", "Which editor opens; the values are in the next table.", "EditMode", "EditMode.Inline"),
+            new("ShowConfirmDialog", "A toolbar or command delete first shows a dialog saying how many records will go; false deletes at once. Not consulted for edits.", "bool", "true"),
+            new("NewRowPosition", "Where the Inline add editor sits and where the saved new row goes in the list: index 0 for <code>Top</code>, the end for <code>Bottom</code>. Batch mode does not read it.", "NewRowPosition", "NewRowPosition.Top"),
+            new("AllowEditOnDblClick", "In Batch mode a double-click on an editable cell opens its editor; in Inline and Dialog mode a double-click on the row opens the row editor. False leaves the double-click to <code>OnRecordDoubleClick</code>.", "bool", "true"),
+            new("EditOnEnterKey", "Enter on the active editable cell opens its editor with the value selected. A cell with edit options opens its list instead and does not read this.", "bool", "true"),
+            new("EditOnActiveCellClick", "A plain click on the cell that was already active opens its editor: the first click selects, the second edits.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Modes =
+        {
+            new("Inline", "A row editor takes the row's place, or sits at <code>NewRowPosition</code> for an add, with a generated control per editable column or the column's <code>EditTemplate</code>. Enter saves, Escape cancels, and <code>OnBeginEdit</code> and the Row events fire around it."),
+            new("Dialog", "The same row editor inside a <code>DialogControl</code> titled Edit Record or Add New Record; closing the dialog cancels."),
+            new("Batch", "No row editor. One cell at a time opens in place; Enter, Tab or a click elsewhere commits it to the bound object and Escape abandons it. <code>OnCellEdit</code> and <code>OnCellSave</code> report it; <code>OnBeginEdit</code> and the Row events belong to the row editor."),
+        };
+        public static readonly ApiRow[] Behaviors =
+        {
+            new("MultiRow", "The default. When the edited row is one of several selected rows and the user typed in the editor, the commit writes the value to every selected row the predicate allows and raises <code>OnCellSave</code> once per row; <code>OnCellEdit</code> fired only for the cell that opened. Typing with several rows selected and no editor open starts a type-ahead that commits the same way."),
+            new("SingleCell", "A click selects a cell, a double-click edits it, and typed keys go to that one cell and commit on Enter. Several cells of one column can be edited together only through <code>AllowSingleCellColumnMassEdit</code>."),
+        };
+        public static readonly ApiRow[] Column =
+        {
+            new("AllowEditing", "False keeps the cell read-only: batch and keyboard entry skip it, the Inline editor shows its plain value and the Dialog editor leaves it out. The example sets it on every column.", "bool", "true"),
+            new("IsPrimaryKey", "Never editable, whatever <code>AllowEditing</code> says: batch entry, <code>BeginEditCellAsync</code> and type-ahead skip it, the Inline editor shows its plain value and the Dialog editor shows it disabled.", "bool", "false"),
+            new("SelectAllOnEdit", "Read when the editor opens without a pointer position, for example from <code>BeginEditCellAsync</code>: the existing value is pre-selected so the first keystroke replaces it. Enter and F2 pre-select regardless; a click or double-click puts the caret under the pointer.", "bool", "false"),
+            new("MaxLength", "Limit of the text editor. The browser clips a longer paste and <code>CellValueTruncated</code> reports it.", "int?", "null"),
+            new("ShowNumericSpinner", "Number columns edit in a plain text editor with a decimal input mode; true renders a native number input with spinner arrows.", "bool", "false"),
+            new("EditTemplate", "Replaces the generated control in the Inline and Dialog row editors; <code>context</code> is the row being edited, a copy until it is saved. The batch cell editor does not use it, and keyboard entry skips a column that has one.", "RenderFragment&lt;object&gt;?", "null"),
+            new("PreferCellEditOnDoubleClick", "Declared, but <code>GridControl</code> never reads it.", "bool", "false"),
+            new("ValidationRules", "Declared, but <code>GridControl</code> never reads it. Batch validation comes from the grid's <code>ValidationSettings</code>: data annotations and a custom validator.", "string?", "null"),
+            new("DefaultValue", "Declared, but <code>GridControl</code> never reads it. A new row's values come from <code>NewItemFactory</code>.", "string?", "null"),
+        };
+        public static readonly ApiRow[] ColumnEditors =
+        {
+            new("EditOptions", "Fixed choices for an in-cell dropdown editor in Batch mode. An entry written <code>#value;text</code> shows the text and stores the value; a plain entry is both.", "IEnumerable&lt;string&gt;?", "null"),
+            new("EditOptionsProvider", "Row-aware choices, called with the row and used instead of <code>EditOptions</code> when it returns a list; an exception from it falls back to <code>EditOptions</code>.", "Func&lt;object, IEnumerable&lt;string&gt;&gt;?", "null"),
+            new("AllowCustomEditOptionValue", "Renders the dropdown as an editable combo that also accepts a typed value outside the list.", "bool", "false"),
+            new("OpenEditOptionsOnEdit", "Opens the list as soon as a click or double-click starts the edit; false leaves that to the arrow button.", "bool", "true"),
+            new("RequireEditValueInList", "A typed value must match an allowed entry, case-insensitively and on either side of a mapped option, before the cell commits; the stored value is the mapped value. A miss shows the not-found message and keeps the editor open; an empty entry always passes. The list is <code>EditValueListProvider</code>, else <code>EditValueList</code>, else the edit options.", "bool", "false"),
+            new("EditValueList", "Allowed values for <code>RequireEditValueInList</code> on a cell with a picker button rather than a dropdown.", "IEnumerable&lt;string&gt;?", "null"),
+            new("EditValueListProvider", "Row-aware allowed values; an exception from it counts as no list.", "Func&lt;object, IEnumerable&lt;string&gt;&gt;?", "null"),
+            new("EditValueNotFoundMessage", "Text of the refusal; a <code>{0}</code> placeholder takes the refused entry. Null gives the column name, the entry and not found.", "string?", "null"),
+            new("ShowEditButton", "Adds a trailing picker button to the cell while its editor is open. A click on it closes the editor and raises <code>OnEditButtonClick</code>; Enter on the active cell does the same when a handler is attached.", "bool", "false"),
+            new("EditButtonText", "Caption of that button.", "string", "&quot;...&quot;"),
+            new("AlwaysShowEditButton", "Paints the button in the display cell as well, not only while editing.", "bool", "false"),
+            new("OpenEditButtonOnDoubleClick", "A double-click on a <code>ShowEditButton</code> cell raises <code>OnEditButtonClick</code> as the button would.", "bool", "true"),
+            new("ShowEditButtonPredicate", "Per-row veto for <code>AlwaysShowEditButton</code>; false hides the button on that row.", "Func&lt;object, bool&gt;?", "null"),
+            new("OpenDateCalendarOnDoubleClick", "Date columns edit as text; true adds the calendar button to the editor and opens the picker on a double-click.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("OnCellEdit", "Before a batch cell opens, and before a checkbox toggle or a context-menu paste or clear writes a cell. Set <code>Cancel</code> to refuse. Not raised for the further rows of a multi-row commit, nor for a cell the predicate refused.", "CellEditArgs&lt;TValue&gt;"),
+            new("OnCellSave", "After a value is written to the bound object: when a batch editor commits with a changed value or one the user typed, once per row the commit fanned out to, and after a checkbox toggle, a paste or clear or a type-ahead commit. The example counts these.", "CellSaveArgs&lt;TValue&gt;"),
+            new("OnEditButtonClick", "The picker button of a <code>ShowEditButton</code> cell was clicked, the cell was double-clicked with <code>OpenEditButtonOnDoubleClick</code>, or Enter was pressed on it; an open editor on that cell is closed first.", "CellEditButtonArgs&lt;TValue&gt;"),
+            new("CellValueTruncated", "A paste into a text editor with <code>MaxLength</code> was longer than the limit. The browser already clipped it; this reports the pasted and kept lengths.", "CellValueTruncatedArgs&lt;TValue&gt;"),
+            new("OnTypeAheadCommit", "A value typed with several rows selected and no editor open is being committed. With a handler the grid passes the editable selected rows and the text and writes nothing itself; without one it runs the normal validation and <code>OnCellSave</code> pipeline per row.", "TypeAheadCommitArgs&lt;TValue&gt;"),
+            new("OnBeginEdit", "Before the Inline or Dialog row editor opens on an existing row: row double-click, F2 with one row selected, the toolbar Edit item or a column's edit command. Set <code>Cancel</code> to keep it closed. Not raised for an add.", "RowEditEventArgs&lt;TValue&gt;"),
+            new("RowUpdating / RowUpdated", "Around saving the row editor over an existing row: <code>RowUpdating</code> with the edited copy before it is written back to the list item (set <code>Cancel</code> to keep the editor open), <code>RowUpdated</code> after.", "RowEditEventArgs&lt;TValue&gt;"),
+            new("RowCreating / RowCreated", "Around saving an added row: <code>RowCreating</code> before it is inserted into the list at <code>NewRowPosition</code> (cancellable), <code>RowCreated</code> after.", "RowEditEventArgs&lt;TValue&gt;"),
+            new("RowDeleting / RowDeleted", "Per record of a toolbar or command delete, after the confirm step: <code>RowDeleting</code> before the removal (set <code>Cancel</code> to keep that record), <code>RowDeleted</code> after. <code>DeleteRecordAsync</code> raises neither.", "RowEditEventArgs&lt;TValue&gt;"),
+            new("CellSaved", "Declared, but <code>GridControl</code> never raises it; <code>OnCellSave</code> is the event that fires after a cell commits.", "CellSavedArgs&lt;TValue&gt;"),
+            new("OnActionComplete", "Declared, but <code>GridControl</code> never raises it.", "ActionEventArgs&lt;TValue&gt;"),
+        };
+        public static readonly ApiRow[] EditArgs =
+        {
+            new("Data", "The row about to be edited.", "TValue"),
+            new("ColumnName", "The column's <code>Field</code>.", "string", "&quot;&quot;"),
+            new("Cancel", "Set true to keep the cell read-only this time.", "bool", "false"),
+        };
+        public static readonly ApiRow[] SaveArgs =
+        {
+            new("Data", "The row that was written; in a multi-row commit, each selected row in turn.", "TValue"),
+            new("ColumnName", "The column's <code>Field</code>.", "string", "&quot;&quot;"),
+            new("Value", "What was written: the editor text for a commit or type-ahead, a <code>bool</code> for a checkbox toggle.", "object?", "null"),
+        };
+        public static readonly ApiRow[] RowArgs =
+        {
+            new("Data", "The row: the list item for <code>OnBeginEdit</code> and the delete events, the edited copy for the update and create events.", "TValue?", "null"),
+            new("RowIndex", "The row's index in the current display order; 0 for the create events.", "int", "0"),
+            new("Cancel", "Read by <code>OnBeginEdit</code>, <code>RowUpdating</code>, <code>RowCreating</code> and <code>RowDeleting</code>; the completed events ignore it.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("BeginEditCellAsync(TValue row, string field)", "Pages to the row if needed, selects the cell and opens its batch editor as a click would, raising <code>OnCellEdit</code>. Needs Batch mode and an editable, non-key column; otherwise a no-op.", "Task"),
+            new("EndEditAsync()", "Commits whatever is open: a pending type-ahead, the batch cell editor (validation and <code>OnCellSave</code> included), then a row editor. A validation failure keeps the editor open.", "Task"),
+            new("AppendRow(TValue record, string? editField = null, bool beginEdit = true)", "Adds the row at the end of the list, which must be an <code>IList&lt;TValue&gt;</code> or it throws, and by default opens the editor on <code>editField</code> or the first editable cell. The overload without <code>record</code> builds one with <code>NewItemFactory</code>; <code>AppendRowAsync</code> is the same method.", "Task&lt;TValue&gt;"),
+            new("InsertRow(int rowIndex, TValue record, string? editField = null, bool beginEdit = true)", "The same at <code>rowIndex</code>, clamped to the list; the overload without <code>record</code> and <code>InsertRowAsync</code> as above.", "Task&lt;TValue&gt;"),
+            new("AddRecordAsync(TValue record)", "Adds to the list and repaints; nothing happens when <code>DataSource</code> is not an <code>IList&lt;TValue&gt;</code>. No editor, no events.", "Task"),
+            new("DeleteRecordAsync(TValue record)", "Removes the row from the list and the selection and repaints. No confirm dialog, no <code>RowDeleting</code> or <code>RowDeleted</code>, and <code>AllowDeleting</code> is not consulted.", "Task"),
+        };
     }
 }

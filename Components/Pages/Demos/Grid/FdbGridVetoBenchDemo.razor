@@ -11,13 +11,16 @@
    when a value is written (OnCellSave) rather than when an editor opens (OnCellEdit, which also fired for edits abandoned with
    Escape); the doc table that named a non-existent RowSelectingEventArgs is gone and the code tabs are generated from the page
    (SC-148, SC-149); the unused @ref and the explicit TextEditorTypingBehavior (its default) went; Save is a ButtonControl.
-   Parameter tables are a later pass (SC-278). *@
+   Parameter tables are a later pass (SC-278).
+   2026-10-24 (SC-278): Documentation tables written from Grid/GridControlEvents.cs, Grid/GridModels.cs, Grid/SelectionSettings.cs and
+   the raise sites in Grid/GridControl.razor.cs and Grid/GridControl.KeyboardSelection.cs; the selection rows are copied from
+   UserPermsBenchDemo.razor; every row checked with vocabcheck.py and the raise-site line numbers. *@
 
 <PageTitle>Unsaved-row lock — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Unsaved-row lock" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
                    Tagline="Veto the move to another row while the current one has unsaved changes."
-                   SourcePath="Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/GridControl.razor.cs">
+                   SourcePath="Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/SelectionSettings.cs;Grid/GridControl.razor.cs;Grid/GridControl.KeyboardSelection.cs">
     <Overview>
         <p>
             <code>RowSelecting</code> fires before the selection moves. Its <code>RowSelectEventArgs</code> carries the target row in
@@ -62,7 +65,22 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>RowSelecting</code> / <code>RowSelected</code>, <code>RowSelectEventArgs</code>, <code>OnCellSave</code> and <code>SelectionSettings</code> are still to be written up from <code>Grid/GridControlEvents.cs</code> and <code>Grid/GridModels.cs</code>.</p>
+        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, selection" Rows="Vocab.Events" />
+        <ApiTable Kind="ApiKind.Properties" Title="RowSelectEventArgs&lt;TValue&gt;" Rows="Vocab.Args" />
+        <ApiTable Kind="ApiKind.Properties" Title="SelectionSettings, the properties that matter here" Rows="Vocab.Settings" />
+        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, cell editing" Rows="Vocab.CellEvents" />
+        <ApiTable Kind="ApiKind.Properties" Title="CellSaveArgs&lt;TValue&gt;" Rows="Vocab.SaveArgs" />
+        <ApiTable Kind="ApiKind.Properties" Title="CellEditArgs&lt;TValue&gt;" Rows="Vocab.EditArgs" />
+        <ApiTable Kind="ApiKind.Methods" Title="Edit methods" Rows="Vocab.Methods" />
+        <p>
+            The selection rows are the ones on <a href="demo/grid/master-detail">Master-detail</a>, which also lists the other
+            <code>SelectionSettings</code> properties, <code>SelectionChanged</code> and the selection methods. Those methods change the
+            selection without raising <code>RowSelecting</code>, and so does Shift plus an arrow when <code>ModifierKeysExtendSelection</code>
+            lets a <code>Single</code> selection grow. The veto stops the selection, not every edit path: a checkbox toggle on another row,
+            or a dropdown or date editor that opens on mouse-down there, still runs. <code>GridControl</code> has no public member that
+            cancels the open editor, says whether one is open or lists unsaved rows: Escape discards the edit inside the grid, and a page
+            keeps its own dirty flag, as this one does.
+        </p>
     </Vocabulary>
 
     <Related>
@@ -234,5 +252,50 @@ private void Save()
     _vetoCount = 0;
     _saveCount++;
 }";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Events =
+        {
+            new("RowSelecting", "Before a row is selected by mouse, keyboard or checkbox toggle. Set <code>Cancel</code> to refuse. Not raised by <code>AutoSelectFirstRow</code>, type-ahead moves or the selection methods.", "RowSelectEventArgs&lt;TValue&gt;"),
+            new("RowSelected", "After a row is selected by mouse, keyboard, checkbox toggle, type-ahead search or <code>AutoSelectFirstRow</code>. Not raised during drag-select or by the selection methods.", "RowSelectEventArgs&lt;TValue&gt;"),
+            new("RowDeselecting / RowDeselected", "Declared, but <code>GridControl</code> never raises them. <code>TreeGridControl</code> raises <code>RowDeselected</code>.", "RowSelectEventArgs&lt;TValue&gt;"),
+        };
+        public static readonly ApiRow[] Args =
+        {
+            new("Data", "The row.", "TValue?", "null"),
+            new("RowIndex", "The row's index in the grid's current display order.", "int", "0"),
+            new("Cancel", "Set in <code>RowSelecting</code> to keep the current selection. Ignored by <code>RowSelected</code>.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Settings =
+        {
+            new("Type", "<code>Single</code> keeps one row; Ctrl or Shift with a click or an arrow still extends it unless <code>ModifierKeysExtendSelection</code> is off. <code>Multiple</code>: a plain click still collapses to the clicked row; Ctrl toggles a row, Shift selects the visible range from the last selected row.", "SelectionType", "SelectionType.Single"),
+            new("Mode", "<code>Row</code> or <code>Cell</code>. In Cell mode the selected set is cells, <code>SelectionChanged</code> counts cells, and <code>AutoSelectFirstRow</code> is skipped.", "SelectionMode", "SelectionMode.Row"),
+            new("ModifierKeysExtendSelection", "With <code>Single</code>, Ctrl or Shift plus a click or Shift plus an arrow add rows. False keeps exactly one row: a modifier click selects the clicked row alone. Ignored for <code>Multiple</code> and for Cell mode.", "bool", "true"),
+        };
+        public static readonly ApiRow[] CellEvents =
+        {
+            new("OnCellEdit", "Before a batch editor opens on a cell, and before a checkbox toggle or a cell context-menu paste or delete writes its value. Set <code>Cancel</code> to keep the cell as it is. Not raised when an open editor commits.", "CellEditArgs&lt;TValue&gt;"),
+            new("OnCellSave", "After a cell's value is written: when the batch editor commits on Enter, Tab, blur or a click elsewhere, when a checkbox toggles, and when a context-menu paste or delete, a type-ahead commit or a fill writes a value. Also raised when a touched editor commits the text it started with, so a row can be marked dirty without a change; an untouched editor that commits because focus moved, and an edit abandoned with Escape, raise nothing. There is no cancel: the value is already in the row.", "CellSaveArgs&lt;TValue&gt;"),
+            new("CellSaved", "Declared, but <code>GridControl</code> never raises it. <code>CellSavedArgs</code> has the same three properties as <code>CellSaveArgs</code>.", "CellSavedArgs&lt;TValue&gt;"),
+        };
+        public static readonly ApiRow[] SaveArgs =
+        {
+            new("Data", "The row the value was written to.", "TValue", "default!"),
+            new("ColumnName", "The column's <code>Field</code>.", "string", "\"\""),
+            new("Value", "What was written: the committed editor text as a string for a batch edit, the new <code>bool</code> for a checkbox, the pasted or filled object otherwise.", "object?", "null"),
+        };
+        public static readonly ApiRow[] EditArgs =
+        {
+            new("Data", "The row.", "TValue", "default!"),
+            new("ColumnName", "The column's <code>Field</code>.", "string", "\"\""),
+            new("Cancel", "Set to keep the editor closed, or the checkbox or pasted value unwritten.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("EndEditAsync()", "Commits the open batch editor through the same path as Enter, raising <code>OnCellSave</code>; a pending type-ahead is committed and an open row editor saved the same way. Returns without saving when the value fails validation.", "Task"),
+            new("BeginEditCellAsync(TValue row, string field)", "Pages to the row, selects the cell (through <code>RowSelecting</code> and <code>RowSelected</code>) and opens its batch editor as a click would, after <code>OnCellEdit</code>. Does nothing when that is cancelled, the column is not editable or edit mode is not <code>Batch</code>; a checkbox cell is selected but not toggled.", "Task"),
+        };
     }
 }

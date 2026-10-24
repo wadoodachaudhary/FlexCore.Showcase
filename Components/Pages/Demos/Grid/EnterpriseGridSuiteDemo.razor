@@ -13,13 +13,18 @@
    .xls HTML alias, so the old .xlsx file was HTML); the status badge is BadgeControl instead of Bootstrap classes; the buttons are
    ButtonControls. Copy dropped: "zero external JavaScript dependencies", "complete parity with high-end desktop data grids",
    ClosedXML (the grid's xlsx writer is the library's own, GridExportModels.cs BuildXlsx), multi-column sorting, checklist
-   filtering and frozen columns (none configured here). Parameter tables are a later pass (SC-278). *@
+   filtering and frozen columns (none configured here). Parameter tables are a later pass (SC-278).
+   2026-10-24: Documentation tables (SC-278) written from Grid/GridControl.razor.cs (ExportAsync family, BuildGridExportTable, print defaults),
+   Grid/GridControl.ExportOptions.cs, Grid/GridControl.ProviderExport.cs, Grid/GridExportModels.cs (GridExporter, the format builders,
+   GridExportCellStyle, GridPdfPrintOptions), Grid/NativePdfDocument.cs (WriteLegacy), Excel/XlsxWriter.cs and Grid/GridColumn.cs; every row
+   checked at its read site and with vocabcheck.py. The grid PDF goes through WriteLegacy with the standard Helvetica fonts; the embedded
+   Liberation fonts belong to the report PDF writer (Reports/ReportPdfExport.cs). *@
 
 <PageTitle>Export &amp; templates — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Export &amp; templates" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
                    Tagline="Export the rows you see to CSV or a real .xlsx workbook, and render a column through your own markup."
-                   SourcePath="Grid/GridControl.razor.cs;Grid/GridExportModels.cs;Grid/GridColumn.cs">
+                   SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.ExportOptions.cs;Grid/GridControl.ProviderExport.cs;Grid/GridExportModels.cs;Grid/NativePdfDocument.cs;Excel/XlsxWriter.cs;Grid/GridColumn.cs">
     <Overview>
         <p>
             The grid exports itself: <code>ExportToCsvAsync</code>, <code>ExportToXlsxAsync</code> and the other <code>ExportTo…Async</code>
@@ -78,7 +83,29 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending">The export methods and <code>GridExportFormat</code>, and the <code>Template</code> parameter of <code>GridColumn</code>, are still to be written from <code>Grid/GridControl.razor.cs</code>, <code>Grid/GridExportModels.cs</code> and <code>Grid/GridColumn.cs</code>.</p>
+        <p>
+            Every <code>ExportTo…Async</code> method is <code>ExportAsync</code> with a fixed <code>GridExportFormat</code>. The grid builds a
+            <code>GridExportTable</code> from <code>VisibleColumns</code> and the filtered, sorted rows; <code>GridExporter</code> turns it into
+            bytes with writers that live in the FlexCore assembly itself (<code>XlsxWriter</code> for .xlsx, <code>NativePdfDocument</code> for
+            PDF; no ClosedXML, and the <code>FlexCore.Documents</code> project the Showcase references for its spreadsheet and PDF viewers plays
+            no part); <code>GridExporter.SaveAsync</code> then hands the bytes to the browser.
+        </p>
+        <ApiTable Kind="ApiKind.Methods" Title="GridControl export methods" Rows="Vocab.Export" />
+        <ApiTable Kind="ApiKind.Methods" Title="Provider export methods" Rows="Vocab.Provider" />
+        <ApiTable Kind="ApiKind.Methods" Title="GridExporter (static)" Rows="Vocab.Exporter" />
+        <ApiTable Kind="ApiKind.Values" Title="GridExportFormat" Rows="Vocab.Formats" />
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl export parameters" Rows="Vocab.Params" />
+        <ApiTable Kind="ApiKind.Properties" Title="GridExportCellStyle" Rows="Vocab.CellStyle" />
+        <ApiTable Kind="ApiKind.Properties" Title="GridPdfPrintOptions" Rows="Vocab.PdfOptions" />
+        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn template parameters" Rows="Vocab.Templates" />
+        <p>
+            <code>IsProviderExporting</code>, <code>ProviderExportProgress</code> and <code>ProviderExportLastError</code> are read-only
+            properties that mirror a provider export in flight. The embedded Liberation fonts under <code>Grid/PdfFonts</code> serve the report
+            PDF writer; the grid PDF draws with the standard Helvetica fonts. <code>GridControl</code> also declares
+            <code>GroupFooterTemplate</code> (<code>RenderFragment&lt;object&gt;?</code>) but never reads it, and <code>GridColumn</code> has no
+            footer template: an aggregate's footer text comes from <code>AggregateColumn.FooterTemplate</code>, a format string whose default is
+            <code>{value}</code>.
+        </p>
     </Vocabulary>
 
     <Related>
@@ -197,5 +224,105 @@ protected override void OnInitialized()
 private Task ExportCsv() => _grid?.ExportToCsvAsync(""estimate-items.csv"") ?? Task.CompletedTask;
 
 private Task ExportExcel() => _grid?.ExportToXlsxAsync(""estimate-items.xlsx"") ?? Task.CompletedTask;";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Export =
+        {
+            new("ExportToCsvAsync(string? fileName = null)", "Comma-separated text: a header line, then the display values row by row; a value holding the delimiter, a quote or a line break is quoted, an empty value is written as two quotes. Encoded per <code>DelimitedExportEncoding</code>. <code>ExportAsync</code> with <code>GridExportFormat.Csv</code>; the CSV button on this page calls it.", "Task"),
+            new("ExportToTsvAsync(string? fileName = null)", "The same with a tab delimiter.", "Task"),
+            new("ExportToXlsxAsync(string? fileName = null)", "A real workbook from <code>Fx.ControlKit.Excel.XlsxWriter</code> in the FlexCore assembly: bold shaded header, thin borders, number formats resolved from each column's <code>Format</code>, column widths from the grid, native numbers and dates instead of display text, and a column <code>Formula</code> that references only exported fields written as a cell formula. The Excel button on this page calls it.", "Task"),
+            new("ExportToExcelAsync(string? fileName = null)", "Compatibility alias: it calls <code>ExportToXlsAsync</code>, so the file is an HTML table with an .xls name, not a workbook.", "Task"),
+            new("ExportToXlsAsync(string? fileName = null)", "The HTML table of <code>ExportToHtmlAsync</code> without the document wrapper, served as <code>application/vnd.ms-excel</code> with an .xls extension.", "Task"),
+            new("ExportToHtmlAsync(string? fileName = null)", "A standalone HTML document with one styled table; row and cell styles become a <code>bold</code> class and inline CSS.", "Task"),
+            new("ExportToJsonAsync(string? fileName = null)", "An indented JSON array, one object per row keyed by header text (<code>ColumnN</code> for a blank header), holding the display values.", "Task"),
+            new("ExportToPdfAsync(string title = &quot;Export&quot;)", "PDF with a default <code>GridPdfPrintOptions</code>, named after the title. The toolbar pdf item calls this overload. Whatever title is passed, the grid's <code>Title</code>, <code>Data</code> or <code>Id</code> parameter replaces it when one is set (<code>ResolveExportTitle</code>, shared by every method here).", "Task"),
+            new("ExportToPdfAsync(string fileName, string title)", "The same with an explicit file name.", "Task"),
+            new("ExportToPdfAsync(string fileName, string title, GridPdfPrintOptions? pdfOptions, bool showCompletionStatus = true)", "Page size, orientation, column layout, margin and zoom from <code>pdfOptions</code>; <code>false</code> suppresses the status pill. The header-menu Print command calls this with the dialog's choices, the name <code>grid-export.pdf</code> and no pill.", "Task"),
+            new("ExportToPdfFileAsync(string fileName = &quot;export.pdf&quot;, string title = &quot;Export&quot;)", "The two-argument PDF overload with defaults for both.", "Task"),
+            new("ExportAsync(GridExportFormat format, string? fileName = null, string title = &quot;Export&quot;, GridPdfPrintOptions? pdfOptions = null, bool showCompletionStatus = true)", "What the methods above call. Builds the table (the pivot table in pivot mode; every provider page when <code>ExportAllProviderItems</code> is on; otherwise <code>SortedData</code> and <code>VisibleColumns</code>), runs <code>GridExporter.ExportWithEncoding</code> with <code>DelimitedExportEncoding</code>, then <code>GridExporter.SaveAsync</code>. A null or blank file name becomes the sanitised title; a missing extension is added. Afterwards the pill shows <code>N rows exported successfully.</code> for about 2.5 seconds, or a warning when the save dialog could not open; a cancelled dialog shows nothing.", "Task"),
+            new("CreateExport(GridExportFormat format, string? fileName = null, string title = &quot;Export&quot;, GridPdfPrintOptions? pdfOptions = null)", "The same bytes without the browser step: a <code>GridExportResult</code> record with <code>Bytes</code>, <code>FileName</code> and <code>ContentType</code>, for your own storage or mail. Synchronous, so a provider grid exports only the rows it has loaded.", "GridExportResult"),
+            new("ExportWithEncodingAsync(GridExportFormat format, GridDelimitedTextEncoding delimitedEncoding, string? fileName = null, string title = &quot;Export&quot;, GridPdfPrintOptions? pdfOptions = null, bool showCompletionStatus = true)", "<code>ExportAsync</code> with a one-off CSV/TSV encoding in place of <code>DelimitedExportEncoding</code>; the other formats ignore it.", "Task"),
+            new("CreateExportWithEncoding(GridExportFormat format, GridDelimitedTextEncoding delimitedEncoding, string? fileName = null, string title = &quot;Export&quot;, GridPdfPrintOptions? pdfOptions = null)", "<code>CreateExport</code> with a one-off encoding.", "GridExportResult"),
+            new("ExportToCsvWithEncodingAsync(GridDelimitedTextEncoding delimitedEncoding, string? fileName = null)", "CSV with an explicit encoding.", "Task"),
+            new("ExportToTsvWithEncodingAsync(GridDelimitedTextEncoding delimitedEncoding, string? fileName = null)", "TSV with an explicit encoding.", "Task"),
+        };
+        public static readonly ApiRow[] Provider =
+        {
+            new("ExportProviderQueryAsync(GridExportFormat format, string? fileName = null, string title = &quot;Export&quot;, GridPdfPrintOptions? pdfOptions = null, bool showCompletionStatus = true, CancellationToken cancellationToken = default)", "With an <code>ItemsProvider</code>: pages through the whole current query (sort, filters, search) in <code>ProviderExportPageSize</code> batches, raising <code>ProviderExportProgressChanged</code> from before the first page, then saves like <code>ExportAsync</code>. Does not need <code>ExportAllProviderItems</code>; starting it cancels an export already in flight. Without a provider it is <code>ExportAsync</code>.", "Task"),
+            new("CreateProviderExportAsync(GridExportFormat format, string? fileName = null, string title = &quot;Export&quot;, GridPdfPrintOptions? pdfOptions = null, CancellationToken cancellationToken = default)", "The bytes of that complete query without the browser step; <code>CreateExport</code> when there is no provider.", "Task&lt;GridExportResult&gt;"),
+            new("ExportProviderQueryWithEncodingAsync(GridExportFormat format, GridDelimitedTextEncoding delimitedEncoding, string? fileName = null, string title = &quot;Export&quot;, GridPdfPrintOptions? pdfOptions = null, bool showCompletionStatus = true, CancellationToken cancellationToken = default)", "<code>ExportProviderQueryAsync</code> with a one-off CSV/TSV encoding.", "Task"),
+            new("CreateProviderExportWithEncodingAsync(GridExportFormat format, GridDelimitedTextEncoding delimitedEncoding, string? fileName = null, string title = &quot;Export&quot;, GridPdfPrintOptions? pdfOptions = null, CancellationToken cancellationToken = default)", "<code>CreateProviderExportAsync</code> with a one-off encoding.", "Task&lt;GridExportResult&gt;"),
+            new("CancelProviderExport()", "Cancels the provider export in flight, if any.", "void"),
+        };
+        public static readonly ApiRow[] Exporter =
+        {
+            new("Export(GridExportTable table, GridExportFormat format, string? fileName = null, GridPdfPrintOptions? pdfOptions = null)", "Bytes for a <code>GridExportTable</code> you assembled yourself; CSV and TSV as UTF-8 without a byte-order mark.", "GridExportResult"),
+            new("ExportWithEncoding(GridExportTable table, GridExportFormat format, GridDelimitedTextEncoding delimitedEncoding, string? fileName = null, GridPdfPrintOptions? pdfOptions = null)", "The dispatcher behind every grid export: one builder per <code>GridExportFormat</code>; the file name is the argument or the sanitised table <code>Title</code>, given the format's extension when it has none.", "GridExportResult"),
+            new("SaveAsync(IJSRuntime jsRuntime, GridExportResult export)", "Imports the library's <code>grid-control.js</code> module and calls its <code>saveFile</code> with the file name, the bytes as base-64 and the content type, returning the module's result string; <code>unavailable</code> when the module could not be imported. The grid treats <code>cancelled</code> as no message and <code>unavailable</code> as a warning. This is the step the grid methods use.", "Task&lt;string&gt;"),
+            new("DownloadAsync(IJSRuntime jsRuntime, GridExportResult export)", "Same module, <code>downloadFile</code>: a plain download without a dialog. <code>TreeGridControl.DownloadAsync</code> uses it; <code>GridControl</code> does not.", "Task"),
+            new("DefaultExtension(GridExportFormat format)", "The extension for a format, as listed in the values table.", "string"),
+        };
+        public static readonly ApiRow[] Formats =
+        {
+            new("Csv", "<code>BuildDelimited</code> with a comma: header line, then the display values row by row; a value holding the delimiter, a quote or a line break is quoted, an empty value is written as two quotes. <code>text/csv</code>, .csv; a charset suffix is added for the BOM and ASCII encodings."),
+            new("Tsv", "The same with a tab. <code>text/tab-separated-values</code>, .tsv."),
+            new("Html", "A standalone HTML document with one styled table: bold rows get a <code>bold</code> class, highlight columns a <code>highlight</code> class; cell colours, alignment, italics and strikethrough become inline CSS. <code>text/html</code>, .html."),
+            new("Xls", "That table without the document wrapper, served as <code>application/vnd.ms-excel</code> with .xls so Excel opens it. HTML, not a workbook."),
+            new("Xlsx", "An OOXML workbook from <code>XlsxWriter</code>: the only format that uses <code>XlsxValues</code>, <code>XlsxFormats</code> and column <code>Formula</code> translation. <code>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</code>, .xlsx. An unknown format value falls back to this."),
+            new("Pdf", "The library's own writer, <code>NativePdfDocument.WriteLegacy</code>: one content stream per page over the standard Helvetica and Helvetica-Bold fonts (bold for the header and for bold rows), grey header fill, optional grid lines, text widths from a built-in estimate, and extra page sets when the columns do not fit the width. <code>application/pdf</code>, .pdf."),
+            new("Json", "An indented array of objects keyed by header text. <code>application/json</code>, .json."),
+        };
+        public static readonly ApiRow[] Params =
+        {
+            new("RowExportStyleSelector", "Called once per exported row with the item and its row index. A non-null result copies <code>ForeColorHex</code> and <code>BackColorHex</code> to the row and sets the row's bold, italic and strikethrough flags where the matching property is non-null. Honoured by Xlsx, Html and Xls; the PDF uses the bold flag only; CSV, TSV and JSON carry no styling. Not called for the appended total rows.", "Func&lt;TValue, int, GridExportCellStyle?&gt;?", "null"),
+            new("CellExportStyleSelector", "Called per row and visible column with the item, the column <code>Field</code> and the row index. In Xlsx, Html and Xls each non-null property overrides the row's value for that cell, so a cell with <code>Bold = false</code> inside a bold row exports in normal weight. Not read by the PDF, CSV, TSV or JSON builders.", "Func&lt;TValue, string, int, GridExportCellStyle?&gt;?", "null"),
+            new("DelimitedExportEncoding", "Byte encoding of CSV and TSV: <code>Utf8NoBom</code>, <code>Utf8WithBom</code>, <code>Utf16LittleEndian</code> or <code>Ascii</code> (characters outside ASCII become a question mark). The other formats ignore it.", "GridDelimitedTextEncoding", "GridDelimitedTextEncoding.Utf8NoBom"),
+            new("IncludeTotalsInExport", "Appends the footer <code>AggregateRows</code> (those with <code>ShowInFooter</code>) as bold rows after the data, formatted as on screen; in Xlsx they keep native values and formats and skip column formulas. Nothing is added when this is false, there are no footer rows, or there is no data.", "bool", "true"),
+            new("ShowPrintOptionsDialog", "The header-menu Print command opens the print-options dialog first; false makes it export the PDF at once with the defaults below.", "bool", "true"),
+            new("DefaultPrintOrientation", "Starting value of that dialog, and the value Print uses without it. The six <code>DefaultPrint…</code> parameters are read only on that menu path: <code>ExportToPdfAsync</code> takes its layout from the <code>GridPdfPrintOptions</code> you pass.", "GridPdfOrientation", "GridPdfOrientation.Portrait"),
+            new("DefaultPrintPageSize", "Letter, Legal or A4; same path.", "GridPdfPageSize", "GridPdfPageSize.Letter"),
+            new("DefaultPrintColumnLayout", "WrapText, ClipText or FitColumnsToPage; same path. Ignored while the zoom mode is FitToPage, which always fits the columns.", "GridPdfColumnLayout", "GridPdfColumnLayout.WrapText"),
+            new("DefaultPrintGridLines", "Cell borders in the printed PDF; same path.", "bool", "true"),
+            new("DefaultPrintZoomMode", "FitToPage scales the table down until its natural width fits the page; Percent uses the percentage below. Same path.", "GridPdfZoomMode", "GridPdfZoomMode.FitToPage"),
+            new("DefaultPrintZoomPercent", "Clamped to 25 to 200; same path.", "int", "100"),
+            new("ExportAllProviderItems", "With an <code>ItemsProvider</code>, makes <code>ExportAsync</code> and every <code>ExportTo…Async</code> page through the whole query like <code>ExportProviderQueryAsync</code>. Off, they export the rows the provider has loaded.", "bool", "false"),
+            new("ProviderExportPageSize", "Rows requested per provider call while paging an export; clamped to 1 to 100000.", "int", "1_000"),
+            new("ProviderExportProgressChanged", "Raised from before the first page as a provider export progresses, with <code>ExportedRows</code>, <code>TotalRows</code>, <code>IsCompleted</code> and <code>IsCanceled</code>; the latest record is also kept in <code>ProviderExportProgress</code>.", "EventCallback&lt;GridProviderExportProgress&gt;", "default"),
+        };
+        public static readonly ApiRow[] CellStyle =
+        {
+            new("ForeColorHex", "Text colour as three- or six-digit hex, with or without a leading #. Black is dropped (it is the default colour) and anything unparseable is ignored.", "string?", "null"),
+            new("BackColorHex", "Fill colour in the same forms; white is dropped. When null, a highlighted column fills <code>ffffc1</code> in Xlsx and takes the <code>highlight</code> class in HTML.", "string?", "null"),
+            new("Bold", "Null inherits the row flag; true or false overrides it for this cell. From the row selector, null leaves the row flag alone.", "bool?", "null"),
+            new("Italic", "Same rule for italics.", "bool?", "null"),
+            new("Strikethrough", "Same rule for strikethrough.", "bool?", "null"),
+        };
+        public static readonly ApiRow[] PdfOptions =
+        {
+            new("Orientation", "Landscape swaps the page width and height.", "GridPdfOrientation", "GridPdfOrientation.Portrait"),
+            new("PageSize", "Letter 612 by 792 points, Legal 612 by 1008, A4 595 by 842.", "GridPdfPageSize", "GridPdfPageSize.Letter"),
+            new("ColumnLayout", "WrapText wraps cell text up to <code>MaxWrappedLines</code>; ClipText keeps one line; FitColumnsToPage scales the column widths to the content width. Forced to FitColumnsToPage while <code>ZoomMode</code> is FitToPage.", "GridPdfColumnLayout", "GridPdfColumnLayout.WrapText"),
+            new("Margin", "Points on all four sides, clamped to 12 to 72.", "double", "24"),
+            new("MaxWrappedLines", "Lines per cell in WrapText, clamped to 1 to 12.", "int", "4"),
+            new("IncludeColumnHeaders", "Repeats the header row at the top of every page (the table's <code>IncludeHeaderRow</code> must also be true).", "bool", "true"),
+            new("ShowGridLines", "Thin grey borders around every cell.", "bool", "true"),
+            new("ZoomMode", "FitToPage scales fonts, padding and widths down (never up, floor 12 percent) until the natural column widths fit the content width; Percent uses <code>ZoomPercent</code>.", "GridPdfZoomMode", "GridPdfZoomMode.FitToPage"),
+            new("ZoomPercent", "Used with Percent; clamped to 25 to 200.", "int", "100"),
+        };
+        public static readonly ApiRow[] Templates =
+        {
+            new("Template", "Replaces the cell content. The grid invokes it as <code>EffectiveTemplate((object)item)</code>, so <code>context</code> is the row item typed as <code>object</code>; cast it to your row class as the Status column does. Exports never see the markup: a templated column writes its <code>Field</code> value formatted like a plain cell (<code>Format</code>, <code>DisplayFormatter</code>, <code>DisplayField</code>), which is why the badge exports as text.", "RenderFragment&lt;object&gt;?", "null"),
+            new("ChildContent", "Shorthand for <code>Template</code>: markup placed directly inside <code>&lt;GridColumn&gt;</code> without a <code>&lt;Template&gt;</code> tag. <code>EffectiveTemplate</code> is <code>Template ?? ChildContent</code>.", "RenderFragment&lt;object&gt;?", "null"),
+            new("HeaderTemplate", "Replaces the caption span in the header cell; the sort arrow and filter badge still render after it. No context.", "RenderFragment?", "null"),
+            new("HeaderSuffixTemplate", "Rendered in the header cell after the caption, sort arrow and filter badge. No context.", "RenderFragment?", "null"),
+            new("EditTemplate", "Replaces the editor for this column in the inline edit row and in the edit dialog; the grid passes the item being edited, cast to <code>object</code>, and nothing else, so the template does its own binding. A column with one is excluded from keyboard-started batch edits.", "RenderFragment&lt;object&gt;?", "null"),
+            new("FilterTemplate", "Older filter-row cell template; <code>context</code> is the <code>GridColumn</code>. Used only when the column allows filtering and <code>FilterCellTemplate</code> is null.", "RenderFragment&lt;GridColumn&gt;?", "null"),
+            new("FilterCellTemplate", "Filter-row cell. <code>context</code> carries <code>Column</code>, the current <code>Value</code>, <code>Operator</code> and <code>Operators</code>, and the <code>ValueChanged</code>, <code>OperatorChanged</code>, <code>ApplyAsync</code> and <code>ClearAsync</code> callbacks that drive the grid's own filter state.", "RenderFragment&lt;GridFilterCellTemplateContext&gt;?", "null"),
+            new("FilterMenuTemplate", "Body of the header filter menu. <code>context</code> carries the column, the draft value and operator of both conditions with their <code>LogicalOperator</code>, the distinct values and checklist state, and the matching change, apply, clear and close callbacks.", "RenderFragment&lt;GridFilterMenuTemplateContext&gt;?", "null"),
+            new("FilterMenuButtonsTemplate", "Button area of that menu. <code>context</code>: <code>Column</code>, <code>AutoApply</code>, <code>ApplyAsync</code> (applies and closes), <code>ClearAsync</code>, <code>CloseAsync</code>.", "RenderFragment&lt;GridFilterMenuButtonsTemplateContext&gt;?", "null"),
+            new("PrintCellIcon", "A small icon drawn before the text of this column's cells in the PDF only (<code>IdentityCard</code> is the one icon), for a templated column whose visual cue would otherwise be lost. Copied to the export column; the other formats ignore it.", "GridPrintCellIcon", "GridPrintCellIcon.None"),
+        };
     }
 }

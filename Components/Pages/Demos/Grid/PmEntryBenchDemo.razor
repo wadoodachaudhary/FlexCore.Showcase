@@ -10,13 +10,20 @@
    went (both counted the same event); the counter now counts saves through OnCellSave; the transport switch is a ButtonGroupControl;
    the unused @ref went; "HomeFront", "Project Managers entry grid", "PM Entry", "zero network lag", "lag-free", "up to 95%" and the
    WAN sentence left the copy. What each mode does comes from TextBoxTypingBehavior.cs and GridControl.razor.cs:511-514.
-   Parameter tables are a later pass (SC-278). *@
+   Parameter tables are a later pass (SC-278).
+   2026-10-24 (SC-278): documentation tables written from TextBoxTypingBehavior.cs, Grid/GridControl.razor.cs (parameters 518-529,
+   the editor builder 9676-9771, SynchronizeClientBufferedBatchEditorValueAsync 1584-1606 and its callers, the counters and the two
+   diagnostics methods 1474-1481 / 10223-10239, the Tab and Enter read sites 10330 / 10403), Grid/GridTextEditingDiagnosticsSnapshot.cs,
+   TextBoxControl.razor (parameters 232-402, EffectiveTypingBehavior 328, OnNativeKeyDown / OnNativeBlur / the sync and JSInvokable
+   commit 416-574, the attach in OnAfterRenderAsync 745-826, OnNativeInput / OnNativeChange 983-1037) and the listener those call in
+   wwwroot/textbox-control.js (pre-attach shield 192-224, suppressTypingKeyDispatch 558-577, enableClientBufferedTyping 580-806);
+   rows checked with scratchpad/vocabcheck.py. *@
 
 <PageTitle>Typing modes — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Typing modes" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
                    Tagline="Decide whether each keystroke in a cell editor goes to the server or stays in the browser until commit."
-                   SourcePath="TextBoxTypingBehavior.cs;Grid/GridControl.razor.cs;TextBoxControl.razor">
+                   SourcePath="TextBoxTypingBehavior.cs;Grid/GridControl.razor.cs;Grid/GridTextEditingDiagnosticsSnapshot.cs;TextBoxControl.razor;wwwroot/textbox-control.js">
     <Overview>
         <p>
             Text cell editors are <code>TextBoxControl</code>s, and <code>TextEditorTypingBehavior</code> picks their transport.
@@ -59,7 +66,19 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>TextEditorTypingBehavior</code>, the <code>TextBoxTypingBehavior</code> enum and <code>TextBoxControl</code>'s own <code>TypingBehavior</code> are still to be written up from <code>TextBoxTypingBehavior.cs</code>, <code>Grid/GridControl.razor.cs</code> and <code>TextBoxControl.razor</code>.</p>
+        <ApiTable Kind="ApiKind.Values" Title="TextBoxTypingBehavior" Rows="Vocab.Modes" />
+        <ApiTable Kind="ApiKind.Parameters" Title="GridControl typing parameters" Rows="Vocab.Grid" />
+        <ApiTable Kind="ApiKind.Methods" Title="GridControl transport counters" Rows="Vocab.GridMethods" />
+        <ApiTable Kind="ApiKind.Properties" Title="GridTextEditingDiagnosticsSnapshot" Rows="Vocab.Snapshot" />
+        <ApiTable Kind="ApiKind.Parameters" Title="TextBoxControl typing parameters" Rows="Vocab.TextBox" />
+        <ApiTable Kind="ApiKind.Events" Title="TextBoxControl callbacks on the typing path" Rows="Vocab.TextBoxEvents" />
+        <ApiTable Kind="ApiKind.Methods" Title="TextBoxControl commit methods" Rows="Vocab.TextBoxMethods" />
+        <p>
+            Both modes end in the same place, the grid's edit buffer and its cell commit; what differs is how many messages travel
+            before that, and neither changes how the editor opens. The grid's filter and search boxes pick their own mode from
+            <code>FilterSettings.SearchAsYouType</code> (<code>ServerBacked</code> as you type, <code>ClientBuffered</code> when it is
+            off) and do not read <code>TextEditorTypingBehavior</code>.
+        </p>
     </Vocabulary>
 
     <Related>
@@ -185,5 +204,59 @@ protected override void OnInitialized()
 }
 
 private void SetTransport(bool clientBuffered) => _clientBuffered = clientBuffered;";
+    }
+
+    // 2026-10-24: every row below was read at its declaration and at the sites that use it; the vocabcheck limits (enum members,
+    // positional record parameters, the getter-only TotalServerCallbacks and the tuple-typed OnPasteTruncated) were checked by grep.
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Modes =
+        {
+            new("ServerBacked", "The ordinary Blazor event path. The input binds <code>oninput</code>, so every keystroke is a round trip: the server runs <code>InputValueChanged</code> with the text so far, and <code>ValueChanged</code> on the native change event (Enter or blur) unless <code>UpdateOnInput</code> is set. The grid's cell editor also sets <code>TypingKeysStayLocal</code>, so a typing key costs one message (its input event) rather than two; Enter and blur reach the server as keydown and blur events and commit the cell."),
+            new("ClientBuffered", "The browser owns the text. The input renders <code>data-fx-cb-pending</code> so typing keys stay local from the first paint, then <code>textbox-control.js</code> attaches a listener that stops the input, change, blur and typing keydown events from reaching Blazor. It sends the whole value once, through <code>CommitClientBufferedTypingAsync</code>, on Enter, Tab, Up, Down, Page Up, Page Down, Ctrl+Home, Ctrl+End, an arrow at either end of the text, or blur; that call sets <code>Value</code>, runs <code>InputValueChanged</code> and <code>ValueChanged</code>, then forwards the key to <code>OnKeyDown</code> or raises <code>OnBlur</code> (Escape is forwarded without storing). The grid commits the cell from that forwarded key or blur, and reads the browser text itself before a click on another cell commits."),
+        };
+        public static readonly ApiRow[] Grid =
+        {
+            new("TextEditorTypingBehavior", "Passed as <code>TypingBehavior</code> to the <code>TextBoxControl</code> the grid builds for a text or number cell in batch edit; the other cell editors do not read it. An editor that fans out to several selected rows or cells is forced to <code>ServerBacked</code>. The grid also uses the resolved value to decide whether to read the browser text before a click elsewhere commits, whether Tab is left to the grid host, and whether to guard a committed Enter from re-opening the editor.", "TextBoxTypingBehavior", "TextBoxTypingBehavior.ServerBacked"),
+            new("UseClientBufferedTextEditing", "<code>true</code> or <code>false</code> overrides <code>TextEditorTypingBehavior</code> for a host that switches the transport with a flag; <code>null</code> follows it. Every read site goes through this override.", "bool?", "null"),
+        };
+        public static readonly ApiRow[] GridMethods =
+        {
+            new("GetTextEditingDiagnosticsSnapshot()", "This grid's counters of what its text editors sent to the server, for comparing the two modes.", "GridTextEditingDiagnosticsSnapshot"),
+            new("ResetTextEditingDiagnostics()", "Zeroes those counters.", "void"),
+        };
+        public static readonly ApiRow[] Snapshot =
+        {
+            new("ServerInputCallbacks", "Input events a <code>ServerBacked</code> editor sent, one per keystroke; also counted for a <code>ClientBuffered</code> editor whose browser listener never attached and fell back to per-character events.", "long"),
+            new("ServerValueChangedCallbacks", "<code>ValueChanged</code> calls from a <code>ServerBacked</code> editor: its native change event on Enter or blur.", "long"),
+            new("ServerKeyDownCallbacks", "Keydown events a <code>ServerBacked</code> editor sent (Enter, Tab, arrows and other non-typing keys; typing keys stay local), plus any typing key that reached a <code>ClientBuffered</code> editor's <code>OnKeyDown</code>, which only happens while its listener is not attached.", "long"),
+            new("ServerBlurCallbacks", "Blur events a <code>ServerBacked</code> editor sent.", "long"),
+            new("ClientBufferedCommitCallbacks", "<code>OnKeyDown</code> and <code>OnBlur</code> calls from an attached <code>ClientBuffered</code> editor: one per forwarded key or blur, each carrying the completed value.", "long"),
+            new("TotalServerCallbacks", "The four server counters added together. Getter only.", "long"),
+        };
+        public static readonly ApiRow[] TextBox =
+        {
+            new("TypingBehavior", "Which of the two paths this box uses. <code>ClientBuffered</code> always renders the raw input (never the <code>InputText</code> form fast path), keeps a browser-owned value whatever <code>Uncontrolled</code> says, and loads <code>textbox-control.js</code> after the first render to attach its listener. A box inside a cell host (the cascading <code>ICellEditorHost</code> of a hosted cell template) is <code>ClientBuffered</code> regardless of this value.", "TextBoxTypingBehavior", "TextBoxTypingBehavior.ServerBacked"),
+            new("UpdateOnInput", "<code>ServerBacked</code>: <code>ValueChanged</code> runs on every input event instead of on the native change event, and the form fast path is skipped. It has no effect once a <code>ClientBuffered</code> listener is attached, because input events no longer reach the server.", "bool", "false"),
+            new("InputValueChanged", "Runs before <code>ValueChanged</code> with the same text: on every input event in <code>ServerBacked</code>, and with the committed value on each <code>ClientBuffered</code> commit. An <code>Action</code> rather than an <code>EventCallback</code>, so it does not re-render the parent by itself. The grid feeds its edit buffer from it.", "Action&lt;string?&gt;?", "null"),
+            new("Uncontrolled", "The input keeps its own text and a parent re-render never writes an older <code>Value</code> back over it; a different <code>Value</code> set from outside re-seeds the draft. <code>false</code> is the controlled input whose rendered value tracks <code>Value</code> on every render. A <code>ClientBuffered</code> box is browser-owned either way.", "bool", "true"),
+            new("ReseedOnOutsideChange", "With <code>Uncontrolled</code> and <code>ServerBacked</code>, a <code>Value</code> change from the parent re-seeds the draft; <code>false</code> leaves the DOM text alone, for a host that pushes server-side values itself (the grid's editor sets it false). Not read for <code>ClientBuffered</code> or hosted boxes.", "bool", "true"),
+            new("TypingKeysStayLocal", "<code>ServerBacked</code> only: printable keys, Backspace and Delete are never dispatched as keydown events (their input events still are), which is how the grid's editor keeps a keystroke to one message. Ignored when <code>ClientBuffered</code>, whose listener already owns those keys.", "bool", "false"),
+            new("KeepNativeTab", "<code>ClientBuffered</code> with an <code>OnKeyDown</code> host: Tab commits the draft and reaches the host once, but its default is not prevented, so the browser moves focus itself. Grid cell editors leave it false and let the grid move the active cell.", "bool", "false"),
+            new("MaxLength", "Rendered as the <code>maxlength</code> attribute; a <code>ClientBuffered</code> commit also clips the value it receives to this length. With an <code>OnPasteTruncated</code> delegate the browser reports a paste it had to shorten.", "int?", "null"),
+        };
+        public static readonly ApiRow[] TextBoxEvents =
+        {
+            new("ValueChanged", "<code>ServerBacked</code>: on the native change event, or on every input event with <code>UpdateOnInput</code>. <code>ClientBuffered</code>: on each commit, after <code>InputValueChanged</code>.", "string?"),
+            new("OnKeyDown", "<code>ServerBacked</code>: bound only when a delegate is set; then every keydown the browser dispatches reaches it. <code>ClientBuffered</code>: a delegate makes the listener own Enter, Tab, Escape, Up, Down, Page Up, Page Down and the edge arrows; each commits the draft first and is then forwarded here with the key and modifier flags, and typing keys never arrive. Without a delegate the box commits on blur (and on Enter inside a dialog with a default button).", "KeyboardEventArgs"),
+            new("OnBlur", "After the value has been synchronized: through the native blur in <code>ServerBacked</code>, through the listener's Blur commit in <code>ClientBuffered</code>. Bound only when a delegate is set."),
+            new("OnPasteTruncated", "Raised from the browser when a paste was clipped by <code>MaxLength</code>, which happens before any input event. Attached only when <code>MaxLength</code> is set and a delegate exists; the grid maps it to <code>CellValueTruncated</code>.", "(int PastedLength, int MaxLength)"),
+        };
+        public static readonly ApiRow[] TextBoxMethods =
+        {
+            new("FlushClientBufferedValueAsync()", "Reads the browser's current text and publishes it through <code>InputValueChanged</code> and <code>ValueChanged</code> without waiting for a commit key or blur, for a form that confirms with a button. Returns at once for a <code>ServerBacked</code> box.", "Task"),
+            new("FlushClientBufferedValueAsync(bool requireCurrentValue)", "The same; with <code>true</code> a failed read throws instead of silently keeping the older value.", "Task"),
+            new("CommitClientBufferedTypingAsync(string? value, string key, bool shiftKey, bool ctrlKey, bool altKey, bool metaKey)", "The <code>JSInvokable</code> entry the listener in <code>textbox-control.js</code> calls with the input's value and the key that ended the typing (or Blur, or Sync for a value-only flush). It stores the value, runs <code>InputValueChanged</code> and <code>ValueChanged</code>, then forwards the key to <code>OnKeyDown</code> or raises <code>OnBlur</code>; Escape is forwarded without storing. Page code does not call it.", "Task"),
+        };
     }
 }

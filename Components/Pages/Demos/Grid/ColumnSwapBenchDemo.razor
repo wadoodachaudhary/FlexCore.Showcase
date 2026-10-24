@@ -14,13 +14,19 @@
    keyed, new fields appended after the fields the grid already knew instead of taking the declared order; the columns are keyed by
    field so added and removed columns converge in place;
    the two unused @refs went (SC-131); "legacy applications", "DOM thrashing" and "seamless" left the copy. Parameter tables are a
-   later pass (SC-278). *@
+   later pass (SC-278).
+   2026-10-24 (SC-278 closed): Documentation tables written from Grid/GridColumn.cs, Grid/GridColumnsBase.cs, Grid/GridControl.razor.cs
+   (BeginUpdate/EndUpdateAsync/SuspendRedraw 88-147, SyncPendingColumnStructure 157-200), Grid/GridControlEvents.cs, Grid/GridModels.cs
+   and Grid/GridEnums.cs; every row checked at its read or raise site and with vocabcheck, whose only flags are its own artifacts (it
+   compares an event payload to the EventCallback declaration and reads async Task as the return type). Found while checking: the
+   RowDeselected handler wired at line 120 never runs, GridControl does not raise it (TreeGridControl does); left as is, the code tabs
+   are verbatim. *@
 
 <PageTitle>Column sets — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Column sets" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
                    Tagline="Swap the whole column set at runtime from a list of specs, without remounting the grid."
-                   SourcePath="Grid/GridControl.razor.cs;Grid/GridColumn.cs">
+                   SourcePath="Grid/GridColumn.cs;Grid/GridColumnsBase.cs;Grid/GridControl.razor.cs;Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
             The columns inside <code>GridColumnsBase</code> are ordinary Razor markup, so a <code>@@foreach</code> over a list of column
@@ -69,7 +75,28 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>GridColumn</code> (<code>Field</code>, <code>HeaderText</code>, <code>Width</code>, <code>Visible</code>, <code>AllowEditing</code>), <code>GridColumnsBase</code> and the selection events on <code>GridControlEvents</code> are still to be written up from <code>Grid/GridColumn.cs</code> and <code>Grid/GridControlEvents.cs</code>.</p>
+        <p>
+            The core <code>GridColumn</code> parameters, the container they register with, the column-set methods this page calls and the
+            selection events it wires. The editing parameters (<code>EditTemplate</code>, <code>EditOptions</code>, the edit button and
+            their relatives) are on <a href="demo/grid/batch-editing">Batch editing</a>; <code>Field</code>, <code>Type</code> and
+            <code>Format</code> in depth on <a href="demo/grid/dynamic-columns">Dynamic columns</a>; <code>SelectionSettings</code>, the
+            selection methods and <code>GridSelectionChangedArgs</code> on <a href="demo/grid/master-detail">Master-detail</a>. A set
+            switch here is host state: the <code>@@foreach</code> inside <code>GridColumnsBase</code> runs over <code>_currentColumns</code>,
+            each column keyed by its <code>Field</code>, and the assignment sits inside <code>SuspendRedraw(fields)</code>, which pairs
+            <code>BeginUpdate()</code> with <code>EndUpdateAsync(order)</code>.
+        </p>
+        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn core parameters" Rows="Vocab.Column" />
+        <ApiTable Kind="ApiKind.Parameters" Title="GridColumnsBase parameters" Rows="Vocab.ColumnsBase" />
+        <ApiTable Kind="ApiKind.Properties" Title="GridColumnsBase properties" Rows="Vocab.ColumnsBaseProps" />
+        <ApiTable Kind="ApiKind.Methods" Title="GridControl column-set methods" Rows="Vocab.Methods" />
+        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, selection" Rows="Vocab.Events" />
+        <ApiTable Kind="ApiKind.Properties" Title="RowSelectEventArgs&lt;TValue&gt;" Rows="Vocab.Args" />
+        <p>
+            <code>SelectionChanged</code> carries the selected count as a plain <code>int</code>; <code>Count</code> and <code>Source</code>
+            arrive on <code>SelectionChangedDetailed</code>. The selection survives a swap because the grid keeps selected rows by item and
+            only the column list changes; the positional cell selection and active cell are cleared when a column is added or removed, and
+            nothing is cleared when an instance is merely replaced under the same <code>Field</code>.
+        </p>
     </Vocabulary>
 
     <Related>
@@ -284,5 +311,60 @@ public sealed class ColumnSpec
     public bool Visible { get; set; } = true;
     public bool Editable { get; set; }
 }";
+    }
+
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Column =
+        {
+            new("Field", "The row property the cell reads, through a cached accessor, or the key when the row is a dictionary; a missing or unreadable member gives an empty cell. Also the column's identity: <code>GridColumnsBase</code> replaces a new instance with the same Field in place, <code>SuspendRedraw(order)</code> matches fields by it, and a column without one is not navigable, sortable or editable.", "string", "\"\""),
+            new("HeaderText", "The caption. Null shows the Field (<code>DisplayHeader</code>); an empty string is a deliberately blank header. A caption renamed through the header menu wins until <code>ClearColumnOverrides()</code>.", "string?", "null"),
+            new("Width", "CSS width emitted on the header cell and every data cell. A drag-resize replaces it with a runtime pixel width, which a same-Field replacement instance inherits. Left blank, the grid estimates a width from up to 50 rows of the data source once the columns have settled, outside any <code>BeginUpdate</code> window.", "string?", "null"),
+            new("MinWidth", "Emitted as <code>min-width</code> on the data cells, not the header; the floor of the width the grid computes for frozen offsets and column virtualization, and handed to best fit as a bound. A non-pixel value stops column virtualization from resolving the column.", "string?", "null"),
+            new("MaxWidth", "The <code>max-width</code> counterpart of <code>MinWidth</code>; when both are set the floor is applied last, as in CSS.", "string?", "null"),
+            new("Type", "<code>Text</code>, <code>Password</code>, <code>Number</code>, <code>Date</code>, <code>Boolean</code> or <code>CheckBox</code>. Picks the filter operators, the editor (check box, date editor, number input), the default alignment and the plain ungrouped display of a <code>Number</code> column without <code>Format</code>.", "ColumnType", "ColumnType.Text"),
+            new("TextAlign", "Cell alignment. Null resolves by <code>Type</code>: <code>CheckBox</code> centres, <code>Date</code> right-aligns, everything else left-aligns. On a <code>CheckBox</code> column only <code>Right</code> overrides; <code>Left</code> still centres.", "TextAlign?", "null"),
+            new("HeaderTextAlign", "Caption alignment in the header cell, independent of the cells. The default is <code>TextAlign.Left</code>, written with the <code>Grid.</code> qualifier in the source because the parameter above hides the enum.", "TextAlign", "Grid.TextAlign.Left"),
+            new("Format", ".NET format string applied to an <code>IFormattable</code> value with the current culture, after <code>DisplayFormatter</code> and mapped edit options have had their turn; also used by aggregates and the Excel export. Blank on a <code>Number</code> column means plain ungrouped text.", "string?", "null"),
+            new("Visible", "False keeps the column registered, with its sort, filter and column state, but out of the rendered set, keyboard navigation, edit targets and auto-width. A Choose Columns or Hide choice by the user overrides it per field until <code>ClearColumnOverrides()</code>.", "bool", "true"),
+            new("AllowSorting", "With the grid's <code>AllowSorting</code>: a header click sorts, the arrow and the menu item show. A column without a Field never sorts.", "bool", "true"),
+            new("AllowFiltering", "With the grid's <code>AllowFiltering</code>: the header filter icon, the filter-row cell and the menu filter are offered.", "bool", "true"),
+            new("AllowEditing", "Every edit entry, double-click, keyboard, dropdown or generated row editor, also requires <code>EditSettings.AllowEditing</code>, a Field and not <code>IsPrimaryKey</code>; false makes the column read-only while the rest of the row edits. <code>AllowCellDragSelection</code> can keep column drag selection on. The editing parameters themselves are on the Batch editing page.", "bool", "true"),
+            new("AllowResizing", "With the grid's <code>AllowResizing</code>: the header gets its resize grip; false also skips the grip's double-click best fit.", "bool", "true"),
+            new("AllowHiding", "Whether the header menu may hide the column (never the last visible one, never a grouped one) and whether Choose Columns offers to.", "bool", "true"),
+            new("Template", "Cell content in place of the value; <code>context</code> is the row, typed as <code>object</code>. Wins over <code>ChildContent</code>. A templated cell counts as an action cell for clicks and as a keyboard edit target.", "RenderFragment&lt;object&gt;?", "null"),
+            new("HeaderTemplate", "Replaces the caption span in the header cell; the sort arrow and the filter icon still render after it.", "RenderFragment?", "null"),
+            new("ChildContent", "Shorthand for <code>Template</code>, used only while <code>Template</code> is null.", "RenderFragment&lt;object&gt;?", "null"),
+        };
+        public static readonly ApiRow[] ColumnsBase =
+        {
+            new("ChildContent", "The <code>GridColumn</code> tags, rendered inside a <code>CascadingValue</code> of the container so each column registers in its <code>OnInitialized</code> and unregisters in <code>Dispose</code>; a <code>@foreach</code> here adds and removes columns in place.", "RenderFragment?", "null"),
+            new("DebugTag", "Declared, but only read behind an <code>if (false &amp;&amp; …)</code> in <code>OnInitialized</code>, so it never does anything.", "string?", "null"),
+        };
+        public static readonly ApiRow[] ColumnsBaseProps =
+        {
+            new("Columns", "The registered columns in display order. A new instance with the same Field replaces the old one at its index and inherits its drag-resize width; a header drag or Choose Columns moves entries; a disposed column is removed by reference.", "IReadOnlyList&lt;GridColumn&gt;"),
+            new("ColumnsGeneration", "Bumped once per completed registration wave in the container's <code>OnAfterRender</code> and handed to the grid as <code>NotifyColumnsCompleted(generation)</code>, which ignores a repeat of the same generation.", "int"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("SuspendRedraw(IEnumerable&lt;string&gt;? finalColumnOrder = null)", "The exception-safe form of the pair below, <code>await using (grid.SuspendRedraw(fields)) { … }</code>: the scope's constructor calls <code>BeginUpdate()</code>, its <code>DisposeAsync</code> awaits <code>EndUpdateAsync(finalColumnOrder)</code>. <code>ColumnUpdateScope</code> is nested in <code>GridControl&lt;TValue&gt;</code>. What this page uses.", "ColumnUpdateScope"),
+            new("BeginUpdate()", "Suspends column-driven grid renders; calls nest, so only the outermost <code>EndUpdateAsync</code> flushes. A bare call must be balanced in a try/finally: a leaked depth suppresses column renders until the grid is disposed.", "void"),
+            new("EndUpdateAsync(IEnumerable&lt;string&gt;? finalColumnOrder = null)", "When the outermost window closes: re-renders the child content once so added and removed columns converge in place, queues one auto-width pass, and applies <code>finalColumnOrder</code> in the render pass that first has every listed field registered; fields not listed follow in their old relative order, and without an order new fields append. Completes when the batch carrying the final column set has rendered. A call with no open <code>BeginUpdate</code> is a no-op.", "Task"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("RowSelecting", "Before a row is selected by mouse, keyboard or checkbox toggle. Set <code>Cancel</code> to refuse. Not raised by <code>AutoSelectFirstRow</code>, type-ahead moves or the selection methods.", "RowSelectEventArgs&lt;TValue&gt;"),
+            new("RowSelected", "After a row is selected by mouse, keyboard, checkbox toggle, type-ahead search or <code>AutoSelectFirstRow</code>. Not raised during drag-select or by the selection methods.", "RowSelectEventArgs&lt;TValue&gt;"),
+            new("SelectionChanged", "After any change to the selected set: click, drag-select, Select All, Clear, the selection methods. The payload is the selected count, rows or cells by <code>Mode</code>.", "int"),
+            new("SelectionChangedDetailed", "Same timing, with <code>Count</code> and <code>Source</code>: Pointer, MouseDrag, Keyboard, Programmatic or Unknown.", "GridSelectionChangedArgs"),
+            new("RowDeselecting / RowDeselected", "Declared, but <code>GridControl</code> never raises them. <code>TreeGridControl</code> raises <code>RowDeselected</code>.", "RowSelectEventArgs&lt;TValue&gt;"),
+        };
+        public static readonly ApiRow[] Args =
+        {
+            new("Data", "The row.", "TValue?", "null"),
+            new("RowIndex", "The row's index in the grid's current display order.", "int", "0"),
+            new("Cancel", "Set in <code>RowSelecting</code> to keep the current selection. Ignored by <code>RowSelected</code>.", "bool", "false"),
+        };
     }
 }
