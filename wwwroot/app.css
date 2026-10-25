@@ -304,8 +304,37 @@ h1:focus {
     height: 36px !important;
 }
 
+/* Frozen cells paint background-color: inherit, so a row with no background let the scrolled cells show through the
+   Request column; every row gets an opaque one (the hover rule below is more specific and still wins). */
+.fx-grid.hero-grid-theme .fx-row {
+    background-color: #ffffff !important;
+}
+.fx-grid.hero-grid-theme .fx-row.fx-alt-row {
+    background-color: #fbfcfe !important;
+}
+
 .fx-grid.hero-grid-theme .fx-row:hover {
     background-color: #f1f5f9 !important;
+}
+
+/* Every hero column has a Field and sorts on a header click: a faint arrow says so until the grid draws its own ▲ / ▼. */
+.fx-grid.hero-grid-theme th.fx-header-cell[data-field] {
+    cursor: pointer;
+}
+.fx-grid.hero-grid-theme th.fx-header-cell[data-field]:not(.fx-sorted) .fx-header-text::after {
+    content: "↕";
+    margin-left: 4px;
+    color: #94a3b8;
+    font-weight: 400;
+}
+.fx-grid.hero-grid-theme th.fx-header-cell[data-field]:not(.fx-sorted):hover .fx-header-text::after {
+    color: #0284c7;
+}
+.fx-grid.hero-grid-theme th.fx-header-cell[data-field]:active {
+    background: #e0f2fe !important;
+}
+.fx-grid.hero-grid-theme .fx-sort-icon {
+    color: #0284c7;
 }
 
 .fx-grid.hero-grid-theme .fx-row.fx-selected > td,
@@ -509,6 +538,12 @@ h1:focus {
     background: #0284c7;
     color: #ffffff;
     border-color: #0284c7;
+}
+
+.btn-cell-popup-edit:active {
+    background: #0369a1;
+    border-color: #0369a1;
+    transform: scale(0.96);
 }
 
 /* ── In-Grid DropDownGrid styling ── */

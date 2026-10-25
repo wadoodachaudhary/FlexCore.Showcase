@@ -14,6 +14,14 @@
    request and adds it on Save. The "grid" string in the code tab is the GridControl block below, copied verbatim (scratchpad
    home_inbox.py regenerates it). *@
 
+@* 2026-10-25 (Baaria: "not very interactive"): the dropdown, Edit button and header sort all worked, but on the live site each
+   answered in 0.4 to 1.6 s with no sign of life, and a second click undid the first (closed the list, flipped the sort). The grid
+   rendered about 144 rows (8 columns, so the default 60-row overscan per side), each with its own DropDownGridControl; WindowOverscanRows
+   is now 15, about 42 rows. Trip type, Fare trend and Itinerary had no Field, so their headers could not sort; they now sort by
+   TripType, FareDeltaPercent and Itinerary. Headers lost their "(DropDownGrid)" style suffixes so the sort arrow fits; the feature
+   cards above the grid name the controls. Rows get an opaque background in app.css: frozen cells use background-color: inherit,
+   and a row with no background let the scrolled cells show through the Request column. *@
+
 <PageTitle>FlexCore — Enterprise Blazor Component Suite for .NET</PageTitle>
 
 <div class="landing-container">
@@ -180,6 +188,7 @@
                                  CssClass="hero-grid-theme"
                                  EditSettingsRef="@_editSettings"
                                  EventsRef="@_gridEvents"
+                                 WindowOverscanRows="15"
                                  Height="440px">
                         <GridColumnsBase>
                             <GridColumn Field="@nameof(TripRequest.Request)" HeaderText="Request" Width="100px"
@@ -203,8 +212,8 @@
 
                             <GridColumn Field="@nameof(TripRequest.Destination)" HeaderText="Destination" Width="130px" AllowEditing="false" />
 
-                            @* In-cell DropDownGridControl: a four-column lookup with search *@
-                            <GridColumn HeaderText="Trip type (DropDownGrid)" Width="190px" AllowEditing="false">
+                            @* In-cell DropDownGridControl: a four-column lookup with search; the header sorts by the code *@
+                            <GridColumn Field="@nameof(TripRequest.TripType)" HeaderText="Trip type" Width="170px" AllowEditing="false">
                                 <Template Context="row">
                                     @{ var r = (TripRequest)row; }
                                     <div class="grid-cell-dropdowngrid">
@@ -234,12 +243,12 @@
                             </GridColumn>
 
                             @* Fast typing: click the cell and type, the value commits on Enter or blur *@
-                            <GridColumn Field="@nameof(TripRequest.Quote)" HeaderText="Quote (Fast Typing)" Width="140px"
+                            <GridColumn Field="@nameof(TripRequest.Quote)" HeaderText="Quote" Width="130px"
                                         Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right"
                                         AllowEditing="true" SelectAllOnEdit="true" />
 
-                            @* Inline SVG sparkline: five weekly fare samples for the route, the last one is the quote *@
-                            <GridColumn HeaderText="Fare Trend" Width="135px" AllowSorting="false" AllowFiltering="false" AllowEditing="false">
+                            @* Inline SVG sparkline: five weekly fare samples for the route, the last one is the quote; the header sorts by the change *@
+                            <GridColumn Field="@nameof(TripRequest.FareDeltaPercent)" HeaderText="Fare trend" Width="135px" AllowFiltering="false" AllowEditing="false">
                                 <Template Context="row">
                                     @{
                                         var r = (TripRequest)row;
@@ -275,7 +284,7 @@
                             </GridColumn>
 
                             @* The Edit button opens the popup editor; a double-click on the row does the same *@
-                            <GridColumn HeaderText="Itinerary (Popup Edit)" Width="280px" AllowEditing="false">
+                            <GridColumn Field="@nameof(TripRequest.Itinerary)" HeaderText="Itinerary" Width="300px" AllowEditing="false">
                                 <Template Context="row">
                                     @{ var r = (TripRequest)row; }
                                     <div class="desc-cell-wrapper">
@@ -1179,6 +1188,7 @@
              CssClass=""hero-grid-theme""
              EditSettingsRef=""@_editSettings""
              EventsRef=""@_gridEvents""
+             WindowOverscanRows=""15""
              Height=""440px"">
     <GridColumnsBase>
         <GridColumn Field=""@nameof(TripRequest.Request)"" HeaderText=""Request"" Width=""100px""
@@ -1202,8 +1212,8 @@
 
         <GridColumn Field=""@nameof(TripRequest.Destination)"" HeaderText=""Destination"" Width=""130px"" AllowEditing=""false"" />
 
-        @* In-cell DropDownGridControl: a four-column lookup with search *@
-        <GridColumn HeaderText=""Trip type (DropDownGrid)"" Width=""190px"" AllowEditing=""false"">
+        @* In-cell DropDownGridControl: a four-column lookup with search; the header sorts by the code *@
+        <GridColumn Field=""@nameof(TripRequest.TripType)"" HeaderText=""Trip type"" Width=""170px"" AllowEditing=""false"">
             <Template Context=""row"">
                 @{ var r = (TripRequest)row; }
                 <div class=""grid-cell-dropdowngrid"">
@@ -1233,12 +1243,12 @@
         </GridColumn>
 
         @* Fast typing: click the cell and type, the value commits on Enter or blur *@
-        <GridColumn Field=""@nameof(TripRequest.Quote)"" HeaderText=""Quote (Fast Typing)"" Width=""140px""
+        <GridColumn Field=""@nameof(TripRequest.Quote)"" HeaderText=""Quote"" Width=""130px""
                     Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right""
                     AllowEditing=""true"" SelectAllOnEdit=""true"" />
 
-        @* Inline SVG sparkline: five weekly fare samples for the route, the last one is the quote *@
-        <GridColumn HeaderText=""Fare Trend"" Width=""135px"" AllowSorting=""false"" AllowFiltering=""false"" AllowEditing=""false"">
+        @* Inline SVG sparkline: five weekly fare samples for the route, the last one is the quote; the header sorts by the change *@
+        <GridColumn Field=""@nameof(TripRequest.FareDeltaPercent)"" HeaderText=""Fare trend"" Width=""135px"" AllowFiltering=""false"" AllowEditing=""false"">
             <Template Context=""row"">
                 @{
                     var r = (TripRequest)row;
@@ -1274,7 +1284,7 @@
         </GridColumn>
 
         @* The Edit button opens the popup editor; a double-click on the row does the same *@
-        <GridColumn HeaderText=""Itinerary (Popup Edit)"" Width=""280px"" AllowEditing=""false"">
+        <GridColumn Field=""@nameof(TripRequest.Itinerary)"" HeaderText=""Itinerary"" Width=""300px"" AllowEditing=""false"">
             <Template Context=""row"">
                 @{ var r = (TripRequest)row; }
                 <div class=""desc-cell-wrapper"">
