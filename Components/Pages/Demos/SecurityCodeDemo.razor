@@ -34,10 +34,18 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="SecurityCodeControl parameters" Rows="Vocab.Params" />
-        <ApiTable Kind="ApiKind.Values" Title="SecurityCodeType (nested enum)" Rows="Vocab.Types" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-        <p>Colors are fixed in the control's stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
+        <DocSections>
+            <DocSection Id="doc-securitycodecontrol-parameters" Title="SecurityCodeControl parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="SecurityCodeControl parameters" Rows="Vocab.Params" />
+            </DocSection>
+            <DocSection Id="doc-securitycodetype-nested-enum" Title="SecurityCodeType (nested enum)" Count='@DocSection.Label(Vocab.Types.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="SecurityCodeType (nested enum)" Rows="Vocab.Types" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+                <p>Colors are fixed in the control's stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

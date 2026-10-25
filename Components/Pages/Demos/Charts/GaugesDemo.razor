@@ -74,35 +74,47 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="Gauge parameters, shared by the four controls" Rows="Vocab.Gauge" />
-        <p>
-            <code>GaugeRange(double From, double To, string Color, string? Label = null)</code> and
-            <code>GaugePointer(double Value, string Color = "#dc2626", string? Label = null)</code> are records;
-            <code>GaugeValueContext(double Value, double Min, double Max)</code> is what a <code>ValueTemplate</code> receives.
-            <code>CssClass</code>, <code>Style</code>, <code>Id</code>, <code>Visible</code> and <code>AdditionalAttributes</code> come from
-            <code>FlexControlBase</code> and apply to the root <code>div</code>.
-        </p>
-        <p>How the gauges draw, from the shared SVG:</p>
-        <ul>
-            <li>The arc, radial and circular gauges use a 300 by 300 view box. The track and the ranges are 16 px arcs; the value arc is 16 px on its own and 7 px over ranges. The arc and radial gauges sweep 270 degrees from the lower left; the circular gauge sweeps the full 360.</li>
-            <li>The radial gauge draws a needle for the value; every gauge draws a needle, or a vertical mark on the linear gauge, for each pointer. Ranges and pointers carry a <code>title</code> with their label, so hovering shows it.</li>
-            <li><code>TickCount</code> intervals give <code>TickCount + 1</code> labels formatted with <code>LabelFormat</code>; the circular gauge drops the last one, which would overlap the first.</li>
-            <li>The value is printed in the middle with <code>ValueFormat</code> unless a <code>ValueTemplate</code> is set, in which case the template is centred over the drawing.</li>
-            <li>For drawing and for <code>aria-valuenow</code> the value is clamped into <code>Min</code> to <code>Max</code>; a range or pointer outside that span is clamped the same way.</li>
-            <li>The gauge throws when a value is not finite, when <code>Max</code> is not above <code>Min</code>, when <code>TickCount</code> is outside 1 to 100, or when a range ends before it starts.</li>
-        </ul>
-        <ApiTable Kind="ApiKind.Parameters" Title="StockChartControl parameters" Rows="Vocab.Stock" />
-        <ApiTable Kind="ApiKind.Events" Title="StockChartControl events" Rows="Vocab.StockEvents" />
-        <ApiTable Kind="ApiKind.Methods" Title="StockChartControl methods" Rows="Vocab.StockMethods" />
-        <p>
-            Each data point is a <code>ChartDataPoint</code> made with <code>ChartDataPoint.Financial(label, open, high, low, close, date)</code>:
-            open, high, low and close land in <code>Value</code> to <code>Value4</code> and are read back through <code>Open</code>, <code>High</code>,
-            <code>Low</code> and <code>Close</code>; <code>DateValue</code> is required and the points are sorted by it. <code>StockChartRange(DateTime Start, DateTime End)</code>
-            is the record <code>RangeChanged</code> delivers. The control throws for a <code>Type</code> other than <code>Candlestick</code>, <code>Ohlc</code>
-            or <code>HighLow</code>, for a point without a date, and for a <code>Start</code> after <code>End</code>. With no points it shows
-            "No financial data." instead of the chart.
-        </p>
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <DocSections>
+            <DocSection Id="doc-gauge-parameters-shared-by-the-four-cont" Title="Gauge parameters, shared by the four controls" Count='@DocSection.Label(Vocab.Gauge.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="Gauge parameters, shared by the four controls" Rows="Vocab.Gauge" />
+                <p>
+                <code>GaugeRange(double From, double To, string Color, string? Label = null)</code> and
+                <code>GaugePointer(double Value, string Color = "#dc2626", string? Label = null)</code> are records;
+                <code>GaugeValueContext(double Value, double Min, double Max)</code> is what a <code>ValueTemplate</code> receives.
+                <code>CssClass</code>, <code>Style</code>, <code>Id</code>, <code>Visible</code> and <code>AdditionalAttributes</code> come from
+                <code>FlexControlBase</code> and apply to the root <code>div</code>.
+                </p>
+                <p>How the gauges draw, from the shared SVG:</p>
+                <ul>
+                <li>The arc, radial and circular gauges use a 300 by 300 view box. The track and the ranges are 16 px arcs; the value arc is 16 px on its own and 7 px over ranges. The arc and radial gauges sweep 270 degrees from the lower left; the circular gauge sweeps the full 360.</li>
+                <li>The radial gauge draws a needle for the value; every gauge draws a needle, or a vertical mark on the linear gauge, for each pointer. Ranges and pointers carry a <code>title</code> with their label, so hovering shows it.</li>
+                <li><code>TickCount</code> intervals give <code>TickCount + 1</code> labels formatted with <code>LabelFormat</code>; the circular gauge drops the last one, which would overlap the first.</li>
+                <li>The value is printed in the middle with <code>ValueFormat</code> unless a <code>ValueTemplate</code> is set, in which case the template is centred over the drawing.</li>
+                <li>For drawing and for <code>aria-valuenow</code> the value is clamped into <code>Min</code> to <code>Max</code>; a range or pointer outside that span is clamped the same way.</li>
+                <li>The gauge throws when a value is not finite, when <code>Max</code> is not above <code>Min</code>, when <code>TickCount</code> is outside 1 to 100, or when a range ends before it starts.</li>
+                </ul>
+            </DocSection>
+            <DocSection Id="doc-stockchartcontrol-parameters" Title="StockChartControl parameters" Count='@DocSection.Label(Vocab.Stock.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="StockChartControl parameters" Rows="Vocab.Stock" />
+            </DocSection>
+            <DocSection Id="doc-stockchartcontrol-events" Title="StockChartControl events" Count='@DocSection.Label(Vocab.StockEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="StockChartControl events" Rows="Vocab.StockEvents" />
+            </DocSection>
+            <DocSection Id="doc-stockchartcontrol-methods" Title="StockChartControl methods" Count='@DocSection.Label(Vocab.StockMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="StockChartControl methods" Rows="Vocab.StockMethods" />
+                <p>
+                Each data point is a <code>ChartDataPoint</code> made with <code>ChartDataPoint.Financial(label, open, high, low, close, date)</code>:
+                open, high, low and close land in <code>Value</code> to <code>Value4</code> and are read back through <code>Open</code>, <code>High</code>,
+                <code>Low</code> and <code>Close</code>; <code>DateValue</code> is required and the points are sorted by it. <code>StockChartRange(DateTime Start, DateTime End)</code>
+                is the record <code>RangeChanged</code> delivers. The control throws for a <code>Type</code> other than <code>Candlestick</code>, <code>Ohlc</code>
+                or <code>HighLow</code>, for a point without a date, and for a <code>Start</code> after <code>End</code>. With no points it shows
+                "No financial data." instead of the chart.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

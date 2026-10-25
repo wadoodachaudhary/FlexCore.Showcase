@@ -13,7 +13,9 @@
    Height set to the width-bound value for a 465 px tile; RangeColumn labels kept to 8 characters because the renderer cuts longer
    ones; the Sankey data given one flow per node because the renderer draws a node and label per flow (a shared source prints once per
    link); the radial gauge tile widened to its 300 px design size and the linear gauge raised to its 105 px. 
-   2026-10-24: Documentation: the page's seven ChartType rows and the ChartDataPoint table from ChartsVocab (shared with the Charts page). *@
+   2026-10-24: Documentation: the page's seven ChartType rows and the ChartDataPoint table from ChartsVocab (shared with the Charts page).
+   2026-10-24: the datasets became small stories: a trading week of BAKE (a fictional bakery chain), a household budget against
+   plan, a week of garden temperatures, recycling by bin, a rain barrel's level. The 2026-10-23 geometry is unchanged. *@
 
 <PageTitle>Financial &amp; gauges — FlexCore Showcase</PageTitle>
 
@@ -32,8 +34,8 @@
             <Description><p>Both read the same series; <code>Candlestick</code> fills the body, <code>Ohlc</code> draws ticks.</p></Description>
             <Demo>
                 <div class="two">
-                    <ChartControl Type="ChartType.Candlestick" Title="Candlestick" Series="_candlestickSeries" Height="248px" />
-                    <ChartControl Type="ChartType.Ohlc" Title="OHLC" Series="_candlestickSeries" Height="248px" />
+                    <ChartControl Type="ChartType.Candlestick" Title="BAKE, one week of trading" Series="_candlestickSeries" Height="248px" />
+                    <ChartControl Type="ChartType.Ohlc" Title="BAKE, the same week as OHLC" Series="_candlestickSeries" Height="248px" />
                 </div>
             </Demo>
         </DemoExample>
@@ -42,10 +44,10 @@
             <Description><p><code>Bullet</code> shows actual against target bands, <code>RangeColumn</code> floats a minimum to maximum bar, <code>Sankey</code> draws weighted flows between nodes.</p></Description>
             <Demo>
                 <div class="stack">
-                    <ChartControl Type="ChartType.Bullet" Title="Actual vs target" Series="_bulletSeries" Height="240px" />
+                    <ChartControl Type="ChartType.Bullet" Title="Monthly budget, spent against planned" Series="_bulletSeries" Height="240px" />
                     <div class="two">
-                        <ChartControl Type="ChartType.RangeColumn" Title="Min to max" Series="_rangeSeries" Height="232px" />
-                        <ChartControl Type="ChartType.Sankey" Title="Flow" Series="_sankeySeries" Height="243px" />
+                        <ChartControl Type="ChartType.RangeColumn" Title="Temperature this week, low to high °C" Series="_rangeSeries" Height="232px" />
+                        <ChartControl Type="ChartType.Sankey" Title="Recycling, kg by bin and what it becomes" Series="_sankeySeries" Height="243px" />
                     </div>
                 </div>
             </Demo>
@@ -55,8 +57,8 @@
             <Description><p>One series, two gauge types. The standalone <code>ArcGaugeControl</code>, <code>CircularGaugeControl</code>, <code>RadialGaugeControl</code> and <code>LinearGaugeControl</code> have <a href="demo/gauges">a page of their own</a>.</p></Description>
             <Demo>
                 <div class="gauges">
-                    <ChartControl Type="ChartType.RadialGauge" Title="Radial" Series="_gaugeSeries" Height="300px" />
-                    <ChartControl Type="ChartType.LinearGauge" Title="Linear" Series="_gaugeSeries" Height="105px" />
+                    <ChartControl Type="ChartType.RadialGauge" Title="Rain barrel, percent full" Series="_gaugeSeries" Height="300px" />
+                    <ChartControl Type="ChartType.LinearGauge" Title="Same reading, linear" Series="_gaugeSeries" Height="105px" />
                 </div>
             </Demo>
         </DemoExample>
@@ -68,8 +70,14 @@
             <code>ChartSeries</code>, <code>ChartAxis</code> and <code>ChartLegend</code> tables are on the <a href="demo/charts">Charts</a> page.
             The financial, bullet, range and Sankey points are built with the static factories listed under <code>ChartDataPoint</code>.
         </p>
-        <ApiTable Kind="ApiKind.Values" Title="Chart types on this page" Rows="@ChartsVocab.TypesNamed("Candlestick", "Ohlc", "Bullet", "RangeColumn", "Sankey", "RadialGauge", "LinearGauge")" />
-        <ApiTable Kind="ApiKind.Properties" Title="ChartDataPoint" Rows="ChartsVocab.Point" />
+        <DocSections>
+            <DocSection Id="doc-chart-types-on-this-page" Title="Chart types on this page" Open="true">
+                <ApiTable Kind="ApiKind.Values" Title="Chart types on this page" Rows="@ChartsVocab.TypesNamed("Candlestick", "Ohlc", "Bullet", "RangeColumn", "Sankey", "RadialGauge", "LinearGauge")" />
+            </DocSection>
+            <DocSection Id="doc-chartdatapoint" Title="ChartDataPoint" Count='@DocSection.Label(ChartsVocab.Point.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="ChartDataPoint" Rows="ChartsVocab.Point" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 </FeatureDemoLayout>
 
@@ -77,58 +85,60 @@
 
     private List<ChartSeries> _candlestickSeries = new()
     {
-        new ChartSeries("Equities", ChartType.Candlestick, new[]
+        // BAKE is a fictional bakery chain; one trading week of open, high, low, close (the axis runs from the lowest low to the highest high)
+        new ChartSeries("BAKE", ChartType.Candlestick, new[]
         {
-            ChartDataPoint.Financial("Day 1", 120, 135, 115, 130),
-            ChartDataPoint.Financial("Day 2", 130, 142, 125, 138),
-            ChartDataPoint.Financial("Day 3", 138, 140, 122, 126),
-            ChartDataPoint.Financial("Day 4", 126, 132, 120, 131),
-            ChartDataPoint.Financial("Day 5", 131, 145, 128, 143),
-            ChartDataPoint.Financial("Day 6", 143, 148, 135, 137),
-            ChartDataPoint.Financial("Day 7", 137, 150, 136, 149)
+            ChartDataPoint.Financial("Mon", 120, 135, 115, 130),
+            ChartDataPoint.Financial("Tue", 130, 142, 125, 138),
+            ChartDataPoint.Financial("Wed", 138, 140, 122, 126),
+            ChartDataPoint.Financial("Thu", 126, 132, 120, 131),
+            ChartDataPoint.Financial("Fri", 131, 155, 128, 149)
         })
     };
 
     private List<ChartSeries> _bulletSeries = new()
     {
-        new ChartSeries("Metrics", ChartType.Bullet, new[]
+        // one month in dollars: the dark bar is what was spent, the red line what was planned
+        new ChartSeries("Household budget", ChartType.Bullet, new[]
         {
-            ChartDataPoint.Bullet("Revenue ($k)", 275, 250),
-            ChartDataPoint.Bullet("Profit ($k)", 42, 50),
-            ChartDataPoint.Bullet("Orders", 310, 280),
-            ChartDataPoint.Bullet("NPS Score", 78, 85)
+            ChartDataPoint.Bullet("Groceries", 420, 400),
+            ChartDataPoint.Bullet("Transport", 95, 120),
+            ChartDataPoint.Bullet("Eating out", 180, 150),
+            ChartDataPoint.Bullet("Savings", 300, 350)
         })
     };
 
     private List<ChartSeries> _rangeSeries = new()
     {
-        new ChartSeries("Salary Ranges", ChartType.RangeColumn, new[]
+        // overnight low to afternoon high in °C; the axis runs from the lowest low (4) to the highest high (20) in four steps
+        new ChartSeries("Garden thermometer", ChartType.RangeColumn, new[]
         {
-            ChartDataPoint.Range("Junior", 60, 85),
-            ChartDataPoint.Range("Mid", 85, 120),
-            ChartDataPoint.Range("Senior", 120, 165),
-            ChartDataPoint.Range("Lead", 160, 210),
-            ChartDataPoint.Range("Director", 200, 260)
+            ChartDataPoint.Range("Mon", 6, 14),
+            ChartDataPoint.Range("Tue", 8, 17),
+            ChartDataPoint.Range("Wed", 10, 20),
+            ChartDataPoint.Range("Thu", 7, 15),
+            ChartDataPoint.Range("Fri", 4, 11)
         })
     };
 
     private List<ChartSeries> _sankeySeries = new()
     {
-        new ChartSeries("Budget Flow", ChartType.Sankey, new[]
+        // kg collected from each bin in a month and what it is made into; one flow per node, because the renderer draws a node and label per flow
+        new ChartSeries("Recycling", ChartType.Sankey, new[]
         {
-            ChartDataPoint.Sankey("Sales", "Payroll", 120),
-            ChartDataPoint.Sankey("Services", "Marketing", 60),
-            ChartDataPoint.Sankey("Licences", "Operations", 40),
-            ChartDataPoint.Sankey("Grants", "R&D", 80),
-            ChartDataPoint.Sankey("Loans", "Expansion", 50)
+            ChartDataPoint.Sankey("Paper", "Cardboard", 120),
+            ChartDataPoint.Sankey("Glass", "Bottles", 60),
+            ChartDataPoint.Sankey("Cans", "Car parts", 40),
+            ChartDataPoint.Sankey("Food", "Compost", 80),
+            ChartDataPoint.Sankey("Plastic", "Fleece", 50)
         })
     };
 
     private List<ChartSeries> _gaugeSeries = new()
     {
-        new ChartSeries("Performance", ChartType.RadialGauge, new[]
+        new ChartSeries("Rain barrel", ChartType.RadialGauge, new[]
         {
-            new ChartDataPoint("Score", 82.5)
+            new ChartDataPoint("Percent full", 82.5)
         })
     };
 
@@ -136,72 +146,74 @@
     private static class Code
     {
         public const string Financial = @"<div class=""two"">
-    <ChartControl Type=""ChartType.Candlestick"" Title=""Candlestick"" Series=""_candlestickSeries"" Height=""248px"" />
-    <ChartControl Type=""ChartType.Ohlc"" Title=""OHLC"" Series=""_candlestickSeries"" Height=""248px"" />
+    <ChartControl Type=""ChartType.Candlestick"" Title=""BAKE, one week of trading"" Series=""_candlestickSeries"" Height=""248px"" />
+    <ChartControl Type=""ChartType.Ohlc"" Title=""BAKE, the same week as OHLC"" Series=""_candlestickSeries"" Height=""248px"" />
 </div>";
         public const string FinancialCs = @"private List<ChartSeries> _candlestickSeries = new()
 {
-    new ChartSeries(""Equities"", ChartType.Candlestick, new[]
+    // BAKE is a fictional bakery chain; one trading week of open, high, low, close (the axis runs from the lowest low to the highest high)
+    new ChartSeries(""BAKE"", ChartType.Candlestick, new[]
     {
-        ChartDataPoint.Financial(""Day 1"", 120, 135, 115, 130),
-        ChartDataPoint.Financial(""Day 2"", 130, 142, 125, 138),
-        ChartDataPoint.Financial(""Day 3"", 138, 140, 122, 126),
-        ChartDataPoint.Financial(""Day 4"", 126, 132, 120, 131),
-        ChartDataPoint.Financial(""Day 5"", 131, 145, 128, 143),
-        ChartDataPoint.Financial(""Day 6"", 143, 148, 135, 137),
-        ChartDataPoint.Financial(""Day 7"", 137, 150, 136, 149)
+        ChartDataPoint.Financial(""Mon"", 120, 135, 115, 130),
+        ChartDataPoint.Financial(""Tue"", 130, 142, 125, 138),
+        ChartDataPoint.Financial(""Wed"", 138, 140, 122, 126),
+        ChartDataPoint.Financial(""Thu"", 126, 132, 120, 131),
+        ChartDataPoint.Financial(""Fri"", 131, 155, 128, 149)
     })
 };";
         public const string Comparisons = @"<div class=""stack"">
-    <ChartControl Type=""ChartType.Bullet"" Title=""Actual vs target"" Series=""_bulletSeries"" Height=""240px"" />
+    <ChartControl Type=""ChartType.Bullet"" Title=""Monthly budget, spent against planned"" Series=""_bulletSeries"" Height=""240px"" />
     <div class=""two"">
-        <ChartControl Type=""ChartType.RangeColumn"" Title=""Min to max"" Series=""_rangeSeries"" Height=""232px"" />
-        <ChartControl Type=""ChartType.Sankey"" Title=""Flow"" Series=""_sankeySeries"" Height=""243px"" />
+        <ChartControl Type=""ChartType.RangeColumn"" Title=""Temperature this week, low to high °C"" Series=""_rangeSeries"" Height=""232px"" />
+        <ChartControl Type=""ChartType.Sankey"" Title=""Recycling, kg by bin and what it becomes"" Series=""_sankeySeries"" Height=""243px"" />
     </div>
 </div>";
         public const string ComparisonsCs = @"private List<ChartSeries> _bulletSeries = new()
 {
-    new ChartSeries(""Metrics"", ChartType.Bullet, new[]
+    // one month in dollars: the dark bar is what was spent, the red line what was planned
+    new ChartSeries(""Household budget"", ChartType.Bullet, new[]
     {
-        ChartDataPoint.Bullet(""Revenue ($k)"", 275, 250),
-        ChartDataPoint.Bullet(""Profit ($k)"", 42, 50),
-        ChartDataPoint.Bullet(""Orders"", 310, 280),
-        ChartDataPoint.Bullet(""NPS Score"", 78, 85)
+        ChartDataPoint.Bullet(""Groceries"", 420, 400),
+        ChartDataPoint.Bullet(""Transport"", 95, 120),
+        ChartDataPoint.Bullet(""Eating out"", 180, 150),
+        ChartDataPoint.Bullet(""Savings"", 300, 350)
     })
 };
 
 private List<ChartSeries> _rangeSeries = new()
 {
-    new ChartSeries(""Salary Ranges"", ChartType.RangeColumn, new[]
+    // overnight low to afternoon high in °C; the axis runs from the lowest low (4) to the highest high (20) in four steps
+    new ChartSeries(""Garden thermometer"", ChartType.RangeColumn, new[]
     {
-        ChartDataPoint.Range(""Junior"", 60, 85),
-        ChartDataPoint.Range(""Mid"", 85, 120),
-        ChartDataPoint.Range(""Senior"", 120, 165),
-        ChartDataPoint.Range(""Lead"", 160, 210),
-        ChartDataPoint.Range(""Director"", 200, 260)
+        ChartDataPoint.Range(""Mon"", 6, 14),
+        ChartDataPoint.Range(""Tue"", 8, 17),
+        ChartDataPoint.Range(""Wed"", 10, 20),
+        ChartDataPoint.Range(""Thu"", 7, 15),
+        ChartDataPoint.Range(""Fri"", 4, 11)
     })
 };
 
 private List<ChartSeries> _sankeySeries = new()
 {
-    new ChartSeries(""Budget Flow"", ChartType.Sankey, new[]
+    // kg collected from each bin in a month and what it is made into; one flow per node, because the renderer draws a node and label per flow
+    new ChartSeries(""Recycling"", ChartType.Sankey, new[]
     {
-        ChartDataPoint.Sankey(""Sales"", ""Payroll"", 120),
-        ChartDataPoint.Sankey(""Services"", ""Marketing"", 60),
-        ChartDataPoint.Sankey(""Licences"", ""Operations"", 40),
-        ChartDataPoint.Sankey(""Grants"", ""R&D"", 80),
-        ChartDataPoint.Sankey(""Loans"", ""Expansion"", 50)
+        ChartDataPoint.Sankey(""Paper"", ""Cardboard"", 120),
+        ChartDataPoint.Sankey(""Glass"", ""Bottles"", 60),
+        ChartDataPoint.Sankey(""Cans"", ""Car parts"", 40),
+        ChartDataPoint.Sankey(""Food"", ""Compost"", 80),
+        ChartDataPoint.Sankey(""Plastic"", ""Fleece"", 50)
     })
 };";
         public const string Gauges = @"<div class=""gauges"">
-    <ChartControl Type=""ChartType.RadialGauge"" Title=""Radial"" Series=""_gaugeSeries"" Height=""300px"" />
-    <ChartControl Type=""ChartType.LinearGauge"" Title=""Linear"" Series=""_gaugeSeries"" Height=""105px"" />
+    <ChartControl Type=""ChartType.RadialGauge"" Title=""Rain barrel, percent full"" Series=""_gaugeSeries"" Height=""300px"" />
+    <ChartControl Type=""ChartType.LinearGauge"" Title=""Same reading, linear"" Series=""_gaugeSeries"" Height=""105px"" />
 </div>";
         public const string GaugesCs = @"private List<ChartSeries> _gaugeSeries = new()
 {
-    new ChartSeries(""Performance"", ChartType.RadialGauge, new[]
+    new ChartSeries(""Rain barrel"", ChartType.RadialGauge, new[]
     {
-        new ChartDataPoint(""Score"", 82.5)
+        new ChartDataPoint(""Percent full"", 82.5)
     })
 };";
     }

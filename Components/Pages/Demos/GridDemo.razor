@@ -4,13 +4,15 @@
 
 @* 2026-10-17: moved onto FeatureDemoLayout (one-example-plus-code push, tracker section 6). The grid and its data are unchanged;
    the hand-typed markup block became Razor and C# tabs copied from the live example. "Right-click for menu" left the copy:
-   GridControl only raises OnContextMenu when the host handles it, and this page does not. Parameter tables are a later pass (SC-278). *@
+   GridControl only raises OnContextMenu when the host handles it, and this page does not. Parameter tables are a later pass (SC-278). 
+   2026-10-24: Documentation written: all 224 GridControl parameters in 27 purpose groups plus AggregateRow and AggregateColumn, rows in
+   GridVocab.A.cs and GridVocab.B.cs (two agents, read sites checked with scratchpad/vocabcheck.py). *@
 
 <PageTitle>Data Grid — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Data Grid" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
                    Tagline="Sort, filter, group and resize a bound list. Every other grid page takes one feature further."
-                   SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs">
+                   SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs;Grid/GridControl.AdvancedFeatures.cs;Grid/GridControl.PresentationFeatures.cs;Grid/GridControl.ItemsProvider.cs;Grid/GridControl.ColumnVirtualization.cs;Grid/GridControl.ProviderGrouping.cs;Grid/GridControl.ProviderExport.cs;Grid/GridModels.cs">
     <Overview>
         <p>
             <code>GridControl</code> binds a list through <code>DataSource</code> and <code>TValue</code>, declares its columns in
@@ -49,7 +51,67 @@
     </Examples>
 
     <Vocabulary>
-        <p class="fd-pending"><code>GridControl</code>, <code>GridColumn</code> and <code>AggregateRow</code> tables are still to be written from <code>Grid/GridControl.razor.cs</code> and its partial files.</p>
+        <p>
+            <code>GridControl</code> has 224 parameters. They are listed here in full, in eight sections you can open one at a time or all at once, with one or
+            two sentences each and a pointer to the page that shows the feature; the detailed tables live there: columns on
+            <a href="demo/grid/column-swap">Column sets</a> and <a href="demo/grid/dynamic-columns">Dynamic columns</a>, editing on
+            <a href="demo/grid/batch-editing">Batch editing</a>, selection and detail rows on <a href="demo/grid/master-detail">Master-detail</a>,
+            export on <a href="demo/grid/enterprise-suite">Export &amp; templates</a>, loading on <a href="demo/grid/provider-enterprise">On-demand loading</a>.
+            Every row was checked against the place in the grid that reads the parameter; five parameters are declared but never read and
+            say so.
+        </p>
+        <DocSections>
+            <DocSection Id="doc-data" Title="Data and loading" Count="@GridVocab.Count(GridVocab.A_Data, GridVocab.B_Settings, GridVocab.B_Provider)" Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="Data binding" Rows="GridVocab.A_Data" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Settings objects and direct row events" Rows="GridVocab.B_Settings" />
+                <ApiTable Kind="ApiKind.Parameters" Title="On-demand loading" Rows="GridVocab.B_Provider" />
+            </DocSection>
+            <DocSection Id="doc-layout" Title="Size, layout and scrolling" Count="@GridVocab.Count(GridVocab.A_Layout, GridVocab.B_Presentation, GridVocab.A_Appearance, GridVocab.B_Scrolling)">
+                <ApiTable Kind="ApiKind.Parameters" Title="Size and layout" Rows="GridVocab.A_Layout" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Presentation, paging and accessibility" Rows="GridVocab.B_Presentation" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Appearance and footer" Rows="GridVocab.A_Appearance" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Row windowing and scrolling" Rows="GridVocab.B_Scrolling" />
+            </DocSection>
+            <DocSection Id="doc-rows-columns" Title="Rows and columns" Count="@GridVocab.Count(GridVocab.A_Rows, GridVocab.A_Columns, GridVocab.B_Columns, GridVocab.B_HeaderMenu, GridVocab.B_ColumnChooser, GridVocab.A_ContextMenu)">
+                <ApiTable Kind="ApiKind.Parameters" Title="Rows" Rows="GridVocab.A_Rows" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Columns" Rows="GridVocab.A_Columns" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Column generation, header bands and column virtualization" Rows="GridVocab.B_Columns" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Column header menu, cell menu and reorder" Rows="GridVocab.B_HeaderMenu" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Choose Columns, layout persistence and state" Rows="GridVocab.B_ColumnChooser" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Context menu" Rows="GridVocab.A_ContextMenu" />
+            </DocSection>
+            <DocSection Id="doc-sort-filter" Title="Sorting, filtering and paging" Count="@GridVocab.Count(GridVocab.A_Sorting, GridVocab.A_Filtering, GridVocab.B_Filtering, GridVocab.A_Paging)">
+                <ApiTable Kind="ApiKind.Parameters" Title="Sorting" Rows="GridVocab.A_Sorting" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Filtering" Rows="GridVocab.A_Filtering" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Filtering and sorting, more" Rows="GridVocab.B_Filtering" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Paging" Rows="GridVocab.A_Paging" />
+            </DocSection>
+            <DocSection Id="doc-grouping" Title="Grouping and totals" Count="@GridVocab.Count(GridVocab.B_Grouping)">
+                <ApiTable Kind="ApiKind.Parameters" Title="Grouping and totals" Rows="GridVocab.B_Grouping" />
+                <ApiTable Kind="ApiKind.Properties" Title="AggregateRow" Rows="GridVocab.AggregateRow" />
+                <ApiTable Kind="ApiKind.Properties" Title="AggregateColumn" Rows="GridVocab.AggregateColumn" />
+            </DocSection>
+            <DocSection Id="doc-selection" Title="Selection, keyboard and master-detail" Count="@GridVocab.Count(GridVocab.A_Selection, GridVocab.A_Keyboard, GridVocab.B_MasterDetail)">
+                <ApiTable Kind="ApiKind.Parameters" Title="Selection" Rows="GridVocab.A_Selection" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Keyboard and focus" Rows="GridVocab.A_Keyboard" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Master-detail" Rows="GridVocab.B_MasterDetail" />
+            </DocSection>
+            <DocSection Id="doc-editing" Title="Editing" Count="@GridVocab.Count(GridVocab.A_Editing, GridVocab.B_Editing)">
+                <ApiTable Kind="ApiKind.Parameters" Title="Editing" Rows="GridVocab.A_Editing" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Adding, cloning and validating rows" Rows="GridVocab.B_Editing" />
+            </DocSection>
+            <DocSection Id="doc-toolbar" Title="Toolbar, options rail, print and chart view" Count="@GridVocab.Count(GridVocab.B_Toolbar, GridVocab.B_OptionsRail, GridVocab.B_Print, GridVocab.B_Chart)">
+                <ApiTable Kind="ApiKind.Parameters" Title="Toolbar" Rows="GridVocab.B_Toolbar" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Advanced view and options rail" Rows="GridVocab.B_OptionsRail" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Print and export" Rows="GridVocab.B_Print" />
+                <ApiTable Kind="ApiKind.Parameters" Title="Chart view" Rows="GridVocab.B_Chart" />
+            </DocSection>
+        </DocSections>
+        <p>
+            <code>GridColumn</code> is documented on <a href="demo/grid/column-swap">Column sets</a> (layout), <a href="demo/grid/dynamic-columns">Dynamic columns</a>
+            (data) and <a href="demo/grid/batch-editing">Batch editing</a> (editors). The events live on <code>GridControlEvents</code>, passed through
+            <code>EventsRef</code>; the selection ones are on Master-detail and the editing ones on Batch editing.
+        </p>
     </Vocabulary>
 
     <Related>

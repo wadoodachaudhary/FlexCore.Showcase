@@ -90,22 +90,40 @@
             PDF; no ClosedXML, and the <code>FlexCore.Documents</code> project the Showcase references for its spreadsheet and PDF viewers plays
             no part); <code>GridExporter.SaveAsync</code> then hands the bytes to the browser.
         </p>
-        <ApiTable Kind="ApiKind.Methods" Title="GridControl export methods" Rows="Vocab.Export" />
-        <ApiTable Kind="ApiKind.Methods" Title="Provider export methods" Rows="Vocab.Provider" />
-        <ApiTable Kind="ApiKind.Methods" Title="GridExporter (static)" Rows="Vocab.Exporter" />
-        <ApiTable Kind="ApiKind.Values" Title="GridExportFormat" Rows="Vocab.Formats" />
-        <ApiTable Kind="ApiKind.Parameters" Title="GridControl export parameters" Rows="Vocab.Params" />
-        <ApiTable Kind="ApiKind.Properties" Title="GridExportCellStyle" Rows="Vocab.CellStyle" />
-        <ApiTable Kind="ApiKind.Properties" Title="GridPdfPrintOptions" Rows="Vocab.PdfOptions" />
-        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn template parameters" Rows="Vocab.Templates" />
-        <p>
-            <code>IsProviderExporting</code>, <code>ProviderExportProgress</code> and <code>ProviderExportLastError</code> are read-only
-            properties that mirror a provider export in flight. The embedded Liberation fonts under <code>Grid/PdfFonts</code> serve the report
-            PDF writer; the grid PDF draws with the standard Helvetica fonts. <code>GridControl</code> also declares
-            <code>GroupFooterTemplate</code> (<code>RenderFragment&lt;object&gt;?</code>) but never reads it, and <code>GridColumn</code> has no
-            footer template: an aggregate's footer text comes from <code>AggregateColumn.FooterTemplate</code>, a format string whose default is
-            <code>{value}</code>.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-gridcontrol-export-methods" Title="GridControl export methods" Count='@DocSection.Label(Vocab.Export.Length, "methods")' Open="true">
+                <ApiTable Kind="ApiKind.Methods" Title="GridControl export methods" Rows="Vocab.Export" />
+            </DocSection>
+            <DocSection Id="doc-provider-export-methods" Title="Provider export methods" Count='@DocSection.Label(Vocab.Provider.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Provider export methods" Rows="Vocab.Provider" />
+            </DocSection>
+            <DocSection Id="doc-gridexporter-static" Title="GridExporter (static)" Count='@DocSection.Label(Vocab.Exporter.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="GridExporter (static)" Rows="Vocab.Exporter" />
+            </DocSection>
+            <DocSection Id="doc-gridexportformat" Title="GridExportFormat" Count='@DocSection.Label(Vocab.Formats.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="GridExportFormat" Rows="Vocab.Formats" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrol-export-parameters" Title="GridControl export parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl export parameters" Rows="Vocab.Params" />
+            </DocSection>
+            <DocSection Id="doc-gridexportcellstyle" Title="GridExportCellStyle" Count='@DocSection.Label(Vocab.CellStyle.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridExportCellStyle" Rows="Vocab.CellStyle" />
+            </DocSection>
+            <DocSection Id="doc-gridpdfprintoptions" Title="GridPdfPrintOptions" Count='@DocSection.Label(Vocab.PdfOptions.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridPdfPrintOptions" Rows="Vocab.PdfOptions" />
+            </DocSection>
+            <DocSection Id="doc-gridcolumn-template-parameters" Title="GridColumn template parameters" Count='@DocSection.Label(Vocab.Templates.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridColumn template parameters" Rows="Vocab.Templates" />
+                <p>
+                <code>IsProviderExporting</code>, <code>ProviderExportProgress</code> and <code>ProviderExportLastError</code> are read-only
+                properties that mirror a provider export in flight. The embedded Liberation fonts under <code>Grid/PdfFonts</code> serve the report
+                PDF writer; the grid PDF draws with the standard Helvetica fonts. <code>GridControl</code> also declares
+                <code>GroupFooterTemplate</code> (<code>RenderFragment&lt;object&gt;?</code>) but never reads it, and <code>GridColumn</code> has no
+                footer template: an aggregate's footer text comes from <code>AggregateColumn.FooterTemplate</code>, a format string whose default is
+                <code>{value}</code>.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

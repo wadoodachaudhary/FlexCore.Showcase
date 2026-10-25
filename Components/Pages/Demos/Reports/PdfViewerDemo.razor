@@ -70,27 +70,47 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="PdfViewerControl parameters" Rows="Vocab.Params" />
-        <p>
-            <code>CssClass</code>, <code>Style</code>, <code>Id</code>, <code>Visible</code>, <code>Enabled</code> and
-            <code>AdditionalAttributes</code> come from <code>FlexControlBase</code> and apply to the root <code>div</code>;
-            <code>Enabled="false"</code> disables every toolbar control and the methods.
-        </p>
-        <ApiTable Kind="ApiKind.Events" Title="PdfViewerControl events" Rows="Vocab.Events" />
-        <ApiTable Kind="ApiKind.Methods" Title="PdfViewerControl methods" Rows="Vocab.Methods" />
-        <ApiTable Kind="ApiKind.Properties" Title="PdfViewerControl read-only state" Rows="Vocab.State" />
-        <ApiTable Kind="ApiKind.Properties" Title="PdfDocumentInfo" Rows="Vocab.Info" />
-        <ApiTable Kind="ApiKind.Properties" Title="PdfFormField" Rows="Vocab.Field" />
-        <ApiTable Kind="ApiKind.Properties" Title="PdfBookmark" Rows="Vocab.Bookmark" />
-        <p>
-            <code>PdfSearchState(string Query, bool MatchCase, IReadOnlyList&lt;PdfSearchMatch&gt; Matches, int CurrentIndex, bool IsTruncated)</code>
-            and <code>PdfSearchMatch(int Page, string Text, int Index, int Length)</code> are records; <code>Index</code> and
-            <code>Length</code> refer to the page's extracted text. A search returns at most 200 matches or 24 KB of results, and
-            <code>IsTruncated</code> says when the list was cut. Forms with XFA content cannot be edited: the viewer reports it and the
-            original file can still be downloaded.
-        </p>
-        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <DocSections>
+            <DocSection Id="doc-pdfviewercontrol-parameters" Title="PdfViewerControl parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="PdfViewerControl parameters" Rows="Vocab.Params" />
+                <p>
+                <code>CssClass</code>, <code>Style</code>, <code>Id</code>, <code>Visible</code>, <code>Enabled</code> and
+                <code>AdditionalAttributes</code> come from <code>FlexControlBase</code> and apply to the root <code>div</code>;
+                <code>Enabled="false"</code> disables every toolbar control and the methods.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-pdfviewercontrol-events" Title="PdfViewerControl events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="PdfViewerControl events" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-pdfviewercontrol-methods" Title="PdfViewerControl methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="PdfViewerControl methods" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-pdfviewercontrol-read-only-state" Title="PdfViewerControl read-only state" Count='@DocSection.Label(Vocab.State.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="PdfViewerControl read-only state" Rows="Vocab.State" />
+            </DocSection>
+            <DocSection Id="doc-pdfdocumentinfo" Title="PdfDocumentInfo" Count='@DocSection.Label(Vocab.Info.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="PdfDocumentInfo" Rows="Vocab.Info" />
+            </DocSection>
+            <DocSection Id="doc-pdfformfield" Title="PdfFormField" Count='@DocSection.Label(Vocab.Field.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="PdfFormField" Rows="Vocab.Field" />
+            </DocSection>
+            <DocSection Id="doc-pdfbookmark" Title="PdfBookmark" Count='@DocSection.Label(Vocab.Bookmark.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="PdfBookmark" Rows="Vocab.Bookmark" />
+                <p>
+                <code>PdfSearchState(string Query, bool MatchCase, IReadOnlyList&lt;PdfSearchMatch&gt; Matches, int CurrentIndex, bool IsTruncated)</code>
+                and <code>PdfSearchMatch(int Page, string Text, int Index, int Length)</code> are records; <code>Index</code> and
+                <code>Length</code> refer to the page's extracted text. A search returns at most 200 matches or 24 KB of results, and
+                <code>IsTruncated</code> says when the list was cut. Forms with XFA content cannot be edited: the viewer reports it and the
+                original file can still be downloaded.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-keyboard" Title="Keyboard" Count='@DocSection.Label(Vocab.Keys.Length, "keys")'>
+                <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

@@ -51,10 +51,18 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
-        <ApiTable Kind="ApiKind.Properties" Title="SplitButtonItem" Rows="Vocab.Item" />
-        <p class="note">Colors are fixed in the control's stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <DocSections>
+            <DocSection Id="doc-parameters" Title="Parameters" Count='@DocSection.Label(Vocab.Parameters.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
+            </DocSection>
+            <DocSection Id="doc-splitbuttonitem" Title="SplitButtonItem" Count='@DocSection.Label(Vocab.Item.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="SplitButtonItem" Rows="Vocab.Item" />
+                <p class="note">Colors are fixed in the control's stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

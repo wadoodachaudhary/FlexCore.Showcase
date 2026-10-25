@@ -49,10 +49,18 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
-        <ApiTable Kind="ApiKind.Properties" Title="FabMenuItem" Rows="Vocab.Item" />
-        <p class="note">Colours, sizes and the 2rem corner offset are fixed in the control's stylesheet; it reads no <code>--fx-*</code> variables. There are no public methods.</p>
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <DocSections>
+            <DocSection Id="doc-parameters" Title="Parameters" Count='@DocSection.Label(Vocab.Parameters.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
+            </DocSection>
+            <DocSection Id="doc-fabmenuitem" Title="FabMenuItem" Count='@DocSection.Label(Vocab.Item.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="FabMenuItem" Rows="Vocab.Item" />
+                <p class="note">Colours, sizes and the 2rem corner offset are fixed in the control's stylesheet; it reads no <code>--fx-*</code> variables. There are no public methods.</p>
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

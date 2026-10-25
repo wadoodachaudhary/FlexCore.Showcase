@@ -1,0 +1,5 @@
+.doc-section { scroll-margin-top: 76px; }
+.doc-section:focus { outline: none; }
+.doc-section ::deep .fx-accordion-title { font-weight: 600; }
+.doc-count { color: #94a3b8; font-weight: 400; font-size: 12.5px; margin-right: 12px; white-space: nowrap; }  /* right-aligned by the title's flex-grow, beside the arrow (Baaria, 2026-10-25) */
+.doc-section ::deep .fx-accordion-body { padding-top: 4px; }

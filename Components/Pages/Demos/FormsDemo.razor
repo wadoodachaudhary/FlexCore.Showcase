@@ -70,51 +70,77 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="FormControl parameters" Rows="Vocab.Form" />
-        <ApiTable Kind="ApiKind.Events" Title="FormControl events" Rows="Vocab.FormEvents" />
-        <ApiTable Kind="ApiKind.Methods" Title="FormControl methods" Rows="Vocab.FormMethods" />
-        <p>
-            <code>CurrentEditContext</code> exposes the context in use. <code>CssClass</code>, <code>Style</code>, <code>Id</code>,
-            <code>Visible</code>, <code>Enabled</code> and <code>AdditionalAttributes</code> come from <code>FlexControlBase</code> and apply to the
-            <code>form</code> element; <code>Enabled="false"</code> disables the submit button, <code>SubmitAsync</code> and every item.
-        </p>
-        <p>Without child content the form generates an item for each property of the model that:</p>
-        <ul>
-            <li>is public, readable and not an indexer;</li>
-            <li>has a supported type, or its nullable form: an enum, <code>string</code>, <code>bool</code>, <code>Guid</code>, <code>DateTime</code>, <code>DateOnly</code>, <code>TimeOnly</code>, <code>decimal</code>, <code>double</code>, <code>float</code> or any integer type;</li>
-            <li>is not marked <code>[Display(AutoGenerateField = false)]</code>.</li>
-        </ul>
-        <p>Items follow <code>[Display(Order = n)]</code>; properties without an order come last, in declaration order.</p>
-        <ApiTable Kind="ApiKind.Parameters" Title="FormItemControl parameters" Rows="Vocab.Item" />
-        <ApiTable Kind="ApiKind.Events" Title="FormItemControl events" Rows="Vocab.ItemEvents" />
-        <ApiTable Kind="ApiKind.Methods" Title="FormItemControl methods" Rows="Vocab.ItemMethods" />
-        <p>The editor is chosen in this order:</p>
-        <ol>
-            <li><code>Template</code>, when set.</li>
-            <li>A dropdown for <code>EditorType.DropDownList</code>, for an enum, or for a nullable <code>bool</code>. Choices are <code>Options</code>, else the enum names or True and False, with a blank entry first for a nullable property.</li>
-            <li>A switch for <code>EditorType.Switch</code>.</li>
-            <li>A checkbox for <code>bool</code>.</li>
-            <li>A date picker for <code>DateTime</code> and <code>DateOnly</code>; it shows the time when <code>ShowTime</code> is set or the property carries <code>[DataType(DataType.DateTime)]</code>.</li>
-            <li>A time picker for <code>TimeOnly</code>.</li>
-            <li>A text box for everything else; <code>EditorType.TextArea</code> makes it multi-line with <code>Rows</code> lines.</li>
-        </ol>
-        <p>
-            Asking for <code>Switch</code> or <code>CheckBox</code> on a property that is not a <code>bool</code>, <code>DatePicker</code> on one that is
-            not a date, or <code>TimePicker</code> on one that is not a <code>TimeOnly</code> throws. Text is converted to the property type with
-            <code>Culture</code>; an empty value becomes null for a nullable property; a value that does not convert leaves the property unchanged and
-            adds "Enter a valid <em>caption</em>." to the context, and a null for a non-nullable value type adds "<em>Caption</em> is required."
-            The caption is <code>Label</code>, else <code>[Display(Name)]</code>, else the property name split at its capitals. An item is editable
-            only while it and its form are enabled, the property has a public setter and it is not marked <code>[Editable(false)]</code>.
-            <code>FormEditorType</code> is <code>Auto</code>, <code>TextBox</code>, <code>TextArea</code>, <code>CheckBox</code>, <code>Switch</code>,
-            <code>DatePicker</code>, <code>TimePicker</code> or <code>DropDownList</code>; <code>FormFieldChangedArgs(object Model, string Field, object? Value)</code>
-            is the record both <code>ValueChanged</code> and <code>OnUpdate</code> receive.
-        </p>
-        <ApiTable Kind="ApiKind.Properties" Title="FormFieldContext, passed to a Template" Rows="Vocab.Ctx" />
-        <ApiTable Kind="ApiKind.Parameters" Title="FormGroupControl parameters" Rows="Vocab.Group" />
-        <ApiTable Kind="ApiKind.Parameters" Title="ValidationTooltipControl parameters" Rows="Vocab.Tooltip" />
-        <ApiTable Kind="ApiKind.Parameters" Title="ValidationMessageControl parameters" Rows="Vocab.Message" />
-        <ApiTable Kind="ApiKind.Parameters" Title="ValidationSummaryControl parameters" Rows="Vocab.Summary" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <DocSections>
+            <DocSection Id="doc-formcontrol-parameters" Title="FormControl parameters" Count='@DocSection.Label(Vocab.Form.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="FormControl parameters" Rows="Vocab.Form" />
+            </DocSection>
+            <DocSection Id="doc-formcontrol-events" Title="FormControl events" Count='@DocSection.Label(Vocab.FormEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="FormControl events" Rows="Vocab.FormEvents" />
+            </DocSection>
+            <DocSection Id="doc-formcontrol-methods" Title="FormControl methods" Count='@DocSection.Label(Vocab.FormMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="FormControl methods" Rows="Vocab.FormMethods" />
+                <p>
+                <code>CurrentEditContext</code> exposes the context in use. <code>CssClass</code>, <code>Style</code>, <code>Id</code>,
+                <code>Visible</code>, <code>Enabled</code> and <code>AdditionalAttributes</code> come from <code>FlexControlBase</code> and apply to the
+                <code>form</code> element; <code>Enabled="false"</code> disables the submit button, <code>SubmitAsync</code> and every item.
+                </p>
+                <p>Without child content the form generates an item for each property of the model that:</p>
+                <ul>
+                <li>is public, readable and not an indexer;</li>
+                <li>has a supported type, or its nullable form: an enum, <code>string</code>, <code>bool</code>, <code>Guid</code>, <code>DateTime</code>, <code>DateOnly</code>, <code>TimeOnly</code>, <code>decimal</code>, <code>double</code>, <code>float</code> or any integer type;</li>
+                <li>is not marked <code>[Display(AutoGenerateField = false)]</code>.</li>
+                </ul>
+                <p>Items follow <code>[Display(Order = n)]</code>; properties without an order come last, in declaration order.</p>
+            </DocSection>
+            <DocSection Id="doc-formitemcontrol-parameters" Title="FormItemControl parameters" Count='@DocSection.Label(Vocab.Item.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="FormItemControl parameters" Rows="Vocab.Item" />
+            </DocSection>
+            <DocSection Id="doc-formitemcontrol-events" Title="FormItemControl events" Count='@DocSection.Label(Vocab.ItemEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="FormItemControl events" Rows="Vocab.ItemEvents" />
+            </DocSection>
+            <DocSection Id="doc-formitemcontrol-methods" Title="FormItemControl methods" Count='@DocSection.Label(Vocab.ItemMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="FormItemControl methods" Rows="Vocab.ItemMethods" />
+                <p>The editor is chosen in this order:</p>
+                <ol>
+                <li><code>Template</code>, when set.</li>
+                <li>A dropdown for <code>EditorType.DropDownList</code>, for an enum, or for a nullable <code>bool</code>. Choices are <code>Options</code>, else the enum names or True and False, with a blank entry first for a nullable property.</li>
+                <li>A switch for <code>EditorType.Switch</code>.</li>
+                <li>A checkbox for <code>bool</code>.</li>
+                <li>A date picker for <code>DateTime</code> and <code>DateOnly</code>; it shows the time when <code>ShowTime</code> is set or the property carries <code>[DataType(DataType.DateTime)]</code>.</li>
+                <li>A time picker for <code>TimeOnly</code>.</li>
+                <li>A text box for everything else; <code>EditorType.TextArea</code> makes it multi-line with <code>Rows</code> lines.</li>
+                </ol>
+                <p>
+                Asking for <code>Switch</code> or <code>CheckBox</code> on a property that is not a <code>bool</code>, <code>DatePicker</code> on one that is
+                not a date, or <code>TimePicker</code> on one that is not a <code>TimeOnly</code> throws. Text is converted to the property type with
+                <code>Culture</code>; an empty value becomes null for a nullable property; a value that does not convert leaves the property unchanged and
+                adds "Enter a valid <em>caption</em>." to the context, and a null for a non-nullable value type adds "<em>Caption</em> is required."
+                The caption is <code>Label</code>, else <code>[Display(Name)]</code>, else the property name split at its capitals. An item is editable
+                only while it and its form are enabled, the property has a public setter and it is not marked <code>[Editable(false)]</code>.
+                <code>FormEditorType</code> is <code>Auto</code>, <code>TextBox</code>, <code>TextArea</code>, <code>CheckBox</code>, <code>Switch</code>,
+                <code>DatePicker</code>, <code>TimePicker</code> or <code>DropDownList</code>; <code>FormFieldChangedArgs(object Model, string Field, object? Value)</code>
+                is the record both <code>ValueChanged</code> and <code>OnUpdate</code> receive.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-formfieldcontext-passed-to-a-template" Title="FormFieldContext, passed to a Template" Count='@DocSection.Label(Vocab.Ctx.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="FormFieldContext, passed to a Template" Rows="Vocab.Ctx" />
+            </DocSection>
+            <DocSection Id="doc-formgroupcontrol-parameters" Title="FormGroupControl parameters" Count='@DocSection.Label(Vocab.Group.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="FormGroupControl parameters" Rows="Vocab.Group" />
+            </DocSection>
+            <DocSection Id="doc-validationtooltipcontrol-parameters" Title="ValidationTooltipControl parameters" Count='@DocSection.Label(Vocab.Tooltip.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="ValidationTooltipControl parameters" Rows="Vocab.Tooltip" />
+            </DocSection>
+            <DocSection Id="doc-validationmessagecontrol-parameters" Title="ValidationMessageControl parameters" Count='@DocSection.Label(Vocab.Message.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="ValidationMessageControl parameters" Rows="Vocab.Message" />
+            </DocSection>
+            <DocSection Id="doc-validationsummarycontrol-parameters" Title="ValidationSummaryControl parameters" Count='@DocSection.Label(Vocab.Summary.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="ValidationSummaryControl parameters" Rows="Vocab.Summary" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

@@ -151,21 +151,39 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="GridControl selection parameters" Rows="Vocab.Grid" />
-        <ApiTable Kind="ApiKind.Properties" Title="SelectionSettings" Rows="Vocab.Settings" />
-        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, selection" Rows="Vocab.Events" />
-        <ApiTable Kind="ApiKind.Properties" Title="RowSelectEventArgs&lt;TValue&gt;" Rows="Vocab.Args" />
-        <ApiTable Kind="ApiKind.Methods" Title="Selection methods" Rows="Vocab.Methods" />
-        <ApiTable Kind="ApiKind.Parameters" Title="GridControl detail-row parameters" Rows="Vocab.Detail" />
-        <ApiTable Kind="ApiKind.Events" Title="Detail-row events" Rows="Vocab.DetailEvents" />
-        <ApiTable Kind="ApiKind.Methods" Title="Detail-row methods" Rows="Vocab.DetailMethods" />
-        <p>
-            <code>GridControlEvents</code> also carries the sorting, filtering, paging, editing, grouping, resizing, reordering and cell
-            events; those belong with the pages that use them. The methods above change the selection without raising
-            <code>RowSelecting</code> or <code>RowSelected</code>; they raise <code>SelectionChanged</code> with the source
-            <code>Programmatic</code>. A detail template turns off the grid's row windowing, so the grid renders every row of the current
-            page; keep a master list to pages or a few hundred rows.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-gridcontrol-selection-parameters" Title="GridControl selection parameters" Count='@DocSection.Label(Vocab.Grid.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl selection parameters" Rows="Vocab.Grid" />
+            </DocSection>
+            <DocSection Id="doc-selectionsettings" Title="SelectionSettings" Count='@DocSection.Label(Vocab.Settings.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="SelectionSettings" Rows="Vocab.Settings" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrolevents-selection" Title="GridControlEvents, selection" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, selection" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-rowselecteventargs-tvalue" Title="RowSelectEventArgs&lt;TValue&gt;" Count='@DocSection.Label(Vocab.Args.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="RowSelectEventArgs&lt;TValue&gt;" Rows="Vocab.Args" />
+            </DocSection>
+            <DocSection Id="doc-selection-methods" Title="Selection methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Selection methods" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrol-detail-row-parameters" Title="GridControl detail-row parameters" Count='@DocSection.Label(Vocab.Detail.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl detail-row parameters" Rows="Vocab.Detail" />
+            </DocSection>
+            <DocSection Id="doc-detail-row-events" Title="Detail-row events" Count='@DocSection.Label(Vocab.DetailEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="Detail-row events" Rows="Vocab.DetailEvents" />
+            </DocSection>
+            <DocSection Id="doc-detail-row-methods" Title="Detail-row methods" Count='@DocSection.Label(Vocab.DetailMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Detail-row methods" Rows="Vocab.DetailMethods" />
+                <p>
+                <code>GridControlEvents</code> also carries the sorting, filtering, paging, editing, grouping, resizing, reordering and cell
+                events; those belong with the pages that use them. The methods above change the selection without raising
+                <code>RowSelecting</code> or <code>RowSelected</code>; they raise <code>SelectionChanged</code> with the source
+                <code>Programmatic</code>. A detail template turns off the grid's row windowing, so the grid renders every row of the current
+                page; keep a master list to pages or a few hundred rows.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

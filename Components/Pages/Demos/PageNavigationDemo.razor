@@ -83,18 +83,28 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="PageControl parameters" Rows="Vocab.Page" />
-        <ApiTable Kind="ApiKind.Properties" Title="PageNavigationNode" Rows="Vocab.Node" />
-        <ApiTable Kind="ApiKind.Properties" Title="PageNavigationShortcut" Rows="Vocab.Shortcut" />
-        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
-        <p>
-            <code>PageNavigationGraph(nodes, wrap)</code> validates the nodes once: every node needs an id and a selector, ids are unique,
-            and <code>Next</code> / <code>Previous</code> must name existing nodes. <code>PageNavigationNodeMode</code> is <code>Auto</code>
-            (the matched element when focusable, else its focusable descendants), <code>Element</code> or <code>Descendants</code>;
-            <code>PageNavigationEntry</code> is <code>Directional</code>, <code>First</code> or <code>Last</code>;
-            <code>PageShortcutAction</code> is <code>Focus</code> or <code>Activate</code>. <code>PageNavigationMap</code> is the older
-            linear form, a list of named regions, which the control converts to a graph.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-pagecontrol-parameters" Title="PageControl parameters" Count='@DocSection.Label(Vocab.Page.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="PageControl parameters" Rows="Vocab.Page" />
+            </DocSection>
+            <DocSection Id="doc-pagenavigationnode" Title="PageNavigationNode" Count='@DocSection.Label(Vocab.Node.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="PageNavigationNode" Rows="Vocab.Node" />
+            </DocSection>
+            <DocSection Id="doc-pagenavigationshortcut" Title="PageNavigationShortcut" Count='@DocSection.Label(Vocab.Shortcut.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="PageNavigationShortcut" Rows="Vocab.Shortcut" />
+            </DocSection>
+            <DocSection Id="doc-methods" Title="Methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+                <p>
+                <code>PageNavigationGraph(nodes, wrap)</code> validates the nodes once: every node needs an id and a selector, ids are unique,
+                and <code>Next</code> / <code>Previous</code> must name existing nodes. <code>PageNavigationNodeMode</code> is <code>Auto</code>
+                (the matched element when focusable, else its focusable descendants), <code>Element</code> or <code>Descendants</code>;
+                <code>PageNavigationEntry</code> is <code>Directional</code>, <code>First</code> or <code>Last</code>;
+                <code>PageShortcutAction</code> is <code>Focus</code> or <code>Activate</code>. <code>PageNavigationMap</code> is the older
+                linear form, a list of named regions, which the control converts to a graph.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

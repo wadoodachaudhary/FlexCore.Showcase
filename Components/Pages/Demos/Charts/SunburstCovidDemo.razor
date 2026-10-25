@@ -330,34 +330,48 @@
             <code>Value</code> directly. There is no JavaScript interop in the control; hover and the tooltip position come from Blazor mouse
             events on the container.
         </p>
-        <ApiTable Kind="ApiKind.Parameters" Title="SunburstChartControl parameters" Rows="Vocab.Params" />
-        <ApiTable Kind="ApiKind.Events" Title="SunburstChartControl events" Rows="Vocab.Events" />
-        <p>How the control draws, from the markup:</p>
-        <ul>
-            <li>The view box is 700 by 700 units with a drawing radius of 325. The hub takes <code>CenterRadiusRatio</code> of that radius; ring 1 takes one level's share of the rest, by the depth below the current root, and ring 2 takes what remains. Only those two rings are drawn; levels further down appear after a drill-down.</li>
-            <li>Segments run clockwise from 12 o'clock, each as wide as its share of its siblings' <code>TotalValue</code>; ring 2 splits its parent's span the same way among the grandchildren.</li>
-            <li>While a segment is hovered, segments that are neither its ancestors nor its descendants are dimmed and a tooltip follows the pointer, 16 px right and 20 px up, clamped at 10 to 850 px across and 10 to 750 px down. It lists the name, a regions badge when the node has children, the two totals, the share of the parent for depth 2 nodes, and the share of <code>RootNode</code>, always labelled % of World.</li>
-            <li>Some text is fixed in the markup: the breadcrumb root carries a globe before <code>RootNode.Name</code>; at the root the hub shows Across the World under the value while nothing is hovered, and below the root a Click to zoom out hint; the tooltip badge counts regions and its drill hint says Click continent to drill down.</li>
-        </ul>
-        <ApiTable Kind="ApiKind.Properties" Title="SunburstNode" Rows="Vocab.Node" />
-        <ApiTable Kind="ApiKind.Methods" Title="SunburstNode methods" Rows="Vocab.NodeMethods" />
-        <p>
-            <code>SunburstNode</code> has three constructors: empty, <code>(string name, double value, string? color = null)</code> and
-            <code>(string name, double value, double secondaryValue, string? color = null)</code>. <code>SunburstArc</code>, also public in
-            <code>SunburstModels.cs</code>, is the segment geometry the control computes for itself; no parameter or event exposes it.
-        </p>
-        <ApiTable Kind="ApiKind.Methods" Title="SunburstColorHelper, static" Rows="Vocab.ColorHelper" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-        <p>
-            <code>ChartControl</code> with <code>ChartType.Sunburst</code> renders this control. It builds the tree from its first series: a root
-            named after the chart <code>Title</code>, or Total, with <code>Value</code> 0; one child per distinct <code>ChartDataPoint.Category</code>,
-            or General when the category is empty, coloured from the series palette; and under each, one leaf per point with <code>Label</code>,
-            <code>Value</code>, <code>Value2 ?? 0</code> as the secondary value and <code>Color</code>, or the category colour darkened 8 percent.
-            It passes <code>RootNode</code>, <code>EnableDrilldown</code> and <code>ShowBreadcrumb</code> as true, and <code>Height</code> as its
-            own <code>Height</code>, 360px when that is null, which this control never reads. Nothing else is passed, so the hub says TOTAL CASES
-            and the tooltip says Total Cases and Total Deaths whatever the data is, and because every leaf gets a secondary value the Total
-            Deaths line shows even when no point has a <code>Value2</code>. Use <code>SunburstChartControl</code> directly when those labels matter.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-sunburstchartcontrol-parameters" Title="SunburstChartControl parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="SunburstChartControl parameters" Rows="Vocab.Params" />
+            </DocSection>
+            <DocSection Id="doc-sunburstchartcontrol-events" Title="SunburstChartControl events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="SunburstChartControl events" Rows="Vocab.Events" />
+                <p>How the control draws, from the markup:</p>
+                <ul>
+                <li>The view box is 700 by 700 units with a drawing radius of 325. The hub takes <code>CenterRadiusRatio</code> of that radius; ring 1 takes one level's share of the rest, by the depth below the current root, and ring 2 takes what remains. Only those two rings are drawn; levels further down appear after a drill-down.</li>
+                <li>Segments run clockwise from 12 o'clock, each as wide as its share of its siblings' <code>TotalValue</code>; ring 2 splits its parent's span the same way among the grandchildren.</li>
+                <li>While a segment is hovered, segments that are neither its ancestors nor its descendants are dimmed and a tooltip follows the pointer, 16 px right and 20 px up, clamped at 10 to 850 px across and 10 to 750 px down. It lists the name, a regions badge when the node has children, the two totals, the share of the parent for depth 2 nodes, and the share of <code>RootNode</code>, always labelled % of World.</li>
+                <li>Some text is fixed in the markup: the breadcrumb root carries a globe before <code>RootNode.Name</code>; at the root the hub shows Across the World under the value while nothing is hovered, and below the root a Click to zoom out hint; the tooltip badge counts regions and its drill hint says Click continent to drill down.</li>
+                </ul>
+            </DocSection>
+            <DocSection Id="doc-sunburstnode" Title="SunburstNode" Count='@DocSection.Label(Vocab.Node.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="SunburstNode" Rows="Vocab.Node" />
+            </DocSection>
+            <DocSection Id="doc-sunburstnode-methods" Title="SunburstNode methods" Count='@DocSection.Label(Vocab.NodeMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="SunburstNode methods" Rows="Vocab.NodeMethods" />
+                <p>
+                <code>SunburstNode</code> has three constructors: empty, <code>(string name, double value, string? color = null)</code> and
+                <code>(string name, double value, double secondaryValue, string? color = null)</code>. <code>SunburstArc</code>, also public in
+                <code>SunburstModels.cs</code>, is the segment geometry the control computes for itself; no parameter or event exposes it.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-sunburstcolorhelper-static" Title="SunburstColorHelper, static" Count='@DocSection.Label(Vocab.ColorHelper.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="SunburstColorHelper, static" Rows="Vocab.ColorHelper" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+                <p>
+                <code>ChartControl</code> with <code>ChartType.Sunburst</code> renders this control. It builds the tree from its first series: a root
+                named after the chart <code>Title</code>, or Total, with <code>Value</code> 0; one child per distinct <code>ChartDataPoint.Category</code>,
+                or General when the category is empty, coloured from the series palette; and under each, one leaf per point with <code>Label</code>,
+                <code>Value</code>, <code>Value2 ?? 0</code> as the secondary value and <code>Color</code>, or the category colour darkened 8 percent.
+                It passes <code>RootNode</code>, <code>EnableDrilldown</code> and <code>ShowBreadcrumb</code> as true, and <code>Height</code> as its
+                own <code>Height</code>, 360px when that is null, which this control never reads. Nothing else is passed, so the hub says TOTAL CASES
+                and the tooltip says Total Cases and Total Deaths whatever the data is, and because every leaf gets a secondary value the Total
+                Deaths line shows even when no point has a <code>Value2</code>. Use <code>SunburstChartControl</code> directly when those labels matter.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 </FeatureDemoLayout>
 

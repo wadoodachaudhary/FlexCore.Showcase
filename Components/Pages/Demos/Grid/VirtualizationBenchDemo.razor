@@ -77,14 +77,22 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters used here" Rows="Vocab.Grid" />
-        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents used here" Rows="Vocab.Events" />
-        <ApiTable Kind="ApiKind.Methods" Title="Paging method" Rows="Vocab.Methods" />
-        <p>
-            The row window's own parameters (<code>WindowOverscanRows</code>, <code>WindowOverscanCellBudget</code>,
-            <code>EnableGroupedRowWindowing</code>) are documented on <a href="demo/grid/row-selection-50k">100k rows</a>; selection and
-            editing options on <a href="demo/grid/batch-editing">Batch editing</a>.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-gridcontrol-parameters-used-here" Title="GridControl parameters used here" Count='@DocSection.Label(Vocab.Grid.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters used here" Rows="Vocab.Grid" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrolevents-used-here" Title="GridControlEvents used here" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="GridControlEvents used here" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-paging-method" Title="Paging method" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Paging method" Rows="Vocab.Methods" />
+                <p>
+                The row window's own parameters (<code>WindowOverscanRows</code>, <code>WindowOverscanCellBudget</code>,
+                <code>EnableGroupedRowWindowing</code>) are documented on <a href="demo/grid/row-selection-50k">100k rows</a>; selection and
+                editing options on <a href="demo/grid/batch-editing">Batch editing</a>.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

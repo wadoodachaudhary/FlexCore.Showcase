@@ -56,12 +56,24 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="SliderControl parameters" Rows="Vocab.Slider" />
-        <ApiTable Kind="ApiKind.Parameters" Title="RangeSliderControl parameters" Rows="Vocab.Range" />
-        <ApiTable Kind="ApiKind.Properties" Title="NumericRange" Rows="Vocab.RangeType" />
-        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-        <p>Neither stylesheet reads a <code>--fx-*</code> variable: the track is <code>#e2e8f0</code> and the thumb <code>#2563eb</code>. Recolour with <code>CssClass</code> and a scoped <code>::deep</code> rule on <code>.fx-slider-range</code>.</p>
+        <DocSections>
+            <DocSection Id="doc-slidercontrol-parameters" Title="SliderControl parameters" Count='@DocSection.Label(Vocab.Slider.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="SliderControl parameters" Rows="Vocab.Slider" />
+            </DocSection>
+            <DocSection Id="doc-rangeslidercontrol-parameters" Title="RangeSliderControl parameters" Count='@DocSection.Label(Vocab.Range.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="RangeSliderControl parameters" Rows="Vocab.Range" />
+            </DocSection>
+            <DocSection Id="doc-numericrange" Title="NumericRange" Count='@DocSection.Label(Vocab.RangeType.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="NumericRange" Rows="Vocab.RangeType" />
+            </DocSection>
+            <DocSection Id="doc-methods" Title="Methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+                <p>Neither stylesheet reads a <code>--fx-*</code> variable: the track is <code>#e2e8f0</code> and the thumb <code>#2563eb</code>. Recolour with <code>CssClass</code> and a scoped <code>::deep</code> rule on <code>.fx-slider-range</code>.</p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

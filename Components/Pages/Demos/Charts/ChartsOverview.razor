@@ -18,7 +18,10 @@
    YAxis Max/TickCount set where the default 1.1 x max gave ragged tick values. HorizontalBar has no renderer (draws
    as Bar) and is not used. The Stacked Area title and the Sunburst itself are untouched. 
    2026-10-24: Documentation written as eleven tables from Charts/ChartControl.razor, ChartModels.cs, ChartEnums.cs, ChartControl.razor.css and
-   ChartSvg.cs (rows in ChartsVocab.*.cs, checked with scratchpad/vocabcheck.py; read sites, not just declarations). *@
+   ChartSvg.cs (rows in ChartsVocab.*.cs, checked with scratchpad/vocabcheck.py; read sites, not just declarations).
+   2026-10-24: the datasets became small stories (ice cream flavours, a bakery's week, two seedlings growing, a favourite-colour
+   survey, a library front desk, an office coffee machine); every title names its subject, series and categories are real words,
+   and the 2026-10-23 geometry (label cuts, tile sizes, every YAxis Max) is unchanged. The data is made up. *@
 
 <PageTitle>Charts — FlexCore Showcase</PageTitle>
 
@@ -45,21 +48,22 @@
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.67">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Bar" Title="Vertical Bar" Height="226px"
+                    <ChartControl Type="ChartType.Bar" Title="Ice cream scoops sold in July, by flavour" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 400 })"
-                                  Series="@(new List<ChartSeries> { new() { Name = "Revenue", DataPoints = new() {
-                                      new("Q1", 120), new("Q2", 180), new("Q3", 240), new("Q4", 310) } } })" />
+                                  Series="@(new List<ChartSeries> { new() { Name = "Scoops", DataPoints = new() {
+                                      new("Vanilla", 310), new("Chocolate", 280), new("Strawberry", 190),
+                                      new("Mint", 120), new("Pistachio", 90), new("Lemon", 60) } } })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.GroupedBar" Title="Grouped Bar" Height="226px"
+                    <ChartControl Type="ChartType.GroupedBar" Title="Loaves and pastries sold, by day" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 400 })" Series="@_groupedBarSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.StackedBar" Title="Stacked Bar" Height="226px"
+                    <ChartControl Type="ChartType.StackedBar" Title="Items sold per day, loaves plus pastries" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 800 })" Series="@_groupedBarSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.StackedBar100" Title="100% Stacked Bar" Height="226px"
+                    <ChartControl Type="ChartType.StackedBar100" Title="Share of loaves and pastries, by day" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 100 })" Series="@_groupedBarSeries" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -71,16 +75,16 @@
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.67">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Line" Title="Line Chart" Height="226px"
+                    <ChartControl Type="ChartType.Line" Title="Sunflower and bean height, cm by week" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 80 })" Series="@_lineSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Area" Title="Area Chart" Height="226px"
+                    <ChartControl Type="ChartType.Area" Title="Sunflower height, cm by week" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 80 })"
                                   Series="@(new List<ChartSeries> { _lineSeries[0] })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Spline" Title="Spline Chart" Height="226px"
+                    <ChartControl Type="ChartType.Spline" Title="Sunflower height, smoothed" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 80 })"
                                   Series="@(new List<ChartSeries> { _lineSeries[0] })" />
                 </DashboardLayoutPanel>
@@ -97,16 +101,16 @@
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.86">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Pie" Title="Pie Chart" Height="300px"
+                    <ChartControl Type="ChartType.Pie" Title="Favourite colour, 120 people asked" Height="300px"
                                   Series="@(new List<ChartSeries> { _pieSeries })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Donut" Title="Donut Chart" Height="300px"
+                    <ChartControl Type="ChartType.Donut" Title="Favourite colour, as a donut" Height="300px"
                                   InnerRadius="0.55"
                                   Series="@(new List<ChartSeries> { _pieSeries })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="2" SizeY="1">
-                    <ChartControl Type="ChartType.Funnel" Title="Funnel Chart" Height="350px"
+                    <ChartControl Type="ChartType.Funnel" Title="Sales funnel, 1,000 visits to 180 won" Height="350px"
                                   Series="@(new List<ChartSeries> { _funnelSeries })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="2" Column="0" SizeX="2" SizeY="2">
@@ -125,11 +129,11 @@
         <DashboardLayoutControl Columns="1" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.48">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Histogram" Title="Histogram" Height="400px"
+                    <ChartControl Type="ChartType.Histogram" Title="Response time of 172 requests, ms" Height="400px"
                                   YAxis="@(new ChartAxis { Max = 60 })" Series="@_histogramSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.BoxPlot" Title="Box Plot" Height="400px"
+                    <ChartControl Type="ChartType.BoxPlot" Title="Exam scores by subject, one class" Height="400px"
                                   YAxis="@(new ChartAxis { Max = 100 })" Series="@_boxPlotSeries" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -141,11 +145,11 @@
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.67">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Scatter" Title="Scatter Plot" Height="226px"
+                    <ChartControl Type="ChartType.Scatter" Title="Study hours against exam score" Height="226px"
                                   Series="@_scatterSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Bubble" Title="Bubble Chart" Height="226px"
+                    <ChartControl Type="ChartType.Bubble" Title="Ad spend against sales, sized by store count" Height="226px"
                                   Series="@_bubbleSeries" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -155,7 +159,7 @@
     <TabItem HeaderText="Multivariate">
         <h2>Radar / Spider Chart</h2>
         <div class="demo-frame">
-            <ChartControl Type="ChartType.Radar" Title="Skills Assessment" Height="400px"
+            <ChartControl Type="ChartType.Radar" Title="Two developers' self-rated skills" Height="400px"
                           Series="@_radarSeries" />
         </div>
     </TabItem>
@@ -166,27 +170,27 @@
         <DashboardLayoutControl Columns="3" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.37">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="2">
-                    <ChartControl Type="ChartType.KpiCard" Title="Revenue"
-                                  KpiValue="$2.4M" KpiLabel="Total Revenue" KpiTrend="+12.5%" Height="180px" />
+                    <ChartControl Type="ChartType.KpiCard" Title="Loans"
+                                  KpiValue="2,418" KpiLabel="Books on loan today" KpiTrend="+4.2%" Height="180px" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="2">
-                    <ChartControl Type="ChartType.KpiCard" Title="Users"
-                                  KpiValue="18,429" KpiLabel="Active Users" KpiTrend="+8.2%" Height="180px" />
+                    <ChartControl Type="ChartType.KpiCard" Title="Members"
+                                  KpiValue="136" KpiLabel="New members this month" KpiTrend="+18" Height="180px" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="0" Column="2" SizeX="1" SizeY="2">
-                    <ChartControl Type="ChartType.KpiCard" Title="Churn"
-                                  KpiValue="3.1%" KpiLabel="Monthly Churn" KpiTrend="-0.4%" Height="180px" />
+                    <ChartControl Type="ChartType.KpiCard" Title="Overdue"
+                                  KpiValue="3.1%" KpiLabel="Loans overdue" KpiTrend="-0.4%" Height="180px" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="2" Column="0" SizeX="1" SizeY="3">
-                    <ChartControl Type="ChartType.Gauge" Title="CPU Usage"
+                    <ChartControl Type="ChartType.Gauge" Title="Shelves full, %"
                                   GaugeValue="72" GaugeMin="0" GaugeMax="100" Height="285px" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="2" Column="1" SizeX="1" SizeY="3">
-                    <ChartControl Type="ChartType.Gauge" Title="Memory"
+                    <ChartControl Type="ChartType.Gauge" Title="Study rooms booked, %"
                                   GaugeValue="45" GaugeMin="0" GaugeMax="100" Height="285px" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="2" Column="2" SizeX="1" SizeY="3">
-                    <ChartControl Type="ChartType.Gauge" Title="Disk I/O"
+                    <ChartControl Type="ChartType.Gauge" Title="Wi-Fi seats taken, %"
                                   GaugeValue="88" GaugeMin="0" GaugeMax="100" Height="285px" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -198,11 +202,11 @@
         <DashboardLayoutControl Columns="1" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.48">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Waterfall" Title="Profit Waterfall" Height="400px"
+                    <ChartControl Type="ChartType.Waterfall" Title="Revenue to net income, $k" Height="400px"
                                   YAxis="@(new ChartAxis { Max = 600 })" Series="@_waterfallSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Pareto" Title="Defect Pareto" Height="400px"
+                    <ChartControl Type="ChartType.Pareto" Title="Defects by type, 100 logged" Height="400px"
                                   YAxis="@(new ChartAxis { Max = 50, TickCount = 6 })" Series="@_paretoSeries" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -212,7 +216,7 @@
     <TabItem HeaderText="Project">
         <h2>Gantt Chart</h2>
         <div class="demo-frame">
-            <ChartControl Type="ChartType.Gantt" Title="Project Timeline" Height="400px"
+            <ChartControl Type="ChartType.Gantt" Title="Website rebuild, weeks 0 to 12" Height="400px"
                           Series="@_ganttSeries" />
         </div>
     </TabItem>
@@ -220,7 +224,7 @@
     <TabItem HeaderText="Heatmap">
         <h2>Heatmap Matrix</h2>
         <div class="demo-frame">
-            <ChartControl Type="ChartType.Heatmap" Title="Weekly Activity" Height="400px"
+            <ChartControl Type="ChartType.Heatmap" Title="Office coffee machine, cups per hour" Height="400px"
                           Legend="@(new ChartLegend { Visible = false })" Series="@_heatmapSeries" />
         </div>
     </TabItem>
@@ -228,14 +232,14 @@
     <TabItem HeaderText="Sparkline">
         <h2>Inline Sparklines</h2>
         <div class="demo-frame">
-            <p>Revenue: <ChartControl Type="ChartType.Sparkline" Width="120px" Height="24px"
+            <p>Kilometres run each day: <ChartControl Type="ChartType.Sparkline" Width="120px" Height="24px"
                           Series="@(new List<ChartSeries> { new() { DataPoints = new() {
-                              new("", 10), new("", 25), new("", 18), new("", 32), new("", 28), new("", 40), new("", 35) } } })" /></p>
-            <p>Users: <ChartControl Type="ChartType.Sparkline" Width="120px" Height="24px"
+                              new("", 6), new("", 9), new("", 7), new("", 11), new("", 8), new("", 12), new("", 10) } } })" /></p>
+            <p>Pages read each day: <ChartControl Type="ChartType.Sparkline" Width="120px" Height="24px"
                           ColorPalette="@(new[] { "#16a34a" })"
                           Series="@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("", 5), new("", 12), new("", 8), new("", 20), new("", 18), new("", 25), new("", 30) } } })" /></p>
-            <p>Errors: <ChartControl Type="ChartType.Sparkline" Width="120px" Height="24px"
+            <p>Minutes late each morning: <ChartControl Type="ChartType.Sparkline" Width="120px" Height="24px"
                           ColorPalette="@(new[] { "#dc2626" })"
                           Series="@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("", 8), new("", 3), new("", 5), new("", 2), new("", 6), new("", 1), new("", 3) } } })" /></p>
@@ -255,22 +259,46 @@
             fixed size in that drawing, so a chart in a narrow tile has small labels and a wide one has large labels. Each row below says
             which types read the setting; a row marked never read is declared in the library but has no effect yet.
         </p>
-        <ApiTable Kind="ApiKind.Parameters" Title="ChartControl parameters" Rows="ChartsVocab.Params" />
-        <ApiTable Kind="ApiKind.Parameters" Title="Gauge and KPI parameters" Rows="ChartsVocab.GaugeKpi" />
-        <ApiTable Kind="ApiKind.Values" Title="ChartType" Rows="ChartsVocab.Types" />
-        <ApiTable Kind="ApiKind.Properties" Title="ChartSeries" Rows="ChartsVocab.Series" />
-        <ApiTable Kind="ApiKind.Properties" Title="ChartDataPoint" Rows="ChartsVocab.Point" />
-        <ApiTable Kind="ApiKind.Properties" Title="ChartAxis" Rows="ChartsVocab.Axis" />
-        <ApiTable Kind="ApiKind.Properties" Title="ChartLegend" Rows="ChartsVocab.Legend" />
-        <ApiTable Kind="ApiKind.Properties" Title="ChartControl.ChartBar, the legacy bar list" Rows="ChartsVocab.Bar" />
-        <ApiTable Kind="ApiKind.Methods" Title="ChartSvg, the same renderer as a string" Rows="ChartsVocab.Methods" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="ChartsVocab.Css" />
-        <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="ChartsVocab.CssVars" />
-        <p>
-            <code>ChartControl</code> raises no events and has no public methods. <code>GaugeRange</code> and <code>GaugePointer</code>,
-            used by <code>GaugeRanges</code> and <code>GaugePointers</code>, are documented on the <a href="demo/gauges">Gauges &amp; stock chart</a>
-            page; <code>SunburstChartControl</code>, which the <code>Sunburst</code> type delegates to, on the <a href="demo/charts/sunburst">Sunburst</a> page.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-chartcontrol-parameters" Title="ChartControl parameters" Count='@DocSection.Label(ChartsVocab.Params.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="ChartControl parameters" Rows="ChartsVocab.Params" />
+            </DocSection>
+            <DocSection Id="doc-gauge-and-kpi-parameters" Title="Gauge and KPI parameters" Count='@DocSection.Label(ChartsVocab.GaugeKpi.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="Gauge and KPI parameters" Rows="ChartsVocab.GaugeKpi" />
+            </DocSection>
+            <DocSection Id="doc-charttype" Title="ChartType" Count='@DocSection.Label(ChartsVocab.Types.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="ChartType" Rows="ChartsVocab.Types" />
+            </DocSection>
+            <DocSection Id="doc-chartseries" Title="ChartSeries" Count='@DocSection.Label(ChartsVocab.Series.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="ChartSeries" Rows="ChartsVocab.Series" />
+            </DocSection>
+            <DocSection Id="doc-chartdatapoint" Title="ChartDataPoint" Count='@DocSection.Label(ChartsVocab.Point.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="ChartDataPoint" Rows="ChartsVocab.Point" />
+            </DocSection>
+            <DocSection Id="doc-chartaxis" Title="ChartAxis" Count='@DocSection.Label(ChartsVocab.Axis.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="ChartAxis" Rows="ChartsVocab.Axis" />
+            </DocSection>
+            <DocSection Id="doc-chartlegend" Title="ChartLegend" Count='@DocSection.Label(ChartsVocab.Legend.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="ChartLegend" Rows="ChartsVocab.Legend" />
+            </DocSection>
+            <DocSection Id="doc-chartcontrol-chartbar-the-legacy-bar-lis" Title="ChartControl.ChartBar, the legacy bar list" Count='@DocSection.Label(ChartsVocab.Bar.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="ChartControl.ChartBar, the legacy bar list" Rows="ChartsVocab.Bar" />
+            </DocSection>
+            <DocSection Id="doc-chartsvg-the-same-renderer-as-a-string" Title="ChartSvg, the same renderer as a string" Count='@DocSection.Label(ChartsVocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="ChartSvg, the same renderer as a string" Rows="ChartsVocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(ChartsVocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="ChartsVocab.Css" />
+            </DocSection>
+            <DocSection Id="doc-css-variables" Title="CSS variables" Count='@DocSection.Label(ChartsVocab.CssVars.Length, "variables")'>
+                <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="ChartsVocab.CssVars" />
+                <p>
+                <code>ChartControl</code> raises no events and has no public methods. <code>GaugeRange</code> and <code>GaugePointer</code>,
+                used by <code>GaugeRanges</code> and <code>GaugePointers</code>, are documented on the <a href="demo/gauges">Gauges &amp; stock chart</a>
+                page; <code>SunburstChartControl</code>, which the <code>Sunburst</code> type delegates to, on the <a href="demo/charts/sunburst">Sunburst</a> page.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>
@@ -296,22 +324,24 @@
     }
 
 
+    // a bakery's week: Grouped compares the two lines per day, Stacked adds them (Saturday totals 680), StackedBar100 shows the mix
     List<ChartSeries> _groupedBarSeries = new()
     {
-        new() { Name = "2024", DataPoints = new() { new("Q1", 120), new("Q2", 180), new("Q3", 240), new("Q4", 310) } },
-        new() { Name = "2025", DataPoints = new() { new("Q1", 150), new("Q2", 210), new("Q3", 280), new("Q4", 350) } }
+        new() { Name = "Loaves", DataPoints = new() { new("Mon", 180), new("Tue", 160), new("Wed", 200), new("Thu", 220), new("Fri", 280), new("Sat", 360) } },
+        new() { Name = "Pastries", DataPoints = new() { new("Mon", 90), new("Tue", 100), new("Wed", 120), new("Thu", 140), new("Fri", 220), new("Sat", 320) } }
     };
 
+    // two seedlings measured every Saturday, in cm; Area and Spline show the sunflower alone, Line and Stacked Area show both
     List<ChartSeries> _lineSeries = new()
     {
-        new() { Name = "Product A", DataPoints = new() { new("Jan", 30), new("Feb", 45), new("Mar", 38), new("Apr", 55), new("May", 62), new("Jun", 70) } },
-        new() { Name = "Product B", DataPoints = new() { new("Jan", 20), new("Feb", 25), new("Mar", 35), new("Apr", 40), new("May", 48), new("Jun", 52) } }
+        new() { Name = "Sunflower", DataPoints = new() { new("Week 1", 8), new("Week 2", 15), new("Week 3", 24), new("Week 4", 38), new("Week 5", 55), new("Week 6", 72) } },
+        new() { Name = "Runner bean", DataPoints = new() { new("Week 1", 5), new("Week 2", 12), new("Week 3", 22), new("Week 4", 35), new("Week 5", 48), new("Week 6", 60) } }
     };
 
     ChartSeries _pieSeries = new()
     {
-        Name = "Market Share",
-        DataPoints = new() { new("Chrome", 65), new("Firefox", 12), new("Safari", 15), new("Edge", 5), new("Other", 3) }
+        Name = "People",
+        DataPoints = new() { new("Blue", 42), new("Green", 30), new("Red", 24), new("Purple", 15), new("Yellow", 9) }
     };
 
     ChartSeries _funnelSeries = new()
@@ -344,11 +374,11 @@
     List<ChartSeries> _scatterSeries = new()
     {
         // x = study hours, y = exam score
-        new() { Name = "Class A", DataPoints = new() {
+        new() { Name = "Morning class", DataPoints = new() {
             new("2", 22), new("3", 26), new("5", 33), new("6", 40),
             new("8", 51), new("9", 57), new("11", 64), new("12", 70)
         }},
-        new() { Name = "Class B", DataPoints = new() {
+        new() { Name = "Evening class", DataPoints = new() {
             new("1", 10), new("4", 21), new("5", 28),
             new("7", 37), new("10", 47), new("13", 62)
         }}
@@ -369,9 +399,9 @@
 
     List<ChartSeries> _radarSeries = new()
     {
-        new() { Name = "Developer A", DataPoints = new() {
+        new() { Name = "Backend dev", DataPoints = new() {
             new("C#", 90), new("JS", 75), new("SQL", 85), new("Design", 60), new("DevOps", 70), new("Testing", 80) } },
-        new() { Name = "Developer B", DataPoints = new() {
+        new() { Name = "Frontend dev", DataPoints = new() {
             new("C#", 70), new("JS", 90), new("SQL", 65), new("Design", 85), new("DevOps", 55), new("Testing", 75) } }
     };
 
@@ -423,21 +453,22 @@
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.67"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Bar"" Title=""Vertical Bar"" Height=""226px""
+                    <ChartControl Type=""ChartType.Bar"" Title=""Ice cream scoops sold in July, by flavour"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 400 })""
-                                  Series=""@(new List<ChartSeries> { new() { Name = ""Revenue"", DataPoints = new() {
-                                      new(""Q1"", 120), new(""Q2"", 180), new(""Q3"", 240), new(""Q4"", 310) } } })"" />
+                                  Series=""@(new List<ChartSeries> { new() { Name = ""Scoops"", DataPoints = new() {
+                                      new(""Vanilla"", 310), new(""Chocolate"", 280), new(""Strawberry"", 190),
+                                      new(""Mint"", 120), new(""Pistachio"", 90), new(""Lemon"", 60) } } })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.GroupedBar"" Title=""Grouped Bar"" Height=""226px""
+                    <ChartControl Type=""ChartType.GroupedBar"" Title=""Loaves and pastries sold, by day"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 400 })"" Series=""@_groupedBarSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.StackedBar"" Title=""Stacked Bar"" Height=""226px""
+                    <ChartControl Type=""ChartType.StackedBar"" Title=""Items sold per day, loaves plus pastries"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 800 })"" Series=""@_groupedBarSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.StackedBar100"" Title=""100% Stacked Bar"" Height=""226px""
+                    <ChartControl Type=""ChartType.StackedBar100"" Title=""Share of loaves and pastries, by day"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 100 })"" Series=""@_groupedBarSeries"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -449,16 +480,16 @@
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.67"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Line"" Title=""Line Chart"" Height=""226px""
+                    <ChartControl Type=""ChartType.Line"" Title=""Sunflower and bean height, cm by week"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 80 })"" Series=""@_lineSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Area"" Title=""Area Chart"" Height=""226px""
+                    <ChartControl Type=""ChartType.Area"" Title=""Sunflower height, cm by week"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 80 })""
                                   Series=""@(new List<ChartSeries> { _lineSeries[0] })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Spline"" Title=""Spline Chart"" Height=""226px""
+                    <ChartControl Type=""ChartType.Spline"" Title=""Sunflower height, smoothed"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 80 })""
                                   Series=""@(new List<ChartSeries> { _lineSeries[0] })"" />
                 </DashboardLayoutPanel>
@@ -475,16 +506,16 @@
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.86"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Pie"" Title=""Pie Chart"" Height=""300px""
+                    <ChartControl Type=""ChartType.Pie"" Title=""Favourite colour, 120 people asked"" Height=""300px""
                                   Series=""@(new List<ChartSeries> { _pieSeries })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Donut"" Title=""Donut Chart"" Height=""300px""
+                    <ChartControl Type=""ChartType.Donut"" Title=""Favourite colour, as a donut"" Height=""300px""
                                   InnerRadius=""0.55""
                                   Series=""@(new List<ChartSeries> { _pieSeries })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""2"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Funnel"" Title=""Funnel Chart"" Height=""350px""
+                    <ChartControl Type=""ChartType.Funnel"" Title=""Sales funnel, 1,000 visits to 180 won"" Height=""350px""
                                   Series=""@(new List<ChartSeries> { _funnelSeries })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""2"" SizeY=""2"">
@@ -503,11 +534,11 @@
         <DashboardLayoutControl Columns=""1"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.48"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Histogram"" Title=""Histogram"" Height=""400px""
+                    <ChartControl Type=""ChartType.Histogram"" Title=""Response time of 172 requests, ms"" Height=""400px""
                                   YAxis=""@(new ChartAxis { Max = 60 })"" Series=""@_histogramSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.BoxPlot"" Title=""Box Plot"" Height=""400px""
+                    <ChartControl Type=""ChartType.BoxPlot"" Title=""Exam scores by subject, one class"" Height=""400px""
                                   YAxis=""@(new ChartAxis { Max = 100 })"" Series=""@_boxPlotSeries"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -519,11 +550,11 @@
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.67"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Scatter"" Title=""Scatter Plot"" Height=""226px""
+                    <ChartControl Type=""ChartType.Scatter"" Title=""Study hours against exam score"" Height=""226px""
                                   Series=""@_scatterSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Bubble"" Title=""Bubble Chart"" Height=""226px""
+                    <ChartControl Type=""ChartType.Bubble"" Title=""Ad spend against sales, sized by store count"" Height=""226px""
                                   Series=""@_bubbleSeries"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -533,7 +564,7 @@
     <TabItem HeaderText=""Multivariate"">
         <h2>Radar / Spider Chart</h2>
         <div class=""demo-frame"">
-            <ChartControl Type=""ChartType.Radar"" Title=""Skills Assessment"" Height=""400px""
+            <ChartControl Type=""ChartType.Radar"" Title=""Two developers' self-rated skills"" Height=""400px""
                           Series=""@_radarSeries"" />
         </div>
     </TabItem>
@@ -544,27 +575,27 @@
         <DashboardLayoutControl Columns=""3"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.37"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""2"">
-                    <ChartControl Type=""ChartType.KpiCard"" Title=""Revenue""
-                                  KpiValue=""$2.4M"" KpiLabel=""Total Revenue"" KpiTrend=""+12.5%"" Height=""180px"" />
+                    <ChartControl Type=""ChartType.KpiCard"" Title=""Loans""
+                                  KpiValue=""2,418"" KpiLabel=""Books on loan today"" KpiTrend=""+4.2%"" Height=""180px"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""2"">
-                    <ChartControl Type=""ChartType.KpiCard"" Title=""Users""
-                                  KpiValue=""18,429"" KpiLabel=""Active Users"" KpiTrend=""+8.2%"" Height=""180px"" />
+                    <ChartControl Type=""ChartType.KpiCard"" Title=""Members""
+                                  KpiValue=""136"" KpiLabel=""New members this month"" KpiTrend=""+18"" Height=""180px"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""0"" Column=""2"" SizeX=""1"" SizeY=""2"">
-                    <ChartControl Type=""ChartType.KpiCard"" Title=""Churn""
-                                  KpiValue=""3.1%"" KpiLabel=""Monthly Churn"" KpiTrend=""-0.4%"" Height=""180px"" />
+                    <ChartControl Type=""ChartType.KpiCard"" Title=""Overdue""
+                                  KpiValue=""3.1%"" KpiLabel=""Loans overdue"" KpiTrend=""-0.4%"" Height=""180px"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""1"" SizeY=""3"">
-                    <ChartControl Type=""ChartType.Gauge"" Title=""CPU Usage""
+                    <ChartControl Type=""ChartType.Gauge"" Title=""Shelves full, %""
                                   GaugeValue=""72"" GaugeMin=""0"" GaugeMax=""100"" Height=""285px"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""2"" Column=""1"" SizeX=""1"" SizeY=""3"">
-                    <ChartControl Type=""ChartType.Gauge"" Title=""Memory""
+                    <ChartControl Type=""ChartType.Gauge"" Title=""Study rooms booked, %""
                                   GaugeValue=""45"" GaugeMin=""0"" GaugeMax=""100"" Height=""285px"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""2"" Column=""2"" SizeX=""1"" SizeY=""3"">
-                    <ChartControl Type=""ChartType.Gauge"" Title=""Disk I/O""
+                    <ChartControl Type=""ChartType.Gauge"" Title=""Wi-Fi seats taken, %""
                                   GaugeValue=""88"" GaugeMin=""0"" GaugeMax=""100"" Height=""285px"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -576,11 +607,11 @@
         <DashboardLayoutControl Columns=""1"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.48"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Waterfall"" Title=""Profit Waterfall"" Height=""400px""
+                    <ChartControl Type=""ChartType.Waterfall"" Title=""Revenue to net income, $k"" Height=""400px""
                                   YAxis=""@(new ChartAxis { Max = 600 })"" Series=""@_waterfallSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Pareto"" Title=""Defect Pareto"" Height=""400px""
+                    <ChartControl Type=""ChartType.Pareto"" Title=""Defects by type, 100 logged"" Height=""400px""
                                   YAxis=""@(new ChartAxis { Max = 50, TickCount = 6 })"" Series=""@_paretoSeries"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -590,7 +621,7 @@
     <TabItem HeaderText=""Project"">
         <h2>Gantt Chart</h2>
         <div class=""demo-frame"">
-            <ChartControl Type=""ChartType.Gantt"" Title=""Project Timeline"" Height=""400px""
+            <ChartControl Type=""ChartType.Gantt"" Title=""Website rebuild, weeks 0 to 12"" Height=""400px""
                           Series=""@_ganttSeries"" />
         </div>
     </TabItem>
@@ -598,7 +629,7 @@
     <TabItem HeaderText=""Heatmap"">
         <h2>Heatmap Matrix</h2>
         <div class=""demo-frame"">
-            <ChartControl Type=""ChartType.Heatmap"" Title=""Weekly Activity"" Height=""400px""
+            <ChartControl Type=""ChartType.Heatmap"" Title=""Office coffee machine, cups per hour"" Height=""400px""
                           Legend=""@(new ChartLegend { Visible = false })"" Series=""@_heatmapSeries"" />
         </div>
     </TabItem>
@@ -606,14 +637,14 @@
     <TabItem HeaderText=""Sparkline"">
         <h2>Inline Sparklines</h2>
         <div class=""demo-frame"">
-            <p>Revenue: <ChartControl Type=""ChartType.Sparkline"" Width=""120px"" Height=""24px""
+            <p>Kilometres run each day: <ChartControl Type=""ChartType.Sparkline"" Width=""120px"" Height=""24px""
                           Series=""@(new List<ChartSeries> { new() { DataPoints = new() {
-                              new("""", 10), new("""", 25), new("""", 18), new("""", 32), new("""", 28), new("""", 40), new("""", 35) } } })"" /></p>
-            <p>Users: <ChartControl Type=""ChartType.Sparkline"" Width=""120px"" Height=""24px""
+                              new("""", 6), new("""", 9), new("""", 7), new("""", 11), new("""", 8), new("""", 12), new("""", 10) } } })"" /></p>
+            <p>Pages read each day: <ChartControl Type=""ChartType.Sparkline"" Width=""120px"" Height=""24px""
                           ColorPalette=""@(new[] { ""#16a34a"" })""
                           Series=""@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("""", 5), new("""", 12), new("""", 8), new("""", 20), new("""", 18), new("""", 25), new("""", 30) } } })"" /></p>
-            <p>Errors: <ChartControl Type=""ChartType.Sparkline"" Width=""120px"" Height=""24px""
+            <p>Minutes late each morning: <ChartControl Type=""ChartType.Sparkline"" Width=""120px"" Height=""24px""
                           ColorPalette=""@(new[] { ""#dc2626"" })""
                           Series=""@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("""", 8), new("""", 3), new("""", 5), new("""", 2), new("""", 6), new("""", 1), new("""", 3) } } })"" /></p>
@@ -634,22 +665,24 @@ protected override void OnParametersSet()
     if (i >= 0) _tab = i;
 }
 
+// a bakery's week: Grouped compares the two lines per day, Stacked adds them (Saturday totals 680), StackedBar100 shows the mix
 List<ChartSeries> _groupedBarSeries = new()
 {
-    new() { Name = ""2024"", DataPoints = new() { new(""Q1"", 120), new(""Q2"", 180), new(""Q3"", 240), new(""Q4"", 310) } },
-    new() { Name = ""2025"", DataPoints = new() { new(""Q1"", 150), new(""Q2"", 210), new(""Q3"", 280), new(""Q4"", 350) } }
+    new() { Name = ""Loaves"", DataPoints = new() { new(""Mon"", 180), new(""Tue"", 160), new(""Wed"", 200), new(""Thu"", 220), new(""Fri"", 280), new(""Sat"", 360) } },
+    new() { Name = ""Pastries"", DataPoints = new() { new(""Mon"", 90), new(""Tue"", 100), new(""Wed"", 120), new(""Thu"", 140), new(""Fri"", 220), new(""Sat"", 320) } }
 };
 
+// two seedlings measured every Saturday, in cm; Area and Spline show the sunflower alone, Line and Stacked Area show both
 List<ChartSeries> _lineSeries = new()
 {
-    new() { Name = ""Product A"", DataPoints = new() { new(""Jan"", 30), new(""Feb"", 45), new(""Mar"", 38), new(""Apr"", 55), new(""May"", 62), new(""Jun"", 70) } },
-    new() { Name = ""Product B"", DataPoints = new() { new(""Jan"", 20), new(""Feb"", 25), new(""Mar"", 35), new(""Apr"", 40), new(""May"", 48), new(""Jun"", 52) } }
+    new() { Name = ""Sunflower"", DataPoints = new() { new(""Week 1"", 8), new(""Week 2"", 15), new(""Week 3"", 24), new(""Week 4"", 38), new(""Week 5"", 55), new(""Week 6"", 72) } },
+    new() { Name = ""Runner bean"", DataPoints = new() { new(""Week 1"", 5), new(""Week 2"", 12), new(""Week 3"", 22), new(""Week 4"", 35), new(""Week 5"", 48), new(""Week 6"", 60) } }
 };
 
 ChartSeries _pieSeries = new()
 {
-    Name = ""Market Share"",
-    DataPoints = new() { new(""Chrome"", 65), new(""Firefox"", 12), new(""Safari"", 15), new(""Edge"", 5), new(""Other"", 3) }
+    Name = ""People"",
+    DataPoints = new() { new(""Blue"", 42), new(""Green"", 30), new(""Red"", 24), new(""Purple"", 15), new(""Yellow"", 9) }
 };
 
 ChartSeries _funnelSeries = new()
@@ -682,11 +715,11 @@ List<ChartSeries> _boxPlotSeries = new()
 List<ChartSeries> _scatterSeries = new()
 {
     // x = study hours, y = exam score
-    new() { Name = ""Class A"", DataPoints = new() {
+    new() { Name = ""Morning class"", DataPoints = new() {
         new(""2"", 22), new(""3"", 26), new(""5"", 33), new(""6"", 40),
         new(""8"", 51), new(""9"", 57), new(""11"", 64), new(""12"", 70)
     }},
-    new() { Name = ""Class B"", DataPoints = new() {
+    new() { Name = ""Evening class"", DataPoints = new() {
         new(""1"", 10), new(""4"", 21), new(""5"", 28),
         new(""7"", 37), new(""10"", 47), new(""13"", 62)
     }}
@@ -707,9 +740,9 @@ List<ChartSeries> _bubbleSeries = new()
 
 List<ChartSeries> _radarSeries = new()
 {
-    new() { Name = ""Developer A"", DataPoints = new() {
+    new() { Name = ""Backend dev"", DataPoints = new() {
         new(""C#"", 90), new(""JS"", 75), new(""SQL"", 85), new(""Design"", 60), new(""DevOps"", 70), new(""Testing"", 80) } },
-    new() { Name = ""Developer B"", DataPoints = new() {
+    new() { Name = ""Frontend dev"", DataPoints = new() {
         new(""C#"", 70), new(""JS"", 90), new(""SQL"", 65), new(""Design"", 85), new(""DevOps"", 55), new(""Testing"", 75) } }
 };
 

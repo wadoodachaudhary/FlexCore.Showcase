@@ -50,16 +50,26 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="ReportWriterControl parameters" Rows="Vocab.Params" />
-        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
-        <ApiTable Kind="ApiKind.Properties" Title="State" Rows="Vocab.State" />
-        <ApiTable Kind="ApiKind.Properties" Title="Host services, resolved from dependency injection" Rows="Vocab.Services" />
-        <p>
-            The toolbar's Print / Save as PDF uses the browser's print dialog, and its HTML, CSV and Excel data exports are the control's own
-            (<code>ReportNativeExport</code>), so none of them need <code>IReportExporter</code>. This site registers
-            <code>ReportOptions</code> with an empty schema prefix and DivisionID and UserId as session parameters, its own data executor and
-            session context, the empty pick-list provider, the in-memory viewer settings and a no-op exporter.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-reportwritercontrol-parameters" Title="ReportWriterControl parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="ReportWriterControl parameters" Rows="Vocab.Params" />
+            </DocSection>
+            <DocSection Id="doc-methods" Title="Methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-state" Title="State" Count='@DocSection.Label(Vocab.State.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="State" Rows="Vocab.State" />
+            </DocSection>
+            <DocSection Id="doc-host-services-resolved-from-dependency-i" Title="Host services, resolved from dependency injection" Count='@DocSection.Label(Vocab.Services.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="Host services, resolved from dependency injection" Rows="Vocab.Services" />
+                <p>
+                The toolbar's Print / Save as PDF uses the browser's print dialog, and its HTML, CSV and Excel data exports are the control's own
+                (<code>ReportNativeExport</code>), so none of them need <code>IReportExporter</code>. This site registers
+                <code>ReportOptions</code> with an empty schema prefix and DivisionID and UserId as session parameters, its own data executor and
+                session context, the empty pick-list provider, the in-memory viewer settings and a no-op exporter.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

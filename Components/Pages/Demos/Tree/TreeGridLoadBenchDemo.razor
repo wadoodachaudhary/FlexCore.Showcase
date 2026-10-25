@@ -122,34 +122,82 @@
             events as direct parameters rather than an <code>EventsRef</code> object. One row is selected at a time. The 97 parameters are
             grouped by purpose: 74 in the tables below, the 23 <code>EventCallback</code>s under Events.
         </p>
-        <ApiTable Kind="ApiKind.Parameters" Title="Data and hierarchy" Rows="Vocab.Data" />
-        <ApiTable Kind="ApiKind.Parameters" Title="Expansion" Rows="Vocab.Expansion" />
-        <ApiTable Kind="ApiKind.Parameters" Title="Expand icons and indentation" Rows="Vocab.Icons" />
-        <ApiTable Kind="ApiKind.Parameters" Title="Selection, keyboard and focus" Rows="Vocab.Selection" />
-        <ApiTable Kind="ApiKind.Parameters" Title="Checkboxes" Rows="Vocab.Checking" />
-        <ApiTable Kind="ApiKind.Parameters" Title="Editing and moving rows" Rows="Vocab.Editing" />
-        <ApiTable Kind="ApiKind.Parameters" Title="Sorting, filtering and paging" Rows="Vocab.Query" />
-        <ApiTable Kind="ApiKind.Parameters" Title="Columns and toolbar" Rows="Vocab.Columns" />
-        <ApiTable Kind="ApiKind.Parameters" Title="Display and layout" Rows="Vocab.Display" />
-        <ApiTable Kind="ApiKind.Parameters" Title="TreeGridColumn" Rows="Vocab.Column" />
-        <ApiTable Kind="ApiKind.Events" Title="TreeGridColumn events" Rows="Vocab.ColumnEvents" />
-        <ApiTable Kind="ApiKind.Events" Title="Events" Rows="Vocab.Events" />
-        <ApiTable Kind="ApiKind.Properties" Title="TreeRowSelectEventArgs&lt;TValue&gt; and TreeRowClickEventArgs&lt;TValue&gt;" Rows="Vocab.RowArgs" />
-        <ApiTable Kind="ApiKind.Properties" Title="TreeNodeEventArgs&lt;TValue&gt;" Rows="Vocab.NodeArgs" />
-        <ApiTable Kind="ApiKind.Properties" Title="TreeGridEditEventArgs&lt;T&gt;" Rows="Vocab.EditArgs" />
-        <ApiTable Kind="ApiKind.Properties" Title="TreeGridDataChangeEventArgs&lt;T&gt;" Rows="Vocab.ChangeArgs" />
-        <ApiTable Kind="ApiKind.Properties" Title="TreeGridRowMoveEventArgs&lt;T&gt;" Rows="Vocab.MoveArgs" />
-        <ApiTable Kind="ApiKind.Properties" Title="ResizeEventArgs" Rows="Vocab.ResizeArgs" />
-        <ApiTable Kind="ApiKind.Properties" Title="GridToolbarClickEventArgs" Rows="Vocab.ToolbarArgs" />
-        <ApiTable Kind="ApiKind.Methods" Title="Hierarchy and selection methods" Rows="Vocab.Methods" />
-        <ApiTable Kind="ApiKind.Methods" Title="Checkbox, editing and moving methods" Rows="Vocab.EditMethods" />
-        <ApiTable Kind="ApiKind.Methods" Title="Column, query, state and export methods" Rows="Vocab.QueryMethods" />
-        <ApiTable Kind="ApiKind.Properties" Title="Read-only properties" Rows="Vocab.Props" />
-        <p>
-            Three <code>[JSInvokable]</code> methods and <code>DisposeAsync</code> are entry points for the browser and the renderer, not for a
-            page. <code>ExpandAllAsync</code>, <code>CollapseAllAsync</code> and the level methods set the state without raising
-            <code>Expanded</code> or <code>Collapsed</code>, which is why the Expand all button above the first example leaves its readout alone.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-data-and-hierarchy" Title="Data and hierarchy" Count='@DocSection.Label(Vocab.Data.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="Data and hierarchy" Rows="Vocab.Data" />
+            </DocSection>
+            <DocSection Id="doc-expansion" Title="Expansion" Count='@DocSection.Label(Vocab.Expansion.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="Expansion" Rows="Vocab.Expansion" />
+            </DocSection>
+            <DocSection Id="doc-expand-icons-and-indentation" Title="Expand icons and indentation" Count='@DocSection.Label(Vocab.Icons.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="Expand icons and indentation" Rows="Vocab.Icons" />
+            </DocSection>
+            <DocSection Id="doc-selection-keyboard-and-focus" Title="Selection, keyboard and focus" Count='@DocSection.Label(Vocab.Selection.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="Selection, keyboard and focus" Rows="Vocab.Selection" />
+            </DocSection>
+            <DocSection Id="doc-checkboxes" Title="Checkboxes" Count='@DocSection.Label(Vocab.Checking.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="Checkboxes" Rows="Vocab.Checking" />
+            </DocSection>
+            <DocSection Id="doc-editing-and-moving-rows" Title="Editing and moving rows" Count='@DocSection.Label(Vocab.Editing.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="Editing and moving rows" Rows="Vocab.Editing" />
+            </DocSection>
+            <DocSection Id="doc-sorting-filtering-and-paging" Title="Sorting, filtering and paging" Count='@DocSection.Label(Vocab.Query.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="Sorting, filtering and paging" Rows="Vocab.Query" />
+            </DocSection>
+            <DocSection Id="doc-columns-and-toolbar" Title="Columns and toolbar" Count='@DocSection.Label(Vocab.Columns.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="Columns and toolbar" Rows="Vocab.Columns" />
+            </DocSection>
+            <DocSection Id="doc-display-and-layout" Title="Display and layout" Count='@DocSection.Label(Vocab.Display.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="Display and layout" Rows="Vocab.Display" />
+            </DocSection>
+            <DocSection Id="doc-treegridcolumn" Title="TreeGridColumn" Count='@DocSection.Label(Vocab.Column.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="TreeGridColumn" Rows="Vocab.Column" />
+            </DocSection>
+            <DocSection Id="doc-treegridcolumn-events" Title="TreeGridColumn events" Count='@DocSection.Label(Vocab.ColumnEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="TreeGridColumn events" Rows="Vocab.ColumnEvents" />
+            </DocSection>
+            <DocSection Id="doc-events" Title="Events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="Events" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-treerowselecteventargs-tvalue-and-treero" Title="TreeRowSelectEventArgs&lt;TValue&gt; and TreeRowClickEventArgs&lt;TValue&gt;" Count='@DocSection.Label(Vocab.RowArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="TreeRowSelectEventArgs&lt;TValue&gt; and TreeRowClickEventArgs&lt;TValue&gt;" Rows="Vocab.RowArgs" />
+            </DocSection>
+            <DocSection Id="doc-treenodeeventargs-tvalue" Title="TreeNodeEventArgs&lt;TValue&gt;" Count='@DocSection.Label(Vocab.NodeArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="TreeNodeEventArgs&lt;TValue&gt;" Rows="Vocab.NodeArgs" />
+            </DocSection>
+            <DocSection Id="doc-treegridediteventargs-t" Title="TreeGridEditEventArgs&lt;T&gt;" Count='@DocSection.Label(Vocab.EditArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="TreeGridEditEventArgs&lt;T&gt;" Rows="Vocab.EditArgs" />
+            </DocSection>
+            <DocSection Id="doc-treegriddatachangeeventargs-t" Title="TreeGridDataChangeEventArgs&lt;T&gt;" Count='@DocSection.Label(Vocab.ChangeArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="TreeGridDataChangeEventArgs&lt;T&gt;" Rows="Vocab.ChangeArgs" />
+            </DocSection>
+            <DocSection Id="doc-treegridrowmoveeventargs-t" Title="TreeGridRowMoveEventArgs&lt;T&gt;" Count='@DocSection.Label(Vocab.MoveArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="TreeGridRowMoveEventArgs&lt;T&gt;" Rows="Vocab.MoveArgs" />
+            </DocSection>
+            <DocSection Id="doc-resizeeventargs" Title="ResizeEventArgs" Count='@DocSection.Label(Vocab.ResizeArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="ResizeEventArgs" Rows="Vocab.ResizeArgs" />
+            </DocSection>
+            <DocSection Id="doc-gridtoolbarclickeventargs" Title="GridToolbarClickEventArgs" Count='@DocSection.Label(Vocab.ToolbarArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridToolbarClickEventArgs" Rows="Vocab.ToolbarArgs" />
+            </DocSection>
+            <DocSection Id="doc-hierarchy-and-selection-methods" Title="Hierarchy and selection methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Hierarchy and selection methods" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-checkbox-editing-and-moving-methods" Title="Checkbox, editing and moving methods" Count='@DocSection.Label(Vocab.EditMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Checkbox, editing and moving methods" Rows="Vocab.EditMethods" />
+            </DocSection>
+            <DocSection Id="doc-column-query-state-and-export-methods" Title="Column, query, state and export methods" Count='@DocSection.Label(Vocab.QueryMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Column, query, state and export methods" Rows="Vocab.QueryMethods" />
+            </DocSection>
+            <DocSection Id="doc-read-only-properties" Title="Read-only properties" Count='@DocSection.Label(Vocab.Props.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="Read-only properties" Rows="Vocab.Props" />
+                <p>
+                Three <code>[JSInvokable]</code> methods and <code>DisposeAsync</code> are entry points for the browser and the renderer, not for a
+                page. <code>ExpandAllAsync</code>, <code>CollapseAllAsync</code> and the level methods set the state without raising
+                <code>Expanded</code> or <code>Collapsed</code>, which is why the Expand all button above the first example leaves its readout alone.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

@@ -1,0 +1,30 @@
+@* 2026-10-25 (Baaria): a long Documentation section folds into the library's AccordionControl, one DocSection per topic, so a reader
+   opens the part they need; FeatureDemoLayout lists the sections under Documentation in the rail. Expand all and Collapse all
+   re-create the items with the wanted initial state, because AccordionItemControl has no public expand method (library item). *@
+<div class="doc-sections">
+    <div class="doc-sections-bar">
+        <ButtonControl CssClass="btn-sm" OnClick="() => SetAll(true)">Expand all</ButtonControl>
+        <ButtonControl CssClass="btn-sm" OnClick="() => SetAll(false)">Collapse all</ButtonControl>
+    </div>
+    <CascadingValue Value="this" IsFixed="true">
+        <AccordionControl Multiple="true">@ChildContent</AccordionControl>
+    </CascadingValue>
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly List<DocSection> _sections = new();
+
+    internal void Register(DocSection section)
+    {
+        if (!_sections.Contains(section)) _sections.Add(section);
+    }
+
+    internal void Unregister(DocSection section) => _sections.Remove(section);
+
+    private void SetAll(bool open)
+    {
+        foreach (var s in _sections) s.Set(open);
+    }
+}

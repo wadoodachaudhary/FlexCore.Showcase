@@ -64,14 +64,27 @@
                 </div>
 
                 <div class="showcase-controls">
-                    <button type="button" class="btn-code-toggle" @onclick="@(() => _showCode = !_showCode)">
-                        <span class="bi bi-code-slash"></span> @(_showCode ? "Hide Code" : "View Razor Code")
-                    </button>
+                    <TabStripControl Items="_viewTabs" SelectedIndex="@(_showCode ? 1 : 0)" SelectedIndexChanged="@(i => _showCode = i == 1)" CssClass="hero-view-tabs" />
                 </div>
             </div>
 
             <!-- Showcase Active Tab Content -->
             <div class="showcase-body">
+                @* 2026-10-24 (Baaria): the Razor code is a tab over the example, not a drawer under it. The live example stays
+                   mounted while hidden, so the grid keeps its state when the reader switches back. *@
+                @if (_showCode)
+                {
+                    <div class="code-drawer">
+                        <div class="code-header">
+                            <span>Razor markup for the @(_activeTab.ToUpper()) tab</span>
+                            <button type="button" class="btn-copy-code" @onclick="CopyActiveCode">
+                                @(_copiedCode ? "✓ Copied!" : "📋 Copy Code")
+                            </button>
+                        </div>
+                        <pre><code>@GetActiveCodeSnippet()</code></pre>
+                    </div>
+                }
+                <div class="@(_showCode ? "showcase-live is-hidden" : "showcase-live")">
                 @if (_activeTab == "grid")
                 {
                     <div class="grid-card-toolbar">
@@ -453,21 +466,8 @@
                         </div>
                     </div>
                 }
-            </div>
-
-            <!-- Code Drawer -->
-            @if (_showCode)
-            {
-                <div class="code-drawer">
-                    <div class="code-header">
-                        <span>Razor Markup for @(_activeTab.ToUpper()) Component</span>
-                        <button type="button" class="btn-copy-code" @onclick="CopyActiveCode">
-                            @(_copiedCode ? "✓ Copied!" : "📋 Copy Code")
-                        </button>
-                    </div>
-                    <pre><code>@GetActiveCodeSnippet()</code></pre>
                 </div>
-            }
+            </div>
         </div>
     </section>
 
@@ -647,6 +647,7 @@
         if (tab is not null && HeroTabs.Contains(tab)) _activeTab = tab;
     }
     private bool _showCode = false;
+    private readonly List<TabStripItem> _viewTabs = new() { new("Example", "bi bi-window"), new("Razor", "bi bi-code-slash") };
     private bool _copiedInstall = false;
     private bool _copiedCode = false;
     private string _selectedCategory = "All";

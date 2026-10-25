@@ -73,14 +73,30 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="CheckBoxControl parameters" Rows="Vocab.CheckBox" />
-        <ApiTable Kind="ApiKind.Parameters" Title="RadioGroupControl&lt;TValue&gt; parameters" Rows="Vocab.RadioGroup" />
-        <ApiTable Kind="ApiKind.Properties" Title="RadioGroupItem&lt;TValue&gt; and RadioControl" Rows="Vocab.RadioItem" />
-        <ApiTable Kind="ApiKind.Parameters" Title="SwitchControl parameters" Rows="Vocab.Switch" />
-        <ApiTable Kind="ApiKind.Parameters" Title="RatingControl parameters" Rows="Vocab.Rating" />
-        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-        <p>None of the four stylesheets reads a <code>--fx-*</code> variable. The check box has a second look, <code>fx-checkbox-theme-blue</code>, that switches to the browser's native 16px box with a blue accent.</p>
+        <DocSections>
+            <DocSection Id="doc-checkboxcontrol-parameters" Title="CheckBoxControl parameters" Count='@DocSection.Label(Vocab.CheckBox.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="CheckBoxControl parameters" Rows="Vocab.CheckBox" />
+            </DocSection>
+            <DocSection Id="doc-radiogroupcontrol-tvalue-parameters" Title="RadioGroupControl&lt;TValue&gt; parameters" Count='@DocSection.Label(Vocab.RadioGroup.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="RadioGroupControl&lt;TValue&gt; parameters" Rows="Vocab.RadioGroup" />
+            </DocSection>
+            <DocSection Id="doc-radiogroupitem-tvalue-and-radiocontrol" Title="RadioGroupItem&lt;TValue&gt; and RadioControl" Count='@DocSection.Label(Vocab.RadioItem.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="RadioGroupItem&lt;TValue&gt; and RadioControl" Rows="Vocab.RadioItem" />
+            </DocSection>
+            <DocSection Id="doc-switchcontrol-parameters" Title="SwitchControl parameters" Count='@DocSection.Label(Vocab.Switch.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="SwitchControl parameters" Rows="Vocab.Switch" />
+            </DocSection>
+            <DocSection Id="doc-ratingcontrol-parameters" Title="RatingControl parameters" Count='@DocSection.Label(Vocab.Rating.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="RatingControl parameters" Rows="Vocab.Rating" />
+            </DocSection>
+            <DocSection Id="doc-methods" Title="Methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+                <p>None of the four stylesheets reads a <code>--fx-*</code> variable. The check box has a second look, <code>fx-checkbox-theme-blue</code>, that switches to the browser's native 16px box with a blue accent.</p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

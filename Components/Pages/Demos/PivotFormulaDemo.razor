@@ -92,17 +92,31 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="PivotControl&lt;TValue&gt; parameters" Rows="Vocab.Params" />
-        <ApiTable Kind="ApiKind.Events" Title="PivotControl events" Rows="Vocab.Events" />
-        <ApiTable Kind="ApiKind.Methods" Title="PivotControl methods" Rows="Vocab.Methods" />
-        <p>
-            <code>PivotSortDescriptor(string Field, SortDirection Direction)</code> is a record: <code>Field</code> is a row field, a column
-            field or the generated name of a value column, which the control writes into each header's <code>data-sort-field</code> attribute.
-            <code>AggregateType</code> is <code>Sum</code>, <code>Average</code>, <code>Count</code>, <code>Min</code> or <code>Max</code>.
-        </p>
-        <ApiTable Kind="ApiKind.Properties" Title="PivotValueConfig" Rows="Vocab.Measure" />
-        <ApiTable Kind="ApiKind.Parameters" Title="Formula cells on GridControl" Rows="Vocab.Formula" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <DocSections>
+            <DocSection Id="doc-pivotcontrol-tvalue-parameters" Title="PivotControl&lt;TValue&gt; parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="PivotControl&lt;TValue&gt; parameters" Rows="Vocab.Params" />
+            </DocSection>
+            <DocSection Id="doc-pivotcontrol-events" Title="PivotControl events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="PivotControl events" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-pivotcontrol-methods" Title="PivotControl methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="PivotControl methods" Rows="Vocab.Methods" />
+                <p>
+                <code>PivotSortDescriptor(string Field, SortDirection Direction)</code> is a record: <code>Field</code> is a row field, a column
+                field or the generated name of a value column, which the control writes into each header's <code>data-sort-field</code> attribute.
+                <code>AggregateType</code> is <code>Sum</code>, <code>Average</code>, <code>Count</code>, <code>Min</code> or <code>Max</code>.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-pivotvalueconfig" Title="PivotValueConfig" Count='@DocSection.Label(Vocab.Measure.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="PivotValueConfig" Rows="Vocab.Measure" />
+            </DocSection>
+            <DocSection Id="doc-formula-cells-on-gridcontrol" Title="Formula cells on GridControl" Count='@DocSection.Label(Vocab.Formula.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="Formula cells on GridControl" Rows="Vocab.Formula" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

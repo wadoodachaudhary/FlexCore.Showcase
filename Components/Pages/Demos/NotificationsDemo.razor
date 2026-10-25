@@ -40,10 +40,18 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Methods" Title="NotificationService" Rows="Vocab.Service" />
-        <ApiTable Kind="ApiKind.Properties" Title="Notification" Rows="Vocab.Item" />
-        <p class="note"><code>NotificationDisplayControl</code> has no parameters. It reads the service, re-renders on <code>OnChange</code>, and scales with <code>--fx-zoom</code> when a <code>ZoomService</code> is registered. Position, widths and colors are fixed in its stylesheet.</p>
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <DocSections>
+            <DocSection Id="doc-notificationservice" Title="NotificationService" Count='@DocSection.Label(Vocab.Service.Length, "methods")' Open="true">
+                <ApiTable Kind="ApiKind.Methods" Title="NotificationService" Rows="Vocab.Service" />
+            </DocSection>
+            <DocSection Id="doc-notification" Title="Notification" Count='@DocSection.Label(Vocab.Item.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="Notification" Rows="Vocab.Item" />
+                <p class="note"><code>NotificationDisplayControl</code> has no parameters. It reads the service, re-renders on <code>OnChange</code>, and scales with <code>--fx-zoom</code> when a <code>ZoomService</code> is registered. Position, widths and colors are fixed in its stylesheet.</p>
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

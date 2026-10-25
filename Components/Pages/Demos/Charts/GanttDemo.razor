@@ -75,34 +75,52 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="GanttControl parameters" Rows="Vocab.Params" />
-        <p>
-            <code>CssClass</code>, <code>Style</code>, <code>Id</code>, <code>Visible</code>, <code>Enabled</code> and
-            <code>AdditionalAttributes</code> come from <code>FlexControlBase</code> and apply to the root <code>div</code>;
-            <code>Enabled="false"</code> disables editing the same way <code>AllowEditing</code> does.
-        </p>
-        <ApiTable Kind="ApiKind.Events" Title="GanttControl events" Rows="Vocab.Events" />
-        <ApiTable Kind="ApiKind.Methods" Title="GanttControl methods" Rows="Vocab.Methods" />
-        <ApiTable Kind="ApiKind.Properties" Title="GanttControl read-only state" Rows="Vocab.State" />
-        <ApiTable Kind="ApiKind.Properties" Title="GanttTask" Rows="Vocab.Task" />
-        <p>
-            <code>GanttTask.Clone()</code> returns a shallow copy; the control uses it for everything it stores and everything it hands back.
-            <code>GanttView</code> is <code>Day</code>, <code>Week</code>, <code>Month</code> or <code>Year</code>;
-            <code>GanttChangeAction</code> is <code>Create</code>, <code>Update</code> or <code>Delete</code>.
-        </p>
-        <ApiTable Kind="ApiKind.Properties" Title="GanttTaskChangingArgs" Rows="Vocab.Args" />
-        <p>Rules a schedule has to pass. The incoming <code>Tasks</code> list is checked against all of them except the dependency rule; every change is checked against all of them for the whole schedule.</p>
-        <ul>
-            <li>Ids are unique and not empty.</li>
-            <li><code>End</code> is not before <code>Start</code>.</li>
-            <li><code>Title</code> has at least one character and <code>Progress</code> is 0 to 100 (data annotations on <code>GanttTask</code>).</li>
-            <li><code>ParentId</code> and every id in <code>Predecessors</code> name an existing task.</li>
-            <li>With <code>EnforceDependencies</code>, each predecessor ends on or before the task starts.</li>
-            <li>Neither the parent chain nor the dependency graph contains a cycle.</li>
-            <li>A task is not deleted while another task names it as parent or predecessor.</li>
-        </ul>
-        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <DocSections>
+            <DocSection Id="doc-ganttcontrol-parameters" Title="GanttControl parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="GanttControl parameters" Rows="Vocab.Params" />
+                <p>
+                <code>CssClass</code>, <code>Style</code>, <code>Id</code>, <code>Visible</code>, <code>Enabled</code> and
+                <code>AdditionalAttributes</code> come from <code>FlexControlBase</code> and apply to the root <code>div</code>;
+                <code>Enabled="false"</code> disables editing the same way <code>AllowEditing</code> does.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-ganttcontrol-events" Title="GanttControl events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="GanttControl events" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-ganttcontrol-methods" Title="GanttControl methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="GanttControl methods" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-ganttcontrol-read-only-state" Title="GanttControl read-only state" Count='@DocSection.Label(Vocab.State.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GanttControl read-only state" Rows="Vocab.State" />
+            </DocSection>
+            <DocSection Id="doc-gantttask" Title="GanttTask" Count='@DocSection.Label(Vocab.Task.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GanttTask" Rows="Vocab.Task" />
+                <p>
+                <code>GanttTask.Clone()</code> returns a shallow copy; the control uses it for everything it stores and everything it hands back.
+                <code>GanttView</code> is <code>Day</code>, <code>Week</code>, <code>Month</code> or <code>Year</code>;
+                <code>GanttChangeAction</code> is <code>Create</code>, <code>Update</code> or <code>Delete</code>.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-gantttaskchangingargs" Title="GanttTaskChangingArgs" Count='@DocSection.Label(Vocab.Args.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GanttTaskChangingArgs" Rows="Vocab.Args" />
+                <p>Rules a schedule has to pass. The incoming <code>Tasks</code> list is checked against all of them except the dependency rule; every change is checked against all of them for the whole schedule.</p>
+                <ul>
+                <li>Ids are unique and not empty.</li>
+                <li><code>End</code> is not before <code>Start</code>.</li>
+                <li><code>Title</code> has at least one character and <code>Progress</code> is 0 to 100 (data annotations on <code>GanttTask</code>).</li>
+                <li><code>ParentId</code> and every id in <code>Predecessors</code> name an existing task.</li>
+                <li>With <code>EnforceDependencies</code>, each predecessor ends on or before the task starts.</li>
+                <li>Neither the parent chain nor the dependency graph contains a cycle.</li>
+                <li>A task is not deleted while another task names it as parent or predecessor.</li>
+                </ul>
+            </DocSection>
+            <DocSection Id="doc-keyboard" Title="Keyboard" Count='@DocSection.Label(Vocab.Keys.Length, "keys")'>
+                <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

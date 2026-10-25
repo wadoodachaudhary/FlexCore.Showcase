@@ -120,11 +120,23 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="PageLayoutControl and panels" Rows="Vocab.PageLayout" />
-        <ApiTable Kind="ApiKind.Parameters" Title="SplitterControl" Rows="Vocab.Splitter" />
-        <ApiTable Kind="ApiKind.Parameters" Title="DashboardLayoutControl and DashboardLayoutPanel" Rows="Vocab.Dashboard" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-        <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+        <DocSections>
+            <DocSection Id="doc-pagelayoutcontrol-and-panels" Title="PageLayoutControl and panels" Count='@DocSection.Label(Vocab.PageLayout.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="PageLayoutControl and panels" Rows="Vocab.PageLayout" />
+            </DocSection>
+            <DocSection Id="doc-splittercontrol" Title="SplitterControl" Count='@DocSection.Label(Vocab.Splitter.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="SplitterControl" Rows="Vocab.Splitter" />
+            </DocSection>
+            <DocSection Id="doc-dashboardlayoutcontrol-and-dashboardlayo" Title="DashboardLayoutControl and DashboardLayoutPanel" Count='@DocSection.Label(Vocab.Dashboard.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="DashboardLayoutControl and DashboardLayoutPanel" Rows="Vocab.Dashboard" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+            <DocSection Id="doc-css-variables" Title="CSS variables" Count='@DocSection.Label(Vocab.Vars.Length, "variables")'>
+                <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

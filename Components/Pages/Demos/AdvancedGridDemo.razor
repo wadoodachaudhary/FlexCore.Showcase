@@ -66,16 +66,26 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn parameters" Rows="Vocab.Column" />
-        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters" Rows="Vocab.Grid" />
-        <ApiTable Kind="ApiKind.Properties" Title="GridColumnHeaderBand" Rows="Vocab.Band" />
-        <ApiTable Kind="ApiKind.Properties" Title="EditSettings, the two used here" Rows="Vocab.Edit" />
-        <p>
-            The rest of <code>EditSettings</code> (adding, deleting, the confirm dialog, new-row position, click-to-edit) belongs with
-            <a href="demo/grid/batch-editing">Batch editing</a>. Frozen cells carry no class: the pinning is inline style on the cell.
-            The band row is <code>fx-column-header-band-row</code>; each band is a <code>fx-column-header-band-cell</code>, with
-            <code>fx-column-header-band-empty</code> on the gaps above columns in no band.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-gridcolumn-parameters" Title="GridColumn parameters" Count='@DocSection.Label(Vocab.Column.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="GridColumn parameters" Rows="Vocab.Column" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrol-parameters" Title="GridControl parameters" Count='@DocSection.Label(Vocab.Grid.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters" Rows="Vocab.Grid" />
+            </DocSection>
+            <DocSection Id="doc-gridcolumnheaderband" Title="GridColumnHeaderBand" Count='@DocSection.Label(Vocab.Band.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridColumnHeaderBand" Rows="Vocab.Band" />
+            </DocSection>
+            <DocSection Id="doc-editsettings-the-two-used-here" Title="EditSettings, the two used here" Count='@DocSection.Label(Vocab.Edit.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="EditSettings, the two used here" Rows="Vocab.Edit" />
+                <p>
+                The rest of <code>EditSettings</code> (adding, deleting, the confirm dialog, new-row position, click-to-edit) belongs with
+                <a href="demo/grid/batch-editing">Batch editing</a>. Frozen cells carry no class: the pinning is inline style on the cell.
+                The band row is <code>fx-column-header-band-row</code>; each band is a <code>fx-column-header-band-cell</code>, with
+                <code>fx-column-header-band-empty</code> on the gaps above columns in no band.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

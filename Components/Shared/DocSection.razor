@@ -1,0 +1,97 @@
+@* One topic of a page's Documentation inside DocSections (2026-10-25). Registers its title with FeatureDemoLayout for the rail;
+   opens itself when the URL fragment names it, on load and on a rail click, and takes focus so the browser scrolls to it. *@
+@implements IDisposable
+@inject NavigationManager Nav
+@using Microsoft.AspNetCore.Components.Routing
+
+<div class="doc-section" id="@Id" tabindex="-1" @ref="_el">
+    <AccordionItemControl @key="_gen" Title="@Title" InitiallyExpanded="@_open">
+        <HeaderContent>
+            <span class="fx-accordion-title">@Title</span>
+            @if (!string.IsNullOrEmpty(Count)) { <span class="doc-count">@Count</span> }
+        </HeaderContent>
+        <ChildContent>
+            @ChildContent
+        </ChildContent>
+    </AccordionItemControl>
+</div>
+
+@code {
+    [CascadingParameter] public FeatureDemoLayout? Layout { get; set; }
+    [CascadingParameter] public DocSections? Host { get; set; }
+
+    /// <summary>Fragment id, unique on the page; the rail links to it.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = "";
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    /// <summary>Shown after the title in the header, for example "24 parameters".</summary>
+    [Parameter] public string? Count { get; set; }
+    /// <summary>Open on load. Sections are closed by default.</summary>
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _open;
+    private int _gen;
+    private bool _focusPending;
+    private ElementReference _el;
+
+    protected override void OnInitialized()
+    {
+        var target = IsTarget();
+        _open = Open || target;
+        _focusPending = target;
+        Layout?.RegisterSection(this);
+        Host?.Register(this);
+        Nav.LocationChanged += OnLocationChanged;
+    }
+
+    private bool IsTarget() => new Uri(Nav.Uri).Fragment == "#" + Id;
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        if (!IsTarget()) return;
+        _ = InvokeAsync(() =>
+        {
+            Set(true);
+            _focusPending = true;
+            StateHasChanged();
+        });
+    }
+
+    /// <summary>"1 property", "12 properties": the header count with the right number.</summary>
+    public static string Label(int n, string plural)
+    {
+        if (n != 1) return $"{n} {plural}";
+        var singular = plural switch { "properties" => "property", "classes" => "class", _ => plural.TrimEnd('s') };
+        return $"1 {singular}";
+    }
+
+    /// <summary>Opens the section and moves focus to it (the rail link calls this).</summary>
+    public void Reveal()
+    {
+        Set(true);
+        _focusPending = true;
+        StateHasChanged();
+    }
+
+    /// <summary>Opens or closes the section by re-creating the accordion item with that initial state.</summary>
+    public void Set(bool open)
+    {
+        if (_open == open) return;
+        _open = open;
+        _gen++;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_focusPending) return;
+        _focusPending = false;
+        await _el.FocusAsync();
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= OnLocationChanged;
+        Host?.Unregister(this);
+    }
+}

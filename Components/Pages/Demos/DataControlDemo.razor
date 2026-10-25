@@ -73,17 +73,25 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Properties" Title="DataControl properties" Rows="Vocab.Props" />
-        <ApiTable Kind="ApiKind.Methods" Title="Building, shaping and converting" Rows="Vocab.Methods" />
-        <ApiTable Kind="ApiKind.Events" Title="Events" Rows="Vocab.Events" />
-        <p>
-            Type inference tries <code>bool</code>, <code>int</code>, <code>long</code>, <code>decimal</code> and <code>DateTime</code> in that
-            order, in the current culture, and keeps a column as it is unless every value parses. <code>ConvertDtypes</code> converts
-            <code>object</code> and <code>string</code> columns; <code>InferObjects</code> only <code>object</code> columns. Row numbers in
-            <code>GetItem</code>, <code>SetItem</code>, <code>Find</code> and the row methods are 1-based, as in a DataWindow; <code>Iat</code>
-            is 0-based, as in pandas. The editing and row-copy members (<code>InsertRow</code>, <code>DeleteRow</code>,
-            <code>RowsCopy</code>, <code>RowsMove</code>, <code>SelectRow</code>, <code>Modify</code>) are in the source and not shown here.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-datacontrol-properties" Title="DataControl properties" Count='@DocSection.Label(Vocab.Props.Length, "properties")' Open="true">
+                <ApiTable Kind="ApiKind.Properties" Title="DataControl properties" Rows="Vocab.Props" />
+            </DocSection>
+            <DocSection Id="doc-building-shaping-and-converting" Title="Building, shaping and converting" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Building, shaping and converting" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-events" Title="Events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="Events" Rows="Vocab.Events" />
+                <p>
+                Type inference tries <code>bool</code>, <code>int</code>, <code>long</code>, <code>decimal</code> and <code>DateTime</code> in that
+                order, in the current culture, and keeps a column as it is unless every value parses. <code>ConvertDtypes</code> converts
+                <code>object</code> and <code>string</code> columns; <code>InferObjects</code> only <code>object</code> columns. Row numbers in
+                <code>GetItem</code>, <code>SetItem</code>, <code>Find</code> and the row methods are 1-based, as in a DataWindow; <code>Iat</code>
+                is 0-based, as in pandas. The editing and row-copy members (<code>InsertRow</code>, <code>DeleteRow</code>,
+                <code>RowsCopy</code>, <code>RowsMove</code>, <code>SelectRow</code>, <code>Modify</code>) are in the source and not shown here.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

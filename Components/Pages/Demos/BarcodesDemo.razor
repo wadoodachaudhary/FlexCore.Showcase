@@ -50,13 +50,27 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="BarcodeControl parameters" Rows="Vocab.Barcode" />
-        <ApiTable Kind="ApiKind.Values" Title="BarcodeType" Rows="Vocab.Types" />
-        <ApiTable Kind="ApiKind.Parameters" Title="QrCodeControl parameters" Rows="Vocab.Qr" />
-        <ApiTable Kind="ApiKind.Values" Title="QrErrorCorrectionLevel" Rows="Vocab.Ecc" />
-        <ApiTable Kind="ApiKind.Properties" Title="Read-only properties" Rows="Vocab.Props" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-        <p>Neither stylesheet reads a <code>--fx-*</code> variable. Colours of the code itself come from <code>ForegroundColor</code> and <code>BackgroundColor</code>; the frame is fixed in CSS.</p>
+        <DocSections>
+            <DocSection Id="doc-barcodecontrol-parameters" Title="BarcodeControl parameters" Count='@DocSection.Label(Vocab.Barcode.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="BarcodeControl parameters" Rows="Vocab.Barcode" />
+            </DocSection>
+            <DocSection Id="doc-barcodetype" Title="BarcodeType" Count='@DocSection.Label(Vocab.Types.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="BarcodeType" Rows="Vocab.Types" />
+            </DocSection>
+            <DocSection Id="doc-qrcodecontrol-parameters" Title="QrCodeControl parameters" Count='@DocSection.Label(Vocab.Qr.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="QrCodeControl parameters" Rows="Vocab.Qr" />
+            </DocSection>
+            <DocSection Id="doc-qrerrorcorrectionlevel" Title="QrErrorCorrectionLevel" Count='@DocSection.Label(Vocab.Ecc.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="QrErrorCorrectionLevel" Rows="Vocab.Ecc" />
+            </DocSection>
+            <DocSection Id="doc-read-only-properties" Title="Read-only properties" Count='@DocSection.Label(Vocab.Props.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="Read-only properties" Rows="Vocab.Props" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+                <p>Neither stylesheet reads a <code>--fx-*</code> variable. Colours of the code itself come from <code>ForegroundColor</code> and <code>BackgroundColor</code>; the frame is fixed in CSS.</p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

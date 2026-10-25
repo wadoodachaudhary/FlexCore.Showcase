@@ -52,12 +52,26 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="ToggleButtonControl parameters" Rows="Vocab.Toggle" />
-        <ApiTable Kind="ApiKind.Parameters" Title="ButtonGroupControl parameters" Rows="Vocab.Group" />
-        <ApiTable Kind="ApiKind.Properties" Title="SelectionItem" Rows="Vocab.Item" />
-        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-        <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+        <DocSections>
+            <DocSection Id="doc-togglebuttoncontrol-parameters" Title="ToggleButtonControl parameters" Count='@DocSection.Label(Vocab.Toggle.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="ToggleButtonControl parameters" Rows="Vocab.Toggle" />
+            </DocSection>
+            <DocSection Id="doc-buttongroupcontrol-parameters" Title="ButtonGroupControl parameters" Count='@DocSection.Label(Vocab.Group.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="ButtonGroupControl parameters" Rows="Vocab.Group" />
+            </DocSection>
+            <DocSection Id="doc-selectionitem" Title="SelectionItem" Count='@DocSection.Label(Vocab.Item.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="SelectionItem" Rows="Vocab.Item" />
+            </DocSection>
+            <DocSection Id="doc-methods" Title="Methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+            <DocSection Id="doc-css-variables" Title="CSS variables" Count='@DocSection.Label(Vocab.Vars.Length, "variables")'>
+                <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

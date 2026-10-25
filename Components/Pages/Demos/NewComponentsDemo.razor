@@ -79,27 +79,61 @@
             never read. <code>TimelineItemControl</code> does not inherit it: it has no <code>CssClass</code> or <code>Style</code>, and an attribute it
             does not declare is a runtime error.
         </p>
-        <ApiTable Kind="ApiKind.Parameters" Title="BadgeControl" Rows="Vocab.Badge" />
-        <ApiTable Kind="ApiKind.Values" Title="BadgeVariant" Rows="Vocab.BadgeVariants" />
-        <ApiTable Kind="ApiKind.Values" Title="BadgeSize" Rows="Vocab.BadgeSizes" />
-        <ApiTable Kind="ApiKind.Parameters" Title="AlertControl" Rows="Vocab.Alert" />
-        <ApiTable Kind="ApiKind.Events" Title="AlertControl events" Rows="Vocab.AlertEvents" />
-        <ApiTable Kind="ApiKind.Values" Title="AlertSeverity" Rows="Vocab.AlertSeverities" />
-        <ApiTable Kind="ApiKind.Parameters" Title="SkeletonControl" Rows="Vocab.Skeleton" />
-        <ApiTable Kind="ApiKind.Values" Title="SkeletonVariant" Rows="Vocab.SkeletonVariants" />
-        <ApiTable Kind="ApiKind.Values" Title="SkeletonAnimation" Rows="Vocab.SkeletonAnimations" />
-        <ApiTable Kind="ApiKind.Parameters" Title="TimelineControl" Rows="Vocab.Timeline" />
-        <ApiTable Kind="ApiKind.Values" Title="TimelineOrientation" Rows="Vocab.TimelineOrientations" />
-        <ApiTable Kind="ApiKind.Values" Title="TimelinePosition" Rows="Vocab.TimelinePositions" />
-        <ApiTable Kind="ApiKind.Parameters" Title="TimelineItemControl" Rows="Vocab.TimelineItem" />
-        <ApiTable Kind="ApiKind.Parameters" Title="BreadCrumbControl" Rows="Vocab.BreadCrumb" />
-        <ApiTable Kind="ApiKind.Properties" Title="BreadCrumbItem" Rows="Vocab.CrumbItem" />
-        <p>
-            <code>BreadCrumbItem</code> has a parameterless constructor and <code>BreadCrumbItem(string text, string? href = null, string? iconCss = null)</code>.
-            The example passes an empty string as the Home crumb's <code>Href</code>, which the control treats like no <code>Href</code>: Home renders as
-            text, not as a link.
-        </p>
-        <ApiTable Kind="ApiKind.Parameters" Title="Inherited from FlexControlBase" Rows="Vocab.FlexBase" />
+        <DocSections>
+            <DocSection Id="doc-badgecontrol" Title="BadgeControl" Count='@DocSection.Label(Vocab.Badge.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="BadgeControl" Rows="Vocab.Badge" />
+            </DocSection>
+            <DocSection Id="doc-badgevariant" Title="BadgeVariant" Count='@DocSection.Label(Vocab.BadgeVariants.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="BadgeVariant" Rows="Vocab.BadgeVariants" />
+            </DocSection>
+            <DocSection Id="doc-badgesize" Title="BadgeSize" Count='@DocSection.Label(Vocab.BadgeSizes.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="BadgeSize" Rows="Vocab.BadgeSizes" />
+            </DocSection>
+            <DocSection Id="doc-alertcontrol" Title="AlertControl" Count='@DocSection.Label(Vocab.Alert.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="AlertControl" Rows="Vocab.Alert" />
+            </DocSection>
+            <DocSection Id="doc-alertcontrol-events" Title="AlertControl events" Count='@DocSection.Label(Vocab.AlertEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="AlertControl events" Rows="Vocab.AlertEvents" />
+            </DocSection>
+            <DocSection Id="doc-alertseverity" Title="AlertSeverity" Count='@DocSection.Label(Vocab.AlertSeverities.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="AlertSeverity" Rows="Vocab.AlertSeverities" />
+            </DocSection>
+            <DocSection Id="doc-skeletoncontrol" Title="SkeletonControl" Count='@DocSection.Label(Vocab.Skeleton.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="SkeletonControl" Rows="Vocab.Skeleton" />
+            </DocSection>
+            <DocSection Id="doc-skeletonvariant" Title="SkeletonVariant" Count='@DocSection.Label(Vocab.SkeletonVariants.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="SkeletonVariant" Rows="Vocab.SkeletonVariants" />
+            </DocSection>
+            <DocSection Id="doc-skeletonanimation" Title="SkeletonAnimation" Count='@DocSection.Label(Vocab.SkeletonAnimations.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="SkeletonAnimation" Rows="Vocab.SkeletonAnimations" />
+            </DocSection>
+            <DocSection Id="doc-timelinecontrol" Title="TimelineControl" Count='@DocSection.Label(Vocab.Timeline.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="TimelineControl" Rows="Vocab.Timeline" />
+            </DocSection>
+            <DocSection Id="doc-timelineorientation" Title="TimelineOrientation" Count='@DocSection.Label(Vocab.TimelineOrientations.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="TimelineOrientation" Rows="Vocab.TimelineOrientations" />
+            </DocSection>
+            <DocSection Id="doc-timelineposition" Title="TimelinePosition" Count='@DocSection.Label(Vocab.TimelinePositions.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="TimelinePosition" Rows="Vocab.TimelinePositions" />
+            </DocSection>
+            <DocSection Id="doc-timelineitemcontrol" Title="TimelineItemControl" Count='@DocSection.Label(Vocab.TimelineItem.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="TimelineItemControl" Rows="Vocab.TimelineItem" />
+            </DocSection>
+            <DocSection Id="doc-breadcrumbcontrol" Title="BreadCrumbControl" Count='@DocSection.Label(Vocab.BreadCrumb.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="BreadCrumbControl" Rows="Vocab.BreadCrumb" />
+            </DocSection>
+            <DocSection Id="doc-breadcrumbitem" Title="BreadCrumbItem" Count='@DocSection.Label(Vocab.CrumbItem.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="BreadCrumbItem" Rows="Vocab.CrumbItem" />
+                <p>
+                <code>BreadCrumbItem</code> has a parameterless constructor and <code>BreadCrumbItem(string text, string? href = null, string? iconCss = null)</code>.
+                The example passes an empty string as the Home crumb's <code>Href</code>, which the control treats like no <code>Href</code>: Home renders as
+                text, not as a link.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-inherited-from-flexcontrolbase" Title="Inherited from FlexControlBase" Count='@DocSection.Label(Vocab.FlexBase.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="Inherited from FlexControlBase" Rows="Vocab.FlexBase" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

@@ -71,10 +71,20 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
-        <ApiTable Kind="ApiKind.Properties" Title="TreeNode" Rows="Vocab.Node" />
-        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="ARIA output" Rows="Vocab.Aria" />
+        <DocSections>
+            <DocSection Id="doc-parameters" Title="Parameters" Count='@DocSection.Label(Vocab.Parameters.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
+            </DocSection>
+            <DocSection Id="doc-treenode" Title="TreeNode" Count='@DocSection.Label(Vocab.Node.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="TreeNode" Rows="Vocab.Node" />
+            </DocSection>
+            <DocSection Id="doc-keyboard" Title="Keyboard" Count='@DocSection.Label(Vocab.Keys.Length, "keys")'>
+                <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
+            </DocSection>
+            <DocSection Id="doc-aria-output" Title="ARIA output" Count='@DocSection.Label(Vocab.Aria.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="ARIA output" Rows="Vocab.Aria" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

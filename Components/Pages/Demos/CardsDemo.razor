@@ -58,10 +58,18 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="CardControl parameters" Rows="Vocab.Card" />
-        <ApiTable Kind="ApiKind.Parameters" Title="CardGroupControl parameters" Rows="Vocab.Group" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-        <p>Colours, padding and the three shadows are fixed in the stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
+        <DocSections>
+            <DocSection Id="doc-cardcontrol-parameters" Title="CardControl parameters" Count='@DocSection.Label(Vocab.Card.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="CardControl parameters" Rows="Vocab.Card" />
+            </DocSection>
+            <DocSection Id="doc-cardgroupcontrol-parameters" Title="CardGroupControl parameters" Count='@DocSection.Label(Vocab.Group.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="CardGroupControl parameters" Rows="Vocab.Group" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+                <p>Colours, padding and the three shadows are fixed in the stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

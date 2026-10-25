@@ -660,19 +660,24 @@
     background: #0369a1;
 }
 
-/* Code Drawer */
+/* Code panel: since 2026-10-24 a tab over the live example (the example stays mounted, hidden) */
 .code-drawer {
     background: #0f172a;
     color: #e2e8f0;
     padding: 20px;
-    border-top: 1px solid #334155;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    min-height: 360px;
 }
+.showcase-live.is-hidden { display: none; }
+.hero-view-tabs { font-size: 12.5px; }
 .code-drawer pre {
     margin: 0;
     font-family: "SF Mono", Menlo, Consolas, monospace;
     font-size: 13px;
     line-height: 1.6;
-    overflow-x: auto;
+    max-height: 70vh;      /* the grid snippet is long; the tab scrolls instead of stretching the page */
+    overflow: auto;
 }
 .code-header {
     display: flex;

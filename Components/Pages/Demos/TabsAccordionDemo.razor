@@ -79,14 +79,32 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="TabControl parameters" Rows="Vocab.TabControl" />
-        <ApiTable Kind="ApiKind.Parameters" Title="TabItem parameters" Rows="Vocab.TabItem" />
-        <ApiTable Kind="ApiKind.Parameters" Title="TabStripControl parameters" Rows="Vocab.Strip" />
-        <ApiTable Kind="ApiKind.Properties" Title="TabStripItem" Rows="Vocab.StripItem" />
-        <ApiTable Kind="ApiKind.Parameters" Title="AccordionControl parameters" Rows="Vocab.Accordion" />
-        <ApiTable Kind="ApiKind.Parameters" Title="AccordionItemControl parameters" Rows="Vocab.AccordionItem" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-        <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables (TabStripControl only)" Rows="Vocab.Vars" />
+        <DocSections>
+            <DocSection Id="doc-tabcontrol-parameters" Title="TabControl parameters" Count='@DocSection.Label(Vocab.TabControl.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="TabControl parameters" Rows="Vocab.TabControl" />
+            </DocSection>
+            <DocSection Id="doc-tabitem-parameters" Title="TabItem parameters" Count='@DocSection.Label(Vocab.TabItem.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="TabItem parameters" Rows="Vocab.TabItem" />
+            </DocSection>
+            <DocSection Id="doc-tabstripcontrol-parameters" Title="TabStripControl parameters" Count='@DocSection.Label(Vocab.Strip.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="TabStripControl parameters" Rows="Vocab.Strip" />
+            </DocSection>
+            <DocSection Id="doc-tabstripitem" Title="TabStripItem" Count='@DocSection.Label(Vocab.StripItem.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="TabStripItem" Rows="Vocab.StripItem" />
+            </DocSection>
+            <DocSection Id="doc-accordioncontrol-parameters" Title="AccordionControl parameters" Count='@DocSection.Label(Vocab.Accordion.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="AccordionControl parameters" Rows="Vocab.Accordion" />
+            </DocSection>
+            <DocSection Id="doc-accordionitemcontrol-parameters" Title="AccordionItemControl parameters" Count='@DocSection.Label(Vocab.AccordionItem.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="AccordionItemControl parameters" Rows="Vocab.AccordionItem" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+            <DocSection Id="doc-css-variables-tabstripcontrol-only" Title="CSS variables (TabStripControl only)" Count='@DocSection.Label(Vocab.Vars.Length, "variables")'>
+                <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables (TabStripControl only)" Rows="Vocab.Vars" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

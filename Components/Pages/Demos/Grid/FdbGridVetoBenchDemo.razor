@@ -65,22 +65,38 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, selection" Rows="Vocab.Events" />
-        <ApiTable Kind="ApiKind.Properties" Title="RowSelectEventArgs&lt;TValue&gt;" Rows="Vocab.Args" />
-        <ApiTable Kind="ApiKind.Properties" Title="SelectionSettings, the properties that matter here" Rows="Vocab.Settings" />
-        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, cell editing" Rows="Vocab.CellEvents" />
-        <ApiTable Kind="ApiKind.Properties" Title="CellSaveArgs&lt;TValue&gt;" Rows="Vocab.SaveArgs" />
-        <ApiTable Kind="ApiKind.Properties" Title="CellEditArgs&lt;TValue&gt;" Rows="Vocab.EditArgs" />
-        <ApiTable Kind="ApiKind.Methods" Title="Edit methods" Rows="Vocab.Methods" />
-        <p>
-            The selection rows are the ones on <a href="demo/grid/master-detail">Master-detail</a>, which also lists the other
-            <code>SelectionSettings</code> properties, <code>SelectionChanged</code> and the selection methods. Those methods change the
-            selection without raising <code>RowSelecting</code>, and so does Shift plus an arrow when <code>ModifierKeysExtendSelection</code>
-            lets a <code>Single</code> selection grow. The veto stops the selection, not every edit path: a checkbox toggle on another row,
-            or a dropdown or date editor that opens on mouse-down there, still runs. <code>GridControl</code> has no public member that
-            cancels the open editor, says whether one is open or lists unsaved rows: Escape discards the edit inside the grid, and a page
-            keeps its own dirty flag, as this one does.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-gridcontrolevents-selection" Title="GridControlEvents, selection" Count='@DocSection.Label(Vocab.Events.Length, "events")' Open="true">
+                <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, selection" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-rowselecteventargs-tvalue" Title="RowSelectEventArgs&lt;TValue&gt;" Count='@DocSection.Label(Vocab.Args.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="RowSelectEventArgs&lt;TValue&gt;" Rows="Vocab.Args" />
+            </DocSection>
+            <DocSection Id="doc-selectionsettings-the-properties-that-ma" Title="SelectionSettings, the properties that matter here" Count='@DocSection.Label(Vocab.Settings.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="SelectionSettings, the properties that matter here" Rows="Vocab.Settings" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrolevents-cell-editing" Title="GridControlEvents, cell editing" Count='@DocSection.Label(Vocab.CellEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, cell editing" Rows="Vocab.CellEvents" />
+            </DocSection>
+            <DocSection Id="doc-cellsaveargs-tvalue" Title="CellSaveArgs&lt;TValue&gt;" Count='@DocSection.Label(Vocab.SaveArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="CellSaveArgs&lt;TValue&gt;" Rows="Vocab.SaveArgs" />
+            </DocSection>
+            <DocSection Id="doc-celleditargs-tvalue" Title="CellEditArgs&lt;TValue&gt;" Count='@DocSection.Label(Vocab.EditArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="CellEditArgs&lt;TValue&gt;" Rows="Vocab.EditArgs" />
+            </DocSection>
+            <DocSection Id="doc-edit-methods" Title="Edit methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Edit methods" Rows="Vocab.Methods" />
+                <p>
+                The selection rows are the ones on <a href="demo/grid/master-detail">Master-detail</a>, which also lists the other
+                <code>SelectionSettings</code> properties, <code>SelectionChanged</code> and the selection methods. Those methods change the
+                selection without raising <code>RowSelecting</code>, and so does Shift plus an arrow when <code>ModifierKeysExtendSelection</code>
+                lets a <code>Single</code> selection grow. The veto stops the selection, not every edit path: a checkbox toggle on another row,
+                or a dropdown or date editor that opens on mouse-down there, still runs. <code>GridControl</code> has no public member that
+                cancels the open editor, says whether one is open or lists unsaved rows: Escape discards the edit inside the grid, and a page
+                keeps its own dirty flag, as this one does.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

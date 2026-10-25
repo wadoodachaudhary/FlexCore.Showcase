@@ -120,15 +120,23 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Properties" Title="GridItemsRequest" Rows="Vocab.Request" />
-        <ApiTable Kind="ApiKind.Properties" Title="GridQueryDescriptor, the request's Query" Rows="Vocab.Query" />
-        <ApiTable Kind="ApiKind.Properties" Title="GridItemsResult&lt;TValue&gt;" Rows="Vocab.Result" />
-        <p>
-            A sort term is a <code>GridSortDescriptor</code> of <code>Field</code> and <code>Direction</code>; earlier terms rank higher. The
-            group records (<code>GridProviderGroup</code>, <code>GridProviderGroupRequest</code>, <code>GridProviderGroupKey</code>) and the grid's
-            provider parameters named in the overview are still to be written up from <code>Grid/GridControl.ItemsProvider.cs</code>,
-            <code>Grid/GridControl.ProviderGrouping.cs</code> and <code>Grid/GridControl.ProviderExport.cs</code>.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-griditemsrequest" Title="GridItemsRequest" Count='@DocSection.Label(Vocab.Request.Length, "properties")' Open="true">
+                <ApiTable Kind="ApiKind.Properties" Title="GridItemsRequest" Rows="Vocab.Request" />
+            </DocSection>
+            <DocSection Id="doc-gridquerydescriptor-the-request-s-query" Title="GridQueryDescriptor, the request's Query" Count='@DocSection.Label(Vocab.Query.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridQueryDescriptor, the request's Query" Rows="Vocab.Query" />
+            </DocSection>
+            <DocSection Id="doc-griditemsresult-tvalue" Title="GridItemsResult&lt;TValue&gt;" Count='@DocSection.Label(Vocab.Result.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridItemsResult&lt;TValue&gt;" Rows="Vocab.Result" />
+                <p>
+                A sort term is a <code>GridSortDescriptor</code> of <code>Field</code> and <code>Direction</code>; earlier terms rank higher. The
+                group records (<code>GridProviderGroup</code>, <code>GridProviderGroupRequest</code>, <code>GridProviderGroupKey</code>) and the grid's
+                provider parameters named in the overview are still to be written up from <code>Grid/GridControl.ItemsProvider.cs</code>,
+                <code>Grid/GridControl.ProviderGrouping.cs</code> and <code>Grid/GridControl.ProviderExport.cs</code>.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

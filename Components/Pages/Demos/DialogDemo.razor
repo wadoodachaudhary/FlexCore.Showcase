@@ -87,14 +87,30 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="DialogControl parameters" Rows="Vocab.Dialog" />
-        <ApiTable Kind="ApiKind.Methods" Title="IDialogService" Rows="Vocab.Service" />
-        <ApiTable Kind="ApiKind.Parameters" Title="MessageBoxControl parameters" Rows="Vocab.MessageBox" />
-        <ApiTable Kind="ApiKind.Parameters" Title="InputDialogControl parameters" Rows="Vocab.Input" />
-        <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
-        <p class="note">Enums: <code>MessageBoxButtons</code> Ok, OkCancel, YesNo, YesNoCancel · <code>MessageBoxResult</code> Ok, Cancel, Yes, No · <code>MessageBoxLook</code> VB6, DotNet · <code>DialogPosition(X, Y)</code> is the offset from centre in CSS pixels.</p>
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-        <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+        <DocSections>
+            <DocSection Id="doc-dialogcontrol-parameters" Title="DialogControl parameters" Count='@DocSection.Label(Vocab.Dialog.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="DialogControl parameters" Rows="Vocab.Dialog" />
+            </DocSection>
+            <DocSection Id="doc-idialogservice" Title="IDialogService" Count='@DocSection.Label(Vocab.Service.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="IDialogService" Rows="Vocab.Service" />
+            </DocSection>
+            <DocSection Id="doc-messageboxcontrol-parameters" Title="MessageBoxControl parameters" Count='@DocSection.Label(Vocab.MessageBox.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="MessageBoxControl parameters" Rows="Vocab.MessageBox" />
+            </DocSection>
+            <DocSection Id="doc-inputdialogcontrol-parameters" Title="InputDialogControl parameters" Count='@DocSection.Label(Vocab.Input.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="InputDialogControl parameters" Rows="Vocab.Input" />
+            </DocSection>
+            <DocSection Id="doc-methods" Title="Methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+                <p class="note">Enums: <code>MessageBoxButtons</code> Ok, OkCancel, YesNo, YesNoCancel · <code>MessageBoxResult</code> Ok, Cancel, Yes, No · <code>MessageBoxLook</code> VB6, DotNet · <code>DialogPosition(X, Y)</code> is the offset from centre in CSS pixels.</p>
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+            <DocSection Id="doc-css-variables" Title="CSS variables" Count='@DocSection.Label(Vocab.Vars.Length, "variables")'>
+                <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

@@ -82,37 +82,67 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="AutoCompleteControl&lt;TItem&gt; parameters" Rows="Vocab.Auto" />
-        <ApiTable Kind="ApiKind.Events" Title="AutoCompleteControl events" Rows="Vocab.AutoEvents" />
-        <ApiTable Kind="ApiKind.Methods" Title="AutoCompleteControl methods" Rows="Vocab.AutoMethods" />
-        <ApiTable Kind="ApiKind.Properties" Title="AutoCompleteControl read-only state" Rows="Vocab.AutoState" />
-        <p>
-            The text box and the popup are a <code>DropDownListControl</code> in editable mode. A search starts when the text has at least
-            <code>MinLength</code> characters, waits <code>DebounceDelay</code> milliseconds, and is cancelled by the next keystroke. Without
-            <code>OnRead</code> the suggestions are the items whose text contains the typed text, ignoring case. The popup opens when there is at
-            least one suggestion and closes when there is none, when the text is too short, when the control is disabled, or when the page
-            changes <code>Value</code>. An exception thrown by <code>OnRead</code> becomes <code>ErrorMessage</code>, shown under the box.
-        </p>
-        <ApiTable Kind="ApiKind.Parameters" Title="StepperControl parameters" Rows="Vocab.Stepper" />
-        <ApiTable Kind="ApiKind.Events" Title="StepperControl events" Rows="Vocab.StepperEvents" />
-        <ApiTable Kind="ApiKind.Methods" Title="StepperControl methods" Rows="Vocab.StepperMethods" />
-        <ApiTable Kind="ApiKind.Properties" Title="WizardStepDescriptor" Rows="Vocab.StepDesc" />
-        <ApiTable Kind="ApiKind.Properties" Title="WizardStepContext, passed to StepTemplate" Rows="Vocab.StepCtx" />
-        <p>
-            A step can be entered when the control is enabled, no move is in progress, the step is not in <code>DisabledSteps</code>, and, in linear
-            mode, it is at most one past the current step and the current step is not in <code>InvalidSteps</code> when moving forward. A step that
-            cannot be entered renders as a disabled button. The current step carries <code>aria-current="step"</code>, an invalid step a warning
-            sign, and each button's tooltip is the step's <code>Description</code>.
-        </p>
-        <ApiTable Kind="ApiKind.Parameters" Title="ColorPaletteControl parameters" Rows="Vocab.Palette" />
-        <ApiTable Kind="ApiKind.Events" Title="ColorPaletteControl events" Rows="Vocab.PaletteEvents" />
-        <ApiTable Kind="ApiKind.Methods" Title="ColorPaletteControl methods" Rows="Vocab.PaletteMethods" />
-        <p>
-            Colours are compared ignoring case. <code>ColorPalettes.Basic</code> is the default list: 48 colours in six rows of eight. One swatch at a
-            time is in the Tab order; it follows <code>Value</code> when the page changes it and the focus when the user moves with the keys.
-        </p>
-        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <DocSections>
+            <DocSection Id="doc-autocompletecontrol-titem-parameters" Title="AutoCompleteControl&lt;TItem&gt; parameters" Count='@DocSection.Label(Vocab.Auto.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="AutoCompleteControl&lt;TItem&gt; parameters" Rows="Vocab.Auto" />
+            </DocSection>
+            <DocSection Id="doc-autocompletecontrol-events" Title="AutoCompleteControl events" Count='@DocSection.Label(Vocab.AutoEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="AutoCompleteControl events" Rows="Vocab.AutoEvents" />
+            </DocSection>
+            <DocSection Id="doc-autocompletecontrol-methods" Title="AutoCompleteControl methods" Count='@DocSection.Label(Vocab.AutoMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="AutoCompleteControl methods" Rows="Vocab.AutoMethods" />
+            </DocSection>
+            <DocSection Id="doc-autocompletecontrol-read-only-state" Title="AutoCompleteControl read-only state" Count='@DocSection.Label(Vocab.AutoState.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="AutoCompleteControl read-only state" Rows="Vocab.AutoState" />
+                <p>
+                The text box and the popup are a <code>DropDownListControl</code> in editable mode. A search starts when the text has at least
+                <code>MinLength</code> characters, waits <code>DebounceDelay</code> milliseconds, and is cancelled by the next keystroke. Without
+                <code>OnRead</code> the suggestions are the items whose text contains the typed text, ignoring case. The popup opens when there is at
+                least one suggestion and closes when there is none, when the text is too short, when the control is disabled, or when the page
+                changes <code>Value</code>. An exception thrown by <code>OnRead</code> becomes <code>ErrorMessage</code>, shown under the box.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-steppercontrol-parameters" Title="StepperControl parameters" Count='@DocSection.Label(Vocab.Stepper.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="StepperControl parameters" Rows="Vocab.Stepper" />
+            </DocSection>
+            <DocSection Id="doc-steppercontrol-events" Title="StepperControl events" Count='@DocSection.Label(Vocab.StepperEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="StepperControl events" Rows="Vocab.StepperEvents" />
+            </DocSection>
+            <DocSection Id="doc-steppercontrol-methods" Title="StepperControl methods" Count='@DocSection.Label(Vocab.StepperMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="StepperControl methods" Rows="Vocab.StepperMethods" />
+            </DocSection>
+            <DocSection Id="doc-wizardstepdescriptor" Title="WizardStepDescriptor" Count='@DocSection.Label(Vocab.StepDesc.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="WizardStepDescriptor" Rows="Vocab.StepDesc" />
+            </DocSection>
+            <DocSection Id="doc-wizardstepcontext-passed-to-steptemplate" Title="WizardStepContext, passed to StepTemplate" Count='@DocSection.Label(Vocab.StepCtx.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="WizardStepContext, passed to StepTemplate" Rows="Vocab.StepCtx" />
+                <p>
+                A step can be entered when the control is enabled, no move is in progress, the step is not in <code>DisabledSteps</code>, and, in linear
+                mode, it is at most one past the current step and the current step is not in <code>InvalidSteps</code> when moving forward. A step that
+                cannot be entered renders as a disabled button. The current step carries <code>aria-current="step"</code>, an invalid step a warning
+                sign, and each button's tooltip is the step's <code>Description</code>.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-colorpalettecontrol-parameters" Title="ColorPaletteControl parameters" Count='@DocSection.Label(Vocab.Palette.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="ColorPaletteControl parameters" Rows="Vocab.Palette" />
+            </DocSection>
+            <DocSection Id="doc-colorpalettecontrol-events" Title="ColorPaletteControl events" Count='@DocSection.Label(Vocab.PaletteEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="ColorPaletteControl events" Rows="Vocab.PaletteEvents" />
+            </DocSection>
+            <DocSection Id="doc-colorpalettecontrol-methods" Title="ColorPaletteControl methods" Count='@DocSection.Label(Vocab.PaletteMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="ColorPaletteControl methods" Rows="Vocab.PaletteMethods" />
+                <p>
+                Colours are compared ignoring case. <code>ColorPalettes.Basic</code> is the default list: 48 colours in six rows of eight. One swatch at a
+                time is in the Tab order; it follows <code>Value</code> when the page changes it and the focus when the user moves with the keys.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-keyboard" Title="Keyboard" Count='@DocSection.Label(Vocab.Keys.Length, "keys")'>
+                <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

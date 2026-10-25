@@ -66,19 +66,35 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Values" Title="TextBoxTypingBehavior" Rows="Vocab.Modes" />
-        <ApiTable Kind="ApiKind.Parameters" Title="GridControl typing parameters" Rows="Vocab.Grid" />
-        <ApiTable Kind="ApiKind.Methods" Title="GridControl transport counters" Rows="Vocab.GridMethods" />
-        <ApiTable Kind="ApiKind.Properties" Title="GridTextEditingDiagnosticsSnapshot" Rows="Vocab.Snapshot" />
-        <ApiTable Kind="ApiKind.Parameters" Title="TextBoxControl typing parameters" Rows="Vocab.TextBox" />
-        <ApiTable Kind="ApiKind.Events" Title="TextBoxControl callbacks on the typing path" Rows="Vocab.TextBoxEvents" />
-        <ApiTable Kind="ApiKind.Methods" Title="TextBoxControl commit methods" Rows="Vocab.TextBoxMethods" />
-        <p>
-            Both modes end in the same place, the grid's edit buffer and its cell commit; what differs is how many messages travel
-            before that, and neither changes how the editor opens. The grid's filter and search boxes pick their own mode from
-            <code>FilterSettings.SearchAsYouType</code> (<code>ServerBacked</code> as you type, <code>ClientBuffered</code> when it is
-            off) and do not read <code>TextEditorTypingBehavior</code>.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-textboxtypingbehavior" Title="TextBoxTypingBehavior" Count='@DocSection.Label(Vocab.Modes.Length, "values")' Open="true">
+                <ApiTable Kind="ApiKind.Values" Title="TextBoxTypingBehavior" Rows="Vocab.Modes" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrol-typing-parameters" Title="GridControl typing parameters" Count='@DocSection.Label(Vocab.Grid.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl typing parameters" Rows="Vocab.Grid" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrol-transport-counters" Title="GridControl transport counters" Count='@DocSection.Label(Vocab.GridMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="GridControl transport counters" Rows="Vocab.GridMethods" />
+            </DocSection>
+            <DocSection Id="doc-gridtexteditingdiagnosticssnapshot" Title="GridTextEditingDiagnosticsSnapshot" Count='@DocSection.Label(Vocab.Snapshot.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridTextEditingDiagnosticsSnapshot" Rows="Vocab.Snapshot" />
+            </DocSection>
+            <DocSection Id="doc-textboxcontrol-typing-parameters" Title="TextBoxControl typing parameters" Count='@DocSection.Label(Vocab.TextBox.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="TextBoxControl typing parameters" Rows="Vocab.TextBox" />
+            </DocSection>
+            <DocSection Id="doc-textboxcontrol-callbacks-on-the-typing-p" Title="TextBoxControl callbacks on the typing path" Count='@DocSection.Label(Vocab.TextBoxEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="TextBoxControl callbacks on the typing path" Rows="Vocab.TextBoxEvents" />
+            </DocSection>
+            <DocSection Id="doc-textboxcontrol-commit-methods" Title="TextBoxControl commit methods" Count='@DocSection.Label(Vocab.TextBoxMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="TextBoxControl commit methods" Rows="Vocab.TextBoxMethods" />
+                <p>
+                Both modes end in the same place, the grid's edit buffer and its cell commit; what differs is how many messages travel
+                before that, and neither changes how the editor opens. The grid's filter and search boxes pick their own mode from
+                <code>FilterSettings.SearchAsYouType</code> (<code>ServerBacked</code> as you type, <code>ClientBuffered</code> when it is
+                off) and do not read <code>TextEditorTypingBehavior</code>.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

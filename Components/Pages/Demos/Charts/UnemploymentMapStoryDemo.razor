@@ -44,14 +44,18 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="MapStoryControl parameters" Rows="Vocab.Params" />
-        <ul>
-            <li><code>MapStory</code>, <code>MapStoryLevel</code>, <code>MapStoryRegion</code>: the report. A region’s <code>ChildLevelId</code> is the map that opens next.</li>
-            <li><code>ChoroplethScale</code>: sequential stops. The default runs from <code>#F6E27A</code> to <code>#5A1228</code>. Missing values use <code>#C5C6C4</code>.</li>
-            <li><code>MapStoryLevel.SampleData</code> and <code>MapStoryRegion.Sample</code>: the graphic prints “Sample data” instead of presenting a stand-in number as published.</li>
-            <li><code>MapGeographyCatalog.Bundled</code>: Natural Earth 1:110m countries (public domain) and simplified NUTS-2 / US state boundaries, embedded with the control. No tile server.</li>
-            <li>Sources for this story live in <code>wwwroot/maps/stories/unemployment.json</code>.</li>
-        </ul>
+        <DocSections>
+            <DocSection Id="doc-mapstorycontrol-parameters" Title="MapStoryControl parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="MapStoryControl parameters" Rows="Vocab.Params" />
+                <ul>
+                <li><code>MapStory</code>, <code>MapStoryLevel</code>, <code>MapStoryRegion</code>: the report. A region’s <code>ChildLevelId</code> is the map that opens next.</li>
+                <li><code>ChoroplethScale</code>: sequential stops. The default runs from <code>#F6E27A</code> to <code>#5A1228</code>. Missing values use <code>#C5C6C4</code>.</li>
+                <li><code>MapStoryLevel.SampleData</code> and <code>MapStoryRegion.Sample</code>: the graphic prints “Sample data” instead of presenting a stand-in number as published.</li>
+                <li><code>MapGeographyCatalog.Bundled</code>: Natural Earth 1:110m countries (public domain) and simplified NUTS-2 / US state boundaries, embedded with the control. No tile server.</li>
+                <li>Sources for this story live in <code>wwwroot/maps/stories/unemployment.json</code>.</li>
+                </ul>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

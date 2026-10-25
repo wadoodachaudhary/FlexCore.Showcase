@@ -86,14 +86,22 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters used here" Rows="Vocab.Grid" />
-        <ApiTable Kind="ApiKind.Properties" Title="SelectionSettings, the two set here" Rows="Vocab.Selection" />
-        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents used here" Rows="Vocab.Events" />
-        <p>
-            Sorting, filtering, resizing, reordering, grouping and the grid's other parameters are documented on
-            <a href="demo/grid">Grid overview</a> and <a href="demo/grid/grouping">Grouping &amp; totals</a>; batch editing on
-            <a href="demo/grid/batch-editing">Batch editing</a>.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-gridcontrol-parameters-used-here" Title="GridControl parameters used here" Count='@DocSection.Label(Vocab.Grid.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters used here" Rows="Vocab.Grid" />
+            </DocSection>
+            <DocSection Id="doc-selectionsettings-the-two-set-here" Title="SelectionSettings, the two set here" Count='@DocSection.Label(Vocab.Selection.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="SelectionSettings, the two set here" Rows="Vocab.Selection" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrolevents-used-here" Title="GridControlEvents used here" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="GridControlEvents used here" Rows="Vocab.Events" />
+                <p>
+                Sorting, filtering, resizing, reordering, grouping and the grid's other parameters are documented on
+                <a href="demo/grid">Grid overview</a> and <a href="demo/grid/grouping">Grouping &amp; totals</a>; batch editing on
+                <a href="demo/grid/batch-editing">Batch editing</a>.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

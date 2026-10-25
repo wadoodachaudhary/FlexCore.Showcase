@@ -103,19 +103,33 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="GridControl grouping parameters" Rows="Vocab.Grid" />
-        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn" Rows="Vocab.Column" />
-        <ApiTable Kind="ApiKind.Properties" Title="AggregateRow" Rows="Vocab.Row" />
-        <ApiTable Kind="ApiKind.Properties" Title="AggregateColumn" Rows="Vocab.Agg" />
-        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, grouping" Rows="Vocab.Events" />
-        <ApiTable Kind="ApiKind.Methods" Title="Grouping methods" Rows="Vocab.Methods" />
-        <p>
-            <code>AggregateType</code> is <code>Sum</code>, <code>Average</code>, <code>Count</code>, <code>Min</code> or <code>Max</code>. Values are
-            read as doubles: numeric properties directly, anything else through a parse of its text. <code>Count</code> therefore counts the
-            values that parse as numbers, so on a text or boolean column it prints nothing; count a numeric column instead, as this page does.
-            A group footer and the grid footer print one value per column, the first <code>AggregateColumn</code> for that field; a caption
-            prints every value of every caption row.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-gridcontrol-grouping-parameters" Title="GridControl grouping parameters" Count='@DocSection.Label(Vocab.Grid.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl grouping parameters" Rows="Vocab.Grid" />
+            </DocSection>
+            <DocSection Id="doc-gridcolumn" Title="GridColumn" Count='@DocSection.Label(Vocab.Column.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridColumn" Rows="Vocab.Column" />
+            </DocSection>
+            <DocSection Id="doc-aggregaterow" Title="AggregateRow" Count='@DocSection.Label(Vocab.Row.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="AggregateRow" Rows="Vocab.Row" />
+            </DocSection>
+            <DocSection Id="doc-aggregatecolumn" Title="AggregateColumn" Count='@DocSection.Label(Vocab.Agg.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="AggregateColumn" Rows="Vocab.Agg" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrolevents-grouping" Title="GridControlEvents, grouping" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, grouping" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-grouping-methods" Title="Grouping methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Grouping methods" Rows="Vocab.Methods" />
+                <p>
+                <code>AggregateType</code> is <code>Sum</code>, <code>Average</code>, <code>Count</code>, <code>Min</code> or <code>Max</code>. Values are
+                read as doubles: numeric properties directly, anything else through a parse of its text. <code>Count</code> therefore counts the
+                values that parse as numbers, so on a text or boolean column it prints nothing; count a numeric column instead, as this page does.
+                A group footer and the grid footer print one value per column, the first <code>AggregateColumn</code> for that field; a caption
+                prints every value of every caption row.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

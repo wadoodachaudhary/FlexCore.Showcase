@@ -97,32 +97,44 @@
             The layout parameters (<code>Width</code>, <code>HeaderBand</code>, <code>IsFrozen</code>, <code>Visible</code> and the rest) and
             the same three methods used on fixed column sets are on <a href="demo/grid/column-swap">Column sets</a>.
         </p>
-        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn data parameters" Rows="Vocab.Column" />
-        <ApiTable Kind="ApiKind.Values" Title="ColumnType" Rows="Vocab.ColumnTypes" />
-        <ApiTable Kind="ApiKind.Values" Title="Row shapes and how Field is resolved" Rows="Vocab.RowShapes" />
-        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters" Rows="Vocab.Grid" />
-        <h3 class="api-title">What AutoGenerateColumns reads from the row type</h3>
-        <ul>
-            <li><strong>Which properties:</strong> public instance properties with a public getter and no indexer. <code>[Display(AutoGenerateField = false)]</code> or <code>[ScaffoldColumn(false)]</code> leaves one out. A scalar row type such as <code>string</code> or <code>int</code> generates nothing.</li>
-            <li><strong>Order:</strong> <code>Display.Order</code>, then declaration order.</li>
-            <li><strong>Header:</strong> <code>Display.Name</code>, else <code>[DisplayName]</code>, else the property name. <code>Display.GroupName</code> becomes the column's <code>HeaderBand</code>.</li>
-            <li><strong>Format:</strong> <code>DisplayFormat.DataFormatString</code> with the <code>{0:…}</code> wrapper removed, so <code>{0:C2}</code> becomes <code>C2</code>.</li>
-            <li><strong>Read-only:</strong> <code>[Key]</code> (which also sets <code>IsPrimaryKey</code>), <code>[Editable(false)]</code>, <code>[ReadOnly(true)]</code>, or no public setter.</li>
-            <li><strong>Type:</strong> <code>Nullable&lt;T&gt;</code> is unwrapped first. <code>[DataType(DataType.Password)]</code> gives Password; a DataType of Date, DateTime or Time gives Date; <code>bool</code> gives CheckBox; <code>DateTime</code>, <code>DateTimeOffset</code> and <code>DateOnly</code> give Date; the numeric types give Number; everything else is Text. Numbers and dates align right, check boxes centre, headers included.</li>
-        </ul>
-        <ApiTable Kind="ApiKind.Methods" Title="Run-time column methods" Rows="Vocab.Methods" />
-        <p>
-            Inside the window a <code>GridColumn</code> that initialises registers with the container and one that disposes unregisters, but the
-            grid's column-driven render is held. The flush render runs <code>SyncPendingColumnStructure</code> at the top of the pass: when every
-            field in the final order is registered it reorders the container, and whenever a column was added or removed it clears the
-            selected cells, the active cell and any batch edit (selected rows stay), drops the sort and filter state and the sort priority of
-            fields that are no longer present, and invalidates the display caches. A same-<code>Field</code> replacement (the <code>@@key</code>
-            dedup) only invalidates the caches and carries the user's drag-resized width forward. After the paint, auto widths are measured
-            again and the awaited task completes; an order that names a field no column registered is discarded at that point. Before the
-            first render <code>_grid</code> is null, so the page assigns the lists directly. <code>GridControl.Columns</code> returns the
-            effective set: the generated columns merged with the explicit ones when <code>AutoGenerateColumns</code> is on, otherwise the
-            container's list.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-gridcolumn-data-parameters" Title="GridColumn data parameters" Count='@DocSection.Label(Vocab.Column.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="GridColumn data parameters" Rows="Vocab.Column" />
+            </DocSection>
+            <DocSection Id="doc-columntype" Title="ColumnType" Count='@DocSection.Label(Vocab.ColumnTypes.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="ColumnType" Rows="Vocab.ColumnTypes" />
+            </DocSection>
+            <DocSection Id="doc-row-shapes-and-how-field-is-resolved" Title="Row shapes and how Field is resolved" Count='@DocSection.Label(Vocab.RowShapes.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="Row shapes and how Field is resolved" Rows="Vocab.RowShapes" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrol-parameters" Title="GridControl parameters" Count='@DocSection.Label(Vocab.Grid.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters" Rows="Vocab.Grid" />
+                <h3 class="api-title">What AutoGenerateColumns reads from the row type</h3>
+                <ul>
+                <li><strong>Which properties:</strong> public instance properties with a public getter and no indexer. <code>[Display(AutoGenerateField = false)]</code> or <code>[ScaffoldColumn(false)]</code> leaves one out. A scalar row type such as <code>string</code> or <code>int</code> generates nothing.</li>
+                <li><strong>Order:</strong> <code>Display.Order</code>, then declaration order.</li>
+                <li><strong>Header:</strong> <code>Display.Name</code>, else <code>[DisplayName]</code>, else the property name. <code>Display.GroupName</code> becomes the column's <code>HeaderBand</code>.</li>
+                <li><strong>Format:</strong> <code>DisplayFormat.DataFormatString</code> with the <code>{0:…}</code> wrapper removed, so <code>{0:C2}</code> becomes <code>C2</code>.</li>
+                <li><strong>Read-only:</strong> <code>[Key]</code> (which also sets <code>IsPrimaryKey</code>), <code>[Editable(false)]</code>, <code>[ReadOnly(true)]</code>, or no public setter.</li>
+                <li><strong>Type:</strong> <code>Nullable&lt;T&gt;</code> is unwrapped first. <code>[DataType(DataType.Password)]</code> gives Password; a DataType of Date, DateTime or Time gives Date; <code>bool</code> gives CheckBox; <code>DateTime</code>, <code>DateTimeOffset</code> and <code>DateOnly</code> give Date; the numeric types give Number; everything else is Text. Numbers and dates align right, check boxes centre, headers included.</li>
+                </ul>
+            </DocSection>
+            <DocSection Id="doc-run-time-column-methods" Title="Run-time column methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Run-time column methods" Rows="Vocab.Methods" />
+                <p>
+                Inside the window a <code>GridColumn</code> that initialises registers with the container and one that disposes unregisters, but the
+                grid's column-driven render is held. The flush render runs <code>SyncPendingColumnStructure</code> at the top of the pass: when every
+                field in the final order is registered it reorders the container, and whenever a column was added or removed it clears the
+                selected cells, the active cell and any batch edit (selected rows stay), drops the sort and filter state and the sort priority of
+                fields that are no longer present, and invalidates the display caches. A same-<code>Field</code> replacement (the <code>@@key</code>
+                dedup) only invalidates the caches and carries the user's drag-resized width forward. After the paint, auto widths are measured
+                again and the awaited task completes; an order that names a field no column registered is discarded at that point. Before the
+                first render <code>_grid</code> is null, so the page assigns the lists directly. <code>GridControl.Columns</code> returns the
+                effective set: the generated columns merged with the explicit ones when <code>AutoGenerateColumns</code> is on, otherwise the
+                container's list.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

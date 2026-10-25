@@ -85,18 +85,32 @@
             each column keyed by its <code>Field</code>, and the assignment sits inside <code>SuspendRedraw(fields)</code>, which pairs
             <code>BeginUpdate()</code> with <code>EndUpdateAsync(order)</code>.
         </p>
-        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn core parameters" Rows="Vocab.Column" />
-        <ApiTable Kind="ApiKind.Parameters" Title="GridColumnsBase parameters" Rows="Vocab.ColumnsBase" />
-        <ApiTable Kind="ApiKind.Properties" Title="GridColumnsBase properties" Rows="Vocab.ColumnsBaseProps" />
-        <ApiTable Kind="ApiKind.Methods" Title="GridControl column-set methods" Rows="Vocab.Methods" />
-        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, selection" Rows="Vocab.Events" />
-        <ApiTable Kind="ApiKind.Properties" Title="RowSelectEventArgs&lt;TValue&gt;" Rows="Vocab.Args" />
-        <p>
-            <code>SelectionChanged</code> carries the selected count as a plain <code>int</code>; <code>Count</code> and <code>Source</code>
-            arrive on <code>SelectionChangedDetailed</code>. The selection survives a swap because the grid keeps selected rows by item and
-            only the column list changes; the positional cell selection and active cell are cleared when a column is added or removed, and
-            nothing is cleared when an instance is merely replaced under the same <code>Field</code>.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-gridcolumn-core-parameters" Title="GridColumn core parameters" Count='@DocSection.Label(Vocab.Column.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="GridColumn core parameters" Rows="Vocab.Column" />
+            </DocSection>
+            <DocSection Id="doc-gridcolumnsbase-parameters" Title="GridColumnsBase parameters" Count='@DocSection.Label(Vocab.ColumnsBase.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridColumnsBase parameters" Rows="Vocab.ColumnsBase" />
+            </DocSection>
+            <DocSection Id="doc-gridcolumnsbase-properties" Title="GridColumnsBase properties" Count='@DocSection.Label(Vocab.ColumnsBaseProps.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridColumnsBase properties" Rows="Vocab.ColumnsBaseProps" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrol-column-set-methods" Title="GridControl column-set methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="GridControl column-set methods" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrolevents-selection" Title="GridControlEvents, selection" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, selection" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-rowselecteventargs-tvalue" Title="RowSelectEventArgs&lt;TValue&gt;" Count='@DocSection.Label(Vocab.Args.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="RowSelectEventArgs&lt;TValue&gt;" Rows="Vocab.Args" />
+                <p>
+                <code>SelectionChanged</code> carries the selected count as a plain <code>int</code>; <code>Count</code> and <code>Source</code>
+                arrive on <code>SelectionChangedDetailed</code>. The selection survives a swap because the grid keeps selected rows by item and
+                only the column list changes; the positional cell selection and active cell are cleared when a column is added or removed, and
+                nothing is cleared when an instance is merely replaced under the same <code>Field</code>.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

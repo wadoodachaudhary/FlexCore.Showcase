@@ -62,37 +62,55 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="DockManagerControl parameters" Rows="Vocab.Params" />
-        <ApiTable Kind="ApiKind.Events" Title="DockManagerControl events" Rows="Vocab.Events" />
-        <ApiTable Kind="ApiKind.Methods" Title="DockManagerControl methods" Rows="Vocab.Methods" />
-        <p>
-            <code>DockPanel(string Key, string Title, RenderFragment Content, bool Closable = true, bool Floatable = true)</code> is a record;
-            <code>DockPosition</code> is <code>Tab</code>, <code>Left</code>, <code>Right</code>, <code>Top</code> or <code>Bottom</code>.
-            <code>CssClass</code>, <code>Style</code>, <code>Id</code>, <code>Visible</code>, <code>Enabled</code> and <code>AdditionalAttributes</code>
-            come from <code>FlexControlBase</code>; <code>Enabled="false"</code> disables every button, the tab drag and the methods.
-        </p>
-        <p>What the user can do, and where it comes from:</p>
-        <ul>
-            <li>Each group shows its panes as tabs; a click makes a pane active. The active pane gets an action bar with Dock…, Float (when floatable and not already floating), Unpin or Pin, and Close (when closable).</li>
-            <li>Dragging a tab shows Tab, Left, Right, Top and Bottom targets in every group; dropping on one, or clicking it, docks there. Dock… offers the same five positions for every group, including an empty one, so no drag is needed.</li>
-            <li>Docking as Tab, or into an empty group, appends the pane and makes it active. The other four positions split the target 50/50: Left and Right side by side, Top and Bottom stacked, the moved pane first for Left and Top.</li>
-            <li>Floating opens the pane in a non-modal <code>DialogControl</code>, 520 by 360 px, each further floating pane offset 20 px from the one before; it can be dragged and resized while the manager is enabled, and its close icon and Escape close it only when the pane is closable.</li>
-            <li>Unpinned panes sit in a strip above the groups; a click opens the pane as a drawer over the left side, and Pin docks it into the first group.</li>
-            <li>Closed panes gather in a "Closed panes" menu; choosing one docks it into the first group as a tab.</li>
-            <li>After every change empty splits are collapsed and the whole layout is validated before <code>StateChanged</code> is raised.</li>
-        </ul>
-        <ApiTable Kind="ApiKind.Properties" Title="DockLayoutState" Rows="Vocab.State" />
-        <ApiTable Kind="ApiKind.Methods" Title="DockLayoutState methods" Rows="Vocab.StateMethods" />
-        <ApiTable Kind="ApiKind.Properties" Title="DockNode" Rows="Vocab.Node" />
-        <ApiTable Kind="ApiKind.Properties" Title="DockFloatingPane" Rows="Vocab.Floating" />
-        <p>
-            <code>Validate</code> refuses a layout in which a panel key is unknown, missing or placed twice; a node that has both panels and
-            children or a child count other than 0 or 2; a ratio outside 5 to 95; a tree deeper than 30 levels or with a repeated node; an
-            active panel that is not in its group; or a floating position that is not finite. <code>State</code> is validated against the current
-            panel keys when it arrives, and so is the JSON given to <code>RestoreLayoutAsync</code>. When the panel list changes without a new
-            <code>State</code>, removed panels leave the layout and added ones join the first group.
-        </p>
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+        <DocSections>
+            <DocSection Id="doc-dockmanagercontrol-parameters" Title="DockManagerControl parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="DockManagerControl parameters" Rows="Vocab.Params" />
+            </DocSection>
+            <DocSection Id="doc-dockmanagercontrol-events" Title="DockManagerControl events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="DockManagerControl events" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-dockmanagercontrol-methods" Title="DockManagerControl methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="DockManagerControl methods" Rows="Vocab.Methods" />
+                <p>
+                <code>DockPanel(string Key, string Title, RenderFragment Content, bool Closable = true, bool Floatable = true)</code> is a record;
+                <code>DockPosition</code> is <code>Tab</code>, <code>Left</code>, <code>Right</code>, <code>Top</code> or <code>Bottom</code>.
+                <code>CssClass</code>, <code>Style</code>, <code>Id</code>, <code>Visible</code>, <code>Enabled</code> and <code>AdditionalAttributes</code>
+                come from <code>FlexControlBase</code>; <code>Enabled="false"</code> disables every button, the tab drag and the methods.
+                </p>
+                <p>What the user can do, and where it comes from:</p>
+                <ul>
+                <li>Each group shows its panes as tabs; a click makes a pane active. The active pane gets an action bar with Dock…, Float (when floatable and not already floating), Unpin or Pin, and Close (when closable).</li>
+                <li>Dragging a tab shows Tab, Left, Right, Top and Bottom targets in every group; dropping on one, or clicking it, docks there. Dock… offers the same five positions for every group, including an empty one, so no drag is needed.</li>
+                <li>Docking as Tab, or into an empty group, appends the pane and makes it active. The other four positions split the target 50/50: Left and Right side by side, Top and Bottom stacked, the moved pane first for Left and Top.</li>
+                <li>Floating opens the pane in a non-modal <code>DialogControl</code>, 520 by 360 px, each further floating pane offset 20 px from the one before; it can be dragged and resized while the manager is enabled, and its close icon and Escape close it only when the pane is closable.</li>
+                <li>Unpinned panes sit in a strip above the groups; a click opens the pane as a drawer over the left side, and Pin docks it into the first group.</li>
+                <li>Closed panes gather in a "Closed panes" menu; choosing one docks it into the first group as a tab.</li>
+                <li>After every change empty splits are collapsed and the whole layout is validated before <code>StateChanged</code> is raised.</li>
+                </ul>
+            </DocSection>
+            <DocSection Id="doc-docklayoutstate" Title="DockLayoutState" Count='@DocSection.Label(Vocab.State.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="DockLayoutState" Rows="Vocab.State" />
+            </DocSection>
+            <DocSection Id="doc-docklayoutstate-methods" Title="DockLayoutState methods" Count='@DocSection.Label(Vocab.StateMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="DockLayoutState methods" Rows="Vocab.StateMethods" />
+            </DocSection>
+            <DocSection Id="doc-docknode" Title="DockNode" Count='@DocSection.Label(Vocab.Node.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="DockNode" Rows="Vocab.Node" />
+            </DocSection>
+            <DocSection Id="doc-dockfloatingpane" Title="DockFloatingPane" Count='@DocSection.Label(Vocab.Floating.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="DockFloatingPane" Rows="Vocab.Floating" />
+                <p>
+                <code>Validate</code> refuses a layout in which a panel key is unknown, missing or placed twice; a node that has both panels and
+                children or a child count other than 0 or 2; a ratio outside 5 to 95; a tree deeper than 30 levels or with a repeated node; an
+                active panel that is not in its group; or a floating position that is not finite. <code>State</code> is validated against the current
+                panel keys when it arrives, and so is the JSON given to <code>RestoreLayoutAsync</code>. When the panel list changes without a new
+                <code>State</code>, removed panels leave the layout and added ones join the first group.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Accessibility>

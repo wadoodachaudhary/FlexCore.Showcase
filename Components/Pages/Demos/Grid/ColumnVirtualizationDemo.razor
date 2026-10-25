@@ -80,15 +80,23 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters" Rows="Vocab.Grid" />
-        <ApiTable Kind="ApiKind.Properties" Title="Read-only status on GridControl" Rows="Vocab.Status" />
-        <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes and data attributes" Rows="Vocab.Dom" />
-        <p>
-            Whether a column can be windowed is decided by its own <code>Width</code>, <code>MinWidth</code> and <code>MaxWidth</code>: a pixel
-            value (<code>120px</code> or a bare <code>120</code>) counts, anything else does not; a column the user has resized keeps that width.
-            The scroll area reports its position and width through the grid's script, and the grid re-renders only when the set of mounted
-            columns changes.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-gridcontrol-parameters" Title="GridControl parameters" Count='@DocSection.Label(Vocab.Grid.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl parameters" Rows="Vocab.Grid" />
+            </DocSection>
+            <DocSection Id="doc-read-only-status-on-gridcontrol" Title="Read-only status on GridControl" Count='@DocSection.Label(Vocab.Status.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="Read-only status on GridControl" Rows="Vocab.Status" />
+            </DocSection>
+            <DocSection Id="doc-css-classes-and-data-attributes" Title="CSS classes and data attributes" Count='@DocSection.Label(Vocab.Dom.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes and data attributes" Rows="Vocab.Dom" />
+                <p>
+                Whether a column can be windowed is decided by its own <code>Width</code>, <code>MinWidth</code> and <code>MaxWidth</code>: a pixel
+                value (<code>120px</code> or a bare <code>120</code>) counts, anything else does not; a column the user has resized keeps that width.
+                The scroll area reports its position and width through the grid's script, and the grid re-renders only when the set of mounted
+                columns changes.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>

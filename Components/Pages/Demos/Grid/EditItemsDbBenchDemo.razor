@@ -70,33 +70,57 @@
     </Examples>
 
     <Vocabulary>
-        <ApiTable Kind="ApiKind.Parameters" Title="GridControl editing parameters" Rows="Vocab.Grid" />
-        <ApiTable Kind="ApiKind.Properties" Title="EditSettings" Rows="Vocab.Settings" />
-        <ApiTable Kind="ApiKind.Values" Title="EditMode" Rows="Vocab.Modes" />
-        <ApiTable Kind="ApiKind.Values" Title="GridBatchEditBehavior" Rows="Vocab.Behaviors" />
-        <p>
-            The <code>GridColumn</code> parameters that bear on editing follow; the column's other parameters are on the
-            <a href="demo/grid/column-swap">Column sets</a> and <a href="demo/grid/dynamic-columns">Dynamic columns</a> pages.
-        </p>
-        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn editing parameters" Rows="Vocab.Column" />
-        <ApiTable Kind="ApiKind.Parameters" Title="GridColumn dropdown, picker and date parameters" Rows="Vocab.ColumnEditors" />
-        <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, editing" Rows="Vocab.Events" />
-        <ApiTable Kind="ApiKind.Properties" Title="CellEditArgs&lt;TValue&gt;" Rows="Vocab.EditArgs" />
-        <ApiTable Kind="ApiKind.Properties" Title="CellSaveArgs&lt;TValue&gt;" Rows="Vocab.SaveArgs" />
-        <ApiTable Kind="ApiKind.Properties" Title="RowEditEventArgs&lt;TValue&gt;" Rows="Vocab.RowArgs" />
-        <ApiTable Kind="ApiKind.Methods" Title="Editing methods" Rows="Vocab.Methods" />
-        <p>
-            The other payloads: <code>CellEditButtonArgs&lt;TValue&gt;</code> carries <code>Data</code>, <code>ColumnName</code> and the
-            <code>GridColumn</code> itself as <code>Column</code>; <code>CellValueTruncatedArgs&lt;TValue&gt;</code> carries <code>Data</code>,
-            <code>ColumnName</code>, <code>HeaderText</code>, <code>PastedLength</code> and <code>MaxLength</code>;
-            <code>TypeAheadCommitArgs&lt;TValue&gt;</code> carries <code>SelectedItems</code>, <code>ColumnName</code> and the typed
-            <code>Value</code>. Beyond <code>EndEditAsync</code> there is no public commit or cancel for a batch cell: Escape abandons the
-            open editor, and Enter, Tab or a click elsewhere commits it. A commit converts the text to the property's type, runs
-            <code>ValidationSettings</code> (data annotations and a custom validator) and on failure keeps the editor open with the
-            message; only then is the value written and <code>OnCellSave</code> raised. The toolbar items named above come from the
-            grid's <code>Toolbar</code> parameter, a list of names with Add, Edit and Delete among them; a column's <code>Commands</code>
-            give per-row edit, delete, save and cancel buttons for the row editor.
-        </p>
+        <DocSections>
+            <DocSection Id="doc-gridcontrol-editing-parameters" Title="GridControl editing parameters" Count='@DocSection.Label(Vocab.Grid.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl editing parameters" Rows="Vocab.Grid" />
+            </DocSection>
+            <DocSection Id="doc-editsettings" Title="EditSettings" Count='@DocSection.Label(Vocab.Settings.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="EditSettings" Rows="Vocab.Settings" />
+            </DocSection>
+            <DocSection Id="doc-editmode" Title="EditMode" Count='@DocSection.Label(Vocab.Modes.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="EditMode" Rows="Vocab.Modes" />
+            </DocSection>
+            <DocSection Id="doc-gridbatcheditbehavior" Title="GridBatchEditBehavior" Count='@DocSection.Label(Vocab.Behaviors.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="GridBatchEditBehavior" Rows="Vocab.Behaviors" />
+                <p>
+                The <code>GridColumn</code> parameters that bear on editing follow; the column's other parameters are on the
+                <a href="demo/grid/column-swap">Column sets</a> and <a href="demo/grid/dynamic-columns">Dynamic columns</a> pages.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-gridcolumn-editing-parameters" Title="GridColumn editing parameters" Count='@DocSection.Label(Vocab.Column.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridColumn editing parameters" Rows="Vocab.Column" />
+            </DocSection>
+            <DocSection Id="doc-gridcolumn-dropdown-picker-and-date-para" Title="GridColumn dropdown, picker and date parameters" Count='@DocSection.Label(Vocab.ColumnEditors.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridColumn dropdown, picker and date parameters" Rows="Vocab.ColumnEditors" />
+            </DocSection>
+            <DocSection Id="doc-gridcontrolevents-editing" Title="GridControlEvents, editing" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="GridControlEvents, editing" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-celleditargs-tvalue" Title="CellEditArgs&lt;TValue&gt;" Count='@DocSection.Label(Vocab.EditArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="CellEditArgs&lt;TValue&gt;" Rows="Vocab.EditArgs" />
+            </DocSection>
+            <DocSection Id="doc-cellsaveargs-tvalue" Title="CellSaveArgs&lt;TValue&gt;" Count='@DocSection.Label(Vocab.SaveArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="CellSaveArgs&lt;TValue&gt;" Rows="Vocab.SaveArgs" />
+            </DocSection>
+            <DocSection Id="doc-rowediteventargs-tvalue" Title="RowEditEventArgs&lt;TValue&gt;" Count='@DocSection.Label(Vocab.RowArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="RowEditEventArgs&lt;TValue&gt;" Rows="Vocab.RowArgs" />
+            </DocSection>
+            <DocSection Id="doc-editing-methods" Title="Editing methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Editing methods" Rows="Vocab.Methods" />
+                <p>
+                The other payloads: <code>CellEditButtonArgs&lt;TValue&gt;</code> carries <code>Data</code>, <code>ColumnName</code> and the
+                <code>GridColumn</code> itself as <code>Column</code>; <code>CellValueTruncatedArgs&lt;TValue&gt;</code> carries <code>Data</code>,
+                <code>ColumnName</code>, <code>HeaderText</code>, <code>PastedLength</code> and <code>MaxLength</code>;
+                <code>TypeAheadCommitArgs&lt;TValue&gt;</code> carries <code>SelectedItems</code>, <code>ColumnName</code> and the typed
+                <code>Value</code>. Beyond <code>EndEditAsync</code> there is no public commit or cancel for a batch cell: Escape abandons the
+                open editor, and Enter, Tab or a click elsewhere commits it. A commit converts the text to the property's type, runs
+                <code>ValidationSettings</code> (data annotations and a custom validator) and on failure keeps the editor open with the
+                message; only then is the value written and <code>OnCellSave</code> raised. The toolbar items named above come from the
+                grid's <code>Toolbar</code> parameter, a list of names with Add, Edit and Delete among them; a column's <code>Commands</code>
+                give per-row edit, delete, save and cancel buttons for the row editor.
+                </p>
+            </DocSection>
+        </DocSections>
     </Vocabulary>
 
     <Related>
