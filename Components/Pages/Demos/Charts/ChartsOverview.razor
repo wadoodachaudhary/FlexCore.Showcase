@@ -1,6 +1,5 @@
 @page "/demo/charts"
 @using Fx.ControlKit.Charts
-@using FlexCore.Showcase.Services
 @using FlexCore.Showcase.Components.Shared
 @* 2026-10-12: wrapped in FeatureDemoLayout as one example (the tabbed gallery, unchanged). "No JavaScript
    dependencies" reworded per the claims rule. ChartControl parameter table pending (SC-264).
@@ -21,7 +20,11 @@
    ChartSvg.cs (rows in ChartsVocab.*.cs, checked with scratchpad/vocabcheck.py; read sites, not just declarations).
    2026-10-24: the datasets became small stories (ice cream flavours, a bakery's week, two seedlings growing, a favourite-colour
    survey, a library front desk, an office coffee machine); every title names its subject, series and categories are real words,
-   and the 2026-10-23 geometry (label cuts, tile sizes, every YAxis Max) is unchanged. The data is made up. *@
+   and the 2026-10-23 geometry (label cuts, tile sizes, every YAxis Max) is unchanged. The data is made up.
+   2026-10-25 (Baaria): charts that have a page of their own left the gallery: the Sunburst panel (Part-to-Whole), the three
+   ChartType.Gauge tiles (KPI & Gauge, now "KPI cards") and the Project tab (ChartType.Gantt). The Overview and Related list point at
+   those pages. ChartType.Gauge and ChartType.Gantt are now drawn on no page (the gauge and Gantt pages use the dedicated controls);
+   their ChartType rows say so. TabSlugs follow the tabs: kpi-gauge became kpi, project went. *@
 
 <PageTitle>Charts — FlexCore Showcase</PageTitle>
 
@@ -32,9 +35,10 @@
         <p>
             <code>ChartControl</code> takes a <code>ChartType</code> and a list of <code>ChartSeries</code> and draws the result as SVG;
             there is no npm package or third-party script behind it. The gallery groups the types by the question they answer:
-            comparison, trend, part-to-whole, distribution, correlation, multivariate, single values, statistics, project, heatmap and
-            sparklines. Candlestick, OHLC, bullet, range, Sankey and the gauge family are on <a href="demo/advanced-charts">Financial &amp; gauges</a>;
-            the drill-down sunburst has <a href="demo/charts/sunburst">its own page</a>.
+            comparison, trend, part-to-whole, distribution, correlation, multivariate, KPI cards, statistics, heatmap and sparklines.
+            Charts with a page of their own are not repeated here: the drill-down <a href="demo/charts/sunburst">sunburst</a>, the
+            <a href="demo/gantt">Gantt chart</a>, the <a href="demo/gauges">gauges and stock chart</a> and the <a href="demo/charts/map-story">map story</a>;
+            candlestick, OHLC, bullet, range, Sankey and the radial and linear gauge types are on <a href="demo/advanced-charts">Financial &amp; gauges</a>.
         </p>
     </Overview>
 
@@ -97,7 +101,7 @@
     </TabItem>
 
     <TabItem HeaderText="Part-to-Whole">
-        <h2>Pie, Donut, Funnel &amp; Sunburst</h2>
+        <h2>Pie, Donut &amp; Funnel</h2>
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.86">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
@@ -112,13 +116,6 @@
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="2" SizeY="1">
                     <ChartControl Type="ChartType.Funnel" Title="Sales funnel, 1,000 visits to 180 won" Height="350px"
                                   Series="@(new List<ChartSeries> { _funnelSeries })" />
-                </DashboardLayoutPanel>
-                <DashboardLayoutPanel Row="2" Column="0" SizeX="2" SizeY="2">
-                    <div class="d-flex justify-content-between align-items-center mb-2 px-2 pt-2">
-                        <h4 class="mb-0" style="font-size: 1.1rem; font-weight: 700;">COVID-19 Radial Sunburst Chart</h4>
-                        <a href="demo/charts/sunburst" class="btn btn-sm btn-primary">Open Full Interactive COVID-19 Screen ↗</a>
-                    </div>
-                    <SunburstChartControl RootNode="@_sunburstDemoNode" Height="420px" EnableDrilldown="true" ShowBreadcrumb="true" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
@@ -164,9 +161,9 @@
         </div>
     </TabItem>
 
-    <TabItem HeaderText="KPI & Gauge">
+    <TabItem HeaderText="KPI cards">
         <h2>Single Value Indicators</h2>
-        @* Cards span 2 rows and gauges 3: with CellAspectRatio 0.37 a card tile is about 220px tall and a gauge tile about 330px. *@
+        @* Cards span 2 rows: with CellAspectRatio 0.37 a card tile is about 220px tall. *@
         <DashboardLayoutControl Columns="3" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.37">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="2">
@@ -180,18 +177,6 @@
                 <DashboardLayoutPanel Row="0" Column="2" SizeX="1" SizeY="2">
                     <ChartControl Type="ChartType.KpiCard" Title="Overdue"
                                   KpiValue="3.1%" KpiLabel="Loans overdue" KpiTrend="-0.4%" Height="180px" />
-                </DashboardLayoutPanel>
-                <DashboardLayoutPanel Row="2" Column="0" SizeX="1" SizeY="3">
-                    <ChartControl Type="ChartType.Gauge" Title="Shelves full, %"
-                                  GaugeValue="72" GaugeMin="0" GaugeMax="100" Height="285px" />
-                </DashboardLayoutPanel>
-                <DashboardLayoutPanel Row="2" Column="1" SizeX="1" SizeY="3">
-                    <ChartControl Type="ChartType.Gauge" Title="Study rooms booked, %"
-                                  GaugeValue="45" GaugeMin="0" GaugeMax="100" Height="285px" />
-                </DashboardLayoutPanel>
-                <DashboardLayoutPanel Row="2" Column="2" SizeX="1" SizeY="3">
-                    <ChartControl Type="ChartType.Gauge" Title="Wi-Fi seats taken, %"
-                                  GaugeValue="88" GaugeMin="0" GaugeMax="100" Height="285px" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
@@ -211,14 +196,6 @@
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
-    </TabItem>
-
-    <TabItem HeaderText="Project">
-        <h2>Gantt Chart</h2>
-        <div class="demo-frame">
-            <ChartControl Type="ChartType.Gantt" Title="Website rebuild, weeks 0 to 12" Height="400px"
-                          Series="@_ganttSeries" />
-        </div>
     </TabItem>
 
     <TabItem HeaderText="Heatmap">
@@ -306,6 +283,8 @@
             <li><a href="demo/advanced-charts">Financial &amp; gauges</a>: candlestick, OHLC, bullet, range, Sankey, radial and linear gauges.</li>
             <li><a href="demo/charts/sunburst">Sunburst</a>: drill-down hierarchy on a real dataset.</li>
             <li><a href="demo/charts/map-story">Map story</a>: drill-down unemployment choropleth, world to province.</li>
+            <li><a href="demo/gantt">Gantt chart</a>: <code>GanttControl</code>, a project schedule with dependencies.</li>
+            <li><a href="demo/gauges">Gauges &amp; stock chart</a>: the four gauge controls and the stock chart.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
@@ -315,7 +294,7 @@
     [SupplyParameterFromQuery(Name = "tab")] public string? Tab { get; set; }
     private int _tab;
     private static readonly string[] TabSlugs =
-        ["comparison", "trend", "part-to-whole", "distribution", "correlation", "multivariate", "kpi-gauge", "statistical", "project", "heatmap", "sparkline"];
+        ["comparison", "trend", "part-to-whole", "distribution", "correlation", "multivariate", "kpi", "statistical", "heatmap", "sparkline"];
 
     protected override void OnParametersSet()
     {
@@ -418,21 +397,6 @@
             new("UI Bugs", 45), new("API Errors", 30), new("Perf", 15), new("Security", 8), new("Other", 2) } }
     };
 
-    List<ChartSeries> _ganttSeries = new()
-    {
-        // weeks 0-12; eight rows fill the plot because the renderer caps a row at 30 of the 250 plot units
-        new() { Name = "Tasks", DataPoints = new() {
-            new("Discovery", 0) { Value2 = 2, Category = "Phase 1" },
-            new("Design", 1) { Value2 = 3, Category = "Phase 1" },
-            new("Database", 2) { Value2 = 5, Category = "Phase 2" },
-            new("Backend", 3) { Value2 = 7, Category = "Phase 2" },
-            new("Frontend", 4) { Value2 = 8, Category = "Phase 2" },
-            new("Integration", 7) { Value2 = 9, Category = "Phase 3" },
-            new("Testing", 8) { Value2 = 11, Category = "Phase 3" },
-            new("Launch", 11) { Value2 = 12, Category = "Phase 3" }
-        }}
-    };
-
     List<ChartSeries> _heatmapSeries = new()
     {
         new() { Name = "Mon", DataPoints = new() { new("9am", 2), new("10am", 5), new("11am", 8), new("12pm", 4), new("1pm", 3), new("2pm", 7), new("3pm", 9), new("4pm", 6) } },
@@ -442,7 +406,6 @@
         new() { Name = "Fri", DataPoints = new() { new("9am", 6), new("10am", 4), new("11am", 5), new("12pm", 3), new("1pm", 2), new("2pm", 4), new("3pm", 3), new("4pm", 2) } }
     };
 
-    SunburstNode _sunburstDemoNode = CovidDataService.GetCovidSunburstTree();
 
     // Code tabs are verbatim
     private static class Code
@@ -502,7 +465,7 @@
     </TabItem>
 
     <TabItem HeaderText=""Part-to-Whole"">
-        <h2>Pie, Donut, Funnel &amp; Sunburst</h2>
+        <h2>Pie, Donut &amp; Funnel</h2>
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.86"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
@@ -517,13 +480,6 @@
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""2"" SizeY=""1"">
                     <ChartControl Type=""ChartType.Funnel"" Title=""Sales funnel, 1,000 visits to 180 won"" Height=""350px""
                                   Series=""@(new List<ChartSeries> { _funnelSeries })"" />
-                </DashboardLayoutPanel>
-                <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""2"" SizeY=""2"">
-                    <div class=""d-flex justify-content-between align-items-center mb-2 px-2 pt-2"">
-                        <h4 class=""mb-0"" style=""font-size: 1.1rem; font-weight: 700;"">COVID-19 Radial Sunburst Chart</h4>
-                        <a href=""demo/charts/sunburst"" class=""btn btn-sm btn-primary"">Open Full Interactive COVID-19 Screen ↗</a>
-                    </div>
-                    <SunburstChartControl RootNode=""@_sunburstDemoNode"" Height=""420px"" EnableDrilldown=""true"" ShowBreadcrumb=""true"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
@@ -569,9 +525,9 @@
         </div>
     </TabItem>
 
-    <TabItem HeaderText=""KPI & Gauge"">
+    <TabItem HeaderText=""KPI cards"">
         <h2>Single Value Indicators</h2>
-        @* Cards span 2 rows and gauges 3: with CellAspectRatio 0.37 a card tile is about 220px tall and a gauge tile about 330px. *@
+        @* Cards span 2 rows: with CellAspectRatio 0.37 a card tile is about 220px tall. *@
         <DashboardLayoutControl Columns=""3"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.37"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""2"">
@@ -585,18 +541,6 @@
                 <DashboardLayoutPanel Row=""0"" Column=""2"" SizeX=""1"" SizeY=""2"">
                     <ChartControl Type=""ChartType.KpiCard"" Title=""Overdue""
                                   KpiValue=""3.1%"" KpiLabel=""Loans overdue"" KpiTrend=""-0.4%"" Height=""180px"" />
-                </DashboardLayoutPanel>
-                <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""1"" SizeY=""3"">
-                    <ChartControl Type=""ChartType.Gauge"" Title=""Shelves full, %""
-                                  GaugeValue=""72"" GaugeMin=""0"" GaugeMax=""100"" Height=""285px"" />
-                </DashboardLayoutPanel>
-                <DashboardLayoutPanel Row=""2"" Column=""1"" SizeX=""1"" SizeY=""3"">
-                    <ChartControl Type=""ChartType.Gauge"" Title=""Study rooms booked, %""
-                                  GaugeValue=""45"" GaugeMin=""0"" GaugeMax=""100"" Height=""285px"" />
-                </DashboardLayoutPanel>
-                <DashboardLayoutPanel Row=""2"" Column=""2"" SizeX=""1"" SizeY=""3"">
-                    <ChartControl Type=""ChartType.Gauge"" Title=""Wi-Fi seats taken, %""
-                                  GaugeValue=""88"" GaugeMin=""0"" GaugeMax=""100"" Height=""285px"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
@@ -616,14 +560,6 @@
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
-    </TabItem>
-
-    <TabItem HeaderText=""Project"">
-        <h2>Gantt Chart</h2>
-        <div class=""demo-frame"">
-            <ChartControl Type=""ChartType.Gantt"" Title=""Website rebuild, weeks 0 to 12"" Height=""400px""
-                          Series=""@_ganttSeries"" />
-        </div>
     </TabItem>
 
     <TabItem HeaderText=""Heatmap"">
@@ -653,17 +589,16 @@
 </TabControl>";
         public const string GalleryCs = @"/// <summary>Tab named in the address, e.g. demo/charts?tab=sparkline; read when the page loads, never written back.</summary>
 [SupplyParameterFromQuery(Name = ""tab"")] public string? Tab { get; set; }
-
 private int _tab;
-
 private static readonly string[] TabSlugs =
-    [""comparison"", ""trend"", ""part-to-whole"", ""distribution"", ""correlation"", ""multivariate"", ""kpi-gauge"", ""statistical"", ""project"", ""heatmap"", ""sparkline""];
+    [""comparison"", ""trend"", ""part-to-whole"", ""distribution"", ""correlation"", ""multivariate"", ""kpi"", ""statistical"", ""heatmap"", ""sparkline""];
 
 protected override void OnParametersSet()
 {
     var i = Array.IndexOf(TabSlugs, Tab?.Trim().ToLowerInvariant());
     if (i >= 0) _tab = i;
 }
+
 
 // a bakery's week: Grouped compares the two lines per day, Stacked adds them (Saturday totals 680), StackedBar100 shows the mix
 List<ChartSeries> _groupedBarSeries = new()
@@ -759,21 +694,6 @@ List<ChartSeries> _paretoSeries = new()
         new(""UI Bugs"", 45), new(""API Errors"", 30), new(""Perf"", 15), new(""Security"", 8), new(""Other"", 2) } }
 };
 
-List<ChartSeries> _ganttSeries = new()
-{
-    // weeks 0-12; eight rows fill the plot because the renderer caps a row at 30 of the 250 plot units
-    new() { Name = ""Tasks"", DataPoints = new() {
-        new(""Discovery"", 0) { Value2 = 2, Category = ""Phase 1"" },
-        new(""Design"", 1) { Value2 = 3, Category = ""Phase 1"" },
-        new(""Database"", 2) { Value2 = 5, Category = ""Phase 2"" },
-        new(""Backend"", 3) { Value2 = 7, Category = ""Phase 2"" },
-        new(""Frontend"", 4) { Value2 = 8, Category = ""Phase 2"" },
-        new(""Integration"", 7) { Value2 = 9, Category = ""Phase 3"" },
-        new(""Testing"", 8) { Value2 = 11, Category = ""Phase 3"" },
-        new(""Launch"", 11) { Value2 = 12, Category = ""Phase 3"" }
-    }}
-};
-
 List<ChartSeries> _heatmapSeries = new()
 {
     new() { Name = ""Mon"", DataPoints = new() { new(""9am"", 2), new(""10am"", 5), new(""11am"", 8), new(""12pm"", 4), new(""1pm"", 3), new(""2pm"", 7), new(""3pm"", 9), new(""4pm"", 6) } },
@@ -781,8 +701,6 @@ List<ChartSeries> _heatmapSeries = new()
     new() { Name = ""Wed"", DataPoints = new() { new(""9am"", 4), new(""10am"", 7), new(""11am"", 6), new(""12pm"", 8), new(""1pm"", 5), new(""2pm"", 9), new(""3pm"", 8), new(""4pm"", 7) } },
     new() { Name = ""Thu"", DataPoints = new() { new(""9am"", 5), new(""10am"", 8), new(""11am"", 7), new(""12pm"", 6), new(""1pm"", 7), new(""2pm"", 6), new(""3pm"", 5), new(""4pm"", 4) } },
     new() { Name = ""Fri"", DataPoints = new() { new(""9am"", 6), new(""10am"", 4), new(""11am"", 5), new(""12pm"", 3), new(""1pm"", 2), new(""2pm"", 4), new(""3pm"", 3), new(""4pm"", 2) } }
-};
-
-SunburstNode _sunburstDemoNode = CovidDataService.GetCovidSunburstTree();";
+};";
     }
 }

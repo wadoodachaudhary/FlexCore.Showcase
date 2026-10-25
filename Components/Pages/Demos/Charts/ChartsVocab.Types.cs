@@ -125,7 +125,7 @@ public static partial class ChartsVocab
             "A 270-degree arc from the lower left with a needle, or a full ring without a needle when <code>GaugeCircular</code> is set, drawn by <code>GaugeVisualControl</code>. " +
             "Reads <code>GaugeValue</code>, falling back to the first point's <code>Value</code> of the first series and then 0; <code>GaugeMin</code>/<code>GaugeMax</code> default 0 and 100; <code>GaugeRanges</code> adds coloured bands and <code>GaugePointers</code> extra needles; the value colour is the series colour or the palette. " +
             "300x300 viewBox, <code>Height</code> default 260px, tick labels from <code>GaugeTickCount</code> (default 5, allowed 1 to 100) in <code>GaugeLabelFormat</code>, the centre value in <code>ValueFormat</code> (default N2). " +
-            "Throws <code>ArgumentException</code> when <code>Max</code> is not above <code>Min</code> or a value is not finite; not gated by the <code>No data</code> message."),
+            "Throws <code>ArgumentException</code> when <code>Max</code> is not above <code>Min</code> or a value is not finite; not gated by the <code>No data</code> message. Not in the gallery: the gauges have <a href=\"demo/gauges\">their own page</a>, built on the gauge controls."),
         new("KpiCard",
             "An HTML card rather than SVG: <code>KpiValue</code> (or <code>--</code>) in large type, <code>KpiLabel</code> beneath, and <code>KpiTrend</code> with an up arrow when it starts with + or contains the word up, a down arrow when it starts with - or contains down. " +
             "Reads no series data at all and ignores <code>Height</code>. Not gated by the <code>No data</code> message."),
@@ -181,7 +181,7 @@ public static partial class ChartsVocab
         new("Gantt",
             "A horizontal bar per task on a numeric timeline with five vertical ticks. " +
             "Reads the first series: <code>Label</code> as the row label (cut at 12 characters), <code>Value</code> as the start, <code>Value2</code> as the end (default start + 1), colour per point from <code>Color</code> or the palette; <code>DateValue</code> and <code>Category</code> are not read, so dates must be supplied as numbers. " +
-            "600x300 viewBox; rows are capped at 30 units tall, so a few tasks leave the lower part of the plot empty, and bars are at least 2 units wide."),
+            "600x300 viewBox; rows are capped at 30 units tall, so a few tasks leave the lower part of the plot empty, and bars are at least 2 units wide. Not in the gallery: the <a href=\"demo/gantt\">Gantt chart page</a> uses <code>GanttControl</code>."),
 
         // Statistical
         new("Waterfall",
