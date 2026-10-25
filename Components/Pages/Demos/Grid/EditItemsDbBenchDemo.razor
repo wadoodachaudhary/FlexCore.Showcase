@@ -1,4 +1,3 @@
-@page "/demo/grid/edit-items-db"
 @page "/demo/grid/batch-editing"
 @rendermode InteractiveServer
 @using Fx.ControlKit
@@ -21,11 +20,13 @@
    Members the library declares but never reads or raises (CellSaved, OnActionComplete, PreferCellEditOnDoubleClick, ValidationRules,
    DefaultValue) are listed as such. The CellEditButtonArgs, CellValueTruncatedArgs and TypeAheadCommitArgs payloads are described in
    the closing paragraph rather than in tables of their own, being off this page's topic. *@
+@* 2026-10-25 (Baaria, SC-344): the example runs on the operator's rate card (Data/BenchModels.cs RateCardItem, BenchDataStore.RateCard)
+   instead of the estimating items copied from HomeFront. *@
 
 <PageTitle>Batch editing — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Batch editing" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Double-click a cell, type, press Enter: cell-by-cell editing on a 5,000-row list, written straight to the bound objects."
+                   Tagline="Double-click a cell, type, press Enter: cell-by-cell editing on a 5,000-line rate card, written straight to the bound objects."
                    SourcePath="Grid/EditSettings.cs;Grid/GridEnums.cs;Grid/GridColumn.cs;Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/GridControl.razor.cs;Grid/GridControl.razor;Grid/GridControl.DeleteConfirmation.cs;Grid/GridControl.RowEditing.cs;Grid/GridControl.Validation.cs">
     <Overview>
         <p>
@@ -37,11 +38,11 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="edit" Title="Edit cells in place" RazorCode="@Code.Edit" CSharpCode="@Code.EditCs">
-            <Description><p>Five thousand generated rows held in memory. Item Code, Phase and Phase Title are read-only; double-click any other cell, or select it and press Enter, to edit it. Enter commits and stays on the cell, Tab commits and moves the selection to the next editable cell, Escape abandons the edit. The line under the grid counts saves and names the last one.</p></Description>
+        <DemoExample Id="edit" Title="Edit rate card cells in place" RazorCode="@Code.Edit" CSharpCode="@Code.EditCs">
+            <Description><p>Five thousand generated rate card lines held in memory; each line is a service from one supplier at one destination, with the net rate the operator pays and the margin it adds. Code, Region and Destination are read-only; double-click any other cell, or select it and press Enter, to edit it. Enter commits and stays on the cell, Tab commits and moves the selection to the next editable cell, Escape abandons the edit. The line under the grid counts saves and names the last one.</p></Description>
             <Demo>
-                <GridControl TValue="EstimatingItemRecord"
-                             DataSource="@_items"
+                <GridControl TValue="RateCardItem"
+                             DataSource="@_lines"
                              ShowRowCountInFooter="true"
                              AllowSelection="true"
                              AllowSorting="true"
@@ -53,15 +54,15 @@
                              EventsRef="@_events"
                              CssClass="fx-grid-compact">
                     <GridColumnsBase>
-                        <GridColumn Field="@nameof(EstimatingItemRecord.Item)" HeaderText="Item Code" Width="105px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.ItemDesc)" HeaderText="Description" Width="260px" AllowEditing="true" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.Phase)" HeaderText="Phase" Width="80px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.PhaseDesc)" HeaderText="Phase Title" Width="180px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.CostCategory)" HeaderText="Cost Category" Width="130px" AllowEditing="true" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.OrderUOM)" HeaderText="UOM" Width="75px" TextAlign="TextAlign.Center" AllowEditing="true" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.Price)" HeaderText="Unit Price" Width="105px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" Format="$#,##0.00" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.WastePercent)" HeaderText="Waste %" Width="85px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.POIndex)" HeaderText="PO Index" Width="100px" AllowEditing="true" />
+                        <GridColumn Field="@nameof(RateCardItem.Code)" HeaderText="Code" Width="95px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(RateCardItem.Description)" HeaderText="Description" Width="230px" AllowEditing="true" />
+                        <GridColumn Field="@nameof(RateCardItem.Region)" HeaderText="Region" Width="130px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(RateCardItem.Destination)" HeaderText="Destination" Width="115px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(RateCardItem.Category)" HeaderText="Category" Width="125px" AllowEditing="true" />
+                        <GridColumn Field="@nameof(RateCardItem.Unit)" HeaderText="Unit" Width="75px" TextAlign="TextAlign.Center" AllowEditing="true" />
+                        <GridColumn Field="@nameof(RateCardItem.Rate)" HeaderText="Rate" Width="100px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" Format="C2" />
+                        <GridColumn Field="@nameof(RateCardItem.MarginPercent)" HeaderText="Margin %" Width="90px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" SelectAllOnEdit="true" />
+                        <GridColumn Field="@nameof(RateCardItem.Supplier)" HeaderText="Supplier" Width="200px" AllowEditing="true" />
                     </GridColumnsBase>
                 </GridControl>
                 <p class="result">@_saveCount @(_saveCount == 1 ? "cell" : "cells") saved@(_last is null ? "" : $"; last: {_last}")</p>
@@ -133,7 +134,7 @@
 </FeatureDemoLayout>
 
 @code {
-    private List<EstimatingItemRecord> _items = [];
+    private List<RateCardItem> _lines = [];
     private int _saveCount;
     private string? _last;
 
@@ -143,25 +144,25 @@
         Mode = EditMode.Batch
     };
 
-    private readonly GridControlEvents<EstimatingItemRecord> _events = new();
+    private readonly GridControlEvents<RateCardItem> _events = new();
 
     protected override void OnInitialized()
     {
-        _items = BenchData.EstimatingItems.ToList();
+        _lines = BenchData.RateCard.ToList();
 
-        _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<EstimatingItemRecord>>(this, args =>
+        _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<RateCardItem>>(this, args =>
         {
             _saveCount++;
-            _last = $"{args.ColumnName} = {args.Value} on {args.Data.Item}";
+            _last = $"{args.ColumnName} = {args.Value} on {args.Data.Code}";
         });
     }
 
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed); the C# tab also carries
-    // EstimatingItemRecord from Data/BenchModels.cs.
+    // RateCardItem from Data/BenchModels.cs.
     private static class Code
     {
-        public const string Edit = @"<GridControl TValue=""EstimatingItemRecord""
-             DataSource=""@_items""
+        public const string Edit = @"<GridControl TValue=""RateCardItem""
+             DataSource=""@_lines""
              ShowRowCountInFooter=""true""
              AllowSelection=""true""
              AllowSorting=""true""
@@ -173,19 +174,19 @@
              EventsRef=""@_events""
              CssClass=""fx-grid-compact"">
     <GridColumnsBase>
-        <GridColumn Field=""@nameof(EstimatingItemRecord.Item)"" HeaderText=""Item Code"" Width=""105px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.ItemDesc)"" HeaderText=""Description"" Width=""260px"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.Phase)"" HeaderText=""Phase"" Width=""80px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.PhaseDesc)"" HeaderText=""Phase Title"" Width=""180px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.CostCategory)"" HeaderText=""Cost Category"" Width=""130px"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.OrderUOM)"" HeaderText=""UOM"" Width=""75px"" TextAlign=""TextAlign.Center"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.Price)"" HeaderText=""Unit Price"" Width=""105px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" SelectAllOnEdit=""true"" Format=""$#,##0.00"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.WastePercent)"" HeaderText=""Waste %"" Width=""85px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" SelectAllOnEdit=""true"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.POIndex)"" HeaderText=""PO Index"" Width=""100px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(RateCardItem.Code)"" HeaderText=""Code"" Width=""95px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(RateCardItem.Description)"" HeaderText=""Description"" Width=""230px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(RateCardItem.Region)"" HeaderText=""Region"" Width=""130px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(RateCardItem.Destination)"" HeaderText=""Destination"" Width=""115px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(RateCardItem.Category)"" HeaderText=""Category"" Width=""125px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(RateCardItem.Unit)"" HeaderText=""Unit"" Width=""75px"" TextAlign=""TextAlign.Center"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(RateCardItem.Rate)"" HeaderText=""Rate"" Width=""100px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" SelectAllOnEdit=""true"" Format=""C2"" />
+        <GridColumn Field=""@nameof(RateCardItem.MarginPercent)"" HeaderText=""Margin %"" Width=""90px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" SelectAllOnEdit=""true"" />
+        <GridColumn Field=""@nameof(RateCardItem.Supplier)"" HeaderText=""Supplier"" Width=""200px"" AllowEditing=""true"" />
     </GridColumnsBase>
 </GridControl>
 <p class=""result"">@_saveCount @(_saveCount == 1 ? ""cell"" : ""cells"") saved@(_last is null ? """" : $""; last: {_last}"")</p>";
-        public const string EditCs = @"private List<EstimatingItemRecord> _items = [];
+        public const string EditCs = @"private List<RateCardItem> _lines = [];
 
 private int _saveCount;
 
@@ -197,45 +198,34 @@ private readonly EditSettings _editSettings = new()
     Mode = EditMode.Batch
 };
 
-private readonly GridControlEvents<EstimatingItemRecord> _events = new();
+private readonly GridControlEvents<RateCardItem> _events = new();
 
 protected override void OnInitialized()
 {
-    _items = BenchData.EstimatingItems.ToList();
+    _lines = BenchData.RateCard.ToList();
 
-    _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<EstimatingItemRecord>>(this, args =>
+    _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<RateCardItem>>(this, args =>
     {
         _saveCount++;
-        _last = $""{args.ColumnName} = {args.Value} on {args.Data.Item}"";
+        _last = $""{args.ColumnName} = {args.Value} on {args.Data.Code}"";
     });
 }
 
 // Data/BenchModels.cs
-public sealed class EstimatingItemRecord
+public sealed class RateCardItem
 {
-    public int DivisionID { get; set; } = 1;
-    public string? Phase { get; set; }
-    public string? Item { get; set; }
-    public string? ItemDesc { get; set; }
-    public string? PhaseDesc { get; set; }
-    public string? CostCategory { get; set; }
-    public string? Notes { get; set; }
-    public string? POIndex { get; set; }
-    public string? POIndexDescription { get; set; }
-    public string? JCCostCode { get; set; }
-    public string? JCCostCodeDesc { get; set; }
-    public string? JCCategory { get; set; }
-    public string? JCCategoryDesc { get; set; }
-    public string? TaxGroup { get; set; }
-    public int? WastePercent { get; set; }
-    public int? RoundDir { get; set; }
-    public decimal? RoundTo { get; set; }
-    public decimal? Price { get; set; }
-    public bool? IsQuote { get; set; }
-    public string? OrderUOM { get; set; }
-    public decimal? ConversionFactor { get; set; }
-    public string? PartNumber { get; set; }
-    public string? Formula { get; set; }
+    public string Code { get; set; } = string.Empty;
+    public string Region { get; set; } = string.Empty;
+    public string Destination { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public string Supplier { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Unit { get; set; } = string.Empty;
+    public decimal Rate { get; set; }
+    public int MarginPercent { get; set; }
+    public string Season { get; set; } = string.Empty;
+    public bool Bookable { get; set; } = true;
+    public string Notes { get; set; } = string.Empty;
 }";
     }
 

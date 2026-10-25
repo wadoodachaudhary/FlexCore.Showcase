@@ -1,5 +1,4 @@
 @page "/demo/grid/provider-enterprise"
-@page "/demo/grid/items-provider-db"
 @rendermode InteractiveServer
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
@@ -19,6 +18,12 @@
    region's footer showed the grand total; child pages now carry the parent group's totals. The .orders wrapper exists for the page
    CSS: the caption count and sum pills are built in C# and never get the scoped library styling (SC-253), so the page spaces them.
    Parameter tables are a later pass (SC-278). *@
+
+@* 2026-10-25 (Baaria, SC-344): the search example runs on the operator's rate card (Data/BenchModels.cs RateCardItem,
+   BenchDataStore.RateCard) instead of the estimating items copied from HomeFront. Same provider shape as before: the search
+   matches the code, description and supplier; SortItems still sorts by property name; paging and the readout are unchanged.
+   Supplier is a new column and the others were narrowed so the eight fit the main column. Code.Search and Code.SearchCs were
+   regenerated verbatim; the orders example was not touched. *@
 
 <PageTitle>On-demand loading — FlexCore Showcase</PageTitle>
 
@@ -93,9 +98,9 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="search" Title="A flat list, searched, sorted and paged by the provider" RazorCode="@Code.Search" CSharpCode="@Code.SearchCs">
-            <Description><p>The estimating items are an in-memory list loaded at startup and stand in for a database; the provider gets every request the grid makes and returns only the range asked for, with the total. Type in the search box and the next request carries <code>SearchText</code>; sort a column and it carries <code>Sorts</code>; scroll and the grid asks for the next range. The line under the grid describes the last request. Column filters are off because this provider does not translate them.</p></Description>
+            <Description><p>The rate card is an in-memory list of 5,000 lines synthesized at startup and stands in for a database: each line is one supplier's service at one destination, with the net rate the operator pays. The provider gets every request the grid makes and returns only the range asked for, with the total. Type in the search box and the next request carries <code>SearchText</code>, which this provider matches against the code, description and supplier; sort a column and it carries <code>Sorts</code>; scroll and the grid asks for the next range. The line under the grid describes the last request. Column filters are off because this provider does not translate them.</p></Description>
             <Demo>
-                <GridControl TValue="EstimatingItemRecord"
+                <GridControl TValue="RateCardItem"
                              ItemsProvider="LoadItemsAsync"
                              Height="380px"
                              AllowSorting="true"
@@ -105,13 +110,14 @@
                              ShowSearchBar="true"
                              ShowRowCountInFooter="true">
                     <GridColumnsBase>
-                        <GridColumn Field="@nameof(EstimatingItemRecord.Item)" HeaderText="Item" Width="110px" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.ItemDesc)" HeaderText="Description" Width="260px" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.Phase)" HeaderText="Phase" Width="100px" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.PhaseDesc)" HeaderText="Phase description" Width="180px" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.CostCategory)" HeaderText="Cost category" Width="130px" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.OrderUOM)" HeaderText="UOM" Width="75px" TextAlign="TextAlign.Center" />
-                        <GridColumn Field="@nameof(EstimatingItemRecord.Price)" HeaderText="Unit price" Width="110px" Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(RateCardItem.Code)" HeaderText="Code" Width="95px" />
+                        <GridColumn Field="@nameof(RateCardItem.Description)" HeaderText="Description" Width="215px" />
+                        <GridColumn Field="@nameof(RateCardItem.Supplier)" HeaderText="Supplier" Width="185px" />
+                        <GridColumn Field="@nameof(RateCardItem.Region)" HeaderText="Region" Width="115px" />
+                        <GridColumn Field="@nameof(RateCardItem.Destination)" HeaderText="Destination" Width="120px" />
+                        <GridColumn Field="@nameof(RateCardItem.Category)" HeaderText="Category" Width="115px" />
+                        <GridColumn Field="@nameof(RateCardItem.Unit)" HeaderText="Unit" Width="65px" TextAlign="TextAlign.Center" />
+                        <GridColumn Field="@nameof(RateCardItem.Rate)" HeaderText="Rate" Width="100px" Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
                     </GridColumnsBase>
                 </GridControl>
                 <p class="result">@_flatLast</p>
@@ -372,22 +378,22 @@
         public decimal Amount { get; init; }
     }
 
-    // Flat provider (moved here from the On-demand items provider page, 2026-10-20): the estimating items are an in-memory list
-    // loaded at startup and stand in for a database; only the requested range leaves this method.
+    // Flat provider (moved here from the On-demand items provider page, 2026-10-20): the rate card is an in-memory list synthesized
+    // at startup and stands in for a database; only the requested range leaves this method.
     private int _flatRequests;
     private string _flatLast = "Waiting for the first request…";
 
-    private async ValueTask<GridItemsResult<EstimatingItemRecord>> LoadItemsAsync(GridItemsRequest request)
+    private async ValueTask<GridItemsResult<RateCardItem>> LoadItemsAsync(GridItemsRequest request)
     {
         await Task.Delay(25, request.CancellationToken);
-        IEnumerable<EstimatingItemRecord> rows = BenchData.EstimatingItems;
+        IEnumerable<RateCardItem> rows = BenchData.RateCard;
         var text = request.Query.SearchText;
         if (!string.IsNullOrWhiteSpace(text))
         {
             var comparison = request.Query.CaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
-            rows = rows.Where(r => (r.Item ?? "").Contains(text, comparison)
-                                || (r.ItemDesc ?? "").Contains(text, comparison)
-                                || (r.PhaseDesc ?? "").Contains(text, comparison));
+            rows = rows.Where(r => r.Code.Contains(text, comparison)
+                                || r.Description.Contains(text, comparison)
+                                || r.Supplier.Contains(text, comparison));
         }
         var matched = SortItems(rows, request.Query.Sorts).ToList();
         var page = matched.Skip(request.StartIndex).Take(request.Count).ToList();
@@ -395,17 +401,17 @@
                   + $"{page.Count} of {matched.Count:N0} matching rows returned"
                   + (string.IsNullOrWhiteSpace(text) ? "." : $" for \"{text}\".");
         await InvokeAsync(StateHasChanged);
-        return new GridItemsResult<EstimatingItemRecord>(page, matched.Count);
+        return new GridItemsResult<RateCardItem>(page, matched.Count);
     }
 
-    private static IEnumerable<EstimatingItemRecord> SortItems(IEnumerable<EstimatingItemRecord> rows, IReadOnlyList<GridSortDescriptor> sorts)
+    private static IEnumerable<RateCardItem> SortItems(IEnumerable<RateCardItem> rows, IReadOnlyList<GridSortDescriptor> sorts)
     {
-        IOrderedEnumerable<EstimatingItemRecord>? ordered = null;
+        IOrderedEnumerable<RateCardItem>? ordered = null;
         foreach (var sort in sorts)
         {
-            var property = typeof(EstimatingItemRecord).GetProperty(sort.Field);
+            var property = typeof(RateCardItem).GetProperty(sort.Field);
             if (property is null) continue;
-            Func<EstimatingItemRecord, object?> key = r => property.GetValue(r);
+            Func<RateCardItem, object?> key = r => property.GetValue(r);
             ordered = ordered is null
                 ? sort.Direction == SortDirection.Descending ? rows.OrderByDescending(key) : rows.OrderBy(key)
                 : sort.Direction == SortDirection.Descending ? ordered.ThenByDescending(key) : ordered.ThenBy(key);
@@ -455,7 +461,7 @@
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
     private static class Code
     {
-        public const string Search = @"<GridControl TValue=""EstimatingItemRecord""
+        public const string Search = @"<GridControl TValue=""RateCardItem""
              ItemsProvider=""LoadItemsAsync""
              Height=""380px""
              AllowSorting=""true""
@@ -465,33 +471,34 @@
              ShowSearchBar=""true""
              ShowRowCountInFooter=""true"">
     <GridColumnsBase>
-        <GridColumn Field=""@nameof(EstimatingItemRecord.Item)"" HeaderText=""Item"" Width=""110px"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.ItemDesc)"" HeaderText=""Description"" Width=""260px"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.Phase)"" HeaderText=""Phase"" Width=""100px"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.PhaseDesc)"" HeaderText=""Phase description"" Width=""180px"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.CostCategory)"" HeaderText=""Cost category"" Width=""130px"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.OrderUOM)"" HeaderText=""UOM"" Width=""75px"" TextAlign=""TextAlign.Center"" />
-        <GridColumn Field=""@nameof(EstimatingItemRecord.Price)"" HeaderText=""Unit price"" Width=""110px"" Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(RateCardItem.Code)"" HeaderText=""Code"" Width=""95px"" />
+        <GridColumn Field=""@nameof(RateCardItem.Description)"" HeaderText=""Description"" Width=""215px"" />
+        <GridColumn Field=""@nameof(RateCardItem.Supplier)"" HeaderText=""Supplier"" Width=""185px"" />
+        <GridColumn Field=""@nameof(RateCardItem.Region)"" HeaderText=""Region"" Width=""115px"" />
+        <GridColumn Field=""@nameof(RateCardItem.Destination)"" HeaderText=""Destination"" Width=""120px"" />
+        <GridColumn Field=""@nameof(RateCardItem.Category)"" HeaderText=""Category"" Width=""115px"" />
+        <GridColumn Field=""@nameof(RateCardItem.Unit)"" HeaderText=""Unit"" Width=""65px"" TextAlign=""TextAlign.Center"" />
+        <GridColumn Field=""@nameof(RateCardItem.Rate)"" HeaderText=""Rate"" Width=""100px"" Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
     </GridColumnsBase>
 </GridControl>
 <p class=""result"">@_flatLast</p>";
-        public const string SearchCs = @"// Flat provider (moved here from the On-demand items provider page, 2026-10-20): the estimating items are an in-memory list
-// loaded at startup and stand in for a database; only the requested range leaves this method.
+        public const string SearchCs = @"// Flat provider (moved here from the On-demand items provider page, 2026-10-20): the rate card is an in-memory list synthesized
+// at startup and stands in for a database; only the requested range leaves this method.
 private int _flatRequests;
 
 private string _flatLast = ""Waiting for the first request…"";
 
-private async ValueTask<GridItemsResult<EstimatingItemRecord>> LoadItemsAsync(GridItemsRequest request)
+private async ValueTask<GridItemsResult<RateCardItem>> LoadItemsAsync(GridItemsRequest request)
 {
     await Task.Delay(25, request.CancellationToken);
-    IEnumerable<EstimatingItemRecord> rows = BenchData.EstimatingItems;
+    IEnumerable<RateCardItem> rows = BenchData.RateCard;
     var text = request.Query.SearchText;
     if (!string.IsNullOrWhiteSpace(text))
     {
         var comparison = request.Query.CaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
-        rows = rows.Where(r => (r.Item ?? """").Contains(text, comparison)
-                            || (r.ItemDesc ?? """").Contains(text, comparison)
-                            || (r.PhaseDesc ?? """").Contains(text, comparison));
+        rows = rows.Where(r => r.Code.Contains(text, comparison)
+                            || r.Description.Contains(text, comparison)
+                            || r.Supplier.Contains(text, comparison));
     }
     var matched = SortItems(rows, request.Query.Sorts).ToList();
     var page = matched.Skip(request.StartIndex).Take(request.Count).ToList();
@@ -499,17 +506,17 @@ private async ValueTask<GridItemsResult<EstimatingItemRecord>> LoadItemsAsync(Gr
               + $""{page.Count} of {matched.Count:N0} matching rows returned""
               + (string.IsNullOrWhiteSpace(text) ? ""."" : $"" for \""{text}\""."");
     await InvokeAsync(StateHasChanged);
-    return new GridItemsResult<EstimatingItemRecord>(page, matched.Count);
+    return new GridItemsResult<RateCardItem>(page, matched.Count);
 }
 
-private static IEnumerable<EstimatingItemRecord> SortItems(IEnumerable<EstimatingItemRecord> rows, IReadOnlyList<GridSortDescriptor> sorts)
+private static IEnumerable<RateCardItem> SortItems(IEnumerable<RateCardItem> rows, IReadOnlyList<GridSortDescriptor> sorts)
 {
-    IOrderedEnumerable<EstimatingItemRecord>? ordered = null;
+    IOrderedEnumerable<RateCardItem>? ordered = null;
     foreach (var sort in sorts)
     {
-        var property = typeof(EstimatingItemRecord).GetProperty(sort.Field);
+        var property = typeof(RateCardItem).GetProperty(sort.Field);
         if (property is null) continue;
-        Func<EstimatingItemRecord, object?> key = r => property.GetValue(r);
+        Func<RateCardItem, object?> key = r => property.GetValue(r);
         ordered = ordered is null
             ? sort.Direction == SortDirection.Descending ? rows.OrderByDescending(key) : rows.OrderBy(key)
             : sort.Direction == SortDirection.Descending ? ordered.ThenByDescending(key) : ordered.ThenBy(key);

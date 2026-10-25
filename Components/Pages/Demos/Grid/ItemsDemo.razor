@@ -19,11 +19,14 @@
    configuration (grouped by one column, average and count in captions and footers) on other data, so it is gone; Assembly becomes
    the second example, because it shows the one thing the catalog does not: sums in the grid footer with no initial grouping. Both
    old routes now open this page. *@
+@* 2026-10-25 (Baaria, SC-344): both examples run on the tour operator's data in Data/DemoData.cs (rate card lines, package cost
+   lines) instead of the assembly and item catalog copied from HomeFront. The example anchors are now rate-card and package-costs;
+   nothing linked to the old ones. The .catalog wrapper class stays because the page CSS keys on it. *@
 
 <PageTitle>Grouping &amp; totals — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Grouping &amp; totals" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Group rows by a column, with averages, counts and sums in the group captions, group footers and the grid footer."
+                   Tagline="Group rows by a column, with averages, counts and sums in the group captions, group footers and the grid footer, on a tour operator's rate card and the cost lines of one of its packages."
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridModels.cs;Grid/GridControlEvents.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
@@ -36,12 +39,12 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="catalog" Title="Item catalog grouped by category" RazorCode="@Code.Catalog" CSharpCode="@Code.CatalogCs">
-            <Description><p>A cost-item catalog: material, labor, subcontract, equipment and overhead lines keyed by phase, each with a default cost and an Active flag. It opens grouped by <strong>Category</strong>; drag <strong>Phase</strong> into the bar to regroup. Each caption shows the average default cost and the item count; each footer repeats the average. Sort <strong>Default $</strong> descending for the priciest items, filter <strong>Active</strong> for the inactive ones, or type in the search box.</p></Description>
+        <DemoExample Id="rate-card" Title="Rate card grouped by category" RazorCode="@Code.RateCard" CSharpCode="@Code.RateCardCs">
+            <Description><p>The operator's rate card: the services it buys at each destination it sells, from flights and transfers to rooms, tours, insurance and its own booking fees, each with the supplier, the unit the rate is quoted per, the rate and a Bookable flag. It opens grouped by <strong>Category</strong>; drag <strong>Destination</strong> into the bar to regroup. Each caption shows the average rate and the line count; each footer repeats the average. Sort <strong>Rate</strong> descending for the most expensive services, filter <strong>Bookable</strong> for the lines that cannot be sold at present, or type in the search box.</p></Description>
             <Demo>
                 <div class="catalog">
-                <GridControl TValue="CatalogItem"
-                             DataSource="@_items"
+                <GridControl TValue="RateCardLine"
+                             DataSource="@_rateCard"
                              AllowSelection="true"
                              AllowSorting="true"
                              AllowFiltering="true"
@@ -54,26 +57,27 @@
                              GroupColumns="@_groupColumns"
                              AggregateRows="_aggregates">
                     <GridColumnsBase>
-                        <GridColumn Field="@nameof(CatalogItem.ItemId)"      HeaderText="Item ID"     Width="110px" />
-                        <GridColumn Field="@nameof(CatalogItem.Description)" HeaderText="Description" Width="260px" />
-                        <GridColumn Field="@nameof(CatalogItem.Phase)"       HeaderText="Phase"       Width="160px" />
-                        <GridColumn Field="@nameof(CatalogItem.Category)"    HeaderText="Category"    Width="160px" />
-                        <GridColumn Field="@nameof(CatalogItem.UOM)"         HeaderText="UOM"         Width="70px" />
-                        <GridColumn Field="@nameof(CatalogItem.DefaultCost)" HeaderText="Default $"   Width="120px"
+                        <GridColumn Field="@nameof(RateCardLine.Code)"        HeaderText="Code"        Width="100px" />
+                        <GridColumn Field="@nameof(RateCardLine.Description)" HeaderText="Description" Width="240px" />
+                        <GridColumn Field="@nameof(RateCardLine.Supplier)"    HeaderText="Supplier"    Width="200px" />
+                        <GridColumn Field="@nameof(RateCardLine.Destination)" HeaderText="Destination" Width="130px" />
+                        <GridColumn Field="@nameof(RateCardLine.Category)"    HeaderText="Category"    Width="140px" />
+                        <GridColumn Field="@nameof(RateCardLine.Unit)"        HeaderText="Unit"        Width="80px" />
+                        <GridColumn Field="@nameof(RateCardLine.Rate)"        HeaderText="Rate"        Width="110px"
                                     Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(CatalogItem.IsActive)"    HeaderText="Active"      Width="80px"
+                        <GridColumn Field="@nameof(RateCardLine.Bookable)"    HeaderText="Bookable"    Width="90px"
                                     Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
                     </GridColumnsBase>
                 </GridControl>
                 </div>
             </Demo>
         </DemoExample>
-        <DemoExample Id="assembly" Title="Line items with sums in the footer, grouped on demand" RazorCode="@Code.Assembly" CSharpCode="@Code.AssemblyCs">
-            <Description><p>Sixty assembly lines, not grouped to start with. The grid footer sums <code>Qty</code> and <code>Total</code>; drag <strong>PO Index</strong> or <strong>Vendor</strong> into the bar above the grid and every group gets the same sums in its footer, while the grid footer keeps the overall total. <code>ShowInGroupFooter</code> and <code>ShowInFooter</code> are both on; there is no caption aggregate here.</p></Description>
+        <DemoExample Id="package-costs" Title="Package cost lines with sums in the footer, grouped on demand" RazorCode="@Code.PackageCosts" CSharpCode="@Code.PackageCostsCs">
+            <Description><p>Sixty cost lines for the Lisbon Explorer package: the fifteen services the operator pays its suppliers for, costed once per departure season for two travellers and seven nights, not grouped to start with. The grid footer sums <code>Qty</code> and <code>Total</code>; drag <strong>Cost group</strong>, <strong>Supplier</strong> or <strong>Season</strong> into the bar above the grid and every group gets the same sums in its footer, while the grid footer keeps the overall total. <strong>Rate basis</strong> is Contract where the rate comes from the supplier contract and only moves with the season, and Spot where it is bought afresh for each departure. <code>ShowInGroupFooter</code> and <code>ShowInFooter</code> are both on; there is no caption aggregate here.</p></Description>
             <Demo>
                 <div class="catalog">
-                <GridControl TValue="AssemblyItem"
-                             DataSource="@_lines"
+                <GridControl TValue="PackageCostLine"
+                             DataSource="@_costLines"
                              AllowSelection="true"
                              AllowSorting="true"
                              AllowFiltering="true"
@@ -84,17 +88,18 @@
                              Height="420px"
                              AggregateRows="_sums">
                     <GridColumnsBase>
-                        <GridColumn Field="@nameof(AssemblyItem.PriceLevel)"  HeaderText="Price Level" Width="150px" />
-                        <GridColumn Field="@nameof(AssemblyItem.Vendor)"      HeaderText="Vendor"      Width="170px" />
-                        <GridColumn Field="@nameof(AssemblyItem.POIndex)"     HeaderText="PO Index"    Width="110px" />
-                        <GridColumn Field="@nameof(AssemblyItem.Description)" HeaderText="Description" Width="230px" />
-                        <GridColumn Field="@nameof(AssemblyItem.Qty)"         HeaderText="Qty"         Width="80px"
+                        <GridColumn Field="@nameof(PackageCostLine.Season)"      HeaderText="Season"     Width="90px" />
+                        <GridColumn Field="@nameof(PackageCostLine.CostGroup)"   HeaderText="Cost group" Width="140px" />
+                        <GridColumn Field="@nameof(PackageCostLine.Supplier)"    HeaderText="Supplier"   Width="190px" />
+                        <GridColumn Field="@nameof(PackageCostLine.Description)" HeaderText="Service"    Width="240px" />
+                        <GridColumn Field="@nameof(PackageCostLine.Qty)"         HeaderText="Qty"        Width="70px"
                                     Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(AssemblyItem.UOM)"         HeaderText="UOM"         Width="70px" />
-                        <GridColumn Field="@nameof(AssemblyItem.Price)"       HeaderText="Unit Price"  Width="110px"
+                        <GridColumn Field="@nameof(PackageCostLine.Unit)"        HeaderText="Unit"       Width="80px" />
+                        <GridColumn Field="@nameof(PackageCostLine.Rate)"        HeaderText="Net rate"   Width="110px"
                                     Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(AssemblyItem.Total)"       HeaderText="Total"       Width="120px"
+                        <GridColumn Field="@nameof(PackageCostLine.Total)"       HeaderText="Total"      Width="120px"
                                     Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(PackageCostLine.RateBasis)"   HeaderText="Rate basis" Width="100px" />
                     </GridColumnsBase>
                 </GridControl>
                 </div>
@@ -142,9 +147,9 @@
 </FeatureDemoLayout>
 
 @code {
-    private List<CatalogItem> _items = DemoData.GenerateItemCatalog();
+    private List<RateCardLine> _rateCard = DemoData.GenerateRateCard();
 
-    private List<string> _groupColumns = new() { nameof(CatalogItem.Category) };
+    private List<string> _groupColumns = new() { nameof(RateCardLine.Category) };
 
     private List<AggregateRow> _aggregates = new()
     {
@@ -154,16 +159,16 @@
             ShowInGroupFooter = true,
             Columns = new()
             {
-                new AggregateColumn { Field = nameof(CatalogItem.DefaultCost), Type = AggregateType.Average, Format = "C2",
+                new AggregateColumn { Field = nameof(RateCardLine.Rate), Type = AggregateType.Average, Format = "C2",
                     GroupCaptionTemplate = "avg {value}", GroupFooterTemplate = "Avg {value}" },
-                new AggregateColumn { Field = nameof(CatalogItem.DefaultCost), Type = AggregateType.Count,
-                    GroupCaptionTemplate = "({value} items)", GroupFooterTemplate = "{value} items" },
+                new AggregateColumn { Field = nameof(RateCardLine.Rate), Type = AggregateType.Count,
+                    GroupCaptionTemplate = "({value} lines)", GroupFooterTemplate = "{value} lines" },
             }
         }
     };
 
-    // Assembly lines (moved here from the Assembly page, 2026-10-20): sums in group footers and the grid footer, no initial group.
-    private List<AssemblyItem> _lines = DemoData.GenerateAssemblyItems(60);
+    // Package cost lines: sums in group footers and the grid footer, no initial group.
+    private List<PackageCostLine> _costLines = DemoData.GeneratePackageCostLines(60);
 
     private List<AggregateRow> _sums = new()
     {
@@ -173,19 +178,19 @@
             ShowInFooter = true,
             Columns = new()
             {
-                new AggregateColumn { Field = nameof(AssemblyItem.Qty),   Type = AggregateType.Sum, Format = "N0", FooterTemplate = "Σ {value}", GroupFooterTemplate = "Σ {value}" },
-                new AggregateColumn { Field = nameof(AssemblyItem.Total), Type = AggregateType.Sum, Format = "C2", FooterTemplate = "Σ {value}", GroupFooterTemplate = "Σ {value}" },
+                new AggregateColumn { Field = nameof(PackageCostLine.Qty),   Type = AggregateType.Sum, Format = "N0", FooterTemplate = "Σ {value}", GroupFooterTemplate = "Σ {value}" },
+                new AggregateColumn { Field = nameof(PackageCostLine.Total), Type = AggregateType.Sum, Format = "C2", FooterTemplate = "Σ {value}", GroupFooterTemplate = "Σ {value}" },
             }
         }
     };
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed); the C# tab also carries the
-    // CatalogItem record from Data/DemoData.cs.
+    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed); each C# tab also carries its
+    // record from Data/DemoData.cs.
     private static class Code
     {
-        public const string Assembly = @"<div class=""catalog"">
-<GridControl TValue=""AssemblyItem""
-             DataSource=""@_lines""
+        public const string PackageCosts = @"<div class=""catalog"">
+<GridControl TValue=""PackageCostLine""
+             DataSource=""@_costLines""
              AllowSelection=""true""
              AllowSorting=""true""
              AllowFiltering=""true""
@@ -196,22 +201,23 @@
              Height=""420px""
              AggregateRows=""_sums"">
     <GridColumnsBase>
-        <GridColumn Field=""@nameof(AssemblyItem.PriceLevel)""  HeaderText=""Price Level"" Width=""150px"" />
-        <GridColumn Field=""@nameof(AssemblyItem.Vendor)""      HeaderText=""Vendor""      Width=""170px"" />
-        <GridColumn Field=""@nameof(AssemblyItem.POIndex)""     HeaderText=""PO Index""    Width=""110px"" />
-        <GridColumn Field=""@nameof(AssemblyItem.Description)"" HeaderText=""Description"" Width=""230px"" />
-        <GridColumn Field=""@nameof(AssemblyItem.Qty)""         HeaderText=""Qty""         Width=""80px""
+        <GridColumn Field=""@nameof(PackageCostLine.Season)""      HeaderText=""Season""     Width=""90px"" />
+        <GridColumn Field=""@nameof(PackageCostLine.CostGroup)""   HeaderText=""Cost group"" Width=""140px"" />
+        <GridColumn Field=""@nameof(PackageCostLine.Supplier)""    HeaderText=""Supplier""   Width=""190px"" />
+        <GridColumn Field=""@nameof(PackageCostLine.Description)"" HeaderText=""Service""    Width=""240px"" />
+        <GridColumn Field=""@nameof(PackageCostLine.Qty)""         HeaderText=""Qty""        Width=""70px""
                     Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(AssemblyItem.UOM)""         HeaderText=""UOM""         Width=""70px"" />
-        <GridColumn Field=""@nameof(AssemblyItem.Price)""       HeaderText=""Unit Price""  Width=""110px""
+        <GridColumn Field=""@nameof(PackageCostLine.Unit)""        HeaderText=""Unit""       Width=""80px"" />
+        <GridColumn Field=""@nameof(PackageCostLine.Rate)""        HeaderText=""Net rate""   Width=""110px""
                     Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(AssemblyItem.Total)""       HeaderText=""Total""       Width=""120px""
+        <GridColumn Field=""@nameof(PackageCostLine.Total)""       HeaderText=""Total""      Width=""120px""
                     Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(PackageCostLine.RateBasis)""   HeaderText=""Rate basis"" Width=""100px"" />
     </GridColumnsBase>
 </GridControl>
 </div>";
-        public const string AssemblyCs = @"// Assembly lines (moved here from the Assembly page, 2026-10-20): sums in group footers and the grid footer, no initial group.
-private List<AssemblyItem> _lines = DemoData.GenerateAssemblyItems(60);
+        public const string PackageCostsCs = @"// Package cost lines: sums in group footers and the grid footer, no initial group.
+private List<PackageCostLine> _costLines = DemoData.GeneratePackageCostLines(60);
 
 private List<AggregateRow> _sums = new()
 {
@@ -221,18 +227,18 @@ private List<AggregateRow> _sums = new()
         ShowInFooter = true,
         Columns = new()
         {
-            new AggregateColumn { Field = nameof(AssemblyItem.Qty),   Type = AggregateType.Sum, Format = ""N0"", FooterTemplate = ""Σ {value}"", GroupFooterTemplate = ""Σ {value}"" },
-            new AggregateColumn { Field = nameof(AssemblyItem.Total), Type = AggregateType.Sum, Format = ""C2"", FooterTemplate = ""Σ {value}"", GroupFooterTemplate = ""Σ {value}"" },
+            new AggregateColumn { Field = nameof(PackageCostLine.Qty),   Type = AggregateType.Sum, Format = ""N0"", FooterTemplate = ""Σ {value}"", GroupFooterTemplate = ""Σ {value}"" },
+            new AggregateColumn { Field = nameof(PackageCostLine.Total), Type = AggregateType.Sum, Format = ""C2"", FooterTemplate = ""Σ {value}"", GroupFooterTemplate = ""Σ {value}"" },
         }
     }
 };
 
 // Data/DemoData.cs
-public record AssemblyItem(string PriceLevel, string Vendor, string POIndex, string Description,
-    int Qty, string UOM, string ItemType, decimal Price, decimal Total);";
-        public const string Catalog = @"<div class=""catalog"">
-<GridControl TValue=""CatalogItem""
-             DataSource=""@_items""
+public record PackageCostLine(string Season, string RateBasis, string Supplier, string CostGroup, string Description,
+    int Qty, string Unit, string Pricing, decimal Rate, decimal Total);";
+        public const string RateCard = @"<div class=""catalog"">
+<GridControl TValue=""RateCardLine""
+             DataSource=""@_rateCard""
              AllowSelection=""true""
              AllowSorting=""true""
              AllowFiltering=""true""
@@ -245,21 +251,22 @@ public record AssemblyItem(string PriceLevel, string Vendor, string POIndex, str
              GroupColumns=""@_groupColumns""
              AggregateRows=""_aggregates"">
     <GridColumnsBase>
-        <GridColumn Field=""@nameof(CatalogItem.ItemId)""      HeaderText=""Item ID""     Width=""110px"" />
-        <GridColumn Field=""@nameof(CatalogItem.Description)"" HeaderText=""Description"" Width=""260px"" />
-        <GridColumn Field=""@nameof(CatalogItem.Phase)""       HeaderText=""Phase""       Width=""160px"" />
-        <GridColumn Field=""@nameof(CatalogItem.Category)""    HeaderText=""Category""    Width=""160px"" />
-        <GridColumn Field=""@nameof(CatalogItem.UOM)""         HeaderText=""UOM""         Width=""70px"" />
-        <GridColumn Field=""@nameof(CatalogItem.DefaultCost)"" HeaderText=""Default $""   Width=""120px""
+        <GridColumn Field=""@nameof(RateCardLine.Code)""        HeaderText=""Code""        Width=""100px"" />
+        <GridColumn Field=""@nameof(RateCardLine.Description)"" HeaderText=""Description"" Width=""240px"" />
+        <GridColumn Field=""@nameof(RateCardLine.Supplier)""    HeaderText=""Supplier""    Width=""200px"" />
+        <GridColumn Field=""@nameof(RateCardLine.Destination)"" HeaderText=""Destination"" Width=""130px"" />
+        <GridColumn Field=""@nameof(RateCardLine.Category)""    HeaderText=""Category""    Width=""140px"" />
+        <GridColumn Field=""@nameof(RateCardLine.Unit)""        HeaderText=""Unit""        Width=""80px"" />
+        <GridColumn Field=""@nameof(RateCardLine.Rate)""        HeaderText=""Rate""        Width=""110px""
                     Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(CatalogItem.IsActive)""    HeaderText=""Active""      Width=""80px""
+        <GridColumn Field=""@nameof(RateCardLine.Bookable)""    HeaderText=""Bookable""    Width=""90px""
                     Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" />
     </GridColumnsBase>
 </GridControl>
 </div>";
-        public const string CatalogCs = @"private List<CatalogItem> _items = DemoData.GenerateItemCatalog();
+        public const string RateCardCs = @"private List<RateCardLine> _rateCard = DemoData.GenerateRateCard();
 
-private List<string> _groupColumns = new() { nameof(CatalogItem.Category) };
+private List<string> _groupColumns = new() { nameof(RateCardLine.Category) };
 
 private List<AggregateRow> _aggregates = new()
 {
@@ -269,17 +276,17 @@ private List<AggregateRow> _aggregates = new()
         ShowInGroupFooter = true,
         Columns = new()
         {
-            new AggregateColumn { Field = nameof(CatalogItem.DefaultCost), Type = AggregateType.Average, Format = ""C2"",
+            new AggregateColumn { Field = nameof(RateCardLine.Rate), Type = AggregateType.Average, Format = ""C2"",
                 GroupCaptionTemplate = ""avg {value}"", GroupFooterTemplate = ""Avg {value}"" },
-            new AggregateColumn { Field = nameof(CatalogItem.DefaultCost), Type = AggregateType.Count,
-                GroupCaptionTemplate = ""({value} items)"", GroupFooterTemplate = ""{value} items"" },
+            new AggregateColumn { Field = nameof(RateCardLine.Rate), Type = AggregateType.Count,
+                GroupCaptionTemplate = ""({value} lines)"", GroupFooterTemplate = ""{value} lines"" },
         }
     }
 };
 
 // Data/DemoData.cs
-public record CatalogItem(string ItemId, string Description, string Phase, string Category,
-    string UOM, decimal DefaultCost, bool IsActive);";
+public record RateCardLine(string Code, string Description, string Supplier, string Destination,
+    string Category, string Unit, decimal Rate, bool Bookable);";
     }
 
     private static class Vocab

@@ -6,7 +6,7 @@
    same shape. Plain <table>: FlexCore has no static-table control and the grid is overkill here.
    2026-10-20 (Baaria, Barcodes page): enum members get their own Values column set, and an empty Type or Default string draws no chip. *@
 <div class="api-block" id="@Id">
-    @if (!string.IsNullOrEmpty(Title))
+    @if (!string.IsNullOrEmpty(Title) && Title != SectionTitle)
     {
         <h3 class="api-title">@Title</h3>
     }
@@ -49,6 +49,9 @@
     [Parameter, EditorRequired] public ApiKind Kind { get; set; }
     [Parameter, EditorRequired] public IReadOnlyList<ApiRow> Rows { get; set; } = Array.Empty<ApiRow>();
     [Parameter] public string? Title { get; set; }
+    /// <summary>The enclosing DocSection's title (2026-10-25): a table named like its section drops its own heading, so the name is
+    /// not repeated under the header; a section holding several tables keeps each table's heading.</summary>
+    [CascadingParameter(Name = "DocSectionTitle")] public string? SectionTitle { get; set; }
     [Parameter] public string? Id { get; set; }
 
     private bool HasType => Kind is ApiKind.Parameters or ApiKind.Properties or ApiKind.Events or ApiKind.Methods or ApiKind.CssVariables;

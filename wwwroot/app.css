@@ -335,7 +335,7 @@ h1:focus {
 
 .grid-badge-cyan   { background: #cffafe; color: #0e7490; border: 1px solid #a5f3fc; }
 
-.grid-job-code {
+.grid-request-code {
     font-family: "SF Mono", Menlo, Consolas, Monaco, monospace;
     font-weight: 700;
     color: #0284c7;
@@ -346,12 +346,12 @@ h1:focus {
 }
 
 /* Salesperson avatar & name */
-.salesperson-cell {
+.agent-cell {
     display: inline-flex;
     align-items: center;
     gap: 8px;
 }
-.salesperson-avatar {
+.agent-avatar {
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -365,10 +365,19 @@ h1:focus {
     flex-shrink: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
-.salesperson-name {
+.agent-name {
     font-weight: 500;
     color: #1e293b;
     white-space: nowrap;
+}
+
+/* Hero popup editor badge (BadgeControl root, so it cannot live in Home.razor.css) */
+.modal-card-header .modal-badge-request {
+    background: #0284c7 !important; /* BadgeControl's own primary rule wins otherwise */
+    color: #ffffff;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
 }
 
 /* Inline SVG Sparkline Micro-Chart Cell */
@@ -651,16 +660,6 @@ td:has(.fx-dropdown-grid.fx-open),
     gap: 12px;
 }
 
-.modal-badge-job {
-    font-family: "SF Mono", Menlo, monospace !important;
-    background: rgba(255, 255, 255, 0.2) !important;
-    color: #ffffff !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    padding: 4px 8px !important;
-    border-radius: 6px !important;
-    letter-spacing: 0.05em !important;
-}
 
 .modal-h3 {
     margin: 0;

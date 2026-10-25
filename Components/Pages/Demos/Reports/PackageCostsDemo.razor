@@ -1,3 +1,4 @@
+@page "/demo/reports/package-costs"
 @page "/demo/reports/model-costs"
 @rendermode InteractiveServer
 @using Fx.ControlKit
@@ -15,11 +16,15 @@
    2026-10-18: vocabulary written from ReportWriterControl.razor (the six parameters, public state, the public methods and their doc
    comments, the @inject list, the toolbar export items), ReportNativeExport.cs, ReportOptions.cs and the five host interfaces; rows
    checked with scratchpad/vocabcheck.py. ShowReportAsync seeds a literal "DivisionID" from the session context (lines ~1317 and ~1549),
-   a host name inside the library; noted in SC-253. *@
+   a host name inside the library; noted in SC-253.
+   2026-10-25 (Baaria, SC-344): the report is a tour operator's Package Cost Sheet (wwwroot/reports/Package Cost Sheet.xml, data from
+   Data/TravelData.cs through Services/ShowcaseReportDataExecutor.cs). It replaced a cut-down copy of a HomeFront Crystal report. Same
+   shape: four group levels with a sum in every footer; new: a grand total in the report footer (the loader's GrandTotals). The page
+   file moved from ModelCostsDemo to PackageCostsDemo and the old address is kept as an alias. *@
 
 <PageTitle>Report writer — FlexCore Showcase</PageTitle>
 
-<FeatureDemoLayout Title="Report writer" Category="Reports" CategoryHref="demo/reports/model-costs" ControlName="ReportWriterControl"
+<FeatureDemoLayout Title="Report writer" Category="Reports" CategoryHref="demo/reports/package-costs" ControlName="ReportWriterControl"
                    Tagline="Paginated, grouped reports from a Crystal-style XML definition, with a group tree, search, print and export."
                    SourcePath="Reports/ReportWriterControl.razor;Reports/CrystalXmlReportLoader.cs;Reports/ReportOptions.cs;Reports/IReportDataExecutor.cs;Reports/IReportSessionContext.cs;Reports/IReportPickListProvider.cs;Reports/IReportExporter.cs;Reports/IReportViewerSettings.cs">
     <Overview>
@@ -34,11 +39,11 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="report" Title="Model costs by community, model, group and phase" RazorCode="@Code.Report" CSharpCode="@Code.ReportCs">
-            <Description><p>The bundled XML defines four group levels, each with a sum in its footer. Pick a model and a community and press Run; the report loads on arrival too. This site's data executor ignores the SQL in the definition and synthesises rows from the demo data, so every choice returns a report. Open the group tree on the left to jump between groups, or search the report text from the toolbar.</p></Description>
+        <DemoExample Id="report" Title="Package costs by region, package, cost group and supplier" RazorCode="@Code.Report" CSharpCode="@Code.ReportCs">
+            <Description><p>The bundled XML is a tour operator's cost sheet: four group levels (region, package, cost group, supplier), a sum in every group footer and a grand total at the end. Pick a package and a departure season and press Run; the report loads on arrival too. This site's data executor ignores the SQL in the definition and synthesises the supplier lines for the chosen package and season, so every choice returns a report. Open the group tree on the left to jump between groups, or search the report text from the toolbar.</p></Description>
             <Controls>
-                <DropDownListControl TItem="string" TValue="string" DataSource="@_models" @bind-Value="_model" AriaLabel="Model" Width="160px" />
-                <DropDownListControl TItem="string" TValue="string" DataSource="@_communities" @bind-Value="_community" AriaLabel="Community" Width="200px" />
+                <DropDownListControl TItem="string" TValue="string" DataSource="@_packages" @bind-Value="_package" AriaLabel="Package" Width="210px" />
+                <DropDownListControl TItem="string" TValue="string" DataSource="@_seasons" @bind-Value="_season" AriaLabel="Season" Width="120px" />
                 <ButtonControl CssClass="btn-sm" OnClick="RunReport" Disabled="@_running">@(_running ? "Running…" : "Run")</ButtonControl>
             </Controls>
             <Demo>
@@ -83,10 +88,10 @@
 
 @code {
     private ReportWriterControl? _writer;
-    private readonly string[] _models = DemoData.HouseModels.Select(m => m.Name).ToArray();
-    private readonly string[] _communities = { "Showcase Estates", "Riverbend Hills", "Northbrook Crossing" };
-    private string _model = DemoData.HouseModels[0].Name;
-    private string _community = "Showcase Estates";
+    private readonly string[] _packages = TravelData.Packages.Select(p => p.Name).ToArray();
+    private readonly string[] _seasons = TravelData.Seasons;
+    private string _package = TravelData.Packages[0].Name;
+    private string _season = TravelData.Seasons[0];
     private bool _running;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -105,11 +110,11 @@
         StateHasChanged();
         try
         {
-            var path = Path.Combine(Env.WebRootPath, "reports", "Model Costs v1.xml");
+            var path = Path.Combine(Env.WebRootPath, "reports", "Package Cost Sheet.xml");
             await _writer.ShowXmlReport(path, new Dictionary<string, object>
             {
-                ["Model"] = _model,
-                ["Community"] = _community,
+                ["Package"] = _package,
+                ["Season"] = _season,
             });
         }
         finally
@@ -127,15 +132,10 @@
     <ReportWriterControl @ref=""_writer"" />
 </div>";
         public const string ReportCs = @"private ReportWriterControl? _writer;
-
-private readonly string[] _models = DemoData.HouseModels.Select(m => m.Name).ToArray();
-
-private readonly string[] _communities = { ""Showcase Estates"", ""Riverbend Hills"", ""Northbrook Crossing"" };
-
-private string _model = DemoData.HouseModels[0].Name;
-
-private string _community = ""Showcase Estates"";
-
+private readonly string[] _packages = TravelData.Packages.Select(p => p.Name).ToArray();
+private readonly string[] _seasons = TravelData.Seasons;
+private string _package = TravelData.Packages[0].Name;
+private string _season = TravelData.Seasons[0];
 private bool _running;
 
 protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -154,11 +154,11 @@ private async Task RunReport()
     StateHasChanged();
     try
     {
-        var path = Path.Combine(Env.WebRootPath, ""reports"", ""Model Costs v1.xml"");
+        var path = Path.Combine(Env.WebRootPath, ""reports"", ""Package Cost Sheet.xml"");
         await _writer.ShowXmlReport(path, new Dictionary<string, object>
         {
-            [""Model""] = _model,
-            [""Community""] = _community,
+            [""Package""] = _package,
+            [""Season""] = _season,
         });
     }
     finally

@@ -1,206 +1,133 @@
-using System.Data;
-
 namespace FlexCore.Showcase.Data;
 
 /// <summary>
-/// In-memory construction / home-building dataset for the showcase demos.
-/// Fictional vendors, phases, items, and house models — no real customer data.
-/// Shared by the Grid demos and the Reports demo so they tell a single story.
+/// In-memory data for the Grouping &amp; totals grid page: the tour operator's rate card and the cost lines of one of its
+/// packages, both built on <see cref="TravelData"/>. Supplier and service names are invented; no real company is named.
+/// Both generators are seeded, so screenshots repeat. The home page, the Report writer page and the larger grid pages take
+/// their travel data from their own services.
 /// </summary>
 public static class DemoData
 {
-    public static readonly string[] Vendors =
+    /// <summary>Two travellers on every package costing.</summary>
+    private const int Pax = 2;
+
+    /// <summary>How far a destination is from home moves its rates; the same factors as the bench store's rate card.</summary>
+    private static decimal RegionFactor(string region) => region switch
     {
-        "ABC Lumber Co.",
-        "Cornerstone Concrete",
-        "BlueSky Electrical",
-        "Hyland Plumbing Ltd.",
-        "Marvel Roofing",
-        "Pinnacle Drywall",
-        "AzureGlass Windows",
-        "Spectrum Cabinets",
-        "EarthPro Excavating",
-        "Apex HVAC Services",
+        "East Asia" => 1.15m, "Southern Africa" => 1.1m, "North Africa" => 0.85m, "Northern Europe" => 1.4m,
+        "North America" => 1.3m, "Oceania" => 1.35m, "South America" => 1.05m, _ => 1.0m
     };
 
-    public static readonly string[] Phases =
+    /// <summary>Departure season price factor.</summary>
+    private static decimal SeasonFactor(string season) => season switch { "Summer" => 1.25m, "Autumn" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
+
+    /// <summary>The services on the rate card: category, supplier (a {0} placeholder takes the city), description, the unit the
+    /// rate is quoted per, and the rate range in whole currency units before the region factor.</summary>
+    private static readonly (string Category, string Supplier, string Description, string Unit, int Low, int High)[] RateCardServices =
     {
-        "010 Permits",
-        "030 Excavation",
-        "050 Foundation",
-        "070 Framing",
-        "090 Roofing",
-        "120 Plumbing Rough",
-        "150 Electrical Rough",
-        "180 HVAC",
-        "210 Insulation",
-        "240 Drywall",
-        "270 Cabinets",
-        "300 Flooring",
-        "330 Paint",
-        "360 Finishes",
+        ("Transport",     "Meridian Airways",             "Return flights, economy",         "pax",     380, 620),
+        ("Transport",     "{0} Airport Transfers",        "Airport to hotel, private car",   "trip",     45,  90),
+        ("Transport",     "{0} Rail & Coach",             "Day-trip coach with driver",      "day",     120, 260),
+        ("Accommodation", "Hotel {0} Central",            "Double room with breakfast",      "night",   110, 260),
+        ("Accommodation", "Hotel {0} Central",            "Twin room, room only",            "night",    90, 220),
+        ("Accommodation", "Hotel {0} Central",            "Suite with breakfast",            "night",   240, 480),
+        ("Experiences",   "{0} Walks",                    "Old town walking tour",           "pax",      25,  45),
+        ("Experiences",   "{0} Day Tours",                "Full-day excursion with lunch",   "pax",      80, 160),
+        ("Experiences",   "Taste of {0}",                 "Cooking class with market visit", "pax",      70, 120),
+        ("Services",      "Guardian Travel Cover",        "Travel insurance, comprehensive", "pax",      38,  75),
+        ("Services",      "Showcase Travel, head office", "Booking fee",                     "booking",  45,  60),
+        ("Services",      "Showcase Travel, head office", "Documents and delivery",          "booking",  12,  25),
     };
 
-    public static readonly string[] UnitOfMeasure = { "Each", "LF", "SF", "SY", "CY", "LS", "HR" };
-
-    public static readonly HouseModel[] HouseModels =
-    {
-        new("Aurora",    3, 2.0, 1980, 285_000m),
-        new("Brookside", 4, 2.5, 2450, 342_000m),
-        new("Cascade",   3, 2.5, 2120, 318_000m),
-        new("Devonshire",5, 3.5, 3280, 489_000m),
-        new("Evergreen", 4, 3.0, 2760, 401_000m),
-        new("Magnolia",  3, 2.0, 1840, 268_000m),
-        new("Sunridge",  4, 2.5, 2580, 372_000m),
-        new("Whitfield", 5, 4.0, 3640, 542_000m),
-    };
-
-    /// <summary>Generates an FAssembly-style item list: each row is a line item
-    /// in an assembly with vendor, PO index, description, qty, UOM, item type,
-    /// unit price, and computed total.</summary>
-    public static List<AssemblyItem> GenerateAssemblyItems(int count = 40)
-    {
-        var rnd = new Random(42); // deterministic for screenshots
-        var items = new List<AssemblyItem>();
-        string[] itemPool =
-        {
-            "Sales Incentives", "Land Costs", "Fill Dirt and Material",
-            "Permits and Fees", "Rough Grading", "Utility Connections",
-            "Temporary Electric", "Sewer Service", "Gas Service", "Electric Service",
-            "Building Permits", "Telephone Service", "Construction Finance Costs",
-            "Closing Fees and Costs", "Appraisals", "HBA Assessments",
-            "New Home Warranty Fees", "Architectural and Engineering", "Blueprints",
-            "Surveys", "Site Work", "Lot Clearing", "Excavation and Foundation",
-            "Waterproofing", "Termite Protection", "Earth Hauling",
-            "Footing and Foundations", "Gravel", "Sand", "Rebar and Reinforcing Steel",
-            "Structural Slabs", "Stairs", "Garage or Carport Slab", "Concrete Labor",
-            "Rough Sheet Metal", "Gutters and Downspouts", "Metal Edge and Flashing",
-            "Soffit and Gable Flashing", "Rough Plumbing", "Beams - Steel",
-            "Trusses", "Floor Joists", "Framing Labor", "Concrete", "Formwork",
-        };
-        for (int i = 0; i < count; i++)
-        {
-            var phaseIdx = (i / 3) % Phases.Length;
-            var vendor = i < 6 ? "Default" : Vendors[i % Vendors.Length];
-            var phase = Phases[phaseIdx];
-            var item = itemPool[i % itemPool.Length];
-            var itemType = (i % 7 == 0) ? "Quote" : "Unit Price";
-            var qty = rnd.Next(1, 35);
-            decimal price = (i % 11 == 0) ? 0m
-                          : (i < 5) ? rnd.Next(100, 35_000)
-                          : (decimal)Math.Round(rnd.NextDouble() * 5000 + 50, 0);
-            items.Add(new AssemblyItem(
-                PriceLevel: i % 6 == 0 ? "Item DB" : "Global (any Community)",
-                Vendor: vendor,
-                POIndex: $"{phaseIdx * 10 + 10:D3} {phase.Split(' ')[1]}",
-                Description: item,
-                Qty: qty,
-                UOM: UnitOfMeasure[i % UnitOfMeasure.Length],
-                ItemType: itemType,
-                Price: price,
-                Total: qty * price));
-        }
-        return items;
-    }
-
-    /// <summary>Vendor-grouped price list — FVendorPriceList-inspired.</summary>
-    public static List<VendorPrice> GenerateVendorPriceList(int rowsPerVendor = 5)
-    {
-        var rnd = new Random(7);
-        var rows = new List<VendorPrice>();
-        var partsByVendor = new[]
-        {
-            new[] { "Floor Joist 2x10x16", "Wall Stud 2x4x8", "Plywood 4x8 5/8\"", "OSB 4x8 7/16\"", "Ridge Beam LVL", "Engineered I-Joist 16\"" },
-            new[] { "Footing Mix 3000psi", "Slab Mix 3500psi", "Wall Mix 4000psi", "Pump Truck Hour", "Rebar #4 20'", "Vapor Barrier" },
-            new[] { "Service 200A", "Service 400A", "Outlet Standard", "Outlet GFCI", "Switch Single", "Switch 3-way", "Ceiling Light" },
-            new[] { "Rough-in Bath", "Rough-in Kitchen", "Water Heater 50gal", "Sewer Connection", "Toilet Standard", "Faucet Fixture" },
-            new[] { "Shingles 30yr", "Underlayment Roll", "Drip Edge 10'", "Flashing Step", "Ridge Vent 4'", "Soffit Panel" },
-            new[] { "Drywall 4x8 1/2\"", "Drywall 4x12 5/8\"", "Joint Compound 5gal", "Tape 250'", "Texture Spray Hr" },
-            new[] { "Window 36x60", "Window 48x60", "Sliding Door 6'", "Bay Window 8'", "Skylight 24x48" },
-            new[] { "Base Cabinet 36\"", "Wall Cabinet 30\"", "Pantry Tall 24\"", "Crown Molding LF", "Granite Counter SF" },
-            new[] { "Excavate Basement", "Backfill", "Grade Lot Hr", "Topsoil Spread CY", "Compaction Hr" },
-            new[] { "Furnace 80k BTU", "AC Unit 3-ton", "Duct Run 8\"", "Thermostat Smart", "Heat Pump 3-ton" },
-        };
-        for (int v = 0; v < Vendors.Length; v++)
-        {
-            var pool = partsByVendor[v];
-            var uomPool = new[] { "Each", "LF", "SF", "HR", "EA", "CY" };
-            for (int j = 0; j < rowsPerVendor; j++)
-            {
-                var part = pool[j % pool.Length];
-                rows.Add(new VendorPrice(
-                    Vendor: Vendors[v],
-                    Item: part,
-                    UOM: uomPool[j % uomPool.Length],
-                    Price: (decimal)Math.Round(rnd.NextDouble() * 800 + 12, 2),
-                    EffectiveDate: new DateTime(2025, 1, 1).AddDays(rnd.Next(0, 365)),
-                    Notes: j % 4 == 0 ? "Bulk discount available" : ""));
-            }
-        }
-        return rows.OrderBy(r => r.Vendor).ThenBy(r => r.Item).ToList();
-    }
-
-    /// <summary>Generic item catalog — FItems-inspired.</summary>
-    public static List<CatalogItem> GenerateItemCatalog()
+    /// <summary>Generates the rate card: for every destination the operator sells, four to seven of the services above in turn,
+    /// each with a rate drawn from its range and scaled by the region. Roughly one line in ten is not bookable.</summary>
+    public static List<RateCardLine> GenerateRateCard()
     {
         var rnd = new Random(13);
-        var categories = new[] { "M (Material)", "L (Labor)", "S (Subcontract)", "E (Equipment)", "O (Overhead)" };
-        var items = new List<CatalogItem>();
-        int id = 1000;
-        for (int p = 0; p < Phases.Length; p++)
+        var lines = new List<RateCardLine>();
+        int code = 1000;
+        for (int d = 0; d < TravelData.Destinations.Length; d++)
         {
-            var phase = Phases[p];
-            int perPhase = rnd.Next(3, 7);
-            for (int k = 0; k < perPhase; k++)
+            var (city, region, _) = TravelData.Destinations[d];
+            var regionFactor = RegionFactor(region);
+            int perDestination = rnd.Next(4, 8);
+            for (int k = 0; k < perDestination; k++)
             {
-                id++;
-                items.Add(new CatalogItem(
-                    ItemId: $"ITM-{id:D4}",
-                    Description: $"{phase.Split(' ', 2)[1]} component {k + 1}",
-                    Phase: phase,
-                    Category: categories[(p + k) % categories.Length],
-                    UOM: UnitOfMeasure[(p + k) % UnitOfMeasure.Length],
-                    DefaultCost: (decimal)Math.Round(rnd.NextDouble() * 500 + 25, 2),
-                    IsActive: rnd.Next(0, 10) > 0));
+                var svc = RateCardServices[(d + k) % RateCardServices.Length];
+                code++;
+                lines.Add(new RateCardLine(
+                    Code: $"RC-{code:D4}",
+                    Description: svc.Description,
+                    Supplier: string.Format(svc.Supplier, city),
+                    Destination: city,
+                    Category: svc.Category,
+                    Unit: svc.Unit,
+                    Rate: Math.Round(rnd.Next(svc.Low * 100, svc.High * 100 + 1) / 100m * regionFactor, 2),
+                    Bookable: rnd.Next(0, 10) > 0));
             }
         }
-        return items;
+        return lines;
     }
 
-    /// <summary>Builds a DataTable summarising estimated cost per house model
-    /// broken down by phase — fed straight into ReportWriterControl.ShowDataTableReport
-    /// for the Reports demo.</summary>
-    public static DataTable BuildModelCostReport()
+    /// <summary>The services costed for a package: cost group (lettered the way the Report writer's cost sheet letters them),
+    /// supplier (a {0} placeholder takes the package's city), description, unit, the rate range before the season factor, the
+    /// rate basis (Contract or Spot) and whether the line is priced per person or per booking.</summary>
+    private static readonly (string CostGroup, string Supplier, string Description, string Unit, int Low, int High, string RateBasis, string Pricing)[] PackageServices =
     {
-        var rnd = new Random(99);
-        var dt = new DataTable("Model Cost Breakdown");
-        dt.Columns.Add("Model",       typeof(string));
-        dt.Columns.Add("Bedrooms",    typeof(int));
-        dt.Columns.Add("Bathrooms",   typeof(double));
-        dt.Columns.Add("SqFt",        typeof(int));
-        dt.Columns.Add("Phase",       typeof(string));
-        dt.Columns.Add("Vendor",      typeof(string));
-        dt.Columns.Add("Cost",        typeof(decimal));
-        foreach (var m in HouseModels)
+        ("A Transport",     "Meridian Airways",             "Return flights, economy",         "pax",     380, 620, "Contract", "Per person"),
+        ("A Transport",     "Meridian Airways",             "Checked baggage, 23 kg",          "pax",      40,  60, "Contract", "Per person"),
+        ("A Transport",     "{0} Airport Transfers",        "Airport to hotel, private car",   "trip",     45,  90, "Spot",     "Per booking"),
+        ("A Transport",     "{0} Airport Transfers",        "Hotel to airport, private car",   "trip",     45,  90, "Spot",     "Per booking"),
+        ("A Transport",     "{0} Rail & Coach",             "Day-trip coach with driver",      "day",     120, 260, "Spot",     "Per booking"),
+        ("B Accommodation", "Hotel {0} Central",            "Double room with breakfast",      "night",   110, 260, "Contract", "Per booking"),
+        ("B Accommodation", "Hotel {0} Central",            "Late checkout on departure day",  "stay",     30,  60, "Spot",     "Per booking"),
+        ("C Experiences",   "{0} Walks",                    "Old town walking tour",           "pax",      25,  45, "Contract", "Per person"),
+        ("C Experiences",   "{0} Walks",                    "Evening food tour",               "pax",      65, 110, "Spot",     "Per person"),
+        ("C Experiences",   "{0} Day Tours",                "Full-day excursion with lunch",   "pax",      80, 160, "Contract", "Per person"),
+        ("C Experiences",   "{0} Day Tours",                "Entrance tickets",                "pax",      18,  40, "Spot",     "Per person"),
+        ("C Experiences",   "Taste of {0}",                 "Cooking class with market visit", "pax",      70, 120, "Contract", "Per person"),
+        ("D Services",      "Guardian Travel Cover",        "Travel insurance, comprehensive", "pax",      38,  75, "Contract", "Per person"),
+        ("D Services",      "Showcase Travel, head office", "Booking fee",                     "booking",  45,  60, "Contract", "Per booking"),
+        ("D Services",      "Showcase Travel, head office", "Documents and delivery",          "booking",  12,  25, "Contract", "Per booking"),
+    };
+
+    /// <summary>Generates the cost lines of the first package in <see cref="TravelData.Packages"/> (Lisbon Explorer): the services
+    /// above, costed once per departure season in turn, for <see cref="Pax"/> travellers and the package's nights, so the default
+    /// sixty lines are the fifteen services in each of the four seasons. A contract rate is drawn once per service and only moves
+    /// with the season; a spot rate is drawn afresh for every line.</summary>
+    public static List<PackageCostLine> GeneratePackageCostLines(int count = 60)
+    {
+        var rnd = new Random(42);
+        var package = TravelData.Packages[0];
+        var regionFactor = RegionFactor(package.Region);
+        var contractRates = PackageServices.Select(s => rnd.Next(s.Low * 100, s.High * 100 + 1) / 100m).ToArray();
+        var lines = new List<PackageCostLine>();
+        for (int i = 0; i < count; i++)
         {
-            foreach (var ph in Phases.Take(8))
-            {
-                var vendor = Vendors[rnd.Next(Vendors.Length)];
-                decimal cost = (decimal)Math.Round(rnd.NextDouble() * 18_000 + 1_500, 0);
-                dt.Rows.Add(m.Name, m.Bedrooms, m.Bathrooms, m.SqFt, ph, vendor, cost);
-            }
+            int s = i % PackageServices.Length;
+            var svc = PackageServices[s];
+            var season = TravelData.Seasons[(i / PackageServices.Length) % TravelData.Seasons.Length];
+            var baseRate = svc.RateBasis == "Contract" ? contractRates[s] : rnd.Next(svc.Low * 100, svc.High * 100 + 1) / 100m;
+            var rate = Math.Round(baseRate * regionFactor * SeasonFactor(season), 2);
+            int qty = svc.Pricing == "Per person" ? Pax : svc.Unit == "night" ? package.Nights : 1;
+            lines.Add(new PackageCostLine(
+                Season: season,
+                RateBasis: svc.RateBasis,
+                Supplier: string.Format(svc.Supplier, package.City),
+                CostGroup: svc.CostGroup,
+                Description: svc.Description,
+                Qty: qty,
+                Unit: svc.Unit,
+                Pricing: svc.Pricing,
+                Rate: rate,
+                Total: qty * rate));
         }
-        return dt;
+        return lines;
     }
 }
 
-public record AssemblyItem(string PriceLevel, string Vendor, string POIndex, string Description,
-    int Qty, string UOM, string ItemType, decimal Price, decimal Total);
+public record RateCardLine(string Code, string Description, string Supplier, string Destination,
+    string Category, string Unit, decimal Rate, bool Bookable);
 
-public record VendorPrice(string Vendor, string Item, string UOM, decimal Price,
-    DateTime EffectiveDate, string Notes);
-
-public record CatalogItem(string ItemId, string Description, string Phase, string Category,
-    string UOM, decimal DefaultCost, bool IsActive);
-
-public record HouseModel(string Name, int Bedrooms, double Bathrooms, int SqFt, decimal BasePrice);
+public record PackageCostLine(string Season, string RateBasis, string Supplier, string CostGroup, string Description,
+    int Qty, string Unit, string Pricing, decimal Rate, decimal Total);

@@ -10,7 +10,7 @@ namespace FlexCore.Showcase.Services;
 /// Showcase stand-in for <see cref="IReportDataExecutor"/>.
 /// Instead of hitting a real database, this executor inspects the column
 /// aliases in the SELECT list and synthesizes rows from
-/// <see cref="DemoData"/>. That lets the showcase exercise the full XML →
+/// <see cref="TravelData"/>. That lets the showcase exercise the full XML →
 /// SQL → HTML report pipeline (parameters, grouping, sums, page-break logic)
 /// with zero database wiring.
 ///
@@ -36,8 +36,8 @@ public class ShowcaseReportDataExecutor : IReportDataExecutor
 
         // Dispatch by a table-name fingerprint. New showcase reports register
         // their own builder here.
-        if (sql.Contains("AssemblyCostsAllCommunities", StringComparison.OrdinalIgnoreCase))
-            return BuildModelCostsTable(aliases, parameters);
+        if (sql.Contains("PackageCostLines", StringComparison.OrdinalIgnoreCase))
+            return BuildPackageCostTable(aliases, parameters);
 
         // Unknown report — return an empty table with the requested columns so
         // the renderer doesn't NRE on a missing field.
@@ -45,95 +45,141 @@ public class ShowcaseReportDataExecutor : IReportDataExecutor
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // Model Costs report — synthesizes Item rows for the selected
-    // Community + Model, grouped by phase-group / phase.
+    // Package Cost Sheet — synthesizes the service lines a tour operator
+    // pays its suppliers for one package in one departure season, grouped
+    // by cost group and supplier.
     // ─────────────────────────────────────────────────────────────────
-    private DataTable BuildModelCostsTable(IReadOnlyList<string> aliases, IDictionary<string, object>? parameters)
+    private DataTable BuildPackageCostTable(IReadOnlyList<string> aliases, IDictionary<string, object>? parameters)
     {
         var dt = BuildEmptyTable(aliases);
 
-        // Resolve filters — fall back to first house model + a default community
-        // if the caller didn't pass anything.
-        string community = LookupParameter(parameters, "Community") ?? "Showcase Estates";
-        string model     = LookupParameter(parameters, "Model")     ?? DemoData.HouseModels[0].Name;
+        // Resolve filters — fall back to the first package and season if the caller didn't pass anything.
+        string packageName = LookupParameter(parameters, "Package") ?? TravelData.Packages[0].Name;
+        string season      = LookupParameter(parameters, "Season")  ?? TravelData.Seasons[0];
+        var package = TravelData.Packages.FirstOrDefault(p => p.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase))
+                      ?? TravelData.Packages[0];
 
-        // Build a deterministic set of items: each phase-group contains 2-3 phases,
-        // each phase contains 3-5 line items. Drives sums at every group level.
-        var rnd = new Random(HashSeed(community, model));
+        // Deterministic per package and season, so the same choice always prints the same sheet.
+        var rnd = new Random(HashSeed(package.Name, season));
+        var city = package.City;
+        int pax = 2;
+        int nights = package.Nights;
 
-        // Phase-groups (the outer of the inner two groups). Each maps to a slice
-        // of the global Phases array.
-        var phaseGroups = new (string GrpPhase, string GrpDesc, int From, int To)[]
+        // Prices move with the season and with how far the package is from home.
+        decimal seasonFactor = season switch { "Summer" => 1.25m, "Autumn" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
+        decimal flightFactor = package.Region switch { "East Asia" => 1.6m, "Southern Africa" => 1.8m, "North Africa" => 0.9m, _ => 1.0m };
+
+        // Cost groups, each with its suppliers; each supplier with its services:
+        // (code suffix, description, quantity, unit, low rate, high rate, note)
+        var costGroups = new (string Code, string Desc, (string Supplier, (string Code, string Desc, int Qty, string Unit, int Low, int High, string Note)[] Services)[] Suppliers)[]
         {
-            ("A", "Site & Foundation",  0, 3),   // Permits, Excavation, Foundation
-            ("B", "Shell",              3, 5),   // Framing, Roofing
-            ("C", "Mechanical",         5, 8),   // Plumbing rough, Electrical rough, HVAC
-            ("D", "Finishes",           8, 14),  // Insulation, Drywall, Cabinets, Flooring, Paint, Finishes
-        };
-
-        // Pick a reasonable item-name pool keyed to phase, so the rows look like
-        // a real estimating breakdown rather than random words.
-        var itemsByPhaseGrp = new Dictionary<string, string[]>
-        {
-            ["A"] = new[] { "Permit Filing", "Lot Clearing", "Site Excavation", "Footing Concrete", "Foundation Walls", "Waterproofing" },
-            ["B"] = new[] { "Wall Framing", "Roof Trusses", "Sheathing", "Asphalt Shingles", "Ridge Vent", "Gutters" },
-            ["C"] = new[] { "Rough Plumbing", "Sewer Connection", "Rough Electrical", "Panel 200A", "Furnace 80k BTU", "Ductwork", "Thermostat" },
-            ["D"] = new[] { "Insulation R-19", "Drywall 1/2\"", "Cabinet Install", "Granite Counters", "Hardwood Flooring", "Tile Bath", "Interior Paint", "Exterior Trim" },
-        };
-
-        int detailCounter = 1;
-        foreach (var (grpPhase, grpDesc, from, to) in phaseGroups)
-        {
-            for (int phaseIdx = from; phaseIdx < to && phaseIdx < DemoData.Phases.Length; phaseIdx++)
+            ("A", "Transport", new[]
             {
-                var phaseFull = DemoData.Phases[phaseIdx];
-                // "030 Excavation" → code = "030", desc = "Excavation"
-                var spaceIdx = phaseFull.IndexOf(' ');
-                var phaseCode = spaceIdx > 0 ? phaseFull[..spaceIdx] : phaseFull;
-                var phaseDesc = spaceIdx > 0 ? phaseFull[(spaceIdx + 1)..] : phaseFull;
-
-                int rowsInPhase = rnd.Next(3, 6);
-                var itemPool = itemsByPhaseGrp[grpPhase];
-                for (int r = 0; r < rowsInPhase; r++)
+                ("Meridian Airways", new[]
                 {
-                    var itemDesc = itemPool[r % itemPool.Length];
-                    var itemCode = $"I{1000 + detailCounter:D4}";
-                    var vendor = DemoData.Vendors[(phaseIdx + r) % DemoData.Vendors.Length];
-                    var qty = (decimal)Math.Round(rnd.NextDouble() * 90 + 5, 2);
-                    var rate = (decimal)Math.Round(rnd.NextDouble() * 250 + 8, 2);
-                    var uom = DemoData.UnitOfMeasure[(phaseIdx + r) % DemoData.UnitOfMeasure.Length];
+                    ("F", "Return flights, economy",            pax, "pax",  380, 620, "Non-refundable"),
+                    ("F", "Checked baggage, 23 kg",             pax, "pax",   40,  60, ""),
+                    ("F", "Seat selection, outbound and return", pax, "pax",   15,  30, ""),
+                }),
+                ($"{city} Airport Transfers", new[]
+                {
+                    ("T", "Airport to hotel, private car",      1, "trip",   45,  90, ""),
+                    ("T", "Hotel to airport, private car",      1, "trip",   45,  90, ""),
+                }),
+                ($"{city} Rail & Coach", new[]
+                {
+                    ("T", "Day-trip coach with driver",         1, "day",   120, 260, "Net rate"),
+                    ("T", "Regional rail pass, 3 days",       pax, "pax",    90, 180, ""),
+                }),
+            }),
+            ("B", "Accommodation", new[]
+            {
+                ($"Hotel {city} Central", new[]
+                {
+                    ("H", "Double room with breakfast",    nights, "night", 110, 260, "Commissionable 10%"),
+                    ("H", "City tax",                      nights, "night",   2,   5, "Paid locally"),
+                }),
+                ($"{city} Boutique Stays", new[]
+                {
+                    ("H", "Room upgrade, view side",       nights, "night",  40,  90, ""),
+                    ("H", "Late checkout on departure day",     1, "stay",   30,  60, ""),
+                }),
+            }),
+            ("C", "Experiences", new[]
+            {
+                ($"{city} Walks", new[]
+                {
+                    ("E", "Old town walking tour",          pax, "pax",   25,  45, ""),
+                    ("E", "Evening food tour",              pax, "pax",   65, 110, ""),
+                }),
+                ($"{city} Day Tours", new[]
+                {
+                    ("E", "Full-day excursion with lunch",  pax, "pax",   80, 160, ""),
+                    ("E", "Entrance tickets",               pax, "pax",   18,  40, "Pre-booked"),
+                }),
+                ($"Taste of {city}", new[]
+                {
+                    ("E", "Cooking class with market visit", pax, "pax",   70, 120, ""),
+                }),
+            }),
+            ("D", "Services", new[]
+            {
+                ("Guardian Travel Cover", new[]
+                {
+                    ("S", "Travel insurance, comprehensive", pax, "pax",   38,  75, ""),
+                }),
+                ($"{city} Guide Co-op", new[]
+                {
+                    ("S", "Private guide, full day",          2, "day",   180, 320, "Net rate"),
+                }),
+                ("Showcase Travel, head office", new[]
+                {
+                    ("S", "Booking fee",                      1, "booking", 45,  60, ""),
+                    ("S", "Documents and delivery",           1, "booking", 12,  25, ""),
+                }),
+            }),
+        };
+
+        int lineNo = 1;
+        foreach (var group in costGroups)
+        {
+            foreach (var (supplier, services) in group.Suppliers)
+            {
+                foreach (var svc in services)
+                {
+                    var factor = svc.Code == "F" ? flightFactor * seasonFactor : seasonFactor;
+                    // Rates in cents times the factors, rounded back to two places, so every rate prints with two decimals.
+                    var rate = Math.Round(rnd.Next(svc.Low * 100, svc.High * 100 + 1) / 100m * factor, 2);
+                    var serviceCode = $"{svc.Code}{lineNo:D3}";
 
                     var row = dt.NewRow();
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_CommunityDesc", community);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_Model",         model);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_AssemblyDesc",  $"{model} Standard");
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_GrpPhase",      grpPhase);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_GrpDesc",       grpDesc);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_Phase",         phaseCode);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_PhaseDesc",     phaseDesc);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_Item",          itemCode);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_ItemDesc",      itemDesc);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_OrderQty",      qty);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_TakeoffUOM",    uom);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_Rate",          rate);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_VendorDesc",    vendor);
-                    SetIfPresent(row, "AssemblyCostsAllCommunities_DivisionID",    1);
+                    SetIfPresent(row, "PackageCostLines_Region",        package.Region);
+                    SetIfPresent(row, "PackageCostLines_Package",       package.Name);
+                    SetIfPresent(row, "PackageCostLines_Season",        season);
+                    SetIfPresent(row, "PackageCostLines_CostGroup",     group.Code);
+                    SetIfPresent(row, "PackageCostLines_CostGroupDesc", group.Desc);
+                    SetIfPresent(row, "PackageCostLines_Supplier",      supplier);
+                    SetIfPresent(row, "PackageCostLines_Service",       serviceCode);
+                    SetIfPresent(row, "PackageCostLines_ServiceDesc",   svc.Desc);
+                    SetIfPresent(row, "PackageCostLines_Qty",           (decimal)svc.Qty);
+                    SetIfPresent(row, "PackageCostLines_Unit",          svc.Unit);
+                    SetIfPresent(row, "PackageCostLines_Rate",          rate);
+                    SetIfPresent(row, "PackageCostLines_Notes",         svc.Note);
 
                     // Formula columns — values must match the Crystal formulas so
                     // grouping & summary aggregation work consistently.
-                    SetIfPresent(row, "Formula_Amount",    qty * rate);
-                    SetIfPresent(row, "Formula_ModelDesc", $"{model} {model} Standard");
-                    SetIfPresent(row, "Formula_GroupDesc", $"{grpPhase} {grpDesc}");
-                    SetIfPresent(row, "Formula_PhaseDesc", $"{phaseCode} {phaseDesc}");
+                    SetIfPresent(row, "Formula_Amount",      svc.Qty * rate);
+                    SetIfPresent(row, "Formula_PackageDesc", $"{package.Name}, {season}");
+                    SetIfPresent(row, "Formula_GroupDesc",   $"{group.Code} {group.Desc}");
 
                     dt.Rows.Add(row);
-                    detailCounter++;
+                    lineNo++;
                 }
             }
         }
 
-        _logger.LogInformation("Showcase Model Costs: produced {Rows} rows for community='{C}', model='{M}'",
-            dt.Rows.Count, community, model);
+        _logger.LogInformation("Showcase Package Cost Sheet: produced {Rows} rows for package='{P}', season='{S}'",
+            dt.Rows.Count, package.Name, season);
         return dt;
     }
 

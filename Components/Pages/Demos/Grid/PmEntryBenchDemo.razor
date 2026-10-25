@@ -1,4 +1,3 @@
-@page "/demo/grid/pm-entry"
 @page "/demo/grid/typing-modes"
 @rendermode InteractiveServer
 @using Fx.ControlKit
@@ -17,7 +16,9 @@
    TextBoxControl.razor (parameters 232-402, EffectiveTypingBehavior 328, OnNativeKeyDown / OnNativeBlur / the sync and JSInvokable
    commit 416-574, the attach in OnAfterRenderAsync 745-826, OnNativeInput / OnNativeChange 983-1037) and the listener those call in
    wwwroot/textbox-control.js (pre-attach shield 192-224, suppressTypingKeyDispatch 558-577, enableClientBufferedTyping 580-806);
-   rows checked with scratchpad/vocabcheck.py. *@
+   rows checked with scratchpad/vocabcheck.py.
+   2026-10-25 (Baaria, SC-344): the rows are travel agents with a discount limit instead of the project managers and PO limit copied
+   from HomeFront. *@
 
 <PageTitle>Typing modes — FlexCore Showcase</PageTitle>
 
@@ -35,14 +36,14 @@
 
     <Examples>
         <DemoExample Id="transport" Title="Switch the transport, then type" RazorCode="@Code.Transport" CSharpCode="@Code.TransportCs">
-            <Description><p>Pick a transport, double-click a Full Name, Email or Phone cell, type and press Enter. The line under the grid counts the saves and names the last one. On a local connection the two modes feel the same; the difference is how many messages travel while you type.</p></Description>
+            <Description><p>Pick a transport, double-click an agent's Full Name, Email, Phone or Desk cell, type and press Enter. The line under the grid counts the saves and names the last one. On a local connection the two modes feel the same; the difference is how many messages travel while you type.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_transports" Values="@(new[] { _clientBuffered ? "client" : "server" })"
                                     ValuesChanged="@(v => SetTransport(v.Count > 0 && v[0] == "client"))"
                                     Selection="ChoiceSelectionMode.Single" AriaLabel="Typing transport" />
             </Controls>
             <Demo>
-                <GridControl TValue="PMRow"
+                <GridControl TValue="AgentRow"
                              DataSource="@_rows"
                              Height="360px"
                              AllowSelection="true"
@@ -52,12 +53,13 @@
                              EventsRef="@_events"
                              CssClass="fx-grid-compact">
                     <GridColumnsBase>
-                        <GridColumn Field="@nameof(PMRow.ID)" HeaderText="PM ID" Width="85px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(PMRow.FullName)" HeaderText="Full Name" Width="200px" AllowEditing="true" />
-                        <GridColumn Field="@nameof(PMRow.Email)" HeaderText="Email Address" Width="220px" AllowEditing="true" />
-                        <GridColumn Field="@nameof(PMRow.Phone)" HeaderText="Direct Phone" Width="130px" AllowEditing="true" />
-                        <GridColumn Field="@nameof(PMRow.IsAdmin)" HeaderText="Admin" Width="80px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" AllowEditing="true" />
-                        <GridColumn Field="@nameof(PMRow.POLimit)" HeaderText="PO Limit" Width="130px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" Format="$#,##0" />
+                        <GridColumn Field="@nameof(AgentRow.ID)" HeaderText="Agent ID" Width="85px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(AgentRow.FullName)" HeaderText="Full Name" Width="200px" AllowEditing="true" />
+                        <GridColumn Field="@nameof(AgentRow.Email)" HeaderText="Email Address" Width="220px" AllowEditing="true" />
+                        <GridColumn Field="@nameof(AgentRow.Phone)" HeaderText="Direct Phone" Width="130px" AllowEditing="true" />
+                        <GridColumn Field="@nameof(AgentRow.Desk)" HeaderText="Desk" Width="130px" AllowEditing="true" />
+                        <GridColumn Field="@nameof(AgentRow.TeamLead)" HeaderText="Team Lead" Width="90px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" AllowEditing="true" />
+                        <GridColumn Field="@nameof(AgentRow.DiscountLimit)" HeaderText="Discount Limit" Width="130px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" Format="$#,##0" />
                     </GridColumnsBase>
                 </GridControl>
                 <p class="result">@(_clientBuffered ? "ClientBuffered" : "ServerBacked") · @_saveCount @(_saveCount == 1 ? "cell" : "cells") saved@(_last is null ? "" : $"; last: {_last}")</p>
@@ -107,18 +109,19 @@
 </FeatureDemoLayout>
 
 @code {
-    public class PMRow
+    public class AgentRow
     {
         public string ID { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
-        public bool IsAdmin { get; set; }
-        public decimal POLimit { get; set; }
+        public string Desk { get; set; } = string.Empty;
+        public bool TeamLead { get; set; }
+        public decimal DiscountLimit { get; set; }
     }
 
     private readonly SelectionItem[] _transports = { new("server", "ServerBacked"), new("client", "ClientBuffered") };
-    private List<PMRow> _rows = [];
+    private List<AgentRow> _rows = [];
     private bool _clientBuffered = true;
     private int _saveCount;
     private string? _last;
@@ -129,11 +132,11 @@
         Mode = EditMode.Batch
     };
 
-    private readonly GridControlEvents<PMRow> _events = new();
+    private readonly GridControlEvents<AgentRow> _events = new();
 
     protected override void OnInitialized()
     {
-        _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<PMRow>>(this, args =>
+        _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<AgentRow>>(this, args =>
         {
             _saveCount++;
             _last = $"{args.ColumnName} = {args.Value} on {args.Data.ID}";
@@ -141,11 +144,11 @@
 
         _rows =
         [
-            new PMRow { ID = "PM-01", FullName = "Marcus Vance", Email = "m.vance@builder.com", Phone = "(512) 555-0142", IsAdmin = true, POLimit = 250000m },
-            new PMRow { ID = "PM-02", FullName = "Sarah Jenkins", Email = "s.jenkins@builder.com", Phone = "(512) 555-0189", IsAdmin = false, POLimit = 50000m },
-            new PMRow { ID = "PM-03", FullName = "Robert Chen", Email = "r.chen@builder.com", Phone = "(512) 555-0233", IsAdmin = false, POLimit = 75000m },
-            new PMRow { ID = "PM-04", FullName = "Amanda Blake", Email = "a.blake@builder.com", Phone = "(512) 555-0287", IsAdmin = true, POLimit = 500000m },
-            new PMRow { ID = "PM-05", FullName = "Daniel Torres", Email = "d.torres@builder.com", Phone = "(512) 555-0312", IsAdmin = false, POLimit = 60000m }
+            new AgentRow { ID = "AG-01", FullName = "Nadia Okafor", Email = "nokafor@showcase-travel.example", Phone = "(512) 555-0114", Desk = "Leisure desk", TeamLead = true, DiscountLimit = 1000m },
+            new AgentRow { ID = "AG-02", FullName = "Lucas Moreau", Email = "lmoreau@showcase-travel.example", Phone = "(512) 555-0157", Desk = "Adventure desk", TeamLead = false, DiscountLimit = 250m },
+            new AgentRow { ID = "AG-03", FullName = "Hannah Byrne", Email = "hbyrne@showcase-travel.example", Phone = "(512) 555-0208", Desk = "Cruise desk", TeamLead = false, DiscountLimit = 500m },
+            new AgentRow { ID = "AG-04", FullName = "Kenji Watanabe", Email = "kwatanabe@showcase-travel.example", Phone = "(512) 555-0263", Desk = "Touring desk", TeamLead = true, DiscountLimit = 1000m },
+            new AgentRow { ID = "AG-05", FullName = "Imogen Hart", Email = "ihart@showcase-travel.example", Phone = "(512) 555-0329", Desk = "Luxury desk", TeamLead = false, DiscountLimit = 250m }
         ];
     }
 
@@ -154,7 +157,7 @@
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
     private static class Code
     {
-        public const string Transport = @"<GridControl TValue=""PMRow""
+        public const string Transport = @"<GridControl TValue=""AgentRow""
              DataSource=""@_rows""
              Height=""360px""
              AllowSelection=""true""
@@ -164,28 +167,30 @@
              EventsRef=""@_events""
              CssClass=""fx-grid-compact"">
     <GridColumnsBase>
-        <GridColumn Field=""@nameof(PMRow.ID)"" HeaderText=""PM ID"" Width=""85px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(PMRow.FullName)"" HeaderText=""Full Name"" Width=""200px"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(PMRow.Email)"" HeaderText=""Email Address"" Width=""220px"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(PMRow.Phone)"" HeaderText=""Direct Phone"" Width=""130px"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(PMRow.IsAdmin)"" HeaderText=""Admin"" Width=""80px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(PMRow.POLimit)"" HeaderText=""PO Limit"" Width=""130px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" Format=""$#,##0"" />
+        <GridColumn Field=""@nameof(AgentRow.ID)"" HeaderText=""Agent ID"" Width=""85px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(AgentRow.FullName)"" HeaderText=""Full Name"" Width=""200px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(AgentRow.Email)"" HeaderText=""Email Address"" Width=""220px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(AgentRow.Phone)"" HeaderText=""Direct Phone"" Width=""130px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(AgentRow.Desk)"" HeaderText=""Desk"" Width=""130px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(AgentRow.TeamLead)"" HeaderText=""Team Lead"" Width=""90px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(AgentRow.DiscountLimit)"" HeaderText=""Discount Limit"" Width=""130px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" Format=""$#,##0"" />
     </GridColumnsBase>
 </GridControl>
 <p class=""result"">@(_clientBuffered ? ""ClientBuffered"" : ""ServerBacked"") · @_saveCount @(_saveCount == 1 ? ""cell"" : ""cells"") saved@(_last is null ? """" : $""; last: {_last}"")</p>";
-        public const string TransportCs = @"public class PMRow
+        public const string TransportCs = @"public class AgentRow
 {
     public string ID { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
-    public bool IsAdmin { get; set; }
-    public decimal POLimit { get; set; }
+    public string Desk { get; set; } = string.Empty;
+    public bool TeamLead { get; set; }
+    public decimal DiscountLimit { get; set; }
 }
 
 private readonly SelectionItem[] _transports = { new(""server"", ""ServerBacked""), new(""client"", ""ClientBuffered"") };
 
-private List<PMRow> _rows = [];
+private List<AgentRow> _rows = [];
 
 private bool _clientBuffered = true;
 
@@ -199,11 +204,11 @@ private readonly EditSettings _editSettings = new()
     Mode = EditMode.Batch
 };
 
-private readonly GridControlEvents<PMRow> _events = new();
+private readonly GridControlEvents<AgentRow> _events = new();
 
 protected override void OnInitialized()
 {
-    _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<PMRow>>(this, args =>
+    _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<AgentRow>>(this, args =>
     {
         _saveCount++;
         _last = $""{args.ColumnName} = {args.Value} on {args.Data.ID}"";
@@ -211,11 +216,11 @@ protected override void OnInitialized()
 
     _rows =
     [
-        new PMRow { ID = ""PM-01"", FullName = ""Marcus Vance"", Email = ""m.vance@builder.com"", Phone = ""(512) 555-0142"", IsAdmin = true, POLimit = 250000m },
-        new PMRow { ID = ""PM-02"", FullName = ""Sarah Jenkins"", Email = ""s.jenkins@builder.com"", Phone = ""(512) 555-0189"", IsAdmin = false, POLimit = 50000m },
-        new PMRow { ID = ""PM-03"", FullName = ""Robert Chen"", Email = ""r.chen@builder.com"", Phone = ""(512) 555-0233"", IsAdmin = false, POLimit = 75000m },
-        new PMRow { ID = ""PM-04"", FullName = ""Amanda Blake"", Email = ""a.blake@builder.com"", Phone = ""(512) 555-0287"", IsAdmin = true, POLimit = 500000m },
-        new PMRow { ID = ""PM-05"", FullName = ""Daniel Torres"", Email = ""d.torres@builder.com"", Phone = ""(512) 555-0312"", IsAdmin = false, POLimit = 60000m }
+        new AgentRow { ID = ""AG-01"", FullName = ""Nadia Okafor"", Email = ""nokafor@showcase-travel.example"", Phone = ""(512) 555-0114"", Desk = ""Leisure desk"", TeamLead = true, DiscountLimit = 1000m },
+        new AgentRow { ID = ""AG-02"", FullName = ""Lucas Moreau"", Email = ""lmoreau@showcase-travel.example"", Phone = ""(512) 555-0157"", Desk = ""Adventure desk"", TeamLead = false, DiscountLimit = 250m },
+        new AgentRow { ID = ""AG-03"", FullName = ""Hannah Byrne"", Email = ""hbyrne@showcase-travel.example"", Phone = ""(512) 555-0208"", Desk = ""Cruise desk"", TeamLead = false, DiscountLimit = 500m },
+        new AgentRow { ID = ""AG-04"", FullName = ""Kenji Watanabe"", Email = ""kwatanabe@showcase-travel.example"", Phone = ""(512) 555-0263"", Desk = ""Touring desk"", TeamLead = true, DiscountLimit = 1000m },
+        new AgentRow { ID = ""AG-05"", FullName = ""Imogen Hart"", Email = ""ihart@showcase-travel.example"", Phone = ""(512) 555-0329"", Desk = ""Luxury desk"", TeamLead = false, DiscountLimit = 250m }
     ];
 }
 

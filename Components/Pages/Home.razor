@@ -7,6 +7,13 @@
    ("Finishes (8%)" wrapped to a second row); the shares are rebalanced to 40/25/20/15. The pie draws no slice labels, so the
    share stays in the legend text. The "charts" string in the code tab below is kept by hand and still matches the markup. *@
 
+@* 2026-10-25 (Baaria, SC-344): the hero grid is a travel agency's quote desk, Inbox — Trip Requests. It replaced an example whose
+   banner text, columns and names came from HomeFront's custom-quote inbox. Same grid features as before (1,000 windowed rows, frozen
+   key column, in-cell DropDownGridControl lookup, fast-typing money cell, SVG sparkline, badges, popup editor); two buttons that only
+   raised a notification now do their job: Export to Excel calls the grid's ExportToXlsxAsync, New Request opens the editor on a blank
+   request and adds it on Save. The "grid" string in the code tab is the GridControl block below, copied verbatim (scratchpad
+   home_inbox.py regenerates it). *@
+
 <PageTitle>FlexCore — Enterprise Blazor Component Suite for .NET</PageTitle>
 
 <div class="landing-container">
@@ -17,7 +24,7 @@
             <span>FlexCore v@_flexCoreVersion Enterprise Suite &bull; .NET 10 &bull; C# and SVG rendering &bull; No npm or third-party JavaScript</span>
         </div>
         <h1 class="hero-oneliner">
-            High-throughput enterprise Blazor data grid with sub-millisecond 60 FPS virtualization, instant in-grid editing, and native ClosedXML Excel export.
+            Enterprise Blazor data grid with row windowing for large datasets, in-grid editing and built-in Excel export.
         </h1>
     </div>
 
@@ -33,7 +40,7 @@
                 </div>
                 <div class="window-title">
                     <span class="bi bi-window-sidebar"></span>
-                    <span>Inbox — Custom Quotes</span>
+                    <span>Inbox — Trip Requests</span>
                 </div>
                 <div class="window-tags">
                     <span>FlexCore Grid v@_flexCoreVersion • .NET 10 • 1,000 Rows Virtualized</span>
@@ -43,14 +50,14 @@
             <!-- Hint Subtitle Banner -->
             <div class="grid-banner-hint">
                 <span class="bi bi-info-circle-fill" style="color: #0284c7;"></span>
-                <span><strong>Prepare quotes for custom requests:</strong> Double click on a request to build the quote. Requests can also be declined.</span>
+                <span><strong>Quote desk:</strong> trip requests arrive from the booking site. Double-click a request to open the quote editor, or type a quote straight into the grid.</span>
             </div>
 
             <!-- Showcase Top Bar / Tabs -->
             <div class="showcase-header">
                 <div class="showcase-tabs">
                     <button type="button" class="@($"tab-btn {(_activeTab == "grid" ? "active" : "")}")" @onclick="@(() => _activeTab = "grid")">
-                        <span class="bi bi-table"></span> FlexGrid (Custom Quotes)
+                        <span class="bi bi-table"></span> FlexGrid (Trip Requests)
                     </button>
                     <button type="button" class="@($"tab-btn {(_activeTab == "charts" ? "active" : "")}")" @onclick="@(() => _activeTab = "charts")">
                         <span class="bi bi-bar-chart-line"></span> 30+ SVG Charts
@@ -105,7 +112,7 @@
                                 <span class="bi bi-search search-icon"></span>
                                 <TextBoxControl Value="@_gridSearchTerm"
                                                 ValueChanged="@(v => { _gridSearchTerm = v ?? ""; StateHasChanged(); })"
-                                                placeholder="Search quotes, jobs, salespeople..."
+                                                placeholder="Search requests, destinations, agents..."
                                                 CssClass="grid-search-input" />
                             </div>
                         </div>
@@ -114,57 +121,57 @@
                             <button type="button" class="btn-grid-action btn-excel" @onclick="ExportToExcel">
                                 <span class="bi bi-file-earmark-excel"></span> Export to Excel
                             </button>
-                            <button type="button" class="btn-grid-action btn-new" @onclick="CreateNewQuote">
+                            <button type="button" class="btn-grid-action btn-new" @onclick="CreateNewRequest">
                                 <span class="bi bi-plus-lg"></span> New Request
                             </button>
                         </div>
                     </div>
 
                     <div class="category-filter-bar">
-                        <span class="filter-bar-label">Category:</span>
-                        @foreach (var cat in _quoteCategories)
+                        <span class="filter-bar-label">Trip type:</span>
+                        @foreach (var type in _tripTypes)
                         {
                             <button type="button"
-                                    class="@($"btn-filter-pill {(_selectedCategory == cat ? "active" : "")}")"
-                                    @onclick="@(() => _selectedCategory = cat)">
-                                @cat
+                                    class="@($"btn-filter-pill {(_selectedTripType == type ? "active" : "")}")"
+                                    @onclick="@(() => _selectedTripType = type)">
+                                @type
                             </button>
                         }
                     </div>
 
-                    <!-- HIGH-PERFORMANCE HIGHLIGHTS BANNER -->
                     <div class="grid-perf-highlights">
                         <div class="perf-badge-item">
                             <span class="perf-badge-icon">⚡</span>
                             <div class="perf-badge-text">
                                 <strong>1,000 Rows Live Virtualized</strong>
-                                <span>Ultra-smooth 60 FPS scrolling with zero DOM lag</span>
+                                <span>Only the rows in view plus an overscan band are rendered as you scroll</span>
                             </div>
                         </div>
                         <div class="perf-badge-item">
                             <span class="perf-badge-icon">⌨️</span>
                             <div class="perf-badge-text">
                                 <strong>Instant In-Grid Typing</strong>
-                                <span>Click any Estimate cell to type directly — keystrokes stay in the browser until commit</span>
+                                <span>Click any Quote cell to type directly — keystrokes stay in the browser until commit</span>
                             </div>
                         </div>
                         <div class="perf-badge-item">
                             <span class="perf-badge-icon">🎛️</span>
                             <div class="perf-badge-text">
                                 <strong>DropDownGridControl</strong>
-                                <span>Multi-column category picker with search &amp; sort</span>
+                                <span>Multi-column trip-type picker with search &amp; sort</span>
                             </div>
                         </div>
                         <div class="perf-badge-item">
                             <span class="perf-badge-icon">✏️</span>
                             <div class="perf-badge-text">
                                 <strong>Modal Popup Editor</strong>
-                                <span>Click [✏ Edit] on Description for full quote editor</span>
+                                <span>Click [✏ Edit] on Itinerary for the full request editor</span>
                             </div>
                         </div>
                     </div>
 
-                    <GridControl TValue="CustomQuote" DataSource="@FilteredQuotes"
+                    <GridControl TValue="TripRequest" DataSource="@FilteredRequests"
+                                 @ref="_grid"
                                  AllowSelection="true"
                                  AllowSorting="true"
                                  AllowFiltering="true"
@@ -175,72 +182,73 @@
                                  EventsRef="@_gridEvents"
                                  Height="440px">
                         <GridColumnsBase>
-                            <GridColumn Field="@nameof(CustomQuote.Job)" HeaderText="Job" Width="90px"
+                            <GridColumn Field="@nameof(TripRequest.Request)" HeaderText="Request" Width="100px"
                                         IsPrimaryKey="true" AllowEditing="false"
                                         IsFrozen="true" FrozenPosition="FrozenColumnPosition.Left">
                                 <Template Context="row">
-                                    @{ var q = (CustomQuote)row; }
-                                    <BadgeControl Text="@q.Job" CssClass="grid-job-code" />
+                                    @{ var r = (TripRequest)row; }
+                                    <BadgeControl Text="@r.Request" CssClass="grid-request-code" />
                                 </Template>
                             </GridColumn>
 
-                            <GridColumn Field="@nameof(CustomQuote.Salesperson)" HeaderText="Salesperson" Width="145px" AllowEditing="false">
+                            <GridColumn Field="@nameof(TripRequest.Agent)" HeaderText="Agent" Width="150px" AllowEditing="false">
                                 <Template Context="row">
-                                    @{ var q = (CustomQuote)row; }
-                                    <div class="salesperson-cell">
-                                        <span class="salesperson-avatar" style="background:@q.AvatarBg">@q.AvatarInitials</span>
-                                        <span class="salesperson-name">@q.Salesperson</span>
+                                    @{ var r = (TripRequest)row; }
+                                    <div class="agent-cell">
+                                        <span class="agent-avatar" style="background:@r.AvatarBg">@r.AvatarInitials</span>
+                                        <span class="agent-name">@r.Agent</span>
                                     </div>
                                 </Template>
                             </GridColumn>
 
-                            <GridColumn Field="@nameof(CustomQuote.Community)" HeaderText="Community" Width="130px" AllowEditing="false" />
+                            <GridColumn Field="@nameof(TripRequest.Destination)" HeaderText="Destination" Width="130px" AllowEditing="false" />
 
-                            <!-- IN-CELL DROP DOWN GRID CONTROL (Multi-column lookup) -->
-                            <GridColumn HeaderText="Category (DropDownGrid)" Width="190px" AllowEditing="false">
+                            @* In-cell DropDownGridControl: a four-column lookup with search *@
+                            <GridColumn HeaderText="Trip type (DropDownGrid)" Width="190px" AllowEditing="false">
                                 <Template Context="row">
-                                    @{ var q = (CustomQuote)row; }
+                                    @{ var r = (TripRequest)row; }
                                     <div class="grid-cell-dropdowngrid">
-                                        <DropDownGridControl TItem="CategoryLookup" TValue="string"
-                                                             DataSource="@_categoryLookup"
-                                                             Value="@q.Category"
-                                                             ValueChanged="@(val => OnCategoryChanged(q, val))"
-                                                             TextFieldName="@nameof(CategoryLookup.Name)"
-                                                             ValueFieldName="@nameof(CategoryLookup.Code)"
-                                                             ClosedTextFieldName="@nameof(CategoryLookup.Code)"
-                                                             PopupWidth="410px"
+                                        <DropDownGridControl TItem="TripTypeLookup" TValue="string"
+                                                             DataSource="@_tripTypeLookup"
+                                                             Value="@r.TripType"
+                                                             ValueChanged="@(val => OnTripTypeChanged(r, val))"
+                                                             TextFieldName="@nameof(TripTypeLookup.Name)"
+                                                             ValueFieldName="@nameof(TripTypeLookup.Code)"
+                                                             ClosedTextFieldName="@nameof(TripTypeLookup.Code)"
+                                                             PopupWidth="490px"
                                                              PopupHeight="220px"
                                                              RowHeight="24"
                                                              ShowSearch="true"
-                                                             SearchPlaceholder="Search trades..."
+                                                             SearchPlaceholder="Search trip types..."
                                                              AllowClear="false"
-                                                             Placeholder="Select category...">
+                                                             Placeholder="Select trip type...">
                                             <Columns>
-                                                <GridColumn Field="@nameof(CategoryLookup.Code)" HeaderText="Code" Width="95px" />
-                                                <GridColumn Field="@nameof(CategoryLookup.Name)" HeaderText="Category Name" Width="170px" />
-                                                <GridColumn Field="@nameof(CategoryLookup.Trade)" HeaderText="Trade" Width="110px" />
+                                                <GridColumn Field="@nameof(TripTypeLookup.Code)" HeaderText="Code" Width="95px" />
+                                                <GridColumn Field="@nameof(TripTypeLookup.Name)" HeaderText="Trip type" Width="165px" />
+                                                <GridColumn Field="@nameof(TripTypeLookup.Desk)" HeaderText="Desk" Width="90px" />
+                                                <GridColumn Field="@nameof(TripTypeLookup.LeadTime)" HeaderText="Book ahead" Width="110px" />
                                             </Columns>
                                         </DropDownGridControl>
                                     </div>
                                 </Template>
                             </GridColumn>
 
-                            <!-- IN-GRID FAST TYPING CELL (Click to edit directly) -->
-                            <GridColumn Field="@nameof(CustomQuote.EstimateAmount)" HeaderText="Estimate (Fast Typing)" Width="140px"
+                            @* Fast typing: click the cell and type, the value commits on Enter or blur *@
+                            <GridColumn Field="@nameof(TripRequest.Quote)" HeaderText="Quote (Fast Typing)" Width="140px"
                                         Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right"
                                         AllowEditing="true" SelectAllOnEdit="true" />
 
-                            <!-- INLINE SVG SPARKLINE CHART CELL TEMPLATE -->
-                            <GridColumn HeaderText="Cost Trend" Width="135px" AllowSorting="false" AllowFiltering="false" AllowEditing="false">
+                            @* Inline SVG sparkline: five weekly fare samples for the route, the last one is the quote *@
+                            <GridColumn HeaderText="Fare Trend" Width="135px" AllowSorting="false" AllowFiltering="false" AllowEditing="false">
                                 <Template Context="row">
                                     @{
-                                        var q = (CustomQuote)row;
-                                        var spark = GetSparklinePoints(q.TrendHistory, 68, 22);
-                                        var isUp = q.TrendDeltaPercent >= 0;
+                                        var r = (TripRequest)row;
+                                        var spark = GetSparklinePoints(r.FareHistory, 68, 22);
+                                        var isUp = r.FareDeltaPercent >= 0;
                                         var color = isUp ? "#10b981" : "#ef4444";
                                         var fill = isUp ? "rgba(16, 185, 129, 0.16)" : "rgba(239, 68, 68, 0.16)";
                                         var deltaClass = isUp ? "delta-up" : "delta-down";
-                                        var titleText = $"5-Month Cost Trend: {(isUp ? "+" : "")}{q.TrendDeltaPercent}%";
+                                        var titleText = $"5-week fare trend: {(isUp ? "+" : "")}{r.FareDeltaPercent}%";
                                         var deltaSign = isUp ? "▲" : "▼";
                                     }
                                     <div class="sparkline-cell" title="@titleText">
@@ -250,30 +258,30 @@
                                             <circle cx="@spark.LastX" cy="@spark.LastY" r="2.5" fill="@color" />
                                         </svg>
                                         <span class="sparkline-delta @deltaClass">
-                                            @deltaSign@Math.Abs(q.TrendDeltaPercent)%
+                                            @deltaSign@Math.Abs(r.FareDeltaPercent)%
                                         </span>
                                     </div>
                                 </Template>
                             </GridColumn>
 
-                            <GridColumn Field="@nameof(CustomQuote.Status)" HeaderText="Status" Width="110px" AllowEditing="false">
+                            <GridColumn Field="@nameof(TripRequest.Status)" HeaderText="Status" Width="110px" AllowEditing="false">
                                 <Template Context="row">
                                     @{
-                                        var q = (CustomQuote)row;
-                                        var statusBadge = GetStatusBadgeClass(q.Status);
+                                        var r = (TripRequest)row;
+                                        var statusBadge = GetStatusBadgeClass(r.Status);
                                     }
-                                    <BadgeControl Text="@q.Status" CssClass="@($"grid-badge {statusBadge}")" />
+                                    <BadgeControl Text="@r.Status" CssClass="@($"grid-badge {statusBadge}")" />
                                 </Template>
                             </GridColumn>
 
-                            <!-- POPUP EDITABLE DESCRIPTION COLUMN -->
-                            <GridColumn HeaderText="Description (Popup Edit)" Width="280px" AllowEditing="false">
+                            @* The Edit button opens the popup editor; a double-click on the row does the same *@
+                            <GridColumn HeaderText="Itinerary (Popup Edit)" Width="280px" AllowEditing="false">
                                 <Template Context="row">
-                                    @{ var q = (CustomQuote)row; }
+                                    @{ var r = (TripRequest)row; }
                                     <div class="desc-cell-wrapper">
-                                        <span class="desc-text" title="@q.Description">@q.Description</span>
+                                        <span class="desc-text" title="@r.Itinerary">@r.Itinerary</span>
                                         <button type="button" class="btn-cell-popup-edit" title="Edit in Modal Popup"
-                                                @onclick="@(() => OpenPopupEdit(q))" @onclick:stopPropagation="true">
+                                                @onclick="@(() => OpenPopupEdit(r))" @onclick:stopPropagation="true">
                                             <span class="bi bi-pencil-square"></span> Edit
                                         </button>
                                     </div>
@@ -284,30 +292,29 @@
 
                     <div class="grid-status-footer">
                         <div class="status-left">
-                            <span>Showing <strong>@FilteredQuotes.Count()</strong> of <strong>@_quotes.Count</strong> quotes (Virtual Scrolling 60 FPS)</span>
-                            @if (_selectedQuote != null)
+                            <span>Showing <strong>@FilteredRequests.Count()</strong> of <strong>@_requests.Count</strong> requests</span>
+                            @if (_selectedRequest != null)
                             {
                                 <span class="status-selected-highlight">
-                                    • Selected: <strong>@_selectedQuote.Job</strong> (@_selectedQuote.Community) — <strong>@_selectedQuote.EstimateAmount.ToString("C2")</strong>
+                                    • Selected: <strong>@_selectedRequest.Request</strong> (@_selectedRequest.Destination) — <strong>@_selectedRequest.Quote.ToString("C2")</strong>
                                 </span>
                             }
                         </div>
                         <div class="status-right">
-                            <span>Total Pipeline: <strong>@FilteredQuotes.Sum(q => q.EstimateAmount).ToString("C2")</strong></span>
+                            <span>Total quoted: <strong>@FilteredRequests.Sum(r => r.Quote).ToString("C2")</strong></span>
                         </div>
                     </div>
 
-                    <!-- POPUP EDIT MODAL DIALOG -->
-                    @if (_isPopupEditorOpen && _editingQuote != null)
+                    @if (_isPopupEditorOpen && _editingRequest != null)
                     {
                         <div class="modal-backdrop-blur" @onclick="ClosePopupEdit">
                             <div class="edit-modal-card" @onclick:stopPropagation="true">
                                 <div class="modal-card-header">
                                     <div class="modal-header-titles">
-                                        <BadgeControl Text="@_editingQuote.Job" CssClass="modal-badge-job" />
+                                        <BadgeControl Text="@(_isNewRequest ? "New" : _editingRequest.Request)" CssClass="modal-badge-request" />
                                         <div>
-                                            <h3 class="modal-h3">Edit Quote Specifications</h3>
-                                            <p class="modal-sub">@_editingQuote.Customer • @_editingQuote.Community</p>
+                                            <h3 class="modal-h3">@(_isNewRequest ? "New Trip Request" : "Edit Trip Request")</h3>
+                                            <p class="modal-sub">@(_isNewRequest ? "Fill in the request, then Add" : $"{_editingRequest.Traveller} • {_editingRequest.Destination}")</p>
                                         </div>
                                     </div>
                                     <button type="button" class="btn-close-modal" @onclick="ClosePopupEdit" title="Close">&times;</button>
@@ -316,30 +323,41 @@
                                 <div class="modal-card-body">
                                     <div class="modal-grid-2">
                                         <div class="modal-field">
-                                            <label>Salesperson</label>
-                                            <TextBoxControl CssClass="modal-input" Value="@_editingQuote.Salesperson" ValueChanged="@(v => _editingQuote.Salesperson = v ?? "")" />
+                                            <label>Agent</label>
+                                            <TextBoxControl CssClass="modal-input" Value="@_editingRequest.Agent" ValueChanged="@(v => _editingRequest.Agent = v ?? "")" />
                                         </div>
                                         <div class="modal-field">
-                                            <label>Community</label>
-                                            <TextBoxControl CssClass="modal-input" Value="@_editingQuote.Community" ValueChanged="@(v => _editingQuote.Community = v ?? "")" />
+                                            <label>Destination</label>
+                                            <TextBoxControl CssClass="modal-input" Value="@_editingRequest.Destination" ValueChanged="@(v => _editingRequest.Destination = v ?? "")" />
                                         </div>
                                     </div>
 
                                     <div class="modal-grid-2">
                                         <div class="modal-field">
-                                            <label>Category</label>
-                                            <DropDownListControl TValue="string" TItem="CategoryLookup"
+                                            <label>Lead traveller</label>
+                                            <TextBoxControl CssClass="modal-input" Value="@_editingRequest.Traveller" ValueChanged="@(v => _editingRequest.Traveller = v ?? "")" />
+                                        </div>
+                                        <div class="modal-field">
+                                            <label>Travellers</label>
+                                            <NumericTextBoxControl TValue="int" Min="1" Max="12" Width="100%" CssClass="modal-input" Value="@_editingRequest.Travellers" ValueChanged="@(v => _editingRequest.Travellers = v)" />
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-grid-2">
+                                        <div class="modal-field">
+                                            <label>Trip type</label>
+                                            <DropDownListControl TValue="string" TItem="TripTypeLookup"
                                                                  Width="100%"
-                                                                 DataSource="@_categoryLookup"
-                                                                 Value="@_editingQuote.Category"
-                                                                 ValueChanged="@(v => _editingQuote.Category = v ?? "")"
+                                                                 DataSource="@_tripTypeLookup"
+                                                                 Value="@_editingRequest.TripType"
+                                                                 ValueChanged="@(v => _editingRequest.TripType = v ?? "")"
                                                                  TextFieldName="Display"
                                                                  ValueFieldName="Code"
                                                                  CssClass="modal-flex-dropdown" />
                                         </div>
                                         <div class="modal-field">
-                                            <label>Estimate Amount ($)</label>
-                                            <NumericTextBoxControl TValue="decimal" Step="10" Width="100%" CssClass="modal-input" Value="@_editingQuote.EstimateAmount" ValueChanged="@(v => _editingQuote.EstimateAmount = v)" />
+                                            <label>Quote ($)</label>
+                                            <NumericTextBoxControl TValue="decimal" Step="10" Width="100%" CssClass="modal-input" Value="@_editingRequest.Quote" ValueChanged="@(v => _editingRequest.Quote = v)" />
                                         </div>
                                     </div>
 
@@ -349,34 +367,34 @@
                                             <DropDownListControl TValue="string" TItem="string"
                                                                  Width="100%"
                                                                  DataSource="@_statusOptions"
-                                                                 Value="@_editingQuote.Status"
-                                                                 ValueChanged="@(v => _editingQuote.Status = v ?? "")"
+                                                                 Value="@_editingRequest.Status"
+                                                                 ValueChanged="@(v => _editingRequest.Status = v ?? "")"
                                                                  CssClass="modal-flex-dropdown" />
                                         </div>
                                         <div class="modal-field">
-                                            <label>Date Requested</label>
+                                            <label>Date requested</label>
                                             <DatePickerControl Value="@_modalDateRequested"
-                                                               ValueChanged="@(dt => { if (_editingQuote != null && dt.HasValue) _editingQuote.DateRequested = dt.Value; })"
+                                                               ValueChanged="@(dt => { if (_editingRequest != null && dt.HasValue) _editingRequest.DateRequested = dt.Value; })"
                                                                Format="MM/dd/yyyy"
                                                                CssClass="modal-flex-datepicker" />
                                         </div>
                                     </div>
 
                                     <div class="modal-field">
-                                        <label>Description &amp; Scope of Work</label>
-                                        <TextBoxControl Multiline="true" Rows="3" CssClass="modal-textarea" Value="@_editingQuote.Description" ValueChanged="@(v => _editingQuote.Description = v ?? "")" />
+                                        <label>Itinerary &amp; requirements</label>
+                                        <TextBoxControl Multiline="true" Rows="3" CssClass="modal-textarea" Value="@_editingRequest.Itinerary" ValueChanged="@(v => _editingRequest.Itinerary = v ?? "")" />
                                     </div>
 
                                     <div class="modal-field">
-                                        <label>Field Notes / Comments</label>
-                                        <TextBoxControl CssClass="modal-input" Value="@_editingQuote.Comments" ValueChanged="@(v => _editingQuote.Comments = v ?? "")" />
+                                        <label>Notes for the agent</label>
+                                        <TextBoxControl CssClass="modal-input" Value="@_editingRequest.Notes" ValueChanged="@(v => _editingRequest.Notes = v ?? "")" />
                                     </div>
                                 </div>
 
                                 <div class="modal-card-footer">
                                     <button type="button" class="btn-modal-cancel" @onclick="ClosePopupEdit">Cancel</button>
                                     <button type="button" class="btn-modal-save" @onclick="SavePopupEdit">
-                                        <span class="bi bi-check-lg"></span> Save Quote Specs
+                                        <span class="bi bi-check-lg"></span> @(_isNewRequest ? "Add Request" : "Save Request")
                                     </button>
                                 </div>
                             </div>
@@ -438,30 +456,30 @@
                                     Load Crystal Reports (.rpt XML), bind session parameters, and stream to screen or print without Crystal runtime dependencies.
                                 </p>
                             </div>
-                            <a href="demo/reports/model-costs" class="btn-filter-pill" style="background:#0284c7; color:#fff; text-decoration:none;">
+                            <a href="demo/reports/package-costs" class="btn-filter-pill" style="background:#0284c7; color:#fff; text-decoration:none;">
                                 Open Full Report Demo &rarr;
                             </a>
                         </div>
                         <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 18px; font-family: monospace; font-size: 13px; color: #334155;">
                             <div style="color: #0d3b66; font-weight: 700; border-bottom: 2px solid #0d3b66; padding-bottom: 6px; margin-bottom: 12px; display: flex; justify-content: space-between;">
-                                <span>MODEL COSTS &amp; ESTIMATING SUMMARY</span>
-                                <span>Division: 0100 | As of: @DateTime.Today.ToString("d")</span>
+                                <span>PACKAGE COST SHEET</span>
+                                <span>Lisbon Explorer, Spring | As of: @DateTime.Today.ToString("d")</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
-                                <span>100-FRAMING : Structural Timber &amp; Trusses</span>
-                                <span style="font-weight: 600;">$42,850.00</span>
+                                <span>A Transport : Flights, transfers and rail</span>
+                                <span style="font-weight: 600;">$1,968.00</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
-                                <span>200-PLUMBING : Rough-in &amp; Copper Mains</span>
-                                <span style="font-weight: 600;">$18,420.00</span>
+                                <span>B Accommodation : 7 nights with breakfast</span>
+                                <span style="font-weight: 600;">$1,463.00</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
-                                <span>300-ELECTRICAL : Panel 200A &amp; Romex Circuits</span>
-                                <span style="font-weight: 600;">$21,650.00</span>
+                                <span>C Experiences : Walking tour, food tour, day trip</span>
+                                <span style="font-weight: 600;">$612.00</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; padding: 6px 0; margin-top: 8px; border-top: 2px solid #cbd5e1; font-weight: 700; color: #0f172a;">
-                                <span>TOTAL MODEL ESTIMATE:</span>
-                                <span>$82,920.00</span>
+                                <span>PACKAGE TOTAL:</span>
+                                <span>$4,043.00</span>
                             </div>
                         </div>
                     </div>
@@ -490,7 +508,7 @@
                 <div class="pillar-icon blue">⚡</div>
                 <h3 class="pillar-title">Ultra-Fast Virtualization</h3>
                 <p class="pillar-desc">
-                    Virtual scrolling handles tens of thousands of rows at 60 FPS without memory leaks or DOM bloat. Excel-like keyboard navigation and instant sort/filter.
+                    Row windowing renders only the rows in view plus an overscan band, so tens of thousands of rows scroll without the DOM growing. Excel-like keyboard navigation, sorting and filtering.
                 </p>
             </div>
 
@@ -514,7 +532,7 @@
                 <div class="pillar-icon amber">📊</div>
                 <h3 class="pillar-title">Excel-Grade Grid Power</h3>
                 <p class="pillar-desc">
-                    Frozen columns, hierarchical TreeGrids, column reordering, aggregate footers, inline cell editing, and native ClosedXML Excel export out of the box.
+                    Frozen columns, hierarchical TreeGrids, column reordering, aggregate footers, inline cell editing, and Excel export built in.
                 </p>
             </div>
 
@@ -588,7 +606,7 @@
                         <td><span class="check-no">✗ Not Available</span></td>
                     </tr>
                     <tr>
-                        <td><strong>ClosedXML Native Excel Export</strong></td>
+                        <td><strong>Built-in Excel Export</strong></td>
                         <td class="col-flexcore"><span class="check-yes">✓ Included</span></td>
                         <td>Client-side CSV only</td>
                         <td><span class="check-no">✗ None</span></td>
@@ -650,11 +668,12 @@
     private readonly List<TabStripItem> _viewTabs = new() { new("Example", "bi bi-window"), new("Razor", "bi bi-code-slash") };
     private bool _copiedInstall = false;
     private bool _copiedCode = false;
-    private string _selectedCategory = "All";
+    private string _selectedTripType = "All";
     private string _selectedView = "New requests";
     private string _gridSearchTerm = "";
-    private CustomQuote? _selectedQuote;
-    private GridControlEvents<CustomQuote> _gridEvents = new();
+    private TripRequest? _selectedRequest;
+    private GridControl<TripRequest>? _grid;
+    private GridControlEvents<TripRequest> _gridEvents = new();
 
     private EditSettings _editSettings = new()
     {
@@ -665,9 +684,10 @@
         AllowEditOnDblClick = true
     };
 
-    private List<string> _quoteCategories = new()
+    // Filter pills; matched case-insensitively against TripRequest.TripType codes
+    private List<string> _tripTypes = new()
     {
-        "All", "Appliances", "Garage", "Switches", "Hardwood", "Plumbing", "Electrical", "Finishes", "Structural"
+        "All", "Beach", "City", "Ski", "Safari", "Cruise", "Rail", "Family", "Honeymoon"
     };
 
     public class ViewOption
@@ -678,253 +698,289 @@
 
     private List<ViewOption> ViewOptions => new()
     {
-        new() { Key = "All", Label = $"All Requests ({_quotes.Count})" },
-        new() { Key = "New requests", Label = $"New requests ({_quotes.Count(q => q.Status == "New Request")})" },
-        new() { Key = "In Progress", Label = $"In Progress ({_quotes.Count(q => q.Status == "In Review")})" },
-        new() { Key = "Approved", Label = $"Approved Quotes ({_quotes.Count(q => q.Status == "Approved")})" },
+        new() { Key = "All", Label = $"All requests ({_requests.Count})" },
+        new() { Key = "New requests", Label = $"New requests ({_requests.Count(r => r.Status == "New")})" },
+        new() { Key = "Quoted", Label = $"Quoted ({_requests.Count(r => r.Status == "Quoted")})" },
+        new() { Key = "Booked", Label = $"Booked ({_requests.Count(r => r.Status == "Booked")})" },
     };
 
-    public class CategoryLookup
+    public class TripTypeLookup
     {
         public string Code { get; set; } = "";
         public string Name { get; set; } = "";
-        public string Trade { get; set; } = "";
+        public string Desk { get; set; } = "";
         public string LeadTime { get; set; } = "";
         public string Display => $"{Code} - {Name}";
     }
 
-    private List<CategoryLookup> _categoryLookup = new()
+    private List<TripTypeLookup> _tripTypeLookup = new()
     {
-        new() { Code = "APPLIANCES", Name = "Kitchen & Laundry Appliances", Trade = "Electrical / Plumbing", LeadTime = "2-3 wks" },
-        new() { Code = "SWITCHES", Name = "Smart Switches & Dimmers", Trade = "Electrical", LeadTime = "1 wk" },
-        new() { Code = "PLUMBING", Name = "Rough-in & Designer Fixtures", Trade = "Plumbing", LeadTime = "2 wks" },
-        new() { Code = "FINISHES", Name = "Drywall, Trim & Moldings", Trade = "Carpentry", LeadTime = "1-2 wks" },
-        new() { Code = "STRUCTURAL", Name = "Engineered Beams & Trusses", Trade = "Framing", LeadTime = "3-4 wks" },
-        new() { Code = "GARAGE", Name = "Insulated Doors & Openers", Trade = "Specialty", LeadTime = "2 wks" },
-        new() { Code = "HARDWOOD", Name = "Hardwood & Engineered Plank", Trade = "Flooring", LeadTime = "2 wks" },
-        new() { Code = "ELECTRICAL", Name = "200A Panels & High-Voltage", Trade = "Electrical", LeadTime = "1-2 wks" },
+        new() { Code = "BEACH", Name = "Beach & island resorts", Desk = "Leisure", LeadTime = "6-8 wks" },
+        new() { Code = "CITY", Name = "City breaks & culture", Desk = "Leisure", LeadTime = "2-3 wks" },
+        new() { Code = "SKI", Name = "Ski & snowboard", Desk = "Adventure", LeadTime = "8-12 wks" },
+        new() { Code = "SAFARI", Name = "Safari & wildlife", Desk = "Adventure", LeadTime = "12-16 wks" },
+        new() { Code = "CRUISE", Name = "Ocean & river cruises", Desk = "Cruise", LeadTime = "10-14 wks" },
+        new() { Code = "RAIL", Name = "Scenic rail journeys", Desk = "Touring", LeadTime = "4-6 wks" },
+        new() { Code = "FAMILY", Name = "Family holidays", Desk = "Leisure", LeadTime = "6-8 wks" },
+        new() { Code = "HONEYMOON", Name = "Honeymoons & celebrations", Desk = "Luxury", LeadTime = "8-10 wks" },
     };
 
-    private static readonly List<string> _statusOptions = new() { "New Request", "In Review", "Approved", "Pending" };
+    private static readonly List<string> _statusOptions = new() { "New", "Quoted", "Booked", "Declined" };
 
-    public class CustomQuote
+    public class TripRequest
     {
         public int Id { get; set; }
-        public string Job { get; set; } = "";
-        public string Salesperson { get; set; } = "";
+        public string Request { get; set; } = "";
+        public string Agent { get; set; } = "";
         public string AvatarBg { get; set; } = "#0284c7";
         public string AvatarInitials { get; set; } = "";
         public DateTime DateRequested { get; set; }
-        public string Community { get; set; } = "";
-        public string CustomerNo { get; set; } = "";
-        public string Customer { get; set; } = "";
-        public string Category { get; set; } = "";
-        public string CategoryDesc { get; set; } = "";
-        public string Address { get; set; } = "";
-        public string Description { get; set; } = "";
-        public string Location { get; set; } = "";
-        public string Comments { get; set; } = "";
-        public decimal EstimateAmount { get; set; }
-        public string Status { get; set; } = "New Request";
-        public List<int> TrendHistory { get; set; } = new();
-        public int TrendDeltaPercent { get; set; }
+        public string Destination { get; set; } = "";
+        public string Traveller { get; set; } = "";
+        public int Travellers { get; set; } = 2;
+        public DateTime Departure { get; set; }
+        public string TripType { get; set; } = "";
+        public string TripTypeName { get; set; } = "";
+        public string Itinerary { get; set; } = "";
+        public string Notes { get; set; } = "";
+        public decimal Quote { get; set; }
+        public string Status { get; set; } = "New";
+        public List<int> FareHistory { get; set; } = new();
+        public int FareDeltaPercent { get; set; }
     }
 
-    private List<CustomQuote> _quotes = new();
+    private List<TripRequest> _requests = new();
 
-    // Popup Editor state
+    // Popup editor state
     private bool _isPopupEditorOpen = false;
-    private CustomQuote? _editingQuote = null;
-    private CustomQuote? _originalQuoteRef = null;
+    private bool _isNewRequest = false;
+    private TripRequest? _editingRequest = null;
+    private TripRequest? _originalRequestRef = null;
 
     private DateTime? _modalDateRequested
     {
-        get => _editingQuote?.DateRequested;
+        get => _editingRequest?.DateRequested;
         set
         {
-            if (_editingQuote != null && value.HasValue)
+            if (_editingRequest != null && value.HasValue)
             {
-                _editingQuote.DateRequested = value.Value;
+                _editingRequest.DateRequested = value.Value;
             }
         }
     }
 
-    private void OpenPopupEdit(CustomQuote quote)
+    private static TripRequest Clone(TripRequest r) => new()
     {
-        _originalQuoteRef = quote;
-        _editingQuote = new CustomQuote
+        Id = r.Id, Request = r.Request, Agent = r.Agent, AvatarBg = r.AvatarBg, AvatarInitials = r.AvatarInitials,
+        DateRequested = r.DateRequested, Destination = r.Destination, Traveller = r.Traveller, Travellers = r.Travellers,
+        Departure = r.Departure, TripType = r.TripType, TripTypeName = r.TripTypeName, Itinerary = r.Itinerary, Notes = r.Notes,
+        Quote = r.Quote, Status = r.Status, FareHistory = new List<int>(r.FareHistory), FareDeltaPercent = r.FareDeltaPercent
+    };
+
+    private void OpenPopupEdit(TripRequest request)
+    {
+        _originalRequestRef = request;
+        _editingRequest = Clone(request);
+        _isNewRequest = false;
+        _isPopupEditorOpen = true;
+        StateHasChanged();
+    }
+
+    // New Request opens the same editor on a blank request; Save adds it to the top of the list
+    private void CreateNewRequest()
+    {
+        var agent = Agents[0];
+        _originalRequestRef = null;
+        _editingRequest = new TripRequest
         {
-            Id = quote.Id,
-            Job = quote.Job,
-            Salesperson = quote.Salesperson,
-            AvatarBg = quote.AvatarBg,
-            AvatarInitials = quote.AvatarInitials,
-            DateRequested = quote.DateRequested,
-            Community = quote.Community,
-            CustomerNo = quote.CustomerNo,
-            Customer = quote.Customer,
-            Category = quote.Category,
-            CategoryDesc = quote.CategoryDesc,
-            Address = quote.Address,
-            Description = quote.Description,
-            Location = quote.Location,
-            Comments = quote.Comments,
-            EstimateAmount = quote.EstimateAmount,
-            Status = quote.Status,
-            TrendHistory = new List<int>(quote.TrendHistory),
-            TrendDeltaPercent = quote.TrendDeltaPercent
+            Agent = agent.Name, AvatarInitials = agent.Initials, AvatarBg = agent.Color,
+            DateRequested = DateTime.Today, Departure = DateTime.Today.AddDays(90),
+            Destination = "Lisbon", TripType = "CITY", TripTypeName = "City breaks & culture",
+            Travellers = 2, Status = "New"
         };
+        _isNewRequest = true;
         _isPopupEditorOpen = true;
         StateHasChanged();
     }
 
     private void SavePopupEdit()
     {
-        if (_originalQuoteRef != null && _editingQuote != null)
+        if (_editingRequest != null)
         {
-            _originalQuoteRef.Salesperson = _editingQuote.Salesperson;
-            _originalQuoteRef.Community = _editingQuote.Community;
-            _originalQuoteRef.Category = _editingQuote.Category;
-            _originalQuoteRef.CategoryDesc = _categoryLookup.FirstOrDefault(c => c.Code.Equals(_editingQuote.Category, StringComparison.OrdinalIgnoreCase))?.Name ?? _editingQuote.Category;
-            _originalQuoteRef.EstimateAmount = _editingQuote.EstimateAmount;
-            _originalQuoteRef.Status = _editingQuote.Status;
-            _originalQuoteRef.DateRequested = _editingQuote.DateRequested;
-            _originalQuoteRef.Description = _editingQuote.Description;
-            _originalQuoteRef.Comments = _editingQuote.Comments;
+            var saved = _editingRequest;
+            saved.TripTypeName = _tripTypeLookup.FirstOrDefault(t => t.Code.Equals(saved.TripType, StringComparison.OrdinalIgnoreCase))?.Name ?? saved.TripType;
+            saved.AvatarInitials = Initials(saved.Agent);
+            var known = Agents.FirstOrDefault(a => a.Name.Equals(saved.Agent, StringComparison.OrdinalIgnoreCase));
+            if (known.Name != null) saved.AvatarBg = known.Color;
 
-            var initials = string.Join("", _originalQuoteRef.Salesperson.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => s[0])).ToUpper();
-            if (!string.IsNullOrEmpty(initials))
-                _originalQuoteRef.AvatarInitials = initials.Length > 2 ? initials[..2] : initials;
-
-            Notifications.Success($"Updated quote {_originalQuoteRef.Job} specifications via Popup Editor!");
+            if (_isNewRequest)
+            {
+                saved.Id = _requests.Count + 1;
+                saved.Request = RequestKey(saved.Destination, saved.Id);
+                saved.FareHistory = Enumerable.Repeat((int)saved.Quote, 5).ToList();
+                saved.FareDeltaPercent = 0;
+                _requests.Insert(0, saved);
+                _selectedRequest = saved;
+                Notifications.Success($"Added request {saved.Request} for {saved.Destination}.");
+            }
+            else if (_originalRequestRef != null)
+            {
+                var o = _originalRequestRef;
+                o.Agent = saved.Agent;
+                o.AvatarInitials = saved.AvatarInitials;
+                o.AvatarBg = saved.AvatarBg;
+                o.Destination = saved.Destination;
+                o.Traveller = saved.Traveller;
+                o.Travellers = saved.Travellers;
+                o.TripType = saved.TripType;
+                o.TripTypeName = saved.TripTypeName;
+                o.Quote = saved.Quote;
+                o.Status = saved.Status;
+                o.DateRequested = saved.DateRequested;
+                o.Itinerary = saved.Itinerary;
+                o.Notes = saved.Notes;
+                Notifications.Success($"Saved request {o.Request}.");
+            }
         }
         _isPopupEditorOpen = false;
-        _editingQuote = null;
-        _originalQuoteRef = null;
+        _isNewRequest = false;
+        _editingRequest = null;
+        _originalRequestRef = null;
         StateHasChanged();
     }
 
     private void ClosePopupEdit()
     {
         _isPopupEditorOpen = false;
-        _editingQuote = null;
-        _originalQuoteRef = null;
+        _isNewRequest = false;
+        _editingRequest = null;
+        _originalRequestRef = null;
         StateHasChanged();
     }
 
-    private void OnCategoryChanged(CustomQuote q, string? newCategory)
+    private void OnTripTypeChanged(TripRequest r, string? newType)
     {
-        if (string.IsNullOrEmpty(newCategory)) return;
-        var old = q.Category;
-        q.Category = newCategory;
-        var lookup = _categoryLookup.FirstOrDefault(c => c.Code.Equals(newCategory, StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrEmpty(newType)) return;
+        r.TripType = newType;
+        var lookup = _tripTypeLookup.FirstOrDefault(t => t.Code.Equals(newType, StringComparison.OrdinalIgnoreCase));
         if (lookup != null)
-            q.CategoryDesc = lookup.Name;
-        Notifications.Success($"Updated {q.Job} category to {newCategory} via DropDownGridControl");
+            r.TripTypeName = lookup.Name;
+        Notifications.Success($"Updated {r.Request} trip type to {newType} via DropDownGridControl");
         StateHasChanged();
     }
 
-    private static List<CustomQuote> GenerateQuotes(int count)
+    private static string Initials(string name)
     {
-        var salesPeople = new[]
+        var letters = string.Concat(name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(p => char.ToUpperInvariant(p[0])));
+        return letters.Length > 2 ? letters[..2] : letters;
+    }
+
+    // Request keys are the first three letters of the destination plus a running number, e.g. LIS-0001
+    private static string RequestKey(string destination, int id)
+    {
+        var word = destination.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
+        var code = new string(word.Where(char.IsLetter).Take(3).ToArray()).ToUpperInvariant().PadRight(3, 'X');
+        return $"{code}-{id:D4}";
+    }
+
+    private static readonly (string Name, string Initials, string Color)[] Agents =
+    {
+        ("Maya Okafor", "MO", "#0284c7"),
+        ("Luca Bianchi", "LB", "#7c3aed"),
+        ("Priya Nair", "PN", "#10b981"),
+        ("Tomás Herrera", "TH", "#d97706"),
+        ("Ingrid Solberg", "IS", "#e11d48"),
+        ("Kenji Watanabe", "KW", "#0891b2"),
+        ("Amara Diallo", "AD", "#4f46e5"),
+        ("Oliver Grant", "OG", "#059669")
+    };
+
+    private static List<TripRequest> GenerateRequests(int count)
+    {
+        var destinations = new[]
         {
-            ("Prissy Pearl", "PP", "#0284c7"),
-            ("Snoop Dog", "SD", "#7c3aed"),
-            ("Alex Vance", "AV", "#10b981"),
-            ("Sarah Connor", "SC", "#d97706"),
-            ("Big Betty", "BB", "#e11d48"),
-            ("Gordon Freeman", "GF", "#0891b2"),
-            ("Dana Scully", "DS", "#4f46e5"),
-            ("Fox Mulder", "FM", "#059669")
+            "Lisbon", "Kyoto", "Reykjavik", "Cape Town", "Queenstown", "Marrakech",
+            "Vancouver", "Santorini", "Banff", "Hoi An", "Patagonia", "Amalfi Coast"
         };
 
-        var communities = new[]
+        var tripTypes = new (string Code, string Name, int Low, int High, string ItineraryA, string ItineraryB)[]
         {
-            "CARNATION ROW", "DAISY STREET", "LILY VALLEY", "FERN AVENUE",
-            "ROSE LANE", "MARGARITA VILLE", "ELLIOT TRAINING", "OAK RIDGE",
-            "PINE CREST", "CEDAR SPRINGS", "MAPLE GLEN", "WILLOW PARK"
+            ("BEACH", "Beach & island resorts", 1800, 5200,
+                "Seven nights in a sea-view room, two adults, late August",
+                "Overwater bungalow for five nights with a snorkelling day trip"),
+            ("CITY", "City breaks & culture", 600, 2400,
+                "Long weekend with museum passes and a guided food tour",
+                "Four nights near the old town with an opera ticket for two"),
+            ("SKI", "Ski & snowboard", 2200, 6800,
+                "Ski-in ski-out chalet for six, lessons for two beginners",
+                "Week of lift passes with a half-day guided off-piste tour"),
+            ("SAFARI", "Safari & wildlife", 5500, 14500,
+                "Four nights on safari with a hot-air balloon flight at dawn",
+                "Gorilla trekking permit for two with three nights at the lodge"),
+            ("CRUISE", "Ocean & river cruises", 2800, 9800,
+                "Ten-night river cruise, balcony cabin, all excursions included",
+                "Fjords cruise for two with a glacier hike and the drinks package"),
+            ("RAIL", "Scenic rail journeys", 1500, 5400,
+                "First-class rail pass with two overnight sleeper legs",
+                "Mountain railway loop with three nights in alpine villages"),
+            ("FAMILY", "Family holidays", 2400, 7600,
+                "Half-term beach week with a kids' club and a family suite",
+                "Theme park passes for four with a connecting-rooms hotel"),
+            ("HONEYMOON", "Honeymoons & celebrations", 4200, 12800,
+                "Private villa with a sunset catamaran and a couples' spa day",
+                "Two islands in ten nights, seaplane transfer, champagne on arrival")
         };
 
-        var categories = new[]
+        var firstNames = new[] { "Noah", "Emma", "Liam", "Olivia", "Arjun", "Sofia", "Mateo", "Chloe", "Yusuf", "Hana", "Felix", "Zara" };
+        var lastNames = new[] { "Lindqvist", "Moreau", "Okonkwo", "Tanaka", "Fischer", "Ramos", "Byrne", "Haddad", "Novak", "Petrova", "Mensah", "Castillo" };
+        var statuses = new[] { "New", "New", "Quoted", "Booked", "Declined" };
+        var notes = new[]
         {
-            ("APPLIANCES", "Kitchen & Laundry Appliances", 4500, 9500),
-            ("SWITCHES", "Smart Switches & Dimmers", 800, 2400),
-            ("PLUMBING", "Rough-in & Designer Fixtures", 1800, 4800),
-            ("FINISHES", "Drywall, Trim & Moldings", 1200, 3900),
-            ("STRUCTURAL", "Engineered Beams & Trusses", 6500, 18500),
-            ("GARAGE", "Insulated Doors & Openers", 2200, 12000),
-            ("HARDWOOD", "Hardwood & Engineered Plank", 4800, 19500),
-            ("ELECTRICAL", "200A Panels & High-Voltage", 2400, 5600)
-        };
-
-        var statuses = new[] { "Approved", "In Review", "New Request", "Pending" };
-
-        var descriptions = new[]
-        {
-            "Custom commercial double wall oven with warming drawer",
-            "Add 3-way dimmer switch in kitchen island & pantry",
-            "Dual shower rough-in with thermostatic mixer valve",
-            "Crown molding upgrade in master suite & dining",
-            "Engineered timber beam vault support for open concept",
-            "18x13 clear short glass insulated overhead garage door",
-            "Engineered French Oak 7-inch wide plank throughout main floor",
-            "200A electrical sub-panel installation with EV rough-in",
-            "Under-cabinet LED task strip lighting with smart dimmer",
-            "Freestanding soaking tub with floor-mounted Roman faucet",
-            "Custom coffered ceiling with integrated cove lighting",
-            "Zero-threshold walk-in shower with linear drain tile",
-            "Soundproofing insulation package between floors",
-            "Tankless high-efficiency continuous hot water system",
-            "Smart home automation hub with motorized blinds wiring"
+            "Flexible on dates by a few days", "Prefers a morning departure", "Repeat client, knows the agent",
+            "Asked for a travel insurance quote", "Needs an accessible room", "Travelling with an infant"
         };
 
         var rnd = new Random(42);
-        var list = new List<CustomQuote>(count);
+        var list = new List<TripRequest>(count);
         var startDate = new DateTime(2026, 1, 1);
 
         for (int i = 1; i <= count; i++)
         {
-            var sp = salesPeople[rnd.Next(salesPeople.Length)];
-            var comm = communities[rnd.Next(communities.Length)];
-            var cat = categories[rnd.Next(categories.Length)];
-            var status = statuses[rnd.Next(statuses.Length)];
-            var desc = descriptions[rnd.Next(descriptions.Length)];
-            var est = rnd.Next(cat.Item3 / 10, cat.Item4 / 10) * 10m;
-            var date = startDate.AddMinutes(rnd.Next(0, 180 * 24 * 60));
+            var agent = Agents[rnd.Next(Agents.Length)];
+            var destination = destinations[rnd.Next(destinations.Length)];
+            var type = tripTypes[rnd.Next(tripTypes.Length)];
+            var quote = rnd.Next(type.Low / 10, type.High / 10) * 10m;
+            var requested = startDate.AddMinutes(rnd.Next(0, 180 * 24 * 60));
+            var travellers = type.Code switch { "FAMILY" => rnd.Next(3, 7), "HONEYMOON" => 2, _ => rnd.Next(1, 5) };
 
-            int baseTrend = (int)(est * 0.85m);
-            var trend = new List<int>
-            {
-                baseTrend,
-                baseTrend + rnd.Next(-300, 400),
-                baseTrend + rnd.Next(-100, 600),
-                baseTrend + rnd.Next(100, 800),
-                (int)est
-            };
-            int delta = (int)Math.Round(((decimal)trend[4] - trend[0]) / Math.Max(1, trend[0]) * 100);
+            // five weekly fare samples for the route; the last one is the quote
+            var first = (int)(quote * (100 + rnd.Next(-12, 13)) / 100);
+            var fares = new List<int> { first };
+            for (int k = 1; k < 4; k++)
+                fares.Add(first + (int)(((int)quote - first) * k / 4m) + rnd.Next(-150, 151));
+            fares.Add((int)quote);
+            int delta = (int)Math.Round((fares[4] - fares[0]) / (decimal)Math.Max(1, fares[0]) * 100);
 
-            string prefix = comm.Length >= 2 ? comm[..2] : "CR";
-            list.Add(new CustomQuote
+            list.Add(new TripRequest
             {
                 Id = i,
-                Job = $"{prefix}{i:D4}",
-                Salesperson = sp.Item1,
-                AvatarInitials = sp.Item2,
-                AvatarBg = sp.Item3,
-                DateRequested = date,
-                Community = comm,
-                CustomerNo = $"90000{i:D4}",
-                Customer = $"{prefix}{i:D4} - SPEC",
-                Category = cat.Item1,
-                CategoryDesc = cat.Item2,
-                Address = $"{rnd.Next(10, 999)} {comm.Split(' ')[0]} Way",
-                Description = desc,
-                Location = "Main Floor",
-                Comments = "Client approved options sheet",
-                EstimateAmount = est,
-                Status = status,
-                TrendHistory = trend,
-                TrendDeltaPercent = delta
+                Request = RequestKey(destination, i),
+                Agent = agent.Name,
+                AvatarInitials = agent.Initials,
+                AvatarBg = agent.Color,
+                DateRequested = requested,
+                Destination = destination,
+                Traveller = $"{firstNames[rnd.Next(firstNames.Length)]} {lastNames[rnd.Next(lastNames.Length)]}",
+                Travellers = travellers,
+                Departure = requested.Date.AddDays(rnd.Next(30, 200)),
+                TripType = type.Code,
+                TripTypeName = type.Name,
+                Itinerary = rnd.Next(2) == 0 ? type.ItineraryA : type.ItineraryB,
+                Notes = notes[rnd.Next(notes.Length)],
+                Quote = quote,
+                Status = statuses[rnd.Next(statuses.Length)],
+                FareHistory = fares,
+                FareDeltaPercent = delta
             });
         }
 
@@ -933,51 +989,50 @@
 
     protected override void OnInitialized()
     {
-        _quotes = GenerateQuotes(1000);
-        _selectedQuote = _quotes.FirstOrDefault();
+        _requests = GenerateRequests(1000);
+        _selectedRequest = _requests.FirstOrDefault();
 
-        _gridEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<CustomQuote>>(this, e =>
+        _gridEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<TripRequest>>(this, e =>
         {
-            _selectedQuote = e.Data;
+            _selectedRequest = e.Data;
             StateHasChanged();
         });
 
-        _gridEvents.OnRecordDoubleClick = EventCallback.Factory.Create<CellClickEventArgs<CustomQuote>>(this, e =>
+        _gridEvents.OnRecordDoubleClick = EventCallback.Factory.Create<CellClickEventArgs<TripRequest>>(this, e =>
         {
             if (e.Data != null)
             {
-                _selectedQuote = e.Data;
+                _selectedRequest = e.Data;
                 OpenPopupEdit(e.Data);
             }
         });
     }
 
-    private IEnumerable<CustomQuote> FilteredQuotes
+    private IEnumerable<TripRequest> FilteredRequests
     {
         get
         {
-            var list = _quotes.AsEnumerable();
+            var list = _requests.AsEnumerable();
 
-            if (_selectedCategory != "All")
-                list = list.Where(q => q.Category.Equals(_selectedCategory, StringComparison.OrdinalIgnoreCase));
+            if (_selectedTripType != "All")
+                list = list.Where(r => r.TripType.Equals(_selectedTripType, StringComparison.OrdinalIgnoreCase));
 
-            if (_selectedView == "New requests")
-                list = list.Where(q => q.Status == "New Request");
-            else if (_selectedView == "In Progress")
-                list = list.Where(q => q.Status == "In Review");
-            else if (_selectedView == "Approved")
-                list = list.Where(q => q.Status == "Approved");
+            if (_selectedView != "All")
+            {
+                var status = _selectedView == "New requests" ? "New" : _selectedView;
+                list = list.Where(r => r.Status == status);
+            }
 
             if (!string.IsNullOrWhiteSpace(_gridSearchTerm))
             {
                 var term = _gridSearchTerm.Trim();
-                list = list.Where(q =>
-                    q.Job.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    q.Salesperson.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    q.Customer.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    q.Community.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    q.Description.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    q.Category.Contains(term, StringComparison.OrdinalIgnoreCase));
+                list = list.Where(r =>
+                    r.Request.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    r.Agent.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    r.Traveller.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    r.Destination.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    r.Itinerary.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    r.TripType.Contains(term, StringComparison.OrdinalIgnoreCase));
             }
 
             return list;
@@ -1012,31 +1067,14 @@
         return new SparklineCoord(polyline, area, coords.Last().X, coords.Last().Y);
     }
 
-    private string GetCategoryBadgeClass(string category) => category.ToUpperInvariant() switch
-    {
-        "APPLIANCES" => "grid-badge-blue",
-        "SWITCHES" or "ELECTRICAL" => "grid-badge-amber",
-        "PLUMBING" => "grid-badge-cyan",
-        "FINISHES" => "grid-badge-purple",
-        "STRUCTURAL" => "grid-badge-rose",
-        "GARAGE" => "grid-badge-green",
-        "HARDWOOD" => "grid-badge-amber",
-        _ => "grid-badge-gray"
-    };
-
     private string GetStatusBadgeClass(string status) => status switch
     {
-        "Approved" => "grid-badge-green",
-        "In Review" => "grid-badge-blue",
-        "Pending" => "grid-badge-amber",
+        "Booked" => "grid-badge-green",
+        "Quoted" => "grid-badge-blue",
+        "New" => "grid-badge-amber",
         "Declined" => "grid-badge-rose",
         _ => "grid-badge-gray"
     };
-
-    private void CreateNewQuote()
-    {
-        Notifications.Success("New quote request dialog opened. Ready to capture specifications.");
-    }
 
     private List<ChartSeries> _quarterlySeries = new()
     {
@@ -1084,16 +1122,14 @@
         }
     };
 
-    private void ExportToExcel()
-    {
-        Notifications.Success($"Successfully generated Excel workbook for {FilteredQuotes.Count()} custom quotes using ClosedXML!");
-    }
+    // The grid writes the workbook itself and the browser downloads it
+    private Task ExportToExcel() => _grid?.ExportToXlsxAsync("trip-requests.xlsx") ?? Task.CompletedTask;
 
     private void OnPaste() => Notifications.Info("Pasted from clipboard.");
     private void OnCopy() => Notifications.Info("Copied to clipboard.");
     private void OnNewOrder() => Notifications.Success("Created new order ticket.");
     private void OnSaveBatch() => Notifications.Success("Batch saved successfully.");
-    private void OnExportRibbonExcel() => Notifications.Success("Exported using ClosedXML.");
+    private void OnExportRibbonExcel() => Notifications.Success("Excel export requested.");
     private void OnPrintPdf() => Notifications.Warning("Report queued to PDF virtual spooler.");
     private void OnToggleGrid() => Notifications.Info("Toggled grid outlines.");
     private void OnFreezeHeaders() => Notifications.Info("Header row pinned.");
@@ -1133,8 +1169,8 @@
         return _activeTab switch
         {
             "grid" =>
-@"<!-- Telerik-grade Enterprise DataGrid: 1,000 Rows, In-Grid Typing, DropDownGrid & Popup Edit -->
-<GridControl TValue=""CustomQuote"" DataSource=""@FilteredQuotes""
+@"<GridControl TValue=""TripRequest"" DataSource=""@FilteredRequests""
+             @ref=""_grid""
              AllowSelection=""true""
              AllowSorting=""true""
              AllowFiltering=""true""
@@ -1145,96 +1181,106 @@
              EventsRef=""@_gridEvents""
              Height=""440px"">
     <GridColumnsBase>
-        <GridColumn Field=""Job"" HeaderText=""Job"" Width=""90px""
+        <GridColumn Field=""@nameof(TripRequest.Request)"" HeaderText=""Request"" Width=""100px""
                     IsPrimaryKey=""true"" AllowEditing=""false""
                     IsFrozen=""true"" FrozenPosition=""FrozenColumnPosition.Left"">
             <Template Context=""row"">
-                <span class=""grid-job-code"">@(((CustomQuote)row).Job)</span>
+                @{ var r = (TripRequest)row; }
+                <BadgeControl Text=""@r.Request"" CssClass=""grid-request-code"" />
             </Template>
         </GridColumn>
 
-        <GridColumn Field=""Salesperson"" HeaderText=""Salesperson"" Width=""145px"" AllowEditing=""false"">
+        <GridColumn Field=""@nameof(TripRequest.Agent)"" HeaderText=""Agent"" Width=""150px"" AllowEditing=""false"">
             <Template Context=""row"">
-                @{ var q = (CustomQuote)row; }
-                <div class=""salesperson-cell"">
-                    <span class=""salesperson-avatar"" style=""background:@q.AvatarBg"">@q.AvatarInitials</span>
-                    <span class=""salesperson-name"">@q.Salesperson</span>
+                @{ var r = (TripRequest)row; }
+                <div class=""agent-cell"">
+                    <span class=""agent-avatar"" style=""background:@r.AvatarBg"">@r.AvatarInitials</span>
+                    <span class=""agent-name"">@r.Agent</span>
                 </div>
             </Template>
         </GridColumn>
 
-        <GridColumn Field=""Community"" HeaderText=""Community"" Width=""130px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(TripRequest.Destination)"" HeaderText=""Destination"" Width=""130px"" AllowEditing=""false"" />
 
-        <!-- ── IN-CELL DROP DOWN GRID CONTROL (Multi-column lookup) ── -->
-        <GridColumn HeaderText=""Category (DropDownGrid)"" Width=""190px"" AllowEditing=""false"">
+        @* In-cell DropDownGridControl: a four-column lookup with search *@
+        <GridColumn HeaderText=""Trip type (DropDownGrid)"" Width=""190px"" AllowEditing=""false"">
             <Template Context=""row"">
-                @{ var q = (CustomQuote)row; }
-                <div class=""grid-cell-dropdowngrid"" @onclick:stopPropagation=""true"">
-                    <DropDownGridControl TItem=""CategoryLookup"" TValue=""string""
-                                         DataSource=""@_categoryLookup""
-                                         Value=""@q.Category""
-                                         ValueChanged=""@(val => OnCategoryChanged(q, val))""
-                                         TextFieldName=""@nameof(CategoryLookup.Name)""
-                                         ValueFieldName=""@nameof(CategoryLookup.Code)""
-                                         ClosedTextFieldName=""@nameof(CategoryLookup.Code)""
-                                         PopupWidth=""410px""
+                @{ var r = (TripRequest)row; }
+                <div class=""grid-cell-dropdowngrid"">
+                    <DropDownGridControl TItem=""TripTypeLookup"" TValue=""string""
+                                         DataSource=""@_tripTypeLookup""
+                                         Value=""@r.TripType""
+                                         ValueChanged=""@(val => OnTripTypeChanged(r, val))""
+                                         TextFieldName=""@nameof(TripTypeLookup.Name)""
+                                         ValueFieldName=""@nameof(TripTypeLookup.Code)""
+                                         ClosedTextFieldName=""@nameof(TripTypeLookup.Code)""
+                                         PopupWidth=""490px""
                                          PopupHeight=""220px""
                                          RowHeight=""24""
                                          ShowSearch=""true""
-                                         Placeholder=""Select category..."">
+                                         SearchPlaceholder=""Search trip types...""
+                                         AllowClear=""false""
+                                         Placeholder=""Select trip type..."">
                         <Columns>
-                            <GridColumn Field=""Code"" HeaderText=""Code"" Width=""95px"" />
-                            <GridColumn Field=""Name"" HeaderText=""Category Name"" Width=""170px"" />
-                            <GridColumn Field=""Trade"" HeaderText=""Trade"" Width=""110px"" />
+                            <GridColumn Field=""@nameof(TripTypeLookup.Code)"" HeaderText=""Code"" Width=""95px"" />
+                            <GridColumn Field=""@nameof(TripTypeLookup.Name)"" HeaderText=""Trip type"" Width=""165px"" />
+                            <GridColumn Field=""@nameof(TripTypeLookup.Desk)"" HeaderText=""Desk"" Width=""90px"" />
+                            <GridColumn Field=""@nameof(TripTypeLookup.LeadTime)"" HeaderText=""Book ahead"" Width=""110px"" />
                         </Columns>
                     </DropDownGridControl>
                 </div>
             </Template>
         </GridColumn>
 
-        <!-- ── IN-GRID FAST TYPING CELL (Typed in the browser, committed on blur) ── -->
-        <GridColumn Field=""EstimateAmount"" HeaderText=""Estimate (Fast Typing)"" Width=""140px""
+        @* Fast typing: click the cell and type, the value commits on Enter or blur *@
+        <GridColumn Field=""@nameof(TripRequest.Quote)"" HeaderText=""Quote (Fast Typing)"" Width=""140px""
                     Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right""
                     AllowEditing=""true"" SelectAllOnEdit=""true"" />
 
-        <!-- ── INLINE SVG SPARKLINE CHART CELL TEMPLATE ── -->
-        <GridColumn HeaderText=""Cost Trend"" Width=""135px"" AllowSorting=""false"" AllowFiltering=""false"" AllowEditing=""false"">
+        @* Inline SVG sparkline: five weekly fare samples for the route, the last one is the quote *@
+        <GridColumn HeaderText=""Fare Trend"" Width=""135px"" AllowSorting=""false"" AllowFiltering=""false"" AllowEditing=""false"">
             <Template Context=""row"">
                 @{
-                    var q = (CustomQuote)row;
-                    var spark = GetSparklinePoints(q.TrendHistory, 68, 22);
-                    var isUp = q.TrendDeltaPercent >= 0;
+                    var r = (TripRequest)row;
+                    var spark = GetSparklinePoints(r.FareHistory, 68, 22);
+                    var isUp = r.FareDeltaPercent >= 0;
                     var color = isUp ? ""#10b981"" : ""#ef4444"";
                     var fill = isUp ? ""rgba(16, 185, 129, 0.16)"" : ""rgba(239, 68, 68, 0.16)"";
+                    var deltaClass = isUp ? ""delta-up"" : ""delta-down"";
+                    var titleText = $""5-week fare trend: {(isUp ? ""+"" : """")}{r.FareDeltaPercent}%"";
+                    var deltaSign = isUp ? ""▲"" : ""▼"";
                 }
-                <div class=""sparkline-cell"" title=""5-Month Cost Trend: @(isUp ? ""+"" : """")@q.TrendDeltaPercent%"">
+                <div class=""sparkline-cell"" title=""@titleText"">
                     <svg width=""68"" height=""22"" viewBox=""0 0 68 22"" class=""sparkline-svg"">
                         <polygon points=""@spark.AreaPoints"" fill=""@fill"" />
                         <polyline points=""@spark.PolylinePoints"" fill=""none"" stroke=""@color"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" />
                         <circle cx=""@spark.LastX"" cy=""@spark.LastY"" r=""2.5"" fill=""@color"" />
                     </svg>
-                    <span class=""sparkline-delta @(isUp ? ""delta-up"" : ""delta-down"")"">
-                        @(isUp ? ""▲"" : ""▼"")@Math.Abs(q.TrendDeltaPercent)%
+                    <span class=""sparkline-delta @deltaClass"">
+                        @deltaSign@Math.Abs(r.FareDeltaPercent)%
                     </span>
                 </div>
             </Template>
         </GridColumn>
 
-        <GridColumn Field=""Status"" HeaderText=""Status"" Width=""110px"" AllowEditing=""false"">
+        <GridColumn Field=""@nameof(TripRequest.Status)"" HeaderText=""Status"" Width=""110px"" AllowEditing=""false"">
             <Template Context=""row"">
-                @{ var q = (CustomQuote)row; }
-                <BadgeControl Text=""@q.Status"" CssClass=""@($""grid-badge {GetStatusBadgeClass(q.Status)}"")"" />
+                @{
+                    var r = (TripRequest)row;
+                    var statusBadge = GetStatusBadgeClass(r.Status);
+                }
+                <BadgeControl Text=""@r.Status"" CssClass=""@($""grid-badge {statusBadge}"")"" />
             </Template>
         </GridColumn>
 
-        <!-- ── POPUP EDITABLE DESCRIPTION COLUMN ── -->
-        <GridColumn HeaderText=""Description (Popup Edit)"" Width=""280px"" AllowEditing=""false"">
+        @* The Edit button opens the popup editor; a double-click on the row does the same *@
+        <GridColumn HeaderText=""Itinerary (Popup Edit)"" Width=""280px"" AllowEditing=""false"">
             <Template Context=""row"">
-                @{ var q = (CustomQuote)row; }
+                @{ var r = (TripRequest)row; }
                 <div class=""desc-cell-wrapper"">
-                    <span class=""desc-text"" title=""@q.Description"">@q.Description</span>
+                    <span class=""desc-text"" title=""@r.Itinerary"">@r.Itinerary</span>
                     <button type=""button"" class=""btn-cell-popup-edit"" title=""Edit in Modal Popup""
-                            @onclick=""@(() => OpenPopupEdit(q))"" @onclick:stopPropagation=""true"">
+                            @onclick=""@(() => OpenPopupEdit(r))"" @onclick:stopPropagation=""true"">
                         <span class=""bi bi-pencil-square""></span> Edit
                     </button>
                 </div>

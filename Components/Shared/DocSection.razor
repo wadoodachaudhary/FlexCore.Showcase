@@ -11,7 +11,7 @@
             @if (!string.IsNullOrEmpty(Count)) { <span class="doc-count">@Count</span> }
         </HeaderContent>
         <ChildContent>
-            @ChildContent
+            <CascadingValue Name="DocSectionTitle" Value="@Title" IsFixed="true">@ChildContent</CascadingValue>
         </ChildContent>
     </AccordionItemControl>
 </div>

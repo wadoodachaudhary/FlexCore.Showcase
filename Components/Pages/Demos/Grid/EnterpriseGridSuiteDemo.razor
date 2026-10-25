@@ -18,7 +18,9 @@
    Grid/GridControl.ExportOptions.cs, Grid/GridControl.ProviderExport.cs, Grid/GridExportModels.cs (GridExporter, the format builders,
    GridExportCellStyle, GridPdfPrintOptions), Grid/NativePdfDocument.cs (WriteLegacy), Excel/XlsxWriter.cs and Grid/GridColumn.cs; every row
    checked at its read site and with vocabcheck.py. The grid PDF goes through WriteLegacy with the standard Helvetica fonts; the embedded
-   Liberation fonts belong to the report PDF writer (Reports/ReportPdfExport.cs). *@
+   Liberation fonts belong to the report PDF writer (Reports/ReportPdfExport.cs).
+   2026-10-25 (Baaria, SC-344): the example runs on the operator's rate card (Data/BenchModels.cs RateCardItem, BenchDataStore.RateCard)
+   instead of the estimating items copied from HomeFront. *@
 
 <PageTitle>Export &amp; templates — FlexCore Showcase</PageTitle>
 
@@ -31,20 +33,20 @@
             methods take the rows as currently filtered and sorted and the columns as currently visible, build the file on the server with
             the library's own writers, and hand it to the browser. Where the File System Access API exists a save dialog opens; elsewhere
             the file downloads. A <code>GridColumn</code> with a <code>Template</code> renders whatever markup you put inside it for each row,
-            with <code>context</code> as the row object; the Status column here renders a <code>BadgeControl</code>.
+            with <code>context</code> as the row object; the Status column here renders each line's Bookable flag as a <code>BadgeControl</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="export" Title="Export the rows you see" RazorCode="@Code.Export" CSharpCode="@Code.ExportCs">
-            <Description><p>Two hundred and fifty estimate lines. Search, filter or sort first, then export: the file holds exactly the rows and columns on screen, in the same order. When the export is done the grid shows the row count in a status pill.</p></Description>
+            <Description><p>Two hundred and fifty lines of the operator's rate card: the service, its supplier, category and season, a sample quantity and the net rate, with Bookable or Suspended as a badge. Search, filter or sort first, then export: the file holds exactly the rows and columns on screen, in the same order. When the export is done the grid shows the row count in a status pill.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="ExportCsv">Export CSV</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="ExportExcel">Export Excel (.xlsx)</ButtonControl>
             </Controls>
             <Demo>
                 <GridControl @ref="_grid"
-                             TValue="EnterpriseRow"
+                             TValue="RateCardRow"
                              DataSource="@_displayRows"
                              ShowRowCountInFooter="true"
                              AllowSorting="true"
@@ -55,27 +57,23 @@
                              Height="420px"
                              CssClass="fx-grid-compact">
                     <GridColumnsBase>
-                        <GridColumn Field="@nameof(EnterpriseRow.Code)" HeaderText="Item Code" Width="100px" />
-                        <GridColumn Field="@nameof(EnterpriseRow.Description)" HeaderText="Description" Width="260px" />
-                        <GridColumn Field="@nameof(EnterpriseRow.Category)" HeaderText="Trade Category" Width="140px" />
-                        <GridColumn Field="@nameof(EnterpriseRow.Status)" HeaderText="Status" Width="120px" TextAlign="TextAlign.Center">
+                        <GridColumn Field="@nameof(RateCardRow.Code)" HeaderText="Code" Width="100px" />
+                        <GridColumn Field="@nameof(RateCardRow.Description)" HeaderText="Service" Width="220px" />
+                        <GridColumn Field="@nameof(RateCardRow.Supplier)" HeaderText="Supplier" Width="180px" />
+                        <GridColumn Field="@nameof(RateCardRow.Category)" HeaderText="Category" Width="130px" />
+                        <GridColumn Field="@nameof(RateCardRow.Season)" HeaderText="Season" Width="90px" />
+                        <GridColumn Field="@nameof(RateCardRow.Status)" HeaderText="Status" Width="110px" TextAlign="TextAlign.Center">
                             <Template>
                                 @{
-                                    var row = (EnterpriseRow)context;
-                                    var variant = row.Status switch
-                                    {
-                                        "Approved" => BadgeVariant.Success,
-                                        "Pending" => BadgeVariant.Warning,
-                                        "Review" => BadgeVariant.Info,
-                                        _ => BadgeVariant.Secondary
-                                    };
+                                    var row = (RateCardRow)context;
+                                    var variant = row.Bookable ? BadgeVariant.Success : BadgeVariant.Secondary;
                                 }
                                 <BadgeControl Text="@row.Status" Variant="@variant" Size="BadgeSize.Small" />
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(EnterpriseRow.Qty)" HeaderText="Takeoff Qty" Width="100px" Type="ColumnType.Number" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(EnterpriseRow.UnitPrice)" HeaderText="Unit Price" Width="110px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
-                        <GridColumn Field="@nameof(EnterpriseRow.TotalCost)" HeaderText="Total Cost" Width="120px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
+                        <GridColumn Field="@nameof(RateCardRow.Qty)" HeaderText="Qty" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(RateCardRow.Rate)" HeaderText="Net Rate" Width="110px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
+                        <GridColumn Field="@nameof(RateCardRow.Total)" HeaderText="Total" Width="120px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="$#,##0.00" />
                     </GridColumnsBase>
                 </GridControl>
             </Demo>
@@ -136,45 +134,48 @@
 </FeatureDemoLayout>
 
 @code {
-    public class EnterpriseRow
+    public class RateCardRow
     {
         public string Code { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public string Supplier { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
-        public string Status { get; set; } = "Approved";
+        public string Season { get; set; } = string.Empty;
+        public bool Bookable { get; set; } = true;
+        public string Status { get; set; } = string.Empty;
         public decimal Qty { get; set; }
-        public decimal UnitPrice { get; set; }
-        public decimal TotalCost => Qty * UnitPrice;
+        public decimal Rate { get; set; }
+        public decimal Total => Qty * Rate;
     }
 
-    private GridControl<EnterpriseRow>? _grid;
-    private List<EnterpriseRow> _displayRows = [];
+    private GridControl<RateCardRow>? _grid;
+    private List<RateCardRow> _displayRows = [];
 
     protected override void OnInitialized()
     {
-        var statuses = new[] { "Approved", "Pending", "Review", "Completed" };
-        var categories = new[] { "Foundation", "Framing", "Mechanical", "Electrical", "Plumbing", "Interior" };
-
-        _displayRows = BenchData.EstimatingItems.Take(250).Select((item, idx) => new EnterpriseRow
+        _displayRows = BenchData.RateCard.Take(250).Select((item, idx) => new RateCardRow
         {
-            Code = item.Item ?? $"ITM-{idx:D4}",
-            Description = item.ItemDesc ?? "Construction Assembly Item",
-            Category = categories[idx % categories.Length],
-            Status = statuses[idx % statuses.Length],
-            Qty = (idx % 25) + 1,
-            UnitPrice = item.Price ?? 45.00m
+            Code = item.Code,
+            Description = item.Description,
+            Supplier = item.Supplier,
+            Category = item.Category,
+            Season = item.Season,
+            Bookable = item.Bookable,
+            Status = item.Bookable ? "Bookable" : "Suspended",
+            Qty = (idx % 8) + 1,
+            Rate = item.Rate
         }).ToList();
     }
 
-    private Task ExportCsv() => _grid?.ExportToCsvAsync("estimate-items.csv") ?? Task.CompletedTask;
+    private Task ExportCsv() => _grid?.ExportToCsvAsync("rate-card.csv") ?? Task.CompletedTask;
 
-    private Task ExportExcel() => _grid?.ExportToXlsxAsync("estimate-items.xlsx") ?? Task.CompletedTask;
+    private Task ExportExcel() => _grid?.ExportToXlsxAsync("rate-card.xlsx") ?? Task.CompletedTask;
 
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
     private static class Code
     {
         public const string Export = @"<GridControl @ref=""_grid""
-             TValue=""EnterpriseRow""
+             TValue=""RateCardRow""
              DataSource=""@_displayRows""
              ShowRowCountInFooter=""true""
              AllowSorting=""true""
@@ -185,63 +186,61 @@
              Height=""420px""
              CssClass=""fx-grid-compact"">
     <GridColumnsBase>
-        <GridColumn Field=""@nameof(EnterpriseRow.Code)"" HeaderText=""Item Code"" Width=""100px"" />
-        <GridColumn Field=""@nameof(EnterpriseRow.Description)"" HeaderText=""Description"" Width=""260px"" />
-        <GridColumn Field=""@nameof(EnterpriseRow.Category)"" HeaderText=""Trade Category"" Width=""140px"" />
-        <GridColumn Field=""@nameof(EnterpriseRow.Status)"" HeaderText=""Status"" Width=""120px"" TextAlign=""TextAlign.Center"">
+        <GridColumn Field=""@nameof(RateCardRow.Code)"" HeaderText=""Code"" Width=""100px"" />
+        <GridColumn Field=""@nameof(RateCardRow.Description)"" HeaderText=""Service"" Width=""220px"" />
+        <GridColumn Field=""@nameof(RateCardRow.Supplier)"" HeaderText=""Supplier"" Width=""180px"" />
+        <GridColumn Field=""@nameof(RateCardRow.Category)"" HeaderText=""Category"" Width=""130px"" />
+        <GridColumn Field=""@nameof(RateCardRow.Season)"" HeaderText=""Season"" Width=""90px"" />
+        <GridColumn Field=""@nameof(RateCardRow.Status)"" HeaderText=""Status"" Width=""110px"" TextAlign=""TextAlign.Center"">
             <Template>
                 @{
-                    var row = (EnterpriseRow)context;
-                    var variant = row.Status switch
-                    {
-                        ""Approved"" => BadgeVariant.Success,
-                        ""Pending"" => BadgeVariant.Warning,
-                        ""Review"" => BadgeVariant.Info,
-                        _ => BadgeVariant.Secondary
-                    };
+                    var row = (RateCardRow)context;
+                    var variant = row.Bookable ? BadgeVariant.Success : BadgeVariant.Secondary;
                 }
                 <BadgeControl Text=""@row.Status"" Variant=""@variant"" Size=""BadgeSize.Small"" />
             </Template>
         </GridColumn>
-        <GridColumn Field=""@nameof(EnterpriseRow.Qty)"" HeaderText=""Takeoff Qty"" Width=""100px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(EnterpriseRow.UnitPrice)"" HeaderText=""Unit Price"" Width=""110px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""$#,##0.00"" />
-        <GridColumn Field=""@nameof(EnterpriseRow.TotalCost)"" HeaderText=""Total Cost"" Width=""120px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""$#,##0.00"" />
+        <GridColumn Field=""@nameof(RateCardRow.Qty)"" HeaderText=""Qty"" Width=""80px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" />
+        <GridColumn Field=""@nameof(RateCardRow.Rate)"" HeaderText=""Net Rate"" Width=""110px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""$#,##0.00"" />
+        <GridColumn Field=""@nameof(RateCardRow.Total)"" HeaderText=""Total"" Width=""120px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""$#,##0.00"" />
     </GridColumnsBase>
 </GridControl>";
-        public const string ExportCs = @"public class EnterpriseRow
+        public const string ExportCs = @"public class RateCardRow
 {
     public string Code { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public string Supplier { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
-    public string Status { get; set; } = ""Approved"";
+    public string Season { get; set; } = string.Empty;
+    public bool Bookable { get; set; } = true;
+    public string Status { get; set; } = string.Empty;
     public decimal Qty { get; set; }
-    public decimal UnitPrice { get; set; }
-    public decimal TotalCost => Qty * UnitPrice;
+    public decimal Rate { get; set; }
+    public decimal Total => Qty * Rate;
 }
 
-private GridControl<EnterpriseRow>? _grid;
-
-private List<EnterpriseRow> _displayRows = [];
+private GridControl<RateCardRow>? _grid;
+private List<RateCardRow> _displayRows = [];
 
 protected override void OnInitialized()
 {
-    var statuses = new[] { ""Approved"", ""Pending"", ""Review"", ""Completed"" };
-    var categories = new[] { ""Foundation"", ""Framing"", ""Mechanical"", ""Electrical"", ""Plumbing"", ""Interior"" };
-
-    _displayRows = BenchData.EstimatingItems.Take(250).Select((item, idx) => new EnterpriseRow
+    _displayRows = BenchData.RateCard.Take(250).Select((item, idx) => new RateCardRow
     {
-        Code = item.Item ?? $""ITM-{idx:D4}"",
-        Description = item.ItemDesc ?? ""Construction Assembly Item"",
-        Category = categories[idx % categories.Length],
-        Status = statuses[idx % statuses.Length],
-        Qty = (idx % 25) + 1,
-        UnitPrice = item.Price ?? 45.00m
+        Code = item.Code,
+        Description = item.Description,
+        Supplier = item.Supplier,
+        Category = item.Category,
+        Season = item.Season,
+        Bookable = item.Bookable,
+        Status = item.Bookable ? ""Bookable"" : ""Suspended"",
+        Qty = (idx % 8) + 1,
+        Rate = item.Rate
     }).ToList();
 }
 
-private Task ExportCsv() => _grid?.ExportToCsvAsync(""estimate-items.csv"") ?? Task.CompletedTask;
+private Task ExportCsv() => _grid?.ExportToCsvAsync(""rate-card.csv"") ?? Task.CompletedTask;
 
-private Task ExportExcel() => _grid?.ExportToXlsxAsync(""estimate-items.xlsx"") ?? Task.CompletedTask;";
+private Task ExportExcel() => _grid?.ExportToXlsxAsync(""rate-card.xlsx"") ?? Task.CompletedTask;";
     }
 
     private static class Vocab

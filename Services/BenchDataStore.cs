@@ -1,49 +1,25 @@
 using System.Diagnostics;
-using System.Text.Json;
 using FlexCore.Showcase.Data;
 
 namespace FlexCore.Showcase.Services;
 
 /// <summary>
-/// Central high-performance in-memory data store for showcase benches.
-/// Loads authentic JSON exports if present under Data/, and dynamically synthesizes
-/// rich, realistic enterprise datasets when running standalone or in lightweight distributions.
+/// In-memory data for the grid pages, synthesized once at startup (Program.cs calls <see cref="Load"/>): the tour operator's
+/// rate card (5,000 lines over <see cref="TravelData.Destinations"/>), the supplier list with its contacts (Page navigation) and
+/// the sales desks with their agents (Master-detail). Deterministic, so screenshots and timings repeat.
 /// </summary>
 public sealed class BenchDataStore
 {
-    public const string EstimatingFileName = "estimating-items-full.json";
-    public const string AssemblyFileName = "assembly-details-full.json";
-    public const string VendorsFileName = "vendors-200.json";
-    public const string VendorContactsFileName = "vendor-contacts.json";
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true
-    };
-
-    private readonly string[] _probeRoots;
     private readonly object _gate = new();
     private bool _loaded;
 
-    public BenchDataStore(IWebHostEnvironment env)
-    {
-        _probeRoots =
-        [
-            Path.Combine(AppContext.BaseDirectory, "Data"),
-            Path.Combine(env.ContentRootPath, "Data"),
-            Path.Combine(env.ContentRootPath, "..", "HomeFront", "FlexKitTester", "Data")
-        ];
-    }
-
-    public IReadOnlyList<EstimatingItemRecord> EstimatingItems { get; private set; } = [];
-    public IReadOnlyList<AssemblyDetailRecord> AssemblyDetails { get; private set; } = [];
-    public IReadOnlyList<VendorRecord> Vendors { get; private set; } = [];
-    public IReadOnlyList<VendorContactRecord> VendorContacts { get; private set; } = [];
-    public IReadOnlyList<SecurityGroup> SecurityGroups { get; private set; } = [];
-    public IReadOnlyList<UserListItem> Users { get; private set; } = [];
+    public IReadOnlyList<RateCardItem> RateCard { get; private set; } = [];
+    public IReadOnlyList<SupplierRecord> Suppliers { get; private set; } = [];
+    public IReadOnlyList<SupplierContactRecord> SupplierContacts { get; private set; } = [];
+    public IReadOnlyList<SalesDesk> SalesDesks { get; private set; } = [];
+    public IReadOnlyList<AgentListItem> Agents { get; private set; } = [];
 
     public string LoadReport { get; private set; } = "Initializing...";
-    public string? DataRoot { get; private set; }
 
     public void Load()
     {
@@ -53,262 +29,218 @@ public sealed class BenchDataStore
             if (_loaded) return;
             var sw = Stopwatch.StartNew();
 
-            DataRoot = _probeRoots.FirstOrDefault(Directory.Exists);
-
-            var items = ReadArray<EstimatingItemRecord>(EstimatingFileName);
-            if (items.Count == 0)
-            {
-                items = SynthesizeEstimatingItems(5000);
-            }
-            EstimatingItems = items;
-
-            var assemblies = ReadArray<AssemblyDetailRecord>(AssemblyFileName);
-            if (assemblies.Count == 0)
-            {
-                assemblies = SynthesizeAssemblies(items);
-            }
-            AssemblyDetails = assemblies;
-
-            var vendors = ReadArray<VendorRecord>(VendorsFileName);
-            if (vendors.Count == 0)
-            {
-                vendors = SynthesizeVendors(200);
-            }
-            Vendors = vendors;
-
-            var contacts = ReadArray<VendorContactRecord>(VendorContactsFileName);
-            if (contacts.Count == 0)
-            {
-                contacts = SynthesizeContacts(vendors);
-            }
-            VendorContacts = contacts;
-
-            SecurityGroups = SynthesizeSecurityGroups();
-            Users = SynthesizeUsers(SecurityGroups);
+            RateCard = SynthesizeRateCard(5000);
+            Suppliers = SynthesizeSuppliers(200);
+            SupplierContacts = SynthesizeSupplierContacts(Suppliers);
+            SalesDesks = SynthesizeSalesDesks();
+            Agents = SynthesizeAgents(SalesDesks);
 
             sw.Stop();
-            LoadReport = $"Data loaded in {sw.ElapsedMilliseconds} ms | Estimating: {EstimatingItems.Count:N0} items | Assemblies: {AssemblyDetails.Count:N0} | Vendors: {Vendors.Count:N0}";
+            LoadReport = $"Data synthesized in {sw.ElapsedMilliseconds} ms | Rate card: {RateCard.Count:N0} lines | Suppliers: {Suppliers.Count:N0} | Agents: {Agents.Count:N0}";
             _loaded = true;
         }
     }
 
-    private List<T> ReadArray<T>(string fileName)
+    /// <summary>
+    /// The rate card: for every destination, every supplier's services in every season. Supplier names are built from the
+    /// destination's city (Hotel Lisbon Central, Kyoto Walks); the rates move with the region and the season; the margin
+    /// depends on the category. Every seventeenth line is not bookable.
+    /// </summary>
+    private static List<RateCardItem> SynthesizeRateCard(int count)
     {
-        var path = _probeRoots.Select(root => Path.Combine(root, fileName)).FirstOrDefault(File.Exists);
-        if (path is null) return [];
-
-        try
+        // category → suppliers (a {0} placeholder takes the city) → services (description, unit, low rate, high rate)
+        var catalogue = new (string Category, int Margin, (string Supplier, (string Desc, string Unit, int Low, int High)[] Services)[] Suppliers)[]
         {
-            var bytes = File.ReadAllBytes(path);
-            var length = StripChunkBreaks(bytes);
-            return JsonSerializer.Deserialize<List<T>>(new ReadOnlySpan<byte>(bytes, 0, length), JsonOptions) ?? [];
-        }
-        catch
-        {
-            return [];
-        }
-    }
-
-    private static int StripChunkBreaks(byte[] buffer)
-    {
-        var read = buffer.Length >= 3 && buffer[0] == 0xEF && buffer[1] == 0xBB && buffer[2] == 0xBF ? 3 : 0;
-        var write = 0;
-        for (; read < buffer.Length; read++)
-        {
-            var b = buffer[read];
-            if (b is (byte)'\n' or (byte)'\r') continue;
-            buffer[write++] = b;
-        }
-        return write;
-    }
-
-    private static List<EstimatingItemRecord> SynthesizeEstimatingItems(int count)
-    {
-        var list = new List<EstimatingItemRecord>(count);
-        var phases = new[]
-        {
-            ("0100", "Sitework & Excavation"),
-            ("0200", "Foundation & Concrete"),
-            ("0300", "Framing & Timber"),
-            ("0400", "Roofing & Siding"),
-            ("0500", "Plumbing Rough-In"),
-            ("0600", "Electrical & Lighting"),
-            ("0700", "HVAC & Insulation"),
-            ("0800", "Drywall & Texturing"),
-            ("0900", "Interior Trim & Doors"),
-            ("1000", "Flooring & Tile"),
-            ("1100", "Paint & Finish"),
-            ("1200", "Cabinets & Countertops")
+            ("Transport", 10, new[]
+            {
+                ("Meridian Airways", new[] { ("Return flights, economy", "pax", 380, 620), ("Return flights, premium economy", "pax", 900, 1500), ("Checked baggage, 23 kg", "pax", 40, 60) }),
+                ("{0} Airport Transfers", new[] { ("Airport to hotel, private car", "trip", 45, 90), ("Hotel to airport, private car", "trip", 45, 90), ("Shared shuttle", "pax", 18, 30) }),
+                ("{0} Rail & Coach", new[] { ("Day-trip coach with driver", "day", 120, 260), ("Regional rail pass, 3 days", "pax", 90, 180), ("Car hire, compact", "day", 35, 70) }),
+            }),
+            ("Accommodation", 15, new[]
+            {
+                ("Hotel {0} Central", new[] { ("Double room with breakfast", "night", 110, 260), ("Twin room, room only", "night", 90, 220), ("Suite with breakfast", "night", 240, 480) }),
+                ("{0} Boutique Stays", new[] { ("Room upgrade, view side", "night", 40, 90), ("Late checkout on departure day", "stay", 30, 60), ("Cot and high chair", "stay", 0, 15) }),
+                ("{0} Apartments", new[] { ("Apartment, two bedrooms", "night", 130, 300), ("Welcome groceries", "stay", 25, 45) }),
+            }),
+            ("Experiences", 20, new[]
+            {
+                ("{0} Walks", new[] { ("Old town walking tour", "pax", 25, 45), ("Evening food tour", "pax", 65, 110) }),
+                ("{0} Day Tours", new[] { ("Full-day excursion with lunch", "pax", 80, 160), ("Entrance tickets", "pax", 18, 40), ("Sunset boat trip", "pax", 45, 95) }),
+                ("Taste of {0}", new[] { ("Cooking class with market visit", "pax", 70, 120), ("Wine tasting with transfer", "pax", 60, 120) }),
+                ("{0} Adventures", new[] { ("Guided hike, half day", "pax", 40, 80), ("Kayak hire with guide", "pax", 55, 95) }),
+            }),
+            ("Services", 12, new[]
+            {
+                ("Guardian Travel Cover", new[] { ("Travel insurance, comprehensive", "pax", 38, 75) }),
+                ("{0} Guide Co-op", new[] { ("Private guide, full day", "day", 180, 320), ("Airport meet and greet", "pax", 25, 45) }),
+                ("Showcase Travel, head office", new[] { ("Booking fee", "booking", 45, 60), ("Documents and delivery", "booking", 12, 25), ("Restaurant reservations", "booking", 10, 20) }),
+            }),
         };
-
-        var uoms = new[] { "EA", "LF", "SF", "CY", "HRS", "BOX" };
+        var notes = new[] { "", "", "Net rate", "Commissionable 10%", "Non-refundable", "Paid locally", "Pre-booked", "" };
         var random = new Random(42);
+        var list = new List<RateCardItem>(count);
 
         for (var i = 1; i <= count; i++)
         {
-            var p = phases[i % phases.Length];
-            var uom = uoms[i % uoms.Length];
-            var price = Math.Round((decimal)(random.NextDouble() * 850 + 15), 2);
-            list.Add(new EstimatingItemRecord
+            var (city, region, _) = TravelData.Destinations[i % TravelData.Destinations.Length];
+            var cat = catalogue[(i / TravelData.Destinations.Length) % catalogue.Length];
+            var sup = cat.Suppliers[random.Next(cat.Suppliers.Length)];
+            var svc = sup.Services[random.Next(sup.Services.Length)];
+            var season = TravelData.Seasons[random.Next(TravelData.Seasons.Length)];
+            var regionFactor = region switch
             {
-                DivisionID = 1,
-                Phase = p.Item1,
-                PhaseDesc = p.Item2,
-                Item = $"ITM-{i:D5}",
-                ItemDesc = $"{p.Item2} Specification {i}",
-                CostCategory = (i % 3 == 0) ? "Subcontract" : (i % 3 == 1) ? "Material" : "Labor",
-                OrderUOM = uom,
-                Price = price,
-                WastePercent = (i % 5 == 0) ? 10 : 5,
-                POIndex = $"PO-{(i % 40) + 1:D3}",
-                POIndexDescription = $"Purchase Group {(i % 40) + 1}",
-                JCCostCode = $"{p.Item1}-{(i % 8) + 1:D2}",
-                JCCostCodeDesc = $"{p.Item2} Task {(i % 8) + 1}",
-                IsQuote = (i % 4 == 0),
-                PartNumber = $"SKU-{(100000 + i)}",
-                Notes = $"Standard specification item for {p.Item2}"
+                "East Asia" => 1.15m, "Southern Africa" => 1.1m, "North Africa" => 0.85m, "Northern Europe" => 1.4m,
+                "North America" => 1.3m, "Oceania" => 1.35m, "South America" => 1.05m, _ => 1.0m
+            };
+            var seasonFactor = season switch { "Summer" => 1.25m, "Autumn" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
+            var rate = Math.Round(random.Next(svc.Low * 100, svc.High * 100 + 1) / 100m * regionFactor * seasonFactor, 2);
+
+            list.Add(new RateCardItem
+            {
+                Code = $"SRV-{i:D5}",
+                Region = region,
+                Destination = city,
+                Category = cat.Category,
+                Supplier = string.Format(sup.Supplier, city),
+                Description = svc.Desc,
+                Unit = svc.Unit,
+                Rate = rate,
+                MarginPercent = cat.Margin + (i % 3 == 0 ? 2 : 0) - (i % 5 == 0 ? 2 : 0),
+                Season = season,
+                Bookable = i % 17 != 0,
+                Notes = notes[random.Next(notes.Length)]
             });
         }
         return list;
     }
 
-    private static List<AssemblyDetailRecord> SynthesizeAssemblies(List<EstimatingItemRecord> items)
+    /// <summary>
+    /// The supplier list: every destination's hotels, transfer companies, tour operators and services, named from the city
+    /// (Hotel Lisbon Central, Kyoto Walks) with a few operator-wide names. Deterministic; about a third have no contract yet.
+    /// </summary>
+    private static List<SupplierRecord> SynthesizeSuppliers(int count)
     {
-        var list = new List<AssemblyDetailRecord>();
-        var models = new[] { "Birchwood", "Cedarbrook", "Oakmont", "Pinecrest", "Sycamore" };
-
-        for (var i = 0; i < Math.Min(items.Count, 300); i++)
+        var patterns = new (string Name, string Category)[]
         {
-            var item = items[i];
-            list.Add(new AssemblyDetailRecord
-            {
-                DivisionID = 1,
-                Community = "Meadowlands",
-                Assembly = $"ASM-{(i % 25) + 1:D3}",
-                Model = models[i % models.Length],
-                Phase = item.Phase,
-                Item = item.Item,
-                Sequence = (i % 10) + 1,
-                TakeoffQty = Math.Round((decimal)(new Random(i).NextDouble() * 50 + 1), 2),
-                OrderQty = Math.Round((decimal)(new Random(i).NextDouble() * 55 + 1), 2)
-            });
-        }
-        return list;
-    }
-
-    private static List<VendorRecord> SynthesizeVendors(int count)
-    {
-        var list = new List<VendorRecord>(count);
-        var trades = new[] { "Framing", "Concrete", "Electrical", "Plumbing", "Drywall", "Roofing", "Painting", "HVAC" };
-        var cities = new[] { "Austin", "Dallas", "Houston", "San Antonio", "Fort Worth", "Plano" };
-
-        for (var i = 1; i <= count; i++)
+            ("Hotel {0} Central", "Accommodation"), ("{0} Boutique Stays", "Accommodation"), ("{0} Apartments", "Accommodation"), ("{0} Villas", "Accommodation"),
+            ("{0} Airport Transfers", "Transport"), ("{0} Rail & Coach", "Transport"), ("{0} Car Hire", "Transport"),
+            ("{0} Walks", "Experiences"), ("{0} Day Tours", "Experiences"), ("Taste of {0}", "Experiences"), ("{0} Adventures", "Experiences"),
+            ("{0} Harbour Cruises", "Experiences"), ("{0} Bike Tours", "Experiences"), ("{0} Cooking School", "Experiences"),
+            ("{0} Guide Co-op", "Services"), ("{0} Concierge", "Services"), ("{0} Spa Retreat", "Services"),
+        };
+        var streets = new[] { "Harbour Road", "Market Street", "Station Square", "Old Town Lane", "Cathedral Close", "Riverside Walk", "Hill Road", "Garden Street" };
+        var random = new Random(7);
+        var list = new List<SupplierRecord>(count);
+        for (var i = 0; i < count; i++)
         {
-            var trade = trades[i % trades.Length];
-            var city = cities[i % cities.Length];
-            list.Add(new VendorRecord
+            var (city, _, country) = TravelData.Destinations[i % TravelData.Destinations.Length];
+            var pattern = patterns[(i / TravelData.Destinations.Length) % patterns.Length];
+            var slug = string.Format(pattern.Name, city).ToLowerInvariant().Replace(" & ", "-").Replace(' ', '-');
+            list.Add(new SupplierRecord
             {
-                DivisionID = 1,
-                Vendor_ID = $"VND-{i:D3}",
-                Vendor_Name = $"{city} {trade} Contractors #{i}",
-                Addr1 = $"{100 + i * 12} Industrial Blvd",
+                Code = $"SUP-{i + 1:D3}",
+                Name = string.Format(pattern.Name, city),
+                Category = pattern.Category,
+                Address = $"{random.Next(2, 180)} {streets[random.Next(streets.Length)]}",
                 City = city,
-                State = "TX",
-                Zip = $"7500{i % 10}",
-                Phone = $"(512) 555-{(1000 + i):D4}",
-                Fax = $"(512) 555-{(2000 + i):D4}",
-                TradeType = trade,
-                HoldBackPercentage = 10.0,
-                GLInsRequired = true,
-                WCInsRequired = true,
-                BuildProEnabled = (i % 2 == 0),
-                InActive = false
+                Country = country,
+                PostalCode = $"{random.Next(1000, 9999)}-{random.Next(100, 999)}",
+                Phone = $"+{random.Next(20, 99)} {random.Next(10, 99)} {random.Next(100, 999)} {random.Next(1000, 9999)}",
+                Email = $"bookings@{slug}.example",
+                Contracted = i % 3 != 2,
+                InsuranceOnFile = i % 4 != 3,
+                OnlineBooking = i % 2 == 0,
+                Active = i % 23 != 22
             });
         }
         return list;
     }
 
-    private static List<VendorContactRecord> SynthesizeContacts(List<VendorRecord> vendors)
+    /// <summary>One or two contacts per supplier: reservations first, then accounts for every other supplier.</summary>
+    private static List<SupplierContactRecord> SynthesizeSupplierContacts(IReadOnlyList<SupplierRecord> suppliers)
     {
-        var list = new List<VendorContactRecord>();
-        var firstNames = new[] { "Michael", "Sarah", "David", "Jessica", "James", "Emily", "Robert", "Jennifer" };
-        var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis" };
-
-        for (var i = 0; i < vendors.Count; i++)
+        string[] firstNames = ["Ana", "Bruno", "Chiara", "Daniel", "Elif", "Farid", "Greta", "Hiro", "Ines", "Jonas", "Keiko", "Luis", "Mai", "Nadia", "Omar", "Paula", "Quang", "Rosa", "Sven", "Thandi"];
+        string[] lastNames = ["Almeida", "Bianchi", "Costa", "Dubois", "Eriksen", "Fujimoto", "Gomez", "Haddad", "Ivanova", "Jensen", "Khan", "Lund", "Mbeki", "Nakamura", "Okafor", "Pereira", "Quinn", "Rossi", "Santos", "Tran"];
+        var list = new List<SupplierContactRecord>();
+        var id = 1;
+        for (var i = 0; i < suppliers.Count; i++)
         {
-            var v = vendors[i];
-            var fn = firstNames[i % firstNames.Length];
-            var ln = lastNames[i % lastNames.Length];
-            list.Add(new VendorContactRecord
+            var s = suppliers[i];
+            var domain = s.Email[(s.Email.IndexOf('@') + 1)..];
+            var count = i % 2 == 0 ? 2 : 1;
+            for (var k = 0; k < count; k++)
             {
-                DivisionID = 1,
-                ContactID = i + 1,
-                VendorCode = v.Vendor_ID,
-                FirstName = fn,
-                DisplayName = $"{fn} {ln}",
-                Role = (i % 2 == 0) ? "Project Manager" : "Accounts Payable",
-                WorkPhone = v.Phone,
-                Email = $"{fn.ToLower()}.{ln.ToLower()}@vendorcorp.example",
-                Active = true
-            });
+                var first = firstNames[(i * 3 + k * 7) % firstNames.Length];
+                var last = lastNames[(i * 5 + k * 11) % lastNames.Length];
+                list.Add(new SupplierContactRecord
+                {
+                    ContactID = id++,
+                    SupplierCode = s.Code,
+                    DisplayName = $"{first} {last}",
+                    Role = k == 0 ? "Reservations" : "Accounts",
+                    Phone = s.Phone,
+                    Email = $"{first.ToLowerInvariant()}.{last.ToLowerInvariant()}@{domain}",
+                    Active = (i + k) % 9 != 8
+                });
+            }
         }
         return list;
     }
 
-    private static List<SecurityGroup> SynthesizeSecurityGroups()
+    private static List<SalesDesk> SynthesizeSalesDesks()
     {
         return
         [
-            new SecurityGroup { GroupID = 1, Description = "Executive Management", IsAdmin = true, MemberCount = 6 },
-            new SecurityGroup { GroupID = 2, Description = "Project Managers", IsAdmin = false, MemberCount = 24 },
-            new SecurityGroup { GroupID = 3, Description = "Estimating Specialists", IsAdmin = false, MemberCount = 12 },
-            new SecurityGroup { GroupID = 4, Description = "Purchasing & Subcontracts", IsAdmin = false, MemberCount = 18 },
-            new SecurityGroup { GroupID = 5, Description = "Accounting & Payroll", IsAdmin = false, MemberCount = 15 },
-            new SecurityGroup { GroupID = 6, Description = "Field Superintendents", IsAdmin = false, MemberCount = 42 },
-            new SecurityGroup { GroupID = 7, Description = "Customer Care & Warranty", IsAdmin = false, MemberCount = 9 }
+            new SalesDesk { DeskID = 1, Name = "Leisure desk", GroupBookings = false, AgentCount = 24 },
+            new SalesDesk { DeskID = 2, Name = "Adventure desk", GroupBookings = true, AgentCount = 12 },
+            new SalesDesk { DeskID = 3, Name = "Cruise desk", GroupBookings = true, AgentCount = 9 },
+            new SalesDesk { DeskID = 4, Name = "Touring desk", GroupBookings = true, AgentCount = 15 },
+            new SalesDesk { DeskID = 5, Name = "Luxury desk", GroupBookings = false, AgentCount = 6 },
+            new SalesDesk { DeskID = 6, Name = "Customer care", GroupBookings = false, AgentCount = 18 },
+            new SalesDesk { DeskID = 7, Name = "Head office", GroupBookings = false, AgentCount = 8 }
         ];
     }
 
     /// <summary>
-    /// One user per <see cref="SecurityGroup.MemberCount"/>, so the Users column of the master grid and the detail
-    /// grid's row count agree. Names cycle through two lists; login ids are made unique with a numeric suffix.
-    /// Every ninth user is inactive.
+    /// One agent per <see cref="SalesDesk.AgentCount"/>, so the Agents column of the master grid and the detail grid's row
+    /// count agree. Names cycle through two lists; logins are made unique with a numeric suffix. Every ninth agent is inactive.
     /// </summary>
-    private static List<UserListItem> SynthesizeUsers(IEnumerable<SecurityGroup> groups)
+    private static List<AgentListItem> SynthesizeAgents(IEnumerable<SalesDesk> desks)
     {
         string[] firstNames =
         [
-            "Alex", "Bradley", "Catherine", "David", "Elena", "Frank", "Grace", "Henry", "Isabel", "Jonah", "Keira", "Liam", "Maya",
+            "Alex", "Bruna", "Catherine", "Dario", "Elena", "Femi", "Grace", "Hugo", "Isabel", "Jonah", "Keira", "Liam", "Maya",
             "Noah", "Olivia", "Priya", "Quentin", "Rosa", "Samuel", "Tessa", "Umar", "Vera", "Wesley", "Ximena", "Yusuf", "Zoe"
         ];
         string[] lastNames =
         [
-            "Smith", "Jenkins", "Clark", "Davis", "Evans", "Foster", "Garcia", "Harris", "Ibarra", "Jones", "Kim", "Lopez", "Murphy",
+            "Silva", "Jenkins", "Clark", "Dias", "Evans", "Foster", "Garcia", "Harris", "Ibarra", "Jones", "Kim", "Lopez", "Murphy",
             "Nguyen", "Ortiz", "Patel", "Quinn", "Reed", "Singh", "Turner", "Usman", "Vargas", "Walsh", "Xu", "Young", "Zimmer"
         ];
-        var users = new List<UserListItem>();
+        var agents = new List<AgentListItem>();
         var taken = new HashSet<string>(StringComparer.Ordinal);
         var n = 0;
-        foreach (var group in groups)
+        foreach (var desk in desks)
         {
-            for (var i = 0; i < group.MemberCount; i++, n++)
+            for (var i = 0; i < desk.AgentCount; i++, n++)
             {
                 var first = firstNames[n % firstNames.Length];
                 var last = lastNames[(n * 7 + n / firstNames.Length) % lastNames.Length];
                 var login = $"{char.ToLowerInvariant(first[0])}{last.ToLowerInvariant()}";
                 for (var suffix = 2; !taken.Add(login); suffix++)
                     login = $"{char.ToLowerInvariant(first[0])}{last.ToLowerInvariant()}{suffix}";
-                users.Add(new UserListItem
+                agents.Add(new AgentListItem
                 {
-                    UserID = login,
-                    UserName = $"{first} {last}",
-                    Email = $"{login}@enterprise.local",
+                    Login = login,
+                    FullName = $"{first} {last}",
+                    Email = $"{login}@showcase-travel.example",
                     Active = n % 9 != 4,
-                    GroupID = group.GroupID
+                    DeskID = desk.DeskID
                 });
             }
         }
-        return users;
+        return agents;
     }
 
     // ══════════════════════════════════════════════════════════════════════

@@ -50,7 +50,7 @@ dotnet run --project FlexCore.Showcase
    - `Components/Pages/Demos/Tree/*.razor` (TreeGrid and TreeView benches)
    - `Components/Pages/Demos/Workspace/*.razor` (PageControl bench)
 2. **C# Code & Services**:
-   - `Data/BenchModels.cs` (LedgerRow, BenchTreeNode, SRow, EstimatingItemRecord, etc.)
+   - `Data/BenchModels.cs` (RateCardItem, SupplierRecord, SalesDesk, SupplierNode, etc.)
    - `Services/BenchDataStore.cs` (Self-contained in-memory data generator)
 3. **Styles & Assets**:
    - `wwwroot/css/syncfusion-demo-layout.css` (Clean, self-contained CSS styles for the demo shell, copy button, parameter table, and dark code snippets)

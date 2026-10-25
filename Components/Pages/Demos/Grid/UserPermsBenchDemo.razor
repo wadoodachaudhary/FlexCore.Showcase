@@ -1,4 +1,3 @@
-@page "/demo/grid/userperms-lists"
 @page "/demo/grid/master-detail"
 @rendermode InteractiveServer
 @using Fx.ControlKit
@@ -8,12 +7,15 @@
 @using FlexCore.Showcase.Components.Shared
 @inject FlexCore.Showcase.Services.BenchDataStore BenchData
 
-@* 2026-10-18: moved onto FeatureDemoLayout (Saturday plan) and given a real relation: UserListItem now carries GroupID and
-   BenchDataStore generates one user per SecurityGroup.MemberCount, so the detail grid filters on u.GroupID == group.GroupID and
-   the master's Users column equals the detail's row count (SC-189, SC-193). Gone: the Take((GroupID % 4) + 3) subset, the
-   "Create Group & Rename" button that never opened an editor (SC-190), the manual dirty checkbox (SC-191; the real veto is on
-   Unsaved-row lock), the benchmark wording (SC-192) and the UserPerms jargon in the copy (SC-188; the old route stays as an
-   alias).
+@* 2026-10-25 (Baaria, SC-344): the master-detail example runs on sales desks and agents (Data/BenchModels.cs SalesDesk, AgentListItem;
+   BenchDataStore.SalesDesks, Agents) instead of the security groups and users copied from HomeFront. *@
+
+@* 2026-10-18: moved onto FeatureDemoLayout (Saturday plan) and given a real relation: each detail row carries its master's key and
+   BenchDataStore generates one detail row per master count (today AgentListItem.DeskID and SalesDesk.AgentCount), so the detail
+   grid filters on a.DeskID == desk.DeskID and the master's Agents column equals the detail's row count (SC-189, SC-193). Gone: the
+   Take((GroupID % 4) + 3) subset, the "Create Group & Rename" button that never opened an editor (SC-190), the manual dirty checkbox
+   (SC-191; the real veto is on Unsaved-row lock), the benchmark wording (SC-192) and the legacy form's jargon in the copy (SC-188;
+   the old route stays as an alias).
    2026-10-18: vocabulary written from GridControl.razor.cs (selection parameters, the private SelectRow/ToggleRowSelection paths that
    raise RowSelecting/RowSelected, SelectFirstVisibleRowAsync, the public Select*/Clear* methods and NotifySelectionChangedAsync),
    GridControl.KeyboardSelection.cs, GridControlEvents.cs, SelectionSettings.cs and GridModels.cs; rows checked with
@@ -50,43 +52,43 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="groups" Title="Security groups and their members" RazorCode="@Code.Groups" CSharpCode="@Code.GroupsCs">
-            <Description><p>Seven groups on the left, 126 users on the right. Click a group and the right grid shows its members; the Users column of the group row, the member grid's footer and the line under the grids count the same people. The member grid sorts on its own and marks inactive accounts.</p></Description>
+        <DemoExample Id="groups" Title="Sales desks and their agents" RazorCode="@Code.Groups" CSharpCode="@Code.GroupsCs">
+            <Description><p>Seven desks on the left, 92 agents on the right. Click a desk and the right grid shows the agents on it; the Agents column of the desk row, the agent grid's footer and the line under the grids count the same people. The agent grid sorts on its own and marks inactive agents.</p></Description>
             <Demo>
                 <div class="pair">
                     <div>
-                        <p class="pane-title">Groups</p>
-                        <GridControl TValue="SecurityGroup"
-                                     DataSource="@_groups"
+                        <p class="pane-title">Desks</p>
+                        <GridControl TValue="SalesDesk"
+                                     DataSource="@_desks"
                                      Height="300px"
                                      AllowSelection="true"
                                      AutoSelectFirstRow="true"
                                      SelectionSettingsRef="@_singleRow"
-                                     EventsRef="@_groupEvents">
+                                     EventsRef="@_deskEvents">
                             <GridColumnsBase>
-                                <GridColumn Field="@nameof(SecurityGroup.Description)" HeaderText="Group" Width="200px" />
-                                <GridColumn Field="@nameof(SecurityGroup.IsAdmin)" HeaderText="Admin" Width="80px" Type="ColumnType.Boolean" />
-                                <GridColumn Field="@nameof(SecurityGroup.MemberCount)" HeaderText="Users" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" />
+                                <GridColumn Field="@nameof(SalesDesk.Name)" HeaderText="Desk" Width="200px" />
+                                <GridColumn Field="@nameof(SalesDesk.GroupBookings)" HeaderText="Group bookings" Width="110px" Type="ColumnType.Boolean" />
+                                <GridColumn Field="@nameof(SalesDesk.AgentCount)" HeaderText="Agents" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" />
                             </GridColumnsBase>
                         </GridControl>
                     </div>
                     <div>
-                        <p class="pane-title">Members of @(_selectedGroup?.Description ?? "…")</p>
-                        <GridControl TValue="UserListItem"
-                                     DataSource="@_members"
+                        <p class="pane-title">Agents on @(_selectedDesk?.Name ?? "…")</p>
+                        <GridControl TValue="AgentListItem"
+                                     DataSource="@_deskAgents"
                                      Height="300px"
                                      AllowSorting="true"
                                      ShowRowCountInFooter="true">
                             <GridColumnsBase>
-                                <GridColumn Field="@nameof(UserListItem.UserID)" HeaderText="Login" Width="100px" />
-                                <GridColumn Field="@nameof(UserListItem.UserName)" HeaderText="Name" Width="150px" />
-                                <GridColumn Field="@nameof(UserListItem.Email)" HeaderText="Email" Width="210px" />
-                                <GridColumn Field="@nameof(UserListItem.Active)" HeaderText="Active" Width="70px" Type="ColumnType.Boolean" />
+                                <GridColumn Field="@nameof(AgentListItem.Login)" HeaderText="Login" Width="100px" />
+                                <GridColumn Field="@nameof(AgentListItem.FullName)" HeaderText="Name" Width="150px" />
+                                <GridColumn Field="@nameof(AgentListItem.Email)" HeaderText="Email" Width="210px" />
+                                <GridColumn Field="@nameof(AgentListItem.Active)" HeaderText="Active" Width="70px" Type="ColumnType.Boolean" />
                             </GridColumnsBase>
                         </GridControl>
                     </div>
                 </div>
-                <p class="result">@_members.Count members of @(_selectedGroup?.Description ?? "no group"), @_members.Count(u => !u.Active) inactive.</p>
+                <p class="result">@_deskAgents.Count agents on @(_selectedDesk?.Name ?? "no desk"), @_deskAgents.Count(a => !a.Active) inactive.</p>
             </Demo>
         </DemoExample>
 
@@ -197,26 +199,26 @@
 </FeatureDemoLayout>
 
 @code {
-    private List<SecurityGroup> _groups = [];
-    private List<UserListItem> _users = [];
-    private List<UserListItem> _members = [];
-    private SecurityGroup? _selectedGroup;
+    private List<SalesDesk> _desks = [];
+    private List<AgentListItem> _agents = [];
+    private List<AgentListItem> _deskAgents = [];
+    private SalesDesk? _selectedDesk;
 
     private readonly SelectionSettings _singleRow = new() { Mode = SelectionMode.Row, Type = SelectionType.Single };
-    private readonly GridControlEvents<SecurityGroup> _groupEvents = new();
+    private readonly GridControlEvents<SalesDesk> _deskEvents = new();
 
     protected override void OnInitialized()
     {
-        _groups = BenchData.SecurityGroups.ToList();
-        _users = BenchData.Users.ToList();
-        _groupEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<SecurityGroup>>(this, args => Show(args.Data));
-        Show(_groups.FirstOrDefault());
+        _desks = BenchData.SalesDesks.ToList();
+        _agents = BenchData.Agents.ToList();
+        _deskEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<SalesDesk>>(this, args => Show(args.Data));
+        Show(_desks.FirstOrDefault());
     }
 
-    private void Show(SecurityGroup? group)
+    private void Show(SalesDesk? desk)
     {
-        _selectedGroup = group;
-        _members = group is null ? [] : _users.Where(u => u.GroupID == group.GroupID).ToList();
+        _selectedDesk = desk;
+        _deskAgents = desk is null ? [] : _agents.Where(a => a.DeskID == desk.DeskID).ToList();
     }
 
     private GridControl<InventoryProduct>? _grid;
@@ -265,81 +267,81 @@
     {
         public const string Groups = @"<div class=""pair"">
     <div>
-        <p class=""pane-title"">Groups</p>
-        <GridControl TValue=""SecurityGroup""
-                     DataSource=""@_groups""
+        <p class=""pane-title"">Desks</p>
+        <GridControl TValue=""SalesDesk""
+                     DataSource=""@_desks""
                      Height=""300px""
                      AllowSelection=""true""
                      AutoSelectFirstRow=""true""
                      SelectionSettingsRef=""@_singleRow""
-                     EventsRef=""@_groupEvents"">
+                     EventsRef=""@_deskEvents"">
             <GridColumnsBase>
-                <GridColumn Field=""@nameof(SecurityGroup.Description)"" HeaderText=""Group"" Width=""200px"" />
-                <GridColumn Field=""@nameof(SecurityGroup.IsAdmin)"" HeaderText=""Admin"" Width=""80px"" Type=""ColumnType.Boolean"" />
-                <GridColumn Field=""@nameof(SecurityGroup.MemberCount)"" HeaderText=""Users"" Width=""80px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" />
+                <GridColumn Field=""@nameof(SalesDesk.Name)"" HeaderText=""Desk"" Width=""200px"" />
+                <GridColumn Field=""@nameof(SalesDesk.GroupBookings)"" HeaderText=""Group bookings"" Width=""110px"" Type=""ColumnType.Boolean"" />
+                <GridColumn Field=""@nameof(SalesDesk.AgentCount)"" HeaderText=""Agents"" Width=""80px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" />
             </GridColumnsBase>
         </GridControl>
     </div>
     <div>
-        <p class=""pane-title"">Members of @(_selectedGroup?.Description ?? ""…"")</p>
-        <GridControl TValue=""UserListItem""
-                     DataSource=""@_members""
+        <p class=""pane-title"">Agents on @(_selectedDesk?.Name ?? ""…"")</p>
+        <GridControl TValue=""AgentListItem""
+                     DataSource=""@_deskAgents""
                      Height=""300px""
                      AllowSorting=""true""
                      ShowRowCountInFooter=""true"">
             <GridColumnsBase>
-                <GridColumn Field=""@nameof(UserListItem.UserID)"" HeaderText=""Login"" Width=""100px"" />
-                <GridColumn Field=""@nameof(UserListItem.UserName)"" HeaderText=""Name"" Width=""150px"" />
-                <GridColumn Field=""@nameof(UserListItem.Email)"" HeaderText=""Email"" Width=""210px"" />
-                <GridColumn Field=""@nameof(UserListItem.Active)"" HeaderText=""Active"" Width=""70px"" Type=""ColumnType.Boolean"" />
+                <GridColumn Field=""@nameof(AgentListItem.Login)"" HeaderText=""Login"" Width=""100px"" />
+                <GridColumn Field=""@nameof(AgentListItem.FullName)"" HeaderText=""Name"" Width=""150px"" />
+                <GridColumn Field=""@nameof(AgentListItem.Email)"" HeaderText=""Email"" Width=""210px"" />
+                <GridColumn Field=""@nameof(AgentListItem.Active)"" HeaderText=""Active"" Width=""70px"" Type=""ColumnType.Boolean"" />
             </GridColumnsBase>
         </GridControl>
     </div>
 </div>
-<p class=""result"">@_members.Count members of @(_selectedGroup?.Description ?? ""no group""), @_members.Count(u => !u.Active) inactive.</p>";
-        public const string GroupsCs = @"private List<SecurityGroup> _groups = [];
+<p class=""result"">@_deskAgents.Count agents on @(_selectedDesk?.Name ?? ""no desk""), @_deskAgents.Count(a => !a.Active) inactive.</p>";
+        public const string GroupsCs = @"private List<SalesDesk> _desks = [];
 
-private List<UserListItem> _users = [];
+private List<AgentListItem> _agents = [];
 
-private List<UserListItem> _members = [];
+private List<AgentListItem> _deskAgents = [];
 
-private SecurityGroup? _selectedGroup;
+private SalesDesk? _selectedDesk;
 
 private readonly SelectionSettings _singleRow = new() { Mode = SelectionMode.Row, Type = SelectionType.Single };
 
-private readonly GridControlEvents<SecurityGroup> _groupEvents = new();
+private readonly GridControlEvents<SalesDesk> _deskEvents = new();
 
 protected override void OnInitialized()
 {
-    _groups = BenchData.SecurityGroups.ToList();
-    _users = BenchData.Users.ToList();
-    _groupEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<SecurityGroup>>(this, args => Show(args.Data));
-    Show(_groups.FirstOrDefault());
+    _desks = BenchData.SalesDesks.ToList();
+    _agents = BenchData.Agents.ToList();
+    _deskEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<SalesDesk>>(this, args => Show(args.Data));
+    Show(_desks.FirstOrDefault());
 }
 
-private void Show(SecurityGroup? group)
+private void Show(SalesDesk? desk)
 {
-    _selectedGroup = group;
-    _members = group is null ? [] : _users.Where(u => u.GroupID == group.GroupID).ToList();
-}
-
-// Data/BenchModels.cs
-public sealed class SecurityGroup
-{
-    public int GroupID { get; set; }
-    public string Description { get; set; } = string.Empty;
-    public bool IsAdmin { get; set; }
-    public int MemberCount { get; set; }
+    _selectedDesk = desk;
+    _deskAgents = desk is null ? [] : _agents.Where(a => a.DeskID == desk.DeskID).ToList();
 }
 
 // Data/BenchModels.cs
-public sealed class UserListItem
+public sealed class SalesDesk
 {
-    public string UserID { get; set; } = string.Empty;
-    public string UserName { get; set; } = string.Empty;
+    public int DeskID { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public bool GroupBookings { get; set; }
+    public int AgentCount { get; set; }
+}
+
+// Data/BenchModels.cs
+public sealed class AgentListItem
+{
+    public string Login { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public bool Active { get; set; } = true;
-    public int GroupID { get; set; }
+    public int DeskID { get; set; }
 }";
         public const string WarehousesCss = @".detail { display: grid; gap: 6px; padding: 2px 4px 4px; }
 /* A GridControl with no Height sizes its scroll area with flex-basis 0, which inside a table cell collapses to the
@@ -463,6 +465,7 @@ public sealed class InventoryProduct
     public decimal InventoryValuation => TotalOnHand * UnitCost;
     public string StockStatus => AvailableStock <= 0 ? ""Out of Stock"" : AvailableStock <= ReorderPoint ? ""Low Stock"" : ""In Stock"";
     public List<WarehouseStock> WarehouseDetails { get; set; } = new();
+}
 
 // Data/ScenarioModels.cs
 public sealed class WarehouseStock
