@@ -1814,6 +1814,10 @@ td:has(.fx-dropdown-grid.fx-open),
    selectors carry an extra class to outrank the scoped ones. Active: bold blue text and the 2px bar; hover: blue text on the tint. */
 .fx-tabs .fx-tab-headers .fx-tab-button.active { color: #0284c7; font-weight: 700; box-shadow: inset 0 -2px 0 #0284c7; }
 .fx-tabs .fx-tab-headers .fx-tab-button:not(.active):hover { color: #0284c7; background: #f1f5f9; }
+/* Labels stay on one line: 10px side padding fits the chart gallery's ten tabs in the 945px column at a 1280px window (14px wrapped
+   "Part-to-Whole" and "KPI cards"); on narrower screens the row wraps instead of squeezing the labels. */
+.fx-tabs .fx-tab-headers { flex-wrap: wrap; }
+.fx-tabs .fx-tab-headers .fx-tab-button { white-space: nowrap; padding: 8px 10px; }
 /* 2026-10-25 (Baaria): one hover design site-wide: text turns #0284c7 (the top menu's blue), neutral backgrounds tint #f1f5f9;
    filled blue buttons still darken to #0369a1; the 2px bar is reserved for the active or open item. */
 /* ── 2026-10-18, Baaria's review ─────────────────────────────────────────────
