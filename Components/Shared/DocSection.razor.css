@@ -8,3 +8,6 @@
 .doc-section ::deep .fx-accordion-expanded > .fx-accordion-header { box-shadow: inset 0 -2px 0 #0284c7; }
 .doc-section ::deep .fx-accordion-expanded > .fx-accordion-header .fx-accordion-title,
 .doc-section ::deep .fx-accordion-expanded > .fx-accordion-header .fx-accordion-arrow { color: #0284c7; }
+/* 2026-10-25 (Baaria): hovering a header turns its title and arrow blue as well; the bar stays reserved for the open section. */
+.doc-section ::deep .fx-accordion-header:hover .fx-accordion-title,
+.doc-section ::deep .fx-accordion-header:hover .fx-accordion-arrow { color: #0284c7; }

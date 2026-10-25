@@ -3,7 +3,7 @@
 .ex-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .ex-title { margin: 0; font-size: 16px; font-weight: 600; color: #0f172a; }
 .ex-anchor { color: #cbd5e1; text-decoration: none; margin-right: 6px; font-weight: 400; }
-.ex-title:hover .ex-anchor { color: #2563eb; }
+.ex-title:hover .ex-anchor { color: #0284c7; }
 .ex-controls { font-size: 13px; color: #475569; }
 .ex-desc { margin-top: 4px; font-size: 13.5px; color: #475569; max-width: 75ch; }
 .ex-desc ::deep p { margin: 0; }

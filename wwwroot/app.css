@@ -94,7 +94,7 @@ h1:focus {
 .feature-card h3 { font-size: 16px; font-weight: 700; margin: 0 0 8px; color: #0d3b66; }
 .feature-card p { font-size: 13px; color: #4b5563; margin: 0 0 8px; line-height: 1.5; }
 .feature-card a { font-size: 13px; color: #1d6fa5; text-decoration: none; font-weight: 600; }
-.feature-card a:hover { text-decoration: underline; }
+.feature-card a:hover { color: #0284c7; text-decoration: underline; }
 .feature-card code { background: #f3f4f6; padding: 1px 6px; border-radius: 3px; font-size: 12px; }
 
 .footer-section { max-width: 1100px; margin: 32px auto; padding: 32px;
@@ -1055,9 +1055,7 @@ td:has(.fx-dropdown-grid.fx-open),
     display: block !important;
 }
 
-.fx-datepicker-dropdown .fx-today-link:hover {
-    color: #0369a1 !important;
-    text-decoration: underline !important;
+.fx-datepicker-dropdown .fx-today-link:hover { color: #0284c7 !important;
 }
 
 /* ── Modern DropDownListControl Enterprise Theme ── */
@@ -1341,8 +1339,7 @@ td:has(.fx-dropdown-grid.fx-open),
     font-weight: 500;
 }
 
-.sf-demo-breadcrumb a:hover {
-    text-decoration: underline;
+.sf-demo-breadcrumb a:hover { color: #0284c7;
 }
 
 .sf-breadcrumb-sep {
@@ -1672,8 +1669,7 @@ td:has(.fx-dropdown-grid.fx-open),
     box-shadow: none !important;
 }
 
-.landing-container .tab-btn:hover {
-    color: #0f172a !important;
+.landing-container .tab-btn:hover { color: #0284c7 !important;
     background: rgba(255, 255, 255, 0.7) !important;
 }
 
@@ -1714,7 +1710,7 @@ td:has(.fx-dropdown-grid.fx-open),
 .landing-container .btn-code-toggle:hover {
     background: #f8fafc !important;
     border-color: #94a3b8 !important;
-    color: #0f172a !important;
+    color: #0284c7 !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
 }
 
@@ -1798,9 +1794,7 @@ td:has(.fx-dropdown-grid.fx-open),
     box-shadow: none !important;
 }
 
-.landing-container .btn-filter-pill:hover {
-    background: #e2e8f0 !important;
-    color: #0f172a !important;
+.landing-container .btn-filter-pill:hover { background: #f1f5f9 !important; color: #0284c7 !important;
     border-color: #cbd5e1 !important;
     transform: translateY(-1px) !important;
 }
@@ -1813,6 +1807,13 @@ td:has(.fx-dropdown-grid.fx-open),
     box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4) !important;
 }
 
+/* 2026-10-25 (Baaria): the library's tab strips (Example | Razor | C# on every example, the home hero's Example | Razor) follow the
+   same hover and active blue, through the control's own CSS variables. */
+.fx-tabstrip { --fx-tab-active-color: #0284c7; --fx-tab-active-border-color: #0284c7; }
+.fx-tabstrip-tab:hover:not(.fx-tabstrip-tab-disabled) { --fx-text-color: #0284c7; }
+.fx-tab-button:hover:not(.active) { color: #0284c7; }   /* TabControl (the chart gallery's tabs) */
+/* 2026-10-25 (Baaria): one hover design site-wide: text turns #0284c7 (the top menu's blue), neutral backgrounds tint #f1f5f9;
+   filled blue buttons still darken to #0369a1; the 2px bar is reserved for the active or open item. */
 /* ── 2026-10-18, Baaria's review ─────────────────────────────────────────────
    Frozen header cells: GridControl.razor writes style="…position:sticky;left:…; position:relative;" on every header cell, so the
    later position:relative wins and a frozen column's header scrolls away while its body cells stay pinned (SC-292). Until the

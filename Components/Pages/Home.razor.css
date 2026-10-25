@@ -164,9 +164,7 @@
     line-height: 1.4;
 }
 
-.tab-btn:hover {
-    color: #0f172a;
-    background: rgba(255, 255, 255, 0.7);
+.tab-btn:hover { color: #0284c7; background: rgba(255, 255, 255, 0.7);
 }
 
 .tab-btn.active {
@@ -212,7 +210,7 @@
 .btn-code-toggle:hover {
     background: #f8fafc;
     border-color: #94a3b8;
-    color: #0f172a;
+    color: #0284c7;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
@@ -352,9 +350,7 @@
     transition: all 0.15s ease;
 }
 
-.btn-filter-pill:hover {
-    background: #e2e8f0;
-    color: #0f172a;
+.btn-filter-pill:hover { background: #f1f5f9; color: #0284c7;
 }
 
 .btn-filter-pill.active {
@@ -588,8 +584,7 @@
     cursor: pointer;
     line-height: 1;
 }
-.btn-close-modal:hover {
-    color: #0f172a;
+.btn-close-modal:hover { color: #0284c7;
 }
 
 .modal-card-body {
@@ -638,9 +633,7 @@
     border-radius: 6px;
     cursor: pointer;
 }
-.btn-modal-cancel:hover {
-    background: #e2e8f0;
-    color: #0f172a;
+.btn-modal-cancel:hover { background: #f1f5f9; color: #0284c7;
 }
 
 .btn-modal-save {
@@ -867,9 +860,7 @@
 }
 
 .comp-list li:hover ::deep .mini-icon,
-.comp-list li:hover .mini-icon {
-    transform: scale(1.15);
-    color: #0369a1;
+.comp-list li:hover .mini-icon { transform: scale(1.15); color: #0284c7;
 }
 
 .comp-list a {
@@ -881,9 +872,7 @@
     transition: color 0.12s ease;
 }
 
-.comp-list a:hover {
-    color: #0284c7;
-    text-decoration: underline;
+.comp-list a:hover { color: #0284c7;
 }
 
 /* ── 5. Enterprise Architecture Pillars ── */
