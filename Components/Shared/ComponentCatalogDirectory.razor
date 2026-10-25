@@ -264,8 +264,11 @@
 
     private readonly DirectoryItem[] _dataManagement =
     [
+        // 2026-10-25 (Baaria, catalog audit SC-345): TextBox, Numeric TextBox, DropDownList and DropDownGrid point at the home quote desk,
+        // the only place they render; Picklist Dropdown (no such control) and Speed Dial (a second FAB row) removed; icons now fit
+        // their rows; Report Parameter Dialog lands on the report, whose toolbar Parameters button opens the dialog.
         new("grid", "Data Grid", "demo/grid"),
-        new("ag-grid", "Live Updates (ticker)", "demo/grid/live-updates"),
+        new("live-grid", "Live Updates (ticker)", "demo/grid/live-updates"),
         new("grid", "Warehouse Detail (master-detail)", "demo/grid/master-detail#warehouses"),
         new("tree-grid", "Org Chart (tree grid)", "demo/grid/tree-grid#org"),
         new("tree-grid", "Tree Grid", "demo/grid/tree-grid"),
@@ -277,11 +280,11 @@
         new("col-virt", "Wide Grids", "demo/grid/column-virtualization"),
         new("col-swap", "Column Sets", "demo/grid/column-swap"),
         new("batch-edit", "Batch Editing", "demo/grid/batch-editing"),
-        new("sqlite", "On-Demand Items Provider", "demo/grid/provider-enterprise#search"),
-        new("master-detail", "Typing Modes", "demo/grid/typing-modes"),
-        new("picklist", "Dynamic Columns", "demo/grid/dynamic-columns#dynamic"),
+        new("provider", "On-Demand Items Provider", "demo/grid/provider-enterprise#search"),
+        new("input-text", "Typing Modes", "demo/grid/typing-modes"),
+        new("dynamic-columns", "Dynamic Columns", "demo/grid/dynamic-columns#dynamic"),
         new("veto", "Unsaved-Row Lock", "demo/grid/unsaved-row-lock"),
-        new("dual-list", "Master-Detail", "demo/grid/master-detail"),
+        new("master-detail", "Master-Detail", "demo/grid/master-detail"),
         new("reorder", "Column Reorder", "demo/grid/reordering")
     ];
 
@@ -290,7 +293,7 @@
         new("editor", "Rich Text Editor", "demo/counterparts"),
         new("pdf", "PDF Viewer", "demo/pdf-viewer"),
         new("report", "Report Writer Control", "demo/reports/package-costs"),
-        new("report-param", "Report Parameter Dialog", "demo/reports/package-costs"),
+        new("report-param", "Report Parameter Dialog", "demo/reports/package-costs#report"),
         new("format", "Format Control", "demo/counterparts")
     ];
 
@@ -336,7 +339,6 @@
         new("split-button", "Split Button", "demo/split-button"),
         new("toggle-button", "Toggle Button", "demo/toggle-buttons"),
         new("fab", "Floating Action Button (FAB)", "demo/fab#menu"),
-        new("speed-dial", "Speed Dial Menu", "demo/fab#menu"),          // same control, open state
         new("button", "Rounded Pill Buttons", "demo/buttons#variants")
     ];
 
@@ -352,8 +354,8 @@
 
     private readonly DirectoryItem[] _inputs =
     [
-        new("input-number", "Numeric TextBox", "demo/forms#generated"),
-        new("input-text", "TextBox", "demo/forms#generated"),
+        new("input-number", "Numeric TextBox", "?tab=grid#live-showcase"),
+        new("input-text", "TextBox", "?tab=grid#live-showcase"),
         new("textarea", "TextArea", "demo/forms#handbuilt"),
         new("otp", "OTP / Security Code", "demo/security-code"),
         new("slider", "Slider & Range Slider", "demo/sliders"),
@@ -376,11 +378,10 @@
 
     private readonly DirectoryItem[] _dropdowns =
     [
-        new("dropdown", "DropDownList", "demo/forms#generated"),
-        new("dropdowngrid", "DropDownGrid Control", "demo/grid"),
+        new("dropdown", "DropDownList", "?tab=grid#live-showcase"),
+        new("dropdowngrid", "DropDownGrid Control", "?tab=grid#live-showcase"),
         new("autocomplete", "AutoComplete", "demo/pickers#suggest"),
-        new("listbox", "ListBox", "demo/counterparts"),
-        new("picklist", "Picklist Dropdown", "demo/grid/dynamic-columns#dynamic")
+        new("listbox", "ListBox", "demo/counterparts")
     ];
 
     private readonly DirectoryItem[] _navigation =
@@ -399,7 +400,7 @@
     [
         new("dialog", "Modal Dialog", "demo/dialog#modal"),
         new("toast", "Toast Notifications", "demo/notifications"),
-        new("toast", "Context Alert Banners", "demo/new-components#status"),
+        new("alert", "Context Alert Banners", "demo/new-components#status"),
         new("badge", "Status Badges", "demo/new-components#status"),
         new("progress", "Progress Bar", "demo/layout"),
         new("skeleton", "Loading Skeleton", "demo/new-components#status")
@@ -408,7 +409,7 @@
     private readonly DirectoryItem[] _aiAssist =
     [
         new("ai-prompt", "AI Prompt Control", "demo/counterparts?tab=ai-prompt"),
-        new("ai-prompt", "LLM Result Card", "demo/counterparts?tab=ai-prompt")
+        new("llm-card", "LLM Result Card", "demo/counterparts?tab=ai-prompt")
     ];
 
     private bool MatchesCategory(string catName, DirectoryItem[] items)

@@ -254,8 +254,8 @@ h1:focus {
     font-size: 20px; cursor: pointer; line-height: 1;
 }
 
-/* ── Telerik & Enterprise Precision Grid Theme ──────────────────────────── */
-.fx-grid.telerik-grid-theme {
+/* ── Home hero grid theme ──────────────────────────────────────────────── */
+.fx-grid.hero-grid-theme {
     --fx-grid-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
     --fx-grid-font-size: 13px !important;
     --fx-grid-header-font-size: 13px !important;
@@ -282,7 +282,7 @@ h1:focus {
     box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
 }
 
-.fx-grid.telerik-grid-theme .fx-header-cell {
+.fx-grid.hero-grid-theme .fx-header-cell {
     padding: 8px 12px !important;
     font-weight: 600 !important;
     font-size: 13px !important;
@@ -294,7 +294,7 @@ h1:focus {
     height: 38px !important;
 }
 
-.fx-grid.telerik-grid-theme .fx-cell {
+.fx-grid.hero-grid-theme .fx-cell {
     padding: 7px 12px !important;
     font-size: 13px !important;
     line-height: 1.4 !important;
@@ -304,12 +304,12 @@ h1:focus {
     height: 36px !important;
 }
 
-.fx-grid.telerik-grid-theme .fx-row:hover {
+.fx-grid.hero-grid-theme .fx-row:hover {
     background-color: #f1f5f9 !important;
 }
 
-.fx-grid.telerik-grid-theme .fx-row.fx-selected > td,
-.fx-grid.telerik-grid-theme .fx-row.fx-selected .fx-cell {
+.fx-grid.hero-grid-theme .fx-row.fx-selected > td,
+.fx-grid.hero-grid-theme .fx-row.fx-selected .fx-cell {
     background-color: #dbeafe !important;
     color: #1e3a8a !important;
     font-weight: 500 !important;
