@@ -1,0 +1,24 @@
+/* 2026-10-25: AI prompt page. No Bootstrap names in here. */
+
+/* Prompt */
+.ai-note { margin: 10px 0 0; font-size: 13px; color: #475569; }
+.ai-label { margin: 14px 0 4px; font-size: 12px; font-weight: 600; color: #475569; }
+
+/* Response card colours, both examples */
+.ai, .qd { --panel: #ffffff; --panel-2: #f1f5f9; --border: #cbd5e1; --ink: #1e293b; --muted: #475569; --accent: #2563eb; --accent-strong: #1d4ed8; --accent-2: #0f766e; }
+.ai ::deep .fx-result-output, .qd ::deep .fx-result-output { background: #f8fafc; }
+
+/* App bar */
+.qd ::deep .fx-app-bar { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px 8px 0 0; }
+.qd ::deep .fx-app-bar-toolbar { min-height: 0; margin: 0; background: transparent; border: 0; }
+.qd-sub { font-size: 13px; color: #475569; }
+.qd ::deep .fx-toolbar-btn-icon { font-size: 16px; line-height: 18px; text-align: center; }
+.qd ::deep .fx-toolbar-btn--selected { background: #dbeafe; border-color: #93c5fd; }
+.qd-export { position: relative; display: inline-flex; }
+.qd-menu { position: absolute; top: 100%; left: 0; z-index: 5; display: flex; flex-direction: column; min-width: 160px; padding: 4px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12); }
+.qd-menu ::deep .qd-menu-item { text-align: left; background: transparent; border-color: transparent; }
+.qd-status { margin: 4px 0 12px; font-size: 13px; color: #475569; }
+.qd-body { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+.qd-notes { flex: 1 1 320px; min-width: 0; }
+.qd-label { margin-bottom: 4px; font-size: 12px; font-weight: 600; color: #475569; }
+.qd-panel { flex: 0 1 380px; min-width: 280px; padding: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; }

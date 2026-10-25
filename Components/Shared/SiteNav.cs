@@ -33,7 +33,10 @@ public static class SiteNav
             new("Checks & switches", "demo/checks"),
             new("Forms", "demo/forms"),                        // own page since 2026-10-19; was a Control tour tab
             new("Pickers & selectors", "demo/pickers"),        // own page since 2026-10-19; was the tour's Selection tab
-            new("Control tour", "demo/counterparts"),          // 7-tab sampler; split in phase 2
+            new("Text inputs", "demo/text-inputs"),            // 2026-10-25, SC-347
+            new("Lists & dropdowns", "demo/lists-dropdowns"),  // 2026-10-25, SC-347
+            new("Rich text editor", "demo/rich-text-editor"),  // 2026-10-25, SC-347
+            new("AI prompt", "demo/ai-prompt"),                // 2026-10-25: replaced the Control tour (demo/counterparts forwards here)
             new("Layout & navigation", null),
             new("Page layouts", "demo/layout"),
             new("Page navigation", "demo/page-navigation"),               // PageControl: keyboard navigation graph (2026-10-20)
@@ -44,6 +47,8 @@ public static class SiteNav
             new("Cards", "demo/cards"),
             new("UI elements", "demo/new-components"),
             new("Barcodes & QR", "demo/barcodes"),
+            new("Scheduler", "demo/scheduler"),                // 2026-10-25, SC-347
+            new("Diagram", "demo/diagram"),                    // 2026-10-25, SC-347
         }),
         new("Data Grid", "bi-grid-3x3-gap-fill", "demo/grid", "Grid overview", new NavItem[]
         {

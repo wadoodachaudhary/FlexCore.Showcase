@@ -1,0 +1,13 @@
+/* 2026-10-25: Diagram page. The first block is the workflow example's CSS tab, copied verbatim. */
+.wf-layout { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+.canvas { max-width: 100%; overflow-x: auto; }
+.canvas ::deep .wf-current :is(rect, ellipse, polygon) { stroke: #0f172a; stroke-width: 4px; }
+.wf-layout ::deep .wf-panel { flex: 1 1 240px; max-width: 340px; }
+.wf-facts { margin: 0; font-size: 13px; }
+.wf-facts dt { font-weight: 600; color: #334155; }
+.wf-facts dd { margin: 2px 0 10px; color: #475569; }
+.wf-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Shapes example */
+.controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.status { font-size: 13px; color: #475569; margin: 10px 0 0; }

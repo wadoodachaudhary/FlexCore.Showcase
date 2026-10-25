@@ -1,0 +1,474 @@
+@page "/demo/diagram"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-25: new page on FeatureDemoLayout; two examples (booking workflow with NodeClicked, shapes/connectors/links). Facts checked
+   against Diagram/DiagramControl.razor, DiagramControl.razor.css and DiagramModels.cs in FlexCore 0.2.49. The control has no layout
+   engine (OffsetX/OffsetY are hand-set centres), no drag, zoom or editing, and no keyboard or ARIA support on nodes; the workflow's
+   Previous/Next buttons are the page's keyboard route. Connector Ids are page-unique (wf-*, sh-*) because the arrowhead marker ids
+   are document-wide. *@
+
+<PageTitle>Diagram — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Diagram" Category="Components" ControlName="DiagramControl"
+                   Tagline="Boxes and arrows placed by hand and drawn as one inline SVG: six node shapes, labelled connectors and a click event."
+                   SourcePath="Diagram/DiagramControl.razor;Diagram/DiagramControl.razor.css;Diagram/DiagramModels.cs">
+    <Overview>
+        <p>
+            <code>DiagramControl</code> draws a list of <code>Nodes</code> and the <code>Connectors</code> between them as a single
+            <code>&lt;svg&gt;</code>. There is no automatic layout: each node's <code>OffsetX</code> and <code>OffsetY</code> give its centre
+            in pixels. A connector names two node Ids, picks a side of each node unless you set the ports, and draws a straight or right-angled
+            line with an optional arrowhead and label. A click on an enabled node raises <code>NodeClicked</code> and then follows the node's
+            <code>NavigateUrl</code>. The control has no dragging, zooming or editing; to change the diagram, change the node and connector
+            objects and let the page re-render.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="workflow" Title="A booking workflow" RazorCode="@Code.Workflow" CSharpCode="@Code.WorkflowCs" CssCode="@Code.WorkflowCss">
+            <Description><p>Showcase Travel's trip requests from first contact to travel documents. Every position is set by hand, and with the default <code>Auto</code> ports each connector leaves from the side that faces its target. Click a step, or use Previous step and Next step, and the panel shows who handles it and how long it usually takes; the page marks the current step with a <code>CssClass</code> styled through <code>::deep</code>.</p></Description>
+            <Demo>
+                <div class="wf-layout">
+                    <div class="canvas">
+                        <DiagramControl Nodes="_workflowNodes" Connectors="_workflowConnectors" Width="460" Height="530"
+                                        Padding="12" SizePadPercent="0" NodeClicked="OnStepClicked" />
+                    </div>
+                    <CardControl CssClass="wf-panel" Title="@Current.Label" Subtitle="@CurrentStep.Owner" aria-live="polite">
+                        <ChildContent>
+                            <dl class="wf-facts">
+                                <dt>Typical time</dt>
+                                <dd>@CurrentStep.Typical</dd>
+                                <dt>What happens</dt>
+                                <dd>@CurrentStep.Detail</dd>
+                            </dl>
+                        </ChildContent>
+                        <FooterContent>
+                            <div class="wf-buttons">
+                                <ButtonControl OnClick="() => Move(-1)">Previous step</ButtonControl>
+                                <ButtonControl OnClick="() => Move(1)">Next step</ButtonControl>
+                            </div>
+                        </FooterContent>
+                    </CardControl>
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="shapes" Title="Shapes, connectors and links" RazorCode="@Code.Shapes" CSharpCode="@Code.ShapesCs">
+            <Description><p>Each node's second line names its shape. <code>Rectangle</code> and <code>RoundedRectangle</code> both round their corners by <code>CornerRadius</code>, so the Rectangle here sets it to 0. "Visa needed?" forks from its bottom port: "yes" is a default orthogonal connector, "no" a <code>Straight</code> one with both ports set. The other connectors show a closed arrowhead, a dash pattern, a wider coloured line and <code>IsBroken</code>. "Package chosen" has a <code>NavigateUrl</code>; while Follow links is off, the <code>NodeClicked</code> handler sets <code>Handled</code> and the page stays put. The grey node has <code>Enabled</code> false. Hover "Package chosen" or "Departure" for their tooltips.</p></Description>
+            <Demo>
+                <div class="controls">
+                    <SwitchControl @bind-Checked="_followLinks" Label="Follow links" />
+                </div>
+                <div class="canvas">
+                    <DiagramControl Nodes="_shapeNodes" Connectors="_shapeConnectors" Width="550" Height="330"
+                                    Padding="12" SizePadPercent="0" NodeClicked="OnShapeClicked" />
+                </div>
+                <p class="status" aria-live="polite">@_status</p>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <DocSections>
+            <DocSection Id="doc-diagramcontrol-parameters" Title="DiagramControl parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="DiagramControl parameters" Rows="Vocab.Params" />
+            </DocSection>
+            <DocSection Id="doc-diagramnode" Title="DiagramNode" Count='@DocSection.Label(Vocab.Node.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="DiagramNode" Rows="Vocab.Node" />
+            </DocSection>
+            <DocSection Id="doc-diagramconnector" Title="DiagramConnector" Count='@DocSection.Label(Vocab.Connector.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="DiagramConnector" Rows="Vocab.Connector" />
+            </DocSection>
+            <DocSection Id="doc-diagramnodeclickeventargs" Title="DiagramNodeClickEventArgs" Count='@DocSection.Label(Vocab.ClickArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="DiagramNodeClickEventArgs" Rows="Vocab.ClickArgs" />
+            </DocSection>
+            <DocSection Id="doc-diagramcontrolshape" Title="DiagramControlShape" Count='@DocSection.Label(Vocab.Shapes.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="DiagramControlShape" Rows="Vocab.Shapes" />
+            </DocSection>
+            <DocSection Id="doc-connectortype" Title="ConnectorType" Count='@DocSection.Label(Vocab.Types.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="ConnectorType" Rows="Vocab.Types" />
+            </DocSection>
+            <DocSection Id="doc-diagramport" Title="DiagramPort" Count='@DocSection.Label(Vocab.Ports.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="DiagramPort" Rows="Vocab.Ports" />
+            </DocSection>
+            <DocSection Id="doc-arrowstyle" Title="ArrowStyle" Count='@DocSection.Label(Vocab.Arrows.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="ArrowStyle" Rows="Vocab.Arrows" />
+            </DocSection>
+            <DocSection Id="doc-imagefit" Title="ImageFit" Count='@DocSection.Label(Vocab.Fits.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="ImageFit" Rows="Vocab.Fits" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+            <DocSection Id="doc-css-variables" Title="CSS variables" Count='@DocSection.Label(Vocab.Vars.Length, "variables")'>
+                <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+                <p>Fill, outline and text colours come from the node and connector properties, not from CSS variables.</p>
+            </DocSection>
+        </DocSections>
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>Nodes are SVG <code>&lt;g&gt;</code> elements with a click handler and nothing else: no <code>tabindex</code>, role or key handling, so they cannot be reached or activated from the keyboard, and the <code>&lt;svg&gt;</code> has no role or accessible name. Offer another route to the same actions; in the first example the Previous step and Next step buttons walk every step, and the panel is an <code>aria-live="polite"</code> region.</li>
+            <li><code>DiagramControl</code> does not capture extra attributes, so an <code>aria-label</code> passed to it throws at render time. Put any description on an element around it.</li>
+            <li>Labels, sublabels, icons and connector labels are SVG <code>&lt;text&gt;</code>, real text rather than pictures of text.</li>
+            <li><code>Tooltip</code> becomes an SVG <code>&lt;title&gt;</code>, the node's first child; browsers show it on hover. A disabled node has <code>pointer-events: none</code>, so its tooltip never appears.</li>
+            <li>A disabled node is marked only visually, by 45% opacity and a close icon <code>&lt;image&gt;</code> that has no text alternative.</li>
+            <li>Contrast is up to the page. White text on the default <code>#4A90D9</code> fill is about 3.3:1, under the WCAG AA 4.5:1 for text this size; the fills on this page reach at least 5:1 against their text colour. Sublabels are drawn at 85% opacity, which brings the white ones here down to about 4.2:1 on blue and 4.4:1 on teal.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>Tasks with dependency links on a timeline: <a href="demo/gantt">Gantt chart</a>.</li>
+            <li>Hierarchies as an expandable list: <a href="demo/tree/treeview-explorer">Tree view</a>.</li>
+            <li>The package cost sheet the second example links to: <a href="demo/reports/package-costs">Report writer</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Workflow
+    private sealed record Step(string Owner, string Typical, string Detail);
+
+    private static readonly Dictionary<string, Step> Steps = new()
+    {
+        ["request"] = new("Sales desk", "Same day", "The client asks for a trip by phone, email or the web form; the desk logs dates, party size and destination."),
+        ["quote"] = new("Product team", "1–2 working days", "Flights, hotels and experiences are priced from the rate card into one quote."),
+        ["decide"] = new("Client", "Up to 7 days", "The quote is held for seven days while the client accepts or declines it."),
+        ["booked"] = new("Reservations", "1 working day", "Every supplier on the quote is confirmed and the trip gets a booking reference."),
+        ["deposit"] = new("Finance", "Within 3 days", "A 20% deposit secures the booking; the balance is due before departure."),
+        ["documents"] = new("Operations", "2 weeks before departure", "Tickets, vouchers and the day-by-day itinerary go to the client."),
+        ["declined"] = new("Sales desk", "Same day", "The desk records the reason and releases any rooms held for the quote."),
+    };
+
+    private readonly List<DiagramNode> _workflowNodes = new()
+    {
+        new() { Id = "request", Label = "Request received", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 24, Width = 170, Height = 44, FillColor = "#0f766e", StrokeColor = "#134e4a" },
+        new() { Id = "quote", Label = "Quote prepared", OffsetX = 100, OffsetY = 104, Width = 170, Height = 48, FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
+        new() { Id = "decide", Label = "Client decides", Shape = DiagramControlShape.Diamond, OffsetX = 100, OffsetY = 202, Width = 170, Height = 80, FillColor = "#fbbf24", StrokeColor = "#b45309", TextColor = "#1f2937" },
+        new() { Id = "booked", Label = "Booked", OffsetX = 100, OffsetY = 344, Width = 170, Height = 48, FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
+        new() { Id = "deposit", Label = "Deposit paid", OffsetX = 100, OffsetY = 426, Width = 170, Height = 48, FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
+        new() { Id = "documents", Label = "Documents sent", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 506, Width = 170, Height = 44, FillColor = "#0f766e", StrokeColor = "#134e4a" },
+        new() { Id = "declined", Label = "Declined", Shape = DiagramControlShape.Stadium, OffsetX = 380, OffsetY = 202, Width = 120, Height = 44, FillColor = "#fee2e2", StrokeColor = "#b91c1c", TextColor = "#991b1b" },
+    };
+
+    private readonly List<DiagramConnector> _workflowConnectors = new()
+    {
+        new() { Id = "wf-1", SourceId = "request", TargetId = "quote" },
+        new() { Id = "wf-2", SourceId = "quote", TargetId = "decide" },
+        new() { Id = "wf-3", SourceId = "decide", TargetId = "booked", Label = "accepted", StrokeColor = "#15803d", LabelColor = "#15803d" },
+        new() { Id = "wf-4", SourceId = "decide", TargetId = "declined", Label = "declined", StrokeColor = "#b91c1c", LabelColor = "#b91c1c", DashArray = "6,4" },
+        new() { Id = "wf-5", SourceId = "booked", TargetId = "deposit" },
+        new() { Id = "wf-6", SourceId = "deposit", TargetId = "documents" },
+    };
+
+    private string _currentId = "request";
+
+    private int Index => _workflowNodes.FindIndex(n => n.Id == _currentId);
+
+    private DiagramNode Current => _workflowNodes[Index];
+
+    private Step CurrentStep => Steps[_currentId];
+
+    protected override void OnInitialized() => ShowStep("request");
+
+    private void OnStepClicked(DiagramNodeClickEventArgs e) => ShowStep(e.Node.Id);
+
+    private void Move(int delta) => ShowStep(_workflowNodes[(Index + delta + _workflowNodes.Count) % _workflowNodes.Count].Id);
+
+    private void ShowStep(string id)
+    {
+        _currentId = id;
+        foreach (var node in _workflowNodes)
+            node.CssClass = node.Id == id ? "wf-current" : null;
+    }
+
+    // Shapes, connectors and links
+    private bool _followLinks;
+
+    private string _status = "No node clicked yet.";
+
+    private readonly List<DiagramNode> _shapeNodes = new()
+    {
+        new() { Id = "package", Label = "Package chosen", SubLabel = "Stadium", Shape = DiagramControlShape.Stadium, OffsetX = 75, OffsetY = 45, Width = 150, Height = 50,
+                FillColor = "#0f766e", StrokeColor = "#134e4a", NavigateUrl = "demo/reports/package-costs", Tooltip = "Opens the package cost sheet on the Report writer page" },
+        new() { Id = "passport", Label = "Passport details", SubLabel = "Parallelogram", Shape = DiagramControlShape.Parallelogram, OffsetX = 275, OffsetY = 45, Width = 150, Height = 50,
+                FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
+        new() { Id = "visa", Label = "Visa needed?", SubLabel = "Diamond", Shape = DiagramControlShape.Diamond, OffsetX = 475, OffsetY = 45, Width = 150, Height = 84,
+                FillColor = "#fbbf24", StrokeColor = "#b45309", TextColor = "#1f2937" },
+        new() { Id = "apply", Label = "Visa applied", SubLabel = "Rectangle, radius 0", OffsetX = 475, OffsetY = 200, Width = 150, Height = 50, CornerRadius = 0,
+                FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
+        new() { Id = "pack", Label = "Travel pack", SubLabel = "RoundedRectangle", Icon = "✉", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 275, OffsetY = 200, Width = 150, Height = 60, CornerRadius = 14,
+                FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
+        new() { Id = "depart", Label = "Departure", SubLabel = "Ellipse", Icon = "✈", Shape = DiagramControlShape.Ellipse, OffsetX = 75, OffsetY = 200, Width = 150, Height = 64,
+                FillColor = "#0f766e", StrokeColor = "#134e4a", Tooltip = "Flight times are on the final itinerary" },
+        new() { Id = "lounge", Label = "Lounge pass", SubLabel = "Enabled = false", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 75, OffsetY = 300, Width = 150, Height = 50,
+                FillColor = "#475569", StrokeColor = "#334155", Enabled = false },
+    };
+
+    private readonly List<DiagramConnector> _shapeConnectors = new()
+    {
+        new() { Id = "sh-1", SourceId = "package", TargetId = "passport" },
+        new() { Id = "sh-2", SourceId = "passport", TargetId = "visa", ArrowStyle = ArrowStyle.Closed },
+        new() { Id = "sh-3", SourceId = "visa", TargetId = "apply", Label = "yes" },
+        new() { Id = "sh-4", SourceId = "visa", TargetId = "pack", Label = "no", Type = ConnectorType.Straight, SourcePort = DiagramPort.Bottom, TargetPort = DiagramPort.Top },
+        new() { Id = "sh-5", SourceId = "apply", TargetId = "pack", DashArray = "6,4" },
+        new() { Id = "sh-6", SourceId = "pack", TargetId = "depart", StrokeColor = "#0f766e", StrokeWidth = 3 },
+        new() { Id = "sh-7", SourceId = "depart", TargetId = "lounge", IsBroken = true },
+    };
+
+    private void OnShapeClicked(DiagramNodeClickEventArgs e)
+    {
+        e.Handled = !_followLinks;
+        _status = e.Node.NavigateUrl is { } url && e.Handled
+            ? $"{e.Node.Label}: Handled is true, so {url} did not open."
+            : $"{e.Node.Label} clicked.";
+    }
+
+    // Vocabulary rows, one per public member (FlexCore 0.2.49).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Params =
+        {
+            new("Nodes", "The boxes to draw, in list order. Each is placed by its own <code>OffsetX</code> and <code>OffsetY</code>; the control does no layout. Ids are matched case-insensitively.", "List&lt;DiagramNode&gt;?", "null"),
+            new("Connectors", "Lines between nodes, drawn behind them. A connector whose <code>SourceId</code> or <code>TargetId</code> matches no node is skipped.", "List&lt;DiagramConnector&gt;?", "null"),
+            new("Width", "A number of pixels (\"460\" or \"460px\") is the drawing area; the SVG and its frame are that plus the padding on both sides. A percentage or <code>auto</code> sizes the frame and makes the SVG 100% wide. The drawing never scales, and whatever lies past the frame is clipped.", "string", "\"100%\""),
+            new("Height", "As <code>Width</code>, for the height.", "string", "\"500\""),
+            new("CssClass", "Added to the outer <code>fx-diagram</code> div.", "string?", "null"),
+            new("Padding", "Space on every side, in pixels. Node coordinates start inside it, and with a pixel <code>Width</code> or <code>Height</code> it is added to that size.", "double", "18"),
+            new("SizePadPercent", "More padding: this percentage of the larger pixel dimension, split between the two sides. Width 460, Height 530 and the default 10 would add 26.5 px a side. Only pixel sizes count; both examples set 0 and use <code>Padding</code> alone.", "double", "10"),
+            new("NodeClicked", "Raised when an enabled node is clicked, before its <code>NavigateUrl</code> is followed; set <code>Handled</code> on the arguments to stay on the page. While it is bound, every enabled node gets <code>fx-clickable</code> and a pointer cursor.", "EventCallback&lt;DiagramNodeClickEventArgs&gt;"),
+        };
+        public static readonly ApiRow[] Node =
+        {
+            new("Id", "The name connectors use in <code>SourceId</code> and <code>TargetId</code>, matched case-insensitively. A node with a <code>BackgroundImage</code> also uses it for the clip path id <code>clip-<em>Id</em></code>, so keep it unique across diagrams on the same page.", "string", "\"\""),
+            new("OffsetX / OffsetY", "Centre of the node, in pixels from the top-left of the drawing area. Nothing is placed automatically.", "double", "0"),
+            new("Width", "Width of the shape in pixels.", "double", "140"),
+            new("Height", "Height of the shape in pixels.", "double", "50"),
+            new("Label", "Main text, centred, 13 px semibold in <code>TextColor</code>. <code>\\n</code> starts a new line 15 px lower; the first line keeps the single-line position, so a multi-line label sits low. Text is not wrapped or clipped to the shape.", "string", "\"\""),
+            new("SubLabel", "Second line at 11 px, 16 px under the label, or 15 px under the last line of a multi-line label. The label moves up 6 px to make room.", "string?", "null"),
+            new("Shape", "Outline; see <code>DiagramControlShape</code>.", "DiagramControlShape", "DiagramControlShape.Rectangle"),
+            new("FillColor", "Shape fill; any SVG colour.", "string", "\"#4A90D9\""),
+            new("StrokeColor", "Outline colour.", "string", "\"#2C5F8A\""),
+            new("TextColor", "Colour of the label, sublabel and icon.", "string", "\"#FFFFFF\""),
+            new("StrokeWidth", "Outline width in pixels.", "double", "2"),
+            new("CornerRadius", "Corner radius of <code>Rectangle</code> and <code>RoundedRectangle</code> alike; set 0 for square corners. Other shapes ignore it.", "double", "6"),
+            new("NavigateUrl", "Followed with <code>NavigationManager.NavigateTo</code> when the node is clicked, after <code>NodeClicked</code> unless that set <code>Handled</code>. A relative URL resolves against the base href. It makes the node clickable even without <code>NodeClicked</code>.", "string?", "null"),
+            new("CssClass", "Added to the node's <code>&lt;g&gt;</code>. Style it from the page through <code>::deep</code>, as the first example does.", "string?", "null"),
+            new("Tooltip", "Rendered as an SVG <code>&lt;title&gt;</code>, which browsers show on hover.", "string?", "null"),
+            new("Icon", "Short text, an emoji or one character, drawn at 16 px above the label; the label moves down to make room.", "string?", "null"),
+            new("BackgroundImage", "Image URL drawn inside the shape and clipped to it. The label then moves 14 px below the node, outside the shape, so its <code>TextColor</code> has to read against the canvas.", "string?", "null"),
+            new("BackgroundImageOpacity", "Opacity of the image, 0 to 1.", "double", "1.0"),
+            new("BackgroundImageFit", "How the image fills the node; see <code>ImageFit</code>.", "ImageFit", "ImageFit.Contain"),
+            new("BackgroundImagePadding", "Inset in pixels between the node edge and a <code>Contain</code> or <code>Icon</code> image; <code>Cover</code> ignores it.", "double", "4"),
+            new("Enabled", "False fades the node to 45% opacity, turns off its pointer events (no click, hover or tooltip) and draws a 16 px close icon on its top-right corner. Connectors still attach to it.", "bool", "true"),
+        };
+        public static readonly ApiRow[] Connector =
+        {
+            new("Id", "Names the arrowhead marker <code>arrow-<em>Id</em></code>. Marker ids are shared by the whole page, so give every connector a distinct Id, across diagrams too; connectors with the same Id all use the first such marker, colour included.", "string", "\"\""),
+            new("SourceId / TargetId", "Ids of the nodes at the start and at the arrow end.", "string", "\"\""),
+            new("Type", "Right-angle path or straight line; see <code>ConnectorType</code>.", "ConnectorType", "ConnectorType.Orthogonal"),
+            new("StrokeColor", "Line and arrowhead colour.", "string", "\"#555555\""),
+            new("StrokeWidth", "Line width in pixels; the arrowhead scales with it.", "double", "2"),
+            new("Label", "Text on a white box at 90% opacity, at the midpoint of a straight line or of the middle segment of an orthogonal one (at the bend of a one-bend path). The box is sized at 7 px per character.", "string?", "null"),
+            new("LabelColor", "Label text colour.", "string", "\"#333333\""),
+            new("ShowArrow", "Draws the arrowhead at the target end; the line is pulled back 6 px toward the source to make room for it.", "bool", "true"),
+            new("DashArray", "SVG <code>stroke-dasharray</code>, such as \"6,4\"; null draws a solid line.", "string?", "null"),
+            new("SourcePort / TargetPort", "Side of each node the line leaves or arrives at. <code>Auto</code> picks top or bottom when the two centres are further apart vertically than horizontally, otherwise left or right.", "DiagramPort", "DiagramPort.Auto"),
+            new("ArrowStyle", "Open chevron or closed triangle; see <code>ArrowStyle</code>.", "ArrowStyle", "ArrowStyle.Open"),
+            new("IsBroken", "Draws the connector and its arrowhead grey (#a0a0a0), 1.5 px wide and dashed 3,3, overriding <code>StrokeColor</code>, <code>StrokeWidth</code> and <code>DashArray</code>.", "bool", "false"),
+        };
+        public static readonly ApiRow[] ClickArgs =
+        {
+            new("Node", "The node that was clicked.", "DiagramNode"),
+            new("Handled", "Set it to true in the handler to stop the control following the node's <code>NavigateUrl</code>.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Shapes =
+        {
+            new("Rectangle", "A <code>rect</code> with its corners rounded by <code>CornerRadius</code> (6 unless set), drawn exactly like RoundedRectangle."),
+            new("RoundedRectangle", "The same drawing as Rectangle."),
+            new("Ellipse", "An ellipse filling the Width × Height box."),
+            new("Diamond", "Points at the middle of each edge of the Width × Height box."),
+            new("Parallelogram", "The top-left and bottom-right corners are pulled in 15 px; the slant is fixed."),
+            new("Stadium", "A <code>rect</code> with a corner radius of half the Height: straight sides, round ends."),
+        };
+        public static readonly ApiRow[] Types =
+        {
+            new("Straight", "One line from port to port."),
+            new("Orthogonal", "Right angles only. Two top or bottom ports: out to the halfway line, across, and in. Two left or right ports: across, up or down, across. A top or bottom source with a left or right target: one bend. A left or right source with a top or bottom target is drawn like two left or right ports and meets the target side-on."),
+        };
+        public static readonly ApiRow[] Ports =
+        {
+            new("Auto", "The side facing the other node, as described under SourcePort / TargetPort."),
+            new("Top", "Middle of the top edge."),
+            new("Bottom", "Middle of the bottom edge."),
+            new("Left", "Middle of the left edge."),
+            new("Right", "Middle of the right edge."),
+        };
+        public static readonly ApiRow[] Arrows =
+        {
+            new("Open", "Two strokes meeting at the tip."),
+            new("Closed", "A filled triangle."),
+        };
+        public static readonly ApiRow[] Fits =
+        {
+            new("Contain", "Scaled to fit inside the padded box and centred (<code>xMidYMid meet</code>)."),
+            new("Cover", "Scaled to cover the whole node and cropped to its shape (<code>xMidYMid slice</code>); padding is ignored."),
+            new("Icon", "Described in the source as natural size, but drawn exactly like Contain: the same padded box and <code>meet</code>."),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-diagram", "Outer div. The stylesheet gives it a #fafbfc background and a 6 px radius; the control's inline style sets its size, a 1 px #c7d6ea border and <code>overflow: hidden</code>."),
+            new("fx-diagram-node", "Each node's <code>&lt;g&gt;</code>; opacity and filter change over 0.15 s. Every node also carries a light drop shadow, <code>filter=\"url(#fx-shadow)\"</code>."),
+            new("fx-clickable", "On an enabled node that has a <code>NavigateUrl</code>, or on every enabled node while <code>NodeClicked</code> is bound: 85% opacity and slightly brighter on hover, 70% while pressed."),
+            new("fx-disabled", "On a node with <code>Enabled</code> false: 45% opacity and <code>pointer-events: none</code>."),
+            new("fx-node-label · fx-node-sublabel · fx-node-icon", "Label 13 px weight 600; sublabel 11 px weight 400 at 85% opacity; icon 16 px. Each size is multiplied by <code>--fx-zoom</code>, and none of them takes pointer events."),
+            new("fx-node-bg-image", "The background <code>&lt;image&gt;</code>; no pointer events."),
+            new("fx-diagram-connector", "Each connector's <code>&lt;g&gt;</code>: line, label box and label. No pointer events."),
+            new("fx-connector-label", "Connector label text, 11 px times <code>--fx-zoom</code>."),
+        };
+        public static readonly ApiRow[] Vars =
+        {
+            new("--fx-zoom", "Multiplies the font size of node labels, sublabels, icons and connector labels. Shapes, positions and the connector label box do not change.", "1"),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Workflow = @"<div class=""wf-layout"">
+    <div class=""canvas"">
+        <DiagramControl Nodes=""_workflowNodes"" Connectors=""_workflowConnectors"" Width=""460"" Height=""530""
+                        Padding=""12"" SizePadPercent=""0"" NodeClicked=""OnStepClicked"" />
+    </div>
+    <CardControl CssClass=""wf-panel"" Title=""@Current.Label"" Subtitle=""@CurrentStep.Owner"" aria-live=""polite"">
+        <ChildContent>
+            <dl class=""wf-facts"">
+                <dt>Typical time</dt>
+                <dd>@CurrentStep.Typical</dd>
+                <dt>What happens</dt>
+                <dd>@CurrentStep.Detail</dd>
+            </dl>
+        </ChildContent>
+        <FooterContent>
+            <div class=""wf-buttons"">
+                <ButtonControl OnClick=""() => Move(-1)"">Previous step</ButtonControl>
+                <ButtonControl OnClick=""() => Move(1)"">Next step</ButtonControl>
+            </div>
+        </FooterContent>
+    </CardControl>
+</div>";
+        public const string WorkflowCs = @"// Workflow
+private sealed record Step(string Owner, string Typical, string Detail);
+
+private static readonly Dictionary<string, Step> Steps = new()
+{
+    [""request""] = new(""Sales desk"", ""Same day"", ""The client asks for a trip by phone, email or the web form; the desk logs dates, party size and destination.""),
+    [""quote""] = new(""Product team"", ""1–2 working days"", ""Flights, hotels and experiences are priced from the rate card into one quote.""),
+    [""decide""] = new(""Client"", ""Up to 7 days"", ""The quote is held for seven days while the client accepts or declines it.""),
+    [""booked""] = new(""Reservations"", ""1 working day"", ""Every supplier on the quote is confirmed and the trip gets a booking reference.""),
+    [""deposit""] = new(""Finance"", ""Within 3 days"", ""A 20% deposit secures the booking; the balance is due before departure.""),
+    [""documents""] = new(""Operations"", ""2 weeks before departure"", ""Tickets, vouchers and the day-by-day itinerary go to the client.""),
+    [""declined""] = new(""Sales desk"", ""Same day"", ""The desk records the reason and releases any rooms held for the quote.""),
+};
+
+private readonly List<DiagramNode> _workflowNodes = new()
+{
+    new() { Id = ""request"", Label = ""Request received"", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 24, Width = 170, Height = 44, FillColor = ""#0f766e"", StrokeColor = ""#134e4a"" },
+    new() { Id = ""quote"", Label = ""Quote prepared"", OffsetX = 100, OffsetY = 104, Width = 170, Height = 48, FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
+    new() { Id = ""decide"", Label = ""Client decides"", Shape = DiagramControlShape.Diamond, OffsetX = 100, OffsetY = 202, Width = 170, Height = 80, FillColor = ""#fbbf24"", StrokeColor = ""#b45309"", TextColor = ""#1f2937"" },
+    new() { Id = ""booked"", Label = ""Booked"", OffsetX = 100, OffsetY = 344, Width = 170, Height = 48, FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
+    new() { Id = ""deposit"", Label = ""Deposit paid"", OffsetX = 100, OffsetY = 426, Width = 170, Height = 48, FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
+    new() { Id = ""documents"", Label = ""Documents sent"", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 506, Width = 170, Height = 44, FillColor = ""#0f766e"", StrokeColor = ""#134e4a"" },
+    new() { Id = ""declined"", Label = ""Declined"", Shape = DiagramControlShape.Stadium, OffsetX = 380, OffsetY = 202, Width = 120, Height = 44, FillColor = ""#fee2e2"", StrokeColor = ""#b91c1c"", TextColor = ""#991b1b"" },
+};
+
+private readonly List<DiagramConnector> _workflowConnectors = new()
+{
+    new() { Id = ""wf-1"", SourceId = ""request"", TargetId = ""quote"" },
+    new() { Id = ""wf-2"", SourceId = ""quote"", TargetId = ""decide"" },
+    new() { Id = ""wf-3"", SourceId = ""decide"", TargetId = ""booked"", Label = ""accepted"", StrokeColor = ""#15803d"", LabelColor = ""#15803d"" },
+    new() { Id = ""wf-4"", SourceId = ""decide"", TargetId = ""declined"", Label = ""declined"", StrokeColor = ""#b91c1c"", LabelColor = ""#b91c1c"", DashArray = ""6,4"" },
+    new() { Id = ""wf-5"", SourceId = ""booked"", TargetId = ""deposit"" },
+    new() { Id = ""wf-6"", SourceId = ""deposit"", TargetId = ""documents"" },
+};
+
+private string _currentId = ""request"";
+
+private int Index => _workflowNodes.FindIndex(n => n.Id == _currentId);
+
+private DiagramNode Current => _workflowNodes[Index];
+
+private Step CurrentStep => Steps[_currentId];
+
+protected override void OnInitialized() => ShowStep(""request"");
+
+private void OnStepClicked(DiagramNodeClickEventArgs e) => ShowStep(e.Node.Id);
+
+private void Move(int delta) => ShowStep(_workflowNodes[(Index + delta + _workflowNodes.Count) % _workflowNodes.Count].Id);
+
+private void ShowStep(string id)
+{
+    _currentId = id;
+    foreach (var node in _workflowNodes)
+        node.CssClass = node.Id == id ? ""wf-current"" : null;
+}";
+        public const string WorkflowCss = @".wf-layout { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+.canvas { max-width: 100%; overflow-x: auto; }
+.canvas ::deep .wf-current :is(rect, ellipse, polygon) { stroke: #0f172a; stroke-width: 4px; }
+.wf-layout ::deep .wf-panel { flex: 1 1 240px; max-width: 340px; }
+.wf-facts { margin: 0; font-size: 13px; }
+.wf-facts dt { font-weight: 600; color: #334155; }
+.wf-facts dd { margin: 2px 0 10px; color: #475569; }
+.wf-buttons { display: flex; gap: 8px; flex-wrap: wrap; }";
+        public const string Shapes = @"<div class=""controls"">
+    <SwitchControl @bind-Checked=""_followLinks"" Label=""Follow links"" />
+</div>
+<div class=""canvas"">
+    <DiagramControl Nodes=""_shapeNodes"" Connectors=""_shapeConnectors"" Width=""550"" Height=""330""
+                    Padding=""12"" SizePadPercent=""0"" NodeClicked=""OnShapeClicked"" />
+</div>
+<p class=""status"" aria-live=""polite"">@_status</p>";
+        public const string ShapesCs = @"// Shapes, connectors and links
+private bool _followLinks;
+
+private string _status = ""No node clicked yet."";
+
+private readonly List<DiagramNode> _shapeNodes = new()
+{
+    new() { Id = ""package"", Label = ""Package chosen"", SubLabel = ""Stadium"", Shape = DiagramControlShape.Stadium, OffsetX = 75, OffsetY = 45, Width = 150, Height = 50,
+            FillColor = ""#0f766e"", StrokeColor = ""#134e4a"", NavigateUrl = ""demo/reports/package-costs"", Tooltip = ""Opens the package cost sheet on the Report writer page"" },
+    new() { Id = ""passport"", Label = ""Passport details"", SubLabel = ""Parallelogram"", Shape = DiagramControlShape.Parallelogram, OffsetX = 275, OffsetY = 45, Width = 150, Height = 50,
+            FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
+    new() { Id = ""visa"", Label = ""Visa needed?"", SubLabel = ""Diamond"", Shape = DiagramControlShape.Diamond, OffsetX = 475, OffsetY = 45, Width = 150, Height = 84,
+            FillColor = ""#fbbf24"", StrokeColor = ""#b45309"", TextColor = ""#1f2937"" },
+    new() { Id = ""apply"", Label = ""Visa applied"", SubLabel = ""Rectangle, radius 0"", OffsetX = 475, OffsetY = 200, Width = 150, Height = 50, CornerRadius = 0,
+            FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
+    new() { Id = ""pack"", Label = ""Travel pack"", SubLabel = ""RoundedRectangle"", Icon = ""✉"", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 275, OffsetY = 200, Width = 150, Height = 60, CornerRadius = 14,
+            FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
+    new() { Id = ""depart"", Label = ""Departure"", SubLabel = ""Ellipse"", Icon = ""✈"", Shape = DiagramControlShape.Ellipse, OffsetX = 75, OffsetY = 200, Width = 150, Height = 64,
+            FillColor = ""#0f766e"", StrokeColor = ""#134e4a"", Tooltip = ""Flight times are on the final itinerary"" },
+    new() { Id = ""lounge"", Label = ""Lounge pass"", SubLabel = ""Enabled = false"", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 75, OffsetY = 300, Width = 150, Height = 50,
+            FillColor = ""#475569"", StrokeColor = ""#334155"", Enabled = false },
+};
+
+private readonly List<DiagramConnector> _shapeConnectors = new()
+{
+    new() { Id = ""sh-1"", SourceId = ""package"", TargetId = ""passport"" },
+    new() { Id = ""sh-2"", SourceId = ""passport"", TargetId = ""visa"", ArrowStyle = ArrowStyle.Closed },
+    new() { Id = ""sh-3"", SourceId = ""visa"", TargetId = ""apply"", Label = ""yes"" },
+    new() { Id = ""sh-4"", SourceId = ""visa"", TargetId = ""pack"", Label = ""no"", Type = ConnectorType.Straight, SourcePort = DiagramPort.Bottom, TargetPort = DiagramPort.Top },
+    new() { Id = ""sh-5"", SourceId = ""apply"", TargetId = ""pack"", DashArray = ""6,4"" },
+    new() { Id = ""sh-6"", SourceId = ""pack"", TargetId = ""depart"", StrokeColor = ""#0f766e"", StrokeWidth = 3 },
+    new() { Id = ""sh-7"", SourceId = ""depart"", TargetId = ""lounge"", IsBroken = true },
+};
+
+private void OnShapeClicked(DiagramNodeClickEventArgs e)
+{
+    e.Handled = !_followLinks;
+    _status = e.Node.NavigateUrl is { } url && e.Handled
+        ? $""{e.Node.Label}: Handled is true, so {url} did not open.""
+        : $""{e.Node.Label} clicked."";
+}";
+    }
+}

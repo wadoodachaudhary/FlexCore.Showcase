@@ -6,3 +6,13 @@
 .result { font-size: 13px; color: #475569; margin: 12px 0 0; }
 .head { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: #1e293b; font-size: 1rem; }
 .head .bi { color: #2563eb; }
+
+/* 2026-10-25: carousel example. The arrows sit 12px in from each side and the dots 12px above the bottom, over the item, so the slide pads round them. */
+.trip-slide { padding: 24px 64px 44px; }
+.trip-slide ::deep .fx-card { max-width: 420px; min-height: 190px; margin: 0 auto; }
+.trip-slide ::deep .fx-card-header { background-color: #eff6ff; }
+.trip-blurb { margin: 0; }
+.trip-package { font-size: 13px; color: #475569; margin-right: auto; }
+.trip-pager { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+.trip-count { font-size: 13px; color: #475569; margin-left: 4px; }
+@media (max-width: 480px) { .trip-slide { padding: 16px 56px 40px; } }

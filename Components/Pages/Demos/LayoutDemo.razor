@@ -1,22 +1,30 @@
 @page "/demo/layout"
 @using FlexCore.Showcase.Components.Shared
+@using FlexCore.Showcase.Data
 
 @* 2026-10-12: rebuilt on FeatureDemoLayout (was two framed demos and a static snippet). Two examples: an
    application shell (page layout + splitter, collapse buttons inside the demo) and the dashboard grid. Splitter added: the catalog already pointed here and no page rendered it. Facts checked
    against Layout/PageLayoutControl, Left/Center/RightPanelControl, DashboardLayoutControl, DashboardLayoutPanel
    and SplitterControl.razor in FlexCore 0.2.48. *@
+@* 2026-10-25 (SC-347): third example "grid", Grid and stack layouts: a Lisbon Explorer package summary (TravelData) on
+   GridLayoutControl with a GridLayoutItemControl span, inside StackLayoutControl rows; a column-count button group and a
+   Wrap switch in the Controls slot. New doc sections for GridLayoutControl, GridLayoutItemControl, StackLayoutControl and
+   FlexAlignment/FlexOrientation, three CSS class rows, one accessibility point; the Related line now points at the example.
+   Facts checked against Layout/GridLayoutControl.razor and .razor.css, Layout/GridLayoutItemControl.razor,
+   Layout/StackLayoutControl.razor, ContentModels.cs, FlexControlBase.cs and BadgeControl.razor in FlexCore 0.2.49. *@
 
 <PageTitle>Page layouts — FlexCore Showcase</PageTitle>
 
-<FeatureDemoLayout Title="Page layouts" Category="Components" ControlName="PageLayoutControl · SplitterControl · DashboardLayoutControl"
-                   Tagline="An application shell with collapsible side panels and a splitter, and a dashboard grid."
-                   SourcePath="Layout/PageLayoutControl.razor; SplitterControl.razor; Layout/DashboardLayoutControl.razor">
+<FeatureDemoLayout Title="Page layouts" Category="Components" ControlName="PageLayoutControl · SplitterControl · DashboardLayoutControl · GridLayoutControl · StackLayoutControl"
+                   Tagline="An application shell with collapsible side panels and a splitter, a dashboard grid, and grid and stack layouts for the content of a panel."
+                   SourcePath="Layout/PageLayoutControl.razor; SplitterControl.razor; Layout/DashboardLayoutControl.razor; Layout/GridLayoutControl.razor; Layout/GridLayoutItemControl.razor; Layout/StackLayoutControl.razor">
     <Overview>
         <p>
             Three ways to divide a page. <code>PageLayoutControl</code> is a flex row of <code>LeftPanelControl</code>,
             <code>CenterPanelControl</code> and <code>RightPanelControl</code>; the side panels collapse to a 20px tab.
             <code>SplitterControl</code> puts a draggable bar between two panes, in pixels or as a share of the container,
             with keyboard resizing. <code>DashboardLayoutControl</code> is a CSS grid of panels placed by row, column and span; change those values and the grid re-flows.
+            Inside a panel, <code>GridLayoutControl</code> and <code>StackLayoutControl</code> write a CSS grid or a flex row or column straight from their parameters.
         </p>
     </Overview>
 
@@ -117,6 +125,47 @@
                 <span class="result">@(_focus is null ? "Three KPI cards on row 0, charts on rows 2–4." : $"{_kpis.First(k => k.Key == _focus).Label} spans the row; the others moved down.")</span>
             </Demo>
         </DemoExample>
+
+        <DemoExample Id="grid" Title="Grid and stack layouts" RazorCode="@Code.GridStack" CSharpCode="@Code.GridStackCs">
+            <Description><p>A package summary for Lisbon Explorer. The fields sit in a <code>GridLayoutControl</code>, whose <code>Columns</code> is a CSS track list written into the style as given: here <code>repeat(n,minmax(0,1fr))</code> from the column buttons. Included is a <code>GridLayoutItemControl</code> with <code>ColumnSpan</code> set to the column count, so it always fills a row. <code>CollapseOnSmallScreen</code> is on by default: in a viewport 600px wide or less the grid drops to one column whatever <code>Columns</code> says. The panel itself is a vertical <code>StackLayoutControl</code> and the header and buttons are horizontal ones; the services are a stack whose <code>Wrap</code> the switch turns off, and they then stay on one line and scroll sideways.</p></Description>
+            <Controls>
+                <ButtonGroupControl Items="_columnItems" Values="@(new[] { _columns.ToString() })" ValuesChanged="PickColumns" AriaLabel="Columns" />
+                <SwitchControl @bind-Checked="_wrapTags" Label="Wrap services" />
+            </Controls>
+            <Demo>
+                <div class="summary">
+                    <StackLayoutControl Orientation="FlexOrientation.Vertical" Gap="14px">
+                        <StackLayoutControl AlignItems="FlexAlignment.Center" Gap="8px">
+                            <h4>@_pkg.Name</h4>
+                            @if (_held)
+                            {
+                                <BadgeControl Variant="BadgeVariant.Success" Text="Place held" />
+                            }
+                        </StackLayoutControl>
+                        <GridLayoutControl Columns="@GridColumns" Gap="12px 20px">
+                            @foreach (var (label, value) in Fields)
+                            {
+                                <div><span class="field-label">@label</span><span class="field-value">@value</span></div>
+                            }
+                            <GridLayoutItemControl ColumnSpan="_columns">
+                                <span class="field-label">Included</span>
+                                <StackLayoutControl Gap="6px" Wrap="_wrapTags" CssClass="tags">
+                                    @foreach (var service in _services)
+                                    {
+                                        <BadgeControl Variant="BadgeVariant.Light" Text="@service" />
+                                    }
+                                </StackLayoutControl>
+                            </GridLayoutItemControl>
+                        </GridLayoutControl>
+                        <StackLayoutControl Gap="8px" JustifyContent="FlexAlignment.End" Wrap="true" CssClass="actions">
+                            <ButtonControl CssClass="btn-sm" OnClick="NextSeason">Next season</ButtonControl>
+                            <ButtonControl CssClass="btn-sm btn-primary" OnClick="@(() => _held = !_held)">@(_held ? "Release the place" : "Hold a place")</ButtonControl>
+                        </StackLayoutControl>
+                    </StackLayoutControl>
+                </div>
+                <span class="result">Columns @GridColumns · wrap @(_wrapTags ? "on" : "off") · @TravelData.Seasons[_season] departure, @(_held ? "place held" : "no place held")</span>
+            </Demo>
+        </DemoExample>
     </Examples>
 
     <Vocabulary>
@@ -129,6 +178,18 @@
             </DocSection>
             <DocSection Id="doc-dashboardlayoutcontrol-and-dashboardlayo" Title="DashboardLayoutControl and DashboardLayoutPanel" Count='@DocSection.Label(Vocab.Dashboard.Length, "parameters")'>
                 <ApiTable Kind="ApiKind.Parameters" Title="DashboardLayoutControl and DashboardLayoutPanel" Rows="Vocab.Dashboard" />
+            </DocSection>
+            <DocSection Id="doc-gridlayoutcontrol-parameters" Title="GridLayoutControl parameters" Count='@DocSection.Label(Vocab.GridLayout.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridLayoutControl parameters" Rows="Vocab.GridLayout" />
+            </DocSection>
+            <DocSection Id="doc-gridlayoutitemcontrol-parameters" Title="GridLayoutItemControl parameters" Count='@DocSection.Label(Vocab.GridItem.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridLayoutItemControl parameters" Rows="Vocab.GridItem" />
+            </DocSection>
+            <DocSection Id="doc-stacklayoutcontrol-parameters" Title="StackLayoutControl parameters" Count='@DocSection.Label(Vocab.Stack.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="StackLayoutControl parameters" Rows="Vocab.Stack" />
+            </DocSection>
+            <DocSection Id="doc-flexalignment-and-flexorientation" Title="FlexAlignment and FlexOrientation" Count='@DocSection.Label(Vocab.Flex.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="FlexAlignment and FlexOrientation" Rows="Vocab.Flex" />
             </DocSection>
             <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
                 <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
@@ -145,13 +206,14 @@
             <li>The splitter bar is a native button with <code>role="separator"</code>, <code>aria-orientation</code> and the <code>Title</code> as its name. Arrow keys move it by <code>KeyboardStep</code>, Home and End go to the limits, double-click resets.</li>
             <li>The splitter imports the library's own <code>splitter-control.js</code> for the drag guide and measuring. No third-party script. Page layout and dashboard are CSS only.</li>
             <li>Dashboard panels are plain grid items with no landmarks or headings of their own; give each panel's content a heading.</li>
+            <li>Grid and stack layouts render a plain <code>div</code> with inline styles, no role and no script. Screen readers follow source order, so write cells in reading order rather than reordering them with <code>Column</code> and <code>Row</code>.</li>
         </ul>
     </Accessibility>
 
     <Related>
         <ul>
-            <li>Dockable, floating panes: <code>DockManagerControl</code> in the <a href="demo/counterparts?tab=docking">Control tour</a>. Tabbed MDI: <a href="demo/workspace/page-control-bench">PageControl</a>.</li>
-            <li>Smaller helpers in the same namespace: <code>GridLayoutControl</code> (CSS grid with <code>Columns</code>, <code>Rows</code>, <code>Gap</code>, collapses on small screens) and <code>StackLayoutControl</code> (flex row or column with <code>Gap</code> and <code>Wrap</code>).</li>
+            <li>Dockable, floating panes: <a href="demo/dock-manager">Dock manager</a>. Keyboard navigation across a page's regions: <a href="demo/page-navigation">Page navigation</a>.</li>
+            <li>For the content of a panel: <code>GridLayoutControl</code>, with <code>GridLayoutItemControl</code> for placed and spanning cells, and <code>StackLayoutControl</code> are shown in <a href="demo/layout#grid">Grid and stack layouts</a> above.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
@@ -218,6 +280,26 @@
         new() { Name = "Traffic", DataPoints = new() { new("Organic", 55), new("Paid", 25), new("Referral", 15), new("Direct", 5) } }
     };
 
+    // Grid and stack: one package from TravelData; the column buttons, the wrap switch and the two buttons change page state.
+    private static readonly TravelData.Package _pkg = TravelData.Packages[0];   // Lisbon Explorer, 7 nights
+    private static readonly string _country = TravelData.Destinations.First(d => d.City == _pkg.City).Country;
+    private static readonly string[] _services = { "Airport transfers", "Seven nights in a guesthouse", "Old-town walking tour", "Sintra day trip", "Fado evening with dinner", "City transport pass" };
+    private int _season, _columns = 3;
+    private bool _wrapTags = true, _held;
+    private string GridColumns => $"repeat({_columns},minmax(0,1fr))";
+    private (string Label, string Value)[] Fields => new[]
+    {
+        ("Destination", $"{_pkg.City}, {_country}"),
+        ("Region", _pkg.Region),
+        ("Nights", _pkg.Nights.ToString()),
+        ("Season", TravelData.Seasons[_season]),
+        ("Group size", "Up to 12"),
+        ("Departs", "Saturdays"),
+    };
+    private readonly SelectionItem[] _columnItems = { new("1", "1 column"), new("2", "2 columns"), new("3", "3 columns") };
+    private void PickColumns(IReadOnlyList<string> values) => _columns = int.Parse(values[0]);
+    private void NextSeason() => _season = (_season + 1) % TravelData.Seasons.Length;
+
     // Vocabulary rows, one per public member (0.2.48).
     private static class Vocab
     {
@@ -267,6 +349,54 @@
             new("fx-splitter-pane · -primary · -secondary · fx-splitter-bar · fx-splitter-grip", "Panes, the bar and its grip."),
             new("fx-splitter-overlay · fx-splitter-guide · fx-splitter-server-guide", "Drag-time overlay and the guide line."),
             new("fx-dashboard-layout · fx-dashboard-panels · fx-dashboard-panel", "The grid, a <code>display: contents</code> wrapper, and each item with its grid placement and aspect ratio inline."),
+            new("fx-grid-layout · responsive", "<code>GridLayoutControl</code>: tracks, gap and alignment are inline. <code>.responsive</code>, from <code>CollapseOnSmallScreen</code>, carries the 600px media rule."),
+            new("fx-grid-layout-item", "<code>GridLayoutItemControl</code>: placement, spans, self-alignment and <code>min-width: 0</code> inline."),
+            new("fx-stack-layout", "<code>StackLayoutControl</code>: every flex property is inline; the library has no stylesheet for it."),
+        };
+        public static readonly ApiRow[] GridLayout =
+        {
+            new("Columns", "Written into <code>grid-template-columns</code> as given, so any CSS track list works: <code>repeat(3,minmax(0,1fr))</code>, <code>160px 1fr</code>, <code>repeat(auto-fill,minmax(160px,1fr))</code>.", "string", "\"repeat(2,minmax(0,1fr))\""),
+            new("Rows", "Written into <code>grid-template-rows</code>.", "string", "\"auto\""),
+            new("Gap", "Written into <code>gap</code>: one length for both directions, or the row gap then the column gap.", "string", "\"12px\""),
+            new("AlignItems", "Written into <code>align-items</code>: block-axis alignment of every cell, such as <code>start</code>, <code>center</code> or <code>end</code>.", "string", "\"stretch\""),
+            new("JustifyItems", "Written into <code>justify-items</code>: inline-axis alignment of every cell.", "string", "\"stretch\""),
+            new("CollapseOnSmallScreen", "Adds the <code>responsive</code> class. In a viewport 600px wide or less the grid becomes one column of automatic rows, and every <code>GridLayoutItemControl</code> inside it goes back to column 1 with its spans and row reset. Those rules are <code>!important</code>, so they win over the inline values.", "bool", "true"),
+            new("ChildContent", "The cells. Plain elements fill the next empty cell; wrap one in <code>GridLayoutItemControl</code> to place or span it.", "RenderFragment?"),
+            new("CssClass / Style", "<code>CssClass</code> joins <code>fx-grid-layout</code>; <code>Style</code> is appended after the generated grid properties, so it can override them.", "string?", "null"),
+            new("Id", "Rendered as the grid's <code>id</code>.", "string?", "null"),
+            new("Visible", "false appends <code>display:none</code>.", "bool", "true"),
+        };
+        public static readonly ApiRow[] GridItem =
+        {
+            new("Column / Row", "First column or row of the cell, counted from 1 like CSS grid lines (<code>DashboardLayoutPanel</code> counts from 0). null leaves it to auto-placement.", "int?", "null"),
+            new("ColumnSpan / RowSpan", "Columns and rows the cell covers; values below 1 count as 1.", "int", "1"),
+            new("AlignSelf / JustifySelf", "Written into <code>align-self</code> and <code>justify-self</code> for this cell only.", "string", "\"auto\""),
+            new("ChildContent", "The cell's content.", "RenderFragment?"),
+            new("CssClass / Style", "<code>CssClass</code> joins <code>fx-grid-layout-item</code>; <code>Style</code> is appended after the placement.", "string?", "null"),
+            new("Id", "Rendered as the cell's <code>id</code>.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Stack =
+        {
+            new("Orientation", "Horizontal writes <code>flex-direction: row</code>, Vertical <code>column</code>.", "FlexOrientation", "FlexOrientation.Horizontal"),
+            new("Gap", "Written into <code>gap</code> between items.", "string", "\"12px\""),
+            new("AlignItems", "Cross-axis alignment, written into <code>align-items</code>. The three Space values are not valid there, so the browser drops them and items stretch.", "FlexAlignment", "FlexAlignment.Stretch"),
+            new("JustifyContent", "Main-axis distribution, written into <code>justify-content</code>. Stretch writes <code>stretch</code>, which a flex container treats as Start.", "FlexAlignment", "FlexAlignment.Start"),
+            new("Wrap", "true writes <code>flex-wrap: wrap</code>. false keeps every item on one line, and items that cannot shrink further overflow the stack.", "bool", "false"),
+            new("ChildContent", "The items, in order.", "RenderFragment?"),
+            new("CssClass / Style", "<code>CssClass</code> joins <code>fx-stack-layout</code>; <code>Style</code> is appended after the generated flex properties.", "string?", "null"),
+            new("Visible", "false appends <code>display:none</code>.", "bool", "true"),
+        };
+        public static readonly ApiRow[] Flex =
+        {
+            new("FlexOrientation.Horizontal", "<code>flex-direction: row</code>."),
+            new("FlexOrientation.Vertical", "<code>flex-direction: column</code>."),
+            new("FlexAlignment.Start", "<code>flex-start</code>."),
+            new("FlexAlignment.Center", "<code>center</code>."),
+            new("FlexAlignment.End", "<code>flex-end</code>."),
+            new("FlexAlignment.Stretch", "<code>stretch</code>: items fill the cross axis in <code>AlignItems</code>; in <code>JustifyContent</code> it behaves as Start."),
+            new("FlexAlignment.SpaceBetween", "<code>space-between</code>: first and last item at the edges, equal space between. <code>JustifyContent</code> only."),
+            new("FlexAlignment.SpaceAround", "<code>space-around</code>: equal space on both sides of each item. <code>JustifyContent</code> only."),
+            new("FlexAlignment.SpaceEvenly", "<code>space-evenly</code>: equal space between items and at both edges. <code>JustifyContent</code> only."),
         };
         public static readonly ApiRow[] Vars =
         {
@@ -439,5 +569,56 @@ private readonly List<ChartSeries> _sources = new()
 {
     new() { Name = ""Traffic"", DataPoints = new() { new(""Organic"", 55), new(""Paid"", 25), new(""Referral"", 15), new(""Direct"", 5) } }
 };";
+
+        public const string GridStack = @"<div class=""summary"">
+    <StackLayoutControl Orientation=""FlexOrientation.Vertical"" Gap=""14px"">
+        <StackLayoutControl AlignItems=""FlexAlignment.Center"" Gap=""8px"">
+            <h4>@_pkg.Name</h4>
+            @if (_held)
+            {
+                <BadgeControl Variant=""BadgeVariant.Success"" Text=""Place held"" />
+            }
+        </StackLayoutControl>
+        <GridLayoutControl Columns=""@GridColumns"" Gap=""12px 20px"">
+            @foreach (var (label, value) in Fields)
+            {
+                <div><span class=""field-label"">@label</span><span class=""field-value"">@value</span></div>
+            }
+            <GridLayoutItemControl ColumnSpan=""_columns"">
+                <span class=""field-label"">Included</span>
+                <StackLayoutControl Gap=""6px"" Wrap=""_wrapTags"" CssClass=""tags"">
+                    @foreach (var service in _services)
+                    {
+                        <BadgeControl Variant=""BadgeVariant.Light"" Text=""@service"" />
+                    }
+                </StackLayoutControl>
+            </GridLayoutItemControl>
+        </GridLayoutControl>
+        <StackLayoutControl Gap=""8px"" JustifyContent=""FlexAlignment.End"" Wrap=""true"" CssClass=""actions"">
+            <ButtonControl CssClass=""btn-sm"" OnClick=""NextSeason"">Next season</ButtonControl>
+            <ButtonControl CssClass=""btn-sm btn-primary"" OnClick=""@(() => _held = !_held)"">@(_held ? ""Release the place"" : ""Hold a place"")</ButtonControl>
+        </StackLayoutControl>
+    </StackLayoutControl>
+</div>
+<span class=""result"">Columns @GridColumns · wrap @(_wrapTags ? ""on"" : ""off"") · @TravelData.Seasons[_season] departure, @(_held ? ""place held"" : ""no place held"")</span>";
+        public const string GridStackCs = @"// Grid and stack: one package from TravelData; the column buttons, the wrap switch and the two buttons change page state.
+private static readonly TravelData.Package _pkg = TravelData.Packages[0];   // Lisbon Explorer, 7 nights
+private static readonly string _country = TravelData.Destinations.First(d => d.City == _pkg.City).Country;
+private static readonly string[] _services = { ""Airport transfers"", ""Seven nights in a guesthouse"", ""Old-town walking tour"", ""Sintra day trip"", ""Fado evening with dinner"", ""City transport pass"" };
+private int _season, _columns = 3;
+private bool _wrapTags = true, _held;
+private string GridColumns => $""repeat({_columns},minmax(0,1fr))"";
+private (string Label, string Value)[] Fields => new[]
+{
+    (""Destination"", $""{_pkg.City}, {_country}""),
+    (""Region"", _pkg.Region),
+    (""Nights"", _pkg.Nights.ToString()),
+    (""Season"", TravelData.Seasons[_season]),
+    (""Group size"", ""Up to 12""),
+    (""Departs"", ""Saturdays""),
+};
+private readonly SelectionItem[] _columnItems = { new(""1"", ""1 column""), new(""2"", ""2 columns""), new(""3"", ""3 columns"") };
+private void PickColumns(IReadOnlyList<string> values) => _columns = int.Parse(values[0]);
+private void NextSeason() => _season = (_season + 1) % TravelData.Seasons.Length;";
     }
 }

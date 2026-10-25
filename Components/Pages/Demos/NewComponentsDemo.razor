@@ -1,5 +1,6 @@
 @page "/demo/new-components"
 @rendermode InteractiveServer
+@implements IDisposable
 @using Fx.ControlKit
 @using FlexCore.Showcase.Components.Shared
 
@@ -12,16 +13,22 @@
    the OnClose payload by grep). Two example facts are stated in the tables: the dot badge's Title is never read, and the Home crumb's empty
    Href renders as text (SC-264). 
    2026-10-24 (later): the dot badge lost a Title attribute the control never reads (no tooltip rendered), and the Home crumb got a real
-   href (an empty one renders as text, not a link); the Overview no longer says the tables follow later. Tabs regenerated. *@
+   href (an empty one renders as text, not a link); the Overview no longer says the tables follow later. Tabs regenerated.
+   2026-10-25 (SC-347): third example, "progress": a ProgressBarControl and two ChunkProgressBarControls showing a supplier-rate import
+   that the page simulates with a PeriodicTimer (disposed with the page, hence @implements IDisposable). Its documentation and the new
+   Accessibility section are written from ProgressBarControl.razor/.css, ChunkProgressBarControl.razor/.css, ContentModels.cs
+   (FlexOrientation), FlexControlBase.cs and ButtonControl.razor. FlexCore's compiled scoped CSS bundle shows the .fx-progress-cancel
+   margin rule carrying ProgressBarControl's scope, so it misses the button ButtonControl renders; the page CSS pushes the button right.
+   Overview, tagline, source list and the Documentation intro now include the two progress controls; the first two examples are unchanged. *@
 
 <PageTitle>UI elements — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="UI elements" Category="Components"
-                   Tagline="The small parts: badges, alerts, skeletons, timeline and breadcrumb."
-                   SourcePath="BadgeControl.razor;BadgeModels.cs;AlertControl.razor;AlertModels.cs;SkeletonControl.razor;SkeletonModels.cs;TimelineControl.razor;TimelineItemControl.razor;TimelineModels.cs;BreadCrumbControl.razor;BreadCrumbItem.cs;FlexControlBase.cs">
+                   Tagline="The small parts: badges, alerts, skeletons, timeline, breadcrumb and progress bars."
+                   SourcePath="BadgeControl.razor;BadgeModels.cs;AlertControl.razor;AlertModels.cs;SkeletonControl.razor;SkeletonModels.cs;TimelineControl.razor;TimelineItemControl.razor;TimelineModels.cs;BreadCrumbControl.razor;BreadCrumbItem.cs;FlexControlBase.cs;ProgressBarControl.razor;ChunkProgressBarControl.razor;ContentModels.cs">
     <Overview>
         <p>
-            Five small controls that have no page of their own yet, grouped by what they do: status and feedback, and content. Each is shown with the parameters it is usually given; the tables under Documentation list every parameter, with what it changes.
+            Seven small controls that have no page of their own yet, grouped by what they do: status and feedback, content, and progress. Each is shown with the parameters it is usually given; the tables under Documentation list every parameter, with what it changes.
         </p>
     </Overview>
 
@@ -69,15 +76,38 @@
                 </div>
             </Demo>
         </DemoExample>
+
+        <DemoExample Id="progress" Title="Progress bars" RazorCode="@Code.Progress" CSharpCode="@Code.ProgressCs" CssCode="@Code.ProgressCss">
+            <Description><p><code>ProgressBarControl</code> takes a percentage (<code>Value</code>, 0 to 100) with a bold <code>Title</code>, a <code>Status</code> after it and a <code>Detail</code> line under the bar. <code>Indeterminate</code> swaps the fill for a sweep while the import connects, <code>IsError</code> with <code>ErrorMessage</code> turns it red, and an <code>OnCancel</code> delegate adds its Cancel button. <code>ChunkProgressBarControl</code> shows the same line count in segments over its <code>Min</code> to <code>Max</code> range, here 0 to 5,000; the small one is vertical, with five segments and <code>ShowValue</code> off. The import is simulated: a timer on the page adds lines every 250 ms.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <ButtonControl CssClass="btn-primary" OnClick="StartImport" Disabled="Running">Start import</ButtonControl>
+                    <ButtonControl OnClick="FailImport" Disabled="@(_phase != ImportPhase.Importing)">Simulate a failure</ButtonControl>
+                </div>
+                <div class="progress-demo mt">
+                    <ProgressBarControl Value="Percent" Title="Importing supplier rates" Status="@ImportStatus" Detail="@ImportDetail"
+                                        Indeterminate="Connecting" IsError="@(_phase == ImportPhase.Failed)" ErrorMessage="@_error"
+                                        OnCancel="CancelCallback" CancelText="Stop import" CancelDisabled="_cancelling" />
+                    <div class="chunk-col">
+                        <ChunkProgressBarControl Value="_linesDone" Max="TotalLines" ChunkCount="10" Indeterminate="Connecting"
+                                                 AriaLabel="Supplier rate lines imported" />
+                    </div>
+                    <ChunkProgressBarControl Value="_linesDone" Max="TotalLines" ChunkCount="5" Indeterminate="Connecting" ShowValue="false"
+                                             Orientation="FlexOrientation.Vertical" Style="height: 120px" AriaLabel="Supplier rate lines imported, vertical" />
+                </div>
+            </Demo>
+        </DemoExample>
     </Examples>
 
     <Vocabulary>
         <p>
-            Read from the six component files and their stylesheets. <code>BadgeControl</code>, <code>AlertControl</code>, <code>SkeletonControl</code>,
+            Read from the eight component files and their stylesheets. <code>BadgeControl</code>, <code>AlertControl</code>, <code>SkeletonControl</code>,
             <code>TimelineControl</code> and <code>BreadCrumbControl</code> inherit <code>FlexControlBase</code>; its <code>CssClass</code>, <code>Style</code>
             and unmatched attributes land on each root element and are listed once, in the last table, together with the base parameters these controls
             never read. <code>TimelineItemControl</code> does not inherit it: it has no <code>CssClass</code> or <code>Style</code>, and an attribute it
-            does not declare is a runtime error.
+            does not declare is a runtime error. <code>ChunkProgressBarControl</code> inherits it but uses it differently, so its inherited parameters
+            are in its own table. <code>ProgressBarControl</code> does not inherit it: it declares its own <code>CssClass</code> and <code>Style</code>,
+            and an attribute it does not declare is a runtime error.
         </p>
         <DocSections>
             <DocSection Id="doc-badgecontrol" Title="BadgeControl" Count='@DocSection.Label(Vocab.Badge.Length, "parameters")' Open="true">
@@ -126,15 +156,48 @@
                 <ApiTable Kind="ApiKind.Properties" Title="BreadCrumbItem" Rows="Vocab.CrumbItem" />
                 <p>
                 <code>BreadCrumbItem</code> has a parameterless constructor and <code>BreadCrumbItem(string text, string? href = null, string? iconCss = null)</code>.
-                The example passes an empty string as the Home crumb's <code>Href</code>, which the control treats like no <code>Href</code>: Home renders as
-                text, not as a link.
+                A null or empty <code>Href</code> renders the crumb as text; the example's Home and Estimates crumbs have one and render as links, and the
+                last crumb is always text.
                 </p>
+            </DocSection>
+            <DocSection Id="doc-progressbarcontrol" Title="ProgressBarControl" Count='@DocSection.Label(Vocab.Progress.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="ProgressBarControl" Rows="Vocab.Progress" />
+                <p>
+                The control is one bordered panel: a header row with <code>Title</code>, <code>Status</code> and the Cancel button when any of the three is
+                present, then the <code>ErrorMessage</code> line, the 10px track, and the monospace detail line with the percentage and <code>Detail</code>.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-progressbarcontrol-events" Title="ProgressBarControl events" Count='@DocSection.Label(Vocab.ProgressEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="ProgressBarControl events" Rows="Vocab.ProgressEvents" />
+            </DocSection>
+            <DocSection Id="doc-chunkprogressbarcontrol" Title="ChunkProgressBarControl" Count='@DocSection.Label(Vocab.Chunk.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="ChunkProgressBarControl" Rows="Vocab.Chunk" />
+                <p>
+                Whenever parameters are set, the control checks them: a <code>Min</code>, <code>Max</code> or <code>Value</code> that is not finite, a
+                <code>Max</code> not greater than <code>Min</code>, or a <code>ChunkCount</code> outside 1 to 1000 throws <code>ArgumentOutOfRangeException</code>
+                from <code>OnParametersSet</code>, always naming <code>ChunkCount</code>.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-flexorientation" Title="FlexOrientation" Count='@DocSection.Label(Vocab.Orientations.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="FlexOrientation" Rows="Vocab.Orientations" />
+                <p><code>ButtonGroupControl</code>, <code>SegmentedControl</code> and <code>StackLayoutControl</code> take the same enum; these rows describe what it does to <code>ChunkProgressBarControl</code>.</p>
             </DocSection>
             <DocSection Id="doc-inherited-from-flexcontrolbase" Title="Inherited from FlexControlBase" Count='@DocSection.Label(Vocab.FlexBase.Length, "parameters")'>
                 <ApiTable Kind="ApiKind.Parameters" Title="Inherited from FlexControlBase" Rows="Vocab.FlexBase" />
             </DocSection>
         </DocSections>
     </Vocabulary>
+
+    <Accessibility>
+        <p>Notes for the two progress controls in the third example.</p>
+        <ul>
+            <li><code>ChunkProgressBarControl</code> renders <code>role="progressbar"</code> with <code>aria-valuemin</code>, <code>aria-valuemax</code> and <code>aria-valuenow</code> taken from <code>Min</code>, <code>Max</code> and the clamped <code>Value</code> (here a line count out of 5,000), and <code>aria-valuetext</code> with the whole-number percentage. While <code>Indeterminate</code> is true it leaves out <code>aria-valuenow</code> and the value text is "In progress". The segments are <code>aria-hidden</code>.</li>
+            <li>Its accessible name is <code>AriaLabel</code>, "Progress" unless set. An <code>aria-label</code> attribute does not reach the element: the control captures unmatched attributes but never renders them.</li>
+            <li><code>ProgressBarControl</code> renders no ARIA: no role, no value attributes and no live region. Its title, status, detail and error text are plain text, so a screen reader is not told it is a progress bar or when the text changes. In this example the chunk bars carry the progressbar role for the same count.</li>
+            <li>The Cancel button is a native <code>button</code>, so it is in the tab order and responds to Enter and Space. Its <code>title</code> stays "Cancel" whatever <code>CancelText</code> says. With <code>CancelDisabled</code> it is disabled and drops out of the tab order.</li>
+            <li>Motion: the chunk segments stop blinking under <code>prefers-reduced-motion: reduce</code> and show solid blue instead. <code>ProgressBarControl</code>'s indeterminate sweep has no such rule and keeps moving.</li>
+        </ul>
+    </Accessibility>
 
     <Related>
         <ul>
@@ -147,6 +210,85 @@
 
 @code {
     private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", "/"), new("Estimates", "demo/layout"), new("EST-2042 Contoso") };
+
+    // Progress (2026-10-25): the import is simulated; a PeriodicTimer on this page advances it and the controls only display it.
+    private enum ImportPhase { Idle, Connecting, Importing, Cancelled, Failed, Done }
+    private static readonly (string City, int Lines)[] RateFiles = { ("Lisbon", 2000), ("Kyoto", 1800), ("Cape Town", 1200) };
+    private static readonly int TotalLines = RateFiles.Sum(f => f.Lines);
+    private ImportPhase _phase;
+    private int _linesDone, _connectTicks;
+    private bool _cancelling;
+    private string? _error;
+    private PeriodicTimer? _timer;
+
+    private bool Running => _phase is ImportPhase.Connecting or ImportPhase.Importing;
+    private bool Connecting => _phase == ImportPhase.Connecting;
+    private double Percent => 100.0 * _linesDone / TotalLines;
+    // The control shows its Cancel button whenever OnCancel has a delegate, so pass one only while the import runs.
+    private EventCallback CancelCallback => Running ? EventCallback.Factory.Create(this, CancelImport) : default;
+
+    private (int Index, int Done) CurrentFile()
+    {
+        int i = 0, left = _linesDone;
+        while (i < RateFiles.Length - 1 && left >= RateFiles[i].Lines) left -= RateFiles[i++].Lines;
+        return (i, left);
+    }
+
+    private string FileStatus() { var (i, done) = CurrentFile(); return $"{RateFiles[i].City}: {done:N0} of {RateFiles[i].Lines:N0} lines"; }
+
+    private string ImportStatus => _phase switch
+    {
+        ImportPhase.Idle => "not started",
+        ImportPhase.Connecting => "connecting",
+        ImportPhase.Cancelled => $"stopped at {_linesDone:N0} lines",
+        ImportPhase.Done => $"{TotalLines:N0} lines read",
+        _ => FileStatus(),
+    };
+
+    private string ImportDetail => $"file {CurrentFile().Index + 1} of {RateFiles.Length} · {_linesDone:N0} of {TotalLines:N0} lines in all";
+
+    private void StartImport()
+    {
+        StopTimer();
+        (_phase, _linesDone, _connectTicks, _cancelling, _error) = (ImportPhase.Connecting, 0, 0, false, null);
+        _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250));
+        _ = RunImportAsync(_timer);
+    }
+
+    private async Task RunImportAsync(PeriodicTimer timer)
+    {
+        // StopTimer and Dispose end this loop: a disposed PeriodicTimer's WaitForNextTickAsync returns false.
+        while (await timer.WaitForNextTickAsync())
+            await InvokeAsync(() => { Tick(); StateHasChanged(); });
+    }
+
+    private void Tick()
+    {
+        if (!Running) return;
+        if (_cancelling) { _phase = ImportPhase.Cancelled; StopTimer(); }
+        else if (Connecting) { if (++_connectTicks == 6) _phase = ImportPhase.Importing; }
+        else
+        {
+            _linesDone = Math.Min(TotalLines, _linesDone + Random.Shared.Next(80, 170));
+            if (_linesDone == TotalLines) { _phase = ImportPhase.Done; StopTimer(); }
+        }
+    }
+
+    // Bound to CancelDisabled: the button reads "cancelling…" until the next tick stops the loop.
+    private void CancelImport() => _cancelling = true;
+
+    private void FailImport()
+    {
+        var (i, done) = CurrentFile();
+        _error = $"{RateFiles[i].City}, line {done + 1:N0}: the rate column is empty.";
+        _phase = ImportPhase.Failed;
+        StopTimer();
+    }
+
+    private void StopTimer() { _timer?.Dispose(); _timer = null; }
+
+    // The page declares @implements IDisposable, so the timer stops when the page goes away.
+    public void Dispose() => StopTimer();
 
     // Code tabs are verbatim copies of the Demo blocks above (2026-10-13).
     private static class Code
@@ -184,6 +326,105 @@
     <BreadCrumbControl Items=""_crumbs"" />
 </div>";
         public const string ContentCs = @"private readonly List<BreadCrumbItem> _crumbs = new() { new(""Home"", ""/""), new(""Estimates"", ""demo/layout""), new(""EST-2042 Contoso"") };";
+        public const string Progress = @"<div class=""demo-row"">
+    <ButtonControl CssClass=""btn-primary"" OnClick=""StartImport"" Disabled=""Running"">Start import</ButtonControl>
+    <ButtonControl OnClick=""FailImport"" Disabled=""@(_phase != ImportPhase.Importing)"">Simulate a failure</ButtonControl>
+</div>
+<div class=""progress-demo mt"">
+    <ProgressBarControl Value=""Percent"" Title=""Importing supplier rates"" Status=""@ImportStatus"" Detail=""@ImportDetail""
+                        Indeterminate=""Connecting"" IsError=""@(_phase == ImportPhase.Failed)"" ErrorMessage=""@_error""
+                        OnCancel=""CancelCallback"" CancelText=""Stop import"" CancelDisabled=""_cancelling"" />
+    <div class=""chunk-col"">
+        <ChunkProgressBarControl Value=""_linesDone"" Max=""TotalLines"" ChunkCount=""10"" Indeterminate=""Connecting""
+                                 AriaLabel=""Supplier rate lines imported"" />
+    </div>
+    <ChunkProgressBarControl Value=""_linesDone"" Max=""TotalLines"" ChunkCount=""5"" Indeterminate=""Connecting"" ShowValue=""false""
+                             Orientation=""FlexOrientation.Vertical"" Style=""height: 120px"" AriaLabel=""Supplier rate lines imported, vertical"" />
+</div>";
+        public const string ProgressCs = @"// Progress (2026-10-25): the import is simulated; a PeriodicTimer on this page advances it and the controls only display it.
+private enum ImportPhase { Idle, Connecting, Importing, Cancelled, Failed, Done }
+private static readonly (string City, int Lines)[] RateFiles = { (""Lisbon"", 2000), (""Kyoto"", 1800), (""Cape Town"", 1200) };
+private static readonly int TotalLines = RateFiles.Sum(f => f.Lines);
+private ImportPhase _phase;
+private int _linesDone, _connectTicks;
+private bool _cancelling;
+private string? _error;
+private PeriodicTimer? _timer;
+
+private bool Running => _phase is ImportPhase.Connecting or ImportPhase.Importing;
+private bool Connecting => _phase == ImportPhase.Connecting;
+private double Percent => 100.0 * _linesDone / TotalLines;
+// The control shows its Cancel button whenever OnCancel has a delegate, so pass one only while the import runs.
+private EventCallback CancelCallback => Running ? EventCallback.Factory.Create(this, CancelImport) : default;
+
+private (int Index, int Done) CurrentFile()
+{
+    int i = 0, left = _linesDone;
+    while (i < RateFiles.Length - 1 && left >= RateFiles[i].Lines) left -= RateFiles[i++].Lines;
+    return (i, left);
+}
+
+private string FileStatus() { var (i, done) = CurrentFile(); return $""{RateFiles[i].City}: {done:N0} of {RateFiles[i].Lines:N0} lines""; }
+
+private string ImportStatus => _phase switch
+{
+    ImportPhase.Idle => ""not started"",
+    ImportPhase.Connecting => ""connecting"",
+    ImportPhase.Cancelled => $""stopped at {_linesDone:N0} lines"",
+    ImportPhase.Done => $""{TotalLines:N0} lines read"",
+    _ => FileStatus(),
+};
+
+private string ImportDetail => $""file {CurrentFile().Index + 1} of {RateFiles.Length} · {_linesDone:N0} of {TotalLines:N0} lines in all"";
+
+private void StartImport()
+{
+    StopTimer();
+    (_phase, _linesDone, _connectTicks, _cancelling, _error) = (ImportPhase.Connecting, 0, 0, false, null);
+    _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250));
+    _ = RunImportAsync(_timer);
+}
+
+private async Task RunImportAsync(PeriodicTimer timer)
+{
+    // StopTimer and Dispose end this loop: a disposed PeriodicTimer's WaitForNextTickAsync returns false.
+    while (await timer.WaitForNextTickAsync())
+        await InvokeAsync(() => { Tick(); StateHasChanged(); });
+}
+
+private void Tick()
+{
+    if (!Running) return;
+    if (_cancelling) { _phase = ImportPhase.Cancelled; StopTimer(); }
+    else if (Connecting) { if (++_connectTicks == 6) _phase = ImportPhase.Importing; }
+    else
+    {
+        _linesDone = Math.Min(TotalLines, _linesDone + Random.Shared.Next(80, 170));
+        if (_linesDone == TotalLines) { _phase = ImportPhase.Done; StopTimer(); }
+    }
+}
+
+// Bound to CancelDisabled: the button reads ""cancelling…"" until the next tick stops the loop.
+private void CancelImport() => _cancelling = true;
+
+private void FailImport()
+{
+    var (i, done) = CurrentFile();
+    _error = $""{RateFiles[i].City}, line {done + 1:N0}: the rate column is empty."";
+    _phase = ImportPhase.Failed;
+    StopTimer();
+}
+
+private void StopTimer() { _timer?.Dispose(); _timer = null; }
+
+// The page declares @implements IDisposable, so the timer stops when the page goes away.
+public void Dispose() => StopTimer();";
+        public const string ProgressCss = @"/* 2026-10-25: progress example. ProgressBarControl's margin-left rule for its Cancel button is scoped to ProgressBarControl
+   and does not reach the button that ButtonControl renders, so the page pushes the button to the right. */
+.progress-demo { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.progress-demo ::deep .fx-progress { flex: 1 1 320px; margin: 0; }
+.progress-demo ::deep .fx-progress-cancel { margin-left: auto; }
+.chunk-col { flex: 0 1 240px; }";
     }
 
     // Documentation rows (2026-10-24), written from the FlexCore sources named in the header comment.
@@ -289,7 +530,7 @@
         public static readonly ApiRow[] CrumbItem =
         {
             new("Text", "The crumb's visible text, inside the link or the span.", "string", "\"\""),
-            new("Href", "Link target. Null or empty renders the crumb as text, as the example's Home crumb shows.", "string?", "null"),
+            new("Href", "Link target. Null or empty renders the crumb as text; the last crumb is text whatever its <code>Href</code>.", "string?", "null"),
             new("IconCss", "Classes of a <code>span.fx-breadcrumb-icon</code> placed before the text, in both the link and the text form.", "string?", "null"),
             new("Disabled", "Adds the class <code>disabled</code> to the item (grey, <code>pointer-events: none</code>) and renders it as text even when it has an <code>Href</code>.", "bool", "false"),
         };
@@ -304,6 +545,48 @@
             new("Id", "Declared, but none of the five reads it, so it never reaches the element.", "string?", "null"),
             new("Tag / Data", "Declared, but none of the five reads them.", "string?", "null"),
             new("Parent", "Declared, but none of the five reads it.", "FlexControlBase?", "null"),
+        };
+        public static readonly ApiRow[] Progress =
+        {
+            new("Value", "Percent complete, 0 to 100, not a fraction: 0.5 is half a percent. Clamped to that range for the fill width, which eases over 0.25 s when it changes, and for the percentage in the detail line, shown with at most one decimal (<code>0.#</code>). Ignored while <code>Indeterminate</code> is true.", "double", "0"),
+            new("Title", "Bold lead-in at the start of the header, when not blank. A non-null <code>Title</code>, even an empty one, also puts a middle dot before <code>Status</code>.", "string?", "null"),
+            new("Status", "Grey text after the title (<code>span.fx-progress-status</code>), when not blank.", "string?", "null"),
+            new("Detail", "Text of the monospace line under the bar (<code>p.fx-progress-detail</code>), after the percentage and a middle dot when the percentage is shown.", "string?", "null"),
+            new("Indeterminate", "Adds <code>fx-progress-indeterminate</code> to the fill: a block 30% wide sweeps left to right every 1.4 s in place of the fill width, and the percentage is not shown.", "bool", "false"),
+            new("IsError", "Adds <code>fx-progress-error</code> to the root: pink background, red border and a solid red fill, and an indeterminate sweep stops. It shows no text by itself; pair it with <code>ErrorMessage</code>.", "bool", "false"),
+            new("ErrorMessage", "A dark red line between the header and the bar (<code>p.fx-progress-error-text</code>), prefixed with ✗. Rendered only when <code>IsError</code> is true and the message is not blank.", "string?", "null"),
+            new("CancelDisabled", "Disables the Cancel button and changes its label to \"cancelling…\", ignoring <code>CancelText</code>. No effect without an <code>OnCancel</code> delegate.", "bool", "false"),
+            new("CancelText", "Label of the Cancel button; null shows \"Cancel\". The button's <code>title</code> attribute stays \"Cancel\" whatever the label.", "string?", "null"),
+            new("ShowPercent", "Shows the clamped <code>Value</code> with a % sign at the start of the detail line, except while <code>Indeterminate</code> is true.", "bool", "true"),
+            new("CssClass", "Appended to the root's classes after <code>fx-progress</code> and, when <code>IsError</code> is true, <code>fx-progress-error</code>.", "string?", "null"),
+            new("Style", "The root's <code>style</code> attribute, as given.", "string?", "null"),
+        };
+        public static readonly ApiRow[] ProgressEvents =
+        {
+            new("OnCancel", "Raised when the Cancel button is clicked; no argument. The header shows the button, a bare <code>ButtonControl</code> with class <code>fx-progress-cancel</code> and no <code>fx-button</code> styling, only while this has a delegate. The control stops nothing itself: the example's handler sets the flag bound to <code>CancelDisabled</code>, and the page passes no delegate once the import has stopped, which removes the button.", "EventCallback"),
+        };
+        public static readonly ApiRow[] Chunk =
+        {
+            new("Value", "Clamped to <code>Min</code>–<code>Max</code>. The clamped value itself is <code>aria-valuenow</code>; the percentage, 100 × (Value − Min) / (Max − Min), fills the segments and is <code>aria-valuetext</code>. The example passes a line count with <code>Max</code> 5,000.", "double", "0"),
+            new("Min", "Start of the range; <code>aria-valuemin</code>.", "double", "0"),
+            new("Max", "End of the range; <code>aria-valuemax</code>. Must be greater than <code>Min</code>.", "double", "100"),
+            new("ChunkCount", "Number of segments: <code>span</code>s that share the bar's length, 3px apart. The first floor(ChunkCount × percentage / 100) get the class <code>complete</code> and turn blue, so a segment fills only when its whole share is reached. 1 to 1000.", "int", "10"),
+            new("Indeterminate", "Adds the class <code>indeterminate</code> to every segment: each fades to blue and back, one second each way, or is solid blue under <code>prefers-reduced-motion: reduce</code>. <code>aria-valuenow</code> is left out, <code>aria-valuetext</code> becomes \"In progress\" and the shown value \"…\". Segments already complete keep <code>complete</code>.", "bool", "false"),
+            new("ShowValue", "Renders an <code>output</code> after the segments with the percentage as a whole number, or \"…\" while <code>Indeterminate</code> is true.", "bool", "true"),
+            new("Orientation", "Adds the lower-cased value, <code>horizontal</code> or <code>vertical</code>, to the root's classes; see the values below.", "FlexOrientation", "FlexOrientation.Horizontal"),
+            new("AriaLabel", "The root's <code>aria-label</code>. The default names nothing in particular; the example gives each bar its own.", "string", "\"Progress\""),
+            new("CssClass", "Inherited from <code>FlexControlBase</code>. Placed after <code>fx-chunk-progress</code> and before the orientation class.", "string?", "null"),
+            new("Style", "Inherited. Reaches the root through the base's <code>ResolvedStyle</code> and wins over the stylesheet, as the vertical bar's <code>height: 120px</code> shows.", "string?", "null"),
+            new("Visible", "Inherited. False adds <code>display:none</code> through <code>ResolvedStyle</code>: unlike the five controls in the last table, this one is hidden by it.", "bool", "true"),
+            new("AdditionalAttributes", "Inherited. Captures attributes that match no parameter but never renders them, so <code>data-*</code> and <code>aria-*</code> attributes are dropped; <code>id</code> and <code>title</code> bind to the unread <code>Id</code> and <code>Title</code> parameters.", "Dictionary&lt;string, object&gt;?", "null"),
+            new("Title / Id / Tag / Data", "Inherited; declared, but the control never reads them.", "string?", "null"),
+            new("Enabled", "Inherited; declared, but the control never reads it.", "bool", "true"),
+            new("Parent", "Inherited; declared, but the control never reads it.", "FlexControlBase?", "null"),
+        };
+        public static readonly ApiRow[] Orientations =
+        {
+            new("Horizontal", "Class <code>horizontal</code>, which has no rule: the segments run left to right in the base row layout, at least 180px wide; the default."),
+            new("Vertical", "Class <code>vertical</code>: a column 20px wide and 200px tall, filled from the bottom (<code>column-reverse</code>); the shown value sits at the top."),
         };
     }
 }

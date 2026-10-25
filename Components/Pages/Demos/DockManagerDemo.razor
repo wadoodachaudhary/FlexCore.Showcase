@@ -11,6 +11,9 @@
    read from OnParametersSet, PublishAsync, DockAsync, FloatAsync, UnpinAsync, CloseAsync, DockLayoutState.Validate and the two
    child views. *@
 
+@* 2026-10-25 (SC-253 item 27): tab dragging does not start in the browser (DockNodeView.razor:15 renders draggable=""); the copy no longer
+   tells readers to drag and says so in the behaviour list. *@
+
 <PageTitle>Dock manager — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Dock manager" Category="Components" CategoryHref="components" ControlName="DockManagerControl"
@@ -19,8 +22,8 @@
     <Overview>
         <p>
             <code>DockManagerControl</code> takes a list of <code>DockPanel</code>s, each a key, a title and a render fragment, and arranges them in
-            a tree of tab groups and two-pane splits. The user drags a tab onto another group and chooses Tab, Left, Right, Top or Bottom, or
-            uses each pane's Dock… menu to do the same without dragging. A pane can float as a non-modal window, unpin into a strip along the top
+            a tree of tab groups and two-pane splits. Each pane's Dock… menu moves it into any group as a tab, or beside that
+            group on its left, right, top or bottom. A pane can float as a non-modal window, unpin into a strip along the top
             that opens as a drawer, or close into a "Closed panes" menu that brings it back. Splits are <code>SplitterControl</code>s and keep their
             ratio. The arrangement is a <code>DockLayoutState</code>: the control reports it after every change, accepts one as its starting point, and
             saves or restores it as JSON.
@@ -29,7 +32,7 @@
 
     <Examples>
         <DemoExample Id="workspace" Title="A four-pane workspace" RazorCode="@Code.Workspace" CSharpCode="@Code.WorkspaceCs">
-            <Description><p>Explorer on the left, Document and Output as tabs in the middle, Properties on the right, from a <code>State</code> built in code. Document cannot be closed and Output cannot float, so those buttons are missing on their action bars. Drag a tab onto another group and drop it on one of the five targets, resize a split, float Properties, unpin Explorer and open it from the strip, close Output and bring it back from Closed panes. Save keeps the current layout as JSON, Restore applies it again, Reset hands the control a fresh starting state. The line below is fed by <code>StateChanged</code>.</p></Description>
+            <Description><p>Explorer on the left, Document and Output as tabs in the middle, Properties on the right, from a <code>State</code> built in code. Document cannot be closed and Output cannot float, so those buttons are missing on their action bars. Use Dock… to move a pane to another group or beside it, resize a split, float Properties, unpin Explorer and open it from the strip, close Output and bring it back from Closed panes. Save keeps the current layout as JSON, Restore applies it again, Reset hands the control a fresh starting state. The line below is fed by <code>StateChanged</code>.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _json = _dock!.SaveLayout()">Save layout</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _dock!.RestoreLayoutAsync(_json!)" Disabled="@(_json is null)">Restore layout</ButtonControl>
@@ -75,12 +78,12 @@
                 <code>DockPanel(string Key, string Title, RenderFragment Content, bool Closable = true, bool Floatable = true)</code> is a record;
                 <code>DockPosition</code> is <code>Tab</code>, <code>Left</code>, <code>Right</code>, <code>Top</code> or <code>Bottom</code>.
                 <code>CssClass</code>, <code>Style</code>, <code>Id</code>, <code>Visible</code>, <code>Enabled</code> and <code>AdditionalAttributes</code>
-                come from <code>FlexControlBase</code>; <code>Enabled="false"</code> disables every button, the tab drag and the methods.
+                come from <code>FlexControlBase</code>; <code>Enabled="false"</code> disables every button and the methods.
                 </p>
                 <p>What the user can do, and where it comes from:</p>
                 <ul>
                 <li>Each group shows its panes as tabs; a click makes a pane active. The active pane gets an action bar with Dock…, Float (when floatable and not already floating), Unpin or Pin, and Close (when closable).</li>
-                <li>Dragging a tab shows Tab, Left, Right, Top and Bottom targets in every group; dropping on one, or clicking it, docks there. Dock… offers the same five positions for every group, including an empty one, so no drag is needed.</li>
+                <li>Dock… opens a list of every group, named by its panes or "Empty area", each with Tab, Left, Right, Top and Bottom buttons; clicking one docks the pane there. The tabs also carry drag handlers that show the same five targets in each group while a pane is dragged, but in this release a tab does not start a drag: the control renders its <code>draggable</code> attribute empty, which browsers treat as not draggable.</li>
                 <li>Docking as Tab, or into an empty group, appends the pane and makes it active. The other four positions split the target 50/50: Left and Right side by side, Top and Bottom stacked, the moved pane first for Left and Top.</li>
                 <li>Floating opens the pane in a non-modal <code>DialogControl</code>, 520 by 360 px, each further floating pane offset 20 px from the one before; it can be dragged and resized while the manager is enabled, and its close icon and Escape close it only when the pane is closable.</li>
                 <li>Unpinned panes sit in a strip above the groups; a click opens the pane as a drawer over the left side, and Pin docks it into the first group.</li>
@@ -117,8 +120,7 @@
         <p>
             Each group is a <code>tablist</code> of <code>tab</code> buttons with <code>aria-selected</code>, and its content a <code>tabpanel</code>
             named after the pane. The unpinned strip is labelled "Unpinned panes", the drawer is a <code>section</code> labelled with the pane's title,
-            and floating panes are dialogs with the title as their header. Dragging is optional: the Dock… menu and the clickable drop targets reach
-            every position from the keyboard.
+            and floating panes are dialogs with the title as their header. The Dock… menu's buttons reach every position from the keyboard.
         </p>
     </Accessibility>
 

@@ -264,9 +264,11 @@
 
     private readonly DirectoryItem[] _dataManagement =
     [
-        // 2026-10-25 (Baaria, catalog audit SC-345): TextBox, Numeric TextBox, DropDownList and DropDownGrid point at the home quote desk,
-        // the only place they render; Picklist Dropdown (no such control) and Speed Dial (a second FAB row) removed; icons now fit
-        // their rows; Report Parameter Dialog lands on the report, whose toolbar Parameters button opens the dialog.
+        // 2026-10-25 (Baaria, catalog audit SC-345): Picklist Dropdown (no such control) and Speed Dial (a second FAB row) removed; icons
+        // now fit their rows; Report Parameter Dialog lands on the report, whose toolbar Parameters button opens the dialog.
+        // SC-347: TextBox, Numeric TextBox and TextArea point at Text inputs; DropDownList, DropDownGrid and ListBox at Lists & dropdowns;
+        // Rich Text Editor and Format at the editor page; Diagram, Scheduler and Property Grid (Forms) at their new examples; Grid Layout,
+        // Progress Bar and Carousel at the third examples on Page layouts, UI elements and Cards.
         new("grid", "Data Grid", "demo/grid"),
         new("live-grid", "Live Updates (ticker)", "demo/grid/live-updates"),
         new("grid", "Warehouse Detail (master-detail)", "demo/grid/master-detail#warehouses"),
@@ -290,11 +292,11 @@
 
     private readonly DirectoryItem[] _fileViewers =
     [
-        new("editor", "Rich Text Editor", "demo/counterparts"),
+        new("editor", "Rich Text Editor", "demo/rich-text-editor"),
         new("pdf", "PDF Viewer", "demo/pdf-viewer"),
         new("report", "Report Writer Control", "demo/reports/package-costs"),
         new("report-param", "Report Parameter Dialog", "demo/reports/package-costs#report"),
-        new("format", "Format Control", "demo/counterparts")
+        new("format", "Format Control", "demo/rich-text-editor#document")
     ];
 
     private readonly DirectoryItem[] _layoutWorkspace =
@@ -303,7 +305,7 @@
         new("dock", "Dock Manager", "demo/dock-manager"),
         new("splitter", "Splitter Control", "demo/layout#shell"),
         new("dashboard", "Dashboard Layout", "demo/layout#dashboard"),
-        new("grid", "Grid Layout", "demo/counterparts"),
+        new("grid", "Grid Layout", "demo/layout#grid"),
         new("card", "Card Control", "demo/cards#card"),
         new("card-group", "Card Group", "demo/cards#group"),
         new("timeline", "Timeline", "demo/new-components#content")
@@ -327,9 +329,9 @@
 
     private readonly DirectoryItem[] _diagrams =
     [
-        new("diagram", "Diagram Flowchart", "demo/counterparts"),
+        new("diagram", "Diagram Flowchart", "demo/diagram"),
         new("treeview", "TreeView Explorer", "demo/tree/treeview-explorer"),
-        new("property-grid", "Property Grid", "demo/counterparts")
+        new("property-grid", "Property Grid", "demo/forms#property-grid")
     ];
 
     // Pill deep-links to the Button page's Themes and pill variants example; Split and Toggle have their own pages (2026-10-12).
@@ -345,7 +347,7 @@
     private readonly DirectoryItem[] _scheduling =
     [
         new("gantt", "Gantt Chart", "demo/gantt"),
-        new("scheduler", "Scheduler", "demo/counterparts"),
+        new("scheduler", "Scheduler", "demo/scheduler"),
         new("calendar", "Calendar", "demo/date-time#calendar"),
         new("datepicker", "DatePicker", "demo/date-time#appointment"),
         new("timepicker", "TimePicker", "demo/date-time#appointment"),
@@ -354,9 +356,9 @@
 
     private readonly DirectoryItem[] _inputs =
     [
-        new("input-number", "Numeric TextBox", "?tab=grid#live-showcase"),
-        new("input-text", "TextBox", "?tab=grid#live-showcase"),
-        new("textarea", "TextArea", "demo/forms#handbuilt"),
+        new("input-number", "Numeric TextBox", "demo/text-inputs#details"),
+        new("input-text", "TextBox", "demo/text-inputs#details"),
+        new("textarea", "TextArea", "demo/text-inputs#notes"),
         new("otp", "OTP / Security Code", "demo/security-code"),
         new("slider", "Slider & Range Slider", "demo/sliders"),
         new("checkbox", "Checkbox", "demo/checks#checks"),
@@ -378,22 +380,22 @@
 
     private readonly DirectoryItem[] _dropdowns =
     [
-        new("dropdown", "DropDownList", "?tab=grid#live-showcase"),
-        new("dropdowngrid", "DropDownGrid Control", "?tab=grid#live-showcase"),
+        new("dropdown", "DropDownList", "demo/lists-dropdowns#dropdown"),
+        new("dropdowngrid", "DropDownGrid Control", "demo/lists-dropdowns#lookup"),
         new("autocomplete", "AutoComplete", "demo/pickers#suggest"),
-        new("listbox", "ListBox", "demo/counterparts")
+        new("listbox", "ListBox", "demo/lists-dropdowns#listbox")
     ];
 
     private readonly DirectoryItem[] _navigation =
     [
         new("ribbon", "Office Ribbon", "?tab=ribbon#live-showcase"),   // the home hero, opened on its Ribbon tab (base href is the site root)
-        new("toolbar", "Toolbar Control", "demo/counterparts"),
+        new("toolbar", "Toolbar Control", "demo/ai-prompt#app-bar"),
         new("tab", "Tab Control", "demo/tabs-accordion#tabs"),
         new("accordion", "Accordion Control", "demo/tabs-accordion#accordion"),
-        new("appbar", "AppBar Control", "demo/counterparts"),
+        new("appbar", "AppBar Control", "demo/ai-prompt#app-bar"),
         new("breadcrumb", "Breadcrumb", "demo/new-components#content"),
         new("stepper", "Stepper Control", "demo/pickers#steps"),
-        new("carousel", "Carousel", "demo/new-components")
+        new("carousel", "Carousel", "demo/cards#carousel")
     ];
 
     private readonly DirectoryItem[] _feedback =
@@ -402,14 +404,14 @@
         new("toast", "Toast Notifications", "demo/notifications"),
         new("alert", "Context Alert Banners", "demo/new-components#status"),
         new("badge", "Status Badges", "demo/new-components#status"),
-        new("progress", "Progress Bar", "demo/layout"),
+        new("progress", "Progress Bar", "demo/new-components#progress"),
         new("skeleton", "Loading Skeleton", "demo/new-components#status")
     ];
 
     private readonly DirectoryItem[] _aiAssist =
     [
-        new("ai-prompt", "AI Prompt Control", "demo/counterparts?tab=ai-prompt"),
-        new("llm-card", "LLM Result Card", "demo/counterparts?tab=ai-prompt")
+        new("ai-prompt", "AI Prompt Control", "demo/ai-prompt#prompt"),
+        new("llm-card", "LLM Result Card", "demo/ai-prompt#prompt")
     ];
 
     private bool MatchesCategory(string catName, DirectoryItem[] items)

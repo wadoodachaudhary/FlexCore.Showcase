@@ -1,21 +1,28 @@
 @page "/demo/cards"
 @using FlexCore.Showcase.Components.Shared
+@using FlexCore.Showcase.Data
 
 @* 2026-10-13: new page on FeatureDemoLayout; two examples (card, card group). Facts checked against CardControl.razor(.css),
    CardGroupControl.razor and FlexControlBase.cs (FlexCore 0.2.48). Cards moved here from UI elements. The Razor tabs are
    generated verbatim from the Demo blocks by script. *@
+@* 2026-10-25 (SC-347): third example, "carousel": CarouselControl with six CarouselItemControls, each a CardControl for a
+   TravelData package. Facts checked against CarouselControl.razor(.css) and CarouselItemControl.razor (FlexCore 0.2.49): the
+   methods are Next, Prev and SelectSlide; there is no key handling and no ARIA beyond the buttons' labels, so the example adds
+   role, aria-roledescription and aria-label on the root and an aria-live count. The two card examples are unchanged. *@
 
 <PageTitle>Cards — FlexCore Showcase</PageTitle>
 
-<FeatureDemoLayout Title="Cards" Category="Components" ControlName="CardControl · CardGroupControl"
-                   Tagline="A bordered container with an optional header, image, body and footer, and a grid that lays several of them out."
-                   SourcePath="CardControl.razor; CardGroupControl.razor">
+<FeatureDemoLayout Title="Cards" Category="Components" ControlName="CardControl · CardGroupControl · CarouselControl"
+                   Tagline="A bordered container with an optional header, image, body and footer, a grid that lays several of them out, and a carousel that shows one at a time."
+                   SourcePath="CardControl.razor; CardGroupControl.razor; CarouselControl.razor; CarouselItemControl.razor">
     <Overview>
         <p>
             <code>CardControl</code> stacks four regions: a header from <code>Title</code> and <code>Subtitle</code> (or your own
             <code>HeaderContent</code>), an image from <code>ImageUrl</code>, the body from child content, and a right-aligned
             <code>FooterContent</code> row. <code>Elevation</code> picks one of three shadow depths. <code>CardGroupControl</code> is a
             grid of 280px-minimum columns that wraps as the page narrows and stretches every card in a row to the same height.
+            <code>CarouselControl</code> shows one <code>CarouselItemControl</code> at a time, with arrow and dot buttons of its own,
+            a two-way <code>ActiveIndex</code> and three public methods for moving from code.
         </p>
     </Overview>
 
@@ -55,6 +62,39 @@
                 </CardGroupControl>
             </Demo>
         </DemoExample>
+
+        <DemoExample Id="carousel" Title="Carousel of destination cards" RazorCode="@Code.Carousel" CSharpCode="@Code.CarouselCs" CssCode="@Code.CarouselCss">
+            <Description><p>Six packages from the tour catalogue, one card per <code>CarouselItemControl</code>. The arrows and dots are the carousel's own buttons; Previous, Next and First below call its <code>Prev()</code>, <code>Next()</code> and <code>SelectSlide(0)</code>. Every move raises <code>ActiveIndexChanged</code>, which <code>@@bind-ActiveIndex</code> turns into the count. Next and Previous wrap round at the ends. Only the current card is rendered. The switches set <code>ShowNavButtons</code> and <code>ShowIndicators</code>.</p></Description>
+            <Controls>
+                <SwitchControl @bind-Checked="_showNav" Label="Nav buttons" />
+                <SwitchControl @bind-Checked="_showDots" Label="Indicators" />
+            </Controls>
+            <Demo>
+                <CarouselControl @ref="_carousel" @bind-ActiveIndex="_slide" ShowNavButtons="_showNav" ShowIndicators="_showDots"
+                                 role="region" aria-roledescription="carousel" aria-label="Destinations">
+                    @foreach (var t in _trips)
+                    {
+                        <CarouselItemControl>
+                            <div class="trip-slide">
+                                <CardControl Title="@t.City" Subtitle="@t.Country" Elevation="2">
+                                    <ChildContent><p class="trip-blurb">@t.Blurb</p></ChildContent>
+                                    <FooterContent>
+                                        <span class="trip-package">@t.Package</span>
+                                        <BadgeControl Text="@($"{t.Nights} nights")" Variant="BadgeVariant.Info" />
+                                    </FooterContent>
+                                </CardControl>
+                            </div>
+                        </CarouselItemControl>
+                    }
+                </CarouselControl>
+                <div class="trip-pager">
+                    <ButtonControl CssClass="btn-sm" OnClick="@(() => _carousel!.Prev())">Previous</ButtonControl>
+                    <ButtonControl CssClass="btn-sm" OnClick="@(() => _carousel!.Next())">Next</ButtonControl>
+                    <ButtonControl CssClass="btn-sm" OnClick="@(() => _carousel!.SelectSlide(0))" Disabled="@(_slide == 0)">First</ButtonControl>
+                    <span class="trip-count" aria-live="polite">Card @(_slide + 1) of @_trips.Length</span>
+                </div>
+            </Demo>
+        </DemoExample>
     </Examples>
 
     <Vocabulary>
@@ -69,6 +109,25 @@
                 <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
                 <p>Colours, padding and the three shadows are fixed in the stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
             </DocSection>
+            <DocSection Id="doc-carouselcontrol-parameters" Title="CarouselControl parameters" Count='@DocSection.Label(Vocab.Carousel.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="CarouselControl parameters" Rows="Vocab.Carousel" />
+            </DocSection>
+            <DocSection Id="doc-carouselcontrol-events" Title="CarouselControl events" Count='@DocSection.Label(Vocab.CarouselEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="CarouselControl events" Rows="Vocab.CarouselEvents" />
+            </DocSection>
+            <DocSection Id="doc-carouselcontrol-methods" Title="CarouselControl methods" Count='@DocSection.Label(Vocab.CarouselMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="CarouselControl methods" Rows="Vocab.CarouselMethods" />
+            </DocSection>
+            <DocSection Id="doc-carouselitemcontrol-parameters" Title="CarouselItemControl parameters" Count='@DocSection.Label(Vocab.Item.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="CarouselItemControl parameters" Rows="Vocab.Item" />
+            </DocSection>
+            <DocSection Id="doc-carouselitemcontrol-properties" Title="CarouselItemControl read-only property" Count='@DocSection.Label(Vocab.ItemProps.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="CarouselItemControl read-only property" Rows="Vocab.ItemProps" />
+            </DocSection>
+            <DocSection Id="doc-carousel-css-classes" Title="Carousel CSS classes" Count='@DocSection.Label(Vocab.CarouselCss.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="Carousel CSS classes" Rows="Vocab.CarouselCss" />
+                <p>The carousel stylesheet reads no <code>--fx-*</code> variables either. The arrows and dots sit over the item, so pad the item's content to keep it clear of them, as the example's CSS does.</p>
+            </DocSection>
         </DocSections>
     </Vocabulary>
 
@@ -78,6 +137,10 @@
             <li>The image's <code>alt</code> is <code>ImageAlt</code>, then <code>Title</code>, then "Card image". Give decorative images an empty <code>ImageAlt</code>.</li>
             <li>Nothing in a card is focusable except what you put in it. The footer is a flex row, so buttons there keep their natural Tab order.</li>
             <li><code>CardGroupControl</code> is a CSS grid; it adds no list semantics.</li>
+            <li><code>CarouselControl</code> renders a plain <code>&lt;div&gt;</code> with no role, no <code>aria-roledescription</code> and no label. The carousel example passes <code>role="region"</code>, <code>aria-roledescription="carousel"</code> and <code>aria-label</code> as attributes, which the control forwards to that div.</li>
+            <li>The arrows are buttons labelled "Previous" and "Next"; each dot is a button labelled "Slide 1", "Slide 2" and so on. The current dot is marked only by its <code>active</code> class (solid and wider), with no <code>aria-current</code> or pressed state. The dots are 10px circles, a small target.</li>
+            <li>The carousel has no key handling; arrow keys do nothing. Its arrows and dots are native buttons, reached with Tab and pressed with Enter or Space.</li>
+            <li>Only the current item is in the page, so the other cards cannot be reached by Tab or by a screen reader until they are shown. The control does not announce a change of slide; the example's count line is <code>aria-live="polite"</code>, so screen readers announce the new position.</li>
         </ul>
     </Accessibility>
 
@@ -107,6 +170,25 @@
         new("EST-2043 Fabrikam", "bi bi-building", "Office fit-out, 22 lines, $48,900.", "Awaiting approval", BadgeVariant.Warning),
         new("EST-2044 Northwind", "bi bi-shop", "Storefront, 9 lines, $7,150.", "Draft", BadgeVariant.Secondary),
     };
+
+    // Carousel
+    private CarouselControl? _carousel;
+    private int _slide;
+    private bool _showNav = true;
+    private bool _showDots = true;
+    private sealed record Trip(string City, string Country, string Package, int Nights, string Blurb);
+    private static readonly Dictionary<string, string> Blurbs = new()
+    {
+        ["Lisbon"] = "Tram 28 up to the Alfama, custard tarts in Belém and an evening of fado.",
+        ["Amalfi"] = "The cliff road from Positano to Ravello, with a boat day out to Capri.",
+        ["Kyoto"] = "Temple gardens at opening time, a tea ceremony and a day trip to Nara.",
+        ["Hoi An"] = "Lantern evenings in the old town, a tailor's fitting and a riverside cooking class.",
+        ["Cape Town"] = "Table Mountain by cable car, then three days among the Stellenbosch vineyards.",
+        ["Marrakech"] = "The souks and Jemaa el-Fnaa, then over the Atlas to a camp in the dunes.",
+    };
+    private readonly Trip[] _trips = TravelData.Packages
+        .Select(p => new Trip(p.City, TravelData.Destinations.First(d => d.City == p.City).Country, p.Name, p.Nights, Blurbs[p.City]))
+        .ToArray();
 
     // Vocabulary rows, one per public member (0.2.48). Base-class parameters marked (base).
     private static class Vocab
@@ -138,6 +220,44 @@
             new("fx-card-body", "Padded body that grows to fill the card."),
             new("fx-card-footer", "Light grey footer, flex row aligned to the end."),
             new("fx-card-group", "Grid, <code>repeat(auto-fit, minmax(280px, 1fr))</code>, 1rem gap."),
+        };
+        // Carousel rows (0.2.49)
+        public static readonly ApiRow[] Carousel =
+        {
+            new("ChildContent", "The <code>CarouselItemControl</code>s. Each registers when it is first rendered; the order of registration is its index.", "RenderFragment?", "null"),
+            new("ActiveIndex", "Zero-based index of the item shown. The carousel sets it itself when its buttons or methods move; bind it with <code>@bind-ActiveIndex</code>, because a fixed value is put back the next time the parent renders. An index with no item shows nothing.", "int", "0"),
+            new("ShowNavButtons", "Draws the previous and next arrow buttons when there are at least two items.", "bool", "true"),
+            new("ShowIndicators", "Draws one dot button per item when there are at least two items.", "bool", "true"),
+            new("CssClass / Style (base)", "On the <code>fx-carousel</code> root. The base <code>Visible</code> is not applied.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the root <code>&lt;div&gt;</code>; the example passes its ARIA attributes this way.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] CarouselEvents =
+        {
+            new("ActiveIndexChanged", "After an arrow, a dot, <code>Next</code>, <code>Prev</code> or <code>SelectSlide</code>, with the new index; a dot or <code>SelectSlide</code> for the current item raises it too. Not raised when an item is removed and the index is pulled back to the last item.", "int"),
+        };
+        public static readonly ApiRow[] CarouselMethods =
+        {
+            new("Next()", "Shows the next item, from the last back to the first, and raises <code>ActiveIndexChanged</code>. Does nothing with no items.", "Task"),
+            new("Prev()", "Shows the previous item, from the first round to the last, and raises <code>ActiveIndexChanged</code>. Does nothing with no items.", "Task"),
+            new("SelectSlide(int index)", "Shows that item and raises <code>ActiveIndexChanged</code>. An index outside the items is ignored.", "Task"),
+        };
+        public static readonly ApiRow[] Item =
+        {
+            new("ChildContent", "What the item shows. Rendered only while the item is the current one; the others render nothing at all.", "RenderFragment?", "null"),
+            new("(no base class)", "It does not inherit <code>FlexControlBase</code>, so it takes no <code>CssClass</code>, <code>Style</code> or other attributes. Wrap the content in your own element to style it, as the example does."),
+        };
+        public static readonly ApiRow[] ItemProps =
+        {
+            new("CarouselItemControl.Active", "True while this item is the carousel's current one; false outside a <code>CarouselControl</code>, where it never renders.", "bool"),
+        };
+        public static readonly ApiRow[] CarouselCss =
+        {
+            new("fx-carousel", "Root: full width, <code>overflow: hidden</code>, 8px radius, dark slate background <code>#1e293b</code>."),
+            new("fx-carousel-inner", "Holds the items; at least 200px tall."),
+            new("fx-carousel-item · active", "The current item's wrapper; it fades in from 40% opacity over 0.3s."),
+            new("fx-carousel-btn · fx-carousel-prev / -next", "36px round arrow buttons, translucent black, centred vertically 12px in from the left and right edges."),
+            new("fx-carousel-indicators", "Row of dots centred 12px above the bottom edge."),
+            new("fx-carousel-indicator · active", "10px dot with a white ring; the current one is solid white and 22px wide."),
         };
     }
 
@@ -188,5 +308,55 @@ private readonly Estimate[] _estimates =
     new(""EST-2043 Fabrikam"", ""bi bi-building"", ""Office fit-out, 22 lines, $48,900."", ""Awaiting approval"", BadgeVariant.Warning),
     new(""EST-2044 Northwind"", ""bi bi-shop"", ""Storefront, 9 lines, $7,150."", ""Draft"", BadgeVariant.Secondary),
 };";
+        public const string Carousel = @"<CarouselControl @ref=""_carousel"" @bind-ActiveIndex=""_slide"" ShowNavButtons=""_showNav"" ShowIndicators=""_showDots""
+                 role=""region"" aria-roledescription=""carousel"" aria-label=""Destinations"">
+    @foreach (var t in _trips)
+    {
+        <CarouselItemControl>
+            <div class=""trip-slide"">
+                <CardControl Title=""@t.City"" Subtitle=""@t.Country"" Elevation=""2"">
+                    <ChildContent><p class=""trip-blurb"">@t.Blurb</p></ChildContent>
+                    <FooterContent>
+                        <span class=""trip-package"">@t.Package</span>
+                        <BadgeControl Text=""@($""{t.Nights} nights"")"" Variant=""BadgeVariant.Info"" />
+                    </FooterContent>
+                </CardControl>
+            </div>
+        </CarouselItemControl>
+    }
+</CarouselControl>
+<div class=""trip-pager"">
+    <ButtonControl CssClass=""btn-sm"" OnClick=""@(() => _carousel!.Prev())"">Previous</ButtonControl>
+    <ButtonControl CssClass=""btn-sm"" OnClick=""@(() => _carousel!.Next())"">Next</ButtonControl>
+    <ButtonControl CssClass=""btn-sm"" OnClick=""@(() => _carousel!.SelectSlide(0))"" Disabled=""@(_slide == 0)"">First</ButtonControl>
+    <span class=""trip-count"" aria-live=""polite"">Card @(_slide + 1) of @_trips.Length</span>
+</div>";
+        public const string CarouselCs = @"// Carousel
+private CarouselControl? _carousel;
+private int _slide;
+private bool _showNav = true;
+private bool _showDots = true;
+private sealed record Trip(string City, string Country, string Package, int Nights, string Blurb);
+private static readonly Dictionary<string, string> Blurbs = new()
+{
+    [""Lisbon""] = ""Tram 28 up to the Alfama, custard tarts in Belém and an evening of fado."",
+    [""Amalfi""] = ""The cliff road from Positano to Ravello, with a boat day out to Capri."",
+    [""Kyoto""] = ""Temple gardens at opening time, a tea ceremony and a day trip to Nara."",
+    [""Hoi An""] = ""Lantern evenings in the old town, a tailor's fitting and a riverside cooking class."",
+    [""Cape Town""] = ""Table Mountain by cable car, then three days among the Stellenbosch vineyards."",
+    [""Marrakech""] = ""The souks and Jemaa el-Fnaa, then over the Atlas to a camp in the dunes."",
+};
+private readonly Trip[] _trips = TravelData.Packages
+    .Select(p => new Trip(p.City, TravelData.Destinations.First(d => d.City == p.City).Country, p.Name, p.Nights, Blurbs[p.City]))
+    .ToArray();";
+        public const string CarouselCss = @"/* 2026-10-25: carousel example. The arrows sit 12px in from each side and the dots 12px above the bottom, over the item, so the slide pads round them. */
+.trip-slide { padding: 24px 64px 44px; }
+.trip-slide ::deep .fx-card { max-width: 420px; min-height: 190px; margin: 0 auto; }
+.trip-slide ::deep .fx-card-header { background-color: #eff6ff; }
+.trip-blurb { margin: 0; }
+.trip-package { font-size: 13px; color: #475569; margin-right: auto; }
+.trip-pager { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+.trip-count { font-size: 13px; color: #475569; margin-left: 4px; }
+@media (max-width: 480px) { .trip-slide { padding: 16px 56px 40px; } }";
     }
 }

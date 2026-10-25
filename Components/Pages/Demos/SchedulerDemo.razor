@@ -1,0 +1,484 @@
+@page "/demo/scheduler"
+@using Fx.ControlKit.Scheduling
+@using FlexCore.Showcase.Data
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-25: new page (SC-347 wave 1). Three examples: a week of repeating tours (views, navigation, editor, SlotMinutes,
+   ReadOnly, two-way Date/View/Events), a Changing guard on a Day view with two guides as Resources, and one list shown in two
+   TimeZoneIds. Facts checked against Scheduling/SchedulerControl.razor, SchedulerControl.razor.css and SchedulerModels.cs
+   (FlexCore main 58a62e0), plus ToolbarControl, DialogControl, Forms/FormControl and Forms/FormItemControl for the editor.
+   The demo data was expanded with SchedulerEngine.Expand in a scratch console against the built FlexCore.dll (Lisbon and
+   Vancouver ranges) before it went on the page.
+   Left out on purpose: moving an appointment by dragging it. SchedulerControl.razor:13, 15 and 20 render draggable="@CanEdit",
+   which Blazor writes as an empty draggable attribute, and browsers treat that as not draggable (checked on the live
+   Dock manager page, whose DockNodeView.razor:15 has the same pattern: getAttribute "" and .draggable false). Only the resize
+   strip (draggable="true", line 20) can be dragged, so the page offers that and nothing else. *@
+
+<PageTitle>Scheduler — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Scheduler" Category="Components" CategoryHref="components" ControlName="SchedulerControl"
+                   Tagline="Appointments in day, week, month, timeline and agenda layouts, with repeat rules, time zones and a veto on every change."
+                   SourcePath="Scheduling/SchedulerControl.razor;Scheduling/SchedulerControl.razor.css;Scheduling/SchedulerModels.cs">
+    <Overview>
+        <p>
+            <code>SchedulerControl</code> lays out <code>SchedulerEvent</code> appointments in seven views and edits them in a dialog of its
+            own. Its toolbar holds Previous, Today and Next, the dates on screen, a view drop-down and New appointment. Day, Week, WorkWeek
+            and MultiDay draw a time grid with a column per day, or per day and resource when <code>Resources</code> is set; Month draws six
+            weeks of day cells, Timeline a row per resource with a cell per day, and Agenda a table of the 30 days from <code>Date</code>.
+        </p>
+        <p>
+            Clicking an appointment opens the editor (title, start, end, all day, time zone, resource, repeat rule, description);
+            double-clicking an empty slot, or clicking a date in Month or Timeline, opens it for a new one. In the time views the strip at
+            the bottom of an appointment can be dragged onto a later slot, and the appointment then ends where that slot starts. Repeating appointments are iCalendar RRULE
+            strings expanded by Ical.Net; saving or deleting one occurrence excludes its date from the series, and a saved occurrence
+            becomes an entry of its own. Each appointment carries its own <code>TimeZoneId</code> and is converted into the scheduler's.
+            Every change is validated, offered to <code>Changing</code>, which may cancel it, and then delivered through
+            <code>EventsChanged</code> as a new list of copies; the list passed in is never modified.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="week" Title="A week of guided tours" RazorCode="@Code.Week" CSharpCode="@Code.WeekCs">
+            <Description><p>Showcase Travel's Lisbon tours in the Week view, the default, with the time zone set to Europe/Lisbon and the grid running to 22:00. Five tours repeat from four weeks back with no end date: the old town walk every day, the others on set weekdays. The Lisbon Explorer group's two transfers and its day at leisure, an all-day entry in Thursday's heading, belong to the current week. On Wednesdays the Sintra trip and the walk overlap and share the column. Use the toolbar to move through the dates and switch views, click a tour to edit it (a repeating one asks whether to change this occurrence or the entire series), or double-click an empty slot to add one. The buttons above set <code>SlotMinutes</code>; Read-only turns off every editing route while navigation keeps working. <code>Date</code>, <code>View</code> and <code>Events</code> are bound both ways, and the line below reads them.</p></Description>
+            <Demo>
+                <div class="controls">
+                    <ButtonGroupControl Items="_slotItems" Values="@(new[] { _slot.ToString() })" ValuesChanged="PickSlot" AriaLabel="Slot length" />
+                    <SwitchControl @bind-Checked="_readOnly" Label="Read-only" />
+                </div>
+                <SchedulerControl @bind-Events="_tours" @bind-Date="_date" @bind-View="_view" TimeZoneId="Europe/Lisbon" EndHour="22"
+                                  SlotMinutes="_slot" ReadOnly="_readOnly" Height="520px" />
+                <p class="result">@_view view, date @_date.ToString("dddd d MMMM") · @_tours.Count entries in the list, @(_tours.Count(t => t.RecurrenceRule is not null)) of them repeating.</p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="rules" Title="Changes the page refuses" RazorCode="@Code.Rules" CSharpCode="@Code.RulesCs">
+            <Description><p>Today's tours for two guides, Inês and Rui, given as <code>Resources</code> to the Day view: one column each, with the guide's colour on the left edge of the tours. <code>Changing</code> receives every create, update and delete after the control's own validation, with the action and a copy of the tour as it would be saved; setting <code>Cancel</code> keeps the list as it was. This page refuses a tour that starts before 08:00, a tour without a guide or whose times overlap another tour of the same guide, and the delete of a tour with seats sold (the old town walk and Belém by tram). Try it: double-click Rui's column at 13:30 and save, so the new hour runs into Belém by tram; drag the strip at the bottom of the old town walk down to 13:30, which is accepted, then below the food tour, which is not; open Belém by tram and delete it. The control shows no message for a refusal: a refused save leaves the editor open, a refused drag opens it with the dropped end time, and a refused delete leaves its confirmation open. Cancel, then read the line under the scheduler.</p></Description>
+            <Demo>
+                <SchedulerControl @bind-Events="_guided" @bind-Date="_guideDay" @bind-View="_guideView" Resources="_guides" Changing="Guard"
+                                  TimeZoneId="Europe/Lisbon" EndHour="20" Height="480px" />
+                <p class="result">@_decision</p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="zones" Title="Two time zones" RazorCode="@Code.Zones" CSharpCode="@Code.ZonesCs">
+            <Description><p>One list of six entries in two schedulers that open in the Agenda view: the guide's set to Europe/Lisbon, the client's to America/Vancouver. Five entries are written in Lisbon time and the video call in Vancouver time; each pane converts every entry from its own <code>TimeZoneId</code>, so the 06:30 airport meet-and-greet falls on the previous evening for the client. Both panes bind the same list, <code>Date</code> and <code>View</code>, so an edit in one shows in the other and the two toolbars move together. The editor fills in its own pane's zone, so an entry saved in the Vancouver pane is stored in Vancouver time, as the list underneath shows. Both run the time grid from 0 to 24, so in the Week view the Lisbon morning tours appear in Vancouver's small hours.</p></Description>
+            <Demo>
+                <div class="pair">
+                    <div>
+                        <p class="pane-title">Guide in Lisbon · <code>TimeZoneId="Europe/Lisbon"</code></p>
+                        <SchedulerControl @bind-Events="_trip" @bind-Date="_tripDate" @bind-View="_tripView" TimeZoneId="Europe/Lisbon"
+                                          StartHour="0" EndHour="24" Height="320px" />
+                    </div>
+                    <div>
+                        <p class="pane-title">Client in Vancouver · <code>TimeZoneId="America/Vancouver"</code></p>
+                        <SchedulerControl @bind-Events="_trip" @bind-Date="_tripDate" @bind-View="_tripView" TimeZoneId="America/Vancouver"
+                                          StartHour="0" EndHour="24" Height="320px" />
+                    </div>
+                </div>
+                <p class="result">How the list stores them:</p>
+                <ul class="stored">
+                    @foreach (var t in _trip)
+                    {
+                        <li>@t.Title, @t.Start.ToString("ddd HH:mm") <code>@t.TimeZoneId</code></li>
+                    }
+                </ul>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <DocSections>
+            <DocSection Id="doc-schedulercontrol-parameters" Title="SchedulerControl parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="SchedulerControl parameters" Rows="Vocab.Params" />
+                <p>
+                <code>Id</code>, <code>Title</code>, <code>Tag</code>, <code>Data</code>, <code>Parent</code> and unmatched attributes, also from
+                <code>FlexControlBase</code>, are not applied to any element. The editor and the delete confirmation render after the root
+                element, not inside it. A <code>StartHour</code>, <code>EndHour</code>, <code>SlotMinutes</code> or <code>MultiDayCount</code>
+                outside its range throws <code>ArgumentException</code> ("Invalid scheduler slot settings.") when parameters are set.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-schedulercontrol-events" Title="SchedulerControl events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="SchedulerControl events" Rows="Vocab.Events" />
+            </DocSection>
+            <DocSection Id="doc-schedulercontrol-methods" Title="Methods and read-only properties" Count='@DocSection.Label(Vocab.Methods.Length, "members")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Methods and read-only properties" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-schedulerevent" Title="SchedulerEvent" Count='@DocSection.Label(Vocab.Event.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="SchedulerEvent" Rows="Vocab.Event" />
+                <p>
+                <code>Clone()</code> copies every property, with a new <code>ExcludedStarts</code> list. <code>Validate</code> implements
+                <code>IValidatableObject</code>: <code>End</code> after <code>Start</code>, a zone that
+                <code>TimeZoneInfo.FindSystemTimeZoneById</code> knows with neither time in a daylight-saving gap, and a repeat rule Ical.Net
+                can parse. The editor's form runs it before saving, and <code>SchedulerEngine.Expand</code> runs it on every appointment.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-schedulerview" Title="SchedulerView" Count='@DocSection.Label(Vocab.Views.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="SchedulerView" Rows="Vocab.Views" />
+            </DocSection>
+            <DocSection Id="doc-schedulerchangeaction" Title="SchedulerChangeAction" Count='@DocSection.Label(Vocab.Actions.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="SchedulerChangeAction" Rows="Vocab.Actions" />
+            </DocSection>
+            <DocSection Id="doc-schedulerchangingargs" Title="SchedulerChangingArgs" Count='@DocSection.Label(Vocab.Args.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="SchedulerChangingArgs" Rows="Vocab.Args" />
+            </DocSection>
+            <DocSection Id="doc-scheduler-records" Title="SchedulerResource, SchedulerRange, SchedulerOccurrence" Count='@DocSection.Label(Vocab.Records.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="SchedulerResource, SchedulerRange, SchedulerOccurrence" Rows="Vocab.Records" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+                <p>The stylesheet reads no <code>--fx-*</code> variable; its colours are fixed. Restyle through <code>CssClass</code> and scoped <code>::deep</code> rules.</p>
+            </DocSection>
+        </DocSections>
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>The toolbar is a <code>ToolbarControl</code> (<code>role="toolbar"</code>) of ordinary buttons, and the view drop-down is labelled "Scheduler view". The date range beside them is plain text and is not announced when it changes.</li>
+            <li>Every appointment is a button: Tab reaches it, Enter or Space opens the editor. In the time views its <code>title</code> gives start, end and name; in Month the button text starts with the time; Agenda puts date and time in their own cells under <code>th</code> headings.</li>
+            <li>Double-clicking a slot and dragging a resize strip need a pointer, and the slots are not focusable. From the keyboard, New appointment, or a date button in Month or Timeline, opens the editor, whose Start, End and resource fields do the same jobs.</li>
+            <li>The editor and the delete confirmation are modal dialogs (<code>role="dialog"</code>, <code>aria-modal="true"</code>) named by their headers. Focus moves into them when they open, and Escape closes them without saving. Validation messages appear in a summary with <code>role="alert"</code>. The resource and repeat drop-downs have accessible names ("Resource", "Repeat") but no visible label.</li>
+            <li>Data errors (an invalid appointment, too many occurrences, a failing <code>OnRead</code>) show in an alert with <code>role="alert"</code>; loading shows a <code>role="status"</code> indicator named "Loading appointments".</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li><a href="demo/gantt">Gantt chart</a>: tasks on a day-scaled timeline with dependencies and progress.</li>
+            <li><a href="demo/date-time">Date &amp; time</a>: the calendar and the date picker that the editor uses for Start and End.</li>
+            <li><a href="demo/dialog">Dialogs</a> and <a href="demo/forms">Forms</a>: the <code>DialogControl</code> and <code>FormControl</code> the editor is built from.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // A week of guided tours
+    private IReadOnlyList<SchedulerEvent> _tours = Tours();
+    private DateTime _date = DateTime.Today;
+    private SchedulerView _view = SchedulerView.Week;
+    private int _slot = 30;
+    private bool _readOnly;
+    private readonly SelectionItem[] _slotItems = { new("15", "15 min"), new("30", "30 min"), new("60", "60 min") };
+
+    private void PickSlot(IReadOnlyList<string> values)
+    {
+        if (values.Count > 0) _slot = int.Parse(values[0]);
+    }
+
+    private static SchedulerEvent[] Tours()
+    {
+        var monday = DateTime.Today.AddDays(-(((int)DateTime.Today.DayOfWeek + 6) % 7));
+        var series = monday.AddDays(-28);                 // the repeating tours started four weeks ago
+        var group = TravelData.Packages[0].Name;          // "Lisbon Explorer"
+        SchedulerEvent Tour(string title, DateTime day, double from, double to, string? rule = null) => new()
+        {
+            Title = title, Start = day.AddHours(from), End = day.AddHours(to), TimeZoneId = "Europe/Lisbon", RecurrenceRule = rule,
+        };
+        return
+        [
+            Tour("Old town walk", series, 10, 12.5, "FREQ=DAILY"),
+            Tour("Food tour", series.AddDays(1), 13, 16, "FREQ=WEEKLY;BYDAY=TU,TH,SA"),
+            Tour("Day trip to Sintra", series.AddDays(2), 9, 18, "FREQ=WEEKLY;BYDAY=WE"),
+            Tour("Belém by tram", series, 14, 16.5, "FREQ=WEEKLY;BYDAY=MO,FR"),
+            Tour("Fado evening", series.AddDays(4), 19.5, 21.5, "FREQ=WEEKLY;BYDAY=FR,SA"),
+            Tour($"{group}: airport meet-and-greet", monday, 8.5, 9.5),
+            new() { Title = $"{group}: day at leisure", Start = monday.AddDays(3), End = monday.AddDays(4), AllDay = true, TimeZoneId = "Europe/Lisbon" },
+            Tour($"{group}: departure transfer", monday.AddDays(6), 8, 9),
+        ];
+    }
+
+    // Changes the page refuses
+    private IReadOnlyList<SchedulerEvent> _guided = Guided();
+    private DateTime _guideDay = DateTime.Today;
+    private SchedulerView _guideView = SchedulerView.Day;
+    private string _decision = "No changes yet.";
+    private readonly SchedulerResource[] _guides = { new("ines", "Inês", "#0f766e"), new("rui", "Rui", "#b45309") };
+    private readonly Dictionary<string, int> _seatsSold = new() { ["walk"] = 6, ["tram"] = 4 };
+
+    private static SchedulerEvent[] Guided()
+    {
+        var today = DateTime.Today;
+        SchedulerEvent Tour(string id, string title, string guide, double from, double to) => new()
+        {
+            Id = id, Title = title, ResourceId = guide, Start = today.AddHours(from), End = today.AddHours(to), TimeZoneId = "Europe/Lisbon",
+        };
+        return
+        [
+            Tour("pickup", "Airport meet-and-greet", "rui", 8.5, 9.5),
+            Tour("walk", "Old town walk", "ines", 10, 12.5),
+            Tour("food", "Food tour", "ines", 14, 17),
+            Tour("tram", "Belém by tram", "rui", 14, 16.5),
+            Tour("sunset", "Sunset viewpoints", "rui", 17.5, 19),
+        ];
+    }
+
+    private void Guard(SchedulerChangingArgs e)
+    {
+        var tour = e.Item;
+        var clash = _guided.FirstOrDefault(t => t.Id != tour.Id && t.ResourceId == tour.ResourceId && t.Start < tour.End && tour.Start < t.End);
+        var reason = e.Action switch
+        {
+            SchedulerChangeAction.Delete => _seatsSold.TryGetValue(tour.Id, out var sold) ? $"{sold} seats are sold" : null,
+            _ when tour.Start.TimeOfDay < TimeSpan.FromHours(8) => "tours start at 08:00 or later",
+            _ when string.IsNullOrEmpty(tour.ResourceId) => "pick a guide",
+            _ when clash is not null => $"{_guides.First(g => g.Id == tour.ResourceId).Text} already leads {clash.Title} then",
+            _ => null,
+        };
+        e.Cancel = reason is not null;
+        _decision = reason is null
+            ? $"Accepted: {e.Action} of '{tour.Title}', {tour.Start:t} to {tour.End:t}."
+            : $"Refused: {e.Action} of '{tour.Title}': {reason}.";
+    }
+
+    // Two time zones
+    private IReadOnlyList<SchedulerEvent> _trip = Trip();
+    private DateTime _tripDate = DateTime.Today;
+    private SchedulerView _tripView = SchedulerView.Agenda;
+
+    private static SchedulerEvent[] Trip()
+    {
+        var today = DateTime.Today;
+        SchedulerEvent At(string title, int day, double from, double to, string zone = "Europe/Lisbon") => new()
+        {
+            Title = title, Start = today.AddDays(day).AddHours(from), End = today.AddDays(day).AddHours(to), TimeZoneId = zone,
+        };
+        return
+        [
+            At("Airport meet-and-greet", 1, 6.5, 7.5),
+            At("Old town walk", 1, 10, 12.5),
+            At("Day trip to Sintra", 2, 9, 18),
+            At("Video call about next year's trip", 3, 9, 9.5, "America/Vancouver"),
+            At("Fado evening", 3, 19.5, 21.5),
+            At("Departure transfer", 5, 8, 9),
+        ];
+    }
+
+    // Vocabulary rows, one per public member (FlexCore main 58a62e0). Base-class parameters marked (base).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Params =
+        {
+            new("Events", "The appointments, each with a unique <code>Id</code>. Two-way with <code>@bind-Events</code>: the control never edits this list, and every accepted change arrives as a new list of copies. Not read once <code>OnRead</code> has returned rows.", "IReadOnlyList&lt;SchedulerEvent&gt;", "Array.Empty&lt;SchedulerEvent&gt;()"),
+            new("OnRead", "Loads appointments for a range instead of <code>Events</code>. Called with the visible <code>SchedulerRange</code> on the first render and whenever the range or time zone changes, and after Previous, Today, Next and a view change; a newer call cancels the older call's token. \"Loading appointments\" shows meanwhile, and an exception's message shows as an alert. After an accepted change the control keeps the edited list without calling it again.", "Func&lt;SchedulerRange,CancellationToken,Task&lt;IReadOnlyList&lt;SchedulerEvent&gt;&gt;&gt;?", "null"),
+            new("Resources", "People or rooms. Day, Week, WorkWeek and MultiDay give each day one column per resource, headed with its <code>Text</code>, with its <code>Color</code> on the left edge of the appointments; Timeline gives each a row; Agenda prints the name; the editor offers them in a drop-down. When set, time views and Timeline show only appointments whose <code>ResourceId</code> matches one; Month and Agenda show all. Empty means one column or row headed \"Appointments\".", "IReadOnlyList&lt;SchedulerResource&gt;", "Array.Empty&lt;SchedulerResource&gt;()"),
+            new("Date", "A date inside the period to show. Week and WorkWeek start at the beginning of its week, Month at the beginning of the week holding the 1st of its month; the other views start on it. Two-way with <code>@bind-Date</code>: Previous, Today and Next change it.", "DateTime", "DateTime.Today"),
+            new("View", "The layout; see <code>SchedulerView</code>. Two-way with <code>@bind-View</code>: the toolbar's drop-down changes it.", "SchedulerView", "SchedulerView.Week"),
+            new("TimeZoneId", "The zone times are shown in; each appointment is converted from its own <code>TimeZoneId</code>. The editor fills this zone into new and edited appointments (the field can be changed), except that choosing Entire series keeps the series' zone. Any id <code>TimeZoneInfo.FindSystemTimeZoneById</code> accepts.", "string", "\"UTC\""),
+            new("FirstDayOfWeek", "First column of Week and WorkWeek, and of each row in Month.", "DayOfWeek", "DayOfWeek.Monday"),
+            new("MultiDayCount", "Days shown by MultiDay, from <code>Date</code>, and the step of Previous and Next in that view. 1 to 31.", "int", "3"),
+            new("StartHour", "First hour of the time grid in Day, Week, WorkWeek and MultiDay. Also the time New appointment and the Month and Timeline date buttons start a new appointment at. 0 or more and below <code>EndHour</code>.", "int", "8"),
+            new("EndHour", "End of the time grid, at most 24. Appointments are cut to the hours shown, and one wholly outside them is not drawn in the time views (Month and Agenda still list it).", "int", "18"),
+            new("SlotMinutes", "Height of a grid row in minutes, at one pixel per minute. A double-click on a row starts a new appointment at its start; a resize strip dropped on it sets the end there. 5 to 120.", "int", "30"),
+            new("ReadOnly", "Disables New appointment and the Month date buttons, ignores clicks on appointments and double-clicks on slots, and removes the resize strips. Previous, Today, Next and the view drop-down still work.", "bool", "false"),
+            new("Height", "CSS height of the scrolling area under the toolbar.", "string", "\"600px\""),
+            new("Enabled (base)", "false has the same effect as <code>ReadOnly</code>.", "bool", "true"),
+            new("CssClass / Style (base)", "On the <code>fx-scheduler</code> root element.", "string?", "null"),
+            new("Visible (base)", "false hides the root element with <code>display:none</code>.", "bool", "true"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("EventsChanged", "After an accepted create, update or delete, with the whole new list of copies. Not raised when validation fails or <code>Changing</code> cancels.", "IReadOnlyList&lt;SchedulerEvent&gt;"),
+            new("Changing", "Before a change is applied, once the whole proposed list has passed validation. Set <code>Cancel</code> to refuse it: the control shows no message, and the editor or the delete confirmation stays open.", "SchedulerChangingArgs"),
+            new("DateChanged", "After Previous, Today or Next.", "DateTime"),
+            new("ViewChanged", "After a pick in the toolbar's view drop-down.", "SchedulerView"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("RefreshAsync()", "Calls <code>OnRead</code> again for the current range, or re-expands <code>Events</code> when there is no <code>OnRead</code>.", "Task"),
+            new("NavigateAsync(int direction)", "Moves <code>Date</code> by <em>direction</em> steps, back when negative: a month in Month, <code>MultiDayCount</code> days in MultiDay, a day in Day, seven days in the other views. Raises <code>DateChanged</code>, then refreshes.", "Task"),
+            new("NewAsync(DateTime start, string? resource)", "Opens the editor on a new one-hour appointment at <em>start</em> for that resource id. Ignored when read-only or disabled.", "Task"),
+            new("EditAsync(SchedulerOccurrence occurrence)", "Opens the editor on an occurrence, with its start and end in the scheduler's zone. Ignored when read-only or disabled.", "Task"),
+            new("Dispose()", "Cancels a pending <code>OnRead</code> call; a result that arrives later is dropped.", "void"),
+            new("Range", "Read-only. The period on screen, end exclusive, in <code>TimeZoneId</code>: one day (Day), <code>MultiDayCount</code> days (MultiDay), seven days from the week start (Week, WorkWeek), 42 days from the start of the week holding the 1st (Month), seven days from <code>Date</code> (Timeline), 30 days from <code>Date</code> (Agenda).", "SchedulerRange"),
+            new("SchedulerEngine.Expand(IEnumerable&lt;SchedulerEvent&gt; events, SchedulerRange range, int maxOccurrences = 20000)", "Static. Validates every appointment and returns the occurrences that overlap the range, repeat rules and excluded starts applied, converted into the range's zone and ordered by start, then end. Throws for an unordered range, duplicate ids, an invalid appointment, or more than <em>maxOccurrences</em> results. The control calls it each time it receives parameters and before offering a change.", "IReadOnlyList&lt;SchedulerOccurrence&gt;"),
+        };
+        public static readonly ApiRow[] Event =
+        {
+            new("Id", "Unique within the list; <code>Expand</code> throws on duplicates.", "string", "Guid.NewGuid().ToString(\"N\")"),
+            new("Title", "Required, at least one character.", "string", "\"New appointment\""),
+            new("Start", "Wall-clock time in <code>TimeZoneId</code>; for a repeating appointment, the first occurrence.", "DateTime", "DateTime.Today.AddHours(9)"),
+            new("End", "Must be after <code>Start</code>.", "DateTime", "DateTime.Today.AddHours(10)"),
+            new("AllDay", "A button in the column heading of the time views and \"All day\" in Agenda, on the same dates in every time zone. <code>Start</code> and <code>End</code> are read as dates with <code>End</code> exclusive, so a one-day entry ends on the next date; an all-day entry whose <code>End</code> is on its <code>Start</code> date has no length and appears only in Agenda.", "bool", "false"),
+            new("TimeZoneId", "The zone <code>Start</code> and <code>End</code> are written in. Must be known to <code>FindSystemTimeZoneById</code>, and neither time may fall in a daylight-saving gap.", "string", "\"UTC\""),
+            new("ResourceId", "Id of a <code>SchedulerResource</code>; picks the column or row in resource layouts.", "string?", "null"),
+            new("Description", "Plain text, edited as a text area in the editor. No view displays it.", "string?", "null"),
+            new("RecurrenceRule", "iCalendar RRULE text such as <code>FREQ=WEEKLY;BYDAY=TU,TH</code>, expanded by Ical.Net. The editor's repeat drop-down offers daily, weekly, monthly and yearly; anything else is typed into the rule field. A rule Ical.Net cannot parse is refused with its message.", "string?", "null"),
+            new("ExcludedStarts", "Original starts of occurrences removed from the series, in the appointment's zone. The editor adds one when a single occurrence is saved or deleted.", "List&lt;DateTime&gt;", "[]"),
+            new("SeriesId", "Set on an entry split off from a repeating appointment, naming the series. Deleting the entire series deletes these entries too.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Views =
+        {
+            new("Day", "One day from <code>Date</code> as a time grid: an hour column, then one column per resource."),
+            new("Week", "Seven days from the start of the week holding <code>Date</code>, one time-grid column per day and resource."),
+            new("WorkWeek", "The same week without the Saturday and Sunday columns. The toolbar still shows the seven-day range."),
+            new("MultiDay", "<code>MultiDayCount</code> days from <code>Date</code>, not aligned to the week, as a time grid."),
+            new("Month", "Six rows of seven day cells from the start of the week holding the 1st. Each cell lists its appointments as start time and title, and its date button starts a new one. Previous and Next move a month."),
+            new("Timeline", "A row per resource (or one \"Appointments\" row) with a cell for each of seven days from <code>Date</code>. Each cell has a date button that starts a new appointment and lists titles without times."),
+            new("Agenda", "A table of every occurrence in the 30 days from <code>Date</code>: date, time or \"All day\", the title as a button that opens the editor, and the resource. Previous and Next move seven days."),
+        };
+        public static readonly ApiRow[] Actions =
+        {
+            new("Create", "Saving the editor opened by New appointment, a double-click on a slot, a Month or Timeline date button, or <code>NewAsync</code>."),
+            new("Update", "Saving an edited appointment, dropping a resize strip, or saving one occurrence of a repeating appointment, which adds a new entry and excludes that date from the series."),
+            new("Delete", "Delete in the editor, after the confirmation. For one occurrence of a repeating appointment it excludes that date; for the entire series it removes the series and the entries split from it."),
+        };
+        public static readonly ApiRow[] Args =
+        {
+            new("Action", "Create, Update or Delete.", "SchedulerChangeAction"),
+            new("Item", "A copy of the appointment being saved or deleted; changing it has no effect. For one occurrence of a repeating appointment that is saved, it is the new split-off entry with <code>SeriesId</code> set.", "SchedulerEvent"),
+            new("Cancel", "Set to true to refuse the change; the list stays as it was.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Records =
+        {
+            new("SchedulerResource.Id / Text", "Key that <code>ResourceId</code> matches; the heading text.", "string"),
+            new("SchedulerResource.Color", "Left edge of the resource's appointments in the time views.", "string", "\"#3274B9\""),
+            new("SchedulerRange.Start / End", "First day and the day after the last, as <code>OnRead</code> receives them and <code>Range</code> returns them.", "DateTime"),
+            new("SchedulerRange.TimeZoneId", "The zone of the range and of the expanded times.", "string"),
+            new("SchedulerOccurrence.Event", "The appointment the occurrence comes from.", "SchedulerEvent"),
+            new("SchedulerOccurrence.Start / End", "Times in the range's zone; dates only for an all-day entry.", "DateTime"),
+            new("SchedulerOccurrence.OriginalStart", "Start in the appointment's own zone, the value <code>ExcludedStarts</code> receives when this occurrence is removed.", "DateTime"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-scheduler", "The root: a 1px border on a white background."),
+            new("fx-scheduler-scroll", "The scrolling area under the toolbar; <code>Height</code> sets its height."),
+            new("fx-scheduler-time-columns · fx-time-labels · fx-time-column", "The time grid (at least 700px wide, day columns at least 140px); the hour labels; one day-and-resource column."),
+            new("fx-time-heading · fx-time-body · fx-time-slot", "The sticky column heading with date, resource and all-day buttons; the body, one pixel per minute; one slot row, tinted on hover."),
+            new("fx-timed-event · fx-schedule-resize", "A positioned appointment, its left edge in the resource colour; the 6px resize strip along its bottom."),
+            new("fx-scheduler-month · fx-month-day · fx-appointment", "The Month grid; one day cell; an appointment button in it."),
+            new("fx-timeline-resource · fx-timeline-days", "A Timeline row; its grid of day cells."),
+            new("fx-agenda", "The Agenda table."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Week = @"<div class=""controls"">
+    <ButtonGroupControl Items=""_slotItems"" Values=""@(new[] { _slot.ToString() })"" ValuesChanged=""PickSlot"" AriaLabel=""Slot length"" />
+    <SwitchControl @bind-Checked=""_readOnly"" Label=""Read-only"" />
+</div>
+<SchedulerControl @bind-Events=""_tours"" @bind-Date=""_date"" @bind-View=""_view"" TimeZoneId=""Europe/Lisbon"" EndHour=""22""
+                  SlotMinutes=""_slot"" ReadOnly=""_readOnly"" Height=""520px"" />
+<p class=""result"">@_view view, date @_date.ToString(""dddd d MMMM"") · @_tours.Count entries in the list, @(_tours.Count(t => t.RecurrenceRule is not null)) of them repeating.</p>";
+        public const string WeekCs = @"// A week of guided tours
+private IReadOnlyList<SchedulerEvent> _tours = Tours();
+private DateTime _date = DateTime.Today;
+private SchedulerView _view = SchedulerView.Week;
+private int _slot = 30;
+private bool _readOnly;
+private readonly SelectionItem[] _slotItems = { new(""15"", ""15 min""), new(""30"", ""30 min""), new(""60"", ""60 min"") };
+
+private void PickSlot(IReadOnlyList<string> values)
+{
+    if (values.Count > 0) _slot = int.Parse(values[0]);
+}
+
+private static SchedulerEvent[] Tours()
+{
+    var monday = DateTime.Today.AddDays(-(((int)DateTime.Today.DayOfWeek + 6) % 7));
+    var series = monday.AddDays(-28);                 // the repeating tours started four weeks ago
+    var group = TravelData.Packages[0].Name;          // ""Lisbon Explorer""
+    SchedulerEvent Tour(string title, DateTime day, double from, double to, string? rule = null) => new()
+    {
+        Title = title, Start = day.AddHours(from), End = day.AddHours(to), TimeZoneId = ""Europe/Lisbon"", RecurrenceRule = rule,
+    };
+    return
+    [
+        Tour(""Old town walk"", series, 10, 12.5, ""FREQ=DAILY""),
+        Tour(""Food tour"", series.AddDays(1), 13, 16, ""FREQ=WEEKLY;BYDAY=TU,TH,SA""),
+        Tour(""Day trip to Sintra"", series.AddDays(2), 9, 18, ""FREQ=WEEKLY;BYDAY=WE""),
+        Tour(""Belém by tram"", series, 14, 16.5, ""FREQ=WEEKLY;BYDAY=MO,FR""),
+        Tour(""Fado evening"", series.AddDays(4), 19.5, 21.5, ""FREQ=WEEKLY;BYDAY=FR,SA""),
+        Tour($""{group}: airport meet-and-greet"", monday, 8.5, 9.5),
+        new() { Title = $""{group}: day at leisure"", Start = monday.AddDays(3), End = monday.AddDays(4), AllDay = true, TimeZoneId = ""Europe/Lisbon"" },
+        Tour($""{group}: departure transfer"", monday.AddDays(6), 8, 9),
+    ];
+}";
+        public const string Rules = @"<SchedulerControl @bind-Events=""_guided"" @bind-Date=""_guideDay"" @bind-View=""_guideView"" Resources=""_guides"" Changing=""Guard""
+                  TimeZoneId=""Europe/Lisbon"" EndHour=""20"" Height=""480px"" />
+<p class=""result"">@_decision</p>";
+        public const string RulesCs = @"// Changes the page refuses
+private IReadOnlyList<SchedulerEvent> _guided = Guided();
+private DateTime _guideDay = DateTime.Today;
+private SchedulerView _guideView = SchedulerView.Day;
+private string _decision = ""No changes yet."";
+private readonly SchedulerResource[] _guides = { new(""ines"", ""Inês"", ""#0f766e""), new(""rui"", ""Rui"", ""#b45309"") };
+private readonly Dictionary<string, int> _seatsSold = new() { [""walk""] = 6, [""tram""] = 4 };
+
+private static SchedulerEvent[] Guided()
+{
+    var today = DateTime.Today;
+    SchedulerEvent Tour(string id, string title, string guide, double from, double to) => new()
+    {
+        Id = id, Title = title, ResourceId = guide, Start = today.AddHours(from), End = today.AddHours(to), TimeZoneId = ""Europe/Lisbon"",
+    };
+    return
+    [
+        Tour(""pickup"", ""Airport meet-and-greet"", ""rui"", 8.5, 9.5),
+        Tour(""walk"", ""Old town walk"", ""ines"", 10, 12.5),
+        Tour(""food"", ""Food tour"", ""ines"", 14, 17),
+        Tour(""tram"", ""Belém by tram"", ""rui"", 14, 16.5),
+        Tour(""sunset"", ""Sunset viewpoints"", ""rui"", 17.5, 19),
+    ];
+}
+
+private void Guard(SchedulerChangingArgs e)
+{
+    var tour = e.Item;
+    var clash = _guided.FirstOrDefault(t => t.Id != tour.Id && t.ResourceId == tour.ResourceId && t.Start < tour.End && tour.Start < t.End);
+    var reason = e.Action switch
+    {
+        SchedulerChangeAction.Delete => _seatsSold.TryGetValue(tour.Id, out var sold) ? $""{sold} seats are sold"" : null,
+        _ when tour.Start.TimeOfDay < TimeSpan.FromHours(8) => ""tours start at 08:00 or later"",
+        _ when string.IsNullOrEmpty(tour.ResourceId) => ""pick a guide"",
+        _ when clash is not null => $""{_guides.First(g => g.Id == tour.ResourceId).Text} already leads {clash.Title} then"",
+        _ => null,
+    };
+    e.Cancel = reason is not null;
+    _decision = reason is null
+        ? $""Accepted: {e.Action} of '{tour.Title}', {tour.Start:t} to {tour.End:t}.""
+        : $""Refused: {e.Action} of '{tour.Title}': {reason}."";
+}";
+        public const string Zones = @"<div class=""pair"">
+    <div>
+        <p class=""pane-title"">Guide in Lisbon · <code>TimeZoneId=""Europe/Lisbon""</code></p>
+        <SchedulerControl @bind-Events=""_trip"" @bind-Date=""_tripDate"" @bind-View=""_tripView"" TimeZoneId=""Europe/Lisbon""
+                          StartHour=""0"" EndHour=""24"" Height=""320px"" />
+    </div>
+    <div>
+        <p class=""pane-title"">Client in Vancouver · <code>TimeZoneId=""America/Vancouver""</code></p>
+        <SchedulerControl @bind-Events=""_trip"" @bind-Date=""_tripDate"" @bind-View=""_tripView"" TimeZoneId=""America/Vancouver""
+                          StartHour=""0"" EndHour=""24"" Height=""320px"" />
+    </div>
+</div>
+<p class=""result"">How the list stores them:</p>
+<ul class=""stored"">
+    @foreach (var t in _trip)
+    {
+        <li>@t.Title, @t.Start.ToString(""ddd HH:mm"") <code>@t.TimeZoneId</code></li>
+    }
+</ul>";
+        public const string ZonesCs = @"// Two time zones
+private IReadOnlyList<SchedulerEvent> _trip = Trip();
+private DateTime _tripDate = DateTime.Today;
+private SchedulerView _tripView = SchedulerView.Agenda;
+
+private static SchedulerEvent[] Trip()
+{
+    var today = DateTime.Today;
+    SchedulerEvent At(string title, int day, double from, double to, string zone = ""Europe/Lisbon"") => new()
+    {
+        Title = title, Start = today.AddDays(day).AddHours(from), End = today.AddDays(day).AddHours(to), TimeZoneId = zone,
+    };
+    return
+    [
+        At(""Airport meet-and-greet"", 1, 6.5, 7.5),
+        At(""Old town walk"", 1, 10, 12.5),
+        At(""Day trip to Sintra"", 2, 9, 18),
+        At(""Video call about next year's trip"", 3, 9, 9.5, ""America/Vancouver""),
+        At(""Fado evening"", 3, 19.5, 21.5),
+        At(""Departure transfer"", 5, 8, 9),
+    ];
+}";
+    }
+}

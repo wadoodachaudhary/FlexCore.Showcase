@@ -26,3 +26,10 @@
 .props dt { color: #64748b; }
 .props dd { margin: 0; }
 
+/* Grid and stack example: a package summary. Stacks and grid items are library elements, so ::deep from the page-scoped .summary */
+.summary { max-width: 640px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; font-size: 13px; color: #334155; }
+.summary h4 { margin: 0; font-size: 15px; font-weight: 600; color: #0f172a; }
+.field-label { display: block; margin-bottom: 3px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #64748b; }
+.field-value { display: block; overflow-wrap: anywhere; }
+.summary ::deep .tags { overflow-x: auto; padding-bottom: 2px; }
+.summary ::deep .actions { padding-top: 12px; border-top: 1px solid #e2e8f0; }

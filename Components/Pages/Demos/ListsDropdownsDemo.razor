@@ -1,0 +1,461 @@
+@page "/demo/lists-dropdowns"
+@using FlexCore.Showcase.Components.Shared
+@using FlexCore.Showcase.Data
+@using FlexCore.Showcase.Services
+
+@* 2026-10-25: new page on FeatureDemoLayout; three examples, one per control (dropdown, lookup, listbox). Facts checked against
+   DropDownListControl.razor, DropDownListControl.razor.cs, DropDownListControl.razor.css, wwwroot/dropdown-list-control.js,
+   Grid/DropDownGridControl.razor, Grid/DropDownGridControl.razor.cs, Grid/DropDownGridControl.razor.css, ListBoxControl.razor,
+   ListBoxControl.razor.css and ListBoxSelectionMode.cs in FlexCore 0.2.49. DropDownListControl declares AllowFiltering and ChildContent
+   but never reads them; the tables say so. None of the three controls captures unmatched attributes. *@
+
+<PageTitle>Lists &amp; dropdowns — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Lists &amp; dropdowns" Category="Components" CategoryHref="components"
+                   ControlName="DropDownListControl · DropDownGridControl · ListBoxControl"
+                   Tagline="A one-line dropdown, a multi-column lookup with search, and a list of radio buttons or checkboxes."
+                   SourcePath="DropDownListControl.razor;Grid/DropDownGridControl.razor;ListBoxControl.razor">
+    <Overview>
+        <p>
+            Three ways to choose from a list. <code>DropDownListControl</code> is a one-line box that opens a list of options; with
+            <code>Editable</code> it becomes a text box that also accepts text that is not in the list. <code>DropDownGridControl</code> opens a
+            <code>GridControl</code> with the columns you declare and a search box, and shows one field of the picked row when closed.
+            <code>ListBoxControl</code> shows every option at once as radio buttons or checkboxes, and its value is a <code>List&lt;string&gt;</code>.
+            All three take any item type and read each item's text and value from properties you name.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="dropdown" Title="Pick a destination" RazorCode="@Code.Dropdown" CSharpCode="@Code.DropdownCs">
+            <Description><p>Left: a list-only dropdown over the twelve destinations. <code>ItemTemplate</code> adds the country to each option; the closed box keeps the <code>TextFieldName</code> text. <code>ValueChange</code> hands the page the whole record as <code>ItemData</code> next to the value. With the box focused, a typed letter selects the first city starting with it, and Up and Down step through the cities without opening the list. Right: <code>Editable="true"</code> makes the box a text input; pick a gateway or type a city that is not listed, and Enter or leaving the box commits the text as the value. The switch sets <code>Enabled</code> on both.</p></Description>
+            <Demo>
+                <div class="pair">
+                    <div class="field">
+                        <span class="field-label">Destination</span>
+                        <DropDownListControl TValue="string" TItem="Destination" DataSource="@_destinations" TextFieldName="City" ValueFieldName="City"
+                                             @bind-Value="_city" ValueChange="args => _picked = args.ItemData" Placeholder="Choose a destination"
+                                             Width="220px" Enabled="_enabled" AriaLabel="Destination">
+                            <ItemTemplate Context="d"><span>@d.City</span> <span class="muted">@d.Country</span></ItemTemplate>
+                        </DropDownListControl>
+                    </div>
+                    <div class="field">
+                        <span class="field-label">Flying from</span>
+                        <DropDownListControl TValue="string" TItem="string" DataSource="@_gateways" @bind-Value="_from" Editable="true"
+                                             Placeholder="Pick or type a city" Width="220px" Enabled="_enabled" AriaLabel="Flying from" />
+                    </div>
+                    <div class="switch-cell">
+                        <SwitchControl @bind-Checked="_enabled" Label="Enabled" />
+                    </div>
+                </div>
+                <p class="result">Value <strong>@(_city ?? "null")</strong> · ItemData @(_picked is null ? "null" : $"{_picked.City}, {_picked.Region}, {_picked.Country}") · Flying from <strong>@(_from ?? "null")</strong></p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="lookup" Title="Pick a supplier from a grid" RazorCode="@Code.Lookup" CSharpCode="@Code.LookupCs">
+            <Description><p>Two hundred suppliers in a four-column popup. The search box keeps the rows where any property contains the typed text, ignoring case, so a city, a category or part of an email address all work although only four columns are shown. Click a row, or press Down to open and move and Enter to pick; the box then shows the supplier's name (<code>ClosedTextFieldName</code>) while <code>Value</code> holds its code. The ✕ clears the value. <code>OnSelectedItemChanged</code> gives the page the whole record for the details below.</p></Description>
+            <Demo>
+                <div class="lookup">
+                    <span class="field-label">Supplier</span>
+                    <div class="lookup-box">
+                        <DropDownGridControl TItem="SupplierRecord" TValue="string" DataSource="@BenchData.Suppliers" @bind-Value="_supplierCode"
+                                             OnSelectedItemChanged="s => _supplier = s" ValueFieldName="Code" ClosedTextFieldName="Name"
+                                             Placeholder="Choose a supplier" SearchPlaceholder="Search any field" PopupWidth="500px" PopupHeight="260px" RowHeight="24">
+                            <Columns>
+                                <GridColumn Field="Code" HeaderText="Code" Width="80px" />
+                                <GridColumn Field="Name" HeaderText="Supplier" Width="180px" />
+                                <GridColumn Field="Category" HeaderText="Category" Width="110px" />
+                                <GridColumn Field="City" HeaderText="City" Width="100px" />
+                            </Columns>
+                        </DropDownGridControl>
+                    </div>
+                </div>
+                @if (_supplier is null)
+                {
+                    <p class="result">Value <strong>@(_supplierCode ?? "null")</strong>: no supplier chosen.</p>
+                }
+                else
+                {
+                    <dl class="supplier">
+                        <dt>Value</dt><dd>@_supplierCode</dd>
+                        <dt>Supplier</dt><dd>@_supplier.Name</dd>
+                        <dt>Category</dt><dd>@_supplier.Category</dd>
+                        <dt>Address</dt><dd>@_supplier.Address, @_supplier.City, @_supplier.Country</dd>
+                        <dt>Phone</dt><dd>@_supplier.Phone</dd>
+                        <dt>Email</dt><dd>@_supplier.Email</dd>
+                        <dt>Online booking</dt><dd>@(_supplier.OnlineBooking ? "Yes" : "No")</dd>
+                    </dl>
+                }
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="listbox" Title="Choose several destinations" RazorCode="@Code.Listbox" CSharpCode="@Code.ListboxCs" CssCode="@Code.ListboxCss">
+            <Description><p>Left: <code>SelectionMode="Multiple"</code>, one checkbox per destination; every click hands <code>ValueChanged</code> a new <code>List&lt;string&gt;</code> of the ticked values. The control does not promise an order, so the page lists them in list order. <code>CssClass</code> lays the twelve rows out in two columns. Right: the default single mode draws radio buttons and keeps at most one value; switch on <code>ShowCheckbox</code> and the same list draws checkboxes that still allow one choice but can be unticked. Items are read by property name, so the four category strings are wrapped in a one-property record: a blank <code>TextField</code> gives empty labels. The button clears the wish list from the page.</p></Description>
+            <Demo>
+                <div class="pair">
+                    <div>
+                        <p class="pane-title" id="wish-title">Wish list</p>
+                        <div role="group" aria-labelledby="wish-title">
+                            <ListBoxControl TItem="Destination" DataSource="@_destinations" TextField="City" ValueField="City"
+                                            SelectionMode="ListBoxSelectionMode.Multiple" @bind-Value="_wishlist" CssClass="two-columns" />
+                        </div>
+                    </div>
+                    <div>
+                        <p class="pane-title" id="spend-title">Spend most on</p>
+                        <div role="group" aria-labelledby="spend-title">
+                            <ListBoxControl TItem="Category" DataSource="@_categories" TextField="Name" ValueField="Name"
+                                            ShowCheckbox="_singleCheckbox" @bind-Value="_spend" />
+                        </div>
+                        <div class="switch-row">
+                            <SwitchControl @bind-Checked="_singleCheckbox" Label="ShowCheckbox" />
+                        </div>
+                    </div>
+                </div>
+                <p class="result">Wish list (@_wishlist.Count): <strong>@string.Join(", ", WishedFor.Select(d => d.City))</strong> · Spend most on: <strong>@(_spend.FirstOrDefault() ?? "nothing")</strong></p>
+                <div class="actions">
+                    <ButtonControl CssClass="btn-sm" OnClick="() => _wishlist = new()" Disabled="@(_wishlist.Count == 0)">Clear the wish list</ButtonControl>
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <DocSections>
+            <DocSection Id="doc-dropdownlistcontrol-tvalue-titem-parameters" Title="DropDownListControl&lt;TValue, TItem&gt; parameters" Count='@DocSection.Label(Vocab.Ddl.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="DropDownListControl&lt;TValue, TItem&gt; parameters" Rows="Vocab.Ddl" />
+                <p>
+                    Option text and values are compared as strings: an option is the selected one when its value text equals <code>Value.ToString()</code>
+                    exactly, and a picked or typed text is converted back to <code>TValue</code> (strings as they are, enums by name ignoring case, other
+                    types with <code>Convert.ChangeType</code> in the invariant culture; text that does not convert gives <code>default</code>). The open
+                    list opens upward when it does not fit below the box and there is more room above.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-dropdownlistcontrol-events" Title="DropDownListControl events" Count='@DocSection.Label(Vocab.DdlEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="DropDownListControl events" Rows="Vocab.DdlEvents" />
+            </DocSection>
+            <DocSection Id="doc-changeeventargs-tval-titm" Title="ChangeEventArgs&lt;TVal, TItm&gt;" Count='@DocSection.Label(Vocab.DdlArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="ChangeEventArgs&lt;TVal, TItm&gt;" Rows="Vocab.DdlArgs" />
+                <p>A class nested in <code>DropDownListControl&lt;TValue, TItem&gt;</code>; <code>ValueChange</code> passes one with the control's own type arguments.</p>
+            </DocSection>
+            <DocSection Id="doc-dropdownlistcontrol-methods" Title="DropDownListControl methods" Count='@DocSection.Label(Vocab.DdlMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="DropDownListControl methods" Rows="Vocab.DdlMethods" />
+                <p>Two further public methods, <code>OnListFocusLeftAsync</code> and <code>OnClientDropdownActionAsync</code>, are <code>[JSInvokable]</code> entry points for the control's own script.</p>
+            </DocSection>
+            <DocSection Id="doc-dropdowngridcontrol-titem-tvalue-parameters" Title="DropDownGridControl&lt;TItem, TValue&gt; parameters" Count='@DocSection.Label(Vocab.Grid.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="DropDownGridControl&lt;TItem, TValue&gt; parameters" Rows="Vocab.Grid" />
+                <p>
+                    The popup grid always sorts on a header click, selects rows and runs in the compact density. The popup is placed with
+                    <code>position: fixed</code> under the box, opens above it when it does not fit below and there is more room above, and is kept inside the window. Up and Down
+                    walk the rows in <code>DataSource</code> order, filtered by the search, not in the order a header sort shows.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-dropdowngridcontrol-events" Title="DropDownGridControl events" Count='@DocSection.Label(Vocab.GridEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="DropDownGridControl events" Rows="Vocab.GridEvents" />
+            </DocSection>
+            <DocSection Id="doc-listboxcontrol-titem-parameters" Title="ListBoxControl&lt;TItem&gt; parameters" Count='@DocSection.Label(Vocab.List.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="ListBoxControl&lt;TItem&gt; parameters" Rows="Vocab.List" />
+            </DocSection>
+            <DocSection Id="doc-listboxcontrol-events" Title="ListBoxControl events" Count='@DocSection.Label(Vocab.ListEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="ListBoxControl events" Rows="Vocab.ListEvents" />
+            </DocSection>
+            <DocSection Id="doc-listboxselectionmode" Title="ListBoxSelectionMode" Count='@DocSection.Label(Vocab.Modes.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="ListBoxSelectionMode" Rows="Vocab.Modes" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+                <p>The only variable the three stylesheets read is <code>--fx-zoom</code>, which scales the dropdown fonts. Colours are fixed in CSS; the popup sets <code>--fx-grid-font-size</code> and <code>--fx-grid-line-color</code> on its own grid.</p>
+            </DocSection>
+        </DocSections>
+    </Vocabulary>
+
+    <Accessibility>
+        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard: DropDownListControl" Rows="Vocab.KeysList" />
+        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard: DropDownGridControl" Rows="Vocab.KeysGrid" />
+        <ul>
+            <li><code>DropDownListControl</code> is a button with <code>aria-haspopup="listbox"</code> and <code>aria-expanded</code>; the open list is <code>role="listbox"</code> of <code>role="option"</code> buttons carrying <code>aria-selected</code>. <code>AriaLabel</code> becomes the button's <code>aria-label</code>, which takes precedence over the button's text when the browser computes its name, so the chosen value is not part of that name.</li>
+            <li>While the list is open, focus sits on the highlighted option; a pick or Escape returns it to the button. Focus leaving an open list takes an option highlighted with the keys and otherwise only closes the list.</li>
+            <li>In editable mode the text box is <code>role="combobox"</code> with <code>aria-autocomplete="list"</code>, <code>aria-controls</code> naming the list and <code>aria-expanded</code>; focus stays in the box and the control's script keeps <code>aria-activedescendant</code> on the highlighted option. F4 or Alt+Down opens the list and, pressed again, closes it as Enter would; Up, Down, Home, End, Page Up and Page Down move the highlight while it is open, and Up and Down select the previous or next option while it is closed. Enter takes the highlighted option after an arrow key and commits the typed text otherwise. Escape closes the list; pressed again it puts back the committed text.</li>
+            <li><code>DropDownGridControl</code> renders no ARIA roles: the closed box is a read-only text input with no role and no <code>aria-expanded</code>, and the control takes no <code>AriaLabel</code> or extra attributes, so show a visible caption next to it. The ✕ button's accessible name is its text, the ✕ character; "Clear" is only its <code>title</code>.</li>
+            <li><code>ListBoxControl</code> renders native inputs inside labels, so each row is named by its text and the browser supplies the keys: Tab reaches each checkbox and Space toggles it; the radio buttons of one list share a group name, so Tab enters the group and the arrow keys move the choice. The control names neither the list nor its role; the example wraps each list in <code>role="group"</code> with <code>aria-labelledby</code> pointing at its caption.</li>
+            <li>None of the three controls accepts unmatched attributes, so <code>aria-*</code> attributes cannot be added to them directly.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>Suggestions while typing, built on an editable <code>DropDownListControl</code>: <code>AutoCompleteControl</code> on <a href="demo/pickers">Pickers &amp; selectors</a>.</li>
+            <li>A few options that are always visible: <code>CheckBoxControl</code> and <code>RadioGroupControl</code> on <a href="demo/checks">Checks &amp; switches</a>.</li>
+            <li>The grid inside the lookup popup: <a href="demo/grid">Data Grid</a>. A <code>DropDownGridControl</code> inside a grid cell: the quote desk on the <a href="">home page</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Destination dropdown
+    private string? _city;
+    private Destination? _picked;
+    private readonly string[] _gateways = { "Amsterdam", "Chicago", "Dublin", "Frankfurt", "London", "New York", "Singapore", "Toronto" };
+    private string? _from = "London";
+    private bool _enabled = true;
+
+    // Destinations (the dropdown and the list boxes)
+    private sealed record Destination(string City, string Region, string Country);
+    private static readonly Destination[] _destinations =
+        TravelData.Destinations.Select(d => new Destination(d.City, d.Region, d.Country)).ToArray();
+
+    // List boxes
+    private sealed record Category(string Name);
+    private static readonly Category[] _categories = TravelData.Categories.Select(c => new Category(c)).ToArray();
+    private List<string> _wishlist = new() { "Kyoto", "Reykjavik" };
+    private List<string> _spend = new() { "Experiences" };
+    private bool _singleCheckbox;
+    private IEnumerable<Destination> WishedFor => _destinations.Where(d => _wishlist.Contains(d.City));
+
+    // Supplier lookup
+    [Inject] private BenchDataStore BenchData { get; set; } = default!;
+    private string? _supplierCode;
+    private SupplierRecord? _supplier;
+
+    // Vocabulary rows, one per public member (FlexCore 0.2.49). None of the three controls has a base class with parameters.
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Ddl =
+        {
+            new("DataSource", "The items. Enumerated again on each render for the options, the closed text and the automatic width. Null shows \"No values\" in the open list.", "IEnumerable&lt;TItem&gt;?", "null"),
+            new("TextFieldName / ValueFieldName", "Names of the item properties that give each option its text and its value, read by reflection. Blank uses the item itself (a string) or its <code>ToString()</code>.", "string", "\"\""),
+            new("Value", "The current value. A value that matches no option shows as its own text; null or an empty string counts as no value.", "TValue?", "null"),
+            new("Placeholder", "Grey text in the closed button, or the input's placeholder, while there is no value. Also counts toward the automatic width.", "string?", "null"),
+            new("AriaLabel", "<code>aria-label</code> of the button or the editable input.", "string?", "null"),
+            new("Width", "CSS width of the host. Unset: sized to the longest option text or the placeholder, 8 to 28 characters plus room for the arrow, never wider than the window less 24px.", "string?", "null"),
+            new("PanelMaxHeight", "Tallest open list in pixels before it scrolls. The visible space around the box can make it shorter.", "int", "180"),
+            new("PanelFitContentWidth", "Sizes the open list to its widest option (at most 360px or 90% of the window) instead of the box width.", "bool", "false"),
+            new("CssClass", "Added to the host and to the button (or the editable input's wrapper).", "string?", "null"),
+            new("Enabled", "False disables the button or input and closes an open list.", "bool", "true"),
+            new("TabIndex", "<code>tabindex</code> of the button or input. Unset: the normal tab order, or -1 when the control is the editor of a hosted cell.", "int?", "null"),
+            new("ItemTemplate", "Content of each option in the open list. The closed button and the editable input still show the <code>TextFieldName</code> text.", "RenderFragment&lt;TItem&gt;?", "null"),
+            new("Editable", "Renders a text input instead of the button. Typed text is committed on Enter (and on blur, see below) and converted to <code>TValue</code>, whether or not it is in the list.", "bool", "false"),
+            new("MaxLength", "<code>maxlength</code> of the editable input; a committed typed text longer than this is cut to it.", "int?", "null"),
+            new("CommitEditableTextOnBlur", "Editable only: leaving the input commits the typed text. False commits on Enter only, and leaving a closed list puts back the committed text.", "bool", "true"),
+            new("AutoFocus", "Focuses the button or input after the first render.", "bool", "false"),
+            new("OpenOnRender", "Opens the list on the first render where this is true, once.", "bool", "false"),
+            new("OpenOnArrowClickOnly", "Only a click on the arrow opens and closes the list; a click on the text does nothing.", "bool", "false"),
+            new("OpenOnClickWhenClosed", "With <code>OpenOnArrowClickOnly</code>, a click on the text of a closed list still opens it; closing stays with the arrow, Escape, a pick or a click outside.", "bool", "false"),
+            new("DelegateVerticalArrows", "Up and Down on a closed list go to <code>OnKeyDown</code> instead of changing the value. Needs an <code>OnKeyDown</code> handler.", "bool", "false"),
+            new("SuppressUnchangedValueChange", "Picking the option that is already the value closes the list without raising <code>ValueChanged</code> or <code>ValueChange</code>.", "bool", "false"),
+            new("AllowFiltering", "Declared but not read anywhere in the control: the list is never filtered.", "bool", "false"),
+            new("ChildContent", "Declared but never rendered.", "RenderFragment?", "null"),
+        };
+        public static readonly ApiRow[] DdlEvents =
+        {
+            new("ValueChanged", "The value changed: a pick from the list, a step on the closed list (Up, Down, Home, End or a typed letter), or committed typed text. Picking the current value again raises it too, unless <code>SuppressUnchangedValueChange</code> is set.", "TValue?"),
+            new("ValueChange", "Right after <code>ValueChanged</code>, with the new value and, for a pick or a step, the item.", "ChangeEventArgs&lt;TValue, TItem&gt;"),
+            new("TextChanged", "Editable only: the text as the user types it, before it is committed (not while <code>DelegateVerticalArrows</code> is set). <code>Value</code> does not change.", "string"),
+            new("Closed", "The list closed without a choice: Escape, a click outside, a click on the arrow, or <code>HidePopupAsync</code>. Focus moving out of an open list raises it too, after taking an option highlighted with the keys. Choosing by click, Enter, Space or Tab does not.", "none"),
+            new("EditableCommitted", "Editable only: typed text was committed by Enter, Tab, leaving the box or a click outside, even when <code>Value</code> did not change. Not raised for a pick from the list.", "none"),
+            new("OnKeyDown", "Keys the control passes on rather than handling, for hosts such as grid editors. In list mode: Tab, Left and Right, Escape on a closed list, Enter or Space after taking an option, and Up and Down on a closed list with <code>DelegateVerticalArrows</code>. With a handler set, Tab no longer takes the highlighted option.", "KeyboardEventArgs"),
+        };
+        public static readonly ApiRow[] DdlArgs =
+        {
+            new("Value", "The new value.", "TVal?"),
+            new("ItemData", "The item behind it, for a pick or a step through the list; <code>default</code> when typed text was committed.", "TItm"),
+        };
+        public static readonly ApiRow[] DdlMethods =
+        {
+            new("FocusAsync()", "Focuses the editable input or the button.", "Task"),
+            new("ShowPopupAsync()", "Opens the list, if the control is enabled.", "Task"),
+            new("HidePopupAsync()", "Closes the list; raises <code>Closed</code> when it was open.", "Task"),
+            new("TryHandleHostKeyDownAsync(KeyboardEventArgs e)", "For a host that keeps focus while the list is open: Up, Down, Home and End move the highlight, Enter takes it, Escape closes. Returns false when the list is closed, a modifier key is down, or the key is another one.", "Task&lt;bool&gt;"),
+        };
+        public static readonly ApiRow[] Grid =
+        {
+            new("DataSource", "Rows for the popup grid.", "IEnumerable&lt;TItem&gt;?", "null"),
+            new("Value", "The picked row's <code>ValueFieldName</code> value. A value that matches no row shows as its own text.", "TValue?", "null"),
+            new("Columns", "<code>GridColumn</code> elements for the popup grid.", "RenderFragment?", "null"),
+            new("ValueFieldName", "Property, matched ignoring case, whose value becomes <code>Value</code>, converted to <code>TValue</code>. Unset: the row itself, when it is a <code>TValue</code>.", "string?", "null"),
+            new("ClosedTextFieldName", "Property shown in the closed box. Unset: <code>TextFieldName</code>.", "string?", "null"),
+            new("TextFieldName", "Property shown in the closed box when <code>ClosedTextFieldName</code> is unset. Neither set: the row's <code>ToString()</code>.", "string?", "null"),
+            new("Placeholder", "Shown in the closed box while there is no value.", "string?", "\"Select an item...\""),
+            new("ShowSearch", "A search box above the grid. It keeps the rows where the text of any public property contains the typed text, ignoring case, including properties with no column. Cleared when the popup closes.", "bool", "true"),
+            new("SearchPlaceholder", "Placeholder of the search box; unset shows \"Search...\".", "string?", "null"),
+            new("AllowClear", "A ✕ button in the box while there is a value. It sets <code>Value</code> to <code>default</code> and raises <code>ValueChanged</code> and <code>OnSelectedItemChanged</code> with default values. Hidden when <code>Disabled</code> or <code>ReadOnly</code>.", "bool", "true"),
+            new("Disabled", "Disables and greys the box; the popup does not open.", "bool", "false"),
+            new("ReadOnly", "The popup does not open and the clear button is hidden, but the box is not greyed.", "bool", "false"),
+            new("Width", "CSS width of the control.", "string?", "\"100%\""),
+            new("PopupWidth", "CSS width of the popup. Placement reads it as a number of pixels to keep the popup inside the window.", "string?", "\"450px\""),
+            new("PopupHeight", "Height of the grid area under the search box.", "string?", "\"240px\""),
+            new("RowHeight", "Row height of the popup grid in pixels.", "int", "22"),
+            new("AllowPaging", "Pages the popup grid.", "bool", "false"),
+            new("PageSize", "Rows per page when <code>AllowPaging</code> is on.", "int", "10"),
+            new("ShowColumnHeaders", "False hides the popup grid's header row; the column widths stay.", "bool", "true"),
+            new("CssClass", "Added to the root <code>fx-dropdown-grid</code> element.", "string?", "null"),
+            new("OpenOnRender", "Opens the popup on the first render where this is true, once.", "bool", "false"),
+            new("AutoFocus", "Focuses the box after the first render.", "bool", "false"),
+        };
+        public static readonly ApiRow[] GridEvents =
+        {
+            new("ValueChanged", "A row was picked (a click, or Enter on the highlighted row) or the clear button was pressed.", "TValue"),
+            new("OnSelectedItemChanged", "Right after <code>ValueChanged</code>: the picked row, or null after a clear.", "TItem?"),
+            new("Closed", "The popup closed: a pick, Escape, a click outside or on the box, or the clear button while it was open. Escape on a closed box raises it too, so a cell editor can dismiss itself.", "none"),
+        };
+        public static readonly ApiRow[] List =
+        {
+            new("DataSource", "Items, one row each.", "IEnumerable&lt;TItem&gt;?", "null"),
+            new("TextField / ValueField", "Names of the item properties that give each row its label and its value, read by reflection. Blank gives an empty string, so plain strings need wrapping in a record.", "string", "\"\""),
+            new("Value", "The selected values, compared ignoring case. Read again on every parameter update, so a new list from the page replaces the selection.", "List&lt;string&gt;?", "null"),
+            new("SelectionMode", "Single keeps at most one value; Multiple keeps any number.", "ListBoxSelectionMode", "ListBoxSelectionMode.Single"),
+            new("ShowCheckbox", "Single mode only: checkboxes instead of radio buttons, so the one choice can be unticked. Multiple mode always draws checkboxes.", "bool", "false"),
+            new("CssClass", "Added to the <code>fx-listbox</code> element.", "string?", "null"),
+        };
+        public static readonly ApiRow[] ListEvents =
+        {
+            new("ValueChanged", "When a checkbox is ticked or unticked, or a radio button chosen: a new list of the selected values, in no guaranteed order. In single mode it holds at most one value.", "List&lt;string&gt;"),
+        };
+        public static readonly ApiRow[] Modes =
+        {
+            new("Single", "At most one value: radio buttons sharing one group name per list, or, with <code>ShowCheckbox</code>, checkboxes where ticking one unticks the other."),
+            new("Multiple", "Any number of values; each row is a checkbox."),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-dropdown-host", "The dropdown's outer element: inline-block, at least 80px wide, Tahoma at 10px times <code>--fx-zoom</code>. <code>fx-dropdown-open-up</code> is added while the list opens upward."),
+            new("fx-dropdown · fx-dropdown-editable · disabled", "The closed button, or the editable input's wrapper: 20px high with a 1px blue-grey border and a dotted focus outline; grey when disabled."),
+            new("fx-dropdown-text · fx-dropdown-placeholder · fx-dropdown-input · fx-dropdown-arrow", "The button's text and its grey placeholder state, the editable text input, and the 18px arrow lane."),
+            new("fx-dropdown-panel · fx-dropdown-panel-fit", "The open list, positioned under the box, 180px at most by default; the fit variant takes its widest option's width."),
+            new("fx-dropdown-option · highlighted · selected", "An option button. <code>highlighted</code> (white on blue) follows the mouse and the keys; <code>selected</code> marks the current value and adds no colour."),
+            new("fx-dropdown-empty", "\"No values\" in the open list when <code>DataSource</code> is null."),
+            new("fx-dropdown-backdrop", "A transparent full-window button behind the open list; a click on it closes the list."),
+            new("fx-dropdown-legacy-blue", "Pass it as <code>CssClass</code> for a white-on-blue button and list."),
+            new("fx-dropdown-grid · fx-open · fx-disabled", "The lookup's root element, with its state while the popup is open and when <code>Disabled</code>."),
+            new("fx-dropdown-grid-input-wrap · fx-dropdown-grid-input · fx-dropdown-grid-arrow · fx-dropdown-grid-clear-btn", "The closed box: its wrapper, the read-only input (13px times <code>--fx-zoom</code>), the arrow lane and the ✕ button."),
+            new("fx-dropdown-grid-popup · fx-dropdown-grid-headerless", "The popup, white with a rounded border and a shadow; the headerless variant collapses the grid's header row."),
+            new("fx-dropdown-grid-search-bar · fx-dropdown-grid-search-input · fx-dropdown-grid-body", "The search row, its input, and the area that holds the grid."),
+            new("fx-dropdown-grid-backdrop", "The popup's transparent full-window backdrop; a click on it closes the popup."),
+            new("fx-listbox · fx-listbox-item", "The list box, a column with 6px gaps that scrolls past 320px, and each label row with its input."),
+        };
+        public static readonly ApiRow[] KeysList =
+        {
+            new("Enter, Space, F4, Alt+Down (closed)", "Opens the list with the current value highlighted, or the first option when there is none."),
+            new("Enter, Space (open)", "Takes the highlighted option, closes the list and returns focus to the button."),
+            new("Up / Down", "Closed: selects the previous or next option at once. Open: moves the highlight. Both stop at the ends."),
+            new("Home / End", "The same for the first or last option."),
+            new("A printable character", "Goes to the first option whose text, or value, starts with the typed characters; typing again within a second extends them, and repeating one character cycles through its matches. Closed: selects it. Open: highlights it."),
+            new("Escape", "Closes the list without changing the value."),
+            new("Tab (open)", "Takes the highlighted option; focus stays on the dropdown."),
+        };
+        public static readonly ApiRow[] KeysGrid =
+        {
+            new("Down", "Closed: opens the popup with the current value's row highlighted, or the first row. Open: highlights the next row."),
+            new("Up (open)", "Highlights the previous row."),
+            new("Enter", "Closed: opens the popup. Open: picks the highlighted row."),
+            new("Escape", "Closes the popup without picking."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Dropdown = @"<div class=""pair"">
+    <div class=""field"">
+        <span class=""field-label"">Destination</span>
+        <DropDownListControl TValue=""string"" TItem=""Destination"" DataSource=""@_destinations"" TextFieldName=""City"" ValueFieldName=""City""
+                             @bind-Value=""_city"" ValueChange=""args => _picked = args.ItemData"" Placeholder=""Choose a destination""
+                             Width=""220px"" Enabled=""_enabled"" AriaLabel=""Destination"">
+            <ItemTemplate Context=""d""><span>@d.City</span> <span class=""muted"">@d.Country</span></ItemTemplate>
+        </DropDownListControl>
+    </div>
+    <div class=""field"">
+        <span class=""field-label"">Flying from</span>
+        <DropDownListControl TValue=""string"" TItem=""string"" DataSource=""@_gateways"" @bind-Value=""_from"" Editable=""true""
+                             Placeholder=""Pick or type a city"" Width=""220px"" Enabled=""_enabled"" AriaLabel=""Flying from"" />
+    </div>
+    <div class=""switch-cell"">
+        <SwitchControl @bind-Checked=""_enabled"" Label=""Enabled"" />
+    </div>
+</div>
+<p class=""result"">Value <strong>@(_city ?? ""null"")</strong> · ItemData @(_picked is null ? ""null"" : $""{_picked.City}, {_picked.Region}, {_picked.Country}"") · Flying from <strong>@(_from ?? ""null"")</strong></p>";
+        public const string DropdownCs = @"// Destination dropdown
+private string? _city;
+private Destination? _picked;
+private readonly string[] _gateways = { ""Amsterdam"", ""Chicago"", ""Dublin"", ""Frankfurt"", ""London"", ""New York"", ""Singapore"", ""Toronto"" };
+private string? _from = ""London"";
+private bool _enabled = true;
+
+// Destinations (the dropdown and the list boxes)
+private sealed record Destination(string City, string Region, string Country);
+private static readonly Destination[] _destinations =
+    TravelData.Destinations.Select(d => new Destination(d.City, d.Region, d.Country)).ToArray();";
+        public const string Lookup = @"<div class=""lookup"">
+    <span class=""field-label"">Supplier</span>
+    <div class=""lookup-box"">
+        <DropDownGridControl TItem=""SupplierRecord"" TValue=""string"" DataSource=""@BenchData.Suppliers"" @bind-Value=""_supplierCode""
+                             OnSelectedItemChanged=""s => _supplier = s"" ValueFieldName=""Code"" ClosedTextFieldName=""Name""
+                             Placeholder=""Choose a supplier"" SearchPlaceholder=""Search any field"" PopupWidth=""500px"" PopupHeight=""260px"" RowHeight=""24"">
+            <Columns>
+                <GridColumn Field=""Code"" HeaderText=""Code"" Width=""80px"" />
+                <GridColumn Field=""Name"" HeaderText=""Supplier"" Width=""180px"" />
+                <GridColumn Field=""Category"" HeaderText=""Category"" Width=""110px"" />
+                <GridColumn Field=""City"" HeaderText=""City"" Width=""100px"" />
+            </Columns>
+        </DropDownGridControl>
+    </div>
+</div>
+@if (_supplier is null)
+{
+    <p class=""result"">Value <strong>@(_supplierCode ?? ""null"")</strong>: no supplier chosen.</p>
+}
+else
+{
+    <dl class=""supplier"">
+        <dt>Value</dt><dd>@_supplierCode</dd>
+        <dt>Supplier</dt><dd>@_supplier.Name</dd>
+        <dt>Category</dt><dd>@_supplier.Category</dd>
+        <dt>Address</dt><dd>@_supplier.Address, @_supplier.City, @_supplier.Country</dd>
+        <dt>Phone</dt><dd>@_supplier.Phone</dd>
+        <dt>Email</dt><dd>@_supplier.Email</dd>
+        <dt>Online booking</dt><dd>@(_supplier.OnlineBooking ? ""Yes"" : ""No"")</dd>
+    </dl>
+}";
+        public const string LookupCs = @"// Supplier lookup
+[Inject] private BenchDataStore BenchData { get; set; } = default!;
+private string? _supplierCode;
+private SupplierRecord? _supplier;";
+        public const string Listbox = @"<div class=""pair"">
+    <div>
+        <p class=""pane-title"" id=""wish-title"">Wish list</p>
+        <div role=""group"" aria-labelledby=""wish-title"">
+            <ListBoxControl TItem=""Destination"" DataSource=""@_destinations"" TextField=""City"" ValueField=""City""
+                            SelectionMode=""ListBoxSelectionMode.Multiple"" @bind-Value=""_wishlist"" CssClass=""two-columns"" />
+        </div>
+    </div>
+    <div>
+        <p class=""pane-title"" id=""spend-title"">Spend most on</p>
+        <div role=""group"" aria-labelledby=""spend-title"">
+            <ListBoxControl TItem=""Category"" DataSource=""@_categories"" TextField=""Name"" ValueField=""Name""
+                            ShowCheckbox=""_singleCheckbox"" @bind-Value=""_spend"" />
+        </div>
+        <div class=""switch-row"">
+            <SwitchControl @bind-Checked=""_singleCheckbox"" Label=""ShowCheckbox"" />
+        </div>
+    </div>
+</div>
+<p class=""result"">Wish list (@_wishlist.Count): <strong>@string.Join("", "", WishedFor.Select(d => d.City))</strong> · Spend most on: <strong>@(_spend.FirstOrDefault() ?? ""nothing"")</strong></p>
+<div class=""actions"">
+    <ButtonControl CssClass=""btn-sm"" OnClick=""() => _wishlist = new()"" Disabled=""@(_wishlist.Count == 0)"">Clear the wish list</ButtonControl>
+</div>";
+        public const string ListboxCs = @"// Destinations (the dropdown and the list boxes)
+private sealed record Destination(string City, string Region, string Country);
+private static readonly Destination[] _destinations =
+    TravelData.Destinations.Select(d => new Destination(d.City, d.Region, d.Country)).ToArray();
+
+// List boxes
+private sealed record Category(string Name);
+private static readonly Category[] _categories = TravelData.Categories.Select(c => new Category(c)).ToArray();
+private List<string> _wishlist = new() { ""Kyoto"", ""Reykjavik"" };
+private List<string> _spend = new() { ""Experiences"" };
+private bool _singleCheckbox;
+private IEnumerable<Destination> WishedFor => _destinations.Where(d => _wishlist.Contains(d.City));";
+        public const string ListboxCss = @"/* List boxes */
+.pair ::deep .two-columns { display: grid; grid-template-columns: repeat(2, minmax(110px, 1fr)); column-gap: 24px; }
+.switch-row { margin-top: 12px; }
+.actions { margin-top: 10px; }";
+    }
+}

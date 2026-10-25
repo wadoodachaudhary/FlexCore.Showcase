@@ -1,0 +1,458 @@
+@page "/demo/text-inputs"
+@using FlexCore.Showcase.Components.Shared
+@using FlexCore.Showcase.Data
+
+@* 2026-10-25: new page on FeatureDemoLayout; two examples (traveller details, notes with a limit). Facts checked against
+   TextBoxControl.razor(.css), TextBoxTypingBehavior.cs, TextContextMenuModels.cs, NumericTextBoxControl.razor(.css),
+   TextAreaControl.razor(.css), TextAreaScrollBars.cs, Editor/TextAreaControl.razor, PasswordControl.razor,
+   Forms/FormItemControl.razor and wwwroot/textbox-control.js in FlexCore 0.2.49, plus Blazor's blazor.web.js 10.0.2 for how
+   the value property is written. Both namespaces Fx.ControlKit and Fx.ControlKit.Editor are imported site-wide and each has a
+   TextAreaControl, so this page writes Fx.ControlKit.TextAreaControl in full. Neither NumericTextBoxControl nor TextAreaControl
+   captures unmatched attributes, so every field is labelled by a wrapping <label>. *@
+
+<PageTitle>Text inputs — FlexCore Showcase</PageTitle>
+
+<FeatureDemoLayout Title="Text inputs" Category="Components" CategoryHref="components"
+                   ControlName="TextBoxControl · NumericTextBoxControl · TextAreaControl"
+                   Tagline="Single-line text, typed numbers and multi-line notes, each bound two ways to a string or a number."
+                   SourcePath="TextBoxControl.razor; NumericTextBoxControl.razor; TextAreaControl.razor">
+    <Overview>
+        <p>
+            <code>TextBoxControl</code> is a text box bound to a <code>string</code>, or a <code>&lt;textarea&gt;</code> with
+            <code>Multiline</code>. By default it reports <code>ValueChanged</code> when the field changes (Tab out, click away, Enter);
+            <code>UpdateOnInput</code> reports every keystroke instead. <code>NumericTextBoxControl&lt;TValue&gt;</code> is a number input
+            for <code>int</code>, <code>decimal</code>, <code>double</code> or <code>float</code> that parses the text, clamps it to
+            <code>Min</code> and <code>Max</code> and reports only when the entry is committed with Enter, Tab or a click away.
+            <code>TextAreaControl</code> is the multi-line box with a character limit, spell checking, scroll-bar modes and methods that
+            insert text at the caret and move focus.
+        </p>
+        <p>
+            All three render native elements and bind with <code>@@bind-Value</code>. None draws a label; the fields here sit inside a
+            <code>&lt;label&gt;</code>.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="details" Title="Traveller details" RazorCode="@Code.Details" CSharpCode="@Code.DetailsCs" CssCode="@Code.DetailsCss">
+            <Description><p>Name has <code>UpdateOnInput</code>, so its count goes up with every keystroke; Email keeps the default and reports when the field changes: on Tab, a click away or Enter. Travellers clamps quietly: type 20 and it commits as 12. Budget rejects instead: below $250 a head its <code>ValueChange</code> handler sets <code>Cancel</code>, which leaves your figure in the box, marks it <code>aria-invalid</code> and puts focus back. <code>Format="C2"</code> shows 3200.00 in the box, because the control turns <code>C</code> into <code>F</code> for the number input; the summary adds the dollar sign.</p></Description>
+            <Demo>
+                <div class="details">
+                    <label class="field">
+                        <span class="field-label">Lead traveller</span>
+                        <TextBoxControl @bind-Value="_name" @bind-Value:after="CountName" UpdateOnInput="true"
+                                        Placeholder="Full name as on the passport" MaxLength="40" CssClass="text-field" />
+                    </label>
+                    <label class="field">
+                        <span class="field-label">Email</span>
+                        <TextBoxControl @bind-Value="_email" @bind-Value:after="CountEmail" InputType="email"
+                                        Placeholder="name@example.com" MaxLength="80" CssClass="text-field" />
+                    </label>
+                    <label class="field">
+                        <span class="field-label">Travellers (1 to 12)</span>
+                        <NumericTextBoxControl TValue="int" @bind-Value="_travellers" Min="1" Max="12" Width="90px" />
+                    </label>
+                    <label class="field">
+                        <span class="field-label">Budget in dollars, steps of 50</span>
+                        <NumericTextBoxControl TValue="decimal" Value="_budget" ValueChange="CheckBudget"
+                                               Format="C2" Step="50" Min="0" Width="140px" />
+                    </label>
+                </div>
+                <p class="summary">
+                    <strong>@Trip.Name</strong>, @Trip.Nights nights: @(string.IsNullOrWhiteSpace(_name) ? "no lead traveller yet" : _name),
+                    @(string.IsNullOrWhiteSpace(_email) ? "no email yet" : _email), @_travellers travellers,
+                    budget @_budget.ToString("$#,##0") (@((_budget / _travellers).ToString("$#,##0")) a head)
+                </p>
+                <p class="counts">ValueChanged so far: name @_nameUpdates, email @_emailUpdates</p>
+                <p class="warn" role="status">@_budgetNote</p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="notes" Title="Notes with a limit" RazorCode="@Code.Notes" CSharpCode="@Code.NotesCs">
+            <Description><p>A 200-character note bound with <code>UpdateOnInput</code>, so the count follows every keystroke; the browser stops typing at <code>MaxLength</code>. The first button calls <code>InsertTextAsync</code>, which puts the phrase at the caret, or over the selection, although the click moved focus to the button; when the phrase would not fit it returns <code>false</code> and inserts nothing. <code>SpellCheck="true"</code> asks the browser to mark misspellings. The switch turns on the control's own context menu with the <code>Editing</code> items; it replaces the browser's menu, spelling suggestions included.</p></Description>
+            <Demo>
+                <div class="notes">
+                    <label class="field">
+                        <span class="field-label">Booking note for @Trip.Name</span>
+                        <Fx.ControlKit.TextAreaControl @ref="_noteBox" @bind-Value="_note" UpdateOnInput="true" MaxLength="NoteLimit" Rows="5"
+                                                       SpellCheck="true" Placeholder="Dietary needs, room requests, arrival times"
+                                                       UseClassicContextMenu="_classicMenu" ContextMenuItems="TextContextMenuItems.Editing" />
+                    </label>
+                    <div class="note-bar">
+                        <span class="count @(NoteLimit - NoteLength <= 20 ? "near" : null)">@NoteLength / @NoteLimit characters</span>
+                        <ButtonControl OnClick="InsertTransfer">Insert "Airport transfer requested."</ButtonControl>
+                        <ButtonControl OnClick="FocusNote">Focus the note</ButtonControl>
+                        <SwitchControl @bind-Checked="_classicMenu" Label="Classic context menu" />
+                    </div>
+                    <p class="warn" role="status">@_noteStatus</p>
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <DocSections>
+            <DocSection Id="doc-textboxcontrol-parameters" Title="TextBoxControl parameters" Count='@DocSection.Label(Vocab.TextBox.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="TextBoxControl parameters" Rows="Vocab.TextBox" />
+            </DocSection>
+            <DocSection Id="doc-textboxcontrol-password-parameters" Title="TextBoxControl password parameters" Count='@DocSection.Label(Vocab.Password.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="TextBoxControl password parameters" Rows="Vocab.Password" />
+                <p>These apply when <code>InputType="password"</code> on a single-line box. <code>PasswordControl</code> wraps a <code>TextBoxControl</code> with the same mask and eye button for password fields.</p>
+            </DocSection>
+            <DocSection Id="doc-textboxcontrol-events" Title="TextBoxControl events" Count='@DocSection.Label(Vocab.TextBoxEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="TextBoxControl events" Rows="Vocab.TextBoxEvents" />
+            </DocSection>
+            <DocSection Id="doc-textboxcontrol-methods" Title="TextBoxControl methods" Count='@DocSection.Label(Vocab.TextBoxMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="TextBoxControl methods" Rows="Vocab.TextBoxMethods" />
+                <p><code>CommitClientBufferedTypingAsync</code> and <code>OnPasteTruncatedAsync</code> are public only so the control's script can call them.</p>
+            </DocSection>
+            <DocSection Id="doc-numerictextboxcontrol-parameters" Title="NumericTextBoxControl parameters" Count='@DocSection.Label(Vocab.Numeric.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="NumericTextBoxControl parameters" Rows="Vocab.Numeric" />
+            </DocSection>
+            <DocSection Id="doc-numerictextboxcontrol-events" Title="NumericTextBoxControl events" Count='@DocSection.Label(Vocab.NumericEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="NumericTextBoxControl events" Rows="Vocab.NumericEvents" />
+            </DocSection>
+            <DocSection Id="doc-numericchangeeventargs" Title="NumericChangeEventArgs" Count='@DocSection.Label(Vocab.NumericArgs.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="NumericChangeEventArgs" Rows="Vocab.NumericArgs" />
+                <p>The class is nested inside the control, so a handler names it in full: <code>NumericTextBoxControl&lt;decimal&gt;.NumericChangeEventArgs&lt;decimal&gt;</code>, as the budget example does.</p>
+            </DocSection>
+            <DocSection Id="doc-textareacontrol-parameters" Title="TextAreaControl parameters" Count='@DocSection.Label(Vocab.TextArea.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="TextAreaControl parameters" Rows="Vocab.TextArea" />
+                <p>A second, simpler <code>TextAreaControl</code> lives in <code>Fx.ControlKit.Editor</code>: a plain rounded textarea that reports every keystroke unless <code>BindOnChange</code> is set, adds <code>Cols</code>, <code>ReadOnly</code> and <code>Style</code>, and has no context menu, scroll-bar modes, typing modes or methods. With both namespaces imported, write the full name, as this page does with <code>Fx.ControlKit.TextAreaControl</code>.</p>
+            </DocSection>
+            <DocSection Id="doc-textareacontrol-events" Title="TextAreaControl events" Count='@DocSection.Label(Vocab.TextAreaEvents.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="TextAreaControl events" Rows="Vocab.TextAreaEvents" />
+            </DocSection>
+            <DocSection Id="doc-textareacontrol-methods" Title="TextAreaControl methods" Count='@DocSection.Label(Vocab.TextAreaMethods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="TextAreaControl methods" Rows="Vocab.TextAreaMethods" />
+                <p><code>CommitClientBufferedTypingAsync</code> is public only so the control's script can call it.</p>
+            </DocSection>
+            <DocSection Id="doc-textboxtypingbehavior" Title="TextBoxTypingBehavior" Count='@DocSection.Label(Vocab.Typing.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="TextBoxTypingBehavior" Rows="Vocab.Typing" />
+            </DocSection>
+            <DocSection Id="doc-textareascrollbars" Title="TextAreaScrollBars" Count='@DocSection.Label(Vocab.ScrollBars.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="TextAreaScrollBars" Rows="Vocab.ScrollBars" />
+            </DocSection>
+            <DocSection Id="doc-textcontextmenuitems" Title="TextContextMenuItems" Count='@DocSection.Label(Vocab.MenuItems.Length, "values")'>
+                <ApiTable Kind="ApiKind.Values" Title="TextContextMenuItems" Rows="Vocab.MenuItems" />
+                <p>A <code>[Flags]</code> enum used by both <code>TextBoxControl</code> and <code>TextAreaControl</code>; combine members with <code>|</code>.</p>
+            </DocSection>
+        </DocSections>
+    </Vocabulary>
+
+    <Accessibility>
+        <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
+        <ul>
+            <li>All three render a native <code>&lt;input&gt;</code> or <code>&lt;textarea&gt;</code>, so the browser's own caret keys, selection and screen-reader announcements apply.</li>
+            <li>None renders a label. <code>TextBoxControl</code> passes unmatched attributes such as <code>id</code>, <code>aria-label</code> or <code>aria-describedby</code> to its input. <code>NumericTextBoxControl</code> and <code>TextAreaControl</code> accept no unmatched attributes, and an <code>aria-label</code> on them fails when the page renders, so wrap them in a <code>&lt;label&gt;</code> as this page does.</li>
+            <li><code>NumericTextBoxControl</code> sets <code>inputmode</code> to <code>numeric</code> or <code>decimal</code> for on-screen keyboards, and <code>aria-invalid="true"</code> while a <code>ValueChange</code> handler has cancelled the entry. Its spin buttons are hidden by its stylesheet.</li>
+            <li><code>MaxLength</code> is enforced by the browser without a message. Show a count or a note, as the notes example does with a <code>role="status"</code> line.</li>
+            <li>The password eye button has <code>aria-label</code> "Show password" or "Hide password" and <code>aria-pressed</code>; it is kept out of the Tab order (<code>tabindex="-1"</code>) so a form tabs as it would with a plain password box.</li>
+            <li>The classic context menu opens on the browser's <code>contextmenu</code> event and is a list of plain buttons placed after the box, without menu roles. Escape does not close it; a click anywhere does.</li>
+            <li>The classic scroll bar's arrow buttons are <code>aria-hidden</code> and out of the Tab order; the textarea itself still scrolls as the caret moves.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>Text editors inside grid cells and the two typing transports: <a href="demo/grid/typing-modes">Typing modes</a>.</li>
+            <li><code>FormControl</code> builds its text editors from <code>TextBoxControl</code> (<code>Multiline</code> for <code>FormEditorType.TextArea</code>): <a href="demo/forms">Forms</a>.</li>
+            <li>Formatted text with toolbars: <a href="demo/rich-text-editor">Rich text editor</a>. Numbers picked by dragging: <a href="demo/sliders">Sliders</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Traveller details
+    private static readonly TravelData.Package Trip = TravelData.Packages[2];
+
+    private string? _name = "Ana Moreira";
+    private string? _email;
+    private int _nameUpdates, _emailUpdates;
+    private int _travellers = 2;
+    private decimal _budget = 3200m;
+    private string? _budgetNote;
+
+    private void CountName() => _nameUpdates++;
+    private void CountEmail() => _emailUpdates++;
+
+    private void CheckBudget(NumericTextBoxControl<decimal>.NumericChangeEventArgs<decimal> e)
+    {
+        var floor = 250m * _travellers;
+        if (e.Value < floor)
+        {
+            e.Cancel = true;
+            _budgetNote = $"Budget not accepted: at least {floor:$#,##0} for {_travellers} travellers. The box keeps your figure until you change it.";
+            return;
+        }
+        _budget = e.Value;
+        _budgetNote = null;
+    }
+
+    // Notes with a limit
+    private const int NoteLimit = 200;
+    private Fx.ControlKit.TextAreaControl? _noteBox;
+    private string? _note = "Arriving on the late flight on day one; please hold the room.";
+    private bool _classicMenu;
+    private string? _noteStatus;
+
+    private int NoteLength => _note?.Length ?? 0;
+
+    private async Task InsertTransfer()
+    {
+        if (_noteBox is null) return;
+        var inserted = await _noteBox.InsertTextAsync("Airport transfer requested. ");
+        _noteStatus = inserted ? "Inserted at the caret." : $"Not inserted: the phrase would pass the {NoteLimit}-character limit.";
+    }
+
+    private async Task FocusNote()
+    {
+        if (_noteBox is not null) await _noteBox.FocusAsync();
+    }
+
+    // Vocabulary rows, one per public member (FlexCore 0.2.49).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] TextBox =
+        {
+            new("Value", "The text. Bind with <code>@bind-Value</code>.", "string?", "null"),
+            new("ValueExpression", "Set by <code>@bind-Value</code>. Server-backed edits then notify a surrounding <code>EditForm</code>'s <code>EditContext</code>. In the plain case (no <code>UpdateOnInput</code>, <code>OnKeyDown</code>, <code>InputValueChanged</code>, focus or selection options, classic menu or <code>ClientBuffered</code>) the control renders Blazor's own <code>InputText</code>, or <code>InputTextArea</code> when multi-line.", "Expression&lt;Func&lt;string?&gt;&gt;?", "null"),
+            new("Placeholder", "Hint shown while the box is empty. An explicit <code>placeholder</code> attribute wins.", "string?", "null"),
+            new("CssClass", "Class on the input, merged with any <code>class</code> attribute. Without one the input has no styling of its own; this page adds <code>text-field</code>.", "string?", "null"),
+            new("Width", "CSS width written as an inline style, such as <code>250px</code> or <code>100%</code>. On a password box it sizes the wrapper and the input fills it.", "string?", "null"),
+            new("Enabled", "False renders <code>disabled</code>. There is no <code>ReadOnly</code> parameter; a <code>readonly</code> attribute passes through to the input.", "bool", "true"),
+            new("MaxLength", "Writes <code>maxlength</code>. A client-buffered commit is also cut to this length.", "int?", "null"),
+            new("InputType", "The input's <code>type</code>: <code>email</code>, <code>tel</code>, <code>password</code> and so on. Ignored when <code>Multiline</code>; an explicit <code>type</code> attribute wins except for a password box.", "string", "\"text\""),
+            new("Multiline", "Renders a <code>&lt;textarea&gt;</code> instead of an input.", "bool", "false"),
+            new("Rows", "Writes the <code>rows</code> attribute: the visible lines of a multi-line box.", "int?", "null"),
+            new("UpdateOnInput", "Raise <code>ValueChanged</code> on every keystroke instead of when the field changes.", "bool", "false"),
+            new("TypingBehavior", "<code>ClientBuffered</code> keeps keystrokes in the browser and sends the whole value when the box loses focus; see the values table.", "TextBoxTypingBehavior", "TextBoxTypingBehavior.ServerBacked"),
+            new("Uncontrolled", "The browser owns the text, so a parent re-render never writes older text back over what is being typed. False gives the controlled input whose value follows <code>Value</code> on every render.", "bool", "true"),
+            new("ReseedOnOutsideChange", "When the parent sets a different <code>Value</code> from code, a browser-owned box shows it. Grid editors that push values through their own channel set this false.", "bool", "true"),
+            new("AutoFocus", "Focuses the box after the first render and writes <code>autofocus</code>.", "bool", "false"),
+            new("SelectOnFocus", "With <code>AutoFocus</code>, that first focus selects the text. On a later focus the control asks its script to select, and the script skips this whenever the text differs from the element's <code>value</code> attribute, which Blazor does not write, so a box holding text is not selected.", "bool", "false"),
+            new("ReplaceOnFirstInput", "After the box gains focus, the first character typed replaces the whole text and the first Backspace or Delete clears it. A click inside the focused box cancels this.", "bool", "false"),
+            new("SelectAllOnDoubleClick", "Double-click asks the script to select the whole text; the same <code>value</code>-attribute check as <code>SelectOnFocus</code> skips it for a box holding text.", "bool", "false"),
+            new("UseClassicContextMenu", "Replaces the browser's right-click menu with the control's own Windows-style menu.", "bool", "false"),
+            new("ContextMenuItems", "The items the classic menu shows; see the values table.", "TextContextMenuItems", "TextContextMenuItems.Legacy"),
+            new("KeepNativeTab", "For <code>ClientBuffered</code> with an <code>OnKeyDown</code> handler: Tab commits and is reported once, but the browser still moves focus. Grid cell editors leave it false.", "bool", "false"),
+            new("TypingKeysStayLocal", "Keydown events for printable keys, Backspace and Delete are not sent to the server; the text itself still is. Not used with <code>ClientBuffered</code>. For browser-owned editors whose host ignores typing keys, such as the grid's cell editor.", "bool", "false"),
+            new("HtmlAttributes", "More attributes for the input, merged after the unmatched ones.", "Dictionary&lt;string, object&gt;?", "null"),
+            new("ElementReferenceCaptured", "Called after each render with the input's <code>ElementReference</code>.", "Action&lt;ElementReference&gt;?", "null"),
+            new("AdditionalAttributes", "Captures unmatched attributes (<code>id</code>, <code>aria-label</code>, <code>readonly</code>…) and writes them on the input.", "IDictionary&lt;string, object&gt;?", "null"),
+        };
+        public static readonly ApiRow[] Password =
+        {
+            new("ShowPasswordToggle", "Shows the eye button that reveals and hides the password.", "bool", "true"),
+            new("RevealLastTypedCharacter", "Briefly draws the character just typed over the masked box. Pasted, autofilled and programmatic text stays masked.", "bool", "true"),
+            new("PasswordRevealDurationMs", "How long that character shows. 0 turns it off; values above 2000 are capped at 2000.", "int", "1000"),
+            new("ExistingPasswordViewable", "False starts the box blank and never renders the supplied <code>Value</code>; a blank commit before any typing is ignored. Keep the saved value on the server.", "bool", "true"),
+            new("PasswordRevealUnavailableReason", "Keeps the eye visible but disabled, with this text as its label and tooltip, for example when only a hash is stored.", "string?", "null"),
+        };
+        public static readonly ApiRow[] TextBoxEvents =
+        {
+            new("ValueChanged", "When the field changes (Tab out, click away, Enter), or on every keystroke with <code>UpdateOnInput</code>. With <code>ClientBuffered</code>, when the box loses focus. Also after a classic-menu command that changed the text.", "string?"),
+            new("InputValueChanged", "A plain <code>Action&lt;string?&gt;</code> called with the text on every input event, with or without <code>UpdateOnInput</code> (with <code>ClientBuffered</code>, on each commit). It does not re-render the parent.", "string?"),
+            new("OnKeyDown", "Key presses in the box; while it is unset, the box sends no keydown events to the server. With <code>ClientBuffered</code> it receives the commit keys (Enter, Tab, Up, Down, the page keys) after the value has been sent, and Escape without sending it; it never sees the typing keys.", "KeyboardEventArgs"),
+            new("OnBlur", "When the box loses focus, after a client-buffered draft has been sent.", null),
+            new("OnPasteTruncated", "A paste was cut short by <code>MaxLength</code>. The browser trims before any input event, so this is the only notice.", "(int PastedLength, int MaxLength)"),
+        };
+        public static readonly ApiRow[] TextBoxMethods =
+        {
+            new("FocusAsync(bool preventScroll = true)", "Focuses the input.", "ValueTask"),
+            new("FlushClientBufferedValueAsync() / FlushClientBufferedValueAsync(bool requireCurrentValue)", "With <code>ClientBuffered</code>, reads the browser's text and raises <code>ValueChanged</code> now, for a Save button that should not wait for blur. With <code>requireCurrentValue</code> a failed read throws instead of leaving the older value.", "Task"),
+        };
+        public static readonly ApiRow[] Numeric =
+        {
+            new("Value", "The number. Bind with <code>@bind-Value</code> and set <code>TValue</code> to <code>int</code>, <code>decimal</code>, <code>double</code>, <code>float</code> or a nullable form of one.", "TValue?", "default"),
+            new("Format", "A .NET format for the number shown, applied with the invariant culture. Every <code>C</code> and <code>N</code> in it becomes <code>F</code>, so <code>C2</code> shows <code>3200.00</code> without a symbol. A custom format with group separators gives text a number input cannot display.", "string?", "null"),
+            new("Placeholder", "Hint shown while the box is empty.", "string?", "null"),
+            new("Width", "CSS width written as an inline style.", "string?", "null"),
+            new("CssClass", "Added after <code>fx-numeric</code>.", "string?", "null"),
+            new("Enabled", "False renders <code>disabled</code> (greyed by the stylesheet).", "bool", "true"),
+            new("Min / Max", "Bounds. A committed value outside them is replaced by the bound. Also written as the input's <code>min</code> and <code>max</code>.", "decimal?", "null"),
+            new("Step", "The input's <code>step</code>, which the browser uses for ArrowUp and ArrowDown. The default 1 writes <code>step=\"any\"</code>; any other value is written as given and makes <code>inputmode</code> <code>decimal</code>.", "decimal", "1"),
+            new("MaxLength", "Writes <code>maxlength</code> and switches the input to <code>type=\"text\"</code>, because number inputs ignore <code>maxlength</code>.", "int?", "null"),
+            new("TabIndex", "The input's <code>tabindex</code>.", "int?", "null"),
+            new("ClearOnCommit", "After each accepted commit the box clears and <code>ValueChanged</code> receives the default value (null for a nullable type). After an Enter commit focus stays in the box.", "bool", "false"),
+        };
+        public static readonly ApiRow[] NumericEvents =
+        {
+            new("ValueChanged", "On commit (Enter, Tab, a click away), after parsing and clamping; never per keystroke. Blank or unreadable text commits as 0, or null for a nullable type when blank, before <code>Min</code> and <code>Max</code> apply.", "TValue?"),
+            new("ValueChange", "Right after <code>ValueChanged</code>, with the same value. Setting <code>Cancel</code> keeps the typed text, marks the input <code>aria-invalid</code>, returns focus to it and skips <code>ClearOnCommit</code>. It does not undo the <code>ValueChanged</code> call, so a page that rejects values listens to this one only, as the budget box does.", "NumericChangeEventArgs&lt;TValue&gt;"),
+        };
+        public static readonly ApiRow[] NumericArgs =
+        {
+            new("Value", "The parsed, clamped value.", "TValue?", "default"),
+            new("Cancel", "Set true to reject the commit; see <code>ValueChange</code>.", "bool", "false"),
+        };
+        public static readonly ApiRow[] TextArea =
+        {
+            new("Value", "The text. Bind with <code>@bind-Value</code>.", "string?", "null"),
+            new("ValueExpression", "Accepted so <code>@bind-Value</code> compiles; otherwise unused, so there is no <code>EditForm</code> field tracking.", "Expression&lt;Func&lt;string?&gt;&gt;?", "null"),
+            new("Placeholder", "Hint shown while the box is empty.", "string?", "null"),
+            new("CssClass", "Added to the textarea; with the classic scroll bar it goes on the host <code>&lt;div&gt;</code> instead.", "string?", "null"),
+            new("Enabled", "False renders <code>disabled</code>: grey background, no resizing. There is no <code>ReadOnly</code> parameter.", "bool", "true"),
+            new("MaxLength", "Writes <code>maxlength</code>. <code>InsertTextAsync</code> refuses text that would pass it, and a client-buffered commit is cut to it.", "int?", "null"),
+            new("Rows", "Visible lines; 4 when null.", "int?", "null"),
+            new("SpellCheck", "Writes <code>spellcheck=\"true\"</code> or <code>\"false\"</code>; null leaves the browser's default.", "bool?", "null"),
+            new("ScrollBars", "Native scrolling per axis; <code>Horizontal</code> and <code>Both</code> also turn wrapping off. <code>Vertical</code> and <code>Both</code> switch to the classic scroll bar unless <code>ClassicScrollBar</code> is false.", "TextAreaScrollBars", "TextAreaScrollBars.Auto"),
+            new("ClassicScrollBar", "A drawn 16px vertical scroll bar with arrow buttons, track and thumb beside the text. Null follows <code>ScrollBars</code>.", "bool?", "null"),
+            new("UpdateOnInput", "Raise <code>ValueChanged</code> on every keystroke instead of when the box loses focus.", "bool", "false"),
+            new("Uncontrolled", "The textarea renders its first value once and later renders never rewrite it. Give it a new <code>@key</code> to load different text.", "bool", "false"),
+            new("TypingBehavior", "<code>ClientBuffered</code> keeps keystrokes in the browser and sends the whole text once, when the box loses focus. Enter stays a new line.", "TextBoxTypingBehavior", "TextBoxTypingBehavior.ServerBacked"),
+            new("TabSpaces", "Above 0, Tab inserts this many spaces at the caret instead of leaving the box. Shift+Tab still leaves.", "int", "0"),
+            new("ReplaceOnFirstInput", "After the box gains focus, the first character typed replaces the whole text and the first Backspace or Delete clears it.", "bool", "false"),
+            new("SelectAllOnDoubleClick", "Double-click asks the script to select the whole text. The script skips this whenever the text differs from the element's <code>value</code> attribute, and a textarea never has one, so a box holding text is not selected.", "bool", "false"),
+            new("UseClassicContextMenu", "Replaces the browser's right-click menu, and its spelling suggestions, with the control's own menu.", "bool", "false"),
+            new("ContextMenuItems", "The items the classic menu shows.", "TextContextMenuItems", "TextContextMenuItems.Legacy"),
+        };
+        public static readonly ApiRow[] TextAreaEvents =
+        {
+            new("ValueChanged", "When the box loses focus after an edit, or on every keystroke with <code>UpdateOnInput</code>; with <code>ClientBuffered</code>, on blur. Also after <code>InsertTextAsync</code>, <code>FlushClientBufferedValueAsync</code> and a classic-menu command that changed the text.", "string?"),
+        };
+        public static readonly ApiRow[] TextAreaMethods =
+        {
+            new("InsertTextAsync(string text)", "Inserts the whole text at the caret, or over the selection, and focuses the box. Works after focus has moved to a button, because the textarea keeps its selection. Returns false and inserts nothing when the result would pass <code>MaxLength</code>, the box is disabled or the text is empty; throws <code>InvalidOperationException</code> when the control's script cannot load.", "Task&lt;bool&gt;"),
+            new("FocusAsync()", "Focuses the textarea without moving its caret or selection.", "ValueTask"),
+            new("FlushClientBufferedValueAsync()", "With <code>Uncontrolled</code> or <code>ClientBuffered</code>, reads the browser's text and raises <code>ValueChanged</code> now, without waiting for blur.", "Task"),
+        };
+        public static readonly ApiRow[] Typing =
+        {
+            new("ServerBacked", "The default: edits travel through Blazor's own input and change events."),
+            new("ClientBuffered", "Input and change events are stopped in the browser and the whole value is sent in one call when the box loses focus. A <code>TextBoxControl</code> with an <code>OnKeyDown</code> handler also commits on Enter, Tab, Up, Down and the page keys, as a grid cell editor needs."),
+        };
+        public static readonly ApiRow[] ScrollBars =
+        {
+            new("Auto", "The default: a scroll bar appears when the text overflows."),
+            new("None", "No scroll bars; overflow is hidden."),
+            new("Horizontal", "Horizontal scrolling only; wrapping is off."),
+            new("Vertical", "A vertical scroll bar always shown; the classic one unless <code>ClassicScrollBar</code> is false."),
+            new("Both", "Both scroll bars always shown and wrapping off; the vertical one is classic unless <code>ClassicScrollBar</code> is false."),
+        };
+        public static readonly ApiRow[] MenuItems =
+        {
+            new("None", "No items."),
+            new("Undo · Cut · Copy · Paste · Delete · SelectAll", "The editing commands. Cut, Copy and Delete need a selection; Select All is off when the box is empty or fully selected; Undo, Cut, Paste and Delete are off when the control is disabled. Paste reads the clipboard through the browser, which may ask for permission first."),
+            new("ReadingOrder", "Switches the box between left-to-right and right-to-left; shown checked while right-to-left."),
+            new("UnicodeOptions", "Two Unicode control-character items kept for the Windows look; always disabled."),
+            new("Ime", "An \"Open IME\" item whose command does nothing."),
+            new("Reconversion", "A \"Reconversion\" item; always disabled."),
+            new("Editing", "Undo, Cut, Copy, Paste, Delete and SelectAll. The notes example uses this."),
+            new("Legacy · All", "Every item above. <code>Legacy</code> is the default."),
+        };
+        public static readonly ApiRow[] Keys =
+        {
+            new("Enter (NumericTextBoxControl)", "Commits the typed number: parse, clamp, <code>ValueChanged</code>, then <code>ValueChange</code>."),
+            new("Tab, or a click away", "Commits a <code>NumericTextBoxControl</code>, and raises the change-time <code>ValueChanged</code> of the text controls when <code>UpdateOnInput</code> is off."),
+            new("Enter (single-line TextBoxControl, server-backed)", "The browser's change event fires, so a changed value is reported without leaving the box."),
+            new("ArrowUp / ArrowDown (NumericTextBoxControl)", "The browser's own number-input stepping, while the input is <code>type=\"number\"</code> (no <code>MaxLength</code>). With <code>Step</code> other than 1 it steps by that amount."),
+            new("Tab (TextAreaControl with TabSpaces)", "Inserts spaces at the caret. Shift+Tab still moves focus back."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Details = @"<div class=""details"">
+    <label class=""field"">
+        <span class=""field-label"">Lead traveller</span>
+        <TextBoxControl @bind-Value=""_name"" @bind-Value:after=""CountName"" UpdateOnInput=""true""
+                        Placeholder=""Full name as on the passport"" MaxLength=""40"" CssClass=""text-field"" />
+    </label>
+    <label class=""field"">
+        <span class=""field-label"">Email</span>
+        <TextBoxControl @bind-Value=""_email"" @bind-Value:after=""CountEmail"" InputType=""email""
+                        Placeholder=""name@example.com"" MaxLength=""80"" CssClass=""text-field"" />
+    </label>
+    <label class=""field"">
+        <span class=""field-label"">Travellers (1 to 12)</span>
+        <NumericTextBoxControl TValue=""int"" @bind-Value=""_travellers"" Min=""1"" Max=""12"" Width=""90px"" />
+    </label>
+    <label class=""field"">
+        <span class=""field-label"">Budget in dollars, steps of 50</span>
+        <NumericTextBoxControl TValue=""decimal"" Value=""_budget"" ValueChange=""CheckBudget""
+                               Format=""C2"" Step=""50"" Min=""0"" Width=""140px"" />
+    </label>
+</div>
+<p class=""summary"">
+    <strong>@Trip.Name</strong>, @Trip.Nights nights: @(string.IsNullOrWhiteSpace(_name) ? ""no lead traveller yet"" : _name),
+    @(string.IsNullOrWhiteSpace(_email) ? ""no email yet"" : _email), @_travellers travellers,
+    budget @_budget.ToString(""$#,##0"") (@((_budget / _travellers).ToString(""$#,##0"")) a head)
+</p>
+<p class=""counts"">ValueChanged so far: name @_nameUpdates, email @_emailUpdates</p>
+<p class=""warn"" role=""status"">@_budgetNote</p>";
+
+        public const string DetailsCs = @"// Traveller details
+private static readonly TravelData.Package Trip = TravelData.Packages[2];
+
+private string? _name = ""Ana Moreira"";
+private string? _email;
+private int _nameUpdates, _emailUpdates;
+private int _travellers = 2;
+private decimal _budget = 3200m;
+private string? _budgetNote;
+
+private void CountName() => _nameUpdates++;
+private void CountEmail() => _emailUpdates++;
+
+private void CheckBudget(NumericTextBoxControl<decimal>.NumericChangeEventArgs<decimal> e)
+{
+    var floor = 250m * _travellers;
+    if (e.Value < floor)
+    {
+        e.Cancel = true;
+        _budgetNote = $""Budget not accepted: at least {floor:$#,##0} for {_travellers} travellers. The box keeps your figure until you change it."";
+        return;
+    }
+    _budget = e.Value;
+    _budgetNote = null;
+}";
+
+        public const string DetailsCss = @".details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; max-width: 620px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: 12.5px; color: #475569; }
+.details ::deep .text-field { padding: 4px 8px; border: 1px solid #c9c9c9; border-radius: 4px; font: inherit; }
+.details ::deep .text-field:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15); }
+.summary { margin: 14px 0 4px; font-size: 13px; }
+.counts { margin: 0; font-size: 12px; color: #64748b; }
+.warn { min-height: 1.3em; margin: 6px 0 0; font-size: 12.5px; color: #b45309; }
+@media (max-width: 640px) { .details { grid-template-columns: 1fr; } }";
+
+        public const string Notes = @"<div class=""notes"">
+    <label class=""field"">
+        <span class=""field-label"">Booking note for @Trip.Name</span>
+        <Fx.ControlKit.TextAreaControl @ref=""_noteBox"" @bind-Value=""_note"" UpdateOnInput=""true"" MaxLength=""NoteLimit"" Rows=""5""
+                                       SpellCheck=""true"" Placeholder=""Dietary needs, room requests, arrival times""
+                                       UseClassicContextMenu=""_classicMenu"" ContextMenuItems=""TextContextMenuItems.Editing"" />
+    </label>
+    <div class=""note-bar"">
+        <span class=""count @(NoteLimit - NoteLength <= 20 ? ""near"" : null)"">@NoteLength / @NoteLimit characters</span>
+        <ButtonControl OnClick=""InsertTransfer"">Insert ""Airport transfer requested.""</ButtonControl>
+        <ButtonControl OnClick=""FocusNote"">Focus the note</ButtonControl>
+        <SwitchControl @bind-Checked=""_classicMenu"" Label=""Classic context menu"" />
+    </div>
+    <p class=""warn"" role=""status"">@_noteStatus</p>
+</div>";
+
+        public const string NotesCs = @"// Notes with a limit
+private const int NoteLimit = 200;
+private Fx.ControlKit.TextAreaControl? _noteBox;
+private string? _note = ""Arriving on the late flight on day one; please hold the room."";
+private bool _classicMenu;
+private string? _noteStatus;
+
+private int NoteLength => _note?.Length ?? 0;
+
+private async Task InsertTransfer()
+{
+    if (_noteBox is null) return;
+    var inserted = await _noteBox.InsertTextAsync(""Airport transfer requested. "");
+    _noteStatus = inserted ? ""Inserted at the caret."" : $""Not inserted: the phrase would pass the {NoteLimit}-character limit."";
+}
+
+private async Task FocusNote()
+{
+    if (_noteBox is not null) await _noteBox.FocusAsync();
+}";
+    }
+}
