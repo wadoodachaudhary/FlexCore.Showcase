@@ -7,6 +7,11 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <!-- OurAirports snapshot (public domain) used by the airport examples; Data/AirportData.cs reads it. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Data\OurAirports\*.tsv" LogicalName="FlexCore.Showcase.Data.OurAirports.%(Filename)%(Extension)" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\FlexCore\FlexCore.csproj" />
     <ProjectReference Include="..\FlexCore\FlexCore.Documents\FlexCore.Documents.csproj" />

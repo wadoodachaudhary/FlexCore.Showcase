@@ -1,51 +1,82 @@
 @page "/demo/grid"
 @page "/demo/grid/radzen-comparison"
 @using FlexCore.Showcase.Components.Shared
+@using FlexCore.Showcase.Data
 
 @* 2026-10-17: moved onto FeatureDemoLayout (one-example-plus-code push, tracker section 6). The grid and its data are unchanged;
    the hand-typed markup block became Razor and C# tabs copied from the live example. "Right-click for menu" left the copy:
    GridControl only raises OnContextMenu when the host handles it, and this page does not. Parameter tables are a later pass (SC-278). 
    2026-10-24: Documentation written: all 224 GridControl parameters in 27 purpose groups plus AggregateRow and AggregateColumn, rows in
-   GridVocab.A.cs and GridVocab.B.cs (two agents, read sites checked with scratchpad/vocabcheck.py). *@
+   GridVocab.A.cs and GridVocab.B.cs (two agents, read sites checked with scratchpad/vocabcheck.py).
+   2026-10-26 (Baaria: a better grid example, on open data used by several pages): the ten-employee list became the 4,009 airports
+   with an IATA code and scheduled service in the OurAirports dump (public domain; Data/OurAirports, Data/AirportData.cs), grouped by
+   continent with count, average elevation and longest runway in the captions; search, sort, filter, group, frozen code column. *@
 
 <PageTitle>Data Grid — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Data Grid" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Sort, filter, group and resize a bound list. Every other grid page takes one feature further."
+                   Tagline="Search, sort, filter and group 4,009 real airports. Every other grid page takes one feature further."
                    SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs;Grid/GridControl.AdvancedFeatures.cs;Grid/GridControl.PresentationFeatures.cs;Grid/GridControl.ItemsProvider.cs;Grid/GridControl.ColumnVirtualization.cs;Grid/GridControl.ProviderGrouping.cs;Grid/GridControl.ProviderExport.cs;Grid/GridModels.cs">
     <Overview>
         <p>
             <code>GridControl</code> binds a list through <code>DataSource</code> and <code>TValue</code>, declares its columns in
-            <code>GridColumnsBase</code> and switches behaviours on with <code>Allow*</code> flags. This page shows the core set on a
-            ten-row list. The pages in the Data Grid menu each take one feature further, from batch editing and frozen columns to
+            <code>GridColumnsBase</code> and switches behaviours on with <code>Allow*</code> flags. This page shows the core set on real data:
+            4,009 airports from <a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports</a>, which is in the public domain. The pages in the Data Grid menu each take one feature further, from batch editing and frozen columns to
             on-demand loading, grouping with totals and the tree grid; they are listed under Related.
         </p>
     </Overview>
 
     <Examples>
-        <DemoExample Id="people" Title="Sort, filter, group and resize" RazorCode="@Code.People" CSharpCode="@Code.PeopleCs">
-            <Description><p>Click a header to sort. Use the filter icon in a header to filter. Drag a header into the bar above the grid to group by it, drag a header edge to resize, and drag a header sideways to reorder (<code>AllowColumnReorder</code> is on by default).</p></Description>
+        <DemoExample Id="airports" Title="4,009 airports: search, sort, filter and group" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs" CssCode="@Code.AirportsCss">
+            <Description><p>Every airport with an IATA code and scheduled passenger service in the <a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports</a> data (public domain, snapshot of 26 October 2026). The grid opens grouped by continent, and each caption counts the airports and gives their average elevation and longest runway. Type in the search box (try <em>Lisbon</em> or <em>Iceland</em>), click a header to sort (Elevation finds the highest airports), use a header's filter icon, or drag the Continent chip out of the bar above the grid for one flat list. Scroll sideways for runways, city and the Wikipedia article: the Code column stays put. Only the rows in view are rendered.</p></Description>
             <Demo>
-                <GridControl TValue="Person" DataSource="@_people"
-                             AllowSelection="true"
-                             AllowSorting="true"
-                             AllowFiltering="true"
-                             AllowGrouping="true"
-                             AllowResizing="true"
-                             EnableHover="true"
-                             Height="420px">
-                    <GridColumnsBase>
-                        <GridColumn Field="@nameof(Person.Id)"        HeaderText="ID"          Width="60px"
-                                    Type="ColumnType.Number" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(Person.Name)"      HeaderText="Name"        Width="160px" />
-                        <GridColumn Field="@nameof(Person.Department)" HeaderText="Department" Width="160px" />
-                        <GridColumn Field="@nameof(Person.Role)"      HeaderText="Role"        Width="160px" />
-                        <GridColumn Field="@nameof(Person.Salary)"    HeaderText="Salary"      Width="120px"
-                                    Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(Person.HireDate)"  HeaderText="Hire Date"   Width="120px"
-                                    Type="ColumnType.Date" Format="d" />
-                    </GridColumnsBase>
-                </GridControl>
+                <div class="airports">
+                    <GridControl TValue="Airport" DataSource="@_airports"
+                                 AllowSelection="true"
+                                 AllowSorting="true"
+                                 AllowFiltering="true"
+                                 AllowGrouping="true"
+                                 AllowResizing="true"
+                                 EnableHover="true"
+                                 ShowSearchBar="true"
+                                 GroupColumns="@_groupColumns"
+                                 AggregateRows="_aggregates"
+                                 Height="560px">
+                        <GridColumnsBase>
+                            <GridColumn Field="@nameof(Airport.Code)" HeaderText="Code" Width="80px"
+                                        IsFrozen="true" FrozenPosition="FrozenColumnPosition.Left">
+                                <Template Context="row">
+                                    <span class="code">@(((Airport)row).Code)</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(Airport.Name)" HeaderText="Airport" Width="240px" />
+                            <GridColumn Field="@nameof(Airport.Country)" HeaderText="Country" Width="140px" />
+                            <GridColumn Field="@nameof(Airport.Type)" HeaderText="Type" Width="90px">
+                                <Template Context="row">
+                                    @{ var type = ((Airport)row).Type; }
+                                    <BadgeControl Text="@type" CssClass="@($"type type-{type.ToLowerInvariant()}")" />
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(Airport.ElevationFt)" HeaderText="Elevation (ft)" Width="110px"
+                                        Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" />
+                            <GridColumn Field="@nameof(Airport.LongestRunwayFt)" HeaderText="Longest runway (ft)" Width="150px"
+                                        Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" />
+                            <GridColumn Field="@nameof(Airport.Runways)" HeaderText="Runways" Width="90px"
+                                        Type="ColumnType.Number" TextAlign="TextAlign.Right" />
+                            <GridColumn Field="@nameof(Airport.City)" HeaderText="City" Width="130px" />
+                            <GridColumn Field="@nameof(Airport.Continent)" HeaderText="Continent" Width="120px" />
+                            <GridColumn Field="@nameof(Airport.Wikipedia)" HeaderText="Wikipedia" Width="90px" AllowSorting="false" AllowFiltering="false">
+                                <Template Context="row">
+                                    @{ var link = ((Airport)row).Wikipedia; }
+                                    @if (!string.IsNullOrEmpty(link))
+                                    {
+                                        <a href="@link" target="_blank" rel="noopener">Article</a>
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumnsBase>
+                    </GridControl>
+                </div>
             </Demo>
         </DemoExample>
     </Examples>
@@ -126,59 +157,107 @@
 </FeatureDemoLayout>
 
 @code {
-    record Person(int Id, string Name, string Department, string Role, decimal Salary, DateTime HireDate);
+    // Airports: the OurAirports snapshot (Data/AirportData.cs), grouped by continent to start. Count needs a numeric field, so it
+    // counts Runways, which every airport has.
+    private readonly IReadOnlyList<Airport> _airports = AirportData.Airports;
 
-    private List<Person> _people = new()
+    private List<string> _groupColumns = new() { nameof(Airport.Continent) };
+
+    private List<AggregateRow> _aggregates = new()
     {
-        new(1,  "Avery Chen",      "Engineering", "Senior Engineer", 145_000m, new(2021, 3, 14)),
-        new(2,  "Blake Rivera",    "Engineering", "Engineer",         98_000m, new(2023, 6, 1)),
-        new(3,  "Casey Patel",     "Engineering", "Lead",            172_000m, new(2019, 9, 22)),
-        new(4,  "Drew Yamamoto",   "Design",      "UX Designer",     112_000m, new(2022, 1, 9)),
-        new(5,  "Elliot Marquez",  "Design",      "Senior Designer", 131_000m, new(2020, 8, 3)),
-        new(6,  "Finley Okafor",   "Product",     "PM",              125_000m, new(2022, 11, 15)),
-        new(7,  "Gray Solberg",    "Product",     "Senior PM",       154_000m, new(2018, 4, 28)),
-        new(8,  "Hayden Lin",      "Sales",       "AE",               92_000m, new(2024, 2, 5)),
-        new(9,  "Indigo Brooks",   "Sales",       "Senior AE",       118_000m, new(2021, 7, 17)),
-        new(10, "Jess Wakefield",  "Marketing",   "Manager",         108_000m, new(2020, 12, 2)),
+        new AggregateRow
+        {
+            ShowInGroupCaption = true,
+            Columns = new()
+            {
+                new AggregateColumn { Field = nameof(Airport.Runways), Type = AggregateType.Count,
+                    GroupCaptionTemplate = "{value} airports" },
+                new AggregateColumn { Field = nameof(Airport.ElevationFt), Type = AggregateType.Average, Format = "N0",
+                    GroupCaptionTemplate = "avg elevation {value} ft" },
+                new AggregateColumn { Field = nameof(Airport.LongestRunwayFt), Type = AggregateType.Max, Format = "N0",
+                    GroupCaptionTemplate = "longest runway {value} ft" },
+            }
+        }
     };
 
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
     private static class Code
     {
-        public const string People = @"<GridControl TValue=""Person"" DataSource=""@_people""
-             AllowSelection=""true""
-             AllowSorting=""true""
-             AllowFiltering=""true""
-             AllowGrouping=""true""
-             AllowResizing=""true""
-             EnableHover=""true""
-             Height=""420px"">
-    <GridColumnsBase>
-        <GridColumn Field=""@nameof(Person.Id)""        HeaderText=""ID""          Width=""60px""
-                    Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(Person.Name)""      HeaderText=""Name""        Width=""160px"" />
-        <GridColumn Field=""@nameof(Person.Department)"" HeaderText=""Department"" Width=""160px"" />
-        <GridColumn Field=""@nameof(Person.Role)""      HeaderText=""Role""        Width=""160px"" />
-        <GridColumn Field=""@nameof(Person.Salary)""    HeaderText=""Salary""      Width=""120px""
-                    Type=""ColumnType.Number"" Format=""C0"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(Person.HireDate)""  HeaderText=""Hire Date""   Width=""120px""
-                    Type=""ColumnType.Date"" Format=""d"" />
-    </GridColumnsBase>
-</GridControl>";
-        public const string PeopleCs = @"record Person(int Id, string Name, string Department, string Role, decimal Salary, DateTime HireDate);
+        public const string Airports = @"<div class=""airports"">
+    <GridControl TValue=""Airport"" DataSource=""@_airports""
+                 AllowSelection=""true""
+                 AllowSorting=""true""
+                 AllowFiltering=""true""
+                 AllowGrouping=""true""
+                 AllowResizing=""true""
+                 EnableHover=""true""
+                 ShowSearchBar=""true""
+                 GroupColumns=""@_groupColumns""
+                 AggregateRows=""_aggregates""
+                 Height=""560px"">
+        <GridColumnsBase>
+            <GridColumn Field=""@nameof(Airport.Code)"" HeaderText=""Code"" Width=""80px""
+                        IsFrozen=""true"" FrozenPosition=""FrozenColumnPosition.Left"">
+                <Template Context=""row"">
+                    <span class=""code"">@(((Airport)row).Code)</span>
+                </Template>
+            </GridColumn>
+            <GridColumn Field=""@nameof(Airport.Name)"" HeaderText=""Airport"" Width=""240px"" />
+            <GridColumn Field=""@nameof(Airport.Country)"" HeaderText=""Country"" Width=""140px"" />
+            <GridColumn Field=""@nameof(Airport.Type)"" HeaderText=""Type"" Width=""90px"">
+                <Template Context=""row"">
+                    @{ var type = ((Airport)row).Type; }
+                    <BadgeControl Text=""@type"" CssClass=""@($""type type-{type.ToLowerInvariant()}"")"" />
+                </Template>
+            </GridColumn>
+            <GridColumn Field=""@nameof(Airport.ElevationFt)"" HeaderText=""Elevation (ft)"" Width=""110px""
+                        Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" />
+            <GridColumn Field=""@nameof(Airport.LongestRunwayFt)"" HeaderText=""Longest runway (ft)"" Width=""150px""
+                        Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" />
+            <GridColumn Field=""@nameof(Airport.Runways)"" HeaderText=""Runways"" Width=""90px""
+                        Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" />
+            <GridColumn Field=""@nameof(Airport.City)"" HeaderText=""City"" Width=""130px"" />
+            <GridColumn Field=""@nameof(Airport.Continent)"" HeaderText=""Continent"" Width=""120px"" />
+            <GridColumn Field=""@nameof(Airport.Wikipedia)"" HeaderText=""Wikipedia"" Width=""90px"" AllowSorting=""false"" AllowFiltering=""false"">
+                <Template Context=""row"">
+                    @{ var link = ((Airport)row).Wikipedia; }
+                    @if (!string.IsNullOrEmpty(link))
+                    {
+                        <a href=""@link"" target=""_blank"" rel=""noopener"">Article</a>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumnsBase>
+    </GridControl>
+</div>";
+        public const string AirportsCs = @"// Airports: the OurAirports snapshot (Data/AirportData.cs), grouped by continent to start. Count needs a numeric field, so it
+// counts Runways, which every airport has.
+private readonly IReadOnlyList<Airport> _airports = AirportData.Airports;
 
-private List<Person> _people = new()
+private List<string> _groupColumns = new() { nameof(Airport.Continent) };
+
+private List<AggregateRow> _aggregates = new()
 {
-    new(1,  ""Avery Chen"",      ""Engineering"", ""Senior Engineer"", 145_000m, new(2021, 3, 14)),
-    new(2,  ""Blake Rivera"",    ""Engineering"", ""Engineer"",         98_000m, new(2023, 6, 1)),
-    new(3,  ""Casey Patel"",     ""Engineering"", ""Lead"",            172_000m, new(2019, 9, 22)),
-    new(4,  ""Drew Yamamoto"",   ""Design"",      ""UX Designer"",     112_000m, new(2022, 1, 9)),
-    new(5,  ""Elliot Marquez"",  ""Design"",      ""Senior Designer"", 131_000m, new(2020, 8, 3)),
-    new(6,  ""Finley Okafor"",   ""Product"",     ""PM"",              125_000m, new(2022, 11, 15)),
-    new(7,  ""Gray Solberg"",    ""Product"",     ""Senior PM"",       154_000m, new(2018, 4, 28)),
-    new(8,  ""Hayden Lin"",      ""Sales"",       ""AE"",               92_000m, new(2024, 2, 5)),
-    new(9,  ""Indigo Brooks"",   ""Sales"",       ""Senior AE"",       118_000m, new(2021, 7, 17)),
-    new(10, ""Jess Wakefield"",  ""Marketing"",   ""Manager"",         108_000m, new(2020, 12, 2)),
+    new AggregateRow
+    {
+        ShowInGroupCaption = true,
+        Columns = new()
+        {
+            new AggregateColumn { Field = nameof(Airport.Runways), Type = AggregateType.Count,
+                GroupCaptionTemplate = ""{value} airports"" },
+            new AggregateColumn { Field = nameof(Airport.ElevationFt), Type = AggregateType.Average, Format = ""N0"",
+                GroupCaptionTemplate = ""avg elevation {value} ft"" },
+            new AggregateColumn { Field = nameof(Airport.LongestRunwayFt), Type = AggregateType.Max, Format = ""N0"",
+                GroupCaptionTemplate = ""longest runway {value} ft"" },
+        }
+    }
 };";
+        public const string AirportsCss = @".airports ::deep .code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; color: #0f172a; }
+.airports ::deep .type { font-size: 11px; font-weight: 600; }
+.airports ::deep .type-large { background: #dbeafe; color: #1e40af; }
+.airports ::deep .type-medium { background: #ccfbf1; color: #115e59; }
+.airports ::deep .type-small { background: #f1f5f9; color: #475569; }
+.airports ::deep .fx-group-caption-agg { margin-left: 12px; color: #475569; font-weight: 400; }
+.airports ::deep a { color: #0284c7; }";
     }
 }
