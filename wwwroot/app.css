@@ -599,6 +599,24 @@ h1:focus {
     cursor: pointer !important;
 }
 
+/* DropDownGridControl keeps its popup hidden at top/left -9999px until two JS round trips (loading its module, then measuring) and
+   a server render place it: 0.6 to 0.85 s on the live site from Pakistan, against about 0.23 s for the popup's markup to arrive.
+   While it waits in that state, CSS anchor positioning shows it under its box at once; the library's own placement replaces the
+   inline style and this rule stops matching (measured 2026-10-26: the two positions agree within 1 px). Browsers without anchor
+   positioning keep the library's behaviour. If the library's hidden-state inline style changes, this simply stops matching. */
+@supports (anchor-name: --a) {
+    .fx-dropdown-grid.fx-open > .fx-dropdown-grid-input-wrap {
+        anchor-name: --fx-dropdown-grid-open;
+    }
+    .fx-dropdown-grid-popup[style*="top: -9999px"] {
+        position-anchor: --fx-dropdown-grid-open;
+        top: anchor(bottom) !important;
+        left: anchor(left) !important;
+        visibility: visible !important;
+        position-try-fallbacks: flip-block;
+    }
+}
+
 /* ── DropDownGrid Floating Popup & Stacking Elevation ── */
 .fx-row:has(.fx-dropdown-grid.fx-open),
 tr:has(.fx-dropdown-grid.fx-open),
