@@ -12,3 +12,70 @@
 .strip-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
 .strip-actions .result { margin: 0; }
 .acc { max-width: 480px; }
+
+/* 2026-10-26: outlined folder tabs in FlexCore colours for both tab examples. Each control sits in a .folder-tabs wrapper and the
+   rules reach the library's markup through ::deep, so tabs elsewhere on the site keep their own look. */
+.folder-tabs ::deep .fx-tab-headers,
+.folder-tabs ::deep .fx-tabstrip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0 0 0 4px;
+    overflow: visible;
+    background: transparent;
+    border-bottom: 1px solid #cbd5e1;
+}
+.folder-tabs ::deep .fx-tab-button,
+.folder-tabs ::deep .fx-tabstrip-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: -1px;
+    padding: 7px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px 8px 0 0;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: none;
+}
+.folder-tabs ::deep .fx-tab-button:not(.active):hover,
+.folder-tabs ::deep .fx-tabstrip-tab:not(.fx-tabstrip-tab-active):not(.fx-tabstrip-tab-disabled):hover {
+    background: #e2e8f0;
+    color: #0284c7;
+}
+.folder-tabs ::deep .fx-tab-button.active,
+.folder-tabs ::deep .fx-tabstrip-tab-active {
+    background: #ffffff;
+    border-bottom-color: #ffffff;
+    color: #0f172a;
+    font-weight: 600;
+    box-shadow: inset 0 2px 0 #0284c7;
+}
+.folder-tabs ::deep .fx-tabstrip-tab-active .fx-tabstrip-icon {
+    color: #0284c7;
+}
+.folder-tabs ::deep .fx-tabstrip-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 2px;
+    border-radius: 4px;
+    color: #94a3b8;
+    font-size: 15px;
+}
+.folder-tabs ::deep .fx-tabstrip-close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+.folder-tabs ::deep .fx-tab-content,
+.folder-tabs .strip-pane {
+    border: 1px solid #cbd5e1;
+    border-top: 0;
+    border-radius: 0 0 8px 8px;
+    background: #ffffff;
+    padding: 14px 16px;
+}

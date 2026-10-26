@@ -5,6 +5,12 @@
    Navigation/TabItem.razor, TabStripControl.razor, TabStripModels.cs, AccordionControl.razor, AccordionItemControl.razor and their stylesheets
    (FlexCore 0.2.48). The accordion moved here from UI elements. *@
 
+@* 2026-10-26 (Baaria, review comment: "more like tabs, with an outline and an x to close, in FlexCore style"): both tab examples sit
+   in a .folder-tabs wrapper whose page CSS draws outlined folder tabs (grey resting tabs, a white active tab joined to its pane by a
+   blue top edge); the CSS tab shows it. TabControl has no close button, so the closable tabs are the tab strip's, now laid out like
+   a document workspace: a pinned Home tab and closable documents. Sample data moved from a kitchen estimate to the site's travel
+   theme. *@
+
 <PageTitle>Tabs & accordion — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Tabs & accordion" Category="Components" ControlName="TabControl · TabStripControl · AccordionControl"
@@ -20,42 +26,46 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs">
-            <Description><p>Panes are declared inline; only the selected one renders, so the Lines table is not in the page until its tab is chosen. The <code>TabItems</code> wrapper is optional.</p></Description>
+        <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs" CssCode="@Code.FolderCss">
+            <Description><p>Panes are declared inline; only the selected one renders, so the Lines table is not in the page until its tab is chosen. The <code>TabItems</code> wrapper is optional. The outlined look is page CSS on a wrapper around the control (CSS tab); <code>TabControl</code> has no close button.</p></Description>
             <Demo>
-                <TabControl @bind-SelectedIndex="_tab">
-                    <TabItems>
-                        <TabItem HeaderText="Summary">
-                            <dl class="summary">
-                                <dt>Estimate</dt><dd>EST-2042 Contoso kitchen</dd>
-                                <dt>Status</dt><dd>Draft, 14 lines</dd>
-                                <dt>Total</dt><dd>$12,480</dd>
-                            </dl>
-                        </TabItem>
-                        <TabItem HeaderText="Lines">
-                            <table class="lines">
-                                <thead><tr><th>Item</th><th>Qty</th><th class="num">Amount</th></tr></thead>
-                                <tbody>
-                                    <tr><td>Quartz counters</td><td>24 ft</td><td class="num">$4,800</td></tr>
-                                    <tr><td>Cabinet install</td><td>18 hr</td><td class="num">$2,340</td></tr>
-                                    <tr><td>Tile backsplash</td><td>36 sq ft</td><td class="num">$1,260</td></tr>
-                                </tbody>
-                            </table>
-                        </TabItem>
-                        <TabItem HeaderText="Notes">
-                            <p class="m0">Quote valid 30 days. Crane access confirmed for the week of the 20th; site contact is the foreman.</p>
-                        </TabItem>
-                    </TabItems>
-                </TabControl>
+                <div class="folder-tabs">
+                    <TabControl @bind-SelectedIndex="_tab">
+                        <TabItems>
+                            <TabItem HeaderText="Summary">
+                                <dl class="summary">
+                                    <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
+                                    <dt>Status</dt><dd>Quoted, 3 lines</dd>
+                                    <dt>Total</dt><dd>$1,720</dd>
+                                </dl>
+                            </TabItem>
+                            <TabItem HeaderText="Lines">
+                                <table class="lines">
+                                    <thead><tr><th>Item</th><th>Qty</th><th class="num">Amount</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Return flights</td><td>2 seats</td><td class="num">$420</td></tr>
+                                        <tr><td>Old-town hotel</td><td>4 nights</td><td class="num">$1,120</td></tr>
+                                        <tr><td>Guided food tour</td><td>2 people</td><td class="num">$180</td></tr>
+                                    </tbody>
+                                </table>
+                            </TabItem>
+                            <TabItem HeaderText="Notes">
+                                <p class="m0">Quote valid 14 days. The travellers prefer a morning flight; the hotel holds the rooms until Friday.</p>
+                            </TabItem>
+                        </TabItems>
+                    </TabControl>
+                </div>
                 <p class="result">Tab @(_tab + 1) of 3 selected</p>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="strip" Title="Tab strip" RazorCode="@Code.Strip" CSharpCode="@Code.StripCs">
-            <Description><p>The strip renders headers only; the page shows the selected item's <code>Tag</code> underneath. Closable tabs raise <code>OnTabClose</code> with the index and the page removes the item. A disabled tab ignores clicks.</p></Description>
+        <DemoExample Id="strip" Title="Document tabs" RazorCode="@Code.Strip" CSharpCode="@Code.StripCs" CssCode="@Code.FolderCss">
+            <Description><p>A tab strip laid out as a document workspace: Home is not <code>Closable</code>, so it has no ×; the documents are, and their × raises <code>OnTabClose</code> with the index, after which the page removes the item. The strip renders headers only; the page shows the selected item's <code>Tag</code> underneath. A disabled tab ignores clicks.</p></Description>
             <Demo>
-                <TabStripControl Items="_docs" @bind-SelectedIndex="_doc" OnTabClose="CloseDoc" />
-                <div class="strip-pane">@(_docs.Count == 0 ? "No documents open." : _docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag)</div>
+                <div class="folder-tabs">
+                    <TabStripControl Items="_docs" @bind-SelectedIndex="_doc" OnTabClose="CloseDoc" />
+                    <div class="strip-pane">@(_docs.Count == 0 ? "No documents open." : _docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag)</div>
+                </div>
                 <div class="strip-actions">
                     <ButtonControl CssClass="btn-sm" OnClick="Reopen" Disabled="@(_closed.Count == 0)">Reopen last closed</ButtonControl>
                     <span class="result">@_docs.Count open, @_closed.Count closed</span>
@@ -68,9 +78,9 @@
             <Demo>
                 <div class="acc">
                     <AccordionControl Multiple="true">
-                        <AccordionItemControl Title="Customer" IconCss="bi bi-person" InitiallyExpanded="true">Contoso Ltd, account 10420, net 30.</AccordionItemControl>
-                        <AccordionItemControl Title="Delivery" IconCss="bi bi-truck">Site address in Redmond; crane access confirmed.</AccordionItemControl>
-                        <AccordionItemControl Title="Notes" IconCss="bi bi-sticky">Quote valid 30 days.</AccordionItemControl>
+                        <AccordionItemControl Title="Traveller" IconCss="bi bi-person" InitiallyExpanded="true">Emma Moreau, two adults, repeat client.</AccordionItemControl>
+                        <AccordionItemControl Title="Flights" IconCss="bi bi-airplane">Return to Lisbon, morning departure, one checked bag each.</AccordionItemControl>
+                        <AccordionItemControl Title="Notes" IconCss="bi bi-sticky">Quote valid 14 days.</AccordionItemControl>
                         <AccordionItemControl Title="Attachments (none)" IconCss="bi bi-paperclip" Disabled="true">—</AccordionItemControl>
                     </AccordionControl>
                 </div>
@@ -131,9 +141,10 @@
     private int _doc;
     private readonly List<TabStripItem> _docs = new()
     {
-        new("Estimate", "bi bi-file-earmark-text", closable: true) { Tag = "EST-2042 Contoso kitchen, 14 lines, draft." },
-        new("Drawings", "bi bi-image", closable: true) { Tag = "Plan view and two elevations, revision B." },
-        new("Photos", "bi bi-camera", closable: true) { Tag = "Six site photos from the survey visit." },
+        new("Home", "bi bi-house") { Tag = "Today: new trip requests, quotes waiting for a reply and departures this week." },
+        new("Quote LIS-0001", "bi bi-file-earmark-text", closable: true) { Tag = "Lisbon city break for two, four nights, quoted at $1,720." },
+        new("Itinerary KYO-0001", "bi bi-map", closable: true) { Tag = "Kyoto long weekend with museum passes and a guided food tour." },
+        new("Suppliers", "bi bi-building", closable: true) { Tag = "Hotels, airlines and guides the desk books with." },
         new("Invoice", "bi bi-receipt") { Disabled = true, Tag = "Not issued yet." },
     };
     private readonly Stack<TabStripItem> _closed = new();
@@ -205,7 +216,7 @@
         public static readonly ApiRow[] Css =
         {
             new("fx-tabs · fx-tab-headers · fx-tab-button (.active) · fx-tab-content", "Tab control root, header row, header buttons and the bordered pane."),
-            new("fx-tabstrip · fx-tabstrip-tab (-active, -disabled) · fx-tabstrip-icon · fx-tabstrip-text · fx-tabstrip-close", "Strip row with a bottom border, each tab with a 2px active underline, its icon, text and × button."),
+            new("fx-tabstrip · fx-tabstrip-tab (-active, -disabled) · fx-tabstrip-icon · fx-tabstrip-text · fx-tabstrip-close", "Strip row with a bottom border, each tab with a 2px active underline, its icon, text and × button. The outlined look in the examples is page CSS over these classes."),
             new("fx-accordion · fx-accordion-item (.fx-accordion-expanded, .fx-accordion-disabled)", "Rounded bordered stack and each item; the expanded class rotates the arrow."),
             new("fx-accordion-header · -icon · -title · -arrow · -body", "Header button and its parts; the body carries the padding."),
         };
@@ -222,51 +233,54 @@
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Tabs = @"<TabControl @bind-SelectedIndex=""_tab"">
-    <TabItems>
-        <TabItem HeaderText=""Summary"">
-            <dl class=""summary"">
-                <dt>Estimate</dt><dd>EST-2042 Contoso kitchen</dd>
-                <dt>Status</dt><dd>Draft, 14 lines</dd>
-                <dt>Total</dt><dd>$12,480</dd>
-            </dl>
-        </TabItem>
-        <TabItem HeaderText=""Lines"">
-            <table class=""lines"">
-                <thead><tr><th>Item</th><th>Qty</th><th class=""num"">Amount</th></tr></thead>
-                <tbody>
-                    <tr><td>Quartz counters</td><td>24 ft</td><td class=""num"">$4,800</td></tr>
-                    <tr><td>Cabinet install</td><td>18 hr</td><td class=""num"">$2,340</td></tr>
-                    <tr><td>Tile backsplash</td><td>36 sq ft</td><td class=""num"">$1,260</td></tr>
-                </tbody>
-            </table>
-        </TabItem>
-        <TabItem HeaderText=""Notes"">
-            <p class=""m0"">Quote valid 30 days. Crane access confirmed for the week of the 20th; site contact is the foreman.</p>
-        </TabItem>
-    </TabItems>
-</TabControl>
+        public const string Tabs = @"<div class=""folder-tabs"">
+    <TabControl @bind-SelectedIndex=""_tab"">
+        <TabItems>
+            <TabItem HeaderText=""Summary"">
+                <dl class=""summary"">
+                    <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
+                    <dt>Status</dt><dd>Quoted, 3 lines</dd>
+                    <dt>Total</dt><dd>$1,720</dd>
+                </dl>
+            </TabItem>
+            <TabItem HeaderText=""Lines"">
+                <table class=""lines"">
+                    <thead><tr><th>Item</th><th>Qty</th><th class=""num"">Amount</th></tr></thead>
+                    <tbody>
+                        <tr><td>Return flights</td><td>2 seats</td><td class=""num"">$420</td></tr>
+                        <tr><td>Old-town hotel</td><td>4 nights</td><td class=""num"">$1,120</td></tr>
+                        <tr><td>Guided food tour</td><td>2 people</td><td class=""num"">$180</td></tr>
+                    </tbody>
+                </table>
+            </TabItem>
+            <TabItem HeaderText=""Notes"">
+                <p class=""m0"">Quote valid 14 days. The travellers prefer a morning flight; the hotel holds the rooms until Friday.</p>
+            </TabItem>
+        </TabItems>
+    </TabControl>
+</div>
 <p class=""result"">Tab @(_tab + 1) of 3 selected</p>";
         public const string TabsCs = @"// Tab control
 private int _tab;";
 
-        public const string Strip = @"<TabStripControl Items=""_docs"" @bind-SelectedIndex=""_doc"" OnTabClose=""CloseDoc"" />
-<div class=""strip-pane"">@(_docs.Count == 0 ? ""No documents open."" : _docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag)</div>
+        public const string Strip = @"<div class=""folder-tabs"">
+    <TabStripControl Items=""_docs"" @bind-SelectedIndex=""_doc"" OnTabClose=""CloseDoc"" />
+    <div class=""strip-pane"">@(_docs.Count == 0 ? ""No documents open."" : _docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag)</div>
+</div>
 <div class=""strip-actions"">
     <ButtonControl CssClass=""btn-sm"" OnClick=""Reopen"" Disabled=""@(_closed.Count == 0)"">Reopen last closed</ButtonControl>
     <span class=""result"">@_docs.Count open, @_closed.Count closed</span>
 </div>";
         public const string StripCs = @"// Tab strip
 private int _doc;
-
 private readonly List<TabStripItem> _docs = new()
 {
-    new(""Estimate"", ""bi bi-file-earmark-text"", closable: true) { Tag = ""EST-2042 Contoso kitchen, 14 lines, draft."" },
-    new(""Drawings"", ""bi bi-image"", closable: true) { Tag = ""Plan view and two elevations, revision B."" },
-    new(""Photos"", ""bi bi-camera"", closable: true) { Tag = ""Six site photos from the survey visit."" },
+    new(""Home"", ""bi bi-house"") { Tag = ""Today: new trip requests, quotes waiting for a reply and departures this week."" },
+    new(""Quote LIS-0001"", ""bi bi-file-earmark-text"", closable: true) { Tag = ""Lisbon city break for two, four nights, quoted at $1,720."" },
+    new(""Itinerary KYO-0001"", ""bi bi-map"", closable: true) { Tag = ""Kyoto long weekend with museum passes and a guided food tour."" },
+    new(""Suppliers"", ""bi bi-building"", closable: true) { Tag = ""Hotels, airlines and guides the desk books with."" },
     new(""Invoice"", ""bi bi-receipt"") { Disabled = true, Tag = ""Not issued yet."" },
 };
-
 private readonly Stack<TabStripItem> _closed = new();
 
 private void CloseDoc(int index)
@@ -286,11 +300,76 @@ private void Reopen()
 
         public const string Accordion = @"<div class=""acc"">
     <AccordionControl Multiple=""true"">
-        <AccordionItemControl Title=""Customer"" IconCss=""bi bi-person"" InitiallyExpanded=""true"">Contoso Ltd, account 10420, net 30.</AccordionItemControl>
-        <AccordionItemControl Title=""Delivery"" IconCss=""bi bi-truck"">Site address in Redmond; crane access confirmed.</AccordionItemControl>
-        <AccordionItemControl Title=""Notes"" IconCss=""bi bi-sticky"">Quote valid 30 days.</AccordionItemControl>
+        <AccordionItemControl Title=""Traveller"" IconCss=""bi bi-person"" InitiallyExpanded=""true"">Emma Moreau, two adults, repeat client.</AccordionItemControl>
+        <AccordionItemControl Title=""Flights"" IconCss=""bi bi-airplane"">Return to Lisbon, morning departure, one checked bag each.</AccordionItemControl>
+        <AccordionItemControl Title=""Notes"" IconCss=""bi bi-sticky"">Quote valid 14 days.</AccordionItemControl>
         <AccordionItemControl Title=""Attachments (none)"" IconCss=""bi bi-paperclip"" Disabled=""true"">—</AccordionItemControl>
     </AccordionControl>
 </div>";
+
+        public const string FolderCss = @".folder-tabs ::deep .fx-tab-headers,
+.folder-tabs ::deep .fx-tabstrip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0 0 0 4px;
+    overflow: visible;
+    background: transparent;
+    border-bottom: 1px solid #cbd5e1;
+}
+.folder-tabs ::deep .fx-tab-button,
+.folder-tabs ::deep .fx-tabstrip-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: -1px;
+    padding: 7px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px 8px 0 0;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: none;
+}
+.folder-tabs ::deep .fx-tab-button:not(.active):hover,
+.folder-tabs ::deep .fx-tabstrip-tab:not(.fx-tabstrip-tab-active):not(.fx-tabstrip-tab-disabled):hover {
+    background: #e2e8f0;
+    color: #0284c7;
+}
+.folder-tabs ::deep .fx-tab-button.active,
+.folder-tabs ::deep .fx-tabstrip-tab-active {
+    background: #ffffff;
+    border-bottom-color: #ffffff;
+    color: #0f172a;
+    font-weight: 600;
+    box-shadow: inset 0 2px 0 #0284c7;
+}
+.folder-tabs ::deep .fx-tabstrip-tab-active .fx-tabstrip-icon {
+    color: #0284c7;
+}
+.folder-tabs ::deep .fx-tabstrip-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 2px;
+    border-radius: 4px;
+    color: #94a3b8;
+    font-size: 15px;
+}
+.folder-tabs ::deep .fx-tabstrip-close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+.folder-tabs ::deep .fx-tab-content,
+.folder-tabs .strip-pane {
+    border: 1px solid #cbd5e1;
+    border-top: 0;
+    border-radius: 0 0 8px 8px;
+    background: #ffffff;
+    padding: 14px 16px;
+}";
     }
 }

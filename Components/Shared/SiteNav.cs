@@ -18,7 +18,7 @@ public static class SiteNav
 {
     public static readonly NavGroup[] Groups =
     {
-        new("Components", "bi-collection", "components", "All components", new NavItem[]
+        new("Components", "bi-collection", "components", "All components", AtoZ(new NavItem[]
         {
             new("Inputs & feedback", null),
             new("Buttons", "demo/buttons"),
@@ -49,8 +49,8 @@ public static class SiteNav
             new("Barcodes & QR", "demo/barcodes"),
             new("Scheduler", "demo/scheduler"),                // 2026-10-25, SC-347
             new("Diagram", "demo/diagram"),                    // 2026-10-25, SC-347
-        }),
-        new("Data Grid", "bi-grid-3x3-gap-fill", "demo/grid", "Grid overview", new NavItem[]
+        })),
+        new("Data Grid", "bi-grid-3x3-gap-fill", "demo/grid", "Grid overview", AtoZ(new NavItem[]
         {
             new("Scenarios", null),                                       // the four use cases of the retired Four scenarios page (2026-10-23)
             new("Live updates", "demo/grid/live-updates"),
@@ -73,27 +73,48 @@ public static class SiteNav
             new("Master-detail", "demo/grid/master-detail"),
             new("Pivot tables", "demo/pivot"),
             new("Tree grid", "demo/grid/tree-grid"),
-        }),
-        new("Charts", "bi-bar-chart-line", "demo/charts", "Charts overview", new NavItem[]
+        })),
+        new("Charts", "bi-bar-chart-line", "demo/charts", "Charts overview", AtoZ(new NavItem[]
         {
             new("Financial & gauges", "demo/advanced-charts"),
             new("Sunburst", "demo/charts/sunburst"),
             new("Map story", "demo/charts/map-story"),
             new("Gantt chart", "demo/gantt"),                    // own page since 2026-10-19; was a Control tour tab
             new("Gauges & stock chart", "demo/gauges"),          // own page since 2026-10-19; was the tour's Charts tab
-        }),
-        new("Reports", "bi-file-earmark-spreadsheet", "demo/reports/package-costs", "Report writer", new NavItem[]
+        })),
+        new("Reports", "bi-file-earmark-spreadsheet", "demo/reports/package-costs", "Report writer", AtoZ(new NavItem[]
         {
             new("PDF viewer", "demo/pdf-viewer"),                  // own page since 2026-10-19; was a Control tour tab
-        }),
+        })),
         // Only pages that measure something and say how. Tree grid load joins when it times the real load.
-        new("Performance", "bi-speedometer2", null, "", new NavItem[]
+        new("Performance", "bi-speedometer2", null, "", AtoZ(new NavItem[]
         {
             new("100k rows", "demo/grid/row-selection-50k"),
             new("Scroll vs paging", "demo/grid/virtualization-bench"),
             new("Live updates", "demo/grid/live-updates"),                // also under Data Grid; measures server render per tick
-        }),
+        })),
     };
+
+    /// <summary>
+    /// Menu order (Baaria, 2026-10-26): the group's overview link (<see cref="NavGroup.AllLabel"/>) stays first, then the
+    /// sub-headings A to Z, and the items under each heading A to Z. Items listed before the first heading come first, A to Z.
+    /// The arrays above may be written in any order.
+    /// </summary>
+    private static NavItem[] AtoZ(NavItem[] items)
+    {
+        var sections = new List<(NavItem? Heading, List<NavItem> Items)> { (null, new()) };
+        foreach (var item in items)
+        {
+            if (item.Href is null) sections.Add((item, new()));
+            else sections[^1].Items.Add(item);
+        }
+        var byText = StringComparer.OrdinalIgnoreCase;
+        return sections.Take(1)
+            .Concat(sections.Skip(1).OrderBy(sec => sec.Heading!.Text, byText))
+            .SelectMany(sec => (sec.Heading is null ? Array.Empty<NavItem>() : new[] { sec.Heading })
+                .Concat(sec.Items.OrderBy(i => i.Text, byText)))
+            .ToArray();
+    }
 
     /// <summary>Footer shows the groups that have a landing page, in bar order.</summary>
     public static IEnumerable<NavGroup> FooterGroups => Groups.Where(g => g.Href is not null);
