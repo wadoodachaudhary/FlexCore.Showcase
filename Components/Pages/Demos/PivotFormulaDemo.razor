@@ -4,13 +4,17 @@
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
+@using FlexCore.Showcase.Data
 
 @* 2026-10-19: moved onto FeatureDemoLayout (SC-275). The four pivots and the hand-typed snippets became three examples with
    generated code tabs (SC-217: the old section 5 copy said Count of Quantity while the live pivot summed it). Route /demo/pivot
    added and the old route kept as an alias (SC-216). The formula grid stays as the third example until it has a page of its own
    (SC-218): it is the only place on the site that shows GridColumn.Formula and AllowCellFormulas. Documentation (SC-219) written
    from Grid/PivotControl.razor(.cs), PivotSortDescriptor.cs, GridEnums.cs, GridColumn.cs and the formula path in
-   GridControl.razor.cs (ResolveCellValue, EvaluateFormula, FormulaValueLiteral); rows checked with scratchpad/vocabcheck.py. *@
+   GridControl.razor.cs (ResolveCellValue, EvaluateFormula, FormulaValueLiteral); rows checked with scratchpad/vocabcheck.py.
+   2026-10-26: all three examples use the OurAirports data (Data/AirportData.cs) instead of the invented sales and deals.
+   The builder pivots a small projection: it offers every public property of the row type, and names or codes in Rows and
+   Columns at once would build millions of cells. *@
 
 <PageTitle>Pivot tables — FlexCore Showcase</PageTitle>
 
@@ -34,14 +38,14 @@
 
     <Examples>
         <DemoExample Id="builder" Title="Interactive builder" RazorCode="@Code.Builder" CSharpCode="@Code.BuilderCs">
-            <Description><p>Drag a field from the list into Filters, Rows, Columns or Values; drag a chip to another area to move it; the ✕ removes it. Each value chip has an aggregation dropdown and a format box (a .NET numeric format such as N0 or C2; blank prints the plain number). A filter field adds a dropdown above the table that narrows the data before grouping. The arrows on row and column chips sort that dimension; a click on a column header sorts the rows by that column's values, and Shift-click adds a second key. The builder starts from the parameters below and then keeps its own state.</p></Description>
+            <Description><p>The 4,009 airports from the <a href="demo/grid#airports">Data Grid</a> page, as a small record: the builder lists every public property of the row type, so names, codes and coordinates are left out. <code>Airports</code> is 1 on every row, so its sum counts airports. Try Runway class in Columns under Type, or Hemisphere in Filters. Drag a field from the list into Filters, Rows, Columns or Values; drag a chip to another area to move it; the ✕ removes it. Each value chip has an aggregation dropdown and a format box (a .NET numeric format such as N0 or C2; blank prints the plain number). A filter field adds a dropdown above the table that narrows the data before grouping. The arrows on row and column chips sort that dimension; a click on a column header sorts the rows by that column's values, and Shift-click adds a second key. The builder starts from the parameters below and then keeps its own state.</p></Description>
             <Demo>
-                <PivotControl TValue="SaleRecord"
-                              DataSource="@_sales"
-                              RowFields="@_byCountry"
-                              ColumnFields="@_byQuarterAndCategory"
-                              ValueField="Amount"
-                              ValueFormat="C0"
+                <PivotControl TValue="AirportFacts"
+                              DataSource="@_facts"
+                              RowFields="@_byContinent"
+                              ColumnFields="@_byType"
+                              ValueField="Airports"
+                              ValueFormat="N0"
                               Interactive="true"
                               FieldLabels="@_labels"
                               Height="420px" />
@@ -49,16 +53,17 @@
         </DemoExample>
 
         <DemoExample Id="grouped" Title="Grouped rows, subtotals and two measures" RazorCode="@Code.Grouped" CSharpCode="@Code.GroupedCs">
-            <Description><p>Two row fields: Country spans its categories and a "Country Total" row closes each group. Two measures: Revenue and Units sit side by side under each quarter and under Total, each with its own format and label. Click a header to sort by that column (ascending, then descending, then off); Shift-click adds a key; rows stay inside their country when sorted by a value. The buttons set <code>SortDescriptors</code> from the page, and the line below shows the keys the control reports through <code>SortDescriptorsChanged</code>, whichever side changed them.</p></Description>
+            <Description><p>The same airports as full <code>Airport</code> records; with no builder, the page decides which fields are pivoted. Two row fields: Continent spans its countries and a "<em>continent</em> Total" row closes each group. Two measures: Airports (a <code>Count</code>) and Longest runway (a <code>Max</code>) sit side by side under each airport type and under Total, each with its own format and label. The table opens sorted by the Airports total, largest first, so each continent lists its countries by airport count; rows stay inside their continent when sorted by a value. Click a header to sort by that column (ascending, then descending, then off); Shift-click adds a key. The buttons set <code>SortDescriptors</code> from the page with the generated names of the Total columns, and the line below shows the keys the control reports through <code>SortDescriptorsChanged</code>, whichever side changed them.</p></Description>
             <Controls>
-                <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [new("Country", SortDirection.Descending)])">Countries Z to A</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [MostAirports])">Most airports first</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [LongestRunway])">Longest runway first</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [])">Clear sort</ButtonControl>
             </Controls>
             <Demo>
-                <PivotControl TValue="SaleRecord"
-                              DataSource="@_sales"
-                              RowFields="@_byCountryAndCategory"
-                              ColumnFields="@_byQuarter"
+                <PivotControl TValue="Airport"
+                              DataSource="@AirportData.Airports"
+                              RowFields="@_byContinentAndCountry"
+                              ColumnFields="@_byType"
                               ValueFields="@_measures"
                               SortDescriptors="@_sorts"
                               SortDescriptorsChanged="s => _sorts = s"
@@ -68,23 +73,22 @@
         </DemoExample>
 
         <DemoExample Id="formulas" Title="Formula columns in a grid" RazorCode="@Code.Formulas" CSharpCode="@Code.FormulasCs">
-            <Description><p>Not a pivot, but the other way to compute numbers in a table. A column's <code>Formula</code> is evaluated per row: <code>[Field]</code> references and bare property names are replaced by the row's values and the expression runs through .NET's <code>DataTable.Compute</code>, so arithmetic, comparisons, <code>IIF</code> and the other DataColumn expression functions work. With <code>AllowCellFormulas</code>, a text cell that starts with <code>=</code> is evaluated the same way; the Commission column reads a property that returns <code>=[Revenue] * 0.08</code>. Values that are not numbers count as 0, and an expression that fails shows as <code>#</code> followed by the expression. The results are display only; the row's data is not changed.</p></Description>
+            <Description><p>Not a pivot, but the other way to compute numbers in a table. A column's <code>Formula</code> is evaluated per row: <code>[Field]</code> references and bare property names are replaced by the row's values and the expression runs through .NET's <code>DataTable.Compute</code>, so arithmetic, comparisons, <code>IIF</code> and the other DataColumn expression functions work. With <code>AllowCellFormulas</code>, a text cell that starts with <code>=</code> is evaluated the same way. Here twelve airports, from Amsterdam below sea level to La Paz at 13,355 ft: Elevation (m) is the column formula <code>[ElevationFt] * 0.3048</code>, and Longest runway (km) reads a property that returns <code>=[LongestRunwayFt] * 0.0003048</code>. Values that are not numbers count as 0, and an expression that fails shows as <code>#</code> followed by the expression. The results are display only; the row's data is not changed.</p></Description>
             <Demo>
-                <GridControl TValue="Deal" DataSource="@_deals"
+                <GridControl TValue="Hub" DataSource="@_hubs"
                              AllowCellFormulas="true"
                              AllowSorting="true"
                              AllowFiltering="true"
                              AllowResizing="true"
-                             Height="360px">
+                             Height="400px">
                     <GridColumnsBase>
-                        <GridColumn Field="@nameof(Deal.Region)" HeaderText="Region" Width="120px" />
-                        <GridColumn Field="@nameof(Deal.Rep)" HeaderText="Rep" Width="140px" />
-                        <GridColumn Field="@nameof(Deal.Product)" HeaderText="Product" Width="120px" />
-                        <GridColumn Field="@nameof(Deal.Revenue)" HeaderText="Revenue" Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" Width="120px" />
-                        <GridColumn Field="@nameof(Deal.Cost)" HeaderText="Cost" Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" Width="120px" />
-                        <GridColumn Field="GrossMargin" HeaderText="Gross margin" Formula="[Revenue] - [Cost]" Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" Width="140px" />
-                        <GridColumn Field="MarginPct" HeaderText="Margin %" Formula="([Revenue] - [Cost]) / [Revenue]" Type="ColumnType.Number" Format="P1" TextAlign="TextAlign.Right" Width="120px" />
-                        <GridColumn Field="@nameof(Deal.CommissionFormula)" HeaderText="Commission" Type="ColumnType.Number" Format="C0" TextAlign="TextAlign.Right" Width="130px" />
+                        <GridColumn Field="@nameof(Hub.Code)" HeaderText="Code" Width="80px" />
+                        <GridColumn Field="@nameof(Hub.City)" HeaderText="City" Width="150px" />
+                        <GridColumn Field="@nameof(Hub.Country)" HeaderText="Country" Width="160px" />
+                        <GridColumn Field="@nameof(Hub.ElevationFt)" HeaderText="Elevation (ft)" Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" Width="120px" />
+                        <GridColumn Field="ElevationM" HeaderText="Elevation (m)" Formula="[ElevationFt] * 0.3048" Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" Width="120px" />
+                        <GridColumn Field="@nameof(Hub.LongestRunwayFt)" HeaderText="Longest runway (ft)" Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" Width="160px" />
+                        <GridColumn Field="@nameof(Hub.RunwayKmFormula)" HeaderText="Longest runway (km)" Type="ColumnType.Number" Format="N2" TextAlign="TextAlign.Right" Width="160px" />
                     </GridColumnsBase>
                 </GridControl>
             </Demo>
@@ -130,279 +134,156 @@
     <Related>
         <ul>
             <li><a href="demo/grid/grouping">Grouping &amp; totals</a>: the same aggregates as group captions and footers inside a grid.</li>
-            <li><a href="demo/grid">Grid overview</a>: the grid that can switch into the embedded pivot view.</li>
+            <li><a href="demo/grid">Grid overview</a>: the grid that can switch into the embedded pivot view, opening on the same airports.</li>
+            <li><a href="demo/charts/map-story#airports">Map story</a>: the airports counted per country on a heat map.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
 
 @code {
-    private readonly string[] _byCountry = ["Country"];
-    private readonly string[] _byQuarterAndCategory = ["Quarter", "Category"];
-    private readonly Dictionary<string, string> _labels = new() { ["Salesperson"] = "Sales rep", ["Quantity"] = "Qty" };
+    // Builder: the airports cut down to the fields worth pivoting on.
+    private static readonly List<AirportFacts> _facts = AirportData.Airports
+        .Select(a => new AirportFacts(a.Continent, a.Type, RunwayClass(a.LongestRunwayFt), a.Latitude >= 0 ? "North" : "South",
+            a.Runways, a.LongestRunwayFt, a.ElevationFt))
+        .ToList();
+    private readonly string[] _byContinent = ["Continent"];
+    private readonly string[] _byType = ["Type"];
+    private readonly Dictionary<string, string> _labels = new()
+    {
+        ["Runway"] = "Runway class",
+        ["LongestRunwayFt"] = "Longest runway (ft)",
+        ["ElevationFt"] = "Elevation (ft)"
+    };
 
-    private readonly string[] _byCountryAndCategory = ["Country", "Category"];
-    private readonly string[] _byQuarter = ["Quarter"];
+    // As text these sort longest first, with Unknown last.
+    private static string RunwayClass(int? longestFt) => longestFt switch
+    {
+        null => "Unknown",
+        >= 10_000 => "10,000 ft or more",
+        >= 6_000 => "6,000 to 9,999 ft",
+        _ => "Under 6,000 ft"
+    };
+
+    private sealed record AirportFacts(string Continent, string Type, string Runway, string Hemisphere,
+        int Runways, int? LongestRunwayFt, int? ElevationFt)
+    {
+        public int Airports => 1;
+    }
+
+    // Grouped: Continent and Country on the full Airport records.
+    private readonly string[] _byContinentAndCountry = ["Continent", "Country"];
     private readonly PivotValueConfig[] _measures =
     [
-        new() { Field = "Amount", Aggregation = AggregateType.Sum, Format = "C0", Label = "Revenue" },
-        new() { Field = "Quantity", Aggregation = AggregateType.Sum, Format = "N0", Label = "Units" }
+        new() { Field = "Code", Aggregation = AggregateType.Count, Format = "N0", Label = "Airports" },
+        new() { Field = "LongestRunwayFt", Aggregation = AggregateType.Max, Format = "N0", Label = "Longest runway (ft)" }
     ];
-    private IReadOnlyList<PivotSortDescriptor> _sorts = [];
+    // A Total column's field name is "__Total_" + the measure's Field + "_" + its Aggregation.
+    private static readonly PivotSortDescriptor MostAirports = new("__Total_Code_Count", SortDirection.Descending);
+    private static readonly PivotSortDescriptor LongestRunway = new("__Total_LongestRunwayFt_Max", SortDirection.Descending);
+    private IReadOnlyList<PivotSortDescriptor> _sorts = [MostAirports];
     private string SortText => _sorts.Count == 0 ? "none." : string.Join(", ", _sorts.Select(s => $"{s.Field} {s.Direction}")) + ".";
 
-    private readonly List<SaleRecord> _sales =
-    [
-        // USA
-        new("USA", "Electronics", "Laptop",  "Alice", "Q1", 48000, 12),
-        new("USA", "Electronics", "Phone",   "Alice", "Q1", 32000, 40),
-        new("USA", "Electronics", "Laptop",  "Bob",   "Q1", 55000, 14),
-        new("USA", "Electronics", "Tablet",  "Bob",   "Q1", 18000, 20),
-        new("USA", "Clothing",    "Jacket",  "Alice", "Q1", 14000, 70),
-        new("USA", "Clothing",    "Shoes",   "Bob",   "Q1", 22000, 55),
-        new("USA", "Electronics", "Laptop",  "Alice", "Q2", 52000, 13),
-        new("USA", "Electronics", "Phone",   "Alice", "Q2", 38000, 48),
-        new("USA", "Electronics", "Laptop",  "Bob",   "Q2", 61000, 16),
-        new("USA", "Electronics", "Tablet",  "Bob",   "Q2", 21000, 24),
-        new("USA", "Clothing",    "Jacket",  "Alice", "Q2", 11000, 55),
-        new("USA", "Clothing",    "Shoes",   "Bob",   "Q2", 26000, 65),
-        new("USA", "Electronics", "Laptop",  "Alice", "Q3", 58000, 15),
-        new("USA", "Electronics", "Phone",   "Bob",   "Q3", 29000, 36),
-        new("USA", "Clothing",    "Jacket",  "Alice", "Q3", 9000,  45),
-        new("USA", "Clothing",    "Shoes",   "Bob",   "Q3", 19000, 48),
-        new("USA", "Electronics", "Laptop",  "Alice", "Q4", 64000, 16),
-        new("USA", "Electronics", "Phone",   "Bob",   "Q4", 35000, 44),
-        new("USA", "Clothing",    "Jacket",  "Alice", "Q4", 16000, 80),
-        new("USA", "Clothing",    "Shoes",   "Bob",   "Q4", 28000, 70),
-        // UK
-        new("UK", "Electronics", "Laptop",  "Carol", "Q1", 42000, 11),
-        new("UK", "Electronics", "Phone",   "Carol", "Q1", 28000, 35),
-        new("UK", "Clothing",    "Jacket",  "Carol", "Q1", 12000, 60),
-        new("UK", "Electronics", "Laptop",  "Carol", "Q2", 46000, 12),
-        new("UK", "Electronics", "Phone",   "Carol", "Q2", 31000, 39),
-        new("UK", "Clothing",    "Jacket",  "Carol", "Q2", 15000, 75),
-        new("UK", "Electronics", "Laptop",  "Carol", "Q3", 39000, 10),
-        new("UK", "Electronics", "Phone",   "Carol", "Q3", 25000, 31),
-        new("UK", "Clothing",    "Shoes",   "Carol", "Q3", 18000, 45),
-        new("UK", "Electronics", "Laptop",  "Carol", "Q4", 51000, 13),
-        new("UK", "Electronics", "Phone",   "Carol", "Q4", 33000, 41),
-        new("UK", "Clothing",    "Shoes",   "Carol", "Q4", 21000, 53),
-        // Germany
-        new("Germany", "Electronics", "Tablet",  "Dave", "Q1", 24000, 27),
-        new("Germany", "Electronics", "Phone",   "Dave", "Q1", 31000, 39),
-        new("Germany", "Clothing",    "Shoes",   "Dave", "Q1", 17000, 43),
-        new("Germany", "Electronics", "Tablet",  "Dave", "Q2", 27000, 30),
-        new("Germany", "Electronics", "Phone",   "Dave", "Q2", 36000, 45),
-        new("Germany", "Clothing",    "Shoes",   "Dave", "Q2", 20000, 50),
-        new("Germany", "Electronics", "Tablet",  "Dave", "Q3", 22000, 25),
-        new("Germany", "Electronics", "Phone",   "Dave", "Q3", 29000, 36),
-        new("Germany", "Clothing",    "Jacket",  "Dave", "Q3", 13000, 65),
-        new("Germany", "Electronics", "Tablet",  "Dave", "Q4", 30000, 33),
-        new("Germany", "Electronics", "Phone",   "Dave", "Q4", 38000, 48),
-        new("Germany", "Clothing",    "Jacket",  "Dave", "Q4", 16000, 80),
-    ];
+    // Formulas: twelve airports from below sea level to La Paz.
+    private static readonly string[] _hubCodes = ["AMS", "LHR", "LIS", "KEF", "DXB", "HND", "SYD", "DEN", "JNB", "MEX", "BOG", "LPB"];
+    private readonly List<Hub> _hubs = _hubCodes
+        .Select(code => AirportData.Airports.First(a => a.Code == code))
+        .Select(a => new Hub(a.Code, a.City, a.Country, a.ElevationFt, a.LongestRunwayFt))
+        .ToList();
 
-    private sealed record SaleRecord(
-        string Country, string Category, string Product,
-        string Salesperson, string Quarter, double Amount, int Quantity);
-
-    private readonly List<Deal> _deals =
-    [
-        new("East", "Avery Chen", "Hardware", 125000, 73000),
-        new("East", "Avery Chen", "Software", 98000, 38000),
-        new("East", "Blake Rivera", "Hardware", 86000, 52000),
-        new("East", "Blake Rivera", "Software", 74000, 29000),
-        new("West", "Casey Patel", "Hardware", 132000, 79000),
-        new("West", "Casey Patel", "Software", 121000, 47000),
-        new("West", "Drew Yamamoto", "Hardware", 92000, 56000),
-        new("West", "Drew Yamamoto", "Software", 83000, 32000),
-    ];
-
-    private sealed record Deal(string Region, string Rep, string Product, double Revenue, double Cost)
+    private sealed record Hub(string Code, string City, string Country, int? ElevationFt, int? LongestRunwayFt)
     {
-        public string CommissionFormula => "=[Revenue] * 0.08";
+        public string RunwayKmFormula => "=[LongestRunwayFt] * 0.0003048";
     }
 
     // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
     private static class Code
     {
-        public const string Builder = @"<PivotControl TValue=""SaleRecord""
-              DataSource=""@_sales""
-              RowFields=""@_byCountry""
-              ColumnFields=""@_byQuarterAndCategory""
-              ValueField=""Amount""
-              ValueFormat=""C0""
+        public const string Builder = @"<PivotControl TValue=""AirportFacts""
+              DataSource=""@_facts""
+              RowFields=""@_byContinent""
+              ColumnFields=""@_byType""
+              ValueField=""Airports""
+              ValueFormat=""N0""
               Interactive=""true""
               FieldLabels=""@_labels""
               Height=""420px"" />";
-        public const string BuilderCs = @"private readonly string[] _byCountry = [""Country""];
+        public const string BuilderCs = @"// Builder: the airports cut down to the fields worth pivoting on.
+private static readonly List<AirportFacts> _facts = AirportData.Airports
+    .Select(a => new AirportFacts(a.Continent, a.Type, RunwayClass(a.LongestRunwayFt), a.Latitude >= 0 ? ""North"" : ""South"",
+        a.Runways, a.LongestRunwayFt, a.ElevationFt))
+    .ToList();
+private readonly string[] _byContinent = [""Continent""];
+private readonly string[] _byType = [""Type""];
+private readonly Dictionary<string, string> _labels = new()
+{
+    [""Runway""] = ""Runway class"",
+    [""LongestRunwayFt""] = ""Longest runway (ft)"",
+    [""ElevationFt""] = ""Elevation (ft)""
+};
 
-private readonly string[] _byQuarterAndCategory = [""Quarter"", ""Category""];
+// As text these sort longest first, with Unknown last.
+private static string RunwayClass(int? longestFt) => longestFt switch
+{
+    null => ""Unknown"",
+    >= 10_000 => ""10,000 ft or more"",
+    >= 6_000 => ""6,000 to 9,999 ft"",
+    _ => ""Under 6,000 ft""
+};
 
-private readonly Dictionary<string, string> _labels = new() { [""Salesperson""] = ""Sales rep"", [""Quantity""] = ""Qty"" };
-
-private readonly List<SaleRecord> _sales =
-[
-    // USA
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Alice"", ""Q1"", 48000, 12),
-    new(""USA"", ""Electronics"", ""Phone"",   ""Alice"", ""Q1"", 32000, 40),
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Bob"",   ""Q1"", 55000, 14),
-    new(""USA"", ""Electronics"", ""Tablet"",  ""Bob"",   ""Q1"", 18000, 20),
-    new(""USA"", ""Clothing"",    ""Jacket"",  ""Alice"", ""Q1"", 14000, 70),
-    new(""USA"", ""Clothing"",    ""Shoes"",   ""Bob"",   ""Q1"", 22000, 55),
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Alice"", ""Q2"", 52000, 13),
-    new(""USA"", ""Electronics"", ""Phone"",   ""Alice"", ""Q2"", 38000, 48),
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Bob"",   ""Q2"", 61000, 16),
-    new(""USA"", ""Electronics"", ""Tablet"",  ""Bob"",   ""Q2"", 21000, 24),
-    new(""USA"", ""Clothing"",    ""Jacket"",  ""Alice"", ""Q2"", 11000, 55),
-    new(""USA"", ""Clothing"",    ""Shoes"",   ""Bob"",   ""Q2"", 26000, 65),
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Alice"", ""Q3"", 58000, 15),
-    new(""USA"", ""Electronics"", ""Phone"",   ""Bob"",   ""Q3"", 29000, 36),
-    new(""USA"", ""Clothing"",    ""Jacket"",  ""Alice"", ""Q3"", 9000,  45),
-    new(""USA"", ""Clothing"",    ""Shoes"",   ""Bob"",   ""Q3"", 19000, 48),
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Alice"", ""Q4"", 64000, 16),
-    new(""USA"", ""Electronics"", ""Phone"",   ""Bob"",   ""Q4"", 35000, 44),
-    new(""USA"", ""Clothing"",    ""Jacket"",  ""Alice"", ""Q4"", 16000, 80),
-    new(""USA"", ""Clothing"",    ""Shoes"",   ""Bob"",   ""Q4"", 28000, 70),
-    // UK
-    new(""UK"", ""Electronics"", ""Laptop"",  ""Carol"", ""Q1"", 42000, 11),
-    new(""UK"", ""Electronics"", ""Phone"",   ""Carol"", ""Q1"", 28000, 35),
-    new(""UK"", ""Clothing"",    ""Jacket"",  ""Carol"", ""Q1"", 12000, 60),
-    new(""UK"", ""Electronics"", ""Laptop"",  ""Carol"", ""Q2"", 46000, 12),
-    new(""UK"", ""Electronics"", ""Phone"",   ""Carol"", ""Q2"", 31000, 39),
-    new(""UK"", ""Clothing"",    ""Jacket"",  ""Carol"", ""Q2"", 15000, 75),
-    new(""UK"", ""Electronics"", ""Laptop"",  ""Carol"", ""Q3"", 39000, 10),
-    new(""UK"", ""Electronics"", ""Phone"",   ""Carol"", ""Q3"", 25000, 31),
-    new(""UK"", ""Clothing"",    ""Shoes"",   ""Carol"", ""Q3"", 18000, 45),
-    new(""UK"", ""Electronics"", ""Laptop"",  ""Carol"", ""Q4"", 51000, 13),
-    new(""UK"", ""Electronics"", ""Phone"",   ""Carol"", ""Q4"", 33000, 41),
-    new(""UK"", ""Clothing"",    ""Shoes"",   ""Carol"", ""Q4"", 21000, 53),
-    // Germany
-    new(""Germany"", ""Electronics"", ""Tablet"",  ""Dave"", ""Q1"", 24000, 27),
-    new(""Germany"", ""Electronics"", ""Phone"",   ""Dave"", ""Q1"", 31000, 39),
-    new(""Germany"", ""Clothing"",    ""Shoes"",   ""Dave"", ""Q1"", 17000, 43),
-    new(""Germany"", ""Electronics"", ""Tablet"",  ""Dave"", ""Q2"", 27000, 30),
-    new(""Germany"", ""Electronics"", ""Phone"",   ""Dave"", ""Q2"", 36000, 45),
-    new(""Germany"", ""Clothing"",    ""Shoes"",   ""Dave"", ""Q2"", 20000, 50),
-    new(""Germany"", ""Electronics"", ""Tablet"",  ""Dave"", ""Q3"", 22000, 25),
-    new(""Germany"", ""Electronics"", ""Phone"",   ""Dave"", ""Q3"", 29000, 36),
-    new(""Germany"", ""Clothing"",    ""Jacket"",  ""Dave"", ""Q3"", 13000, 65),
-    new(""Germany"", ""Electronics"", ""Tablet"",  ""Dave"", ""Q4"", 30000, 33),
-    new(""Germany"", ""Electronics"", ""Phone"",   ""Dave"", ""Q4"", 38000, 48),
-    new(""Germany"", ""Clothing"",    ""Jacket"",  ""Dave"", ""Q4"", 16000, 80),
-];
-
-private sealed record SaleRecord(
-    string Country, string Category, string Product,
-    string Salesperson, string Quarter, double Amount, int Quantity);";
-        public const string Grouped = @"<PivotControl TValue=""SaleRecord""
-              DataSource=""@_sales""
-              RowFields=""@_byCountryAndCategory""
-              ColumnFields=""@_byQuarter""
+private sealed record AirportFacts(string Continent, string Type, string Runway, string Hemisphere,
+    int Runways, int? LongestRunwayFt, int? ElevationFt)
+{
+    public int Airports => 1;
+}";
+        public const string Grouped = @"<PivotControl TValue=""Airport""
+              DataSource=""@AirportData.Airports""
+              RowFields=""@_byContinentAndCountry""
+              ColumnFields=""@_byType""
               ValueFields=""@_measures""
               SortDescriptors=""@_sorts""
               SortDescriptorsChanged=""s => _sorts = s""
               Height=""480px"" />
 <p class=""result"">Sort: @SortText</p>";
-        public const string GroupedCs = @"private readonly string[] _byCountryAndCategory = [""Country"", ""Category""];
+        public const string GroupedCs = @"private readonly string[] _byType = [""Type""];
 
-private readonly string[] _byQuarter = [""Quarter""];
-
+// Grouped: Continent and Country on the full Airport records.
+private readonly string[] _byContinentAndCountry = [""Continent"", ""Country""];
 private readonly PivotValueConfig[] _measures =
 [
-    new() { Field = ""Amount"", Aggregation = AggregateType.Sum, Format = ""C0"", Label = ""Revenue"" },
-    new() { Field = ""Quantity"", Aggregation = AggregateType.Sum, Format = ""N0"", Label = ""Units"" }
+    new() { Field = ""Code"", Aggregation = AggregateType.Count, Format = ""N0"", Label = ""Airports"" },
+    new() { Field = ""LongestRunwayFt"", Aggregation = AggregateType.Max, Format = ""N0"", Label = ""Longest runway (ft)"" }
 ];
-
-private IReadOnlyList<PivotSortDescriptor> _sorts = [];
-
-private string SortText => _sorts.Count == 0 ? ""none."" : string.Join("", "", _sorts.Select(s => $""{s.Field} {s.Direction}"")) + ""."";
-
-private readonly List<SaleRecord> _sales =
-[
-    // USA
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Alice"", ""Q1"", 48000, 12),
-    new(""USA"", ""Electronics"", ""Phone"",   ""Alice"", ""Q1"", 32000, 40),
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Bob"",   ""Q1"", 55000, 14),
-    new(""USA"", ""Electronics"", ""Tablet"",  ""Bob"",   ""Q1"", 18000, 20),
-    new(""USA"", ""Clothing"",    ""Jacket"",  ""Alice"", ""Q1"", 14000, 70),
-    new(""USA"", ""Clothing"",    ""Shoes"",   ""Bob"",   ""Q1"", 22000, 55),
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Alice"", ""Q2"", 52000, 13),
-    new(""USA"", ""Electronics"", ""Phone"",   ""Alice"", ""Q2"", 38000, 48),
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Bob"",   ""Q2"", 61000, 16),
-    new(""USA"", ""Electronics"", ""Tablet"",  ""Bob"",   ""Q2"", 21000, 24),
-    new(""USA"", ""Clothing"",    ""Jacket"",  ""Alice"", ""Q2"", 11000, 55),
-    new(""USA"", ""Clothing"",    ""Shoes"",   ""Bob"",   ""Q2"", 26000, 65),
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Alice"", ""Q3"", 58000, 15),
-    new(""USA"", ""Electronics"", ""Phone"",   ""Bob"",   ""Q3"", 29000, 36),
-    new(""USA"", ""Clothing"",    ""Jacket"",  ""Alice"", ""Q3"", 9000,  45),
-    new(""USA"", ""Clothing"",    ""Shoes"",   ""Bob"",   ""Q3"", 19000, 48),
-    new(""USA"", ""Electronics"", ""Laptop"",  ""Alice"", ""Q4"", 64000, 16),
-    new(""USA"", ""Electronics"", ""Phone"",   ""Bob"",   ""Q4"", 35000, 44),
-    new(""USA"", ""Clothing"",    ""Jacket"",  ""Alice"", ""Q4"", 16000, 80),
-    new(""USA"", ""Clothing"",    ""Shoes"",   ""Bob"",   ""Q4"", 28000, 70),
-    // UK
-    new(""UK"", ""Electronics"", ""Laptop"",  ""Carol"", ""Q1"", 42000, 11),
-    new(""UK"", ""Electronics"", ""Phone"",   ""Carol"", ""Q1"", 28000, 35),
-    new(""UK"", ""Clothing"",    ""Jacket"",  ""Carol"", ""Q1"", 12000, 60),
-    new(""UK"", ""Electronics"", ""Laptop"",  ""Carol"", ""Q2"", 46000, 12),
-    new(""UK"", ""Electronics"", ""Phone"",   ""Carol"", ""Q2"", 31000, 39),
-    new(""UK"", ""Clothing"",    ""Jacket"",  ""Carol"", ""Q2"", 15000, 75),
-    new(""UK"", ""Electronics"", ""Laptop"",  ""Carol"", ""Q3"", 39000, 10),
-    new(""UK"", ""Electronics"", ""Phone"",   ""Carol"", ""Q3"", 25000, 31),
-    new(""UK"", ""Clothing"",    ""Shoes"",   ""Carol"", ""Q3"", 18000, 45),
-    new(""UK"", ""Electronics"", ""Laptop"",  ""Carol"", ""Q4"", 51000, 13),
-    new(""UK"", ""Electronics"", ""Phone"",   ""Carol"", ""Q4"", 33000, 41),
-    new(""UK"", ""Clothing"",    ""Shoes"",   ""Carol"", ""Q4"", 21000, 53),
-    // Germany
-    new(""Germany"", ""Electronics"", ""Tablet"",  ""Dave"", ""Q1"", 24000, 27),
-    new(""Germany"", ""Electronics"", ""Phone"",   ""Dave"", ""Q1"", 31000, 39),
-    new(""Germany"", ""Clothing"",    ""Shoes"",   ""Dave"", ""Q1"", 17000, 43),
-    new(""Germany"", ""Electronics"", ""Tablet"",  ""Dave"", ""Q2"", 27000, 30),
-    new(""Germany"", ""Electronics"", ""Phone"",   ""Dave"", ""Q2"", 36000, 45),
-    new(""Germany"", ""Clothing"",    ""Shoes"",   ""Dave"", ""Q2"", 20000, 50),
-    new(""Germany"", ""Electronics"", ""Tablet"",  ""Dave"", ""Q3"", 22000, 25),
-    new(""Germany"", ""Electronics"", ""Phone"",   ""Dave"", ""Q3"", 29000, 36),
-    new(""Germany"", ""Clothing"",    ""Jacket"",  ""Dave"", ""Q3"", 13000, 65),
-    new(""Germany"", ""Electronics"", ""Tablet"",  ""Dave"", ""Q4"", 30000, 33),
-    new(""Germany"", ""Electronics"", ""Phone"",   ""Dave"", ""Q4"", 38000, 48),
-    new(""Germany"", ""Clothing"",    ""Jacket"",  ""Dave"", ""Q4"", 16000, 80),
-];
-
-private sealed record SaleRecord(
-    string Country, string Category, string Product,
-    string Salesperson, string Quarter, double Amount, int Quantity);";
-        public const string Formulas = @"<GridControl TValue=""Deal"" DataSource=""@_deals""
+// A Total column's field name is ""__Total_"" + the measure's Field + ""_"" + its Aggregation.
+private static readonly PivotSortDescriptor MostAirports = new(""__Total_Code_Count"", SortDirection.Descending);
+private static readonly PivotSortDescriptor LongestRunway = new(""__Total_LongestRunwayFt_Max"", SortDirection.Descending);
+private IReadOnlyList<PivotSortDescriptor> _sorts = [MostAirports];
+private string SortText => _sorts.Count == 0 ? ""none."" : string.Join("", "", _sorts.Select(s => $""{s.Field} {s.Direction}"")) + ""."";";
+        public const string Formulas = @"<GridControl TValue=""Hub"" DataSource=""@_hubs""
              AllowCellFormulas=""true""
              AllowSorting=""true""
              AllowFiltering=""true""
              AllowResizing=""true""
-             Height=""360px"">
+             Height=""400px"">
     <GridColumnsBase>
-        <GridColumn Field=""@nameof(Deal.Region)"" HeaderText=""Region"" Width=""120px"" />
-        <GridColumn Field=""@nameof(Deal.Rep)"" HeaderText=""Rep"" Width=""140px"" />
-        <GridColumn Field=""@nameof(Deal.Product)"" HeaderText=""Product"" Width=""120px"" />
-        <GridColumn Field=""@nameof(Deal.Revenue)"" HeaderText=""Revenue"" Type=""ColumnType.Number"" Format=""C0"" TextAlign=""TextAlign.Right"" Width=""120px"" />
-        <GridColumn Field=""@nameof(Deal.Cost)"" HeaderText=""Cost"" Type=""ColumnType.Number"" Format=""C0"" TextAlign=""TextAlign.Right"" Width=""120px"" />
-        <GridColumn Field=""GrossMargin"" HeaderText=""Gross margin"" Formula=""[Revenue] - [Cost]"" Type=""ColumnType.Number"" Format=""C0"" TextAlign=""TextAlign.Right"" Width=""140px"" />
-        <GridColumn Field=""MarginPct"" HeaderText=""Margin %"" Formula=""([Revenue] - [Cost]) / [Revenue]"" Type=""ColumnType.Number"" Format=""P1"" TextAlign=""TextAlign.Right"" Width=""120px"" />
-        <GridColumn Field=""@nameof(Deal.CommissionFormula)"" HeaderText=""Commission"" Type=""ColumnType.Number"" Format=""C0"" TextAlign=""TextAlign.Right"" Width=""130px"" />
+        <GridColumn Field=""@nameof(Hub.Code)"" HeaderText=""Code"" Width=""80px"" />
+        <GridColumn Field=""@nameof(Hub.City)"" HeaderText=""City"" Width=""150px"" />
+        <GridColumn Field=""@nameof(Hub.Country)"" HeaderText=""Country"" Width=""160px"" />
+        <GridColumn Field=""@nameof(Hub.ElevationFt)"" HeaderText=""Elevation (ft)"" Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" Width=""120px"" />
+        <GridColumn Field=""ElevationM"" HeaderText=""Elevation (m)"" Formula=""[ElevationFt] * 0.3048"" Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" Width=""120px"" />
+        <GridColumn Field=""@nameof(Hub.LongestRunwayFt)"" HeaderText=""Longest runway (ft)"" Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" Width=""160px"" />
+        <GridColumn Field=""@nameof(Hub.RunwayKmFormula)"" HeaderText=""Longest runway (km)"" Type=""ColumnType.Number"" Format=""N2"" TextAlign=""TextAlign.Right"" Width=""160px"" />
     </GridColumnsBase>
 </GridControl>";
-        public const string FormulasCs = @"private readonly List<Deal> _deals =
-[
-    new(""East"", ""Avery Chen"", ""Hardware"", 125000, 73000),
-    new(""East"", ""Avery Chen"", ""Software"", 98000, 38000),
-    new(""East"", ""Blake Rivera"", ""Hardware"", 86000, 52000),
-    new(""East"", ""Blake Rivera"", ""Software"", 74000, 29000),
-    new(""West"", ""Casey Patel"", ""Hardware"", 132000, 79000),
-    new(""West"", ""Casey Patel"", ""Software"", 121000, 47000),
-    new(""West"", ""Drew Yamamoto"", ""Hardware"", 92000, 56000),
-    new(""West"", ""Drew Yamamoto"", ""Software"", 83000, 32000),
-];
+        public const string FormulasCs = @"// Formulas: twelve airports from below sea level to La Paz.
+private static readonly string[] _hubCodes = [""AMS"", ""LHR"", ""LIS"", ""KEF"", ""DXB"", ""HND"", ""SYD"", ""DEN"", ""JNB"", ""MEX"", ""BOG"", ""LPB""];
+private readonly List<Hub> _hubs = _hubCodes
+    .Select(code => AirportData.Airports.First(a => a.Code == code))
+    .Select(a => new Hub(a.Code, a.City, a.Country, a.ElevationFt, a.LongestRunwayFt))
+    .ToList();
 
-private sealed record Deal(string Region, string Rep, string Product, double Revenue, double Cost)
+private sealed record Hub(string Code, string City, string Country, int? ElevationFt, int? LongestRunwayFt)
 {
-    public string CommissionFormula => ""=[Revenue] * 0.08"";
+    public string RunwayKmFormula => ""=[LongestRunwayFt] * 0.0003048"";
 }";
     }
 
