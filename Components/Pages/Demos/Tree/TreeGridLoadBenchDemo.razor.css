@@ -1,2 +1,6 @@
 /* 2026-10-17: Tree grid page. No Bootstrap names in here. */
 .result { font-size: 13px; color: #475569; margin: 8px 0 0; }
+/* 2026-10-26: org chart cells. */
+.vacant { color: #94a3b8; }
+.tag { margin-left: 6px; padding: 0 6px; border-radius: 8px; background: #fef3c7; color: #92400e; font-size: 11px; }
+.muted { color: #94a3b8; font-size: 12px; }

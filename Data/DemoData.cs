@@ -35,8 +35,8 @@ public static class DemoData
         ("Experiences",   "{0} Day Tours",                "Full-day excursion with lunch",   "pax",      80, 160),
         ("Experiences",   "Taste of {0}",                 "Cooking class with market visit", "pax",      70, 120),
         ("Services",      "Guardian Travel Cover",        "Travel insurance, comprehensive", "pax",      38,  75),
-        ("Services",      "Showcase Travel, head office", "Booking fee",                     "booking",  45,  60),
-        ("Services",      "Showcase Travel, head office", "Documents and delivery",          "booking",  12,  25),
+        ("Services",      "FlexCore Travel Agency, head office", "Booking fee",                     "booking",  45,  60),
+        ("Services",      "FlexCore Travel Agency, head office", "Documents and delivery",          "booking",  12,  25),
     };
 
     /// <summary>Generates the rate card: for every destination the operator sells, four to seven of the services above in turn,
@@ -87,8 +87,8 @@ public static class DemoData
         ("C Experiences",   "{0} Day Tours",                "Entrance tickets",                "pax",      18,  40, "Spot",     "Per person"),
         ("C Experiences",   "Taste of {0}",                 "Cooking class with market visit", "pax",      70, 120, "Contract", "Per person"),
         ("D Services",      "Guardian Travel Cover",        "Travel insurance, comprehensive", "pax",      38,  75, "Contract", "Per person"),
-        ("D Services",      "Showcase Travel, head office", "Booking fee",                     "booking",  45,  60, "Contract", "Per booking"),
-        ("D Services",      "Showcase Travel, head office", "Documents and delivery",          "booking",  12,  25, "Contract", "Per booking"),
+        ("D Services",      "FlexCore Travel Agency, head office", "Booking fee",                     "booking",  45,  60, "Contract", "Per booking"),
+        ("D Services",      "FlexCore Travel Agency, head office", "Documents and delivery",          "booking",  12,  25, "Contract", "Per booking"),
     };
 
     /// <summary>Generates the cost lines of the first package in <see cref="TravelData.Packages"/> (Lisbon Explorer): the services

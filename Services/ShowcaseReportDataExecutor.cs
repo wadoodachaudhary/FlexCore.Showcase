@@ -132,7 +132,7 @@ public class ShowcaseReportDataExecutor : IReportDataExecutor
                 {
                     ("S", "Private guide, full day",          2, "day",   180, 320, "Net rate"),
                 }),
-                ("Showcase Travel, head office", new[]
+                ("FlexCore Travel Agency, head office", new[]
                 {
                     ("S", "Booking fee",                      1, "booking", 45,  60, ""),
                     ("S", "Documents and delivery",           1, "booking", 12,  25, ""),

@@ -17,8 +17,6 @@ public sealed class BenchDataStore
     public IReadOnlyList<RateCardItem> RateCard { get; private set; } = [];
     public IReadOnlyList<SupplierRecord> Suppliers { get; private set; } = [];
     public IReadOnlyList<SupplierContactRecord> SupplierContacts { get; private set; } = [];
-    public IReadOnlyList<SalesDesk> SalesDesks { get; private set; } = [];
-    public IReadOnlyList<AgentListItem> Agents { get; private set; } = [];
 
     public string LoadReport { get; private set; } = "Initializing...";
 
@@ -35,11 +33,9 @@ public sealed class BenchDataStore
             RateCard = SynthesizeRateCard(5000);
             Suppliers = SynthesizeSuppliers(200);
             SupplierContacts = SynthesizeSupplierContacts(Suppliers);
-            SalesDesks = SynthesizeSalesDesks();
-            Agents = SynthesizeAgents(SalesDesks);
 
             sw.Stop();
-            LoadReport = $"Data synthesized in {sw.ElapsedMilliseconds} ms | Rate card: {RateCard.Count:N0} lines | Suppliers: {Suppliers.Count:N0} | Agents: {Agents.Count:N0}";
+            LoadReport = $"Data synthesized in {sw.ElapsedMilliseconds} ms | Rate card: {RateCard.Count:N0} lines | Suppliers: {Suppliers.Count:N0}";
             _loaded = true;
         }
     }
@@ -77,7 +73,7 @@ public sealed class BenchDataStore
             {
                 ("Guardian Travel Cover", new[] { ("Travel insurance, comprehensive", "pax", 38, 75) }),
                 ("{0} Guide Co-op", new[] { ("Private guide, full day", "day", 180, 320), ("Airport meet and greet", "pax", 25, 45) }),
-                ("Showcase Travel, head office", new[] { ("Booking fee", "booking", 45, 60), ("Documents and delivery", "booking", 12, 25), ("Restaurant reservations", "booking", 10, 20) }),
+                ("FlexCore Travel Agency, head office", new[] { ("Booking fee", "booking", 45, 60), ("Documents and delivery", "booking", 12, 25), ("Restaurant reservations", "booking", 10, 20) }),
             }),
         };
         var notes = new[] { "", "", "Net rate", "Commissionable 10%", "Non-refundable", "Paid locally", "Pre-booked", "" };
@@ -191,61 +187,6 @@ public sealed class BenchDataStore
         return list;
     }
 
-    private static List<SalesDesk> SynthesizeSalesDesks()
-    {
-        return
-        [
-            new SalesDesk { DeskID = 1, Name = "Leisure desk", GroupBookings = false, AgentCount = 24 },
-            new SalesDesk { DeskID = 2, Name = "Adventure desk", GroupBookings = true, AgentCount = 12 },
-            new SalesDesk { DeskID = 3, Name = "Cruise desk", GroupBookings = true, AgentCount = 9 },
-            new SalesDesk { DeskID = 4, Name = "Touring desk", GroupBookings = true, AgentCount = 15 },
-            new SalesDesk { DeskID = 5, Name = "Luxury desk", GroupBookings = false, AgentCount = 6 },
-            new SalesDesk { DeskID = 6, Name = "Customer care", GroupBookings = false, AgentCount = 18 },
-            new SalesDesk { DeskID = 7, Name = "Head office", GroupBookings = false, AgentCount = 8 }
-        ];
-    }
-
-    /// <summary>
-    /// One agent per <see cref="SalesDesk.AgentCount"/>, so the Agents column of the master grid and the detail grid's row
-    /// count agree. Names cycle through two lists; logins are made unique with a numeric suffix. Every ninth agent is inactive.
-    /// </summary>
-    private static List<AgentListItem> SynthesizeAgents(IEnumerable<SalesDesk> desks)
-    {
-        string[] firstNames =
-        [
-            "Alex", "Bruna", "Catherine", "Dario", "Elena", "Femi", "Grace", "Hugo", "Isabel", "Jonah", "Keira", "Liam", "Maya",
-            "Noah", "Olivia", "Priya", "Quentin", "Rosa", "Samuel", "Tessa", "Umar", "Vera", "Wesley", "Ximena", "Yusuf", "Zoe"
-        ];
-        string[] lastNames =
-        [
-            "Silva", "Jenkins", "Clark", "Dias", "Evans", "Foster", "Garcia", "Harris", "Ibarra", "Jones", "Kim", "Lopez", "Murphy",
-            "Nguyen", "Ortiz", "Patel", "Quinn", "Reed", "Singh", "Turner", "Usman", "Vargas", "Walsh", "Xu", "Young", "Zimmer"
-        ];
-        var agents = new List<AgentListItem>();
-        var taken = new HashSet<string>(StringComparer.Ordinal);
-        var n = 0;
-        foreach (var desk in desks)
-        {
-            for (var i = 0; i < desk.AgentCount; i++, n++)
-            {
-                var first = firstNames[n % firstNames.Length];
-                var last = lastNames[(n * 7 + n / firstNames.Length) % lastNames.Length];
-                var login = $"{char.ToLowerInvariant(first[0])}{last.ToLowerInvariant()}";
-                for (var suffix = 2; !taken.Add(login); suffix++)
-                    login = $"{char.ToLowerInvariant(first[0])}{last.ToLowerInvariant()}{suffix}";
-                agents.Add(new AgentListItem
-                {
-                    Login = login,
-                    FullName = $"{first} {last}",
-                    Email = $"{login}@showcase-travel.example",
-                    Active = n % 9 != 4,
-                    DeskID = desk.DeskID
-                });
-            }
-        }
-        return agents;
-    }
-
     // ══════════════════════════════════════════════════════════════════════
     // ── AG GRID SHOWCASE DATA GENERATORS ──────────────────────────────────
     // ══════════════════════════════════════════════════════════════════════
@@ -308,45 +249,6 @@ public sealed class BenchDataStore
             });
         }
         return list;
-    }
-
-    public static List<EmployeeRow> GetHrHierarchy()
-    {
-        return
-        [
-            // CEO & Executive
-            new EmployeeRow { EmployeeID = "EMP-001", ReportsToID = null, FullName = "Arthur Pendelton", JobTitle = "Chief Executive Officer", Department = "Executive", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2014, 3, 1), Salary = 385000m, Rating = 5, AvatarBg = "#0f172a", SubordinatesCount = 4 },
-            new EmployeeRow { EmployeeID = "EMP-002", ReportsToID = "EMP-001", FullName = "Claire Sterling", JobTitle = "VP of Engineering", Department = "Engineering", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2016, 6, 15), Salary = 265000m, Rating = 5, AvatarBg = "#0284c7", SubordinatesCount = 5 },
-            new EmployeeRow { EmployeeID = "EMP-003", ReportsToID = "EMP-001", FullName = "Marcus Vance", JobTitle = "VP of Product", Department = "Product", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2017, 2, 10), Salary = 245000m, Rating = 4, AvatarBg = "#7c3aed", SubordinatesCount = 3 },
-            new EmployeeRow { EmployeeID = "EMP-004", ReportsToID = "EMP-001", FullName = "Helena Zhang", JobTitle = "VP of Sales & Growth", Department = "Sales", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2018, 9, 1), Salary = 250000m, Rating = 5, AvatarBg = "#059669", SubordinatesCount = 3 },
-            new EmployeeRow { EmployeeID = "EMP-005", ReportsToID = "EMP-001", FullName = "Devon Montgomery", JobTitle = "VP of People & Culture", Department = "Human Resources", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 1, 20), Salary = 210000m, Rating = 4, AvatarBg = "#d97706", SubordinatesCount = 2 },
-
-            // Engineering Directors & Leads
-            new EmployeeRow { EmployeeID = "EMP-010", ReportsToID = "EMP-002", FullName = "Julian Becker", JobTitle = "Director of Core Infrastructure", Department = "Engineering", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2018, 4, 12), Salary = 205000m, Rating = 5, AvatarBg = "#2563eb", SubordinatesCount = 4 },
-            new EmployeeRow { EmployeeID = "EMP-011", ReportsToID = "EMP-002", FullName = "Aisha Khan", JobTitle = "Director of Frontend Architecture", Department = "Engineering", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 7, 8), Salary = 198000m, Rating = 5, AvatarBg = "#4f46e5", SubordinatesCount = 3 },
-            new EmployeeRow { EmployeeID = "EMP-012", ReportsToID = "EMP-002", FullName = "Carlos Mendez", JobTitle = "Lead Data Architect", Department = "Engineering", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 2, 15), Salary = 185000m, Rating = 4, AvatarBg = "#0891b2", SubordinatesCount = 2 },
-
-            // Engineering Staff
-            new EmployeeRow { EmployeeID = "EMP-020", ReportsToID = "EMP-010", FullName = "Dmitri Volkov", JobTitle = "Principal Distributed Systems Engineer", Department = "Engineering", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 8, 1), Salary = 175000m, Rating = 5, AvatarBg = "#0369a1", SubordinatesCount = 0 },
-            new EmployeeRow { EmployeeID = "EMP-021", ReportsToID = "EMP-010", FullName = "Seraphina Lin", JobTitle = "Senior Site Reliability Engineer", Department = "Engineering", Office = "Tokyo", EmploymentType = "Full-Time", HireDate = new DateTime(2021, 3, 22), Salary = 158000m, Rating = 4, AvatarBg = "#0284c7", SubordinatesCount = 0 },
-            new EmployeeRow { EmployeeID = "EMP-022", ReportsToID = "EMP-011", FullName = "Liam Gallagher", JobTitle = "Senior Blazor Specialist", Department = "Engineering", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2021, 5, 14), Salary = 162000m, Rating = 5, AvatarBg = "#6366f1", SubordinatesCount = 0 },
-            new EmployeeRow { EmployeeID = "EMP-023", ReportsToID = "EMP-011", FullName = "Maya Takahashi", JobTitle = "Design Systems Engineer", Department = "Engineering", Office = "Tokyo", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 1, 10), Salary = 145000m, Rating = 4, AvatarBg = "#8b5cf6", SubordinatesCount = 0 },
-            new EmployeeRow { EmployeeID = "EMP-024", ReportsToID = "EMP-012", FullName = "Kofi Mensah", JobTitle = "Database Performance Specialist", Department = "Engineering", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 6, 1), Salary = 152000m, Rating = 4, AvatarBg = "#06b6d4", SubordinatesCount = 0 },
-
-            // Product & Design
-            new EmployeeRow { EmployeeID = "EMP-030", ReportsToID = "EMP-003", FullName = "Sophie Dubois", JobTitle = "Head of Enterprise UX", Department = "Product", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 11, 4), Salary = 175000m, Rating = 5, AvatarBg = "#9333ea", SubordinatesCount = 2 },
-            new EmployeeRow { EmployeeID = "EMP-031", ReportsToID = "EMP-003", FullName = "Lucas Moretti", JobTitle = "Staff Product Manager", Department = "Product", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 5, 18), Salary = 168000m, Rating = 4, AvatarBg = "#a855f7", SubordinatesCount = 0 },
-            new EmployeeRow { EmployeeID = "EMP-032", ReportsToID = "EMP-030", FullName = "Emma Watson", JobTitle = "Senior UI Designer", Department = "Product", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 9, 1), Salary = 132000m, Rating = 4, AvatarBg = "#c084fc", SubordinatesCount = 0 },
-
-            // Sales & Growth
-            new EmployeeRow { EmployeeID = "EMP-040", ReportsToID = "EMP-004", FullName = "Jack Reynolds", JobTitle = "Director of Strategic Accounts", Department = "Sales", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2019, 8, 15), Salary = 190000m, Rating = 5, AvatarBg = "#15803d", SubordinatesCount = 2 },
-            new EmployeeRow { EmployeeID = "EMP-041", ReportsToID = "EMP-004", FullName = "Ananya Sharma", JobTitle = "EMEA Regional Enterprise Lead", Department = "Sales", Office = "London", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 10, 1), Salary = 172000m, Rating = 4, AvatarBg = "#16a34a", SubordinatesCount = 0 },
-            new EmployeeRow { EmployeeID = "EMP-042", ReportsToID = "EMP-040", FullName = "Tyler Brooks", JobTitle = "Senior Account Executive", Department = "Sales", Office = "Sydney", EmploymentType = "Full-Time", HireDate = new DateTime(2022, 2, 1), Salary = 140000m, Rating = 4, AvatarBg = "#22c55e", SubordinatesCount = 0 },
-
-            // HR & Talent
-            new EmployeeRow { EmployeeID = "EMP-050", ReportsToID = "EMP-005", FullName = "Hannah Kim", JobTitle = "Head of Global Talent Acquisition", Department = "Human Resources", Office = "San Francisco", EmploymentType = "Full-Time", HireDate = new DateTime(2020, 3, 9), Salary = 155000m, Rating = 5, AvatarBg = "#ea580c", SubordinatesCount = 1 },
-            new EmployeeRow { EmployeeID = "EMP-051", ReportsToID = "EMP-050", FullName = "Noah Campbell", JobTitle = "Technical Recruiter", Department = "Human Resources", Office = "New York", EmploymentType = "Full-Time", HireDate = new DateTime(2023, 4, 15), Salary = 108000m, Rating = 4, AvatarBg = "#f97316", SubordinatesCount = 0 }
-        ];
     }
 
     public static List<InventoryProduct> GetInventoryProducts()

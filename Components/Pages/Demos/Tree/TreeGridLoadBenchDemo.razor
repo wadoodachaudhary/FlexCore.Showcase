@@ -28,7 +28,10 @@
    the earlier node shape and cost divisions.
    2026-10-26: the first example became the OurAirports data (Data/AirportData.cs): six continents in the list, and countries,
    airports and runways from LoadChildren as rows open, which the page had not shown before. The suppliers, the size buttons and
-   Expand all went with it (ExpandAllAsync opens only rows whose children are loaded, so it would load one level per click). *@
+   Expand all went with it (ExpandAllAsync opens only rows whose children are loaded, so it would load one level per click).
+   2026-10-26 (Baaria): the org chart runs on FlexCore Travel Agency's generated staff (Data/TravelOrg.cs, all names made up)
+   instead of the 21-person HR list; a search box over name, title, office, division and department replaces the department
+   buttons, and the Name column is frozen. *@
 
 <PageTitle>Tree grid — FlexCore Showcase</PageTitle>
 
@@ -79,39 +82,54 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="org" Title="Org chart: who reports to whom" RazorCode="@Code.Org" CSharpCode="@Code.OrgCs">
-            <Description><p>Twenty-one people of an HR directory, each row carrying its manager's id. Pick a department: the people in it stay, together with the managers above them, so the tree never loses its root. Managers show how many people report to them, and the performance column is a read-only <code>RatingControl</code> inside a column template.</p></Description>
+            <Description><p>FlexCore Travel Agency, an imagined tour operator: @_staff.Count(p => !p.Vacant).ToString("N0") people in @_staff.Count.ToString("N0") posts, from the chief executive to seasonal guides in twelve destinations and three contact centres. The staff come from a generator with a fixed seed, so everyone sees the same people, and every name is made up. Search for a name, title, office or division (try <em>Lisbon</em>, <em>Guide</em> or <em>Technology</em>) and press Enter: the matches stay, together with every manager above them, so the tree never loses its root. Vacant posts keep their place and their reports, finance, HR and marketing partners show their second, dotted-line manager under Also reports to, and the Name column stays put while you scroll sideways. The rating is a read-only <code>RatingControl</code> inside a column template.</p></Description>
             <Controls>
-                <ButtonGroupControl Items="_deptItems" Values="@(new[] { _dept })" ValuesChanged="ShowDepartment" Selection="ChoiceSelectionMode.Single" AriaLabel="Department" />
+                <TextBoxControl Value="@_search" ValueChanged="Search" Placeholder="Name, title, office or division" Width="240px" />
             </Controls>
             <Demo>
                 <TreeGridControl @key="_orgGeneration"
-                                 TValue="EmployeeRow"
+                                 TValue="StaffMember"
                                  DataSource="@_shown"
-                                 IdMapping="EmployeeID"
-                                 ParentIdMapping="ReportsToID"
+                                 IdMapping="Id"
+                                 ParentIdMapping="ManagerId"
                                  TreeColumnIndex="0"
                                  EnableCollapseAll="true"
+                                 InitialExpansionPredicate="@(p => !string.IsNullOrEmpty(_search) || p.Level < 1)"
+                                 AllowSorting="true"
                                  AllowSelection="true"
                                  ToggleOnRowClick="false"
-                                 InitialExpansionPredicate="@(_ => true)"
                                  Height="440px">
-                    <TreeGridColumn Field="@nameof(EmployeeRow.FullName)" HeaderText="Name" Width="260px">
+                    <TreeGridColumn Field="@nameof(StaffMember.Name)" HeaderText="Name" Width="290px" IsFrozen="true">
                         <Template>
-                            @{ var person = (EmployeeRow)context; }
-                            <strong>@person.FullName</strong>@(person.IsManager ? $" · manages {person.SubordinatesCount}" : "")
+                            @{ var p = (StaffMember)context; }
+                            @if (p.Vacant) { <em class="vacant">Vacant</em> } else { <strong>@p.Name</strong> }
+                            @if (p.OnLeave) { <span class="tag">on leave</span> }
                         </Template>
                     </TreeGridColumn>
-                    <TreeGridColumn Field="@nameof(EmployeeRow.JobTitle)" HeaderText="Title" Width="200px" />
-                    <TreeGridColumn Field="@nameof(EmployeeRow.Department)" HeaderText="Department" Width="130px" />
-                    <TreeGridColumn Field="@nameof(EmployeeRow.Office)" HeaderText="Office" Width="120px" />
-                    <TreeGridColumn Field="@nameof(EmployeeRow.Salary)" HeaderText="Salary" Width="110px" TextAlign="TextAlign.Right" Format="C0" />
-                    <TreeGridColumn Field="@nameof(EmployeeRow.Rating)" HeaderText="Performance" Width="130px">
+                    <TreeGridColumn Field="@nameof(StaffMember.Title)" HeaderText="Title" Width="230px" />
+                    <TreeGridColumn Field="@nameof(StaffMember.Office)" HeaderText="Office" Width="110px" />
+                    <TreeGridColumn Field="@nameof(StaffMember.Headcount)" HeaderText="People below" Width="110px" TextAlign="TextAlign.Right">
+                        <Template>@(((StaffMember)context).Headcount is > 0 and var n ? n.ToString("N0") : "")</Template>
+                    </TreeGridColumn>
+                    <TreeGridColumn Field="@nameof(StaffMember.Grade)" HeaderText="Grade" Width="70px" TextAlign="TextAlign.Center" />
+                    <TreeGridColumn Field="@nameof(StaffMember.Contract)" HeaderText="Contract" Width="160px">
                         <Template>
-                            @{ var person = (EmployeeRow)context; }
-                            <RatingControl Value="@person.Rating" ReadOnly="true" />
+                            @{ var p = (StaffMember)context; }
+                            @p.Contract@(p.Fte < 1 ? $", {p.Fte:0.0} FTE" : "")
                         </Template>
                     </TreeGridColumn>
-                    <TreeGridColumn Field="@nameof(EmployeeRow.HireDate)" HeaderText="Hired" Width="110px" TextAlign="TextAlign.Center" Format="yyyy-MM-dd" />
+                    <TreeGridColumn Field="@nameof(StaffMember.Salary)" HeaderText="Salary" Width="100px" TextAlign="TextAlign.Right" Format="C0" />
+                    <TreeGridColumn Field="@nameof(StaffMember.Rating)" HeaderText="Rating" Width="120px">
+                        <Template>
+                            @{ var p = (StaffMember)context; }
+                            @if (p.Rating is { } stars) { <RatingControl Value="@stars" ReadOnly="true" /> }
+                            else if (!p.Vacant) { <span class="muted">new starter</span> }
+                        </Template>
+                    </TreeGridColumn>
+                    <TreeGridColumn Field="@nameof(StaffMember.Started)" HeaderText="Started" Width="100px" TextAlign="TextAlign.Center" Format="yyyy-MM-dd" />
+                    <TreeGridColumn Field="@nameof(StaffMember.DottedLineId)" HeaderText="Also reports to" Width="190px">
+                        <Template>@DottedLine((StaffMember)context)</Template>
+                    </TreeGridColumn>
                 </TreeGridControl>
                 <p class="result">@OrgStatus</p>
             </Demo>
@@ -260,123 +278,138 @@
         public int Level => Id.Count(c => c == '|');
     }
 
-    // Org chart (moved here from Four scenarios, 2026-10-23): a department filter keeps the manager chain so the tree stays rooted.
-    private readonly List<EmployeeRow> _people = BenchDataStore.GetHrHierarchy();
-    private List<EmployeeRow> _shown = BenchDataStore.GetHrHierarchy();
-    private readonly SelectionItem[] _deptItems = { new("All", "Everyone"), new("Engineering", "Engineering"), new("Executive", "Executive"), new("Human Resources", "HR"), new("Product", "Product"), new("Sales", "Sales") };
-    private string _dept = "All";
+    // Org chart: FlexCore Travel Agency's staff (Data/TravelOrg.cs). A search keeps every match's managers, so the tree stays
+    // rooted.
+    private static readonly IReadOnlyList<StaffMember> _staff = TravelOrg.Staff;
+    private static readonly Dictionary<string, StaffMember> _byId = _staff.ToDictionary(p => p.Id);
+    private string? _search;
+    private List<StaffMember> _shown = _staff.ToList();
     private int _orgGeneration = 1;   // @key: a new value remounts the tree grid when the list is swapped
 
-    private string OrgStatus => $"{_shown.Count} of {_people.Count} people shown; {_shown.Count(p => p.IsManager)} managers.";
+    private string OrgStatus =>
+        $"{_shown.Count:N0} of {_staff.Count:N0} posts shown; {_shown.Count(p => p.Vacant)} vacant, {_shown.Count(p => p.OnLeave)} on leave.";
 
-    private void ShowDepartment(IReadOnlyList<string> values)
+    private static string DottedLine(StaffMember p) =>
+        p.DottedLineId is { } id ? _byId[id] is { Vacant: true } v ? $"{v.Title} (vacant)" : _byId[id].Name : "";
+
+    private void Search(string? text)
     {
-        if (values.Count == 0) return;
-        _dept = values[0];
-        if (_dept == "All")
-        {
-            _shown = _people.ToList();
-        }
-        else
-        {
-            var keep = _people.Where(p => p.Department == _dept).Select(p => p.EmployeeID).ToHashSet();
-            foreach (var id in keep.ToList())
-            {
-                var current = _people.FirstOrDefault(p => p.EmployeeID == id);
-                while (current?.ReportsToID is { } managerId && keep.Add(managerId))
-                    current = _people.FirstOrDefault(p => p.EmployeeID == managerId);
-            }
-            _shown = _people.Where(p => keep.Contains(p.EmployeeID)).ToList();
-        }
+        _search = text?.Trim();
+        var keep = _staff
+            .Where(p => string.IsNullOrEmpty(_search)
+                        || new[] { p.Name, p.Title, p.Office, p.Division, p.Department }.Any(v => v.Contains(_search, StringComparison.OrdinalIgnoreCase)))
+            .Select(p => p.Id)
+            .ToHashSet();
+        foreach (var id in keep.ToList())
+            for (var manager = _byId[id].ManagerId; manager is not null && keep.Add(manager); manager = _byId[manager].ManagerId) { }
+        _shown = _staff.Where(p => keep.Contains(p.Id)).ToList();
         _orgGeneration++;
     }
 
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
     private static class Code
     {
-        public const string Org = @"<ButtonGroupControl Items=""_deptItems"" Values=""@(new[] { _dept })"" ValuesChanged=""ShowDepartment"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Department"" />
+        public const string Org = @"<TextBoxControl Value=""@_search"" ValueChanged=""Search"" Placeholder=""Name, title, office or division"" Width=""240px"" />
 
 <TreeGridControl @key=""_orgGeneration""
-                 TValue=""EmployeeRow""
+                 TValue=""StaffMember""
                  DataSource=""@_shown""
-                 IdMapping=""EmployeeID""
-                 ParentIdMapping=""ReportsToID""
+                 IdMapping=""Id""
+                 ParentIdMapping=""ManagerId""
                  TreeColumnIndex=""0""
                  EnableCollapseAll=""true""
+                 InitialExpansionPredicate=""@(p => !string.IsNullOrEmpty(_search) || p.Level < 1)""
+                 AllowSorting=""true""
                  AllowSelection=""true""
                  ToggleOnRowClick=""false""
-                 InitialExpansionPredicate=""@(_ => true)""
                  Height=""440px"">
-    <TreeGridColumn Field=""@nameof(EmployeeRow.FullName)"" HeaderText=""Name"" Width=""260px"">
+    <TreeGridColumn Field=""@nameof(StaffMember.Name)"" HeaderText=""Name"" Width=""290px"" IsFrozen=""true"">
         <Template>
-            @{ var person = (EmployeeRow)context; }
-            <strong>@person.FullName</strong>@(person.IsManager ? $"" · manages {person.SubordinatesCount}"" : """")
+            @{ var p = (StaffMember)context; }
+            @if (p.Vacant) { <em class=""vacant"">Vacant</em> } else { <strong>@p.Name</strong> }
+            @if (p.OnLeave) { <span class=""tag"">on leave</span> }
         </Template>
     </TreeGridColumn>
-    <TreeGridColumn Field=""@nameof(EmployeeRow.JobTitle)"" HeaderText=""Title"" Width=""200px"" />
-    <TreeGridColumn Field=""@nameof(EmployeeRow.Department)"" HeaderText=""Department"" Width=""130px"" />
-    <TreeGridColumn Field=""@nameof(EmployeeRow.Office)"" HeaderText=""Office"" Width=""120px"" />
-    <TreeGridColumn Field=""@nameof(EmployeeRow.Salary)"" HeaderText=""Salary"" Width=""110px"" TextAlign=""TextAlign.Right"" Format=""C0"" />
-    <TreeGridColumn Field=""@nameof(EmployeeRow.Rating)"" HeaderText=""Performance"" Width=""130px"">
+    <TreeGridColumn Field=""@nameof(StaffMember.Title)"" HeaderText=""Title"" Width=""230px"" />
+    <TreeGridColumn Field=""@nameof(StaffMember.Office)"" HeaderText=""Office"" Width=""110px"" />
+    <TreeGridColumn Field=""@nameof(StaffMember.Headcount)"" HeaderText=""People below"" Width=""110px"" TextAlign=""TextAlign.Right"">
+        <Template>@(((StaffMember)context).Headcount is > 0 and var n ? n.ToString(""N0"") : """")</Template>
+    </TreeGridColumn>
+    <TreeGridColumn Field=""@nameof(StaffMember.Grade)"" HeaderText=""Grade"" Width=""70px"" TextAlign=""TextAlign.Center"" />
+    <TreeGridColumn Field=""@nameof(StaffMember.Contract)"" HeaderText=""Contract"" Width=""160px"">
         <Template>
-            @{ var person = (EmployeeRow)context; }
-            <RatingControl Value=""@person.Rating"" ReadOnly=""true"" />
+            @{ var p = (StaffMember)context; }
+            @p.Contract@(p.Fte < 1 ? $"", {p.Fte:0.0} FTE"" : """")
         </Template>
     </TreeGridColumn>
-    <TreeGridColumn Field=""@nameof(EmployeeRow.HireDate)"" HeaderText=""Hired"" Width=""110px"" TextAlign=""TextAlign.Center"" Format=""yyyy-MM-dd"" />
+    <TreeGridColumn Field=""@nameof(StaffMember.Salary)"" HeaderText=""Salary"" Width=""100px"" TextAlign=""TextAlign.Right"" Format=""C0"" />
+    <TreeGridColumn Field=""@nameof(StaffMember.Rating)"" HeaderText=""Rating"" Width=""120px"">
+        <Template>
+            @{ var p = (StaffMember)context; }
+            @if (p.Rating is { } stars) { <RatingControl Value=""@stars"" ReadOnly=""true"" /> }
+            else if (!p.Vacant) { <span class=""muted"">new starter</span> }
+        </Template>
+    </TreeGridColumn>
+    <TreeGridColumn Field=""@nameof(StaffMember.Started)"" HeaderText=""Started"" Width=""100px"" TextAlign=""TextAlign.Center"" Format=""yyyy-MM-dd"" />
+    <TreeGridColumn Field=""@nameof(StaffMember.DottedLineId)"" HeaderText=""Also reports to"" Width=""190px"">
+        <Template>@DottedLine((StaffMember)context)</Template>
+    </TreeGridColumn>
 </TreeGridControl>
 <p class=""result"">@OrgStatus</p>";
-        public const string OrgCs = @"// Org chart (moved here from Four scenarios, 2026-10-23): a department filter keeps the manager chain so the tree stays rooted.
-private readonly List<EmployeeRow> _people = BenchDataStore.GetHrHierarchy();
-
-private List<EmployeeRow> _shown = BenchDataStore.GetHrHierarchy();
-
-private readonly SelectionItem[] _deptItems = { new(""All"", ""Everyone""), new(""Engineering"", ""Engineering""), new(""Executive"", ""Executive""), new(""Human Resources"", ""HR""), new(""Product"", ""Product""), new(""Sales"", ""Sales"") };
-
-private string _dept = ""All"";
-
+        public const string OrgCs = @"// Org chart: FlexCore Travel Agency's staff (Data/TravelOrg.cs). A search keeps every match's managers, so the tree stays
+// rooted.
+private static readonly IReadOnlyList<StaffMember> _staff = TravelOrg.Staff;
+private static readonly Dictionary<string, StaffMember> _byId = _staff.ToDictionary(p => p.Id);
+private string? _search;
+private List<StaffMember> _shown = _staff.ToList();
 private int _orgGeneration = 1;   // @key: a new value remounts the tree grid when the list is swapped
 
-private string OrgStatus => $""{_shown.Count} of {_people.Count} people shown; {_shown.Count(p => p.IsManager)} managers."";
+private string OrgStatus =>
+    $""{_shown.Count:N0} of {_staff.Count:N0} posts shown; {_shown.Count(p => p.Vacant)} vacant, {_shown.Count(p => p.OnLeave)} on leave."";
 
-private void ShowDepartment(IReadOnlyList<string> values)
+private static string DottedLine(StaffMember p) =>
+    p.DottedLineId is { } id ? _byId[id] is { Vacant: true } v ? $""{v.Title} (vacant)"" : _byId[id].Name : """";
+
+private void Search(string? text)
 {
-    if (values.Count == 0) return;
-    _dept = values[0];
-    if (_dept == ""All"")
-    {
-        _shown = _people.ToList();
-    }
-    else
-    {
-        var keep = _people.Where(p => p.Department == _dept).Select(p => p.EmployeeID).ToHashSet();
-        foreach (var id in keep.ToList())
-        {
-            var current = _people.FirstOrDefault(p => p.EmployeeID == id);
-            while (current?.ReportsToID is { } managerId && keep.Add(managerId))
-                current = _people.FirstOrDefault(p => p.EmployeeID == managerId);
-        }
-        _shown = _people.Where(p => keep.Contains(p.EmployeeID)).ToList();
-    }
+    _search = text?.Trim();
+    var keep = _staff
+        .Where(p => string.IsNullOrEmpty(_search)
+                    || new[] { p.Name, p.Title, p.Office, p.Division, p.Department }.Any(v => v.Contains(_search, StringComparison.OrdinalIgnoreCase)))
+        .Select(p => p.Id)
+        .ToHashSet();
+    foreach (var id in keep.ToList())
+        for (var manager = _byId[id].ManagerId; manager is not null && keep.Add(manager); manager = _byId[manager].ManagerId) { }
+    _shown = _staff.Where(p => keep.Contains(p.Id)).ToList();
     _orgGeneration++;
 }
 
-// Data/ScenarioModels.cs
-public sealed class EmployeeRow
+// Data/TravelOrg.cs: one post; TravelOrg.Staff generates the list from a fixed seed.
+public sealed record StaffMember
 {
-    public string EmployeeID { get; set; } = """";
-    public string? ReportsToID { get; set; }
-    public string FullName { get; set; } = """";
-    public string JobTitle { get; set; } = """";
-    public string Department { get; set; } = """"; // Engineering, Product, Sales, Marketing, Finance, HR
-    public string Office { get; set; } = """"; // New York, London, San Francisco, Tokyo, Sydney
-    public string EmploymentType { get; set; } = ""Full-Time"";
-    public DateTime HireDate { get; set; }
-    public decimal Salary { get; set; }
-    public int Rating { get; set; } // 1-5 stars
-    public string AvatarBg { get; set; } = ""#0284c7"";
-    public int SubordinatesCount { get; set; }
-    public bool IsManager => SubordinatesCount > 0;
+    public required string Id { get; init; }
+    public string? ManagerId { get; init; }
+    public string? DottedLineId { get; init; }
+    public required string Name { get; init; }        // ""Vacant"" for an open post
+    public required string Title { get; init; }
+    public int Grade { get; init; }                   // 1 trainee to 9 chief executive
+    public required string Division { get; init; }
+    public required string Department { get; init; }
+    public required string Office { get; init; }
+    public required string Country { get; init; }
+    public required string Region { get; init; }
+    public required string Contract { get; init; }    // Permanent, Fixed-term, Seasonal or Contractor
+    public double Fte { get; init; } = 1;             // 1 full time; 0.5 to 0.8 part time
+    public DateOnly? Started { get; init; }
+    public decimal Salary { get; init; }              // USD a year at the post's FTE; the budget for a vacant post
+    public int? Rating { get; init; }                 // 1 to 5; none for vacant posts and people who started under six months ago
+    public string Languages { get; init; } = """";
+    public string Email { get; init; } = """";
+    public bool Vacant { get; init; }
+    public bool OnLeave { get; init; }
+    public int Level { get; init; }                   // 0 for the chief executive
+    public int DirectReports { get; init; }           // posts reporting on the solid line, vacant ones included
+    public int Headcount { get; init; }               // people below on the solid line, vacant posts not counted
 }";
         public const string Airports = @"<TreeGridControl @ref=""_places""
                  TValue=""Place""

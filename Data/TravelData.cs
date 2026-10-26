@@ -1,7 +1,7 @@
 namespace FlexCore.Showcase.Data;
 
 /// <summary>
-/// The imagined tour operator behind the home page's quote desk and the Report writer page's package cost sheet.
+/// FlexCore Travel Agency, the imagined tour operator behind the home page's quote desk and the Report writer page's package cost sheet.
 /// Package, supplier and service names are invented; no real airline, hotel or company is named.
 /// </summary>
 public static class TravelData

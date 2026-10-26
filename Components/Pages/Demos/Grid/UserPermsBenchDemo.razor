@@ -5,10 +5,11 @@
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Services
 @using FlexCore.Showcase.Components.Shared
-@inject FlexCore.Showcase.Services.BenchDataStore BenchData
 
 @* 2026-10-25 (Baaria, SC-344): the master-detail example runs on sales desks and agents (Data/BenchModels.cs SalesDesk, AgentListItem;
-   BenchDataStore.SalesDesks, Agents) instead of the earlier security groups and users. *@
+   BenchDataStore.SalesDesks, Agents) instead of the earlier security groups and users.
+   2026-10-26: the first example became countries and their airports (Data/AirportData.cs, the OurAirports data the Data Grid page
+   opens on); the desks, the agents and their generator in BenchDataStore are gone. The relation is Airport.CountryCode. *@
 
 @* 2026-10-18: moved onto FeatureDemoLayout (Saturday plan) and given a real relation: each detail row carries its master's key and
    BenchDataStore generates one detail row per master count (today AgentListItem.DeskID and SalesDesk.AgentCount), so the detail
@@ -52,43 +53,46 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="groups" Title="Sales desks and their agents" RazorCode="@Code.Groups" CSharpCode="@Code.GroupsCs">
-            <Description><p>Seven desks on the left, 92 agents on the right. Click a desk and the right grid shows the agents on it; the Agents column of the desk row, the agent grid's footer and the line under the grids count the same people. The agent grid sorts on its own and marks inactive agents.</p></Description>
+        <DemoExample Id="countries" Title="Countries and their airports" RazorCode="@Code.Countries" CSharpCode="@Code.CountriesCs">
+            <Description><p>The airports from the <a href="demo/grid#airports">Data Grid</a> page, 233 countries on the left and 4,009 airports on the right. Click a country and the right grid shows its airports: every airport row carries its country's ISO code, and the page keeps the rows whose code matches. The Airports column of the country row, the airport grid's footer and the line under the grids count the same airports. Search the countries (try <em>Portugal</em>) and click the result, or sort either grid on its own.</p></Description>
             <Demo>
                 <div class="pair">
                     <div>
-                        <p class="pane-title">Desks</p>
-                        <GridControl TValue="SalesDesk"
-                                     DataSource="@_desks"
-                                     Height="300px"
+                        <p class="pane-title">Countries</p>
+                        <GridControl TValue="CountryRow"
+                                     DataSource="@_countries"
+                                     Height="340px"
                                      AllowSelection="true"
+                                     AllowSorting="true"
+                                     ShowSearchBar="true"
                                      AutoSelectFirstRow="true"
                                      SelectionSettingsRef="@_singleRow"
-                                     EventsRef="@_deskEvents">
+                                     EventsRef="@_countryEvents">
                             <GridColumnsBase>
-                                <GridColumn Field="@nameof(SalesDesk.Name)" HeaderText="Desk" Width="200px" />
-                                <GridColumn Field="@nameof(SalesDesk.GroupBookings)" HeaderText="Group bookings" Width="110px" Type="ColumnType.Boolean" />
-                                <GridColumn Field="@nameof(SalesDesk.AgentCount)" HeaderText="Agents" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" />
+                                <GridColumn Field="@nameof(CountryRow.Name)" HeaderText="Country" Width="180px" />
+                                <GridColumn Field="@nameof(CountryRow.Code)" HeaderText="ISO" Width="60px" />
+                                <GridColumn Field="@nameof(CountryRow.Airports)" HeaderText="Airports" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" Format="#,##0" />
                             </GridColumnsBase>
                         </GridControl>
                     </div>
                     <div>
-                        <p class="pane-title">Agents on @(_selectedDesk?.Name ?? "…")</p>
-                        <GridControl TValue="AgentListItem"
-                                     DataSource="@_deskAgents"
-                                     Height="300px"
+                        <p class="pane-title">Airports in @(_country?.Name ?? "…")</p>
+                        <GridControl TValue="Airport"
+                                     DataSource="@_countryAirports"
+                                     Height="340px"
                                      AllowSorting="true"
                                      ShowRowCountInFooter="true">
                             <GridColumnsBase>
-                                <GridColumn Field="@nameof(AgentListItem.Login)" HeaderText="Login" Width="100px" />
-                                <GridColumn Field="@nameof(AgentListItem.FullName)" HeaderText="Name" Width="150px" />
-                                <GridColumn Field="@nameof(AgentListItem.Email)" HeaderText="Email" Width="210px" />
-                                <GridColumn Field="@nameof(AgentListItem.Active)" HeaderText="Active" Width="70px" Type="ColumnType.Boolean" />
+                                <GridColumn Field="@nameof(Airport.Code)" HeaderText="Code" Width="60px" />
+                                <GridColumn Field="@nameof(Airport.Name)" HeaderText="Airport" Width="220px" />
+                                <GridColumn Field="@nameof(Airport.City)" HeaderText="City" Width="130px" />
+                                <GridColumn Field="@nameof(Airport.Type)" HeaderText="Type" Width="75px" />
+                                <GridColumn Field="@nameof(Airport.Runways)" HeaderText="Runways" Width="75px" Type="ColumnType.Number" TextAlign="TextAlign.Right" />
                             </GridColumnsBase>
                         </GridControl>
                     </div>
                 </div>
-                <p class="result">@_deskAgents.Count agents on @(_selectedDesk?.Name ?? "no desk"), @_deskAgents.Count(a => !a.Active) inactive.</p>
+                <p class="result">@_countryAirports.Count.ToString("#,##0") airports in @(_country?.Name ?? "no country"), @_countryAirports.Count(a => a.Type == "Large") of them large.</p>
             </Demo>
         </DemoExample>
 
@@ -199,27 +203,31 @@
 </FeatureDemoLayout>
 
 @code {
-    private List<SalesDesk> _desks = [];
-    private List<AgentListItem> _agents = [];
-    private List<AgentListItem> _deskAgents = [];
-    private SalesDesk? _selectedDesk;
+    // Countries: one row per ISO code, most airports first; the airports are the detail rows.
+    private readonly List<CountryRow> _countries = AirportData.Airports
+        .GroupBy(a => (a.CountryCode, a.Country))
+        .Select(g => new CountryRow(g.Key.CountryCode, g.Key.Country, g.Count()))
+        .OrderByDescending(c => c.Airports).ThenBy(c => c.Name)
+        .ToList();
+    private List<Airport> _countryAirports = [];
+    private CountryRow? _country;
 
     private readonly SelectionSettings _singleRow = new() { Mode = SelectionMode.Row, Type = SelectionType.Single };
-    private readonly GridControlEvents<SalesDesk> _deskEvents = new();
+    private readonly GridControlEvents<CountryRow> _countryEvents = new();
 
     protected override void OnInitialized()
     {
-        _desks = BenchData.SalesDesks.ToList();
-        _agents = BenchData.Agents.ToList();
-        _deskEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<SalesDesk>>(this, args => Show(args.Data));
-        Show(_desks.FirstOrDefault());
+        _countryEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<CountryRow>>(this, args => Show(args.Data));
+        Show(_countries.FirstOrDefault());
     }
 
-    private void Show(SalesDesk? desk)
+    private void Show(CountryRow? country)
     {
-        _selectedDesk = desk;
-        _deskAgents = desk is null ? [] : _agents.Where(a => a.DeskID == desk.DeskID).ToList();
+        _country = country;
+        _countryAirports = country is null ? [] : AirportData.Airports.Where(a => a.CountryCode == country.Code).ToList();
     }
+
+    private sealed record CountryRow(string Code, string Name, int Airports);
 
     private GridControl<InventoryProduct>? _grid;
     private readonly List<InventoryProduct> _products = BenchDataStore.GetInventoryProducts();
@@ -265,84 +273,68 @@
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
     private static class Code
     {
-        public const string Groups = @"<div class=""pair"">
+        public const string Countries = @"<div class=""pair"">
     <div>
-        <p class=""pane-title"">Desks</p>
-        <GridControl TValue=""SalesDesk""
-                     DataSource=""@_desks""
-                     Height=""300px""
+        <p class=""pane-title"">Countries</p>
+        <GridControl TValue=""CountryRow""
+                     DataSource=""@_countries""
+                     Height=""340px""
                      AllowSelection=""true""
+                     AllowSorting=""true""
+                     ShowSearchBar=""true""
                      AutoSelectFirstRow=""true""
                      SelectionSettingsRef=""@_singleRow""
-                     EventsRef=""@_deskEvents"">
+                     EventsRef=""@_countryEvents"">
             <GridColumnsBase>
-                <GridColumn Field=""@nameof(SalesDesk.Name)"" HeaderText=""Desk"" Width=""200px"" />
-                <GridColumn Field=""@nameof(SalesDesk.GroupBookings)"" HeaderText=""Group bookings"" Width=""110px"" Type=""ColumnType.Boolean"" />
-                <GridColumn Field=""@nameof(SalesDesk.AgentCount)"" HeaderText=""Agents"" Width=""80px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" />
+                <GridColumn Field=""@nameof(CountryRow.Name)"" HeaderText=""Country"" Width=""180px"" />
+                <GridColumn Field=""@nameof(CountryRow.Code)"" HeaderText=""ISO"" Width=""60px"" />
+                <GridColumn Field=""@nameof(CountryRow.Airports)"" HeaderText=""Airports"" Width=""80px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" Format=""#,##0"" />
             </GridColumnsBase>
         </GridControl>
     </div>
     <div>
-        <p class=""pane-title"">Agents on @(_selectedDesk?.Name ?? ""…"")</p>
-        <GridControl TValue=""AgentListItem""
-                     DataSource=""@_deskAgents""
-                     Height=""300px""
+        <p class=""pane-title"">Airports in @(_country?.Name ?? ""…"")</p>
+        <GridControl TValue=""Airport""
+                     DataSource=""@_countryAirports""
+                     Height=""340px""
                      AllowSorting=""true""
                      ShowRowCountInFooter=""true"">
             <GridColumnsBase>
-                <GridColumn Field=""@nameof(AgentListItem.Login)"" HeaderText=""Login"" Width=""100px"" />
-                <GridColumn Field=""@nameof(AgentListItem.FullName)"" HeaderText=""Name"" Width=""150px"" />
-                <GridColumn Field=""@nameof(AgentListItem.Email)"" HeaderText=""Email"" Width=""210px"" />
-                <GridColumn Field=""@nameof(AgentListItem.Active)"" HeaderText=""Active"" Width=""70px"" Type=""ColumnType.Boolean"" />
+                <GridColumn Field=""@nameof(Airport.Code)"" HeaderText=""Code"" Width=""60px"" />
+                <GridColumn Field=""@nameof(Airport.Name)"" HeaderText=""Airport"" Width=""220px"" />
+                <GridColumn Field=""@nameof(Airport.City)"" HeaderText=""City"" Width=""130px"" />
+                <GridColumn Field=""@nameof(Airport.Type)"" HeaderText=""Type"" Width=""75px"" />
+                <GridColumn Field=""@nameof(Airport.Runways)"" HeaderText=""Runways"" Width=""75px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" />
             </GridColumnsBase>
         </GridControl>
     </div>
 </div>
-<p class=""result"">@_deskAgents.Count agents on @(_selectedDesk?.Name ?? ""no desk""), @_deskAgents.Count(a => !a.Active) inactive.</p>";
-        public const string GroupsCs = @"private List<SalesDesk> _desks = [];
-
-private List<AgentListItem> _agents = [];
-
-private List<AgentListItem> _deskAgents = [];
-
-private SalesDesk? _selectedDesk;
+<p class=""result"">@_countryAirports.Count.ToString(""#,##0"") airports in @(_country?.Name ?? ""no country""), @_countryAirports.Count(a => a.Type == ""Large"") of them large.</p>";
+        public const string CountriesCs = @"// Countries: one row per ISO code, most airports first; the airports are the detail rows.
+private readonly List<CountryRow> _countries = AirportData.Airports
+    .GroupBy(a => (a.CountryCode, a.Country))
+    .Select(g => new CountryRow(g.Key.CountryCode, g.Key.Country, g.Count()))
+    .OrderByDescending(c => c.Airports).ThenBy(c => c.Name)
+    .ToList();
+private List<Airport> _countryAirports = [];
+private CountryRow? _country;
 
 private readonly SelectionSettings _singleRow = new() { Mode = SelectionMode.Row, Type = SelectionType.Single };
-
-private readonly GridControlEvents<SalesDesk> _deskEvents = new();
+private readonly GridControlEvents<CountryRow> _countryEvents = new();
 
 protected override void OnInitialized()
 {
-    _desks = BenchData.SalesDesks.ToList();
-    _agents = BenchData.Agents.ToList();
-    _deskEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<SalesDesk>>(this, args => Show(args.Data));
-    Show(_desks.FirstOrDefault());
+    _countryEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<CountryRow>>(this, args => Show(args.Data));
+    Show(_countries.FirstOrDefault());
 }
 
-private void Show(SalesDesk? desk)
+private void Show(CountryRow? country)
 {
-    _selectedDesk = desk;
-    _deskAgents = desk is null ? [] : _agents.Where(a => a.DeskID == desk.DeskID).ToList();
+    _country = country;
+    _countryAirports = country is null ? [] : AirportData.Airports.Where(a => a.CountryCode == country.Code).ToList();
 }
 
-// Data/BenchModels.cs
-public sealed class SalesDesk
-{
-    public int DeskID { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public bool GroupBookings { get; set; }
-    public int AgentCount { get; set; }
-}
-
-// Data/BenchModels.cs
-public sealed class AgentListItem
-{
-    public string Login { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public bool Active { get; set; } = true;
-    public int DeskID { get; set; }
-}";
+private sealed record CountryRow(string Code, string Name, int Airports);";
         public const string WarehousesCss = @".detail { display: grid; gap: 6px; padding: 2px 4px 4px; }
 /* A GridControl with no Height sizes its scroll area with flex-basis 0, which inside a table cell collapses to the
    scrollbar; this lets the nested grid grow to its rows instead. */

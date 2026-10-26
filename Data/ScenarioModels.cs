@@ -22,26 +22,6 @@ public sealed class TickerRow
 }
 
 /// <summary>
-/// One person of the org chart on the Tree grid page; ReportsToID names the manager.
-/// </summary>
-public sealed class EmployeeRow
-{
-    public string EmployeeID { get; set; } = "";
-    public string? ReportsToID { get; set; }
-    public string FullName { get; set; } = "";
-    public string JobTitle { get; set; } = "";
-    public string Department { get; set; } = ""; // Engineering, Product, Sales, Marketing, Finance, HR
-    public string Office { get; set; } = ""; // New York, London, San Francisco, Tokyo, Sydney
-    public string EmploymentType { get; set; } = "Full-Time";
-    public DateTime HireDate { get; set; }
-    public decimal Salary { get; set; }
-    public int Rating { get; set; } // 1-5 stars
-    public string AvatarBg { get; set; } = "#0284c7";
-    public int SubordinatesCount { get; set; }
-    public bool IsManager => SubordinatesCount > 0;
-}
-
-/// <summary>
 /// One product of the warehouse detail example on Master-detail; WarehouseDetails is the detail grid.
 /// </summary>
 public sealed class InventoryProduct

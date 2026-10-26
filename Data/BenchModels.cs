@@ -55,26 +55,6 @@ public sealed class SupplierContactRecord
     public bool Active { get; set; } = true;
 }
 
-/// <summary>A sales desk at the operator; the master rows on Master-detail. <see cref="AgentCount"/> is the number of agents on it.</summary>
-public sealed class SalesDesk
-{
-    public int DeskID { get; set; }
-    public string Name { get; set; } = string.Empty;
-    /// <summary>The desk takes group bookings as well as individual ones.</summary>
-    public bool GroupBookings { get; set; }
-    public int AgentCount { get; set; }
-}
-
-/// <summary>An agent on a sales desk; the detail rows on Master-detail. <see cref="DeskID"/> is the <see cref="SalesDesk.DeskID"/>.</summary>
-public sealed class AgentListItem
-{
-    public string Login { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public bool Active { get; set; } = true;
-    public int DeskID { get; set; }
-}
-
 /// <summary>
 /// Column specification for dynamic swapping bench.
 /// </summary>
