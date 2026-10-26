@@ -8,7 +8,8 @@
 @* 2026-10-25 (SC-347): third example, "carousel": CarouselControl with six CarouselItemControls, each a CardControl for a
    TravelData package. Facts checked against CarouselControl.razor(.css) and CarouselItemControl.razor (FlexCore 0.2.49): the
    methods are Next, Prev and SelectSlide; there is no key handling and no ARIA beyond the buttons' labels, so the example adds
-   role, aria-roledescription and aria-label on the root and an aria-live count. The two card examples are unchanged. *@
+   role, aria-roledescription and aria-label on the root and an aria-live count. The two card examples are unchanged.
+   2026-10-26 (Baaria): sample content moved to the travel theme. *@
 
 <PageTitle>Cards — FlexCore Showcase</PageTitle>
 
@@ -35,10 +36,10 @@
                     <ButtonGroupControl Items="_elevationItems" Values="@(new[] { _elevation.ToString() })" ValuesChanged="PickElevation" AriaLabel="Elevation" />
                 </div>
                 <div class="card-stage">
-                    <CardControl Title="EST-2042 Contoso kitchen" Subtitle="Draft · 14 lines" ImageUrl="images/card-kitchen.svg" ImageAlt="Kitchen plan, revision B" Elevation="@_elevation">
-                        <ChildContent><p class="m0">Quartz counters, cabinet install and tile backsplash. Last saved today 09:12 by Dana.</p></ChildContent>
+                    <CardControl Title="Quote LIS-0001 Lisbon city break" Subtitle="Quoted · 3 lines · $1,720" ImageUrl="images/card-lisbon.svg" ImageAlt="Route sketch: airport, old-town hotel and food tour" Elevation="@_elevation">
+                        <ChildContent><p class="m0">Return flights, four nights in an old-town hotel and a guided food tour. Last saved today 09:12 by Dana.</p></ChildContent>
                         <FooterContent>
-                            <BadgeControl Text="In progress" Variant="BadgeVariant.Success" />
+                            <BadgeControl Text="Quote sent" Variant="BadgeVariant.Success" />
                             <ButtonControl CssClass="btn-sm" OnClick="@(() => _opened++)">Open</ButtonControl>
                         </FooterContent>
                     </CardControl>
@@ -51,12 +52,12 @@
             <Description><p>Three cards from a list. <code>HeaderContent</code> replaces the title block, here with an icon. Narrow the window and the grid drops to two columns, then one.</p></Description>
             <Demo>
                 <CardGroupControl>
-                    @foreach (var e in _estimates)
+                    @foreach (var q in _quotes)
                     {
                         <CardControl Elevation="1">
-                            <HeaderContent><span class="head"><span class="@e.Icon"></span> @e.Name</span></HeaderContent>
-                            <ChildContent><p class="m0">@e.Summary</p></ChildContent>
-                            <FooterContent><BadgeControl Text="@e.Status" Variant="@e.Variant" /></FooterContent>
+                            <HeaderContent><span class="head"><span class="@q.Icon"></span> @q.Name</span></HeaderContent>
+                            <ChildContent><p class="m0">@q.Summary</p></ChildContent>
+                            <FooterContent><BadgeControl Text="@q.Status" Variant="@q.Variant" /></FooterContent>
                         </CardControl>
                     }
                 </CardGroupControl>
@@ -163,12 +164,12 @@
     }
 
     // Card group
-    private sealed record Estimate(string Name, string Icon, string Summary, string Status, BadgeVariant Variant);
-    private readonly Estimate[] _estimates =
+    private sealed record Quote(string Name, string Icon, string Summary, string Status, BadgeVariant Variant);
+    private readonly Quote[] _quotes =
     {
-        new("EST-2042 Contoso", "bi bi-house", "Kitchen, 14 lines, $12,480.", "In progress", BadgeVariant.Success),
-        new("EST-2043 Fabrikam", "bi bi-building", "Office fit-out, 22 lines, $48,900.", "Awaiting approval", BadgeVariant.Warning),
-        new("EST-2044 Northwind", "bi bi-shop", "Storefront, 9 lines, $7,150.", "Draft", BadgeVariant.Secondary),
+        new("AMF-0002 Brennan", "bi bi-geo-alt", "Amalfi coast drive, 9 lines, $6,240.", "Booked", BadgeVariant.Success),
+        new("CPT-0003 Halvorsen", "bi bi-sun", "Cape winelands, 8 lines, $8,150.", "Awaiting deposit", BadgeVariant.Warning),
+        new("KYO-0001 Lindqvist", "bi bi-map", "Kyoto long weekend, 6 lines, $4,860.", "Draft", BadgeVariant.Secondary),
     };
 
     // Carousel
@@ -269,10 +270,10 @@
     <ButtonGroupControl Items=""_elevationItems"" Values=""@(new[] { _elevation.ToString() })"" ValuesChanged=""PickElevation"" AriaLabel=""Elevation"" />
 </div>
 <div class=""card-stage"">
-    <CardControl Title=""EST-2042 Contoso kitchen"" Subtitle=""Draft · 14 lines"" ImageUrl=""images/card-kitchen.svg"" ImageAlt=""Kitchen plan, revision B"" Elevation=""@_elevation"">
-        <ChildContent><p class=""m0"">Quartz counters, cabinet install and tile backsplash. Last saved today 09:12 by Dana.</p></ChildContent>
+    <CardControl Title=""Quote LIS-0001 Lisbon city break"" Subtitle=""Quoted · 3 lines · $1,720"" ImageUrl=""images/card-lisbon.svg"" ImageAlt=""Route sketch: airport, old-town hotel and food tour"" Elevation=""@_elevation"">
+        <ChildContent><p class=""m0"">Return flights, four nights in an old-town hotel and a guided food tour. Last saved today 09:12 by Dana.</p></ChildContent>
         <FooterContent>
-            <BadgeControl Text=""In progress"" Variant=""BadgeVariant.Success"" />
+            <BadgeControl Text=""Quote sent"" Variant=""BadgeVariant.Success"" />
             <ButtonControl CssClass=""btn-sm"" OnClick=""@(() => _opened++)"">Open</ButtonControl>
         </FooterContent>
     </CardControl>
@@ -290,23 +291,23 @@ private void PickElevation(IReadOnlyList<string> values)
     if (values.Count > 0) _elevation = int.Parse(values[0]);
 }";
         public const string Group = @"<CardGroupControl>
-    @foreach (var e in _estimates)
+    @foreach (var q in _quotes)
     {
         <CardControl Elevation=""1"">
-            <HeaderContent><span class=""head""><span class=""@e.Icon""></span> @e.Name</span></HeaderContent>
-            <ChildContent><p class=""m0"">@e.Summary</p></ChildContent>
-            <FooterContent><BadgeControl Text=""@e.Status"" Variant=""@e.Variant"" /></FooterContent>
+            <HeaderContent><span class=""head""><span class=""@q.Icon""></span> @q.Name</span></HeaderContent>
+            <ChildContent><p class=""m0"">@q.Summary</p></ChildContent>
+            <FooterContent><BadgeControl Text=""@q.Status"" Variant=""@q.Variant"" /></FooterContent>
         </CardControl>
     }
 </CardGroupControl>";
         public const string GroupCs = @"// Card group
-private sealed record Estimate(string Name, string Icon, string Summary, string Status, BadgeVariant Variant);
+private sealed record Quote(string Name, string Icon, string Summary, string Status, BadgeVariant Variant);
 
-private readonly Estimate[] _estimates =
+private readonly Quote[] _quotes =
 {
-    new(""EST-2042 Contoso"", ""bi bi-house"", ""Kitchen, 14 lines, $12,480."", ""In progress"", BadgeVariant.Success),
-    new(""EST-2043 Fabrikam"", ""bi bi-building"", ""Office fit-out, 22 lines, $48,900."", ""Awaiting approval"", BadgeVariant.Warning),
-    new(""EST-2044 Northwind"", ""bi bi-shop"", ""Storefront, 9 lines, $7,150."", ""Draft"", BadgeVariant.Secondary),
+    new(""AMF-0002 Brennan"", ""bi bi-geo-alt"", ""Amalfi coast drive, 9 lines, $6,240."", ""Booked"", BadgeVariant.Success),
+    new(""CPT-0003 Halvorsen"", ""bi bi-sun"", ""Cape winelands, 8 lines, $8,150."", ""Awaiting deposit"", BadgeVariant.Warning),
+    new(""KYO-0001 Lindqvist"", ""bi bi-map"", ""Kyoto long weekend, 6 lines, $4,860."", ""Draft"", BadgeVariant.Secondary),
 };";
         public const string Carousel = @"<CarouselControl @ref=""_carousel"" @bind-ActiveIndex=""_slide"" ShowNavButtons=""_showNav"" ShowIndicators=""_showDots""
                  role=""region"" aria-roledescription=""carousel"" aria-label=""Destinations"">

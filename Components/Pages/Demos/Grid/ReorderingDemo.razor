@@ -10,7 +10,8 @@
    for saving user layouts is on show.
    2026-10-18: vocabulary written from GridControl.razor.cs (AllowColumnReorder ~675, ColumnReorderPipeColor ~713,
    OnLayoutChanged ~781, PersistenceKey ~794) and GridSettings.cs; rows checked against the source with scratchpad/vocabcheck.py.
-   Library doc gaps found on the way are in SC-253 (owner-gated). *@
+   Library doc gaps found on the way are in SC-253 (owner-gated).
+   2026-10-26 (Baaria): sample data moved to the travel theme *@
 
 <PageTitle>Column reorder — FlexCore Showcase</PageTitle>
 
@@ -29,7 +30,7 @@
 
     <Examples>
         <DemoExample Id="reorder" Title="Move columns by dragging headers" RazorCode="@Code.Reorder" CSharpCode="@Code.ReorderCs">
-            <Description><p>Drag <strong>Priority</strong> in front of <strong>Model</strong>, or <strong>Owner</strong> to the right of <strong>Cost</strong>. Only the dragged column moves; sorting, filtering and the search box keep working on the new order.</p></Description>
+            <Description><p>Drag <strong>Priority</strong> in front of <strong>Booking</strong>, or <strong>Agent</strong> to the right of <strong>Cost</strong>. Only the dragged column moves; sorting, filtering and the search box keep working on the new order.</p></Description>
             <Demo>
                 <GridControl TValue="ReorderingRow"
                              DataSource="@_rows"
@@ -44,17 +45,17 @@
                              Height="520px"
                              OnLayoutChanged="LayoutChanged">
                     <GridColumnsBase>
-                        <GridColumn Field="@nameof(ReorderingRow.Model)"       HeaderText="Model"        Width="130px" />
-                        <GridColumn Field="@nameof(ReorderingRow.Community)"   HeaderText="Community"    Width="150px" />
-                        <GridColumn Field="@nameof(ReorderingRow.Phase)"       HeaderText="Phase"        Width="120px" />
-                        <GridColumn Field="@nameof(ReorderingRow.Task)"        HeaderText="Task"         Width="220px" />
-                        <GridColumn Field="@nameof(ReorderingRow.Owner)"       HeaderText="Owner"        Width="150px" />
-                        <GridColumn Field="@nameof(ReorderingRow.Priority)"    HeaderText="Priority"     Width="100px" />
-                        <GridColumn Field="@nameof(ReorderingRow.Hours)"       HeaderText="Hours"        Width="90px"
+                        <GridColumn Field="@nameof(ReorderingRow.Booking)"     HeaderText="Booking"     Width="130px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Destination)" HeaderText="Destination" Width="150px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Desk)"        HeaderText="Desk"        Width="120px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Task)"        HeaderText="Task"        Width="220px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Agent)"       HeaderText="Agent"       Width="150px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Priority)"    HeaderText="Priority"    Width="100px" />
+                        <GridColumn Field="@nameof(ReorderingRow.Hours)"       HeaderText="Hours"       Width="90px"
                                     Type="ColumnType.Number" Format="N1" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(ReorderingRow.Cost)"        HeaderText="Cost"         Width="120px"
+                        <GridColumn Field="@nameof(ReorderingRow.Cost)"        HeaderText="Cost"        Width="120px"
                                     Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(ReorderingRow.LastUpdated)" HeaderText="Last Updated" Width="130px"
+                        <GridColumn Field="@nameof(ReorderingRow.Due)"         HeaderText="Due"         Width="130px"
                                     Type="ColumnType.Date" Format="d" />
                     </GridColumnsBase>
                 </GridControl>
@@ -96,15 +97,15 @@
 
 @code {
     private record ReorderingRow(
-        string Model,
-        string Community,
-        string Phase,
+        string Booking,
+        string Destination,
+        string Desk,
         string Task,
-        string Owner,
+        string Agent,
         string Priority,
         decimal Hours,
         decimal Cost,
-        DateTime LastUpdated);
+        DateTime Due);
 
     private string? _order;
 
@@ -112,18 +113,18 @@
 
     private readonly List<ReorderingRow> _rows = new()
     {
-        new("A100", "North Ridge", "Frame",      "Rough carpentry review",   "Alex Nguyen",   "High",   6.5m,  845.50m, new(2026, 1, 8)),
-        new("A100", "North Ridge", "Electrical", "Panel schedule update",    "Sana Patel",    "High",   4.0m,  620.00m, new(2026, 1, 9)),
-        new("A200", "Maple Hills", "Plumbing",   "Fixture coordination",     "Marcus Lee",    "Medium", 3.0m,  410.25m, new(2026, 1, 10)),
-        new("B150", "Oak View",    "Drywall",    "Shear wall punch list",    "Diana Ortiz",   "Low",    2.5m,  275.00m, new(2026, 1, 11)),
-        new("C300", "Willow Park", "Paint",      "Color board approval",     "Jonah Kim",     "Medium", 1.5m,  190.00m, new(2026, 1, 12)),
-        new("C300", "Willow Park", "Final",      "QC closeout walk",         "Aisha Brown",   "High",   5.0m,  700.00m, new(2026, 1, 13)),
-        new("D410", "River Bend",  "Concrete",   "Slab tolerance check",     "Noah Garcia",   "Medium", 3.5m,  535.75m, new(2026, 1, 14)),
-        new("D410", "River Bend",  "Roof",       "Flashing detail review",   "Priya Menon",   "Low",    2.0m,  260.00m, new(2026, 1, 15)),
-        new("E520", "Cedar Grove", "HVAC",       "Duct reroute approval",    "Ethan Walker",  "High",   4.5m,  655.40m, new(2026, 1, 16)),
-        new("E520", "Cedar Grove", "Trim",       "Cabinet filler alignment", "Mina Hassan",   "Medium", 2.0m,  285.30m, new(2026, 1, 17)),
-        new("F610", "Stone Creek", "Landscape",  "Irrigation valve map",     "Luca Romano",   "Low",    1.0m,  140.00m, new(2026, 1, 18)),
-        new("F610", "Stone Creek", "Final",      "Warranty turnover packet", "Grace Mitchell","Medium", 2.8m,  360.00m, new(2026, 1, 19)),
+        new("BK-1100", "Lisbon",     "Reservations",  "Confirm hotel rooming list", "Alex Nguyen",   "High",   6.5m,  845.50m, new(2026, 1, 8)),
+        new("BK-1100", "Lisbon",     "Ticketing",     "Reissue changed e-tickets",  "Sana Patel",    "High",   4.0m,  620.00m, new(2026, 1, 9)),
+        new("BK-1180", "Amalfi",     "Ground",        "Rebook coast road transfer", "Marcus Lee",    "Medium", 3.0m,  410.25m, new(2026, 1, 10)),
+        new("BK-1250", "Kyoto",      "Documents",     "Send rail pass vouchers",    "Diana Ortiz",   "Low",    2.5m,  275.00m, new(2026, 1, 11)),
+        new("BK-1310", "Cape Town",  "Reservations",  "Hold winery lunch table",    "Jonah Kim",     "Medium", 1.5m,  190.00m, new(2026, 1, 12)),
+        new("BK-1310", "Cape Town",  "Customer care", "Call the lead traveller",    "Aisha Brown",   "High",   5.0m,  700.00m, new(2026, 1, 13)),
+        new("BK-1460", "Reykjavik",  "Ground",        "Confirm glacier walk guide", "Noah Garcia",   "Medium", 3.5m,  535.75m, new(2026, 1, 14)),
+        new("BK-1460", "Reykjavik",  "Documents",     "Issue final itinerary",      "Priya Menon",   "Low",    2.0m,  260.00m, new(2026, 1, 15)),
+        new("BK-1520", "Queenstown", "Ticketing",     "Request long-haul seats",    "Ethan Walker",  "High",   4.5m,  655.40m, new(2026, 1, 16)),
+        new("BK-1520", "Queenstown", "Accounts",      "Chase balance payment",      "Mina Hassan",   "Medium", 2.0m,  285.30m, new(2026, 1, 17)),
+        new("BK-1610", "Marrakech",  "Ground",        "Note riad late check-in",    "Luca Romano",   "Low",    1.0m,  140.00m, new(2026, 1, 18)),
+        new("BK-1610", "Marrakech",  "Customer care", "Post-trip feedback call",    "Grace Mitchell","Medium", 2.8m,  360.00m, new(2026, 1, 19)),
     };
 
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
@@ -142,31 +143,31 @@
              Height=""520px""
              OnLayoutChanged=""LayoutChanged"">
     <GridColumnsBase>
-        <GridColumn Field=""@nameof(ReorderingRow.Model)""       HeaderText=""Model""        Width=""130px"" />
-        <GridColumn Field=""@nameof(ReorderingRow.Community)""   HeaderText=""Community""    Width=""150px"" />
-        <GridColumn Field=""@nameof(ReorderingRow.Phase)""       HeaderText=""Phase""        Width=""120px"" />
-        <GridColumn Field=""@nameof(ReorderingRow.Task)""        HeaderText=""Task""         Width=""220px"" />
-        <GridColumn Field=""@nameof(ReorderingRow.Owner)""       HeaderText=""Owner""        Width=""150px"" />
-        <GridColumn Field=""@nameof(ReorderingRow.Priority)""    HeaderText=""Priority""     Width=""100px"" />
-        <GridColumn Field=""@nameof(ReorderingRow.Hours)""       HeaderText=""Hours""        Width=""90px""
+        <GridColumn Field=""@nameof(ReorderingRow.Booking)""     HeaderText=""Booking""     Width=""130px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Destination)"" HeaderText=""Destination"" Width=""150px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Desk)""        HeaderText=""Desk""        Width=""120px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Task)""        HeaderText=""Task""        Width=""220px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Agent)""       HeaderText=""Agent""       Width=""150px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Priority)""    HeaderText=""Priority""    Width=""100px"" />
+        <GridColumn Field=""@nameof(ReorderingRow.Hours)""       HeaderText=""Hours""       Width=""90px""
                     Type=""ColumnType.Number"" Format=""N1"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(ReorderingRow.Cost)""        HeaderText=""Cost""         Width=""120px""
+        <GridColumn Field=""@nameof(ReorderingRow.Cost)""        HeaderText=""Cost""        Width=""120px""
                     Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(ReorderingRow.LastUpdated)"" HeaderText=""Last Updated"" Width=""130px""
+        <GridColumn Field=""@nameof(ReorderingRow.Due)""         HeaderText=""Due""         Width=""130px""
                     Type=""ColumnType.Date"" Format=""d"" />
     </GridColumnsBase>
 </GridControl>
 <p class=""result"">@(_order is null ? ""Drop a header to see the new order here."" : $""Order: {_order}"")</p>";
         public const string ReorderCs = @"private record ReorderingRow(
-    string Model,
-    string Community,
-    string Phase,
+    string Booking,
+    string Destination,
+    string Desk,
     string Task,
-    string Owner,
+    string Agent,
     string Priority,
     decimal Hours,
     decimal Cost,
-    DateTime LastUpdated);
+    DateTime Due);
 
 private string? _order;
 
@@ -174,18 +175,18 @@ private void LayoutChanged(GridSettings layout) => _order = string.Join("" · ""
 
 private readonly List<ReorderingRow> _rows = new()
 {
-    new(""A100"", ""North Ridge"", ""Frame"",      ""Rough carpentry review"",   ""Alex Nguyen"",   ""High"",   6.5m,  845.50m, new(2026, 1, 8)),
-    new(""A100"", ""North Ridge"", ""Electrical"", ""Panel schedule update"",    ""Sana Patel"",    ""High"",   4.0m,  620.00m, new(2026, 1, 9)),
-    new(""A200"", ""Maple Hills"", ""Plumbing"",   ""Fixture coordination"",     ""Marcus Lee"",    ""Medium"", 3.0m,  410.25m, new(2026, 1, 10)),
-    new(""B150"", ""Oak View"",    ""Drywall"",    ""Shear wall punch list"",    ""Diana Ortiz"",   ""Low"",    2.5m,  275.00m, new(2026, 1, 11)),
-    new(""C300"", ""Willow Park"", ""Paint"",      ""Color board approval"",     ""Jonah Kim"",     ""Medium"", 1.5m,  190.00m, new(2026, 1, 12)),
-    new(""C300"", ""Willow Park"", ""Final"",      ""QC closeout walk"",         ""Aisha Brown"",   ""High"",   5.0m,  700.00m, new(2026, 1, 13)),
-    new(""D410"", ""River Bend"",  ""Concrete"",   ""Slab tolerance check"",     ""Noah Garcia"",   ""Medium"", 3.5m,  535.75m, new(2026, 1, 14)),
-    new(""D410"", ""River Bend"",  ""Roof"",       ""Flashing detail review"",   ""Priya Menon"",   ""Low"",    2.0m,  260.00m, new(2026, 1, 15)),
-    new(""E520"", ""Cedar Grove"", ""HVAC"",       ""Duct reroute approval"",    ""Ethan Walker"",  ""High"",   4.5m,  655.40m, new(2026, 1, 16)),
-    new(""E520"", ""Cedar Grove"", ""Trim"",       ""Cabinet filler alignment"", ""Mina Hassan"",   ""Medium"", 2.0m,  285.30m, new(2026, 1, 17)),
-    new(""F610"", ""Stone Creek"", ""Landscape"",  ""Irrigation valve map"",     ""Luca Romano"",   ""Low"",    1.0m,  140.00m, new(2026, 1, 18)),
-    new(""F610"", ""Stone Creek"", ""Final"",      ""Warranty turnover packet"", ""Grace Mitchell"",""Medium"", 2.8m,  360.00m, new(2026, 1, 19)),
+    new(""BK-1100"", ""Lisbon"",     ""Reservations"",  ""Confirm hotel rooming list"", ""Alex Nguyen"",   ""High"",   6.5m,  845.50m, new(2026, 1, 8)),
+    new(""BK-1100"", ""Lisbon"",     ""Ticketing"",     ""Reissue changed e-tickets"",  ""Sana Patel"",    ""High"",   4.0m,  620.00m, new(2026, 1, 9)),
+    new(""BK-1180"", ""Amalfi"",     ""Ground"",        ""Rebook coast road transfer"", ""Marcus Lee"",    ""Medium"", 3.0m,  410.25m, new(2026, 1, 10)),
+    new(""BK-1250"", ""Kyoto"",      ""Documents"",     ""Send rail pass vouchers"",    ""Diana Ortiz"",   ""Low"",    2.5m,  275.00m, new(2026, 1, 11)),
+    new(""BK-1310"", ""Cape Town"",  ""Reservations"",  ""Hold winery lunch table"",    ""Jonah Kim"",     ""Medium"", 1.5m,  190.00m, new(2026, 1, 12)),
+    new(""BK-1310"", ""Cape Town"",  ""Customer care"", ""Call the lead traveller"",    ""Aisha Brown"",   ""High"",   5.0m,  700.00m, new(2026, 1, 13)),
+    new(""BK-1460"", ""Reykjavik"",  ""Ground"",        ""Confirm glacier walk guide"", ""Noah Garcia"",   ""Medium"", 3.5m,  535.75m, new(2026, 1, 14)),
+    new(""BK-1460"", ""Reykjavik"",  ""Documents"",     ""Issue final itinerary"",      ""Priya Menon"",   ""Low"",    2.0m,  260.00m, new(2026, 1, 15)),
+    new(""BK-1520"", ""Queenstown"", ""Ticketing"",     ""Request long-haul seats"",    ""Ethan Walker"",  ""High"",   4.5m,  655.40m, new(2026, 1, 16)),
+    new(""BK-1520"", ""Queenstown"", ""Accounts"",      ""Chase balance payment"",      ""Mina Hassan"",   ""Medium"", 2.0m,  285.30m, new(2026, 1, 17)),
+    new(""BK-1610"", ""Marrakech"",  ""Ground"",        ""Note riad late check-in"",    ""Luca Romano"",   ""Low"",    1.0m,  140.00m, new(2026, 1, 18)),
+    new(""BK-1610"", ""Marrakech"",  ""Customer care"", ""Post-trip feedback call"",    ""Grace Mitchell"",""Medium"", 2.8m,  360.00m, new(2026, 1, 19)),
 };";
     }
 

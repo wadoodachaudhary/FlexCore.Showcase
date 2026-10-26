@@ -4,9 +4,9 @@
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (row 7 of the Data Grid list). Changes, closing SC-146 to SC-150: "FDBGrid", "VB6",
-   "HomeFront", "mission-critical ERP", "benchmark" and "severe risk surface" left the copy; the rows are purchase-order lines in a
-   page-local OrderLine class instead of ledger accounts with quantities (SC-150; Data.LedgerRow is left as is); a row becomes dirty
+@* 2026-10-17: moved onto FeatureDemoLayout (row 7 of the Data Grid list). Changes, closing SC-146 to SC-150: the old internal names, "VB6",
+   "mission-critical ERP", "benchmark" and "severe risk surface" left the copy; the rows are lines of a
+   page-local class instead of ledger accounts with quantities (SC-150; Data.LedgerRow is left as is); a row becomes dirty
    when a value is written (OnCellSave) rather than when an editor opens (OnCellEdit, which also fired for edits abandoned with
    Escape); the doc table that named a non-existent RowSelectingEventArgs is gone and the code tabs are generated from the page
    (SC-148, SC-149); the unused @ref and the explicit TextEditorTypingBehavior (its default) went; Save is a ButtonControl.
@@ -36,7 +36,7 @@
                 <ButtonControl CssClass="btn-sm" OnClick="Save" Disabled="@(!_dirty)">Save</ButtonControl>
             </Controls>
             <Demo>
-                <GridControl TValue="OrderLine"
+                <GridControl TValue="BookingLine"
                              DataSource="@_rows"
                              ShowRowCountInFooter="true"
                              AllowSorting="false"
@@ -51,11 +51,11 @@
                              EventsRef="@_events"
                              CssClass="fx-grid-compact">
                     <GridColumnsBase>
-                        <GridColumn Field="@nameof(OrderLine.Code)" HeaderText="Line" Width="90px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(OrderLine.Description)" HeaderText="Description" Width="280px" AllowEditing="true" />
-                        <GridColumn Field="@nameof(OrderLine.Qty)" HeaderText="Qty" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" />
-                        <GridColumn Field="@nameof(OrderLine.Price)" HeaderText="Unit price" Width="100px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" Format="$#,##0.00" />
-                        <GridColumn Field="@nameof(OrderLine.Notes)" HeaderText="Notes" Width="260px" AllowEditing="true" />
+                        <GridColumn Field="@nameof(BookingLine.Code)" HeaderText="Line" Width="90px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(BookingLine.Description)" HeaderText="Description" Width="280px" AllowEditing="true" />
+                        <GridColumn Field="@nameof(BookingLine.Qty)" HeaderText="Qty" Width="80px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" />
+                        <GridColumn Field="@nameof(BookingLine.Price)" HeaderText="Unit price" Width="100px" Type="ColumnType.Number" TextAlign="TextAlign.Right" AllowEditing="true" Format="$#,##0.00" />
+                        <GridColumn Field="@nameof(BookingLine.Notes)" HeaderText="Notes" Width="260px" AllowEditing="true" />
                     </GridColumnsBase>
                 </GridControl>
                 <p class="result">@(_dirtyRow is null ? "No unsaved changes." : $"Unsaved changes on line {_dirtyRow.Code}: {_vetoCount} {(_vetoCount == 1 ? "move" : "moves")} refused.")@(_saveCount > 0 ? $" Saved {_saveCount} {(_saveCount == 1 ? "time" : "times")}." : "")</p>
@@ -108,7 +108,7 @@
 </FeatureDemoLayout>
 
 @code {
-    public sealed class OrderLine
+    public sealed class BookingLine
     {
         public string Code { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
@@ -117,9 +117,9 @@
         public string Notes { get; set; } = string.Empty;
     }
 
-    private List<OrderLine> _rows = [];
+    private List<BookingLine> _rows = [];
     private bool _dirty;
-    private OrderLine? _dirtyRow;
+    private BookingLine? _dirtyRow;
     private int _vetoCount;
     private int _saveCount;
 
@@ -135,27 +135,27 @@
         Type = SelectionType.Single
     };
 
-    private readonly GridControlEvents<OrderLine> _events = new();
+    private readonly GridControlEvents<BookingLine> _events = new();
 
     protected override void OnInitialized()
     {
         _rows =
         [
-            new OrderLine { Code = "10", Description = "Ready-mix concrete 4000 psi", Qty = 24, Price = 142.00m, Notes = "Pump truck on site 6:30" },
-            new OrderLine { Code = "20", Description = "#4 rebar, 20 ft", Qty = 180, Price = 11.25m, Notes = "Tie wire included" },
-            new OrderLine { Code = "30", Description = "2x6 studs, 92 5/8 in", Qty = 450, Price = 8.75m, Notes = "Deliver to lot 14" },
-            new OrderLine { Code = "40", Description = "Architectural shingles, 30 yr", Qty = 65, Price = 34.50m, Notes = "Match sample board" },
-            new OrderLine { Code = "50", Description = "PEX supply pipe, 3/4 in", Qty = 12, Price = 145.00m, Notes = "Red and blue coils" },
-            new OrderLine { Code = "60", Description = "200 A main panel", Qty = 2, Price = 680.00m, Notes = "Inspection before cover" }
+            new BookingLine { Code = "10", Description = "Hotel, double room, per night", Qty = 7, Price = 142.00m, Notes = "Late arrival, about 23:30" },
+            new BookingLine { Code = "20", Description = "Airport transfer, private car", Qty = 2, Price = 65.00m, Notes = "Meet at arrivals, exit B" },
+            new BookingLine { Code = "30", Description = "Sintra day tour, small group", Qty = 2, Price = 89.00m, Notes = "Vegetarian lunch for one" },
+            new BookingLine { Code = "40", Description = "Fado dinner show", Qty = 2, Price = 75.00m, Notes = "Table near the stage" },
+            new BookingLine { Code = "50", Description = "Lisbon to Porto train, first class", Qty = 2, Price = 48.50m, Notes = "Window seats requested" },
+            new BookingLine { Code = "60", Description = "Travel insurance, per traveller", Qty = 2, Price = 39.00m, Notes = "Policy sent with the itinerary" }
         ];
 
-        _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<OrderLine>>(this, args =>
+        _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<BookingLine>>(this, args =>
         {
             _dirty = true;
             _dirtyRow = args.Data;
         });
 
-        _events.RowSelecting = EventCallback.Factory.Create<RowSelectEventArgs<OrderLine>>(this, args =>
+        _events.RowSelecting = EventCallback.Factory.Create<RowSelectEventArgs<BookingLine>>(this, args =>
         {
             if (_dirty && _dirtyRow != null && !ReferenceEquals(_dirtyRow, args.Data))
             {
@@ -176,7 +176,7 @@
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
     private static class Code
     {
-        public const string Lock = @"<GridControl TValue=""OrderLine""
+        public const string Lock = @"<GridControl TValue=""BookingLine""
              DataSource=""@_rows""
              ShowRowCountInFooter=""true""
              AllowSorting=""false""
@@ -191,15 +191,15 @@
              EventsRef=""@_events""
              CssClass=""fx-grid-compact"">
     <GridColumnsBase>
-        <GridColumn Field=""@nameof(OrderLine.Code)"" HeaderText=""Line"" Width=""90px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(OrderLine.Description)"" HeaderText=""Description"" Width=""280px"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(OrderLine.Qty)"" HeaderText=""Qty"" Width=""80px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" />
-        <GridColumn Field=""@nameof(OrderLine.Price)"" HeaderText=""Unit price"" Width=""100px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" Format=""$#,##0.00"" />
-        <GridColumn Field=""@nameof(OrderLine.Notes)"" HeaderText=""Notes"" Width=""260px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(BookingLine.Code)"" HeaderText=""Line"" Width=""90px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(BookingLine.Description)"" HeaderText=""Description"" Width=""280px"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(BookingLine.Qty)"" HeaderText=""Qty"" Width=""80px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" />
+        <GridColumn Field=""@nameof(BookingLine.Price)"" HeaderText=""Unit price"" Width=""100px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" AllowEditing=""true"" Format=""$#,##0.00"" />
+        <GridColumn Field=""@nameof(BookingLine.Notes)"" HeaderText=""Notes"" Width=""260px"" AllowEditing=""true"" />
     </GridColumnsBase>
 </GridControl>
 <p class=""result"">@(_dirtyRow is null ? ""No unsaved changes."" : $""Unsaved changes on line {_dirtyRow.Code}: {_vetoCount} {(_vetoCount == 1 ? ""move"" : ""moves"")} refused."")@(_saveCount > 0 ? $"" Saved {_saveCount} {(_saveCount == 1 ? ""time"" : ""times"")}."" : """")</p>";
-        public const string LockCs = @"public sealed class OrderLine
+        public const string LockCs = @"public sealed class BookingLine
 {
     public string Code { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -208,11 +208,11 @@
     public string Notes { get; set; } = string.Empty;
 }
 
-private List<OrderLine> _rows = [];
+private List<BookingLine> _rows = [];
 
 private bool _dirty;
 
-private OrderLine? _dirtyRow;
+private BookingLine? _dirtyRow;
 
 private int _vetoCount;
 
@@ -230,27 +230,27 @@ private readonly SelectionSettings _selectionSettings = new()
     Type = SelectionType.Single
 };
 
-private readonly GridControlEvents<OrderLine> _events = new();
+private readonly GridControlEvents<BookingLine> _events = new();
 
 protected override void OnInitialized()
 {
     _rows =
     [
-        new OrderLine { Code = ""10"", Description = ""Ready-mix concrete 4000 psi"", Qty = 24, Price = 142.00m, Notes = ""Pump truck on site 6:30"" },
-        new OrderLine { Code = ""20"", Description = ""#4 rebar, 20 ft"", Qty = 180, Price = 11.25m, Notes = ""Tie wire included"" },
-        new OrderLine { Code = ""30"", Description = ""2x6 studs, 92 5/8 in"", Qty = 450, Price = 8.75m, Notes = ""Deliver to lot 14"" },
-        new OrderLine { Code = ""40"", Description = ""Architectural shingles, 30 yr"", Qty = 65, Price = 34.50m, Notes = ""Match sample board"" },
-        new OrderLine { Code = ""50"", Description = ""PEX supply pipe, 3/4 in"", Qty = 12, Price = 145.00m, Notes = ""Red and blue coils"" },
-        new OrderLine { Code = ""60"", Description = ""200 A main panel"", Qty = 2, Price = 680.00m, Notes = ""Inspection before cover"" }
+        new BookingLine { Code = ""10"", Description = ""Hotel, double room, per night"", Qty = 7, Price = 142.00m, Notes = ""Late arrival, about 23:30"" },
+        new BookingLine { Code = ""20"", Description = ""Airport transfer, private car"", Qty = 2, Price = 65.00m, Notes = ""Meet at arrivals, exit B"" },
+        new BookingLine { Code = ""30"", Description = ""Sintra day tour, small group"", Qty = 2, Price = 89.00m, Notes = ""Vegetarian lunch for one"" },
+        new BookingLine { Code = ""40"", Description = ""Fado dinner show"", Qty = 2, Price = 75.00m, Notes = ""Table near the stage"" },
+        new BookingLine { Code = ""50"", Description = ""Lisbon to Porto train, first class"", Qty = 2, Price = 48.50m, Notes = ""Window seats requested"" },
+        new BookingLine { Code = ""60"", Description = ""Travel insurance, per traveller"", Qty = 2, Price = 39.00m, Notes = ""Policy sent with the itinerary"" }
     ];
 
-    _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<OrderLine>>(this, args =>
+    _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<BookingLine>>(this, args =>
     {
         _dirty = true;
         _dirtyRow = args.Data;
     });
 
-    _events.RowSelecting = EventCallback.Factory.Create<RowSelectEventArgs<OrderLine>>(this, args =>
+    _events.RowSelecting = EventCallback.Factory.Create<RowSelectEventArgs<BookingLine>>(this, args =>
     {
         if (_dirty && _dirtyRow != null && !ReferenceEquals(_dirtyRow, args.Data))
         {

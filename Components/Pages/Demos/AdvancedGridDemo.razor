@@ -14,7 +14,8 @@
    with scratchpad/vocabcheck.py. The .frozen wrapper exists for the page CSS: pinned body cells use background-color:inherit and the
    library gives rows none, so scrolled columns showed through the pinned ones here too (same stopgap as Wide grids, SC-292).
    2026-10-20 (Baaria): the second example, columns from data annotations, removed with its class, rows, notes and the
-   AutoGenerateColumns row; the page is frozen columns and header bands only. *@
+   AutoGenerateColumns row; the page is frozen columns and header bands only.
+   2026-10-26 (Baaria): sample data moved to the travel theme *@
 
 <PageTitle>Frozen columns — FlexCore Showcase</PageTitle>
 
@@ -128,14 +129,15 @@
     protected override void OnInitialized()
     {
         var list = new List<GridItem>();
-        var cats = new[] { "Electronics", "Hardware", "Lumber", "Paint", "Plumbing", "Electrical" };
+        var cats = new[] { "Hotel", "Flight", "Tour", "Transfer", "Cruise", "Rail" };
+        var places = new[] { "Lisbon", "Kyoto", "Cape Town", "Reykjavik", "Queenstown" };
         for (int i = 1; i <= 200; i++)
         {
             list.Add(new GridItem
             {
                 Id = i,
-                Code = $"SKU-{i:D5}",
-                Name = $"Material Item #{i}",
+                Code = $"SVC-{i:D5}",
+                Name = $"{places[i % places.Length]} {cats[i % cats.Length].ToLowerInvariant()} #{i}",
                 Category = cats[i % cats.Length],
                 Quantity = 10 + (i * 7) % 150,
                 UnitPrice = 15.50m + (i % 25) * 4.25m,
@@ -206,14 +208,15 @@ private void Remove(GridItem row) => _rows = _rows.Where(r => r != row).ToList()
 protected override void OnInitialized()
 {
     var list = new List<GridItem>();
-    var cats = new[] { ""Electronics"", ""Hardware"", ""Lumber"", ""Paint"", ""Plumbing"", ""Electrical"" };
+    var cats = new[] { ""Hotel"", ""Flight"", ""Tour"", ""Transfer"", ""Cruise"", ""Rail"" };
+    var places = new[] { ""Lisbon"", ""Kyoto"", ""Cape Town"", ""Reykjavik"", ""Queenstown"" };
     for (int i = 1; i <= 200; i++)
     {
         list.Add(new GridItem
         {
             Id = i,
-            Code = $""SKU-{i:D5}"",
-            Name = $""Material Item #{i}"",
+            Code = $""SVC-{i:D5}"",
+            Name = $""{places[i % places.Length]} {cats[i % cats.Length].ToLowerInvariant()} #{i}"",
             Category = cats[i % cats.Length],
             Quantity = 10 + (i * 7) % 150,
             UnitPrice = 15.50m + (i % 25) * 4.25m,

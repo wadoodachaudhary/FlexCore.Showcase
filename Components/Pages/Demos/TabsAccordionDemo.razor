@@ -153,8 +153,10 @@
     {
         _closed.Push(_docs[index]);
         _docs.RemoveAt(index);
-        // Keep the same document selected when one before it closes; fall back a step when the last one closes.
+        // Keep the same document selected when one before it closes; fall back a step when the last one closes,
+        // and step back past a disabled tab (the strip would show it as active).
         if (index < _doc || _doc >= _docs.Count) _doc = Math.Max(0, _doc - 1);
+        while (_doc > 0 && _docs[_doc].Disabled) _doc--;
     }
 
     private void Reopen()
@@ -287,8 +289,10 @@ private void CloseDoc(int index)
 {
     _closed.Push(_docs[index]);
     _docs.RemoveAt(index);
-    // Keep the same document selected when one before it closes; fall back a step when the last one closes.
+    // Keep the same document selected when one before it closes; fall back a step when the last one closes,
+    // and step back past a disabled tab (the strip would show it as active).
     if (index < _doc || _doc >= _docs.Count) _doc = Math.Max(0, _doc - 1);
+    while (_doc > 0 && _docs[_doc].Disabled) _doc--;
 }
 
 private void Reopen()

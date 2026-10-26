@@ -19,7 +19,8 @@
    Accessibility section are written from ProgressBarControl.razor/.css, ChunkProgressBarControl.razor/.css, ContentModels.cs
    (FlexOrientation), FlexControlBase.cs and ButtonControl.razor. FlexCore's compiled scoped CSS bundle shows the .fx-progress-cancel
    margin rule carrying ProgressBarControl's scope, so it misses the button ButtonControl renders; the page CSS pushes the button right.
-   Overview, tagline, source list and the Documentation intro now include the two progress controls; the first two examples are unchanged. *@
+   Overview, tagline, source list and the Documentation intro now include the two progress controls; the first two examples are unchanged.
+   2026-10-26 (Baaria): sample content moved to the travel theme. *@
 
 <PageTitle>UI elements — FlexCore Showcase</PageTitle>
 
@@ -48,7 +49,7 @@
                     <BadgeControl IsDot="true" Variant="BadgeVariant.Success" />
                 </div>
                 <div class="stack mt">
-                    <AlertControl Severity="AlertSeverity.Success" Title="Import finished" Text="1,204 vendor rows loaded; 3 skipped as duplicates." AllowClose="true" />
+                    <AlertControl Severity="AlertSeverity.Success" Title="Import finished" Text="1,204 supplier rate rows loaded; 3 skipped as duplicates." AllowClose="true" />
                     <AlertControl Severity="AlertSeverity.Warning" Title="Slow connection" Text="Round trips are taking about 200 ms." AllowClose="true" />
                     <AlertControl Severity="AlertSeverity.Error" Title="Sync failed" Text="The upstream server did not answer." AllowClose="true" />
                     <AlertControl Severity="AlertSeverity.Info" Title="Scheduled maintenance" Text="Saturday 02:00 to 03:00 UTC." AllowClose="true" />
@@ -66,9 +67,9 @@
             <Demo>
                 <div class="two">
                     <TimelineControl>
-                        <TimelineItemControl Title="Contract signed" Time="09:00" PointColor="BadgeVariant.Success">Initial phase authorised.</TimelineItemControl>
-                        <TimelineItemControl Title="Materials dispatched" Time="13:30" PointColor="BadgeVariant.Primary">Lumber and concrete en route.</TimelineItemControl>
-                        <TimelineItemControl Title="Quality inspection" Time="16:45" PointColor="BadgeVariant.Warning">Compliance check scheduled.</TimelineItemControl>
+                        <TimelineItemControl Title="Deposit received" Time="09:00" PointColor="BadgeVariant.Success">Booking LIS-0001 confirmed.</TimelineItemControl>
+                        <TimelineItemControl Title="Tickets issued" Time="13:30" PointColor="BadgeVariant.Primary">Return flights for two travellers.</TimelineItemControl>
+                        <TimelineItemControl Title="Hotel to confirm" Time="16:45" PointColor="BadgeVariant.Warning">Late arrival noted with the old-town hotel.</TimelineItemControl>
                     </TimelineControl>
                 </div>
                 <div class="demo-row mt">
@@ -156,7 +157,7 @@
                 <ApiTable Kind="ApiKind.Properties" Title="BreadCrumbItem" Rows="Vocab.CrumbItem" />
                 <p>
                 <code>BreadCrumbItem</code> has a parameterless constructor and <code>BreadCrumbItem(string text, string? href = null, string? iconCss = null)</code>.
-                A null or empty <code>Href</code> renders the crumb as text; the example's Home and Estimates crumbs have one and render as links, and the
+                A null or empty <code>Href</code> renders the crumb as text; the example's Home and Requests crumbs have one and render as links, and the
                 last crumb is always text.
                 </p>
             </DocSection>
@@ -209,7 +210,7 @@
 </FeatureDemoLayout>
 
 @code {
-    private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", "/"), new("Estimates", "demo/layout"), new("EST-2042 Contoso") };
+    private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", "/"), new("Requests", "demo/layout"), new("LIS-0001 Moreau") };
 
     // Progress (2026-10-25): the import is simulated; a PeriodicTimer on this page advances it and the controls only display it.
     private enum ImportPhase { Idle, Connecting, Importing, Cancelled, Failed, Done }
@@ -305,7 +306,7 @@
     <BadgeControl IsDot=""true"" Variant=""BadgeVariant.Success"" />
 </div>
 <div class=""stack mt"">
-    <AlertControl Severity=""AlertSeverity.Success"" Title=""Import finished"" Text=""1,204 vendor rows loaded; 3 skipped as duplicates."" AllowClose=""true"" />
+    <AlertControl Severity=""AlertSeverity.Success"" Title=""Import finished"" Text=""1,204 supplier rate rows loaded; 3 skipped as duplicates."" AllowClose=""true"" />
     <AlertControl Severity=""AlertSeverity.Warning"" Title=""Slow connection"" Text=""Round trips are taking about 200 ms."" AllowClose=""true"" />
     <AlertControl Severity=""AlertSeverity.Error"" Title=""Sync failed"" Text=""The upstream server did not answer."" AllowClose=""true"" />
     <AlertControl Severity=""AlertSeverity.Info"" Title=""Scheduled maintenance"" Text=""Saturday 02:00 to 03:00 UTC."" AllowClose=""true"" />
@@ -317,15 +318,15 @@
 </div>";
         public const string Content = @"<div class=""two"">
     <TimelineControl>
-        <TimelineItemControl Title=""Contract signed"" Time=""09:00"" PointColor=""BadgeVariant.Success"">Initial phase authorised.</TimelineItemControl>
-        <TimelineItemControl Title=""Materials dispatched"" Time=""13:30"" PointColor=""BadgeVariant.Primary"">Lumber and concrete en route.</TimelineItemControl>
-        <TimelineItemControl Title=""Quality inspection"" Time=""16:45"" PointColor=""BadgeVariant.Warning"">Compliance check scheduled.</TimelineItemControl>
+        <TimelineItemControl Title=""Deposit received"" Time=""09:00"" PointColor=""BadgeVariant.Success"">Booking LIS-0001 confirmed.</TimelineItemControl>
+        <TimelineItemControl Title=""Tickets issued"" Time=""13:30"" PointColor=""BadgeVariant.Primary"">Return flights for two travellers.</TimelineItemControl>
+        <TimelineItemControl Title=""Hotel to confirm"" Time=""16:45"" PointColor=""BadgeVariant.Warning"">Late arrival noted with the old-town hotel.</TimelineItemControl>
     </TimelineControl>
 </div>
 <div class=""demo-row mt"">
     <BreadCrumbControl Items=""_crumbs"" />
 </div>";
-        public const string ContentCs = @"private readonly List<BreadCrumbItem> _crumbs = new() { new(""Home"", ""/""), new(""Estimates"", ""demo/layout""), new(""EST-2042 Contoso"") };";
+        public const string ContentCs = @"private readonly List<BreadCrumbItem> _crumbs = new() { new(""Home"", ""/""), new(""Requests"", ""demo/layout""), new(""LIS-0001 Moreau"") };";
         public const string Progress = @"<div class=""demo-row"">
     <ButtonControl CssClass=""btn-primary"" OnClick=""StartImport"" Disabled=""Running"">Start import</ButtonControl>
     <ButtonControl OnClick=""FailImport"" Disabled=""@(_phase != ImportPhase.Importing)"">Simulate a failure</ButtonControl>

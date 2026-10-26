@@ -4,7 +4,8 @@ using FlexCore.Showcase.Data;
 namespace FlexCore.Showcase.Services;
 
 /// <summary>
-/// In-memory data for the grid pages, synthesized once at startup (Program.cs calls <see cref="Load"/>): the tour operator's
+/// In-memory data for the grid pages, synthesized per circuit (scoped in Program.cs, built in the constructor) so one visitor's
+/// edits never reach another's: the tour operator's
 /// rate card (5,000 lines over <see cref="TravelData.Destinations"/>), the supplier list with its contacts (Page navigation) and
 /// the sales desks with their agents (Master-detail). Deterministic, so screenshots and timings repeat.
 /// </summary>
@@ -20,6 +21,8 @@ public sealed class BenchDataStore
     public IReadOnlyList<AgentListItem> Agents { get; private set; } = [];
 
     public string LoadReport { get; private set; } = "Initializing...";
+
+    public BenchDataStore() => Load();
 
     public void Load()
     {
@@ -371,8 +374,8 @@ public sealed class BenchDataStore
             ("PRD-1010", "Galvanized High-Tensile Steel Conduit 2in", "Raw Materials", 28.90m, 250),
             ("PRD-1011", "Digital Multi-Meter CAT IV 1000V True-RMS", "Electronics", 175.00m, 90),
             ("PRD-1012", "ANSI Class 3 High-Visibility Winter Parka", "Safety Gear", 124.00m, 70),
-            ("PRD-1013", "Precision Pneumatic Framing Nailer 21-Deg", "Industrial Tools", 249.99m, 45),
-            ("PRD-1014", "Pre-Cast Concrete Anchor Bolts 3/4x12in (50 pk)", "Hardware", 89.50m, 180),
+            ("PRD-1013", "Benchtop Drill Press 12-Speed 5/8in Chuck", "Industrial Tools", 249.99m, 45),
+            ("PRD-1014", "Stainless Steel Hex Bolt Assortment M10 (50 pk)", "Hardware", 89.50m, 180),
             ("PRD-1015", "Circuit Breaker 200A 3-Phase Industrial Panel", "Electronics", 495.00m, 35)
         };
 

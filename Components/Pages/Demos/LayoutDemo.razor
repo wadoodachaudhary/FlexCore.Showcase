@@ -11,7 +11,8 @@
    Wrap switch in the Controls slot. New doc sections for GridLayoutControl, GridLayoutItemControl, StackLayoutControl and
    FlexAlignment/FlexOrientation, three CSS class rows, one accessibility point; the Related line now points at the example.
    Facts checked against Layout/GridLayoutControl.razor and .razor.css, Layout/GridLayoutItemControl.razor,
-   Layout/StackLayoutControl.razor, ContentModels.cs, FlexControlBase.cs and BadgeControl.razor in FlexCore 0.2.49. *@
+   Layout/StackLayoutControl.razor, ContentModels.cs, FlexControlBase.cs and BadgeControl.razor in FlexCore 0.2.49.
+   2026-10-26 (Baaria): sample content moved to the travel theme. *@
 
 <PageTitle>Page layouts — FlexCore Showcase</PageTitle>
 
@@ -227,25 +228,25 @@
     private sealed record Item(string Title, string Summary, (string Key, string Value)[] Props);
     private readonly Dictionary<string, Item[]> _data = new()
     {
-        ["Estimates"] = new[]
+        ["Requests"] = new[]
         {
-            new Item("EST-2041 Northwind", "9 lines · Sent · $12,480", new[] { ("Customer", "Northwind"), ("Status", "Sent"), ("Lines", "9"), ("Total", "$12,480") }),
-            new Item("EST-2042 Contoso", "14 lines · Draft · $18,240 · last saved today 09:12", new[] { ("Customer", "Contoso"), ("Status", "Draft"), ("Lines", "14"), ("Total", "$18,240") }),
-            new Item("EST-2043 Fabrikam", "22 lines · Won · $41,900", new[] { ("Customer", "Fabrikam"), ("Status", "Won"), ("Lines", "22"), ("Total", "$41,900") }),
+            new Item("LIS-0001 Moreau", "3 lines · Quoted · $1,720", new[] { ("Traveller", "Emma Moreau"), ("Status", "Quoted"), ("Lines", "3"), ("Total", "$1,720") }),
+            new Item("KYO-0001 Lindqvist", "6 lines · Draft · $4,860 · last saved today 09:12", new[] { ("Traveller", "Ana Lindqvist"), ("Status", "Draft"), ("Lines", "6"), ("Total", "$4,860") }),
+            new Item("AMF-0002 Brennan", "9 lines · Booked · $6,240", new[] { ("Traveller", "Liam Brennan"), ("Status", "Booked"), ("Lines", "9"), ("Total", "$6,240") }),
         },
-        ["Vendors"] = new[]
+        ["Suppliers"] = new[]
         {
-            new Item("Acme Lumber", "Net 30 · 3 open purchase orders", new[] { ("Contact", "J. Ortiz"), ("Terms", "Net 30"), ("Open POs", "3") }),
-            new Item("Bolt & Nut Co", "Net 15 · 1 open purchase order", new[] { ("Contact", "P. Reyes"), ("Terms", "Net 15"), ("Open POs", "1") }),
-            new Item("Cascade Concrete", "COD · no open orders", new[] { ("Contact", "M. Chen"), ("Terms", "COD"), ("Open POs", "0") }),
+            new Item("Meridian Airways", "Net 30 · 3 open bookings", new[] { ("Contact", "J. Ortiz"), ("Terms", "Net 30"), ("Open bookings", "3") }),
+            new Item("Hotel Lisbon Central", "Net 15 · 1 open booking", new[] { ("Contact", "P. Reyes"), ("Terms", "Net 15"), ("Open bookings", "1") }),
+            new Item("Lisbon Walks", "Prepaid · no open bookings", new[] { ("Contact", "M. Chen"), ("Terms", "Prepaid"), ("Open bookings", "0") }),
         },
         ["Settings"] = new[]
         {
-            new Item("Company", "Contoso Builders · USD · fiscal year starts in July", new[] { ("Currency", "USD"), ("Fiscal year", "July"), ("Users", "12") }),
-            new Item("Numbering", "Estimates EST-####, purchase orders PO-####", new[] { ("Estimates", "EST-####"), ("Purchase orders", "PO-####") }),
+            new Item("Company", "Showcase Travel · USD · fiscal year starts in July", new[] { ("Currency", "USD"), ("Fiscal year", "July"), ("Users", "12") }),
+            new Item("Numbering", "Requests by destination code (LIS-####, KYO-####), invoices INV-####", new[] { ("Requests", "City code-####"), ("Invoices", "INV-####") }),
         },
     };
-    private string _section = "Estimates";
+    private string _section = "Requests";
     private Item _selected = null!;
     private void Go(string section) { _section = section; _selected = _data[section][0]; }
 
@@ -260,7 +261,7 @@
     private string? _focus;
     private Dictionary<string, (int Row, int Col, int SizeX, int SizeY)> _place = new();
     private int ChartsRow => _focus is null ? 2 : 4;   // KPI rows 0–1, or 0–3 while one is expanded
-    protected override void OnInitialized() { _selected = _data["Estimates"][1]; Layout(); }
+    protected override void OnInitialized() { _selected = _data["Requests"][1]; Layout(); }
     private void Toggle(string key) { _focus = _focus == key ? null : key; Layout(); }
     private void Layout()
     {
@@ -479,32 +480,32 @@ private sealed record Item(string Title, string Summary, (string Key, string Val
 
 private readonly Dictionary<string, Item[]> _data = new()
 {
-    [""Estimates""] = new[]
+    [""Requests""] = new[]
     {
-        new Item(""EST-2041 Northwind"", ""9 lines · Sent · $12,480"", new[] { (""Customer"", ""Northwind""), (""Status"", ""Sent""), (""Lines"", ""9""), (""Total"", ""$12,480"") }),
-        new Item(""EST-2042 Contoso"", ""14 lines · Draft · $18,240 · last saved today 09:12"", new[] { (""Customer"", ""Contoso""), (""Status"", ""Draft""), (""Lines"", ""14""), (""Total"", ""$18,240"") }),
-        new Item(""EST-2043 Fabrikam"", ""22 lines · Won · $41,900"", new[] { (""Customer"", ""Fabrikam""), (""Status"", ""Won""), (""Lines"", ""22""), (""Total"", ""$41,900"") }),
+        new Item(""LIS-0001 Moreau"", ""3 lines · Quoted · $1,720"", new[] { (""Traveller"", ""Emma Moreau""), (""Status"", ""Quoted""), (""Lines"", ""3""), (""Total"", ""$1,720"") }),
+        new Item(""KYO-0001 Lindqvist"", ""6 lines · Draft · $4,860 · last saved today 09:12"", new[] { (""Traveller"", ""Ana Lindqvist""), (""Status"", ""Draft""), (""Lines"", ""6""), (""Total"", ""$4,860"") }),
+        new Item(""AMF-0002 Brennan"", ""9 lines · Booked · $6,240"", new[] { (""Traveller"", ""Liam Brennan""), (""Status"", ""Booked""), (""Lines"", ""9""), (""Total"", ""$6,240"") }),
     },
-    [""Vendors""] = new[]
+    [""Suppliers""] = new[]
     {
-        new Item(""Acme Lumber"", ""Net 30 · 3 open purchase orders"", new[] { (""Contact"", ""J. Ortiz""), (""Terms"", ""Net 30""), (""Open POs"", ""3"") }),
-        new Item(""Bolt & Nut Co"", ""Net 15 · 1 open purchase order"", new[] { (""Contact"", ""P. Reyes""), (""Terms"", ""Net 15""), (""Open POs"", ""1"") }),
-        new Item(""Cascade Concrete"", ""COD · no open orders"", new[] { (""Contact"", ""M. Chen""), (""Terms"", ""COD""), (""Open POs"", ""0"") }),
+        new Item(""Meridian Airways"", ""Net 30 · 3 open bookings"", new[] { (""Contact"", ""J. Ortiz""), (""Terms"", ""Net 30""), (""Open bookings"", ""3"") }),
+        new Item(""Hotel Lisbon Central"", ""Net 15 · 1 open booking"", new[] { (""Contact"", ""P. Reyes""), (""Terms"", ""Net 15""), (""Open bookings"", ""1"") }),
+        new Item(""Lisbon Walks"", ""Prepaid · no open bookings"", new[] { (""Contact"", ""M. Chen""), (""Terms"", ""Prepaid""), (""Open bookings"", ""0"") }),
     },
     [""Settings""] = new[]
     {
-        new Item(""Company"", ""Contoso Builders · USD · fiscal year starts in July"", new[] { (""Currency"", ""USD""), (""Fiscal year"", ""July""), (""Users"", ""12"") }),
-        new Item(""Numbering"", ""Estimates EST-####, purchase orders PO-####"", new[] { (""Estimates"", ""EST-####""), (""Purchase orders"", ""PO-####"") }),
+        new Item(""Company"", ""Showcase Travel · USD · fiscal year starts in July"", new[] { (""Currency"", ""USD""), (""Fiscal year"", ""July""), (""Users"", ""12"") }),
+        new Item(""Numbering"", ""Requests by destination code (LIS-####, KYO-####), invoices INV-####"", new[] { (""Requests"", ""City code-####""), (""Invoices"", ""INV-####"") }),
     },
 };
 
-private string _section = ""Estimates"";
+private string _section = ""Requests"";
 
 private Item _selected = null!;
 
 private void Go(string section) { _section = section; _selected = _data[section][0]; }
 
-protected override void OnInitialized() { _selected = _data[""Estimates""][1]; Layout(); }";
+protected override void OnInitialized() { _selected = _data[""Requests""][1]; Layout(); }";
 
         public const string Dashboard = @"@* .dash is the page-scoped ancestor that ::deep rules below need *@
 <div class=""dash"">
@@ -547,7 +548,7 @@ private Dictionary<string, (int Row, int Col, int SizeX, int SizeY)> _place = ne
 
 private int ChartsRow => _focus is null ? 2 : 4;   // KPI rows 0–1, or 0–3 while one is expanded
 
-protected override void OnInitialized() { _selected = _data[""Estimates""][1]; Layout(); }
+protected override void OnInitialized() { _selected = _data[""Requests""][1]; Layout(); }
 
 private void Toggle(string key) { _focus = _focus == key ? null : key; Layout(); }
 

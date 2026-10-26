@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" role="img" aria-label="Lisbon city break route sketch">
+  <!-- 2026-10-26: hand-drawn placeholder route sketch for the Cards demo; no external source. -->
+  <rect width="640" height="300" fill="#f1f5f9"/>
+  <g fill="none" stroke="#cbd5e1" stroke-width="1">
+    <path d="M40 40h560M40 80h560M40 120h560M40 160h560M40 200h560"/>
+    <path d="M60 20v260M140 20v260M220 20v260M300 20v260M380 20v260M460 20v260M540 20v260"/>
+  </g>
+  <path d="M0 232 C 120 214, 220 252, 340 236 S 540 214, 640 230 L640 300 L0 300 Z" fill="#bfdbfe"/>
+  <path d="M540 74 C 470 112, 420 150, 330 160 S 190 140, 140 104" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="10 8"/>
+  <g fill="#ffffff" stroke="#1e293b" stroke-width="3">
+    <circle cx="540" cy="74" r="12"/>
+    <circle cx="330" cy="160" r="12"/>
+    <circle cx="140" cy="104" r="12"/>
+  </g>
+  <g fill="#2563eb">
+    <circle cx="540" cy="74" r="5"/>
+    <circle cx="330" cy="160" r="5"/>
+    <circle cx="140" cy="104" r="5"/>
+  </g>
+  <g fill="#1e293b" font-family="ui-monospace, Menlo, monospace" font-size="14">
+    <text x="540" y="50" text-anchor="middle">AIRPORT</text>
+    <text x="330" y="196" text-anchor="middle">OLD-TOWN HOTEL</text>
+    <text x="140" y="80" text-anchor="middle">FOOD TOUR</text>
+  </g>
+  <g fill="#1e3a8a" font-family="ui-monospace, Menlo, monospace">
+    <text x="560" y="274" text-anchor="middle" font-size="14">TAGUS</text>
+    <text x="24" y="285" font-size="12">LIS-0001 · 4 NIGHTS</text>
+  </g>
+</svg>

@@ -7,7 +7,7 @@
 @* 2026-10-17: moved onto FeatureDemoLayout (row 6 of the Data Grid list). Same five rows and columns. Changes, closing SC-164 to
    SC-169: the "Simulated Latency" buttons went (nothing read the value, no delay was injected); the Keystrokes/Server Commits pair
    went (both counted the same event); the counter now counts saves through OnCellSave; the transport switch is a ButtonGroupControl;
-   the unused @ref went; "HomeFront", "Project Managers entry grid", "PM Entry", "zero network lag", "lag-free", "up to 95%" and the
+   the unused @ref went; the old internal names, "zero network lag", "lag-free", "up to 95%" and the
    WAN sentence left the copy. What each mode does comes from TextBoxTypingBehavior.cs and GridControl.razor.cs:511-514.
    Parameter tables are a later pass (SC-278).
    2026-10-24 (SC-278): documentation tables written from TextBoxTypingBehavior.cs, Grid/GridControl.razor.cs (parameters 518-529,
@@ -17,8 +17,8 @@
    commit 416-574, the attach in OnAfterRenderAsync 745-826, OnNativeInput / OnNativeChange 983-1037) and the listener those call in
    wwwroot/textbox-control.js (pre-attach shield 192-224, suppressTypingKeyDispatch 558-577, enableClientBufferedTyping 580-806);
    rows checked with scratchpad/vocabcheck.py.
-   2026-10-25 (Baaria, SC-344): the rows are travel agents with a discount limit instead of the project managers and PO limit copied
-   from HomeFront. *@
+   2026-10-25 (Baaria, SC-344): the rows are travel agents with a discount limit instead of the earlier project managers and PO
+   limit. *@
 
 <PageTitle>Typing modes — FlexCore Showcase</PageTitle>
 

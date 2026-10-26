@@ -5,7 +5,8 @@
    against Diagram/DiagramControl.razor, DiagramControl.razor.css and DiagramModels.cs in FlexCore 0.2.49. The control has no layout
    engine (OffsetX/OffsetY are hand-set centres), no drag, zoom or editing, and no keyboard or ARIA support on nodes; the workflow's
    Previous/Next buttons are the page's keyboard route. Connector Ids are page-unique (wf-*, sh-*) because the arrowhead marker ids
-   are document-wide. *@
+   are document-wide. 
+   2026-10-26: Previous/Next stop at the ends instead of wrapping (Next from Documents sent went to Declined, Previous from the first step too). *@
 
 <PageTitle>Diagram — FlexCore Showcase</PageTitle>
 
@@ -25,7 +26,7 @@
 
     <Examples>
         <DemoExample Id="workflow" Title="A booking workflow" RazorCode="@Code.Workflow" CSharpCode="@Code.WorkflowCs" CssCode="@Code.WorkflowCss">
-            <Description><p>Showcase Travel's trip requests from first contact to travel documents. Every position is set by hand, and with the default <code>Auto</code> ports each connector leaves from the side that faces its target. Click a step, or use Previous step and Next step, and the panel shows who handles it and how long it usually takes; the page marks the current step with a <code>CssClass</code> styled through <code>::deep</code>.</p></Description>
+            <Description><p>Showcase Travel's trip requests from first contact to travel documents. Every position is set by hand, and with the default <code>Auto</code> ports each connector leaves from the side that faces its target. Click a step, or use Previous step and Next step (they walk the main path, then the declined branch), and the panel shows who handles it and how long it usually takes; the page marks the current step with a <code>CssClass</code> styled through <code>::deep</code>.</p></Description>
             <Demo>
                 <div class="wf-layout">
                     <div class="canvas">
@@ -174,7 +175,7 @@
 
     private void OnStepClicked(DiagramNodeClickEventArgs e) => ShowStep(e.Node.Id);
 
-    private void Move(int delta) => ShowStep(_workflowNodes[(Index + delta + _workflowNodes.Count) % _workflowNodes.Count].Id);
+    private void Move(int delta) => ShowStep(_workflowNodes[Math.Clamp(Index + delta, 0, _workflowNodes.Count - 1)].Id);   // main path, then the declined branch; no wrap
 
     private void ShowStep(string id)
     {
@@ -405,7 +406,7 @@ protected override void OnInitialized() => ShowStep(""request"");
 
 private void OnStepClicked(DiagramNodeClickEventArgs e) => ShowStep(e.Node.Id);
 
-private void Move(int delta) => ShowStep(_workflowNodes[(Index + delta + _workflowNodes.Count) % _workflowNodes.Count].Id);
+private void Move(int delta) => ShowStep(_workflowNodes[Math.Clamp(Index + delta, 0, _workflowNodes.Count - 1)].Id);   // main path, then the declined branch; no wrap
 
 private void ShowStep(string id)
 {

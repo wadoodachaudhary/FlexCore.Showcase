@@ -10,7 +10,7 @@ public sealed record NavGroup(string Label, string Icon, string? Href, string Al
 /// <summary>
 /// The single source of truth for site navigation (2026-10-06). The menubar, phone drawer,
 /// footer and the Grid overview's link list all read this, so they cannot drift apart.
-/// Rules: labels say what the page shows; no internal HomeFront names; a page appears here
+/// Rules: labels say what the page shows; no internal application names; a page appears here
 /// only if it exists. Phase 2 pages (AI prompt,
 /// /performance, /migration) are added when they render.
 /// </summary>

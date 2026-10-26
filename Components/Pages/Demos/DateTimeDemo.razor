@@ -3,7 +3,8 @@
 
 @* 2026-10-12: new page on FeatureDemoLayout; three examples (appointment, date range, calendar). Facts checked against DatePickerControl.razor,
    TimePickerControl.razor, DateRangePickerControl.razor, CalendarControl.razor, TimeSpanPickerControl.razor, CalendarModels.cs and their
-   stylesheets (FlexCore 0.2.48). TimeSpanPickerControl was moved here from UI elements; the Control tour keeps its form samples. *@
+   stylesheets (FlexCore 0.2.48). TimeSpanPickerControl was moved here from UI elements; the Control tour keeps its form samples.
+   2026-10-26 (Baaria): sample content moved to the travel theme. *@
 
 <PageTitle>Date & time — FlexCore Showcase</PageTitle>
 
@@ -36,10 +37,10 @@
         </DemoExample>
 
         <DemoExample Id="range" Title="Date range" RazorCode="@Code.Range" CSharpCode="@Code.RangeCs">
-            <Description><p>One <code>CalendarRange</code> binds both pickers and the popup calendar. <code>Min</code> and <code>Max</code> bound the hire window. Put the end before the start and the control reports it; the bound value still updates, so the page can refuse to count nights.</p></Description>
+            <Description><p>One <code>CalendarRange</code> binds both pickers and the popup calendar. <code>Min</code> and <code>Max</code> bound the travel window. Put the end before the start and the control reports it; the bound value still updates, so the page can refuse to count nights.</p></Description>
             <Demo>
-                <DateRangePickerControl @bind-Value="_hire" Min="DateTime.Today" Max="DateTime.Today.AddDays(180)" AriaLabel="Crane hire" />
-                <p class="result">@Hire</p>
+                <DateRangePickerControl @bind-Value="_trip" Min="DateTime.Today" Max="DateTime.Today.AddDays(180)" AriaLabel="Trip dates" />
+                <p class="result">@TripDates</p>
             </Demo>
         </DemoExample>
 
@@ -47,9 +48,9 @@
             <Description><p><code>SelectionMode="Multiple"</code> toggles days into <code>Values</code>. <code>DisabledDate</code> greys out weekends, <code>FirstDayOfWeek</code> starts the grid on Monday, and the heading button switches to a year or decade view. Arrow keys move through the days.</p></Description>
             <Demo>
                 <div class="cal-row">
-                    <CalendarControl @bind-Values="_visits" SelectionMode="CalendarSelectionMode.Multiple" Min="DateTime.Today" Max="DateTime.Today.AddDays(90)"
+                    <CalendarControl @bind-Values="_departures" SelectionMode="CalendarSelectionMode.Multiple" Min="DateTime.Today" Max="DateTime.Today.AddDays(90)"
                                      DisabledDate="Weekend" FirstDayOfWeek="DayOfWeek.Monday" />
-                    <p class="result visits">@Visits</p>
+                    <p class="result departures">@Departures</p>
                 </div>
             </Demo>
         </DemoExample>
@@ -116,13 +117,13 @@
         : "Pick a date and a start time.";
 
     // Date range
-    private CalendarRange _hire = new(DateTime.Today.AddDays(7), DateTime.Today.AddDays(10));
-    private string Hire => _hire is { Start: { } s, End: { } e } && e >= s
-        ? $"{(e - s).Days} day hire, {s:ddd d MMM} to {e:ddd d MMM}"
+    private CalendarRange _trip = new(DateTime.Today.AddDays(7), DateTime.Today.AddDays(10));
+    private string TripDates => _trip is { Start: { } s, End: { } e } && e >= s
+        ? $"{(e - s).Days} night{((e - s).Days == 1 ? "" : "s")}, {s:ddd d MMM} to {e:ddd d MMM}"
         : "Pick a start and an end date.";
 
     // Calendar
-    private IReadOnlyList<DateTime> _visits = Weekdays(DateTime.Today.AddDays(1), 5).Where((_, i) => i % 2 == 0).ToArray();
+    private IReadOnlyList<DateTime> _departures = Weekdays(DateTime.Today.AddDays(1), 5).Where((_, i) => i % 2 == 0).ToArray();
     private static bool Weekend(DateTime d) => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
     private static List<DateTime> Weekdays(DateTime from, int count)
     {
@@ -131,9 +132,9 @@
             if (!Weekend(d)) list.Add(d);
         return list;
     }
-    private string Visits => _visits.Count == 0
-        ? "No site visits picked."
-        : $"{_visits.Count} site visit{(_visits.Count == 1 ? "" : "s")}: {string.Join(", ", _visits.OrderBy(d => d).Select(d => d.ToString("ddd d MMM")))}";
+    private string Departures => _departures.Count == 0
+        ? "No departures picked."
+        : $"{_departures.Count} departure{(_departures.Count == 1 ? "" : "s")}: {string.Join(", ", _departures.OrderBy(d => d).Select(d => d.ToString("ddd d MMM")))}";
 
     // Vocabulary rows (0.2.48). Base-class parameters marked (base).
     private static class Vocab
@@ -278,27 +279,35 @@ private string Appointment => _date is { } d && _time is { } t
     ? $""{d:ddd d MMM yyyy}, {t:h:mm tt} – {t.Add(_duration ?? TimeSpan.Zero):h:mm tt}""
     : ""Pick a date and a start time."";";
 
-        public const string Range = @"<DateRangePickerControl @bind-Value=""_hire"" Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(180)"" AriaLabel=""Crane hire"" />
-<p class=""result"">@Hire</p>";
+        public const string Range = @"<DateRangePickerControl @bind-Value=""_trip"" Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(180)"" AriaLabel=""Trip dates"" />
+<p class=""result"">@TripDates</p>";
         public const string RangeCs = @"// Date range
-private CalendarRange _hire = new(DateTime.Today.AddDays(7), DateTime.Today.AddDays(10));
+private CalendarRange _trip = new(DateTime.Today.AddDays(7), DateTime.Today.AddDays(10));
 
-private string Hire => _hire is { Start: { } s, End: { } e } && e >= s
-    ? $""{(e - s).Days} day hire, {s:ddd d MMM} to {e:ddd d MMM}""
+private string TripDates => _trip is { Start: { } s, End: { } e } && e >= s
+    ? $""{(e - s).Days} night{((e - s).Days == 1 ? """" : ""s"")}, {s:ddd d MMM} to {e:ddd d MMM}""
     : ""Pick a start and an end date."";";
 
         public const string Calendar = @"<div class=""cal-row"">
-    <CalendarControl @bind-Values=""_visits"" SelectionMode=""CalendarSelectionMode.Multiple"" Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(90)""
+    <CalendarControl @bind-Values=""_departures"" SelectionMode=""CalendarSelectionMode.Multiple"" Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(90)""
                      DisabledDate=""Weekend"" FirstDayOfWeek=""DayOfWeek.Monday"" />
-    <p class=""result visits"">@Visits</p>
+    <p class=""result departures"">@Departures</p>
 </div>";
         public const string CalendarCs = @"// Calendar
-private IReadOnlyList<DateTime> _visits = Weekdays(DateTime.Today.AddDays(1), 5).Where((_, i) => i % 2 == 0).ToArray();
+private IReadOnlyList<DateTime> _departures = Weekdays(DateTime.Today.AddDays(1), 5).Where((_, i) => i % 2 == 0).ToArray();
 
 private static bool Weekend(DateTime d) => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
 
-private string Visits => _visits.Count == 0
-    ? ""No site visits picked.""
-    : $""{_visits.Count} site visit{(_visits.Count == 1 ? """" : ""s"")}: {string.Join("", "", _visits.OrderBy(d => d).Select(d => d.ToString(""ddd d MMM"")))}"";";
+private static List<DateTime> Weekdays(DateTime from, int count)
+{
+    var list = new List<DateTime>();
+    for (var d = from.Date; list.Count < count; d = d.AddDays(1))
+        if (!Weekend(d)) list.Add(d);
+    return list;
+}
+
+private string Departures => _departures.Count == 0
+    ? ""No departures picked.""
+    : $""{_departures.Count} departure{(_departures.Count == 1 ? """" : ""s"")}: {string.Join("", "", _departures.OrderBy(d => d).Select(d => d.ToString(""ddd d MMM"")))}"";";
     }
 }

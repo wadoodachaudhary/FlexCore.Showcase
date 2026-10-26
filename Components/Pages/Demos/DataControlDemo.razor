@@ -18,7 +18,8 @@
    set to the width-bound 232px. ShowValues and ValueFormat were dropped: only the legacy Bars mode and the gauges read them, the SVG
    renderer never did, so they drew nothing. YAxis gets Max 4000 with five ticks so the axis reads 0, 1000 ... 4000 instead of
    multiples of 858 (GetNiceRange takes 1.1 x the data maximum and GetTicks divides evenly); the fixed Max keeps the scale the same
-   under every filter. *@
+   under every filter.
+   2026-10-26 (Baaria): sample content moved to the travel theme. *@
 
 <PageTitle>Data control — FlexCore Showcase</PageTitle>
 
@@ -109,7 +110,7 @@
         data: new Dictionary<string, object?>
         {
             ["Order"] = new[] { "A100", "A101", "A102", "A103", "A104", "A105", "A106", "A107" },
-            ["Customer"] = new[] { "Acme", "Northwind", "Contoso", "Fabrikam", "Acme", "Northwind", "Contoso", "Acme" },
+            ["Customer"] = new[] { "Alvarez", "Moreau", "Brennan", "Lindqvist", "Alvarez", "Moreau", "Brennan", "Alvarez" },
             ["Amount"] = new[] { "1280.50", "845.25", "2210.00", "1640.75", "420.00", "1995.10", "760.40", "3120.00" },
             ["Open"] = new[] { "true", "false", "true", "true", "false", "true", "false", "true" },
             ["Ordered"] = new[] { "2026-09-02", "2026-09-05", "2026-09-09", "2026-09-12", "2026-09-15", "2026-09-19", "2026-09-23", "2026-09-30" },
@@ -236,7 +237,7 @@ private readonly DataControl _frame = DataControl.DataFrame(
     data: new Dictionary<string, object?>
     {
         [""Order""] = new[] { ""A100"", ""A101"", ""A102"", ""A103"", ""A104"", ""A105"", ""A106"", ""A107"" },
-        [""Customer""] = new[] { ""Acme"", ""Northwind"", ""Contoso"", ""Fabrikam"", ""Acme"", ""Northwind"", ""Contoso"", ""Acme"" },
+        [""Customer""] = new[] { ""Alvarez"", ""Moreau"", ""Brennan"", ""Lindqvist"", ""Alvarez"", ""Moreau"", ""Brennan"", ""Alvarez"" },
         [""Amount""] = new[] { ""1280.50"", ""845.25"", ""2210.00"", ""1640.75"", ""420.00"", ""1995.10"", ""760.40"", ""3120.00"" },
         [""Open""] = new[] { ""true"", ""false"", ""true"", ""true"", ""false"", ""true"", ""false"", ""true"" },
         [""Ordered""] = new[] { ""2026-09-02"", ""2026-09-05"", ""2026-09-09"", ""2026-09-12"", ""2026-09-15"", ""2026-09-19"", ""2026-09-23"", ""2026-09-30"" },

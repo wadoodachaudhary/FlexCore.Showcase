@@ -1,6 +1,7 @@
 @page "/"
 @inject IJSRuntime JS
 @inject NotificationService Notifications
+@inject IReportDataExecutor ReportData
 
 @* 2026-10-23 (developer meeting point 5, chart label clutter): the Inventory Allocation pie has four slices instead of five so its
    legend, an HTML flex row of 12 px entries about 100 px wide with 12 px gaps, stays on one line in the 575 px column at 1280 px
@@ -8,7 +9,7 @@
    share stays in the legend text. The "charts" string in the code tab below is kept by hand and still matches the markup. *@
 
 @* 2026-10-25 (Baaria, SC-344): the hero grid is a travel agency's quote desk, Inbox — Trip Requests. It replaced an example whose
-   banner text, columns and names came from HomeFront's custom-quote inbox. Same grid features as before (1,000 windowed rows, frozen
+   banner text, columns and names came from an earlier custom-quote inbox. Same grid features as before (1,000 windowed rows, frozen
    key column, in-cell DropDownGridControl lookup, fast-typing money cell, SVG sparkline, badges, popup editor); two buttons that only
    raised a notification now do their job: Export to Excel calls the grid's ExportToXlsxAsync, New Request opens the editor on a blank
    request and adds it on Save. The "grid" string in the code tab is the GridControl block below, copied verbatim (scratchpad
@@ -472,23 +473,18 @@
                         <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 18px; font-family: monospace; font-size: 13px; color: #334155;">
                             <div style="color: #0d3b66; font-weight: 700; border-bottom: 2px solid #0d3b66; padding-bottom: 6px; margin-bottom: 12px; display: flex; justify-content: space-between;">
                                 <span>PACKAGE COST SHEET</span>
-                                <span>Lisbon Explorer, Spring | As of: @DateTime.Today.ToString("d")</span>
+                                <span>@_costPreviewTitle | As of: @DateTime.Today.ToString("d")</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
-                                <span>A Transport : Flights, transfers and rail</span>
-                                <span style="font-weight: 600;">$1,968.00</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
-                                <span>B Accommodation : 7 nights with breakfast</span>
-                                <span style="font-weight: 600;">$1,463.00</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
-                                <span>C Experiences : Walking tour, food tour, day trip</span>
-                                <span style="font-weight: 600;">$612.00</span>
-                            </div>
+                            @foreach (var line in _costPreview)
+                            {
+                                <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                                    <span>@line.Label</span>
+                                    <span style="font-weight: 600;">@line.Amount.ToString("C2")</span>
+                                </div>
+                            }
                             <div style="display: flex; justify-content: space-between; padding: 6px 0; margin-top: 8px; border-top: 2px solid #cbd5e1; font-weight: 700; color: #0f172a;">
                                 <span>PACKAGE TOTAL:</span>
-                                <span>$4,043.00</span>
+                                <span>@_costPreview.Sum(l => l.Amount).ToString("C2")</span>
                             </div>
                         </div>
                     </div>
@@ -678,7 +674,7 @@
     private bool _copiedInstall = false;
     private bool _copiedCode = false;
     private string _selectedTripType = "All";
-    private string _selectedView = "New requests";
+    private string _selectedView = "All";   // opens on all 1,000 requests, the number the badges state
     private string _gridSearchTerm = "";
     private TripRequest? _selectedRequest;
     private GridControl<TripRequest>? _grid;
@@ -844,6 +840,7 @@
                 o.TripType = saved.TripType;
                 o.TripTypeName = saved.TripTypeName;
                 o.Quote = saved.Quote;
+                ApplyQuoteToFares(o);
                 o.Status = saved.Status;
                 o.DateRequested = saved.DateRequested;
                 o.Itinerary = saved.Itinerary;
@@ -865,6 +862,40 @@
         _editingRequest = null;
         _originalRequestRef = null;
         StateHasChanged();
+    }
+
+    // The last of the five weekly fare samples is the quote, so a new quote moves the sparkline's end and its percentage
+    private static void ApplyQuoteToFares(TripRequest r)
+    {
+        if (r.FareHistory.Count == 0) return;
+        r.FareHistory[^1] = (int)r.Quote;
+        r.FareDeltaPercent = (int)Math.Round((r.FareHistory[^1] - r.FareHistory[0]) / (decimal)Math.Max(1, r.FareHistory[0]) * 100);
+    }
+
+    // Reports tab preview (2026-10-26): the report page's default sheet, from the same query, so its figures are the report's own
+    private string _costPreviewTitle = "";
+    private (string Label, decimal Amount)[] _costPreview = [];
+
+    private void LoadCostPreview()
+    {
+        var package = FlexCore.Showcase.Data.TravelData.Packages[0];
+        var season = FlexCore.Showcase.Data.TravelData.Seasons[0];
+        var table = ReportData.Execute(
+            "SELECT CostGroup AS PackageCostLines_CostGroup, Amount AS Formula_Amount FROM PackageCostLines",
+            new Dictionary<string, object> { ["Package"] = package.Name, ["Season"] = season });
+        var blurbs = new Dictionary<string, string>
+        {
+            ["A"] = "Transport : Flights, transfers and rail",
+            ["B"] = $"Accommodation : {package.Nights} nights with breakfast",
+            ["C"] = "Experiences : Tours, tickets and a cooking class",
+            ["D"] = "Services : Insurance, guide and booking fees",
+        };
+        _costPreviewTitle = $"{package.Name}, {season}";
+        _costPreview = table.Rows.Cast<System.Data.DataRow>()
+            .GroupBy(r => (string)r["PackageCostLines_CostGroup"])
+            .OrderBy(g => g.Key)
+            .Select(g => ($"{g.Key} {blurbs.GetValueOrDefault(g.Key, "")}", g.Sum(r => (decimal)r["Formula_Amount"])))
+            .ToArray();
     }
 
     private void OnTripTypeChanged(TripRequest r, string? newType)
@@ -1006,6 +1037,14 @@
             _selectedRequest = e.Data;
             StateHasChanged();
         });
+
+        // A typed quote becomes the route's latest fare sample, so the sparkline, its percentage and the totals follow it
+        _gridEvents.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<TripRequest>>(this, e =>
+        {
+            if (e.ColumnName == nameof(TripRequest.Quote)) ApplyQuoteToFares(e.Data);
+        });
+
+        LoadCostPreview();
 
         _gridEvents.OnRecordDoubleClick = EventCallback.Factory.Create<CellClickEventArgs<TripRequest>>(this, e =>
         {

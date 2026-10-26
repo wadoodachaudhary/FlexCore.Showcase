@@ -11,7 +11,8 @@
    2026-10-24: Keyboard and ARIA tables written from TreeViewControl.razor (markup), HandleKeyDown in TreeViewControl.Operations.cs and
    treeKeyboard in wwwroot/browser-capabilities.js; Parameters and TreeNode rows re-read against TreeViewControl.Appearance.cs,
    TreeViewControl.Operations.cs, TreeViewModels.cs and TreeViewData.cs (FolderStyle and Children defaults, TreeIndentPixels and ShowIcons
-   descriptions corrected; search, display-mode, focus and Outline node members added; mixed-type grouped rows split). *@
+   descriptions corrected; search, display-mode, focus and Outline node members added; mixed-type grouped rows split). 
+   2026-10-26 (Baaria): the sample tree is a tour operator's summer programme instead of a construction project. *@
 
 <PageTitle>Tree view — FlexCore Showcase</PageTitle>
 
@@ -29,7 +30,7 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="explorer" Title="Project explorer with a node inspector" RazorCode="@Code.Explorer" CSharpCode="@Code.ExplorerCs">
+        <DemoExample Id="explorer" Title="Programme explorer with a node inspector" RazorCode="@Code.Explorer" CSharpCode="@Code.ExplorerCs">
             <Description><p>Click a node to select it and read its properties on the right; click a folder to expand it. The switches change the folder icons and the connector lines.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_styleItems" @bind-Values="_styleValues" Selection="ChoiceSelectionMode.Single" AriaLabel="Folder style" />
@@ -131,43 +132,43 @@
             new TreeNode
             {
                 Id = "root-1",
-                Text = "Highland Estates Project",
+                Text = "Summer 2026 Programme",
                 IsExpanded = true,
-                Tag = "Project Root",
+                Tag = "Programme root",
                 Children =
                 [
                     new TreeNode
                     {
-                        Id = "site-dev",
-                        Text = "Site Development",
+                        Id = "europe",
+                        Text = "Europe Departures",
                         IsExpanded = true,
                         Children =
                         [
-                            new TreeNode { Id = "clearing", Text = "Clearing & Grubbing", Tag = "Status: Completed" },
-                            new TreeNode { Id = "rough-grade", Text = "Rough Grading & Drainage", Tag = "Status: In Progress" },
-                            new TreeNode { Id = "utilities", Text = "Underground Utilities (Wet/Dry)", Tag = "Status: Pending" }
+                            new TreeNode { Id = "lisbon", Text = "Lisbon City Break", Tag = "Status: On sale" },
+                            new TreeNode { Id = "amalfi", Text = "Amalfi Coast Week", Tag = "Status: Selling fast" },
+                            new TreeNode { Id = "reykjavik", Text = "Reykjavik Northern Lights", Tag = "Status: Waitlist" }
                         ]
                     },
                     new TreeNode
                     {
-                        Id = "phase-1",
-                        Text = "Phase 1 - Single Family Lots (1-50)",
+                        Id = "long-haul",
+                        Text = "Long-haul Departures",
                         IsExpanded = false,
                         Children =
                         [
-                            new TreeNode { Id = "foundations", Text = "Foundations & Slabs", Tag = "42 of 50 Poured" },
-                            new TreeNode { Id = "framing", Text = "Structural Framing", Tag = "28 Active Crews" },
-                            new TreeNode { Id = "roofing", Text = "Dry-In & Roofing", Tag = "18 Completed" }
+                            new TreeNode { Id = "kyoto", Text = "Kyoto Culture Tour", Tag = "42 of 50 seats sold" },
+                            new TreeNode { Id = "hoi-an", Text = "Hoi An Food Trail", Tag = "28 travellers booked" },
+                            new TreeNode { Id = "cape-town", Text = "Cape Town & Winelands", Tag = "18 departures confirmed" }
                         ]
                     },
                     new TreeNode
                     {
-                        Id = "phase-2",
-                        Text = "Phase 2 - Commercial Center",
+                        Id = "cruises",
+                        Text = "Cruises",
                         Children =
                         [
-                            new TreeNode { Id = "retail-a", Text = "Building A (Anchor Grocery)" },
-                            new TreeNode { Id = "retail-b", Text = "Building B (Shops & Dining)" }
+                            new TreeNode { Id = "greek-islands", Text = "Greek Islands Cruise" },
+                            new TreeNode { Id = "fjords", Text = "Norwegian Fjords Cruise" }
                         ]
                     }
                 ]
@@ -175,11 +176,11 @@
             new TreeNode
             {
                 Id = "root-2",
-                Text = "Corporate Standards & Specifications",
+                Text = "Policies & Supplier Terms",
                 Children =
                 [
-                    new TreeNode { Id = "safety", Text = "Safety Protocols 2026" },
-                    new TreeNode { Id = "subcontractor-guidelines", Text = "Subcontractor Master Agreement" }
+                    new TreeNode { Id = "booking-terms", Text = "Booking Terms 2026" },
+                    new TreeNode { Id = "supplier-agreement", Text = "Supplier Master Agreement" }
                 ]
             }
         ];
@@ -339,43 +340,43 @@ private static List<TreeNode> BuildSampleTree()
         new TreeNode
         {
             Id = ""root-1"",
-            Text = ""Highland Estates Project"",
+            Text = ""Summer 2026 Programme"",
             IsExpanded = true,
-            Tag = ""Project Root"",
+            Tag = ""Programme root"",
             Children =
             [
                 new TreeNode
                 {
-                    Id = ""site-dev"",
-                    Text = ""Site Development"",
+                    Id = ""europe"",
+                    Text = ""Europe Departures"",
                     IsExpanded = true,
                     Children =
                     [
-                        new TreeNode { Id = ""clearing"", Text = ""Clearing & Grubbing"", Tag = ""Status: Completed"" },
-                        new TreeNode { Id = ""rough-grade"", Text = ""Rough Grading & Drainage"", Tag = ""Status: In Progress"" },
-                        new TreeNode { Id = ""utilities"", Text = ""Underground Utilities (Wet/Dry)"", Tag = ""Status: Pending"" }
+                        new TreeNode { Id = ""lisbon"", Text = ""Lisbon City Break"", Tag = ""Status: On sale"" },
+                        new TreeNode { Id = ""amalfi"", Text = ""Amalfi Coast Week"", Tag = ""Status: Selling fast"" },
+                        new TreeNode { Id = ""reykjavik"", Text = ""Reykjavik Northern Lights"", Tag = ""Status: Waitlist"" }
                     ]
                 },
                 new TreeNode
                 {
-                    Id = ""phase-1"",
-                    Text = ""Phase 1 - Single Family Lots (1-50)"",
+                    Id = ""long-haul"",
+                    Text = ""Long-haul Departures"",
                     IsExpanded = false,
                     Children =
                     [
-                        new TreeNode { Id = ""foundations"", Text = ""Foundations & Slabs"", Tag = ""42 of 50 Poured"" },
-                        new TreeNode { Id = ""framing"", Text = ""Structural Framing"", Tag = ""28 Active Crews"" },
-                        new TreeNode { Id = ""roofing"", Text = ""Dry-In & Roofing"", Tag = ""18 Completed"" }
+                        new TreeNode { Id = ""kyoto"", Text = ""Kyoto Culture Tour"", Tag = ""42 of 50 seats sold"" },
+                        new TreeNode { Id = ""hoi-an"", Text = ""Hoi An Food Trail"", Tag = ""28 travellers booked"" },
+                        new TreeNode { Id = ""cape-town"", Text = ""Cape Town & Winelands"", Tag = ""18 departures confirmed"" }
                     ]
                 },
                 new TreeNode
                 {
-                    Id = ""phase-2"",
-                    Text = ""Phase 2 - Commercial Center"",
+                    Id = ""cruises"",
+                    Text = ""Cruises"",
                     Children =
                     [
-                        new TreeNode { Id = ""retail-a"", Text = ""Building A (Anchor Grocery)"" },
-                        new TreeNode { Id = ""retail-b"", Text = ""Building B (Shops & Dining)"" }
+                        new TreeNode { Id = ""greek-islands"", Text = ""Greek Islands Cruise"" },
+                        new TreeNode { Id = ""fjords"", Text = ""Norwegian Fjords Cruise"" }
                     ]
                 }
             ]
@@ -383,11 +384,11 @@ private static List<TreeNode> BuildSampleTree()
         new TreeNode
         {
             Id = ""root-2"",
-            Text = ""Corporate Standards & Specifications"",
+            Text = ""Policies & Supplier Terms"",
             Children =
             [
-                new TreeNode { Id = ""safety"", Text = ""Safety Protocols 2026"" },
-                new TreeNode { Id = ""subcontractor-guidelines"", Text = ""Subcontractor Master Agreement"" }
+                new TreeNode { Id = ""booking-terms"", Text = ""Booking Terms 2026"" },
+                new TreeNode { Id = ""supplier-agreement"", Text = ""Supplier Master Agreement"" }
             ]
         }
     ];

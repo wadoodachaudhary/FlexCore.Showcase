@@ -20,7 +20,8 @@
    and Grid/GridEnums.cs; every row checked at its read or raise site and with vocabcheck, whose only flags are its own artifacts (it
    compares an event payload to the EventCallback declaration and reads async Task as the return type). Found while checking: the
    RowDeselected handler wired at line 120 never runs, GridControl does not raise it (TreeGridControl does); left as is, the code tabs
-   are verbatim. *@
+   are verbatim.
+   2026-10-26 (Baaria): sample data moved to the travel theme *@
 
 <PageTitle>Column sets — FlexCore Showcase</PageTitle>
 
@@ -128,8 +129,8 @@
         public string Code { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
-        public string Vendor { get; set; } = string.Empty;
-        public string POIndex { get; set; } = string.Empty;
+        public string Supplier { get; set; } = string.Empty;
+        public string BookingRef { get; set; } = string.Empty;
         public decimal Qty { get; set; }
         public decimal Price { get; set; }
         public decimal Total => Qty * Price;
@@ -149,12 +150,12 @@
     {
         _rows =
         [
-            new CRow { Code = "01-100", Description = "Grading & Compaction", Category = "Sitework", Vendor = "Hill Country Excavation", POIndex = "PO-001", Qty = 1, Price = 4250.00m },
-            new CRow { Code = "02-210", Description = "Post-Tension Foundation Cables", Category = "Concrete", Vendor = "Austin Concrete Supply", POIndex = "PO-002", Qty = 24, Price = 115.00m },
-            new CRow { Code = "03-310", Description = "2x6 Exterior Wall Studs", Category = "Framing", Vendor = "Lone Star Lumber Co", POIndex = "PO-003", Qty = 450, Price = 8.75m },
-            new CRow { Code = "04-120", Description = "Architectural Shingles 30yr", Category = "Roofing", Vendor = "Summit Building Materials", POIndex = "PO-004", Qty = 65, Price = 34.50m },
-            new CRow { Code = "05-410", Description = "PEX Water Supply Piping", Category = "Plumbing", Vendor = "Capitol Plumbing Supply", POIndex = "PO-005", Qty = 12, Price = 145.00m },
-            new CRow { Code = "06-110", Description = "200A Main Distribution Panel", Category = "Electrical", Vendor = "Apex Electric Dist", POIndex = "PO-006", Qty = 2, Price = 680.00m }
+            new CRow { Code = "HT-110", Description = "Hotel, double room per night", Category = "Hotels", Supplier = "Casa Lumiar Riverside", BookingRef = "BK-2041", Qty = 14, Price = 145.00m },
+            new CRow { Code = "FL-210", Description = "Return flight, economy", Category = "Flights", Supplier = "Tejo Skyline Charters", BookingRef = "BK-2042", Qty = 24, Price = 189.00m },
+            new CRow { Code = "TF-310", Description = "Airport transfer, coach", Category = "Transfers", Supplier = "Alfama Coach Lines", BookingRef = "BK-2043", Qty = 2, Price = 320.00m },
+            new CRow { Code = "TR-410", Description = "Sintra palaces day tour", Category = "Tours", Supplier = "Quinta Azul Day Tours", BookingRef = "BK-2044", Qty = 24, Price = 68.50m },
+            new CRow { Code = "IN-510", Description = "Group travel insurance", Category = "Insurance", Supplier = "Harbourline Travel Cover", BookingRef = "BK-2045", Qty = 24, Price = 34.50m },
+            new CRow { Code = "RL-610", Description = "Rail pass, Lisbon to Porto", Category = "Rail", Supplier = "Ribeira Rail Holidays", BookingRef = "BK-2046", Qty = 24, Price = 42.00m }
         ];
 
         _events.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<CRow>>(this, args => _selected = args.Data?.Code);
@@ -181,8 +182,8 @@
             [
                 new ColumnSpec { Field = nameof(CRow.Code), Header = "Item Code", Width = "90px", Visible = true },
                 new ColumnSpec { Field = nameof(CRow.Description), Header = "Description", Width = "220px", Visible = true },
-                new ColumnSpec { Field = nameof(CRow.Vendor), Header = "Assigned Vendor", Width = "200px", Visible = true },
-                new ColumnSpec { Field = nameof(CRow.POIndex), Header = "PO Index", Width = "100px", Visible = true },
+                new ColumnSpec { Field = nameof(CRow.Supplier), Header = "Supplier", Width = "200px", Visible = true },
+                new ColumnSpec { Field = nameof(CRow.BookingRef), Header = "Booking Ref", Width = "100px", Visible = true },
                 new ColumnSpec { Field = nameof(CRow.Price), Header = "Unit Price", Width = "100px", Visible = true, Editable = true },
                 new ColumnSpec { Field = nameof(CRow.Category), Header = "Category", Width = "120px", Visible = false }
             ],
@@ -235,8 +236,8 @@
     public string Code { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
-    public string Vendor { get; set; } = string.Empty;
-    public string POIndex { get; set; } = string.Empty;
+    public string Supplier { get; set; } = string.Empty;
+    public string BookingRef { get; set; } = string.Empty;
     public decimal Qty { get; set; }
     public decimal Price { get; set; }
     public decimal Total => Qty * Price;
@@ -262,12 +263,12 @@ protected override void OnInitialized()
 {
     _rows =
     [
-        new CRow { Code = ""01-100"", Description = ""Grading & Compaction"", Category = ""Sitework"", Vendor = ""Hill Country Excavation"", POIndex = ""PO-001"", Qty = 1, Price = 4250.00m },
-        new CRow { Code = ""02-210"", Description = ""Post-Tension Foundation Cables"", Category = ""Concrete"", Vendor = ""Austin Concrete Supply"", POIndex = ""PO-002"", Qty = 24, Price = 115.00m },
-        new CRow { Code = ""03-310"", Description = ""2x6 Exterior Wall Studs"", Category = ""Framing"", Vendor = ""Lone Star Lumber Co"", POIndex = ""PO-003"", Qty = 450, Price = 8.75m },
-        new CRow { Code = ""04-120"", Description = ""Architectural Shingles 30yr"", Category = ""Roofing"", Vendor = ""Summit Building Materials"", POIndex = ""PO-004"", Qty = 65, Price = 34.50m },
-        new CRow { Code = ""05-410"", Description = ""PEX Water Supply Piping"", Category = ""Plumbing"", Vendor = ""Capitol Plumbing Supply"", POIndex = ""PO-005"", Qty = 12, Price = 145.00m },
-        new CRow { Code = ""06-110"", Description = ""200A Main Distribution Panel"", Category = ""Electrical"", Vendor = ""Apex Electric Dist"", POIndex = ""PO-006"", Qty = 2, Price = 680.00m }
+        new CRow { Code = ""HT-110"", Description = ""Hotel, double room per night"", Category = ""Hotels"", Supplier = ""Casa Lumiar Riverside"", BookingRef = ""BK-2041"", Qty = 14, Price = 145.00m },
+        new CRow { Code = ""FL-210"", Description = ""Return flight, economy"", Category = ""Flights"", Supplier = ""Tejo Skyline Charters"", BookingRef = ""BK-2042"", Qty = 24, Price = 189.00m },
+        new CRow { Code = ""TF-310"", Description = ""Airport transfer, coach"", Category = ""Transfers"", Supplier = ""Alfama Coach Lines"", BookingRef = ""BK-2043"", Qty = 2, Price = 320.00m },
+        new CRow { Code = ""TR-410"", Description = ""Sintra palaces day tour"", Category = ""Tours"", Supplier = ""Quinta Azul Day Tours"", BookingRef = ""BK-2044"", Qty = 24, Price = 68.50m },
+        new CRow { Code = ""IN-510"", Description = ""Group travel insurance"", Category = ""Insurance"", Supplier = ""Harbourline Travel Cover"", BookingRef = ""BK-2045"", Qty = 24, Price = 34.50m },
+        new CRow { Code = ""RL-610"", Description = ""Rail pass, Lisbon to Porto"", Category = ""Rail"", Supplier = ""Ribeira Rail Holidays"", BookingRef = ""BK-2046"", Qty = 24, Price = 42.00m }
     ];
 
     _events.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<CRow>>(this, args => _selected = args.Data?.Code);
@@ -294,8 +295,8 @@ private static List<ColumnSpec> ColumnsFor(string layoutName)
         [
             new ColumnSpec { Field = nameof(CRow.Code), Header = ""Item Code"", Width = ""90px"", Visible = true },
             new ColumnSpec { Field = nameof(CRow.Description), Header = ""Description"", Width = ""220px"", Visible = true },
-            new ColumnSpec { Field = nameof(CRow.Vendor), Header = ""Assigned Vendor"", Width = ""200px"", Visible = true },
-            new ColumnSpec { Field = nameof(CRow.POIndex), Header = ""PO Index"", Width = ""100px"", Visible = true },
+            new ColumnSpec { Field = nameof(CRow.Supplier), Header = ""Supplier"", Width = ""200px"", Visible = true },
+            new ColumnSpec { Field = nameof(CRow.BookingRef), Header = ""Booking Ref"", Width = ""100px"", Visible = true },
             new ColumnSpec { Field = nameof(CRow.Price), Header = ""Unit Price"", Width = ""100px"", Visible = true, Editable = true },
             new ColumnSpec { Field = nameof(CRow.Category), Header = ""Category"", Width = ""120px"", Visible = false }
         ],

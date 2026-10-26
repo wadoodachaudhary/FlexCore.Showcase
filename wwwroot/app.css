@@ -235,7 +235,7 @@ h1:focus {
 }
 
 
-/* Modal pattern reused from HomeFront's FModelDimensions for the Dialog demo */
+/* Modal pattern for the Dialog demo */
 .modeldim-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.4);
     display: flex; align-items: center; justify-content: center; z-index: 1000;
@@ -620,16 +620,20 @@ h1:focus {
    Its placement is also a fixed screen position taken once, so when the popup grid reveals its current row and the hero grid
    scrolls under it (seen 2026-10-26), the popup is left a row away from its box. CSS anchor positioning ties the open popup to
    its box instead, from the first render (the library's inline top/left are overridden), and flips it when it would leave the
-   window. Browsers without anchor positioning keep the library's placement. */
-@supports (anchor-name: --a) {
+   window. Browsers without anchor positioning (position-area) keep the library's placement. */
+@supports (position-area: bottom) {
     .fx-dropdown-grid.fx-open > .fx-dropdown-grid-input-wrap {
         anchor-name: --fx-dropdown-grid-open;
     }
+    /* position-area, not top/left: the try fallbacks can only flip declarations that are not !important, so the library's inline
+       top/left are cleared with !important and the area itself stays overridable (checked 2026-10-26: at the window's bottom
+       edge the popup now opens upward). */
     .fx-dropdown-grid.fx-open > .fx-dropdown-grid-popup {
         position: fixed !important;
         position-anchor: --fx-dropdown-grid-open;
-        top: anchor(bottom) !important;
-        left: anchor(left) !important;
+        top: auto !important;
+        left: auto !important;
+        position-area: bottom span-right;
         visibility: visible !important;
         position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
     }

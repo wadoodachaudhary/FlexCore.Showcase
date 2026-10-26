@@ -15,7 +15,9 @@ builder.Services.AddScoped<Fx.ControlKit.ZoomService>();
 // Dialog service (confirm / alert / prompt); its host is <DialogHostControl /> in MainLayout. Added 2026-10-12 for /demo/dialog.
 builder.Services.AddScoped<Fx.ControlKit.Dialogs.DialogService>();
 builder.Services.AddScoped<Fx.ControlKit.Dialogs.IDialogService>(sp => sp.GetRequiredService<Fx.ControlKit.Dialogs.DialogService>());
-builder.Services.AddSingleton<BenchDataStore>();
+// Scoped, one store per circuit (2026-10-26): the grid and form pages edit these rows in place, so a shared singleton let one
+// visitor's edits show up for every other visitor until the app restarted.
+builder.Services.AddScoped<BenchDataStore>();
 // Sign-up / question form (2026-10-13): JSON-lines file store; "Signups:Path" overrides the location. Email delivery not wired yet (SC-274).
 builder.Services.Configure<FlexCore.Showcase.Services.Signups.SignupOptions>(builder.Configuration.GetSection("Signups"));
 builder.Services.AddSingleton<FlexCore.Showcase.Services.Signups.ISignupStore, FlexCore.Showcase.Services.Signups.FileSignupStore>();
@@ -36,10 +38,6 @@ builder.Services.AddScoped<IReportViewerSettings, InMemoryReportViewerSettings>(
 builder.Services.AddScoped<IReportPickListProvider, EmptyReportPickListProvider>();
 
 var app = builder.Build();
-
-// Pre-load benchmark store
-var benchData = app.Services.GetRequiredService<BenchDataStore>();
-benchData.Load();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

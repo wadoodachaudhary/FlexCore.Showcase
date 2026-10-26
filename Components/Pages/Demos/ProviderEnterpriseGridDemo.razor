@@ -20,7 +20,7 @@
    Parameter tables are a later pass (SC-278). *@
 
 @* 2026-10-25 (Baaria, SC-344): the search example runs on the operator's rate card (Data/BenchModels.cs RateCardItem,
-   BenchDataStore.RateCard) instead of the estimating items copied from HomeFront. Same provider shape as before: the search
+   BenchDataStore.RateCard) instead of the earlier estimating items. Same provider shape as before: the search
    matches the code, description and supplier; SortItems still sorts by property name; paging and the readout are unchanged.
    Supplier is a new column and the others were narrowed so the eight fit the main column. Code.Search and Code.SearchCs were
    regenerated verbatim; the orders example was not touched. *@
@@ -98,7 +98,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="search" Title="A flat list, searched, sorted and paged by the provider" RazorCode="@Code.Search" CSharpCode="@Code.SearchCs">
-            <Description><p>The rate card is an in-memory list of 5,000 lines synthesized at startup and stands in for a database: each line is one supplier's service at one destination, with the net rate the operator pays. The provider gets every request the grid makes and returns only the range asked for, with the total. Type in the search box and the next request carries <code>SearchText</code>, which this provider matches against the code, description and supplier; sort a column and it carries <code>Sorts</code>; scroll and the grid asks for the next range. The line under the grid describes the last request. Column filters are off because this provider does not translate them.</p></Description>
+            <Description><p>The rate card is an in-memory list of 5,000 lines synthesized for each visitor and stands in for a database: each line is one supplier's service at one destination, with the net rate the operator pays. The provider gets every request the grid makes and returns only the range asked for, with the total. Type in the search box and the next request carries <code>SearchText</code>, which this provider matches against the code, description and supplier; sort a column and it carries <code>Sorts</code>; scroll and the grid asks for the next range. The line under the grid describes the last request. Column filters are off because this provider does not translate them.</p></Description>
             <Demo>
                 <GridControl TValue="RateCardItem"
                              ItemsProvider="LoadItemsAsync"
@@ -379,7 +379,7 @@
     }
 
     // Flat provider (moved here from the On-demand items provider page, 2026-10-20): the rate card is an in-memory list synthesized
-    // at startup and stands in for a database; only the requested range leaves this method.
+    // for each visitor and stands in for a database; only the requested range leaves this method.
     private int _flatRequests;
     private string _flatLast = "Waiting for the first request…";
 
@@ -483,7 +483,7 @@
 </GridControl>
 <p class=""result"">@_flatLast</p>";
         public const string SearchCs = @"// Flat provider (moved here from the On-demand items provider page, 2026-10-20): the rate card is an in-memory list synthesized
-// at startup and stands in for a database; only the requested range leaves this method.
+// for each visitor and stands in for a database; only the requested range leaves this method.
 private int _flatRequests;
 
 private string _flatLast = ""Waiting for the first request…"";

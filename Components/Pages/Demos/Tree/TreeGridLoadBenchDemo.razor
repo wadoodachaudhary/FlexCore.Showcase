@@ -10,7 +10,7 @@
 @* 2026-10-17: moved onto FeatureDemoLayout (row 9 of the Data Grid list) and turned from a "first-load bench" into the plain tree
    grid page the tracker asked for (SC-231). Gone, closing SC-226 to SC-230: the Benchmark button and the timing (the Stopwatch
    only wrapped list construction), the "40 / 180 / 480 nodes" labels (the grid loads 50 / 210 / 540 rows, groups included; the
-   readout now counts them), the no-op Expanded handler (Expanded and Collapsed now feed the readout), "HomeFront's FItems",
+   readout now counts them), the no-op Expanded handler (Expanded and Collapsed now feed the readout), an internal form name,
    "Windows/VB6 folder styles" and the three competing titles. fx-treegrid-dotted-lines stays: it is a Showcase style (wwwroot/app.css:1639),
    not a library one.
    Added: Expand all / Collapse all ButtonControls on the grid's ExpandAllAsync / CollapseAllAsync. Height="100%" became the 440px
@@ -25,7 +25,7 @@
    2026-10-24 (later): three Overview sentences corrected from the source read (EnableCollapseAll vs InitialExpansionPredicate, keyboard
    toggling, ExpandAllAsync/CollapseAllAsync raise no events).
    2026-10-25 (Baaria, SC-344): the load bench runs on suppliers and their services (Data/BenchModels.cs, the node class) instead of
-   the node shape and cost divisions copied from HomeFront's items tree. *@
+   the earlier node shape and cost divisions. *@
 
 <PageTitle>Tree grid — FlexCore Showcase</PageTitle>
 

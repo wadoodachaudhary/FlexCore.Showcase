@@ -12,7 +12,8 @@
    defaults. Now: one example with a three-way switch (scroll, 25 per page, 100 per page), the same two timings as 50k rows,
    the edit count from OnCellSave and the page from PageChanged. Facts checked against GridControl.razor.cs (PageSize, PageSizes,
    AllowPaging, BatchEditBehavior, GoToPageAsync), GridControl.PresentationFeatures.cs (PagerPosition), GridControlEvents.cs and
-   GridModels.cs (PageChangeEventArgs). *@
+   GridModels.cs (PageChangeEventArgs).
+   2026-10-26 (Baaria): sample data moved to the travel theme *@
 
 <PageTitle>Scroll vs paging — FlexCore Showcase</PageTitle>
 
@@ -68,7 +69,7 @@
                         <GridColumn Field="@nameof(VRow.Qty)" HeaderText="Quantity" Width="95px" Type="ColumnType.Number" TextAlign="TextAlign.Right" SelectAllOnEdit="true" />
                         <GridColumn Field="@nameof(VRow.Price)" HeaderText="Unit Price" Width="110px" Type="ColumnType.Number" Format="N2" TextAlign="TextAlign.Right" SelectAllOnEdit="true" />
                         <GridColumn Field="@nameof(VRow.Total)" HeaderText="Total Cost" Width="120px" Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" AllowEditing="false" />
-                        <GridColumn Field="@nameof(VRow.InStock)" HeaderText="In Stock" Width="85px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
+                        <GridColumn Field="@nameof(VRow.Available)" HeaderText="Available" Width="85px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
                     </GridColumnsBase>
                 </GridControl>
                 <p class="result">@Summary</p>
@@ -113,7 +114,7 @@
         public decimal Qty { get; set; }
         public decimal Price { get; set; }
         public decimal Total => Qty * Price;
-        public bool InStock { get; set; }
+        public bool Available { get; set; }
     }
 
     private readonly SelectionItem[] _modeItems = { new("scroll", "Scroll"), new("page25", "25 per page"), new("page100", "100 per page") };
@@ -153,7 +154,7 @@
         _events.PageChanged = EventCallback.Factory.Create<PageChangeEventArgs>(this, e => { _page = e.CurrentPage; StateHasChanged(); });
 
         var sw = Stopwatch.StartNew();
-        var categories = new[] { "Structural", "Mechanical", "Electrical", "Finishing", "Plumbing", "Masonry" };
+        var categories = new[] { "Hotel", "Flight", "Tour", "Transfer", "Cruise", "Rail" };
         var rand = new Random(101);
         var list = new List<VRow>(1000);
         for (var i = 1; i <= 1000; i++)
@@ -161,8 +162,8 @@
             var cat = categories[i % categories.Length];
             list.Add(new VRow
             {
-                Code = $"V-{i:D4}", Description = $"{cat} Material Component #{i}", Category = cat,
-                Qty = rand.Next(1, 150), Price = Math.Round((decimal)(rand.NextDouble() * 320 + 8.5), 2), InStock = i % 3 != 0,
+                Code = $"V-{i:D4}", Description = $"{cat} service #{i}", Category = cat,
+                Qty = rand.Next(1, 150), Price = Math.Round((decimal)(rand.NextDouble() * 320 + 8.5), 2), Available = i % 3 != 0,
             });
         }
         _rows = list;
@@ -258,7 +259,7 @@
         <GridColumn Field=""@nameof(VRow.Qty)"" HeaderText=""Quantity"" Width=""95px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" SelectAllOnEdit=""true"" />
         <GridColumn Field=""@nameof(VRow.Price)"" HeaderText=""Unit Price"" Width=""110px"" Type=""ColumnType.Number"" Format=""N2"" TextAlign=""TextAlign.Right"" SelectAllOnEdit=""true"" />
         <GridColumn Field=""@nameof(VRow.Total)"" HeaderText=""Total Cost"" Width=""120px"" Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(VRow.InStock)"" HeaderText=""In Stock"" Width=""85px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" />
+        <GridColumn Field=""@nameof(VRow.Available)"" HeaderText=""Available"" Width=""85px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" />
     </GridColumnsBase>
 </GridControl>
 <p class=""result"">@Summary</p>";
@@ -270,7 +271,7 @@
     public decimal Qty { get; set; }
     public decimal Price { get; set; }
     public decimal Total => Qty * Price;
-    public bool InStock { get; set; }
+    public bool Available { get; set; }
 }
 
 private readonly SelectionItem[] _modeItems = { new(""scroll"", ""Scroll""), new(""page25"", ""25 per page""), new(""page100"", ""100 per page"") };
@@ -321,7 +322,7 @@ protected override void OnInitialized()
     _events.PageChanged = EventCallback.Factory.Create<PageChangeEventArgs>(this, e => { _page = e.CurrentPage; StateHasChanged(); });
 
     var sw = Stopwatch.StartNew();
-    var categories = new[] { ""Structural"", ""Mechanical"", ""Electrical"", ""Finishing"", ""Plumbing"", ""Masonry"" };
+    var categories = new[] { ""Hotel"", ""Flight"", ""Tour"", ""Transfer"", ""Cruise"", ""Rail"" };
     var rand = new Random(101);
     var list = new List<VRow>(1000);
     for (var i = 1; i <= 1000; i++)
@@ -329,8 +330,8 @@ protected override void OnInitialized()
         var cat = categories[i % categories.Length];
         list.Add(new VRow
         {
-            Code = $""V-{i:D4}"", Description = $""{cat} Material Component #{i}"", Category = cat,
-            Qty = rand.Next(1, 150), Price = Math.Round((decimal)(rand.NextDouble() * 320 + 8.5), 2), InStock = i % 3 != 0,
+            Code = $""V-{i:D4}"", Description = $""{cat} service #{i}"", Category = cat,
+            Qty = rand.Next(1, 150), Price = Math.Round((decimal)(rand.NextDouble() * 320 + 8.5), 2), Available = i % 3 != 0,
         });
     }
     _rows = list;

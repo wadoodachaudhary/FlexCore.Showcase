@@ -9,7 +9,7 @@
 
 @* 2026-10-18: moved onto FeatureDemoLayout (Saturday list). Same report, same auto-run on first paint. Changes, closing SC-220 to
    SC-223 and SC-225: the copy says four group levels (the XML defines Community, Model, Group and Phase; the old intro said four
-   and the bullet list said three); "HomeFront's real Crystal Report", "@DivisionID" and the stub class names left the copy, which
+   and the bullet list said three); the "real production report" claim, "@DivisionID" and the stub class names left the copy, which
    now says what the control does before how this page wires it; the logger and its typo went; title, h1 and menu label all read
    "Report writer". The model and community pickers are DropDownListControls and Run is a ButtonControl; the inline <style> block
    became a scoped stylesheet.
@@ -18,7 +18,7 @@
    checked with scratchpad/vocabcheck.py. ShowReportAsync seeds a literal "DivisionID" from the session context (lines ~1317 and ~1549),
    a host name inside the library; noted in SC-253.
    2026-10-25 (Baaria, SC-344): the report is a tour operator's Package Cost Sheet (wwwroot/reports/Package Cost Sheet.xml, data from
-   Data/TravelData.cs through Services/ShowcaseReportDataExecutor.cs). It replaced a cut-down copy of a HomeFront Crystal report. Same
+   Data/TravelData.cs through Services/ShowcaseReportDataExecutor.cs). It replaced an earlier cut-down cost report. Same
    shape: four group levels with a sum in every footer; new: a grand total in the report footer (the loader's GrandTotals). The page
    file moved from ModelCostsDemo to PackageCostsDemo and the old address is kept as an alias.
    2026-10-25 (catalog audit SC-345): the page loads through ShowReportAsync with Package and Season as seeds instead of ShowXmlReport.
@@ -43,7 +43,7 @@
 
     <Examples>
         <DemoExample Id="report" Title="Package costs by region, package, cost group and supplier" RazorCode="@Code.Report" CSharpCode="@Code.ReportCs">
-            <Description><p>The bundled XML is a tour operator's cost sheet: four group levels (region, package, cost group, supplier), a sum in every group footer and a grand total at the end. Pick a package and a departure season and press Run; the report loads on arrival too. This site's data executor ignores the SQL in the definition and synthesises the supplier lines for the chosen package and season, so every choice returns a report. Press <strong>Parameters</strong> in the report's toolbar and the writer opens its own parameter dialog with the packages and seasons the XML lists; it reruns the report with what you pick there (the two pickers above belong to this page and do not follow the dialog). Open the group tree on the left to jump between groups, or search the report text from the toolbar.</p></Description>
+            <Description><p>The bundled XML is a tour operator's cost sheet: four group levels (region, package, cost group, supplier), a sum in the package, cost group and supplier footers and a grand total at the end. Pick a package and a departure season and press Run; the report loads on arrival too. This site's data executor ignores the SQL in the definition and synthesises the supplier lines for the chosen package and season, so every choice returns a report. Press <strong>Parameters</strong> in the report's toolbar and the writer opens its own parameter dialog with the packages and seasons the XML lists; it reruns the report with what you pick there (the two pickers above belong to this page and do not follow the dialog). Open the group tree on the left to jump between groups, or search the report text from the toolbar.</p></Description>
             <Controls>
                 <DropDownListControl TItem="string" TValue="string" DataSource="@_packages" @bind-Value="_package" AriaLabel="Package" Width="210px" />
                 <DropDownListControl TItem="string" TValue="string" DataSource="@_seasons" @bind-Value="_season" AriaLabel="Season" Width="120px" />

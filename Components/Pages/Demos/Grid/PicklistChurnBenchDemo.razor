@@ -9,7 +9,7 @@
 
 @* 2026-10-17: moved onto FeatureDemoLayout (row 8 of the Data Grid list) and made to match its menu label. The old page bound
    ExpandoObject rows to five fixed columns and dressed that as a "modal opening benchmark" with typed-in numbers (SC-022, SC-159,
-   SC-160, SC-162); all of that went, with the "PickList"/"FPickList"/"HomeFront" names (SC-161) and the unused @ref (SC-163). Now
+   SC-160, SC-162); all of that went, with the old internal names (SC-161) and the unused @ref (SC-163). Now
    the columns are read from the keys of the first row, a switch adds a field to every row so a column appears, and the row count
    is a ButtonGroupControl. Column-set changes go through the grid's SuspendRedraw scope with the columns keyed by field (see
    SC-298 for why). Parameter tables are a later pass (SC-278).
@@ -21,7 +21,8 @@
    Grid/GridControl.ColumnFeatures.cs (AutoGenerateColumns, AvailableColumns fallback, ColumnHeaderBands) and the ColumnType read
    sites in Grid/GridControl.Filtering.cs, Grid/GridControl.RowEditing.cs and Grid/GridControl.MultiSort.cs. Column, Grid and
    Methods rows checked with scratchpad/vocabcheck.py; the ColumnType members and the row-shape rows by grep, which the script
-   cannot parse. The Vocab class moved below the Code class to match the other pages. *@
+   cannot parse. The Vocab class moved below the Code class to match the other pages. 
+   2026-10-26 (Baaria): sample groups moved to the travel theme (Flights, Hotels, Tours, Transfers, Insurance); the annotated rows are travel packages. *@
 
 <PageTitle>Dynamic columns — FlexCore Showcase</PageTitle>
 
@@ -187,7 +188,7 @@
 
     private static List<ExpandoObject> BuildRows(int count, bool leadTime)
     {
-        var groups = new[] { "General", "Architectural", "Structural", "MEP", "Site" };
+        var groups = new[] { "Flights", "Hotels", "Tours", "Transfers", "Insurance" };
         var rand = new Random(55);
         var list = new List<ExpandoObject>(count);
         for (int i = 1; i <= count; i++)
@@ -253,7 +254,7 @@
             var price = 15.50m + (i % 25) * 4.25m;
             return new AnnotatedGridItem
             {
-                Id = i, Code = $"SKU-{i:D5}", Description = $"Material Item #{i}",
+                Id = i, Code = $"SKU-{i:D5}", Description = $"Travel package #{i}",
                 UnitPrice = price, Total = (10 + (i * 7) % 150) * price, InternalCode = $"INTERNAL-{i}"
             };
         }).ToList();
@@ -327,7 +328,7 @@ private static List<AnnotatedGridItem> BuildAnnotated() =>
         var price = 15.50m + (i % 25) * 4.25m;
         return new AnnotatedGridItem
         {
-            Id = i, Code = $""SKU-{i:D5}"", Description = $""Material Item #{i}"",
+            Id = i, Code = $""SKU-{i:D5}"", Description = $""Travel package #{i}"",
             UnitPrice = price, Total = (10 + (i * 7) % 150) * price, InternalCode = $""INTERNAL-{i}""
         };
     }).ToList();";
@@ -377,7 +378,7 @@ private async Task ReloadAsync()
 
 private static List<ExpandoObject> BuildRows(int count, bool leadTime)
 {
-    var groups = new[] { ""General"", ""Architectural"", ""Structural"", ""MEP"", ""Site"" };
+    var groups = new[] { ""Flights"", ""Hotels"", ""Tours"", ""Transfers"", ""Insurance"" };
     var rand = new Random(55);
     var list = new List<ExpandoObject>(count);
     for (int i = 1; i <= count; i++)
