@@ -25,7 +25,10 @@
    2026-10-24 (later): three Overview sentences corrected from the source read (EnableCollapseAll vs InitialExpansionPredicate, keyboard
    toggling, ExpandAllAsync/CollapseAllAsync raise no events).
    2026-10-25 (Baaria, SC-344): the load bench runs on suppliers and their services (Data/BenchModels.cs, the node class) instead of
-   the earlier node shape and cost divisions. *@
+   the earlier node shape and cost divisions.
+   2026-10-26: the first example became the OurAirports data (Data/AirportData.cs): six continents in the list, and countries,
+   airports and runways from LoadChildren as rows open, which the page had not shown before. The suppliers, the size buttons and
+   Expand all went with it (ExpandAllAsync opens only rows whose children are loaded, so it would load one level per click). *@
 
 <PageTitle>Tree grid — FlexCore Showcase</PageTitle>
 
@@ -44,40 +47,35 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="tree" Title="Suppliers and their services" RazorCode="@Code.Tree" CSharpCode="@Code.TreeCs">
-            <Description><p>Each supplier is a root row and the services it sells are its children, all in one flat list; the suppliers are named from the operator's destinations (Hotel Lisbon Central, Lisbon Walks). A service row shows its unit, net rate and bookings, a supplier row its category, service count and bookings total. Click a plus to open a supplier, or use Expand all. Change the size to rebuild the list with more suppliers and services; the line under the grid counts the rows the grid received and names the last node you opened or closed.</p></Description>
+        <DemoExample Id="airports" Title="4,009 airports, loaded as you open them" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs">
+            <Description><p>The airports from the <a href="demo/grid#airports">Data Grid</a> page as continent, country, airport and runway. Only the six continents are in <code>DataSource</code>; <code>TreatAsParent</code> marks the continents, countries and airports with runways as expandable, and <code>LoadChildren</code> returns a row's children the first time it opens, so a visitor who opens Portugal loads Portugal's nineteen airports and nothing else. Europe opens on load through <code>InitialExpansionPredicate</code>. Group rows count their airports and open runways and give the longest; a runway row gives its own length, surface and whether it is lighted. Click a header to sort; each level sorts within its parent. The line under the grid counts the rows loaded so far.</p></Description>
             <Controls>
-                <ButtonGroupControl Items="_sizes" Values="@(new[] { _supplierCount.ToString() })"
-                                    ValuesChanged="@(v => SetScale(v.Count > 0 ? int.Parse(v[0]) : 10))"
-                                    Selection="ChoiceSelectionMode.Single" AriaLabel="Tree size" />
-                <ButtonControl CssClass="btn-sm" OnClick="@(() => _tree?.ExpandAllAsync() ?? Task.CompletedTask)">Expand all</ButtonControl>
-                <ButtonControl CssClass="btn-sm" OnClick="@(() => _tree?.CollapseAllAsync() ?? Task.CompletedTask)">Collapse all</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="@(() => _places?.CollapseAllAsync() ?? Task.CompletedTask)">Collapse all</ButtonControl>
             </Controls>
             <Demo>
-                <TreeGridControl @ref="_tree"
-                                 @key="_treeGeneration"
-                                 TValue="SupplierNode"
-                                 DataSource="@_treeNodes"
+                <TreeGridControl @ref="_places"
+                                 TValue="Place"
+                                 DataSource="@_continents"
                                  IdMapping="Id"
                                  ParentIdMapping="ParentId"
                                  TreeColumnIndex="0"
+                                 TreatAsParent="@(p => p.Level < 2 || (p.Level == 2 && p.Runways > 0))"
+                                 LoadChildren="LoadPlacesAsync"
                                  EnableCollapseAll="true"
+                                 InitialExpansionPredicate="@(p => p.Name == "Europe")"
+                                 AllowSorting="true"
                                  AllowSelection="true"
-                                 ToggleOnRowClick="false"
                                  Height="440px"
-                                 CssClass="fx-treegrid-compact fx-treegrid-yellow-folder fx-treegrid-dotted-lines"
-                                 NodeExpandIconStyle="GroupExpandIconStyle.PlusMinus"
-                                 TreatAsParent="TreatAsParent"
-                                 Expanded="@(a => _last = $"opened {a.Data?.Name} (level {a.Level})")"
-                                 Collapsed="@(a => _last = $"closed {a.Data?.Name} (level {a.Level})")">
-                    <TreeGridColumn Field="Name" HeaderText="Supplier and service" Width="340px" />
-                    <TreeGridColumn Field="Category" HeaderText="Category" Width="130px" />
-                    <TreeGridColumn Field="ServiceCount" HeaderText="Services" Width="90px" TextAlign="TextAlign.Center" />
-                    <TreeGridColumn Field="Unit" HeaderText="Unit" Width="70px" TextAlign="TextAlign.Center" />
-                    <TreeGridColumn Field="Rate" HeaderText="Rate" Width="120px" TextAlign="TextAlign.Right" Format="$#,##0.00" />
-                    <TreeGridColumn Field="Bookings" HeaderText="Bookings" Width="100px" TextAlign="TextAlign.Right" />
+                                 Expanded="@(a => _last = $"opened {a.Data?.Name}")"
+                                 Collapsed="@(a => _last = $"closed {a.Data?.Name}")">
+                    <TreeGridColumn Field="@nameof(Place.Name)" HeaderText="Place" Width="340px" />
+                    <TreeGridColumn Field="@nameof(Place.Detail)" HeaderText="Type or surface" Width="150px" />
+                    <TreeGridColumn Field="@nameof(Place.Airports)" HeaderText="Airports" Width="80px" TextAlign="TextAlign.Right" Format="N0" />
+                    <TreeGridColumn Field="@nameof(Place.Runways)" HeaderText="Runways" Width="80px" TextAlign="TextAlign.Right" Format="N0" />
+                    <TreeGridColumn Field="@nameof(Place.LongestRunwayFt)" HeaderText="Longest runway (ft)" Width="140px" TextAlign="TextAlign.Right" Format="N0" />
+                    <TreeGridColumn Field="@nameof(Place.ElevationFt)" HeaderText="Elevation (ft)" Width="110px" TextAlign="TextAlign.Right" Format="N0" />
                 </TreeGridControl>
-                <p class="result">@_treeNodes.Count rows: @_supplierCount suppliers with @_servicesPerSupplier services each@(_last is null ? "" : $" · last {_last}")</p>
+                <p class="result">@_loaded.ToString("N0") of @_total.ToString("N0") rows loaded@(_last is null ? "" : $" · last {_last}")</p>
             </Demo>
         </DemoExample>
         <DemoExample Id="org" Title="Org chart: who reports to whom" RazorCode="@Code.Org" CSharpCode="@Code.OrgCs">
@@ -215,175 +213,52 @@
 </FeatureDemoLayout>
 
 @code {
-    private readonly SelectionItem[] _sizes = { new("10", "Small"), new("30", "Medium"), new("60", "Large") };
-    private TreeGridControl<SupplierNode>? _tree;
-    private List<SupplierNode> _treeNodes = [];
-    private int _supplierCount = 10;
-    private int _servicesPerSupplier = 4;
-    private int _treeGeneration = 1;   // @key: a new value remounts the tree grid when the list is rebuilt
+    // Airports: the six continents are the whole DataSource; LoadChildren supplies the rest a level at a time.
+    // A row's Id is its path, "Europe|PT|LIS|03/21", so the loader can tell from it what to return.
+    private TreeGridControl<Place>? _places;
+    private readonly List<Place> _continents = AirportData.Airports
+        .GroupBy(a => a.Continent)
+        .OrderBy(g => g.Key)
+        .Select(g => Group(g.Key, null, g.Key, g))
+        .ToList();
+    private int _loaded = 6;
+    private readonly int _total = 6 + AirportData.Airports.Select(a => (a.Continent, a.CountryCode)).Distinct().Count()
+        + AirportData.Airports.Count + AirportData.Airports.Sum(a => a.Runways);
     private string? _last;
 
-    // Supplier name patterns ({0} takes a destination city from TravelData.Destinations), the category each belongs to and the
-    // services it sells: description, unit and the band its net rate is drawn from. Eight services each, so the Large size repeats none.
-    private static readonly (string Pattern, string Category, (string Description, string Unit, int Low, int High)[] Services)[] _catalog =
+    private Task<IReadOnlyList<Place>> LoadPlacesAsync(Place parent, CancellationToken token)
     {
-        ("Hotel {0} Central", "Accommodation", new[]
+        var path = parent.Id.Split('|');
+        IReadOnlyList<Place> children = path.Length switch
         {
-            ("Double room with breakfast", "night", 110, 260),
-            ("Twin room, room only", "night", 90, 220),
-            ("Suite with breakfast", "night", 240, 480),
-            ("Single room with breakfast", "night", 85, 190),
-            ("Family room, two adults and two children", "night", 160, 340),
-            ("Half board supplement", "night", 30, 60),
-            ("Late checkout on departure day", "stay", 30, 60),
-            ("Airport pickup arranged by the hotel", "trip", 40, 80),
-        }),
-        ("{0} Boutique Stays", "Accommodation", new[]
-        {
-            ("Double room with breakfast", "night", 130, 290),
-            ("Garden suite", "night", 210, 420),
-            ("Rooftop room with terrace", "night", 180, 360),
-            ("Room upgrade, view side", "night", 40, 90),
-            ("Breakfast in the room", "stay", 15, 30),
-            ("Late checkout on departure day", "stay", 30, 60),
-            ("Cot and high chair", "stay", 0, 15),
-            ("Whole house, four bedrooms", "night", 650, 1200),
-        }),
-        ("{0} Airport Transfers", "Transport", new[]
-        {
-            ("Airport to hotel, private car", "trip", 45, 90),
-            ("Hotel to airport, private car", "trip", 45, 90),
-            ("Airport to hotel, minivan for six", "trip", 70, 130),
-            ("Hotel to airport, minivan for six", "trip", 70, 130),
-            ("Rail station to hotel, private car", "trip", 35, 70),
-            ("Shared shuttle", "pax", 18, 30),
-            ("Child seat", "trip", 5, 12),
-            ("Waiting time beyond one hour", "hour", 20, 40),
-        }),
-        ("{0} Rail & Coach", "Transport", new[]
-        {
-            ("Day-trip coach with driver", "day", 120, 260),
-            ("Minibus with driver, half day", "trip", 160, 300),
-            ("Regional rail pass, 3 days", "pax", 90, 180),
-            ("Intercity rail, second class", "pax", 25, 80),
-            ("Intercity rail, first class", "pax", 45, 140),
-            ("Coach seat, scheduled service", "pax", 15, 40),
-            ("Car hire, compact", "day", 35, 70),
-            ("Car hire, estate", "day", 55, 110),
-        }),
-        ("{0} Walks", "Experiences", new[]
-        {
-            ("Old town walking tour", "pax", 25, 45),
-            ("Evening food tour", "pax", 65, 110),
-            ("Street art walk", "pax", 20, 40),
-            ("Markets at dawn walk", "pax", 30, 50),
-            ("History walk with museum entry", "pax", 35, 70),
-            ("Night photography walk", "pax", 40, 75),
-            ("Hills and viewpoints hike", "pax", 35, 60),
-            ("Private walking tour", "group", 150, 280),
-        }),
-        ("{0} Day Tours", "Experiences", new[]
-        {
-            ("Full-day excursion with lunch", "pax", 80, 160),
-            ("Half-day coach tour", "pax", 40, 85),
-            ("Countryside day trip with tastings", "pax", 95, 180),
-            ("Coastal villages tour", "pax", 70, 140),
-            ("Sunset boat trip", "pax", 45, 95),
-            ("Entrance tickets", "pax", 18, 40),
-            ("Two-day tour with overnight stay", "pax", 220, 420),
-            ("Private day tour, car and driver", "day", 260, 480),
-        }),
-        ("Taste of {0}", "Experiences", new[]
-        {
-            ("Cooking class with market visit", "pax", 70, 120),
-            ("Wine tasting with transfer", "pax", 60, 120),
-            ("Tasting menu dinner", "pax", 85, 160),
-            ("Street food crawl", "pax", 45, 80),
-            ("Pastry workshop", "pax", 50, 90),
-            ("Craft beer tasting", "pax", 35, 65),
-            ("Farm lunch with producer visit", "pax", 75, 130),
-            ("Private chef dinner at the villa", "group", 350, 650),
-        }),
-        ("{0} Guide Co-op", "Services", new[]
-        {
-            ("Private guide, full day", "day", 180, 320),
-            ("Private guide, half day", "day", 110, 190),
-            ("Driver-guide with car, full day", "day", 260, 460),
-            ("Guide for a group of twenty", "day", 320, 520),
-            ("Interpreter for a day", "day", 150, 280),
-            ("Airport meet and greet", "pax", 25, 45),
-            ("Restaurant bookings", "stay", 10, 25),
-            ("Luggage forwarding", "bag", 15, 35),
-        }),
-    };
-
-    protected override void OnInitialized()
-    {
-        GenerateTree();
+            1 => AirportData.Airports.Where(a => a.Continent == path[0])
+                    .GroupBy(a => (a.CountryCode, a.Country))
+                    .OrderBy(g => g.Key.Country)
+                    .Select(g => Group($"{parent.Id}|{g.Key.CountryCode}", parent.Id, g.Key.Country, g))
+                    .ToList(),
+            2 => AirportData.Airports.Where(a => a.Continent == path[0] && a.CountryCode == path[1])
+                    .OrderBy(a => a.Type).ThenBy(a => a.Code)
+                    .Select(a => new Place($"{parent.Id}|{a.Code}", parent.Id, $"{a.Code} · {a.Name}", $"{a.Type} airport",
+                        null, a.Runways, a.LongestRunwayFt, a.ElevationFt))
+                    .ToList(),
+            _ => AirportData.RunwaysOf(path[2]).Where(r => !r.Closed)
+                    .OrderByDescending(r => r.LengthFt)
+                    .Select(r => new Place($"{parent.Id}|{r.Name}", parent.Id, $"Runway {r.Name}",
+                        r.Lighted ? $"{r.Surface}, lighted" : r.Surface, null, null, r.LengthFt, null))
+                    .ToList()
+        };
+        _loaded += children.Count;
+        return Task.FromResult(children);
     }
 
-    private void SetScale(int suppliers)
+    private static Place Group(string id, string? parentId, string name, IEnumerable<Airport> airports) =>
+        new(id, parentId, name, "", airports.Count(), airports.Sum(a => a.Runways), airports.Max(a => a.LongestRunwayFt), null);
+
+    private sealed record Place(string Id, string? ParentId, string Name, string Detail,
+        int? Airports, int? Runways, int? LongestRunwayFt, int? ElevationFt)
     {
-        _supplierCount = suppliers;
-        _servicesPerSupplier = suppliers switch { 30 => 6, 60 => 8, _ => 4 };
-        _last = null;
-        GenerateTree();
+        public int Level => Id.Count(c => c == '|');
     }
-
-    // Supplier s takes pattern s % 8 and the city s / 8, so the first eight suppliers are Lisbon's, the next eight Amalfi's, and
-    // sixty are distinct. The seed fixes the rates and bookings, so a size gives the same list on every rebuild.
-    private void GenerateTree()
-    {
-        var list = new List<SupplierNode>();
-        var rand = new Random(33);
-
-        for (int s = 0; s < _supplierCount; s++)
-        {
-            var city = TravelData.Destinations[(s / _catalog.Length) % TravelData.Destinations.Length].City;
-            var (pattern, category, services) = _catalog[s % _catalog.Length];
-            var supplierId = $"S-{s + 1:D3}";
-            var bookings = 0;
-
-            var serviceNodes = new List<SupplierNode>();
-            for (int v = 0; v < _servicesPerSupplier; v++)
-            {
-                var (description, unit, low, high) = services[v % services.Length];
-                var booked = rand.Next(0, 80);
-                bookings += booked;
-                serviceNodes.Add(new SupplierNode
-                {
-                    Id = $"{supplierId}-{v + 1:D2}",
-                    ParentId = supplierId,
-                    Name = description,
-                    Category = category,
-                    Level = 2,
-                    IsSupplier = false,
-                    Unit = unit,
-                    Rate = Math.Round(low + (decimal)rand.NextDouble() * (high - low), 2),
-                    Bookings = booked
-                });
-            }
-
-            list.Add(new SupplierNode
-            {
-                Id = supplierId,
-                ParentId = null,
-                Name = string.Format(pattern, city),
-                Category = category,
-                Level = 1,
-                IsSupplier = true,
-                ServiceCount = _servicesPerSupplier,
-                Bookings = bookings
-            });
-
-            list.AddRange(serviceNodes);
-        }
-
-        _treeNodes = list;
-        _treeGeneration++;
-    }
-
-    private bool TreatAsParent(SupplierNode node) => node.IsSupplier;
 
     // Org chart (moved here from Four scenarios, 2026-10-23): a department filter keeps the manager chain so the tree stays rooted.
     private readonly List<EmployeeRow> _people = BenchDataStore.GetHrHierarchy();
@@ -416,8 +291,7 @@
         _orgGeneration++;
     }
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed); the C# tab also carries
-    // SupplierNode from Data/BenchModels.cs.
+    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
     private static class Code
     {
         public const string Org = @"<ButtonGroupControl Items=""_deptItems"" Values=""@(new[] { _dept })"" ValuesChanged=""ShowDepartment"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Department"" />
@@ -504,223 +378,77 @@ public sealed class EmployeeRow
     public int SubordinatesCount { get; set; }
     public bool IsManager => SubordinatesCount > 0;
 }";
-        public const string Tree = @"<TreeGridControl @ref=""_tree""
-                 @key=""_treeGeneration""
-                 TValue=""SupplierNode""
-                 DataSource=""@_treeNodes""
+        public const string Airports = @"<TreeGridControl @ref=""_places""
+                 TValue=""Place""
+                 DataSource=""@_continents""
                  IdMapping=""Id""
                  ParentIdMapping=""ParentId""
                  TreeColumnIndex=""0""
+                 TreatAsParent=""@(p => p.Level < 2 || (p.Level == 2 && p.Runways > 0))""
+                 LoadChildren=""LoadPlacesAsync""
                  EnableCollapseAll=""true""
+                 InitialExpansionPredicate=""@(p => p.Name == ""Europe"")""
+                 AllowSorting=""true""
                  AllowSelection=""true""
-                 ToggleOnRowClick=""false""
                  Height=""440px""
-                 CssClass=""fx-treegrid-compact fx-treegrid-yellow-folder fx-treegrid-dotted-lines""
-                 NodeExpandIconStyle=""GroupExpandIconStyle.PlusMinus""
-                 TreatAsParent=""TreatAsParent""
-                 Expanded=""@(a => _last = $""opened {a.Data?.Name} (level {a.Level})"")""
-                 Collapsed=""@(a => _last = $""closed {a.Data?.Name} (level {a.Level})"")"">
-    <TreeGridColumn Field=""Name"" HeaderText=""Supplier and service"" Width=""340px"" />
-    <TreeGridColumn Field=""Category"" HeaderText=""Category"" Width=""130px"" />
-    <TreeGridColumn Field=""ServiceCount"" HeaderText=""Services"" Width=""90px"" TextAlign=""TextAlign.Center"" />
-    <TreeGridColumn Field=""Unit"" HeaderText=""Unit"" Width=""70px"" TextAlign=""TextAlign.Center"" />
-    <TreeGridColumn Field=""Rate"" HeaderText=""Rate"" Width=""120px"" TextAlign=""TextAlign.Right"" Format=""$#,##0.00"" />
-    <TreeGridColumn Field=""Bookings"" HeaderText=""Bookings"" Width=""100px"" TextAlign=""TextAlign.Right"" />
+                 Expanded=""@(a => _last = $""opened {a.Data?.Name}"")""
+                 Collapsed=""@(a => _last = $""closed {a.Data?.Name}"")"">
+    <TreeGridColumn Field=""@nameof(Place.Name)"" HeaderText=""Place"" Width=""340px"" />
+    <TreeGridColumn Field=""@nameof(Place.Detail)"" HeaderText=""Type or surface"" Width=""150px"" />
+    <TreeGridColumn Field=""@nameof(Place.Airports)"" HeaderText=""Airports"" Width=""80px"" TextAlign=""TextAlign.Right"" Format=""N0"" />
+    <TreeGridColumn Field=""@nameof(Place.Runways)"" HeaderText=""Runways"" Width=""80px"" TextAlign=""TextAlign.Right"" Format=""N0"" />
+    <TreeGridColumn Field=""@nameof(Place.LongestRunwayFt)"" HeaderText=""Longest runway (ft)"" Width=""140px"" TextAlign=""TextAlign.Right"" Format=""N0"" />
+    <TreeGridColumn Field=""@nameof(Place.ElevationFt)"" HeaderText=""Elevation (ft)"" Width=""110px"" TextAlign=""TextAlign.Right"" Format=""N0"" />
 </TreeGridControl>
-<p class=""result"">@_treeNodes.Count rows: @_supplierCount suppliers with @_servicesPerSupplier services each@(_last is null ? """" : $"" · last {_last}"")</p>";
-        public const string TreeCs = @"private readonly SelectionItem[] _sizes = { new(""10"", ""Small""), new(""30"", ""Medium""), new(""60"", ""Large"") };
-
-private TreeGridControl<SupplierNode>? _tree;
-
-private List<SupplierNode> _treeNodes = [];
-
-private int _supplierCount = 10;
-
-private int _servicesPerSupplier = 4;
-
-private int _treeGeneration = 1;   // @key: a new value remounts the tree grid when the list is rebuilt
+<p class=""result"">@_loaded.ToString(""N0"") of @_total.ToString(""N0"") rows loaded@(_last is null ? """" : $"" · last {_last}"")</p>";
+        public const string AirportsCs = @"// Airports: the six continents are the whole DataSource; LoadChildren supplies the rest a level at a time.
+// A row's Id is its path, ""Europe|PT|LIS|03/21"", so the loader can tell from it what to return.
+private TreeGridControl<Place>? _places;
+private readonly List<Place> _continents = AirportData.Airports
+    .GroupBy(a => a.Continent)
+    .OrderBy(g => g.Key)
+    .Select(g => Group(g.Key, null, g.Key, g))
+    .ToList();
+private int _loaded = 6;
+private readonly int _total = 6 + AirportData.Airports.Select(a => (a.Continent, a.CountryCode)).Distinct().Count()
+    + AirportData.Airports.Count + AirportData.Airports.Sum(a => a.Runways);
 private string? _last;
 
-// Supplier name patterns ({0} takes a destination city from TravelData.Destinations), the category each belongs to and the
-// services it sells: description, unit and the band its net rate is drawn from. Eight services each, so the Large size repeats none.
-private static readonly (string Pattern, string Category, (string Description, string Unit, int Low, int High)[] Services)[] _catalog =
+private Task<IReadOnlyList<Place>> LoadPlacesAsync(Place parent, CancellationToken token)
 {
-    (""Hotel {0} Central"", ""Accommodation"", new[]
+    var path = parent.Id.Split('|');
+    IReadOnlyList<Place> children = path.Length switch
     {
-        (""Double room with breakfast"", ""night"", 110, 260),
-        (""Twin room, room only"", ""night"", 90, 220),
-        (""Suite with breakfast"", ""night"", 240, 480),
-        (""Single room with breakfast"", ""night"", 85, 190),
-        (""Family room, two adults and two children"", ""night"", 160, 340),
-        (""Half board supplement"", ""night"", 30, 60),
-        (""Late checkout on departure day"", ""stay"", 30, 60),
-        (""Airport pickup arranged by the hotel"", ""trip"", 40, 80),
-    }),
-    (""{0} Boutique Stays"", ""Accommodation"", new[]
-    {
-        (""Double room with breakfast"", ""night"", 130, 290),
-        (""Garden suite"", ""night"", 210, 420),
-        (""Rooftop room with terrace"", ""night"", 180, 360),
-        (""Room upgrade, view side"", ""night"", 40, 90),
-        (""Breakfast in the room"", ""stay"", 15, 30),
-        (""Late checkout on departure day"", ""stay"", 30, 60),
-        (""Cot and high chair"", ""stay"", 0, 15),
-        (""Whole house, four bedrooms"", ""night"", 650, 1200),
-    }),
-    (""{0} Airport Transfers"", ""Transport"", new[]
-    {
-        (""Airport to hotel, private car"", ""trip"", 45, 90),
-        (""Hotel to airport, private car"", ""trip"", 45, 90),
-        (""Airport to hotel, minivan for six"", ""trip"", 70, 130),
-        (""Hotel to airport, minivan for six"", ""trip"", 70, 130),
-        (""Rail station to hotel, private car"", ""trip"", 35, 70),
-        (""Shared shuttle"", ""pax"", 18, 30),
-        (""Child seat"", ""trip"", 5, 12),
-        (""Waiting time beyond one hour"", ""hour"", 20, 40),
-    }),
-    (""{0} Rail & Coach"", ""Transport"", new[]
-    {
-        (""Day-trip coach with driver"", ""day"", 120, 260),
-        (""Minibus with driver, half day"", ""trip"", 160, 300),
-        (""Regional rail pass, 3 days"", ""pax"", 90, 180),
-        (""Intercity rail, second class"", ""pax"", 25, 80),
-        (""Intercity rail, first class"", ""pax"", 45, 140),
-        (""Coach seat, scheduled service"", ""pax"", 15, 40),
-        (""Car hire, compact"", ""day"", 35, 70),
-        (""Car hire, estate"", ""day"", 55, 110),
-    }),
-    (""{0} Walks"", ""Experiences"", new[]
-    {
-        (""Old town walking tour"", ""pax"", 25, 45),
-        (""Evening food tour"", ""pax"", 65, 110),
-        (""Street art walk"", ""pax"", 20, 40),
-        (""Markets at dawn walk"", ""pax"", 30, 50),
-        (""History walk with museum entry"", ""pax"", 35, 70),
-        (""Night photography walk"", ""pax"", 40, 75),
-        (""Hills and viewpoints hike"", ""pax"", 35, 60),
-        (""Private walking tour"", ""group"", 150, 280),
-    }),
-    (""{0} Day Tours"", ""Experiences"", new[]
-    {
-        (""Full-day excursion with lunch"", ""pax"", 80, 160),
-        (""Half-day coach tour"", ""pax"", 40, 85),
-        (""Countryside day trip with tastings"", ""pax"", 95, 180),
-        (""Coastal villages tour"", ""pax"", 70, 140),
-        (""Sunset boat trip"", ""pax"", 45, 95),
-        (""Entrance tickets"", ""pax"", 18, 40),
-        (""Two-day tour with overnight stay"", ""pax"", 220, 420),
-        (""Private day tour, car and driver"", ""day"", 260, 480),
-    }),
-    (""Taste of {0}"", ""Experiences"", new[]
-    {
-        (""Cooking class with market visit"", ""pax"", 70, 120),
-        (""Wine tasting with transfer"", ""pax"", 60, 120),
-        (""Tasting menu dinner"", ""pax"", 85, 160),
-        (""Street food crawl"", ""pax"", 45, 80),
-        (""Pastry workshop"", ""pax"", 50, 90),
-        (""Craft beer tasting"", ""pax"", 35, 65),
-        (""Farm lunch with producer visit"", ""pax"", 75, 130),
-        (""Private chef dinner at the villa"", ""group"", 350, 650),
-    }),
-    (""{0} Guide Co-op"", ""Services"", new[]
-    {
-        (""Private guide, full day"", ""day"", 180, 320),
-        (""Private guide, half day"", ""day"", 110, 190),
-        (""Driver-guide with car, full day"", ""day"", 260, 460),
-        (""Guide for a group of twenty"", ""day"", 320, 520),
-        (""Interpreter for a day"", ""day"", 150, 280),
-        (""Airport meet and greet"", ""pax"", 25, 45),
-        (""Restaurant bookings"", ""stay"", 10, 25),
-        (""Luggage forwarding"", ""bag"", 15, 35),
-    }),
-};
-
-protected override void OnInitialized()
-{
-    GenerateTree();
+        1 => AirportData.Airports.Where(a => a.Continent == path[0])
+                .GroupBy(a => (a.CountryCode, a.Country))
+                .OrderBy(g => g.Key.Country)
+                .Select(g => Group($""{parent.Id}|{g.Key.CountryCode}"", parent.Id, g.Key.Country, g))
+                .ToList(),
+        2 => AirportData.Airports.Where(a => a.Continent == path[0] && a.CountryCode == path[1])
+                .OrderBy(a => a.Type).ThenBy(a => a.Code)
+                .Select(a => new Place($""{parent.Id}|{a.Code}"", parent.Id, $""{a.Code} · {a.Name}"", $""{a.Type} airport"",
+                    null, a.Runways, a.LongestRunwayFt, a.ElevationFt))
+                .ToList(),
+        _ => AirportData.RunwaysOf(path[2]).Where(r => !r.Closed)
+                .OrderByDescending(r => r.LengthFt)
+                .Select(r => new Place($""{parent.Id}|{r.Name}"", parent.Id, $""Runway {r.Name}"",
+                    r.Lighted ? $""{r.Surface}, lighted"" : r.Surface, null, null, r.LengthFt, null))
+                .ToList()
+    };
+    _loaded += children.Count;
+    return Task.FromResult(children);
 }
 
-private void SetScale(int suppliers)
+private static Place Group(string id, string? parentId, string name, IEnumerable<Airport> airports) =>
+    new(id, parentId, name, """", airports.Count(), airports.Sum(a => a.Runways), airports.Max(a => a.LongestRunwayFt), null);
+
+private sealed record Place(string Id, string? ParentId, string Name, string Detail,
+    int? Airports, int? Runways, int? LongestRunwayFt, int? ElevationFt)
 {
-    _supplierCount = suppliers;
-    _servicesPerSupplier = suppliers switch { 30 => 6, 60 => 8, _ => 4 };
-    _last = null;
-    GenerateTree();
-}
-
-// Supplier s takes pattern s % 8 and the city s / 8, so the first eight suppliers are Lisbon's, the next eight Amalfi's, and
-// sixty are distinct. The seed fixes the rates and bookings, so a size gives the same list on every rebuild.
-private void GenerateTree()
-{
-    var list = new List<SupplierNode>();
-    var rand = new Random(33);
-
-    for (int s = 0; s < _supplierCount; s++)
-    {
-        var city = TravelData.Destinations[(s / _catalog.Length) % TravelData.Destinations.Length].City;
-        var (pattern, category, services) = _catalog[s % _catalog.Length];
-        var supplierId = $""S-{s + 1:D3}"";
-        var bookings = 0;
-
-        var serviceNodes = new List<SupplierNode>();
-        for (int v = 0; v < _servicesPerSupplier; v++)
-        {
-            var (description, unit, low, high) = services[v % services.Length];
-            var booked = rand.Next(0, 80);
-            bookings += booked;
-            serviceNodes.Add(new SupplierNode
-            {
-                Id = $""{supplierId}-{v + 1:D2}"",
-                ParentId = supplierId,
-                Name = description,
-                Category = category,
-                Level = 2,
-                IsSupplier = false,
-                Unit = unit,
-                Rate = Math.Round(low + (decimal)rand.NextDouble() * (high - low), 2),
-                Bookings = booked
-            });
-        }
-
-        list.Add(new SupplierNode
-        {
-            Id = supplierId,
-            ParentId = null,
-            Name = string.Format(pattern, city),
-            Category = category,
-            Level = 1,
-            IsSupplier = true,
-            ServiceCount = _servicesPerSupplier,
-            Bookings = bookings
-        });
-
-        list.AddRange(serviceNodes);
-    }
-
-    _treeNodes = list;
-    _treeGeneration++;
-}
-
-private bool TreatAsParent(SupplierNode node) => node.IsSupplier;
-
-// Data/BenchModels.cs
-public sealed class SupplierNode
-{
-    public string Id { get; set; } = string.Empty;
-    public string? ParentId { get; set; }             // the supplier's Id on a service row; null on a supplier row
-    public string Name { get; set; } = string.Empty;  // the supplier's name, or the service's description
-    public string Category { get; set; } = string.Empty;
-    public int Level { get; set; }                    // 1 supplier, 2 service
-    public bool IsSupplier { get; set; }
-    public int? ServiceCount { get; set; }            // supplier rows only
-    public string Unit { get; set; } = string.Empty;  // service rows only: night, pax, trip, day, stay, hour, group or bag
-    public decimal? Rate { get; set; }                // service rows only: the net rate per Unit
-    public int Bookings { get; set; }                 // the service's bookings, or the supplier's total
+    public int Level => Id.Count(c => c == '|');
 }";
     }
 
-    // Documentation rows (2026-10-24). Line references are into the library files named in SourcePath; the Types and Defaults are
-    // the declarations verbatim, with < > written as &lt; &gt; because ApiTable renders them as markup.
     private static class Vocab
     {
         public static readonly ApiRow[] Data =

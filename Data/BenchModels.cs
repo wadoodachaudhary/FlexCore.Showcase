@@ -76,25 +76,6 @@ public sealed class AgentListItem
 }
 
 /// <summary>
-/// One row of the Tree grid page's supplier tree: a supplier (a root row with its category, service count and bookings total)
-/// or one of the services it sells (a child row with its unit, net rate and bookings). The page generates the flat list; the
-/// grid folds it by <see cref="ParentId"/>.
-/// </summary>
-public sealed class SupplierNode
-{
-    public string Id { get; set; } = string.Empty;
-    public string? ParentId { get; set; }             // the supplier's Id on a service row; null on a supplier row
-    public string Name { get; set; } = string.Empty;  // the supplier's name, or the service's description
-    public string Category { get; set; } = string.Empty;
-    public int Level { get; set; }                    // 1 supplier, 2 service
-    public bool IsSupplier { get; set; }
-    public int? ServiceCount { get; set; }            // supplier rows only
-    public string Unit { get; set; } = string.Empty;  // service rows only: night, pax, trip, day, stay, hour, group or bag
-    public decimal? Rate { get; set; }                // service rows only: the net rate per Unit
-    public int Bookings { get; set; }                 // the service's bookings, or the supplier's total
-}
-
-/// <summary>
 /// Column specification for dynamic swapping bench.
 /// </summary>
 public sealed class ColumnSpec
