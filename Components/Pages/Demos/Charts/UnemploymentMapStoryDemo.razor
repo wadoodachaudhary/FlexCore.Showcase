@@ -2,9 +2,13 @@
 @rendermode InteractiveServer
 @using Fx.ControlKit.Maps
 @using FlexCore.Showcase.Components.Shared
+@using FlexCore.Showcase.Data
 @* 2026-10-21: page added with the FlexKit 0.1.131 choropleth mirror (Cursor branch, merged by Wadood).
    2026-10-23 (meeting point 3): code tabs generated from this file (gencode) instead of hand-written constants; the inline style block
-   moved to the page stylesheet; a parameter table for MapStoryControl written from Maps/MapStoryControl.razor. *@
+   moved to the page stylesheet; a parameter table for MapStoryControl written from Maps/MapStoryControl.razor.
+   2026-10-26 (Baaria): second example, airports per country (the OurAirports snapshot the Data Grid page uses) as a choropleth built in
+   code with MapStoryComposer; a click opens the country on MapControl's plain map with one marker per airport. MapControl draws markers
+   only without a Choropleth, hence the two views. MapControl parameters written from Maps/MapControl.razor. *@
 
 <PageTitle>Map story — FlexCore Showcase</PageTitle>
 
@@ -21,6 +25,8 @@
             The story below is unemployment. Continent figures are labour-force-weighted averages of ILO modelled national rates (World Bank, 2025).
             Europe uses the August 2026 rates from the reference graphic. Provincial maps use Eurostat NUTS-2 for 2024, and the United States uses BLS statewide rates for September 2026.
             No figure on this page is sample data. A country without a provincial series opens “Regional data not available”.
+            The second example builds a choropleth in code from the airports on the <a href="demo/grid">Data Grid</a> page and, for one country,
+            switches <code>MapControl</code> to its plain map with markers.
         </p>
     </Overview>
 
@@ -31,6 +37,46 @@
             </Description>
             <Demo>
                 <MapStoryControl Story="_story" Width="960" Height="640" />
+            </Demo>
+        </DemoExample>
+        <DemoExample Id="airports" Title="Airports per country, then one country's airports" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs" CssCode="@Code.AirportsCss">
+            <Description>
+                <p>The 4,009 airports from the <a href="demo/grid">Data Grid</a> page, counted per country: one airport is the palest beige, the United States' 634 the deepest red. The colours step at 1, 3, 10, 30 and 100 airports because half of the countries have four or fewer. Click a country to open it on the plain map with one marker per airport (blue for large, teal for medium, grey for small). In the three countries with more than 200 airports (the United States, China and Canada), markers close together merge into a numbered circle that zooms in when clicked. Clicking a marker lists the airport's runways. Small territories such as French Polynesia have no outline at this scale. Data: <a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports</a>, public domain.</p>
+            </Description>
+            <Demo>
+                @if (_country is null)
+                {
+                    <MapControl Choropleth="_airportLayout" ShapeClick="OpenCountry" Width="960" Height="560"
+                                AriaLabel="Airports per country. Each country is a button that opens its airports." />
+                }
+                else
+                {
+                    <div class="country-bar">
+                        <ButtonControl OnClick="BackToWorld">Back to the world map</ButtonControl>
+                        <span><strong>@_byCountry[_country][0].Country</strong>: @_byCountry[_country].Count airports with scheduled service</span>
+                        <span class="marker-key"><i class="large"></i>Large <i class="medium"></i>Medium <i class="small"></i>Small</span>
+                    </div>
+                    <MapControl Shapes="_shapes" Markers="_markers" @bind-Center="_center" @bind-Zoom="_zoom" MinZoom="1" MaxZoom="10"
+                                ClusterMarkers="@(_markers.Count > 200)" MarkerClick="PickAirport" Width="960" Height="520"
+                                Attribution="Airports: OurAirports, public domain. Outlines: Natural Earth."
+                                AriaLabel="@($"Airports in {_byCountry[_country][0].Country}. Arrow keys pan, plus and minus zoom.")" />
+                    @if (_picked is { } picked)
+                    {
+                        <div class="airport-card">
+                            <p><strong>@picked.Code</strong> @picked.Name, @picked.City. @picked.Type airport, elevation @(picked.ElevationFt?.ToString("N0") ?? "unknown") ft.</p>
+                            <ul>
+                                @foreach (var runway in AirportData.RunwaysOf(picked.Code))
+                                {
+                                    <li>Runway @runway.Name: @(runway.LengthFt?.ToString("N0") ?? "length unknown") ft, @runway.Surface.ToLowerInvariant()@(runway.Lighted ? ", lit" : "")@(runway.Closed ? ", closed" : "")</li>
+                                }
+                            </ul>
+                            @if (!string.IsNullOrEmpty(picked.Wikipedia))
+                            {
+                                <a href="@picked.Wikipedia" target="_blank" rel="noopener">Wikipedia article</a>
+                            }
+                        </div>
+                    }
+                }
             </Demo>
         </DemoExample>
         <DemoExample Id="svg" Title="The same Europe graphic as static SVG" RazorCode="@Code.Svg" CSharpCode="@Code.SvgCs">
@@ -54,6 +100,9 @@
                 <li><code>MapGeographyCatalog.Bundled</code>: Natural Earth 1:110m countries (public domain) and simplified NUTS-2 / US state boundaries, embedded with the control. No tile server.</li>
                 <li>Sources for this story live in <code>wwwroot/maps/stories/unemployment.json</code>.</li>
                 </ul>
+            </DocSection>
+            <DocSection Id="doc-mapcontrol-parameters" Title="MapControl parameters" Count='@DocSection.Label(Vocab.Map.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="MapControl parameters" Rows="Vocab.Map" />
             </DocSection>
         </DocSections>
     </Vocabulary>
@@ -81,6 +130,109 @@
     {
         _story = MapStory.LoadBundledUnemployment();
         _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), "europe");
+        BuildAirportMap();
+    }
+
+    // Airports (2026-10-26): the OurAirports snapshot (Data/AirportData.cs) counted per country on a choropleth; a click on a country
+    // opens it on the plain map with one marker per airport, coloured by size.
+    static readonly MapGeographyCatalog _geography = MapGeographyCatalog.Bundled();
+    static readonly string[] _stepColors = { "#FAF3E3", "#F5DFAF", "#EFB86E", "#E07B3C", "#C0362C", "#7A0F1C" };
+
+    readonly Dictionary<string, List<Airport>> _byCountry = AirportData.Airports
+        .GroupBy(a => a.CountryCode).ToDictionary(g => g.Key, g => g.ToList());
+    ChoroplethLayout _airportLayout = null!;
+    ChoroplethScale _airportScale = null!;
+    int _maxAirports;
+
+    string? _country;
+    IReadOnlyList<MapShape> _shapes = [];
+    IReadOnlyList<MapMarker> _markers = [];
+    GeoPoint _center = new(20, 0);
+    int _zoom = 2;
+    Airport? _picked;
+
+    void BuildAirportMap()
+    {
+        _maxAirports = _byCountry.Values.Max(list => list.Count);
+        int[] steps = { 1, 3, 10, 30, 100, _maxAirports };
+        var offMap = _byCountry.Where(p => _geography.Country(p.Key) is null).Sum(p => p.Value.Count);
+        var story = new MapStory
+        {
+            Id = "airports",
+            RootLevelId = "world",
+            ValueFormat = "0",
+            NoDataColor = "#E5E7EB",
+            Stops = steps.Select((n, i) => new ChoroplethStop { At = (n - 1d) / (_maxAirports - 1d), Color = _stepColors[i] }).ToList(),
+        };
+        story.Levels.Add(new MapStoryLevel
+        {
+            Id = "world",
+            Title = "Airports with scheduled passenger service",
+            Geography = "countries",
+            Projection = "Robinson",
+            Footnote = $"OurAirports, public domain, {AirportData.SnapshotDate}. Grey: no airport. {offMap} airports in small territories are not drawn at this scale.",
+            Regions = _byCountry.Select(p => new MapStoryRegion { Id = p.Key, Name = p.Value[0].Country, Value = p.Value.Count, ChildLevelId = "country" }).ToList(),
+        });
+        _airportScale = ChoroplethScale.From(story.Stops, story.NoDataColor);
+        var layout = MapStoryComposer.Compose(story, story.Levels[0], _geography, null, null, 960, 560);
+        // The colours step at 1, 3, 10, 30, 100 and the largest count, so the legend spaces them evenly; at their linear
+        // positions five of the six would share the first sixth of the bar.
+        _airportLayout = new ChoroplethLayout
+        {
+            Width = layout.Width, Height = layout.Height, Background = layout.Background, Title = layout.Title,
+            SampleBanner = layout.SampleBanner, Footnote = layout.Footnote, Message = layout.Message,
+            LegendCaption = $"Airports per country, colour steps at {string.Join(", ", steps)}", GradientId = "airports-legend",
+            LegendStops = _stepColors.Select((color, i) => (i / (_stepColors.Length - 1d), color)).ToList(),
+            LegendMin = "1", LegendMax = _maxAirports.ToString("N0"),
+            LegendX = layout.LegendX, LegendY = layout.LegendY, LegendWidth = layout.LegendWidth,
+            Regions = layout.Regions, Labels = layout.Labels, Callouts = layout.Callouts, Insets = layout.Insets,
+        };
+    }
+
+    Task OpenCountry(MapShape shape)
+    {
+        if (!_byCountry.TryGetValue(shape.Id, out var airports)) return Task.CompletedTask;
+        _country = shape.Id;
+        _picked = null;
+        _markers = airports.Select(a => new MapMarker(a.Code, new GeoPoint(a.Latitude, a.Longitude), $"{a.Code} {a.Name}", 1, TypeColor(a.Type))).ToList();
+        (_center, _zoom) = Fit(_markers.Select(m => m.Location).ToList(), 960, 520);
+        // The country in its choropleth colour, with the neighbours inside the airports' bounds in grey for context.
+        _shapes = _geography.Countries
+            .Where(f => f.Id == shape.Id || Overlaps(f, _markers))
+            .OrderBy(f => f.Id == shape.Id)
+            .Select(f => new MapShape(f.Id, f.Name, f.Polygons.SelectMany(polygon => polygon).ToList(),
+                Fill: f.Id == shape.Id ? _airportScale.Color(airports.Count, 1, _maxAirports) : "#F1F5F9",
+                Stroke: f.Id == shape.Id ? "#7A0F1C" : "#CBD5E1"))
+            .ToList();
+        return Task.CompletedTask;
+    }
+
+    void PickAirport(MapMarker marker) => _picked = _byCountry[_country!].First(a => a.Code == marker.Id);
+
+    void BackToWorld() { _country = null; _picked = null; }
+
+    static string TypeColor(string type) => type switch { "Large" => "#1D4ED8", "Medium" => "#0D9488", _ => "#64748B" };
+
+    static bool Overlaps(MapFeature feature, IReadOnlyList<MapMarker> markers)
+    {
+        var south = markers.Min(m => m.Location.Latitude) - 5; var north = markers.Max(m => m.Location.Latitude) + 5;
+        var west = markers.Min(m => m.Location.Longitude) - 5; var east = markers.Max(m => m.Location.Longitude) + 5;
+        return feature.Points.Any(p => p.Latitude >= south && p.Latitude <= north && p.Longitude >= west && p.Longitude <= east);
+    }
+
+    // The highest zoom at which every marker fits inside the map with a margin; one airport opens at zoom 7.
+    static (GeoPoint Center, int Zoom) Fit(IReadOnlyList<GeoPoint> points, int width, int height)
+    {
+        double south = points.Min(p => p.Latitude), north = points.Max(p => p.Latitude);
+        double west = points.Min(p => p.Longitude), east = points.Max(p => p.Longitude);
+        var center = new GeoPoint((south + north) / 2, (west + east) / 2);
+        for (var zoom = 7; zoom > 1; zoom--)
+        {
+            var topLeft = MapProjection.Project(new GeoPoint(north, west), zoom);
+            var bottomRight = MapProjection.Project(new GeoPoint(south, east), zoom);
+            if (bottomRight.X - topLeft.X <= width - 80 && bottomRight.Y - topLeft.Y <= height - 80) return (center, zoom);
+        }
+        return (center, 1);
     }
 
     private static class Vocab
@@ -92,6 +244,26 @@
             new("Width", "Drawing width in pixels.", "int", "960"),
             new("Height", "Drawing height in pixels.", "int", "640"),
         };
+
+        // MapControl, read from Maps/MapControl.razor (2026-10-26).
+        public static readonly ApiRow[] Map =
+        {
+            new("Choropleth", "A fitted graphic from <code>MapStoryComposer.Compose</code>. When set, the map draws only that graphic, each region a button that raises <code>ShapeClick</code>; the toolbar, tiles, panning, <code>Shapes</code> and <code>Markers</code> are off.", "ChoroplethLayout?", "null"),
+            new("Center / CenterChanged", "Map centre of the plain map. Two-way with <code>@bind-Center</code>; panning, the arrow keys and opening a cluster change it.", "GeoPoint", "new(20, 0)"),
+            new("Zoom / ZoomChanged", "Zoom level of the plain map. Two-way with <code>@bind-Zoom</code>; the + and − buttons and keys change it.", "int", "2"),
+            new("ViewChanged", "Raised with the new centre and zoom after a pan or a zoom.", "EventCallback&lt;MapView&gt;"),
+            new("MinZoom / MaxZoom", "Zoom bounds. Outside 0 to 22, reversed, or with <code>Zoom</code> outside them, the control throws.", "int", "0 / 18"),
+            new("Width / Height", "Size of the plain map in pixels; at least 1. A choropleth takes its size from the layout and scales to the container.", "int", "800 / 420"),
+            new("Markers", "Points on the plain map. Ids must be unique, or the control throws. A marker is a circle of radius 7 in its <code>Color</code>, with its <code>Title</code> as tooltip.", "IReadOnlyList&lt;MapMarker&gt;", "empty"),
+            new("Shapes", "Polygons or lines drawn under the markers, each a button that raises <code>ShapeClick</code>.", "IReadOnlyList&lt;MapShape&gt;", "empty"),
+            new("ClusterMarkers", "Markers within 32 px of each other share a numbered circle; clicking it centres there and zooms in two levels.", "bool", "false"),
+            new("BubbleMarkers", "Sizes each marker by the square root of its <code>Value</code>, 5 to 40 px.", "bool", "false"),
+            new("MarkerTemplate", "Content drawn beside each marker in a 150 × 50 box.", "RenderFragment&lt;MapMarker&gt;?", "null"),
+            new("MarkerClick / ShapeClick", "Raised when a marker, or a shape or choropleth region, is clicked or activated with Enter or Space. The status bar shows the clicked marker's title and coordinates.", "EventCallback&lt;MapMarker&gt; / EventCallback&lt;MapShape&gt;"),
+            new("TileUrlTemplate", "Raster tile address with <code>{z}</code>, <code>{x}</code> and <code>{y}</code>. Null draws no tiles: a plain background with a 30° grid.", "string?", "null"),
+            new("Attribution", "Text in the status bar under the plain map.", "string", "\"\""),
+            new("AriaLabel", "Name of the map for assistive technology.", "string", "\"Map. Use arrow keys to pan and plus or minus to zoom.\""),
+        };
     }
 
     // Code tabs are verbatim
@@ -99,23 +271,177 @@
     {
         public const string Story = @"<MapStoryControl Story=""_story"" Width=""960"" Height=""640"" />";
         public const string StoryCs = @"MapStory _story = null!;
-
 string _europeSvg = """";
 
 protected override void OnInitialized()
 {
     _story = MapStory.LoadBundledUnemployment();
     _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), ""europe"");
+    BuildAirportMap();
 }";
+        public const string Airports = @"@if (_country is null)
+{
+    <MapControl Choropleth=""_airportLayout"" ShapeClick=""OpenCountry"" Width=""960"" Height=""560""
+                AriaLabel=""Airports per country. Each country is a button that opens its airports."" />
+}
+else
+{
+    <div class=""country-bar"">
+        <ButtonControl OnClick=""BackToWorld"">Back to the world map</ButtonControl>
+        <span><strong>@_byCountry[_country][0].Country</strong>: @_byCountry[_country].Count airports with scheduled service</span>
+        <span class=""marker-key""><i class=""large""></i>Large <i class=""medium""></i>Medium <i class=""small""></i>Small</span>
+    </div>
+    <MapControl Shapes=""_shapes"" Markers=""_markers"" @bind-Center=""_center"" @bind-Zoom=""_zoom"" MinZoom=""1"" MaxZoom=""10""
+                ClusterMarkers=""@(_markers.Count > 200)"" MarkerClick=""PickAirport"" Width=""960"" Height=""520""
+                Attribution=""Airports: OurAirports, public domain. Outlines: Natural Earth.""
+                AriaLabel=""@($""Airports in {_byCountry[_country][0].Country}. Arrow keys pan, plus and minus zoom."")"" />
+    @if (_picked is { } picked)
+    {
+        <div class=""airport-card"">
+            <p><strong>@picked.Code</strong> @picked.Name, @picked.City. @picked.Type airport, elevation @(picked.ElevationFt?.ToString(""N0"") ?? ""unknown"") ft.</p>
+            <ul>
+                @foreach (var runway in AirportData.RunwaysOf(picked.Code))
+                {
+                    <li>Runway @runway.Name: @(runway.LengthFt?.ToString(""N0"") ?? ""length unknown"") ft, @runway.Surface.ToLowerInvariant()@(runway.Lighted ? "", lit"" : """")@(runway.Closed ? "", closed"" : """")</li>
+                }
+            </ul>
+            @if (!string.IsNullOrEmpty(picked.Wikipedia))
+            {
+                <a href=""@picked.Wikipedia"" target=""_blank"" rel=""noopener"">Wikipedia article</a>
+            }
+        </div>
+    }
+}";
+        public const string AirportsCs = @"MapStory _story = null!;
+string _europeSvg = """";
+
+protected override void OnInitialized()
+{
+    _story = MapStory.LoadBundledUnemployment();
+    _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), ""europe"");
+    BuildAirportMap();
+}
+
+// Airports (2026-10-26): the OurAirports snapshot (Data/AirportData.cs) counted per country on a choropleth; a click on a country
+// opens it on the plain map with one marker per airport, coloured by size.
+static readonly MapGeographyCatalog _geography = MapGeographyCatalog.Bundled();
+static readonly string[] _stepColors = { ""#FAF3E3"", ""#F5DFAF"", ""#EFB86E"", ""#E07B3C"", ""#C0362C"", ""#7A0F1C"" };
+
+readonly Dictionary<string, List<Airport>> _byCountry = AirportData.Airports
+    .GroupBy(a => a.CountryCode).ToDictionary(g => g.Key, g => g.ToList());
+ChoroplethLayout _airportLayout = null!;
+ChoroplethScale _airportScale = null!;
+int _maxAirports;
+
+string? _country;
+IReadOnlyList<MapShape> _shapes = [];
+IReadOnlyList<MapMarker> _markers = [];
+GeoPoint _center = new(20, 0);
+int _zoom = 2;
+Airport? _picked;
+
+void BuildAirportMap()
+{
+    _maxAirports = _byCountry.Values.Max(list => list.Count);
+    int[] steps = { 1, 3, 10, 30, 100, _maxAirports };
+    var offMap = _byCountry.Where(p => _geography.Country(p.Key) is null).Sum(p => p.Value.Count);
+    var story = new MapStory
+    {
+        Id = ""airports"",
+        RootLevelId = ""world"",
+        ValueFormat = ""0"",
+        NoDataColor = ""#E5E7EB"",
+        Stops = steps.Select((n, i) => new ChoroplethStop { At = (n - 1d) / (_maxAirports - 1d), Color = _stepColors[i] }).ToList(),
+    };
+    story.Levels.Add(new MapStoryLevel
+    {
+        Id = ""world"",
+        Title = ""Airports with scheduled passenger service"",
+        Geography = ""countries"",
+        Projection = ""Robinson"",
+        Footnote = $""OurAirports, public domain, {AirportData.SnapshotDate}. Grey: no airport. {offMap} airports in small territories are not drawn at this scale."",
+        Regions = _byCountry.Select(p => new MapStoryRegion { Id = p.Key, Name = p.Value[0].Country, Value = p.Value.Count, ChildLevelId = ""country"" }).ToList(),
+    });
+    _airportScale = ChoroplethScale.From(story.Stops, story.NoDataColor);
+    var layout = MapStoryComposer.Compose(story, story.Levels[0], _geography, null, null, 960, 560);
+    // The colours step at 1, 3, 10, 30, 100 and the largest count, so the legend spaces them evenly; at their linear
+    // positions five of the six would share the first sixth of the bar.
+    _airportLayout = new ChoroplethLayout
+    {
+        Width = layout.Width, Height = layout.Height, Background = layout.Background, Title = layout.Title,
+        SampleBanner = layout.SampleBanner, Footnote = layout.Footnote, Message = layout.Message,
+        LegendCaption = $""Airports per country, colour steps at {string.Join("", "", steps)}"", GradientId = ""airports-legend"",
+        LegendStops = _stepColors.Select((color, i) => (i / (_stepColors.Length - 1d), color)).ToList(),
+        LegendMin = ""1"", LegendMax = _maxAirports.ToString(""N0""),
+        LegendX = layout.LegendX, LegendY = layout.LegendY, LegendWidth = layout.LegendWidth,
+        Regions = layout.Regions, Labels = layout.Labels, Callouts = layout.Callouts, Insets = layout.Insets,
+    };
+}
+
+Task OpenCountry(MapShape shape)
+{
+    if (!_byCountry.TryGetValue(shape.Id, out var airports)) return Task.CompletedTask;
+    _country = shape.Id;
+    _picked = null;
+    _markers = airports.Select(a => new MapMarker(a.Code, new GeoPoint(a.Latitude, a.Longitude), $""{a.Code} {a.Name}"", 1, TypeColor(a.Type))).ToList();
+    (_center, _zoom) = Fit(_markers.Select(m => m.Location).ToList(), 960, 520);
+    // The country in its choropleth colour, with the neighbours inside the airports' bounds in grey for context.
+    _shapes = _geography.Countries
+        .Where(f => f.Id == shape.Id || Overlaps(f, _markers))
+        .OrderBy(f => f.Id == shape.Id)
+        .Select(f => new MapShape(f.Id, f.Name, f.Polygons.SelectMany(polygon => polygon).ToList(),
+            Fill: f.Id == shape.Id ? _airportScale.Color(airports.Count, 1, _maxAirports) : ""#F1F5F9"",
+            Stroke: f.Id == shape.Id ? ""#7A0F1C"" : ""#CBD5E1""))
+        .ToList();
+    return Task.CompletedTask;
+}
+
+void PickAirport(MapMarker marker) => _picked = _byCountry[_country!].First(a => a.Code == marker.Id);
+
+void BackToWorld() { _country = null; _picked = null; }
+
+static string TypeColor(string type) => type switch { ""Large"" => ""#1D4ED8"", ""Medium"" => ""#0D9488"", _ => ""#64748B"" };
+
+static bool Overlaps(MapFeature feature, IReadOnlyList<MapMarker> markers)
+{
+    var south = markers.Min(m => m.Location.Latitude) - 5; var north = markers.Max(m => m.Location.Latitude) + 5;
+    var west = markers.Min(m => m.Location.Longitude) - 5; var east = markers.Max(m => m.Location.Longitude) + 5;
+    return feature.Points.Any(p => p.Latitude >= south && p.Latitude <= north && p.Longitude >= west && p.Longitude <= east);
+}
+
+// The highest zoom at which every marker fits inside the map with a margin; one airport opens at zoom 7.
+static (GeoPoint Center, int Zoom) Fit(IReadOnlyList<GeoPoint> points, int width, int height)
+{
+    double south = points.Min(p => p.Latitude), north = points.Max(p => p.Latitude);
+    double west = points.Min(p => p.Longitude), east = points.Max(p => p.Longitude);
+    var center = new GeoPoint((south + north) / 2, (west + east) / 2);
+    for (var zoom = 7; zoom > 1; zoom--)
+    {
+        var topLeft = MapProjection.Project(new GeoPoint(north, west), zoom);
+        var bottomRight = MapProjection.Project(new GeoPoint(south, east), zoom);
+        if (bottomRight.X - topLeft.X <= width - 80 && bottomRight.Y - topLeft.Y <= height - 80) return (center, zoom);
+    }
+    return (center, 1);
+}";
+        public const string AirportsCss = @".country-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; font-size: 14px; color: #334155; }
+.marker-key { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; margin-left: auto; }
+.marker-key i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #cbd5e1; }
+.marker-key .large { background: #1D4ED8; }
+.marker-key .medium { background: #0D9488; }
+.marker-key .small { background: #64748B; }
+.airport-card { margin-top: 10px; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; font-size: 13px; color: #334155; }
+.airport-card p { margin: 0 0 6px; }
+.airport-card ul { margin: 0 0 6px; padding-left: 18px; }
+.airport-card a { color: #0284c7; }";
         public const string Svg = @"<div class=""map-story-static"">@((MarkupString)_europeSvg)</div>";
         public const string SvgCs = @"MapStory _story = null!;
-
 string _europeSvg = """";
 
 protected override void OnInitialized()
 {
     _story = MapStory.LoadBundledUnemployment();
     _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), ""europe"");
+    BuildAirportMap();
 }";
     }
 }
