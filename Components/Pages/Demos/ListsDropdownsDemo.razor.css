@@ -6,12 +6,9 @@
 .muted { opacity: 0.7; }
 .switch-cell { align-self: flex-end; }
 
-/* Supplier lookup */
-.lookup { width: 320px; max-width: 100%; }
+/* Airport lookups */
+.lookup { width: 280px; max-width: 100%; }
 .lookup-box { height: 26px; }
-.supplier { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 4px 12px; margin: 14px 0 0; font-size: 13px; }
-.supplier dt { font-weight: 400; color: #64748b; }
-.supplier dd { margin: 0; color: #1e293b; }
 
 /* List boxes */
 .pair ::deep .two-columns { display: grid; grid-template-columns: repeat(2, minmax(110px, 1fr)); column-gap: 24px; }

@@ -7,7 +7,9 @@
    DropDownListControl.razor, DropDownListControl.razor.cs, DropDownListControl.razor.css, wwwroot/dropdown-list-control.js,
    Grid/DropDownGridControl.razor, Grid/DropDownGridControl.razor.cs, Grid/DropDownGridControl.razor.css, ListBoxControl.razor,
    ListBoxControl.razor.css and ListBoxSelectionMode.cs in FlexCore 0.2.49. DropDownListControl declares AllowFiltering and ChildContent
-   but never reads them; the tables say so. None of the three controls captures unmatched attributes. *@
+   but never reads them; the tables say so. None of the three controls captures unmatched attributes.
+   2026-10-26 (Baaria): the lookup example picks two of the 4,009 airports the Data Grid page shows (OurAirports, Data/AirportData.cs)
+   and gives the great-circle distance between them, instead of one of 200 invented suppliers. *@
 
 <PageTitle>Lists &amp; dropdowns — FlexCore Showcase</PageTitle>
 
@@ -51,39 +53,49 @@
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="lookup" Title="Pick a supplier from a grid" RazorCode="@Code.Lookup" CSharpCode="@Code.LookupCs">
-            <Description><p>Two hundred suppliers in a four-column popup. The search box keeps the rows where any property contains the typed text, ignoring case, so a city, a category or part of an email address all work although only four columns are shown. Click a row, or press Down to open and move and Enter to pick; the box then shows the supplier's name (<code>ClosedTextFieldName</code>) while <code>Value</code> holds its code. The ✕ clears the value. <code>OnSelectedItemChanged</code> gives the page the whole record for the details below.</p></Description>
+        <DemoExample Id="lookup" Title="Pick two airports from a 4,009-row grid" RazorCode="@Code.Lookup" CSharpCode="@Code.LookupCs" CssCode="@Code.LookupCss">
+            <Description><p>Two lookups over the airports from the <a href="demo/grid">Data Grid</a> page (OurAirports, public domain). The search box keeps the rows where any property contains the typed text, ignoring case, so a code (<em>KEF</em>), a city, a country or part of an airport's name all work although only four columns are shown. Click a row, or press Down to open and move and Enter to pick; the closed box then shows the code and city (<code>ClosedTextFieldName</code>) while <code>Value</code> holds the code. The ✕ clears the value. The page works out the great-circle distance between the two picks from their coordinates.</p></Description>
             <Demo>
-                <div class="lookup">
-                    <span class="field-label">Supplier</span>
-                    <div class="lookup-box">
-                        <DropDownGridControl TItem="SupplierRecord" TValue="string" DataSource="@BenchData.Suppliers" @bind-Value="_supplierCode"
-                                             OnSelectedItemChanged="s => _supplier = s" ValueFieldName="Code" ClosedTextFieldName="Name"
-                                             Placeholder="Choose a supplier" SearchPlaceholder="Search any field" PopupWidth="500px" PopupHeight="260px" RowHeight="24">
-                            <Columns>
-                                <GridColumn Field="Code" HeaderText="Code" Width="80px" />
-                                <GridColumn Field="Name" HeaderText="Supplier" Width="180px" />
-                                <GridColumn Field="Category" HeaderText="Category" Width="110px" />
-                                <GridColumn Field="City" HeaderText="City" Width="100px" />
-                            </Columns>
-                        </DropDownGridControl>
+                <div class="pair">
+                    <div class="lookup">
+                        <span class="field-label">Flying from</span>
+                        <div class="lookup-box">
+                            <DropDownGridControl TItem="Airport" TValue="string" DataSource="@AirportData.Airports" @bind-Value="_fromCode"
+                                                 ValueFieldName="Code" ClosedTextFieldName="Label" Placeholder="Choose an airport"
+                                                 SearchPlaceholder="Code, city, country or name" PopupWidth="560px" PopupHeight="260px" RowHeight="24">
+                                <Columns>
+                                    <GridColumn Field="Code" HeaderText="Code" Width="60px" />
+                                    <GridColumn Field="Name" HeaderText="Airport" Width="230px" />
+                                    <GridColumn Field="City" HeaderText="City" Width="120px" />
+                                    <GridColumn Field="Country" HeaderText="Country" Width="130px" />
+                                </Columns>
+                            </DropDownGridControl>
+                        </div>
+                    </div>
+                    <div class="lookup">
+                        <span class="field-label">Flying to</span>
+                        <div class="lookup-box">
+                            <DropDownGridControl TItem="Airport" TValue="string" DataSource="@AirportData.Airports" @bind-Value="_toCode"
+                                                 ValueFieldName="Code" ClosedTextFieldName="Label" Placeholder="Choose an airport"
+                                                 SearchPlaceholder="Code, city, country or name" PopupWidth="560px" PopupHeight="260px" RowHeight="24">
+                                <Columns>
+                                    <GridColumn Field="Code" HeaderText="Code" Width="60px" />
+                                    <GridColumn Field="Name" HeaderText="Airport" Width="230px" />
+                                    <GridColumn Field="City" HeaderText="City" Width="120px" />
+                                    <GridColumn Field="Country" HeaderText="Country" Width="130px" />
+                                </Columns>
+                            </DropDownGridControl>
+                        </div>
                     </div>
                 </div>
-                @if (_supplier is null)
+                @if (Find(_fromCode) is { } from && Find(_toCode) is { } to)
                 {
-                    <p class="result">Value <strong>@(_supplierCode ?? "null")</strong>: no supplier chosen.</p>
+                    <p class="result"><strong>@from.Code → @to.Code</strong>: @from.Name, @from.Country to @to.Name, @to.Country.
+                        Great-circle distance <strong>@Kilometres(from, to).ToString("N0") km</strong> (@((Kilometres(from, to) / 1.609344).ToString("N0")) miles).</p>
                 }
                 else
                 {
-                    <dl class="supplier">
-                        <dt>Value</dt><dd>@_supplierCode</dd>
-                        <dt>Supplier</dt><dd>@_supplier.Name</dd>
-                        <dt>Category</dt><dd>@_supplier.Category</dd>
-                        <dt>Address</dt><dd>@_supplier.Address, @_supplier.City, @_supplier.Country</dd>
-                        <dt>Phone</dt><dd>@_supplier.Phone</dd>
-                        <dt>Email</dt><dd>@_supplier.Email</dd>
-                        <dt>Online booking</dt><dd>@(_supplier.OnlineBooking ? "Yes" : "No")</dd>
-                    </dl>
+                    <p class="result">Value from <strong>@(_fromCode ?? "null")</strong> · to <strong>@(_toCode ?? "null")</strong>: pick both airports for the distance.</p>
                 }
             </Demo>
         </DemoExample>
@@ -210,10 +222,21 @@
     private bool _singleCheckbox;
     private IEnumerable<Destination> WishedFor => _destinations.Where(d => _wishlist.Contains(d.City));
 
-    // Supplier lookup
-    [Inject] private BenchDataStore BenchData { get; set; } = default!;
-    private string? _supplierCode;
-    private SupplierRecord? _supplier;
+    // Airport lookups: the OurAirports snapshot from Data/AirportData.cs; the values are airport codes
+    private string? _fromCode = "LHR";
+    private string? _toCode = "LIS";
+    private static readonly Dictionary<string, Airport> _airportsByCode = AirportData.Airports.ToDictionary(a => a.Code);
+    private static Airport? Find(string? code) => code is not null && _airportsByCode.TryGetValue(code, out var airport) ? airport : null;
+
+    // Great-circle distance on a sphere of radius 6,371 km (the haversine formula)
+    private static double Kilometres(Airport a, Airport b)
+    {
+        static double Radians(double degrees) => degrees * Math.PI / 180;
+        var dLat = Radians(b.Latitude - a.Latitude);
+        var dLon = Radians(b.Longitude - a.Longitude);
+        var h = Math.Pow(Math.Sin(dLat / 2), 2) + Math.Cos(Radians(a.Latitude)) * Math.Cos(Radians(b.Latitude)) * Math.Pow(Math.Sin(dLon / 2), 2);
+        return 2 * 6371 * Math.Asin(Math.Sqrt(h));
+    }
 
     // Vocabulary rows, one per public member (FlexCore 0.2.49). None of the three controls has a base class with parameters.
     private static class Vocab
@@ -383,41 +406,67 @@ private bool _enabled = true;
 private sealed record Destination(string City, string Region, string Country);
 private static readonly Destination[] _destinations =
     TravelData.Destinations.Select(d => new Destination(d.City, d.Region, d.Country)).ToArray();";
-        public const string Lookup = @"<div class=""lookup"">
-    <span class=""field-label"">Supplier</span>
-    <div class=""lookup-box"">
-        <DropDownGridControl TItem=""SupplierRecord"" TValue=""string"" DataSource=""@BenchData.Suppliers"" @bind-Value=""_supplierCode""
-                             OnSelectedItemChanged=""s => _supplier = s"" ValueFieldName=""Code"" ClosedTextFieldName=""Name""
-                             Placeholder=""Choose a supplier"" SearchPlaceholder=""Search any field"" PopupWidth=""500px"" PopupHeight=""260px"" RowHeight=""24"">
-            <Columns>
-                <GridColumn Field=""Code"" HeaderText=""Code"" Width=""80px"" />
-                <GridColumn Field=""Name"" HeaderText=""Supplier"" Width=""180px"" />
-                <GridColumn Field=""Category"" HeaderText=""Category"" Width=""110px"" />
-                <GridColumn Field=""City"" HeaderText=""City"" Width=""100px"" />
-            </Columns>
-        </DropDownGridControl>
+        public const string Lookup = @"<div class=""pair"">
+    <div class=""lookup"">
+        <span class=""field-label"">Flying from</span>
+        <div class=""lookup-box"">
+            <DropDownGridControl TItem=""Airport"" TValue=""string"" DataSource=""@AirportData.Airports"" @bind-Value=""_fromCode""
+                                 ValueFieldName=""Code"" ClosedTextFieldName=""Label"" Placeholder=""Choose an airport""
+                                 SearchPlaceholder=""Code, city, country or name"" PopupWidth=""560px"" PopupHeight=""260px"" RowHeight=""24"">
+                <Columns>
+                    <GridColumn Field=""Code"" HeaderText=""Code"" Width=""60px"" />
+                    <GridColumn Field=""Name"" HeaderText=""Airport"" Width=""230px"" />
+                    <GridColumn Field=""City"" HeaderText=""City"" Width=""120px"" />
+                    <GridColumn Field=""Country"" HeaderText=""Country"" Width=""130px"" />
+                </Columns>
+            </DropDownGridControl>
+        </div>
+    </div>
+    <div class=""lookup"">
+        <span class=""field-label"">Flying to</span>
+        <div class=""lookup-box"">
+            <DropDownGridControl TItem=""Airport"" TValue=""string"" DataSource=""@AirportData.Airports"" @bind-Value=""_toCode""
+                                 ValueFieldName=""Code"" ClosedTextFieldName=""Label"" Placeholder=""Choose an airport""
+                                 SearchPlaceholder=""Code, city, country or name"" PopupWidth=""560px"" PopupHeight=""260px"" RowHeight=""24"">
+                <Columns>
+                    <GridColumn Field=""Code"" HeaderText=""Code"" Width=""60px"" />
+                    <GridColumn Field=""Name"" HeaderText=""Airport"" Width=""230px"" />
+                    <GridColumn Field=""City"" HeaderText=""City"" Width=""120px"" />
+                    <GridColumn Field=""Country"" HeaderText=""Country"" Width=""130px"" />
+                </Columns>
+            </DropDownGridControl>
+        </div>
     </div>
 </div>
-@if (_supplier is null)
+@if (Find(_fromCode) is { } from && Find(_toCode) is { } to)
 {
-    <p class=""result"">Value <strong>@(_supplierCode ?? ""null"")</strong>: no supplier chosen.</p>
+    <p class=""result""><strong>@from.Code → @to.Code</strong>: @from.Name, @from.Country to @to.Name, @to.Country.
+        Great-circle distance <strong>@Kilometres(from, to).ToString(""N0"") km</strong> (@((Kilometres(from, to) / 1.609344).ToString(""N0"")) miles).</p>
 }
 else
 {
-    <dl class=""supplier"">
-        <dt>Value</dt><dd>@_supplierCode</dd>
-        <dt>Supplier</dt><dd>@_supplier.Name</dd>
-        <dt>Category</dt><dd>@_supplier.Category</dd>
-        <dt>Address</dt><dd>@_supplier.Address, @_supplier.City, @_supplier.Country</dd>
-        <dt>Phone</dt><dd>@_supplier.Phone</dd>
-        <dt>Email</dt><dd>@_supplier.Email</dd>
-        <dt>Online booking</dt><dd>@(_supplier.OnlineBooking ? ""Yes"" : ""No"")</dd>
-    </dl>
+    <p class=""result"">Value from <strong>@(_fromCode ?? ""null"")</strong> · to <strong>@(_toCode ?? ""null"")</strong>: pick both airports for the distance.</p>
 }";
-        public const string LookupCs = @"// Supplier lookup
-[Inject] private BenchDataStore BenchData { get; set; } = default!;
-private string? _supplierCode;
-private SupplierRecord? _supplier;";
+        public const string LookupCss = @".pair { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
+.field-label, .pane-title { display: block; font-size: 12px; color: #64748b; margin: 0 0 6px; }
+.result { font-size: 13px; color: #475569; margin: 14px 0 0; }
+.lookup { width: 280px; max-width: 100%; }
+.lookup-box { height: 26px; }";
+        public const string LookupCs = @"// Airport lookups: the OurAirports snapshot from Data/AirportData.cs; the values are airport codes
+private string? _fromCode = ""LHR"";
+private string? _toCode = ""LIS"";
+private static readonly Dictionary<string, Airport> _airportsByCode = AirportData.Airports.ToDictionary(a => a.Code);
+private static Airport? Find(string? code) => code is not null && _airportsByCode.TryGetValue(code, out var airport) ? airport : null;
+
+// Great-circle distance on a sphere of radius 6,371 km (the haversine formula)
+private static double Kilometres(Airport a, Airport b)
+{
+    static double Radians(double degrees) => degrees * Math.PI / 180;
+    var dLat = Radians(b.Latitude - a.Latitude);
+    var dLon = Radians(b.Longitude - a.Longitude);
+    var h = Math.Pow(Math.Sin(dLat / 2), 2) + Math.Cos(Radians(a.Latitude)) * Math.Cos(Radians(b.Latitude)) * Math.Pow(Math.Sin(dLon / 2), 2);
+    return 2 * 6371 * Math.Asin(Math.Sqrt(h));
+}";
         public const string Listbox = @"<div class=""pair"">
     <div>
         <p class=""pane-title"" id=""wish-title"">Wish list</p>

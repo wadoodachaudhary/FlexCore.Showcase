@@ -6,7 +6,11 @@ namespace FlexCore.Showcase.Data;
 public sealed record Airport(
     string Code, string Icao, string Name, string Type, string City, string CountryCode, string Country,
     string Continent, string Region, double Latitude, double Longitude, int? ElevationFt, string Wikipedia,
-    int Runways, int? LongestRunwayFt);
+    int Runways, int? LongestRunwayFt)
+{
+    /// <summary>Code and city, e.g. "LIS · Lisbon": the text a closed lookup shows.</summary>
+    public string Label => $"{Code} · {City}";
+}
 
 /// <summary>One runway of an <see cref="Airport"/>; <see cref="Surface"/> is a plain group, <see cref="SurfaceCode"/> the source's code.</summary>
 public sealed record Runway(

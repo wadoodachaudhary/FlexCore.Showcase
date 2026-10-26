@@ -2,13 +2,16 @@
 @rendermode InteractiveServer
 @using Fx.ControlKit
 @using FlexCore.Showcase.Components.Shared
+@using FlexCore.Showcase.Data
 
 @* 2026-10-19: new page (Baaria approved the Control tour split; third page). The tour's Selection tab moved here and was removed
    there. Of that tab, RadioGroupControl already lives on Checks & switches and CalendarControl and TimePickerControl on Date & time,
    so this page carries AutoCompleteControl, StepperControl and ColorPaletteControl; DropDownListControl (29 parameters) is proposed
    as a page of its own (SC-279). Documentation written from AutoCompleteControl.razor, StepperControl.razor, WizardModels.cs,
    ColorPaletteControl.razor and ColorPalettes.cs; rows checked with scratchpad/vocabcheck.py; behaviour sentences read from
-   SearchAsync/CommitAsync, CanSelect/SelectAsync/KeyAsync and SelectAsync/KeyAsync/OnParametersSet. *@
+   SearchAsync/CommitAsync, CanSelect/SelectAsync/KeyAsync and SelectAsync/KeyAsync/OnParametersSet.
+   2026-10-26 (Baaria): the suggestions example now lists the operator's twelve destinations and looks up the 4,009 airports of the
+   Data Grid page (OurAirports, Data/AirportData.cs) through the callback, instead of mostly US cities and a hardware list. *@
 
 <PageTitle>Pickers &amp; selectors — FlexCore Showcase</PageTitle>
 
@@ -29,7 +32,7 @@
 
     <Examples>
         <DemoExample Id="suggest" Title="Suggestions while typing" RazorCode="@Code.Suggest" CSharpCode="@Code.SuggestCs">
-            <Description><p>Left: twelve cities filtered by the control, case-insensitive, anywhere in the name, after one character and a 250 ms pause; an <code>ItemTemplate</code> adds the country, and <code>ItemSelected</code> reports the city object once the text matches a suggestion. Right: <code>OnRead</code> answers from a callback that waits 300 ms like a server would, after two characters and a 400 ms pause, five suggestions at most; typing on cancels the previous lookup. In both, the bound value is the text, whether or not it came from the list.</p></Description>
+            <Description><p>Left: the twelve destinations, filtered by the control, case-insensitive, anywhere in the name, after one character and a 250 ms pause; an <code>ItemTemplate</code> adds the country, and <code>ItemSelected</code> reports the destination once the text matches a suggestion. Right: <code>OnRead</code> searches the 4,009 airports from the <a href="demo/grid">Data Grid</a> page through a callback that waits 300 ms like a server would, after two characters and a 400 ms pause, five suggestions at most: an exact code first, then cities and names that start with the text. Try <em>KEF</em>, <em>Lisbon</em> or <em>Portugal</em>. Typing on cancels the previous lookup. In both, the bound value is the text, whether or not it came from the list.</p></Description>
             <Demo>
                 <div class="pair">
                     <div>
@@ -40,9 +43,11 @@
                         <p class="result">Text: @(_cityText ?? "") · Picked: @(_pickedCity is null ? "nothing yet" : $"{_pickedCity.Name}, {_pickedCity.Country}")</p>
                     </div>
                     <div>
-                        <p class="pane-title">From a callback</p>
-                        <AutoCompleteControl TItem="string" OnRead="LookupAsync" MinLength="2" DebounceDelay="400" MaxSuggestions="5" @bind-Value="_product" Placeholder="Type two letters" AriaLabel="Product" Width="100%" />
-                        <p class="result">Text: @(_product ?? "") · @_lookups lookups so far.</p>
+                        <p class="pane-title">From a callback: 4,009 airports</p>
+                        <AutoCompleteControl TItem="Airport" OnRead="LookupAsync" TextField="Name" MinLength="2" DebounceDelay="400" MaxSuggestions="5" @bind-Value="_airportText" ItemSelected="a => _pickedAirport = a" Placeholder="Airport, city, code or country" AriaLabel="Airport" Width="100%">
+                            <ItemTemplate Context="airport"><strong>@airport.Code</strong> @airport.Name <span class="muted">@airport.City, @airport.Country</span></ItemTemplate>
+                        </AutoCompleteControl>
+                        <p class="result">Text: @(_airportText ?? "") · Picked: @(_pickedAirport is null ? "nothing yet" : $"{_pickedAirport.Code}, {_pickedAirport.City}, {_pickedAirport.Country}") · @_lookups lookups so far.</p>
                     </div>
                 </div>
             </Demo>
@@ -166,29 +171,27 @@
 
 @code {
     private sealed record City(string Name, string Country);
-    private readonly City[] _cities =
-    [
-        new("Amsterdam", "Netherlands"), new("Boston", "United States"), new("Chicago", "United States"), new("Denver", "United States"),
-        new("Dublin", "Ireland"), new("Lisbon", "Portugal"), new("London", "United Kingdom"), new("Madrid", "Spain"),
-        new("New York", "United States"), new("Oslo", "Norway"), new("San Francisco", "United States"), new("Seattle", "United States"),
-    ];
+    private readonly City[] _cities = TravelData.Destinations.Select(d => new City(d.City, d.Country)).ToArray();
     private string? _cityText;
     private City? _pickedCity;
 
-    private readonly string[] _products =
-    [
-        "Anchor bolt", "Angle bracket", "Ball valve", "Brass elbow", "Cable tie", "Carriage bolt", "Copper pipe", "Deck screw",
-        "Drywall anchor", "Flat washer", "Hex nut", "Lag screw", "Machine screw", "Pipe clamp", "Spring washer", "Steel strap",
-        "Toggle bolt", "Wall plug", "Wing nut", "Wood dowel",
-    ];
-    private string? _product;
+    private string? _airportText;
+    private Airport? _pickedAirport;
     private int _lookups;
-    private async Task<IEnumerable<string>> LookupAsync(string text, CancellationToken token)
+
+    // Stands in for a server search over the airports (Data/AirportData.cs): an exact code first, then cities and names that start
+    // with the text, larger airports before smaller ones; the control keeps the first five.
+    private async Task<IEnumerable<Airport>> LookupAsync(string text, CancellationToken token)
     {
         _lookups++;
         await InvokeAsync(StateHasChanged);   // the control re-renders itself, not this page, so refresh the counter here
         await Task.Delay(300, token);
-        return _products.Where(p => p.Contains(text, StringComparison.OrdinalIgnoreCase));
+        var ignoreCase = StringComparison.OrdinalIgnoreCase;
+        return AirportData.Airports
+            .Where(a => a.Code.Contains(text, ignoreCase) || a.City.Contains(text, ignoreCase) || a.Name.Contains(text, ignoreCase) || a.Country.Contains(text, ignoreCase))
+            .OrderBy(a => a.Code.Equals(text, ignoreCase) ? 0 : a.City.StartsWith(text, ignoreCase) ? 1 : a.Name.StartsWith(text, ignoreCase) ? 2 : 3)
+            .ThenBy(a => a.Type switch { "Large" => 0, "Medium" => 1, _ => 2 })
+            .ThenBy(a => a.Name);
     }
 
     private StepperControl? _stepper;
@@ -225,41 +228,35 @@
         <p class=""result"">Text: @(_cityText ?? """") · Picked: @(_pickedCity is null ? ""nothing yet"" : $""{_pickedCity.Name}, {_pickedCity.Country}"")</p>
     </div>
     <div>
-        <p class=""pane-title"">From a callback</p>
-        <AutoCompleteControl TItem=""string"" OnRead=""LookupAsync"" MinLength=""2"" DebounceDelay=""400"" MaxSuggestions=""5"" @bind-Value=""_product"" Placeholder=""Type two letters"" AriaLabel=""Product"" Width=""100%"" />
-        <p class=""result"">Text: @(_product ?? """") · @_lookups lookups so far.</p>
+        <p class=""pane-title"">From a callback: 4,009 airports</p>
+        <AutoCompleteControl TItem=""Airport"" OnRead=""LookupAsync"" TextField=""Name"" MinLength=""2"" DebounceDelay=""400"" MaxSuggestions=""5"" @bind-Value=""_airportText"" ItemSelected=""a => _pickedAirport = a"" Placeholder=""Airport, city, code or country"" AriaLabel=""Airport"" Width=""100%"">
+            <ItemTemplate Context=""airport""><strong>@airport.Code</strong> @airport.Name <span class=""muted"">@airport.City, @airport.Country</span></ItemTemplate>
+        </AutoCompleteControl>
+        <p class=""result"">Text: @(_airportText ?? """") · Picked: @(_pickedAirport is null ? ""nothing yet"" : $""{_pickedAirport.Code}, {_pickedAirport.City}, {_pickedAirport.Country}"") · @_lookups lookups so far.</p>
     </div>
 </div>";
         public const string SuggestCs = @"private sealed record City(string Name, string Country);
-
-private readonly City[] _cities =
-[
-    new(""Amsterdam"", ""Netherlands""), new(""Boston"", ""United States""), new(""Chicago"", ""United States""), new(""Denver"", ""United States""),
-    new(""Dublin"", ""Ireland""), new(""Lisbon"", ""Portugal""), new(""London"", ""United Kingdom""), new(""Madrid"", ""Spain""),
-    new(""New York"", ""United States""), new(""Oslo"", ""Norway""), new(""San Francisco"", ""United States""), new(""Seattle"", ""United States""),
-];
-
+private readonly City[] _cities = TravelData.Destinations.Select(d => new City(d.City, d.Country)).ToArray();
 private string? _cityText;
-
 private City? _pickedCity;
 
-private readonly string[] _products =
-[
-    ""Anchor bolt"", ""Angle bracket"", ""Ball valve"", ""Brass elbow"", ""Cable tie"", ""Carriage bolt"", ""Copper pipe"", ""Deck screw"",
-    ""Drywall anchor"", ""Flat washer"", ""Hex nut"", ""Lag screw"", ""Machine screw"", ""Pipe clamp"", ""Spring washer"", ""Steel strap"",
-    ""Toggle bolt"", ""Wall plug"", ""Wing nut"", ""Wood dowel"",
-];
-
-private string? _product;
-
+private string? _airportText;
+private Airport? _pickedAirport;
 private int _lookups;
 
-private async Task<IEnumerable<string>> LookupAsync(string text, CancellationToken token)
+// Stands in for a server search over the airports (Data/AirportData.cs): an exact code first, then cities and names that start
+// with the text, larger airports before smaller ones; the control keeps the first five.
+private async Task<IEnumerable<Airport>> LookupAsync(string text, CancellationToken token)
 {
     _lookups++;
     await InvokeAsync(StateHasChanged);   // the control re-renders itself, not this page, so refresh the counter here
     await Task.Delay(300, token);
-    return _products.Where(p => p.Contains(text, StringComparison.OrdinalIgnoreCase));
+    var ignoreCase = StringComparison.OrdinalIgnoreCase;
+    return AirportData.Airports
+        .Where(a => a.Code.Contains(text, ignoreCase) || a.City.Contains(text, ignoreCase) || a.Name.Contains(text, ignoreCase) || a.Country.Contains(text, ignoreCase))
+        .OrderBy(a => a.Code.Equals(text, ignoreCase) ? 0 : a.City.StartsWith(text, ignoreCase) ? 1 : a.Name.StartsWith(text, ignoreCase) ? 2 : 3)
+        .ThenBy(a => a.Type switch { ""Large"" => 0, ""Medium"" => 1, _ => 2 })
+        .ThenBy(a => a.Name);
 }";
         public const string Steps = @"<StepperControl @ref=""_stepper"" Steps=""@_steps"" @bind-Value=""_step"" InvalidSteps=""@InvalidSteps"" CanNavigate=""Navigating"" AriaLabel=""Checkout steps"" />
 <p class=""result"">Step @(_step + 1) of @_steps.Count: @_steps[_step].Title. @_navLog</p>";
