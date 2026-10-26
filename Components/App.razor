@@ -11,7 +11,10 @@
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["FlexCore.Showcase.styles.css"]" />
     <ImportMap />
-    <link rel="icon" type="image/png" href="favicon.png" />
+    @* 2026-10-26 (Baaria): the tab icon is the FlexCore mark from the top bar, not the Blazor default. SVG for browsers that take
+       it, a 32 px PNG rendered from it for the rest; @Assets fingerprints both so browsers drop the cached old icon. *@
+    <link rel="icon" type="image/png" sizes="32x32" href="@Assets["favicon.png"]" />
+    <link rel="icon" type="image/svg+xml" sizes="any" href="@Assets["favicon.svg"]" />
     @* InteractiveServer like <Routes>: a static HeadOutlet only takes the prerendered title, so <PageTitle> changes on in-app
        navigation never reached the browser tab (2026-10-17, SC-303). *@
     <HeadOutlet @rendermode="InteractiveServer" />

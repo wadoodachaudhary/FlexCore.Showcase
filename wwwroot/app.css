@@ -255,6 +255,9 @@ h1:focus {
 }
 
 /* ── Home hero grid theme ──────────────────────────────────────────────── */
+/* The trip-type DropDownGridControl renders its popup grid inside the hero grid's cells, so the hero's cell and row rules carry
+   :not(.fx-dropdown-grid-popup *); without it the popup took the hero's 36 px rows and padding. Header rules still reach the
+   popup's headers on purpose (the popup grid sorts too). */
 .fx-grid.hero-grid-theme {
     --fx-grid-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
     --fx-grid-font-size: 13px !important;
@@ -294,7 +297,7 @@ h1:focus {
     height: 38px !important;
 }
 
-.fx-grid.hero-grid-theme .fx-cell {
+.fx-grid.hero-grid-theme .fx-cell:not(.fx-dropdown-grid-popup *) {
     padding: 7px 12px !important;
     font-size: 13px !important;
     line-height: 1.4 !important;
@@ -306,18 +309,31 @@ h1:focus {
 
 /* Frozen cells paint background-color: inherit, so a row with no background let the scrolled cells show through the
    Request column; every row gets an opaque one (the hover rule below is more specific and still wins). */
-.fx-grid.hero-grid-theme .fx-row {
+.fx-grid.hero-grid-theme .fx-row:not(.fx-dropdown-grid-popup *) {
     background-color: #ffffff !important;
 }
-.fx-grid.hero-grid-theme .fx-row.fx-alt-row {
+.fx-grid.hero-grid-theme .fx-row.fx-alt-row:not(.fx-dropdown-grid-popup *) {
     background-color: #fbfcfe !important;
 }
 
-.fx-grid.hero-grid-theme .fx-row:hover {
+.fx-grid.hero-grid-theme .fx-row:not(.fx-dropdown-grid-popup *):hover {
     background-color: #f1f5f9 !important;
 }
 
-/* Every hero column has a Field and sorts on a header click: a faint arrow says so until the grid draws its own ▲ / ▼. */
+/* GridControl's scoped selected-row rule ends in a descendant `.fx-cell`, so it also paints the cells of the popup grid opened in
+   a selected hero row: every option took the selected colours. Inside the popup the selection colour variables are reset on the
+   popup's grid (it declares its own defaults) and set again on its selected row, so only the current option is tinted. */
+.fx-grid.hero-grid-theme .fx-dropdown-grid-popup .fx-grid {
+    --fx-grid-selected-row-bg: #ffffff;
+    --fx-grid-selected-row-color: #1e293b;
+}
+.fx-grid.hero-grid-theme .fx-dropdown-grid-popup tr.fx-row.fx-selected {
+    --fx-grid-selected-row-bg: #e0f2fe;
+    --fx-grid-selected-row-color: #0369a1;
+}
+
+/* Every hero column has a Field and sorts on a header click: a faint arrow says so until the grid draws its own ▲ / ▼ (the
+   popup grid's headers sort as well and get the same hint). */
 .fx-grid.hero-grid-theme th.fx-header-cell[data-field] {
     cursor: pointer;
 }
@@ -337,8 +353,8 @@ h1:focus {
     color: #0284c7;
 }
 
-.fx-grid.hero-grid-theme .fx-row.fx-selected > td,
-.fx-grid.hero-grid-theme .fx-row.fx-selected .fx-cell {
+.fx-grid.hero-grid-theme .fx-row.fx-selected:not(.fx-dropdown-grid-popup *) > td,
+.fx-grid.hero-grid-theme .fx-row.fx-selected:not(.fx-dropdown-grid-popup *) > .fx-cell {
     background-color: #dbeafe !important;
     color: #1e3a8a !important;
     font-weight: 500 !important;
@@ -601,19 +617,21 @@ h1:focus {
 
 /* DropDownGridControl keeps its popup hidden at top/left -9999px until two JS round trips (loading its module, then measuring) and
    a server render place it: 0.6 to 0.85 s on the live site from Pakistan, against about 0.23 s for the popup's markup to arrive.
-   While it waits in that state, CSS anchor positioning shows it under its box at once; the library's own placement replaces the
-   inline style and this rule stops matching (measured 2026-10-26: the two positions agree within 1 px). Browsers without anchor
-   positioning keep the library's behaviour. If the library's hidden-state inline style changes, this simply stops matching. */
+   Its placement is also a fixed screen position taken once, so when the popup grid reveals its current row and the hero grid
+   scrolls under it (seen 2026-10-26), the popup is left a row away from its box. CSS anchor positioning ties the open popup to
+   its box instead, from the first render (the library's inline top/left are overridden), and flips it when it would leave the
+   window. Browsers without anchor positioning keep the library's placement. */
 @supports (anchor-name: --a) {
     .fx-dropdown-grid.fx-open > .fx-dropdown-grid-input-wrap {
         anchor-name: --fx-dropdown-grid-open;
     }
-    .fx-dropdown-grid-popup[style*="top: -9999px"] {
+    .fx-dropdown-grid.fx-open > .fx-dropdown-grid-popup {
+        position: fixed !important;
         position-anchor: --fx-dropdown-grid-open;
         top: anchor(bottom) !important;
         left: anchor(left) !important;
         visibility: visible !important;
-        position-try-fallbacks: flip-block;
+        position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
     }
 }
 

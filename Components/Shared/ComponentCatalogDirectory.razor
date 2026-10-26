@@ -269,79 +269,61 @@
         // SC-347: TextBox, Numeric TextBox and TextArea point at Text inputs; DropDownList, DropDownGrid and ListBox at Lists & dropdowns;
         // Rich Text Editor and Format at the editor page; Diagram, Scheduler and Property Grid (Forms) at their new examples; Grid Layout,
         // Progress Bar and Carousel at the third examples on Page layouts, UI elements and Cards.
+        // 2026-10-26 (Baaria, SC-350): one row per component, named the way Syncfusion, Telerik, MudBlazor and Radzen name theirs. Grid
+        // features (live updates, batch editing, frozen columns, virtualization, master-detail, reordering…), sub-parts (report parameter
+        // dialog, format control, card group, form item and group, LLM result card) and variants (pill buttons, the Financial & gauges
+        // page) left the directory; none of the four lists those as components, and every one of those pages stays in the top menu. The
+        // four gauge rows are one (one GaugeControl), the three validation rows one; DateRangePicker added.
         new("grid", "Data Grid", "demo/grid"),
-        new("live-grid", "Live Updates (ticker)", "demo/grid/live-updates"),
-        new("grid", "Warehouse Detail (master-detail)", "demo/grid/master-detail#warehouses"),
-        new("tree-grid", "Org Chart (tree grid)", "demo/grid/tree-grid#org"),
         new("tree-grid", "Tree Grid", "demo/grid/tree-grid"),
         new("pivot", "Pivot Table", "demo/pivot"),
-        new("data-control", "Data Control", "demo/data-control"),
-        new("virtualization", "Scroll vs Paging", "demo/grid/virtualization-bench"),
-        new("selection", "100k Rows", "demo/grid/row-selection-50k"),
-        new("frozen", "Frozen Columns", "demo/grid/advanced"),
-        new("col-virt", "Wide Grids", "demo/grid/column-virtualization"),
-        new("col-swap", "Column Sets", "demo/grid/column-swap"),
-        new("batch-edit", "Batch Editing", "demo/grid/batch-editing"),
-        new("provider", "On-Demand Items Provider", "demo/grid/provider-enterprise#search"),
-        new("input-text", "Typing Modes", "demo/grid/typing-modes"),
-        new("dynamic-columns", "Dynamic Columns", "demo/grid/dynamic-columns#dynamic"),
-        new("veto", "Unsaved-Row Lock", "demo/grid/unsaved-row-lock"),
-        new("master-detail", "Master-Detail", "demo/grid/master-detail"),
-        new("reorder", "Column Reorder", "demo/grid/reordering")
+        new("data-control", "Data Control", "demo/data-control")
     ];
 
     private readonly DirectoryItem[] _fileViewers =
     [
         new("editor", "Rich Text Editor", "demo/rich-text-editor"),
         new("pdf", "PDF Viewer", "demo/pdf-viewer"),
-        new("report", "Report Writer Control", "demo/reports/package-costs"),
-        new("report-param", "Report Parameter Dialog", "demo/reports/package-costs#report"),
-        new("format", "Format Control", "demo/rich-text-editor#document")
+        new("report", "Report Writer", "demo/reports/package-costs")
     ];
 
     private readonly DirectoryItem[] _layoutWorkspace =
     [
-        new("page-control", "PageControl", "demo/page-navigation"),
+        new("page-control", "Page Navigation", "demo/page-navigation"),
         new("dock", "Dock Manager", "demo/dock-manager"),
-        new("splitter", "Splitter Control", "demo/layout#shell"),
+        new("splitter", "Splitter", "demo/layout#shell"),
         new("dashboard", "Dashboard Layout", "demo/layout#dashboard"),
         new("grid", "Grid Layout", "demo/layout#grid"),
-        new("card", "Card Control", "demo/cards#card"),
-        new("card-group", "Card Group", "demo/cards#group"),
+        new("card", "Card", "demo/cards#card"),
         new("timeline", "Timeline", "demo/new-components#content")
     ];
 
     private readonly DirectoryItem[] _dataVis =
     [
-        new("chart-bar", "Charts Gallery", "demo/charts"),
-        new("sunburst", "COVID-19 Sunburst", "demo/charts/sunburst"),
-        new("map-story", "Unemployment map story", "demo/charts/map-story"),
-        new("stock", "Stock & Financial Chart", "demo/gauges#stock"),
-        new("gauge-circular", "Circular Gauge", "demo/gauges#gauges"),
-        new("gauge-linear", "Linear Gauge", "demo/gauges#gauges"),
-        new("gauge-radial", "Radial Gauge", "demo/gauges#gauges"),
-        new("gauge-arc", "Arc Gauge", "demo/gauges#gauges"),
+        new("chart-bar", "Charts", "demo/charts"),
+        new("sunburst", "Sunburst Chart", "demo/charts/sunburst"),
+        new("map-story", "Map", "demo/charts/map-story"),
+        new("stock", "Stock Chart", "demo/gauges#stock"),
+        new("gauge-circular", "Gauges", "demo/gauges#gauges"),
         new("sparkline", "Sparkline Charts", "demo/charts?tab=sparkline#gallery"),
         new("barcode", "Barcode Generator", "demo/barcodes#barcode"),
-        new("qrcode", "QR Code Generator", "demo/barcodes#qr"),
-        new("chart-bar", "Financial & Gauges", "demo/advanced-charts")
+        new("qrcode", "QR Code Generator", "demo/barcodes#qr")
     ];
 
     private readonly DirectoryItem[] _diagrams =
     [
-        new("diagram", "Diagram Flowchart", "demo/diagram"),
-        new("treeview", "TreeView Explorer", "demo/tree/treeview-explorer"),
+        new("diagram", "Diagram", "demo/diagram"),
+        new("treeview", "TreeView", "demo/tree/treeview-explorer"),
         new("property-grid", "Property Grid", "demo/forms#property-grid")
     ];
 
     // Pill deep-links to the Button page's Themes and pill variants example; Split and Toggle have their own pages (2026-10-12).
     private readonly DirectoryItem[] _buttonsActions =
     [
-        new("button", "Button Control", "demo/buttons"),
+        new("button", "Button", "demo/buttons"),
         new("split-button", "Split Button", "demo/split-button"),
         new("toggle-button", "Toggle Button", "demo/toggle-buttons"),
-        new("fab", "Floating Action Button (FAB)", "demo/fab#menu"),
-        new("button", "Rounded Pill Buttons", "demo/buttons#variants")
+        new("fab", "Floating Action Button", "demo/fab#menu")
     ];
 
     private readonly DirectoryItem[] _scheduling =
@@ -350,6 +332,7 @@
         new("scheduler", "Scheduler", "demo/scheduler"),
         new("calendar", "Calendar", "demo/date-time#calendar"),
         new("datepicker", "DatePicker", "demo/date-time#appointment"),
+        new("daterange", "DateRangePicker", "demo/date-time#range"),
         new("timepicker", "TimePicker", "demo/date-time#appointment"),
         new("timespan", "TimeSpan Picker", "demo/date-time#appointment")
     ];
@@ -359,59 +342,54 @@
         new("input-number", "Numeric TextBox", "demo/text-inputs#details"),
         new("input-text", "TextBox", "demo/text-inputs#details"),
         new("textarea", "TextArea", "demo/text-inputs#notes"),
-        new("otp", "OTP / Security Code", "demo/security-code"),
+        new("otp", "OTP Input", "demo/security-code"),
         new("slider", "Slider & Range Slider", "demo/sliders"),
         new("checkbox", "Checkbox", "demo/checks#checks"),
         new("radio", "Radio Group", "demo/checks#radio"),
-        new("switch", "Toggle Switch", "demo/checks#radio"),
+        new("switch", "Switch", "demo/checks#radio"),
         new("palette", "Color Palette", "demo/pickers#palette"),
-        new("rating", "Star Rating", "demo/checks#rating")
+        new("rating", "Rating", "demo/checks#rating")
     ];
 
     private readonly DirectoryItem[] _forms =
     [
-        new("form", "Form Control", "demo/forms#generated"),
-        new("form-item", "Form Item Control", "demo/forms#handbuilt"),
-        new("form-group", "Form Group Control", "demo/forms#handbuilt"),
-        new("validation", "Validation Summary", "demo/forms#generated"),
-        new("validation", "Validation Message", "demo/forms#generated"),
-        new("validation", "Validation Tooltip", "demo/forms#handbuilt")
+        new("form", "Form", "demo/forms#generated"),
+        new("validation", "Validation", "demo/forms#generated")
     ];
 
     private readonly DirectoryItem[] _dropdowns =
     [
         new("dropdown", "DropDownList", "demo/lists-dropdowns#dropdown"),
-        new("dropdowngrid", "DropDownGrid Control", "demo/lists-dropdowns#lookup"),
+        new("dropdowngrid", "DropDownGrid", "demo/lists-dropdowns#lookup"),
         new("autocomplete", "AutoComplete", "demo/pickers#suggest"),
         new("listbox", "ListBox", "demo/lists-dropdowns#listbox")
     ];
 
     private readonly DirectoryItem[] _navigation =
     [
-        new("ribbon", "Office Ribbon", "?tab=ribbon#live-showcase"),   // the home hero, opened on its Ribbon tab (base href is the site root)
-        new("toolbar", "Toolbar Control", "demo/ai-prompt#app-bar"),
-        new("tab", "Tab Control", "demo/tabs-accordion#tabs"),
-        new("accordion", "Accordion Control", "demo/tabs-accordion#accordion"),
-        new("appbar", "AppBar Control", "demo/ai-prompt#app-bar"),
+        new("ribbon", "Ribbon", "?tab=ribbon#live-showcase"),   // the home hero, opened on its Ribbon tab (base href is the site root)
+        new("toolbar", "Toolbar", "demo/ai-prompt#app-bar"),
+        new("tab", "Tabs", "demo/tabs-accordion#tabs"),
+        new("accordion", "Accordion", "demo/tabs-accordion#accordion"),
+        new("appbar", "AppBar", "demo/ai-prompt#app-bar"),
         new("breadcrumb", "Breadcrumb", "demo/new-components#content"),
-        new("stepper", "Stepper Control", "demo/pickers#steps"),
+        new("stepper", "Stepper", "demo/pickers#steps"),
         new("carousel", "Carousel", "demo/cards#carousel")
     ];
 
     private readonly DirectoryItem[] _feedback =
     [
-        new("dialog", "Modal Dialog", "demo/dialog#modal"),
-        new("toast", "Toast Notifications", "demo/notifications"),
-        new("alert", "Context Alert Banners", "demo/new-components#status"),
-        new("badge", "Status Badges", "demo/new-components#status"),
+        new("dialog", "Dialog", "demo/dialog#modal"),
+        new("toast", "Toast", "demo/notifications"),
+        new("alert", "Alert", "demo/new-components#status"),
+        new("badge", "Badge", "demo/new-components#status"),
         new("progress", "Progress Bar", "demo/new-components#progress"),
-        new("skeleton", "Loading Skeleton", "demo/new-components#status")
+        new("skeleton", "Skeleton", "demo/new-components#status")
     ];
 
     private readonly DirectoryItem[] _aiAssist =
     [
-        new("ai-prompt", "AI Prompt Control", "demo/ai-prompt#prompt"),
-        new("llm-card", "LLM Result Card", "demo/ai-prompt#prompt")
+        new("ai-prompt", "AI Prompt", "demo/ai-prompt#prompt")
     ];
 
     private bool MatchesCategory(string catName, DirectoryItem[] items)
