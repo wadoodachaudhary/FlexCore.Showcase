@@ -29,7 +29,7 @@
 
     <Examples>
         <DemoExample Id="modal" Title="Modal dialog with a default button" RazorCode="@Code.Modal" CSharpCode="@Code.ModalCs">
-            <Description><p><code>@@bind-Visible</code> opens and closes it. <code>FooterContent</code> holds the buttons. <code>OnEnter</code> makes Archive the default button: Enter anywhere in the dialog fires it. Escape and the close icon cancel. The switch applies <code>fx-dialog-classic</code>, the Win32 frame for migrated VB6 forms.</p></Description>
+            <Description><p><code>@@bind-Visible</code> opens and closes it. <code>FooterContent</code> holds the buttons. <code>OnEnter</code> makes Archive the default button: Enter anywhere in the dialog fires it. It stays the default over a note, a date and a list in the body: Enter in any of them presses Archive. Escape and the close icon cancel. The switch applies <code>fx-dialog-classic</code>, the Win32 frame for migrated VB6 forms.</p></Description>
             <Controls>
                 <ToggleButtonControl @bind-Selected="_classic">Classic look</ToggleButtonControl>
             </Controls>
@@ -44,6 +44,11 @@
                                    CssClass="@(_classic ? "fx-dialog-classic" : null)" ShowWindowIcon="@_classic">
                         <ChildContent>
                             <p class="dlg-text">Archive <strong>Northwind rewrite</strong>? Members keep read access; nothing is deleted.</p>
+                            <div style="display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center;">
+                                <span>Note</span><TextBoxControl @bind-Value="_note" TypingBehavior="TextBoxTypingBehavior.ClientBuffered" Placeholder="Optional note" />
+                                <span>Due</span><DatePickerControl @bind-Value="_due" />
+                                <span>Priority</span><DropDownListControl TItem="string" TValue="string" DataSource="@_priorities" @bind-Value="_priority" Width="160px" />
+                            </div>
                         </ChildContent>
                         <FooterContent>
                             <ButtonControl CssClass="@(_classic ? "fx-button-classic" : "btn-primary")" OnClick="Archive">Archive</ButtonControl>
@@ -137,7 +142,17 @@
     // Modal
     private bool _archiveOpen, _classic;
     private string? _archiveResult;
-    private void Archive() { _archiveOpen = false; _archiveResult = $"Archived at {DateTime.Now:HH:mm:ss}"; }
+    private string _note = "";
+    private DateTime? _due;
+    private string _priority = "Normal";
+    private readonly List<string> _priorities = new() { "Low", "Normal", "High" };
+    private void Archive()
+    {
+        _archiveOpen = false;
+        _archiveResult = $"Archived at {DateTime.Now:HH:mm:ss} — priority {_priority}"
+            + (_due is { } due ? $", due {due:d}" : "")
+            + (string.IsNullOrWhiteSpace(_note) ? "" : $", note: {_note}");
+    }
 
     // Window
     private bool _winOpen;
@@ -269,6 +284,11 @@
                    CssClass=""@(_classic ? ""fx-dialog-classic"" : null)"" ShowWindowIcon=""@_classic"">
         <ChildContent>
             <p class=""dlg-text"">Archive <strong>Northwind rewrite</strong>? Members keep read access; nothing is deleted.</p>
+            <div style=""display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center;"">
+                <span>Note</span><TextBoxControl @bind-Value=""_note"" TypingBehavior=""TextBoxTypingBehavior.ClientBuffered"" Placeholder=""Optional note"" />
+                <span>Due</span><DatePickerControl @bind-Value=""_due"" />
+                <span>Priority</span><DropDownListControl TItem=""string"" TValue=""string"" DataSource=""@_priorities"" @bind-Value=""_priority"" Width=""160px"" />
+            </div>
         </ChildContent>
         <FooterContent>
             <ButtonControl CssClass=""@(_classic ? ""fx-button-classic"" : ""btn-primary"")"" OnClick=""Archive"">Archive</ButtonControl>
@@ -281,7 +301,18 @@ private bool _archiveOpen, _classic;
 
 private string? _archiveResult;
 
-private void Archive() { _archiveOpen = false; _archiveResult = $""Archived at {DateTime.Now:HH:mm:ss}""; }";
+private string _note = """";
+private DateTime? _due;
+private string _priority = ""Normal"";
+private readonly List<string> _priorities = new() { ""Low"", ""Normal"", ""High"" };
+
+private void Archive()
+{
+    _archiveOpen = false;
+    _archiveResult = $""Archived at {DateTime.Now:HH:mm:ss} — priority {_priority}""
+        + (_due is { } due ? $"", due {due:d}"" : """")
+        + (string.IsNullOrWhiteSpace(_note) ? """" : $"", note: {_note}"");
+}";
 
         public const string Window = @"<div class=""demo-row"">
     <ButtonControl CssClass=""btn-primary"" OnClick=""@(() => _winOpen = true)"">Open window</ButtonControl>
