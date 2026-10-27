@@ -237,7 +237,7 @@
     public sealed class OrderRequest
     {
         [Display(AutoGenerateField = false)] public Guid Id { get; set; } = Guid.NewGuid();
-        [Required, MinLength(2), Display(Name = "Customer name", Order = 0)] public string Name { get; set; } = "Avery Chen";
+        [Required, MinLength(2), Display(Name = "Customer name", Order = 0)] public string Name { get; set; } = "Clementine Marmalade";
         [Range(1, 20), Display(Order = 1)] public int Quantity { get; set; } = 1;
         [Display(Order = 2)] public Priority Priority { get; set; } = Priority.Normal;
         [Display(Name = "Effective from", Order = 3), DataType(DataType.DateTime)] public DateTime Effective { get; set; } = new(2026, 11, 2, 9, 0, 0);
@@ -309,7 +309,7 @@ public enum Priority { Low, Normal, High }
 public sealed class OrderRequest
 {
     [Display(AutoGenerateField = false)] public Guid Id { get; set; } = Guid.NewGuid();
-    [Required, MinLength(2), Display(Name = ""Customer name"", Order = 0)] public string Name { get; set; } = ""Avery Chen"";
+    [Required, MinLength(2), Display(Name = ""Customer name"", Order = 0)] public string Name { get; set; } = ""Clementine Marmalade"";
     [Range(1, 20), Display(Order = 1)] public int Quantity { get; set; } = 1;
     [Display(Order = 2)] public Priority Priority { get; set; } = Priority.Normal;
     [Display(Name = ""Effective from"", Order = 3), DataType(DataType.DateTime)] public DateTime Effective { get; set; } = new(2026, 11, 2, 9, 0, 0);

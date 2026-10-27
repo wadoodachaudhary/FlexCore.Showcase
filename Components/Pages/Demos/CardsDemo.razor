@@ -167,9 +167,9 @@
     private sealed record Quote(string Name, string Icon, string Summary, string Status, BadgeVariant Variant);
     private readonly Quote[] _quotes =
     {
-        new("AMF-0002 Brennan", "bi bi-geo-alt", "Amalfi coast drive, 9 lines, $6,240.", "Booked", BadgeVariant.Success),
-        new("CPT-0003 Halvorsen", "bi bi-sun", "Cape winelands, 8 lines, $8,150.", "Awaiting deposit", BadgeVariant.Warning),
-        new("KYO-0001 Lindqvist", "bi bi-map", "Kyoto long weekend, 6 lines, $4,860.", "Draft", BadgeVariant.Secondary),
+        new("AMF-0002 Puddleby", "bi bi-geo-alt", "Amalfi coast drive, 9 lines, $6,240.", "Booked", BadgeVariant.Success),
+        new("CPT-0003 Wobblesworth", "bi bi-sun", "Cape winelands, 8 lines, $8,150.", "Awaiting deposit", BadgeVariant.Warning),
+        new("KYO-0001 Thistlewood", "bi bi-map", "Kyoto long weekend, 6 lines, $4,860.", "Draft", BadgeVariant.Secondary),
     };
 
     // Carousel
@@ -305,9 +305,9 @@ private sealed record Quote(string Name, string Icon, string Summary, string Sta
 
 private readonly Quote[] _quotes =
 {
-    new(""AMF-0002 Brennan"", ""bi bi-geo-alt"", ""Amalfi coast drive, 9 lines, $6,240."", ""Booked"", BadgeVariant.Success),
-    new(""CPT-0003 Halvorsen"", ""bi bi-sun"", ""Cape winelands, 8 lines, $8,150."", ""Awaiting deposit"", BadgeVariant.Warning),
-    new(""KYO-0001 Lindqvist"", ""bi bi-map"", ""Kyoto long weekend, 6 lines, $4,860."", ""Draft"", BadgeVariant.Secondary),
+    new(""AMF-0002 Puddleby"", ""bi bi-geo-alt"", ""Amalfi coast drive, 9 lines, $6,240."", ""Booked"", BadgeVariant.Success),
+    new(""CPT-0003 Wobblesworth"", ""bi bi-sun"", ""Cape winelands, 8 lines, $8,150."", ""Awaiting deposit"", BadgeVariant.Warning),
+    new(""KYO-0001 Thistlewood"", ""bi bi-map"", ""Kyoto long weekend, 6 lines, $4,860."", ""Draft"", BadgeVariant.Secondary),
 };";
         public const string Carousel = @"<CarouselControl @ref=""_carousel"" @bind-ActiveIndex=""_slide"" ShowNavButtons=""_showNav"" ShowIndicators=""_showDots""
                  role=""region"" aria-roledescription=""carousel"" aria-label=""Destinations"">

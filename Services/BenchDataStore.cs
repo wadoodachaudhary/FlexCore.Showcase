@@ -159,8 +159,8 @@ public sealed class BenchDataStore
     /// <summary>One or two contacts per supplier: reservations first, then accounts for every other supplier.</summary>
     private static List<SupplierContactRecord> SynthesizeSupplierContacts(IReadOnlyList<SupplierRecord> suppliers)
     {
-        string[] firstNames = ["Ana", "Bruno", "Chiara", "Daniel", "Elif", "Farid", "Greta", "Hiro", "Ines", "Jonas", "Keiko", "Luis", "Mai", "Nadia", "Omar", "Paula", "Quang", "Rosa", "Sven", "Thandi"];
-        string[] lastNames = ["Almeida", "Bianchi", "Costa", "Dubois", "Eriksen", "Fujimoto", "Gomez", "Haddad", "Ivanova", "Jensen", "Khan", "Lund", "Mbeki", "Nakamura", "Okafor", "Pereira", "Quinn", "Rossi", "Santos", "Tran"];
+        string[] firstNames = ["Agatha", "Basil", "Crispin", "Dahlia", "Esme", "Florian", "Gideon", "Hazel", "Ignatius", "Jasper", "Mabel", "Nell", "Octavia", "Peregrine", "Quentin", "Rowan", "Sorrel", "Tobias", "Ursula", "Wren"];
+        string[] lastNames = ["Applebottom", "Butterworth", "Cobblestone", "Dimplewick", "Elderflower", "Fiddlesticks", "Gumboot", "Honeysuckle", "Inkwell", "Jumble", "Kettleby", "Larkspur", "Muddlecombe", "Noodle", "Oddfellow", "Picklesby", "Quickfoot", "Rumbletum", "Snodgrass", "Tiddlywink"];
         var list = new List<SupplierContactRecord>();
         var id = 1;
         for (var i = 0; i < suppliers.Count; i++)

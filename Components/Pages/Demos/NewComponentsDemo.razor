@@ -210,7 +210,7 @@
 </FeatureDemoLayout>
 
 @code {
-    private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", "/"), new("Requests", "demo/layout"), new("LIS-0001 Moreau") };
+    private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", "/"), new("Requests", "demo/layout"), new("LIS-0001 Marmalade") };
 
     // Progress (2026-10-25): the import is simulated; a PeriodicTimer on this page advances it and the controls only display it.
     private enum ImportPhase { Idle, Connecting, Importing, Cancelled, Failed, Done }
@@ -326,7 +326,7 @@
 <div class=""demo-row mt"">
     <BreadCrumbControl Items=""_crumbs"" />
 </div>";
-        public const string ContentCs = @"private readonly List<BreadCrumbItem> _crumbs = new() { new(""Home"", ""/""), new(""Requests"", ""demo/layout""), new(""LIS-0001 Moreau"") };";
+        public const string ContentCs = @"private readonly List<BreadCrumbItem> _crumbs = new() { new(""Home"", ""/""), new(""Requests"", ""demo/layout""), new(""LIS-0001 Marmalade"") };";
         public const string Progress = @"<div class=""demo-row"">
     <ButtonControl CssClass=""btn-primary"" OnClick=""StartImport"" Disabled=""Running"">Start import</ButtonControl>
     <ButtonControl OnClick=""FailImport"" Disabled=""@(_phase != ImportPhase.Importing)"">Simulate a failure</ButtonControl>

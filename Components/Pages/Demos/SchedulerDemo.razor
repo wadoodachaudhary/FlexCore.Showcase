@@ -52,7 +52,7 @@
         </DemoExample>
 
         <DemoExample Id="rules" Title="Changes the page refuses" RazorCode="@Code.Rules" CSharpCode="@Code.RulesCs">
-            <Description><p>Today's tours for two guides, Inês and Rui, given as <code>Resources</code> to the Day view: one column each, with the guide's colour on the left edge of the tours. <code>Changing</code> receives every create, update and delete after the control's own validation, with the action and a copy of the tour as it would be saved; setting <code>Cancel</code> keeps the list as it was. This page refuses a tour that starts before 08:00, a tour without a guide or whose times overlap another tour of the same guide, and the delete of a tour with seats sold (the old town walk and Belém by tram). Try it: double-click Rui's column at 13:30 and save, so the new hour runs into Belém by tram; drag the strip at the bottom of the old town walk down to 13:30, which is accepted, then below the food tour, which is not; open Belém by tram and delete it. The control shows no message for a refusal: a refused save leaves the editor open, a refused drag opens it with the dropped end time, and a refused delete leaves its confirmation open. Cancel, then read the line under the scheduler.</p></Description>
+            <Description><p>Today's tours for two guides, Lavender and Rufus, given as <code>Resources</code> to the Day view: one column each, with the guide's colour on the left edge of the tours. <code>Changing</code> receives every create, update and delete after the control's own validation, with the action and a copy of the tour as it would be saved; setting <code>Cancel</code> keeps the list as it was. This page refuses a tour that starts before 08:00, a tour without a guide or whose times overlap another tour of the same guide, and the delete of a tour with seats sold (the old town walk and Belém by tram). Try it: double-click Rufus's column at 13:30 and save, so the new hour runs into Belém by tram; drag the strip at the bottom of the old town walk down to 13:30, which is accepted, then below the food tour, which is not; open Belém by tram and delete it. The control shows no message for a refusal: a refused save leaves the editor open, a refused drag opens it with the dropped end time, and a refused delete leaves its confirmation open. Cancel, then read the line under the scheduler.</p></Description>
             <Demo>
                 <SchedulerControl @bind-Events="_guided" @bind-Date="_guideDay" @bind-View="_guideView" Resources="_guides" Changing="Guard"
                                   TimeZoneId="Europe/Lisbon" EndHour="20" Height="480px" />
@@ -191,7 +191,7 @@
     private DateTime _guideDay = DateTime.Today;
     private SchedulerView _guideView = SchedulerView.Day;
     private string _decision = "No changes yet.";
-    private readonly SchedulerResource[] _guides = { new("ines", "Inês", "#0f766e"), new("rui", "Rui", "#b45309") };
+    private readonly SchedulerResource[] _guides = { new("lavender", "Lavender", "#0f766e"), new("rufus", "Rufus", "#b45309") };
     private readonly Dictionary<string, int> _seatsSold = new() { ["walk"] = 6, ["tram"] = 4 };
 
     private static SchedulerEvent[] Guided()
@@ -203,11 +203,11 @@
         };
         return
         [
-            Tour("pickup", "Airport meet-and-greet", "rui", 8.5, 9.5),
-            Tour("walk", "Old town walk", "ines", 10, 12.5),
-            Tour("food", "Food tour", "ines", 14, 17),
-            Tour("tram", "Belém by tram", "rui", 14, 16.5),
-            Tour("sunset", "Sunset viewpoints", "rui", 17.5, 19),
+            Tour("pickup", "Airport meet-and-greet", "rufus", 8.5, 9.5),
+            Tour("walk", "Old town walk", "lavender", 10, 12.5),
+            Tour("food", "Food tour", "lavender", 14, 17),
+            Tour("tram", "Belém by tram", "rufus", 14, 16.5),
+            Tour("sunset", "Sunset viewpoints", "rufus", 17.5, 19),
         ];
     }
 
@@ -402,7 +402,7 @@ private IReadOnlyList<SchedulerEvent> _guided = Guided();
 private DateTime _guideDay = DateTime.Today;
 private SchedulerView _guideView = SchedulerView.Day;
 private string _decision = ""No changes yet."";
-private readonly SchedulerResource[] _guides = { new(""ines"", ""Inês"", ""#0f766e""), new(""rui"", ""Rui"", ""#b45309"") };
+private readonly SchedulerResource[] _guides = { new(""lavender"", ""Lavender"", ""#0f766e""), new(""rufus"", ""Rufus"", ""#b45309"") };
 private readonly Dictionary<string, int> _seatsSold = new() { [""walk""] = 6, [""tram""] = 4 };
 
 private static SchedulerEvent[] Guided()
@@ -414,11 +414,11 @@ private static SchedulerEvent[] Guided()
     };
     return
     [
-        Tour(""pickup"", ""Airport meet-and-greet"", ""rui"", 8.5, 9.5),
-        Tour(""walk"", ""Old town walk"", ""ines"", 10, 12.5),
-        Tour(""food"", ""Food tour"", ""ines"", 14, 17),
-        Tour(""tram"", ""Belém by tram"", ""rui"", 14, 16.5),
-        Tour(""sunset"", ""Sunset viewpoints"", ""rui"", 17.5, 19),
+        Tour(""pickup"", ""Airport meet-and-greet"", ""rufus"", 8.5, 9.5),
+        Tour(""walk"", ""Old town walk"", ""lavender"", 10, 12.5),
+        Tour(""food"", ""Food tour"", ""lavender"", 14, 17),
+        Tour(""tram"", ""Belém by tram"", ""rufus"", 14, 16.5),
+        Tour(""sunset"", ""Sunset viewpoints"", ""rufus"", 17.5, 19),
     ];
 }
 
