@@ -70,7 +70,12 @@
     protected override void OnParametersSet()
     {
         _tabs.Clear(); _codes.Clear();
-        Add("Razor", RazorCode); Add("C#", CSharpCode); Add("CSS", CssCode);
+        // 2026-10-27: each tab opens with the @using lines it needs, so a copied example compiles in a new project.
+        var razorHeader = string.IsNullOrEmpty(RazorCode) ? "" : CodeUsings.Header(RazorCode, CSharpCode, razorStyle: true);
+        var csharpHeader = string.IsNullOrEmpty(RazorCode) && !string.IsNullOrEmpty(CSharpCode) ? CodeUsings.Header(null, CSharpCode, razorStyle: false) : "";
+        Add("Razor", string.IsNullOrEmpty(RazorCode) ? RazorCode : razorHeader + RazorCode);
+        Add("C#", string.IsNullOrEmpty(CSharpCode) ? CSharpCode : csharpHeader + CSharpCode);
+        Add("CSS", CssCode);
         if (_codes.Count > 0) _tabs.Insert(0, new TabStripItem("Example"));
         if (_tab > _codes.Count) _tab = 0;
         void Add(string name, string? code)

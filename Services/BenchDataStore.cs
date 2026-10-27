@@ -196,28 +196,27 @@ public sealed class BenchDataStore
         var rand = new Random(101);
         var assets = new (string Ticker, string Name, string Instrument, decimal Price, int Qty)[]
         {
-            ("AAPL", "Apple Inc.", "Stock", 232.50m, 150),
-            ("MSFT", "Microsoft Corp.", "Stock", 448.20m, 120),
-            ("NVDA", "NVIDIA Corp.", "Stock", 128.40m, 400),
-            ("GOOGL", "Alphabet Inc.", "Stock", 176.90m, 200),
-            ("AMZN", "Amazon.com Inc.", "Stock", 185.30m, 250),
-            ("META", "Meta Platforms Inc.", "Stock", 512.10m, 100),
-            ("TSLA", "Tesla Inc.", "Stock", 218.70m, 180),
-            ("BTC-USD", "Bitcoin USD", "Crypto", 61450.00m, 4),
-            ("ETH-USD", "Ethereum USD", "Crypto", 2740.00m, 25),
-            ("SOL-USD", "Solana USD", "Crypto", 145.20m, 120),
+            ("RSGW", "Razor Sharp Getaways", "Stock", 48.20m, 400),
+            ("BCAIR", "Buttercup Airways", "Stock", 23.75m, 600),
+            ("PLUH", "Plum & Underhill Hotels", "Stock", 112.40m, 150),
+            ("PWRL", "Pennywhistle Rail", "Stock", 64.10m, 250),
+            ("CRMP", "Crumpet Cruises", "Stock", 38.90m, 300),
+            ("TDLY", "Tiddlywink Travel Tech", "Stock", 215.60m, 90),
+            ("MGLD", "Marigold Resorts", "Stock", 87.30m, 200),
+            ("HBNB", "Hobnob Hostels", "Stock", 12.85m, 900),
+            ("QFJT", "Quickfoot Jets", "Stock", 156.20m, 120),
+            ("LMPL", "Lamplighter Luggage", "Stock", 41.50m, 260),
+            ("FZWK", "Fizzwick Ferries", "Stock", 27.40m, 500),
+            ("TCUP-USD", "Teacup Coin", "Crypto", 61450.00m, 4),
+            ("MBEAM-USD", "Moonbeam Token", "Crypto", 2740.00m, 25),
+            ("PMPK-USD", "Pumpernickel Coin", "Crypto", 145.20m, 120),
             ("US10Y", "U.S. 10-Year Treasury Note", "Bond", 99.85m, 1000),
             ("CAD30Y", "Canada 30-Year Gov Bond", "Bond", 96.40m, 600),
             ("FRN2027", "France Gov Bond 2027", "Bond", 102.15m, 500),
-            ("SPY", "SPDR S&P 500 ETF Trust", "ETF", 552.30m, 80),
-            ("QQQ", "Invesco QQQ Trust", "ETF", 478.60m, 90),
-            ("GLD", "SPDR Gold Shares ETF", "ETF", 231.80m, 110),
-            ("MUB", "iShares National Muni Bond", "ETF", 108.40m, 300),
-            ("JPM", "JPMorgan Chase & Co.", "Stock", 214.60m, 140),
-            ("V", "Visa Inc.", "Stock", 278.30m, 110),
-            ("WMT", "Walmart Inc.", "Stock", 74.50m, 350),
-            ("DIS", "Walt Disney Co.", "Stock", 91.20m, 220),
-            ("NFLX", "Netflix Inc.", "Stock", 685.40m, 60)
+            ("HGTE", "Hedgerow Global Travel ETF", "ETF", 552.30m, 80),
+            ("LKLI", "Larkspur Leisure Index", "ETF", 478.60m, 90),
+            ("GSBG", "Gooseberry Gold Trust", "ETF", 231.80m, 110),
+            ("TMBF", "Thistlewood Muni Bond Fund", "ETF", 108.40m, 300)
         };
 
         var list = new List<TickerRow>();

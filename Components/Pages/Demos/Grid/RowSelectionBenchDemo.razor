@@ -180,7 +180,7 @@
             var cat = categories[i % categories.Length];
             list.Add(new SRow
             {
-                Item = $"HF-{i:D6}", Description = $"{cat} Component Item #{i}", Category = cat,
+                Item = $"ITM-{i:D6}", Description = $"{cat} Component Item #{i}", Category = cat,
                 Qty = rand.Next(1, 100), UnitCost = Math.Round((decimal)(rand.NextDouble() * 180 + 12), 2), Active = i % 5 != 0,
             });
         }
@@ -368,7 +368,7 @@ private void Rebuild()
         var cat = categories[i % categories.Length];
         list.Add(new SRow
         {
-            Item = $""HF-{i:D6}"", Description = $""{cat} Component Item #{i}"", Category = cat,
+            Item = $""ITM-{i:D6}"", Description = $""{cat} Component Item #{i}"", Category = cat,
             Qty = rand.Next(1, 100), UnitCost = Math.Round((decimal)(rand.NextDouble() * 180 + 12), 2), Active = i % 5 != 0,
         });
     }

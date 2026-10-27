@@ -202,6 +202,8 @@ private double Sell => _cost * (1 + _markup / 100);";
         public const string RangeCs = @"// Range slider
 private NumericRange _budget = new(250, 1250);
 
+private readonly record struct Option(string Name, double Price);
+
 private readonly Option[] _options =
 {
     new(""Under-cabinet lighting"", 220), new(""Tile backsplash"", 350), new(""Laminate counters"", 450),

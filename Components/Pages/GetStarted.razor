@@ -1,7 +1,9 @@
 @page "/get-started"
 
 @* 2026-10-17: "Register services" now matches Program.cs (dialog service, optional ZoomService) and a "Mount the hosts" step
-   was added: followed literally, the old steps produced no toasts or dialogs. A License section was added the same day. Tracker SC-284. *@
+   was added: followed literally, the old steps produced no toasts or dialogs. A License section was added the same day. Tracker SC-284.
+   2026-10-27: "Add the namespaces" and "Turn on interactivity" steps, and "Use a control" became a whole page: without the
+   @using lines and a render mode, the old steps gave a page that did not compile or did not respond. *@
 
 <PageTitle>Get Started — FlexCore</PageTitle>
 
@@ -24,6 +26,27 @@
         <p>
             The FlexCore package on NuGet is released under the <a href="https://github.com/wadoodachaudhary/FlexCore/blob/main/LICENSE" target="_blank">MIT license</a>.
             A Community edition is in preparation and will be delivered as a download link by email; <a href="signup">sign up</a> to receive it or to ask a question.
+        </p>
+    </section>
+
+    <section>
+        <h2>Add the namespaces</h2>
+        <p>
+            The controls live in <code>Fx.ControlKit</code> and its sub-namespaces. Add the ones you use to <code>Components/_Imports.razor</code>
+            so every page sees them:
+        </p>
+        <pre><code>&#64;using Fx.ControlKit
+&#64;using Fx.ControlKit.Grid
+&#64;using Fx.ControlKit.Charts
+&#64;using Fx.ControlKit.Layout
+&#64;using Fx.ControlKit.Navigation
+&#64;using Fx.ControlKit.Dialogs
+&#64;using Fx.ControlKit.Notifications</code></pre>
+        <p>
+            <code>Fx.ControlKit</code> holds the buttons, inputs, pickers, cards and tree view; <code>.Grid</code> the data grid, tree grid,
+            pivot table and drop-down grid. Others: <code>Fx.ControlKit.Maps</code>, <code>.Scheduling</code>, <code>.Gantt</code>, <code>.Diagram</code>, <code>.Editor</code>,
+            <code>.Data</code>, <code>.Docking</code>, <code>.Reports</code> and <code>.AI</code>; <code>Fx.ControlKit.Pdf</code> comes with the
+            FlexCore.Documents package. Every Razor tab on this site starts with the <code>&#64;using</code> lines its example needs.
         </p>
     </section>
 
@@ -59,9 +82,23 @@ builder.Services.AddScoped&lt;Fx.ControlKit.ZoomService&gt;();           // opti
     </section>
 
     <section>
+        <h2>Turn on interactivity</h2>
+        <p>
+            The controls respond to clicks and typing only in an interactive render mode. A project made with <code>dotnet new blazor</code>
+            already registers interactive server components in <code>Program.cs</code>; then either put <code>&#64;rendermode InteractiveServer</code>
+            at the top of each page that uses the controls, as this site does, or make the whole app interactive in <code>App.razor</code>:
+        </p>
+        <pre><code>&lt;HeadOutlet &#64;rendermode="InteractiveServer" /&gt;
+...
+&lt;Routes &#64;rendermode="InteractiveServer" /&gt;</code></pre>
+    </section>
+
+    <section>
         <h2>Use a control</h2>
-        <p>In a Razor page or layout:</p>
-        <pre><code>&#64;using Fx.ControlKit.Grid
+        <p>A whole page, <code>Components/Pages/Tours.razor</code>:</p>
+        <pre><code>&#64;page "/tours"
+&#64;rendermode InteractiveServer
+&#64;using Fx.ControlKit.Grid
 
 &lt;GridControl TValue="MyRow" DataSource="&#64;rows"
              AllowSelection="true" AllowSorting="true"
@@ -72,7 +109,18 @@ builder.Services.AddScoped&lt;Fx.ControlKit.ZoomService&gt;();           // opti
         &lt;GridColumn Field="Quantity" HeaderText="Qty"  Width="100px"
                     Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" /&gt;
     &lt;/GridColumnsBase&gt;
-&lt;/GridControl&gt;</code></pre>
+&lt;/GridControl&gt;
+
+&#64;code {
+    private readonly List&lt;MyRow&gt; rows =
+    [
+        new(1, "Old town walk", 12),
+        new(2, "Sintra day trip", 8),
+        new(3, "Sunset sail", 20),
+    ];
+
+    private sealed record MyRow(int Id, string Name, int Quantity);
+}</code></pre>
     </section>
 
     <section>
