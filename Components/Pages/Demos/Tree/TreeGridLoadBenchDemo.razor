@@ -29,7 +29,7 @@
    2026-10-26: the first example became the OurAirports data (Data/AirportData.cs): six continents in the list, and countries,
    airports and runways from LoadChildren as rows open, which the page had not shown before. The suppliers, the size buttons and
    Expand all went with it (ExpandAllAsync opens only rows whose children are loaded, so it would load one level per click).
-   2026-10-26 (Baaria): the org chart runs on FlexCore Travel Agency's generated staff (Data/TravelOrg.cs, all names made up)
+   2026-10-26 (Baaria): the org chart runs on Razor Sharp Getaways' generated staff (Data/TravelOrg.cs, all names made up)
    instead of the 21-person HR list; a search box over name, title, office, division and department replaces the department
    buttons, and the Name column is frozen. *@
 
@@ -82,7 +82,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="org" Title="Org chart: who reports to whom" RazorCode="@Code.Org" CSharpCode="@Code.OrgCs">
-            <Description><p>FlexCore Travel Agency, an imagined tour operator: @_staff.Count(p => !p.Vacant).ToString("N0") people in @_staff.Count.ToString("N0") posts, from the chief executive to seasonal guides in twelve destinations and three contact centres. The staff come from a generator with a fixed seed, so everyone sees the same people, and every name is made up. Search for a name, title, office or division (try <em>Lisbon</em>, <em>Guide</em> or <em>Technology</em>) and press Enter: the matches stay, together with every manager above them, so the tree never loses its root. Vacant posts keep their place and their reports, finance, HR and marketing partners show their second, dotted-line manager under Also reports to, and the Name column stays put while you scroll sideways. The rating is a read-only <code>RatingControl</code> inside a column template.</p></Description>
+            <Description><p>Razor Sharp Getaways, an imagined tour operator: @_staff.Count(p => !p.Vacant).ToString("N0") people in @_staff.Count.ToString("N0") posts, from the chief executive to seasonal guides in twelve destinations and three contact centres. The staff come from a generator with a fixed seed, so everyone sees the same people, and every name is made up. Search for a name, title, office or division (try <em>Lisbon</em>, <em>Guide</em> or <em>Technology</em>) and press Enter: the matches stay, together with every manager above them, so the tree never loses its root. Vacant posts keep their place and their reports, finance, HR and marketing partners show their second, dotted-line manager under Also reports to, and the Name column stays put while you scroll sideways. The rating is a read-only <code>RatingControl</code> inside a column template.</p></Description>
             <Controls>
                 <TextBoxControl Value="@_search" ValueChanged="Search" Placeholder="Name, title, office or division" Width="240px" />
             </Controls>
@@ -278,7 +278,7 @@
         public int Level => Id.Count(c => c == '|');
     }
 
-    // Org chart: FlexCore Travel Agency's staff (Data/TravelOrg.cs). A search keeps every match's managers, so the tree stays
+    // Org chart: Razor Sharp Getaways' staff (Data/TravelOrg.cs). A search keeps every match's managers, so the tree stays
     // rooted.
     private static readonly IReadOnlyList<StaffMember> _staff = TravelOrg.Staff;
     private static readonly Dictionary<string, StaffMember> _byId = _staff.ToDictionary(p => p.Id);
@@ -356,7 +356,7 @@
     </TreeGridColumn>
 </TreeGridControl>
 <p class=""result"">@OrgStatus</p>";
-        public const string OrgCs = @"// Org chart: FlexCore Travel Agency's staff (Data/TravelOrg.cs). A search keeps every match's managers, so the tree stays
+        public const string OrgCs = @"// Org chart: Razor Sharp Getaways' staff (Data/TravelOrg.cs). A search keeps every match's managers, so the tree stays
 // rooted.
 private static readonly IReadOnlyList<StaffMember> _staff = TravelOrg.Staff;
 private static readonly Dictionary<string, StaffMember> _byId = _staff.ToDictionary(p => p.Id);

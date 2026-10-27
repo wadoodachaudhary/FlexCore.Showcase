@@ -1,7 +1,7 @@
 namespace FlexCore.Showcase.Data;
 
 /// <summary>
-/// One post at FlexCore Travel Agency. <see cref="ManagerId"/> is the solid reporting line and <see cref="DottedLineId"/> a second,
+/// One post at Razor Sharp Getaways. <see cref="ManagerId"/> is the solid reporting line and <see cref="DottedLineId"/> a second,
 /// dotted one (a finance or HR partner who also answers to the head of the area they support). A vacant post keeps its place
 /// in the tree, its people and its budgeted salary, but has no name, start date or rating.
 /// </summary>
@@ -33,7 +33,7 @@ public sealed record StaffMember
 }
 
 /// <summary>
-/// The staff of FlexCore Travel Agency, the imagined tour operator of the people demos: a head office in Boston, a ground team in
+/// The staff of Razor Sharp Getaways, the imagined tour operator of the people demos: a head office in Boston, a ground team in
 /// each destination of <see cref="TravelData"/>, contact centres in Lisbon, Manila and Boston, and the usual central functions.
 /// Generated from a fixed seed, so every visitor and every build sees the same people. Every name is made up: the executive team
 /// is fixed, everyone else gets a first name and a surname drawn from the two lists below.
@@ -339,8 +339,8 @@ public static class TravelOrg
         {
             var parts = name.Replace(".", "").ToLowerInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var local = $"{parts[0]}.{string.Join("", parts.Skip(1))}";
-            var email = $"{local}@flexcore-travel.example";
-            for (var n = 2; !_emails.Add(email); n++) email = $"{local}{n}@flexcore-travel.example";
+            var email = $"{local}@razorsharp-getaways.example";
+            for (var n = 2; !_emails.Add(email); n++) email = $"{local}{n}@razorsharp-getaways.example";
             return email;
         }
 

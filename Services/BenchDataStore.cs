@@ -73,7 +73,7 @@ public sealed class BenchDataStore
             {
                 ("Guardian Travel Cover", new[] { ("Travel insurance, comprehensive", "pax", 38, 75) }),
                 ("{0} Guide Co-op", new[] { ("Private guide, full day", "day", 180, 320), ("Airport meet and greet", "pax", 25, 45) }),
-                ("FlexCore Travel Agency, head office", new[] { ("Booking fee", "booking", 45, 60), ("Documents and delivery", "booking", 12, 25), ("Restaurant reservations", "booking", 10, 20) }),
+                ("Razor Sharp Getaways, head office", new[] { ("Booking fee", "booking", 45, 60), ("Documents and delivery", "booking", 12, 25), ("Restaurant reservations", "booking", 10, 20) }),
             }),
         };
         var notes = new[] { "", "", "Net rate", "Commissionable 10%", "Non-refundable", "Paid locally", "Pre-booked", "" };
