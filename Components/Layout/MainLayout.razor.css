@@ -17,7 +17,7 @@
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;   /* under the logo stripe below */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -153,11 +153,27 @@
 
 /* Site Footer */
 .showcase-site-footer {
+    position: relative;
     background: #ffffff;
     border-top: 1px solid #e2e8f0;
     padding: 24px 32px;
     margin-top: auto;
 }
+
+/* 2026-10-28 (Baaria): the logo's four colours as a thin stripe along the bottom of the top bar and the top of the footer. */
+.top-nav-bar::after,
+.showcase-site-footer::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--brand-stripe);
+    pointer-events: none;
+}
+
+.top-nav-bar::after { bottom: -1px; }
+.showcase-site-footer::before { top: -1px; }
 
 .footer-container {
     max-width: 1320px;

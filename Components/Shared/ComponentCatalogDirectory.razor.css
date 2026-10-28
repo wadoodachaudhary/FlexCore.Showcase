@@ -74,9 +74,55 @@
 
 .directory-header {
     text-align: left;
-    max-width: 860px;
     margin: 0 0 36px;
 }
+
+/* The toolbox doodle left of the title (2026-10-28); layout and hand-drawn wobble come from .doodle-head and .doodle in app.css. */
+.directory-head-row { margin-bottom: 20px; }
+.directory-head-row .directory-title { margin: 0; }
+
+/* Lid flips open on its left hinge, the three tools pop up one after another, wiggle and drop back, the lid shuts; sparks flash
+   while the tools are up. Once per visit to the heading; still for visitors who turn motion off. */
+.tb-lid { transform-origin: 21px 84px; }
+.tb-tool { transform-box: fill-box; transform-origin: 50% 100%; }
+.tb-spark { opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; }
+
+.directory-head-row.is-playing .tb-lid { animation: tb-lid 2.8s ease-in-out; }
+.directory-head-row.is-playing .tb-tool { animation: tb-pop 2.8s ease-in-out both; }
+.directory-head-row.is-playing .tb-screwdriver { animation-delay: 0.12s; }
+.directory-head-row.is-playing .tb-hammer { animation-delay: 0.24s; }
+.directory-head-row.is-playing .tb-spark { animation: tb-spark 2.8s ease-out; }
+
+@keyframes tb-lid {
+    0%, 4% { transform: rotate(0deg); }
+    16%, 82% { transform: rotate(-34deg); }
+    94% { transform: rotate(2deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@keyframes tb-pop {
+    0%, 12% { transform: translateY(0) rotate(0deg); }
+    28% { transform: translateY(-52px) rotate(0deg); }
+    34% { transform: translateY(-44px) rotate(0deg); }
+    42% { transform: translateY(-44px) rotate(-9deg); }
+    50% { transform: translateY(-44px) rotate(8deg); }
+    58% { transform: translateY(-44px) rotate(-4deg); }
+    66% { transform: translateY(-44px) rotate(0deg); }
+    80%, 100% { transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes tb-spark {
+    0%, 24% { opacity: 0; transform: scale(0.6); }
+    32% { opacity: 1; transform: scale(1); }
+    50%, 100% { opacity: 0; transform: scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .directory-head-row.is-playing .tb-lid,
+    .directory-head-row.is-playing .tb-tool,
+    .directory-head-row.is-playing .tb-spark { animation: none; }
+}
+
 
 .directory-title {
     font-size: clamp(32px, 4vw, 48px);

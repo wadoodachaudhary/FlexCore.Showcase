@@ -92,7 +92,7 @@
 .hero-btn-secondary:hover { background: #bae6fd; }
 
 /* Word pill (2026-10-28, after notion.com): "The Blazor toolbox that does [grids] right." The three words share one grid cell and
-   take turns, 3 s each; the pill's colour follows the matching workhorse tile (Data Grid pink, Charts purple, Report Writer coral)
+   take turns, 3 s each; the pill and its square take the logo's colours (grids blue, charts indigo, reports green)
    and its width follows the word, so the widths below are the words' widths in Inter 700 at -0.045em. */
 .word-pill {
     display: inline-flex;
@@ -101,7 +101,7 @@
     padding: 0.02em 0.36em 0.06em 0.3em;
     border-radius: 9999px;
     white-space: nowrap;
-    background: #ffe4e6;
+    background: #e0f2fe;
     animation: word-pill-bg 9s infinite;
 }
 
@@ -112,7 +112,7 @@
     width: 0.28em;
     height: 0.28em;
     border-radius: 22%;
-    background: #e11d48;
+    background: var(--brand-blue);
     animation: word-pill-mark 9s infinite;
 }
 
@@ -150,17 +150,17 @@
 }
 
 @keyframes word-pill-bg {
-    0%, 30% { background: #ffe4e6; }
-    35%, 63% { background: #f3e8ff; }
-    68%, 96% { background: #ffedd5; }
-    100% { background: #ffe4e6; }
+    0%, 30% { background: #e0f2fe; }
+    35%, 63% { background: #e0e7ff; }
+    68%, 96% { background: #d1fae5; }
+    100% { background: #e0f2fe; }
 }
 
 @keyframes word-pill-mark {
-    0%, 30% { background: #e11d48; }
-    35%, 63% { background: #9333ea; }
-    68%, 96% { background: #ea580c; }
-    100% { background: #e11d48; }
+    0%, 30% { background: var(--brand-blue); }
+    35%, 63% { background: var(--brand-indigo); }
+    68%, 96% { background: var(--brand-green); }
+    100% { background: var(--brand-blue); }
 }
 
 /* Desktop breaks after "toolbox", phones before the pill, so a changing pill width never moves words between lines. */
@@ -983,53 +983,103 @@
 .comp-list a:hover { color: #0284c7;
 }
 
-/* ── 3. Finish-line ribbon and the four big workhorses (2026-10-28) ──
-   The ribbon is a slightly tilted dark band with checkered edges, like a finish-line banner; the cards are a 2 x 2 grid (one
-   column on phones), each a link with an SVG picture on a tinted panel above its text. Tints match the workhorse tiles. */
+/* ── 3. The four big workhorses (2026-10-28) ──
+   A normal section heading with a hand-drawn chequered flag on the right (Notion-style ink doodle, inline SVG in Home.razor), then
+   a 2 x 2 grid of cards (one column on phones), each a link with an SVG picture on a tinted panel above its text. The four tints
+   are the logo's four colours. */
 .workhorses-section {
     margin: 64px 0 72px;
 }
 
-.finish-ribbon {
-    position: relative;
-    margin: 0 auto 36px;
-    padding: 26px 24px;
-    background: #0f172a;
-    border-radius: 10px;
-    text-align: center;
-    transform: rotate(-1deg);
-    box-shadow: 0 12px 28px -10px rgba(15, 23, 42, 0.35);
+.workhorses-head { margin-bottom: 28px; }
+
+/* Doodle headings (layout and hand-drawn wobble in app.css): the heading text sits beside the picture, so no margin of its own. */
+.doodle-head .section-title { margin: 0; }
+.section-header .doodle-head { margin-bottom: 14px; }
+
+/* The wave: each flag column bobs and skews a little later and a little further than the one nearer the pole, the pole sways,
+   and three wind strokes blow past. Three beats, then still; it plays again the next time the heading scrolls into view. */
+.flag-col { transform-box: fill-box; transform-origin: 50% 50%; }
+.flag-sway { transform-origin: 37px 142px; }
+.flag-wind { opacity: 0; }
+
+.workhorses-head.is-playing .flag-col { animation: flag-ripple 0.8s ease-in-out var(--d) 3; }
+.workhorses-head.is-playing .flag-sway { animation: flag-sway 0.8s ease-in-out 3; }
+.workhorses-head.is-playing .flag-wind { animation: flag-wind 2.4s ease-out; }
+
+@keyframes flag-ripple {
+    0%, 100% { transform: translateY(0) skewY(0deg); }
+    25% { transform: translateY(calc(var(--a) * -1)) skewY(-5deg); }
+    75% { transform: translateY(var(--a)) skewY(5deg); }
 }
 
-.finish-ribbon::before,
-.finish-ribbon::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 10px;
-    background: repeating-conic-gradient(#0f172a 0 25%, #ffffff 0 50%) 0 0 / 10px 10px;
+@keyframes flag-sway {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-3deg); }
 }
 
-.finish-ribbon::before { top: 0; border-radius: 10px 10px 0 0; }
-.finish-ribbon::after { bottom: 0; border-radius: 0 0 10px 10px; }
-
-.finish-ribbon-title {
-    margin: 0;
-    color: #ffffff;
-    font-size: clamp(26px, 3.4vw, 42px);
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.035em;
+@keyframes flag-wind {
+    0% { opacity: 0; transform: translateX(-8px); }
+    20%, 70% { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: translateX(8px); }
 }
 
-.finish-ribbon-flag {   /* the black-and-white flag disappears on the dark band without a light chip behind it */
-    display: inline-block;
-    background: #ffffff;
-    border-radius: 8px;
-    padding: 0 0.12em;
-    font-size: 0.8em;
-    vertical-align: 0.08em;
+/* Crane (Engineered for Enterprise Demand): the load lowers to the ground, waits, is hoisted back with a small overshoot and swings
+   on its cable from the trolley before it settles. */
+.cr-load { transform-origin: 120px 30px; }
+.doodle-head.is-playing .cr-load { animation: crane-lift 3s ease-in-out; }
+
+@keyframes crane-lift {
+    0% { transform: translateY(0) rotate(0deg); }
+    25%, 35% { transform: translateY(36px) rotate(0deg); }
+    62% { transform: translateY(-6px) rotate(0deg); }
+    70% { transform: translateY(0) rotate(6deg); }
+    79% { transform: translateY(0) rotate(-4deg); }
+    88% { transform: translateY(0) rotate(2deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* Scale (How FlexCore Compares): the beam rocks and settles at -10deg, the logo's end low. Each pan rides its beam end, 55 units
+   from the pivot: an angle a moves the left pan by -55 sin a and the right pan by +55 sin a, so the keyframes below pair up. */
+.sc-beam { transform-origin: 85px 34px; transform: rotate(-10deg); }
+.sc-left { transform: translateY(9.5px); }
+.sc-right { transform: translateY(-9.5px); }
+.doodle-head.is-playing .sc-beam { animation: scale-beam 2.8s ease-in-out; }
+.doodle-head.is-playing .sc-left { animation: scale-left 2.8s ease-in-out; }
+.doodle-head.is-playing .sc-right { animation: scale-right 2.8s ease-in-out; }
+
+@keyframes scale-beam {
+    0%, 100% { transform: rotate(-10deg); }
+    20% { transform: rotate(8deg); }
+    40% { transform: rotate(-12deg); }
+    60% { transform: rotate(4deg); }
+    80% { transform: rotate(-11deg); }
+}
+
+@keyframes scale-left {
+    0%, 100% { transform: translateY(9.5px); }
+    20% { transform: translateY(-7.7px); }
+    40% { transform: translateY(11.4px); }
+    60% { transform: translateY(-3.8px); }
+    80% { transform: translateY(10.5px); }
+}
+
+@keyframes scale-right {
+    0%, 100% { transform: translateY(-9.5px); }
+    20% { transform: translateY(7.7px); }
+    40% { transform: translateY(-11.4px); }
+    60% { transform: translateY(3.8px); }
+    80% { transform: translateY(-10.5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workhorses-head.is-playing .flag-col,
+    .workhorses-head.is-playing .flag-sway,
+    .workhorses-head.is-playing .flag-wind,
+    .doodle-head.is-playing .cr-load,
+    .doodle-head.is-playing .sc-beam,
+    .doodle-head.is-playing .sc-left,
+    .doodle-head.is-playing .sc-right { animation: none; }
 }
 
 .workhorse-grid {
@@ -1067,10 +1117,10 @@
 
 .workhorse-art svg { width: 100%; max-width: 320px; height: 100%; }
 
-.workhorse-art.pink   { background: #fff1f2; }
-.workhorse-art.purple { background: #faf5ff; }
-.workhorse-art.coral  { background: #fff7ed; }
-.workhorse-art.teal   { background: #f0fdfa; }
+.workhorse-art.blue   { background: #e0f2fe; }
+.workhorse-art.indigo { background: #eef2ff; }
+.workhorse-art.green  { background: #ecfdf5; }
+.workhorse-art.sky    { background: #f0f9ff; }
 
 .workhorse-body {
     display: flex;
@@ -1101,10 +1151,10 @@
     font-size: 19px;
 }
 
-.workhorse-tile.pink   { background: #ffe4e6; color: #e11d48; }
-.workhorse-tile.purple { background: #f3e8ff; color: #9333ea; }
-.workhorse-tile.coral  { background: #ffedd5; color: #ea580c; }
-.workhorse-tile.teal   { background: #ccfbf1; color: #0d9488; }
+.workhorse-tile.blue   { background: #e0f2fe; color: var(--brand-blue); }
+.workhorse-tile.indigo { background: #e0e7ff; color: var(--brand-indigo); }
+.workhorse-tile.green  { background: #d1fae5; color: #059669; }
+.workhorse-tile.sky    { background: #e0f2fe; color: #0ea5e9; }
 
 .workhorse-desc {
     margin: 0;
@@ -1143,6 +1193,57 @@
 /* ── 5. Enterprise Architecture Pillars ── */
 .pillars-section {
     margin-bottom: 64px;
+}
+
+/* The page's one coloured band (2026-10-28, after telerik.com): full width indigo from the logo, drawn with the box-shadow trick
+   (the shadow fills the viewport sideways, clip-path trims it to the band's height), so nothing overflows the page. The green strip
+   of numbers sits just before it in the markup and pulls its lower half down over the band's top edge. */
+.brand-band {
+    position: relative;
+    background: #4f46e5;
+    box-shadow: 0 0 0 100vmax #4f46e5;
+    clip-path: inset(0 -100vmax);
+    padding: 72px 0 72px;
+    margin-bottom: 72px;
+}
+
+.brand-band .section-title { color: #ffffff; }
+.brand-band .section-desc { color: #e0e7ff; }
+.brand-band .pillar-card { border-color: transparent; box-shadow: 0 10px 24px -12px rgba(15, 23, 42, 0.45); }
+
+.stats-strip {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 0 auto -44px;
+    max-width: 1100px;
+    background: var(--brand-green);
+    border-radius: 6px;
+    box-shadow: 0 14px 30px -14px rgba(15, 23, 42, 0.4);
+}
+
+.stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+    padding: 22px 16px;
+    color: #052e2b;
+}
+
+.stat + .stat { border-left: 1px solid rgba(5, 46, 43, 0.18); }
+
+.stat-num {
+    font-size: clamp(30px, 3.6vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 15px;
+    font-weight: 600;
 }
 
 /* 2026-10-28: section heads are left-aligned and large, without the small uppercase label above them (after notion.com).
@@ -1286,8 +1387,58 @@
     font-weight: 700;
     line-height: 1.1;
     letter-spacing: -0.035em;
-    margin-bottom: 14px;
+    margin: 0;
     color: #ffffff;
+}
+
+/* The banner is centred, so its rocket and heading are centred as a pair (stacked and centred on phones). */
+.cta-banner .doodle-head { justify-content: center; align-items: center; margin-bottom: 14px; }
+
+/* Rocket: rumble with the flame flaring, lift off with speed lines and smoke, hover, settle back. The flame scales from the nozzle. */
+.rk-flame { transform-box: fill-box; transform-origin: 50% 0%; transform: scaleY(0.6); }
+.rk-lines, .rk-smoke { opacity: 0; }
+.rk-smoke { transform-box: fill-box; transform-origin: 50% 100%; }
+.doodle-head.is-playing .rk-rocket { animation: rocket-fly 3s ease-in-out; }
+.doodle-head.is-playing .rk-flame { animation: rocket-flame 3s ease-in-out; }
+.doodle-head.is-playing .rk-lines { animation: rocket-lines 3s ease-out; }
+.doodle-head.is-playing .rk-smoke { animation: rocket-smoke 3s ease-out; }
+
+@keyframes rocket-fly {
+    0% { transform: translate(0, 0); }
+    5%, 15% { transform: translate(-1.5px, 0); }
+    10%, 20% { transform: translate(1.5px, 0); }
+    25% { transform: translate(0, 0); }
+    50%, 72% { transform: translate(0, -28px); }
+    61% { transform: translate(0, -23px); }
+    90% { transform: translate(0, 2px); }
+    100% { transform: translate(0, 0); }
+}
+
+@keyframes rocket-flame {
+    0%, 100% { transform: scaleY(0.6); }
+    8%, 18% { transform: scaleY(1.1); }
+    13%, 23% { transform: scaleY(0.85); }
+    30%, 70% { transform: scaleY(1.35); }
+    90% { transform: scaleY(0.8); }
+}
+
+@keyframes rocket-lines {
+    0%, 26% { opacity: 0; transform: translateY(-6px); }
+    36%, 60% { opacity: 1; transform: translateY(6px); }
+    72%, 100% { opacity: 0; transform: translateY(12px); }
+}
+
+@keyframes rocket-smoke {
+    0%, 20% { opacity: 0; transform: scale(0.8); }
+    32% { opacity: 1; transform: scale(1); }
+    60%, 100% { opacity: 0; transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .doodle-head.is-playing .rk-rocket,
+    .doodle-head.is-playing .rk-flame,
+    .doodle-head.is-playing .rk-lines,
+    .doodle-head.is-playing .rk-smoke { animation: none; }
 }
 
 .cta-banner p {
@@ -1392,7 +1543,10 @@
 @media (max-width: 768px) {
     .workhorse-grid { grid-template-columns: 1fr; }
     .workhorse-art { height: 140px; }
-    .finish-ribbon { padding: 22px 16px; }
+    .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(3) { border-left: none; }
+    .stat:nth-child(n + 3) { border-top: 1px solid rgba(5, 46, 43, 0.18); }
+    .stat { flex-direction: column; align-items: center; gap: 4px; padding: 16px 8px; }
     .hero-br-sm { display: inline; }
     .hero-br-lg { display: none; }
     .hero-btn {

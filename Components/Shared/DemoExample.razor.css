@@ -1,5 +1,9 @@
 .ex { margin: 0 0 24px; scroll-margin-top: 76px; }
 .ex ::deep .fx-card { overflow: visible; }   /* dropdown panels must escape the card */
+/* 2026-10-28: each example card's top edge takes a logo colour in turn (blue, indigo, green), like the home page cards. */
+.ex ::deep .ex-card { border-top: 3px solid var(--brand-blue); }
+.ex:nth-of-type(3n + 2) ::deep .ex-card { border-top-color: var(--brand-indigo); }
+.ex:nth-of-type(3n + 3) ::deep .ex-card { border-top-color: var(--brand-green); }
 .ex-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .ex-title { margin: 0; font-size: 16px; font-weight: 600; color: #0f172a; }
 .ex-anchor { color: #cbd5e1; text-decoration: none; margin-right: 6px; font-weight: 400; }
