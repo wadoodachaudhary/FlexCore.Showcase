@@ -57,7 +57,7 @@ public static partial class ChartsVocab
     // Events: none. ChartControl.razor declares no EventCallback parameter and no @on* handler (grep 2026-10-24); the SVG shapes
     // carry <title> tooltips only. Drill-down exists only inside the child SunburstChartControl, documented on its own page.
     // Methods: ChartControl itself has no public method; its public members are the 36 [Parameter] properties and the nested
-    // ChartControl.ChartBar class (ChartControl.razor:1809-1816). The static ChartSvg.Markup helper (Charts/ChartSvg.cs:20) is the
+    // ChartControl.ChartBar class (ChartControl.razor:1809-1816). The static ChartSvg.Markup helper (Charts/ChartSvg.cs:16) is the
     // one callable entry point, so it is the single row below; title that table "ChartSvg" rather than "ChartControl methods".
     public static readonly ApiRow[] Methods =
     {
