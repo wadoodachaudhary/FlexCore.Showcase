@@ -53,7 +53,7 @@ public static partial class ChartsVocab
     /// <summary>ChartLegend: the Legend parameter.</summary>
     public static readonly ApiRow[] Legend =
     {
-        new("Visible", "Shows the series legend under the chart. It only appears when there is more than one series, so a single-series chart shows nothing either way; Pie and Donut draw their own slice legend regardless. <code>ChartSvg.Markup</code> and the report analysis graphic set it from their own flags.", "bool", "true"),
+        new("Visible", "Shows the series legend under the chart. It only appears when there is more than one series, so a single-series chart shows nothing either way; Pie and Donut draw their own slice legend regardless. <code>ChartSvg.Markup</code> and <code>ReportAnalysisControl</code> set it from their own flags.", "bool", "true"),
         new("Position", "Declared, but never read: the legend is always a row of swatches under the chart. <code>LegendPosition</code> has <code>Top</code>, <code>Bottom</code>, <code>Left</code> and <code>Right</code>.", "LegendPosition", "LegendPosition.Bottom"),
     };
 
