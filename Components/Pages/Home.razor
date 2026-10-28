@@ -122,7 +122,7 @@
                                 <TextBoxControl Value="@_gridSearchTerm"
                                                 ValueChanged="@(v => { _gridSearchTerm = v ?? ""; StateHasChanged(); })"
                                                 placeholder="Search requests, destinations, agents..."
-                                                CssClass="grid-search-input" />
+                                                CssClass="grid-search-input" UpdateOnInput="true" />
                             </div>
                         </div>
 

@@ -59,7 +59,7 @@ using Fx.ControlKit.Notifications;
 builder.Services.AddScoped&lt;NotificationService&gt;();                 // toasts
 builder.Services.AddScoped&lt;DialogService&gt;();                       // confirm / alert / prompt
 builder.Services.AddScoped&lt;IDialogService&gt;(sp =&gt; sp.GetRequiredService&lt;DialogService&gt;());
-builder.Services.AddScoped&lt;Fx.ControlKit.ZoomService&gt;();           // optional: text zoom shared by the controls; the hosts work without it
+builder.Services.AddScoped&lt;Fx.ControlKit.ZoomService&gt;();           // optional: shared text zoom
 // Report writer only: ReportOptions, CrystalXmlReportLoader and your own IReportDataExecutor,
 // IReportSessionContext, IReportExporter, IReportPickListProvider and IReportViewerSettings
 // (the Showcase Program.cs has a working set with stub adapters).</code></pre>

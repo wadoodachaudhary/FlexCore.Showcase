@@ -1,5 +1,7 @@
 @inherits LayoutComponentBase
 @using Fx.ControlKit.Dialogs
+@using Microsoft.AspNetCore.Components.Routing
+@implements IDisposable
 
 <div class="showcase-shell-layout">
     @* Preview banner (owner decision 2026-10-13: keep the site open, point NuGet visitors at the sign-up form; wording "Community edition" per owner 2026-10-13). AlertControl is the library's own banner. *@
@@ -81,8 +83,9 @@
             <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" class="btn-nav-icon" title="View Source on GitHub">
                 <span class="bi bi-github"></span>
             </a>
-            @* Phone: no FlexCore off-canvas control exists yet, so this is a checkbox-toggled drawer. *@
-            <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Open menu" />
+            @* Phone: no FlexCore off-canvas control exists yet, so this is a checkbox-toggled drawer. The whole app is interactive
+               (App.razor), so the layout survives navigation and the box stayed ticked; it is bound so LocationChanged can clear it. *@
+            <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Open menu" @bind="_navOpen" />
             <label for="nav-toggle" class="btn-nav-icon nav-burger" title="Menu"><span class="bi bi-list"></span></label>
         </div>
     </header>
@@ -146,6 +149,18 @@
     [Inject] private NavigationManager Nav { get; set; } = default!;
 
     private bool _showBanner = true;   // closes for the rest of the circuit; comes back on a full reload
+    private bool _navOpen;             // the phone drawer; closed again on every navigation (2026-10-28)
+
+    protected override void OnInitialized() => Nav.LocationChanged += CloseDrawer;
+
+    private void CloseDrawer(object? sender, LocationChangedEventArgs e)
+    {
+        if (!_navOpen) return;
+        _navOpen = false;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() => Nav.LocationChanged -= CloseDrawer;
 
     // Nav data lives in Components/Shared/SiteNav.cs (shared with the footer, drawer and overview pages).
     private static NavGroup[] _groups => SiteNav.Groups;

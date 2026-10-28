@@ -31,11 +31,11 @@
                         }
                         @if (HasType)
                         {
-                            <td class="api-type">@if (!string.IsNullOrEmpty(r.Type)) { <code>@((MarkupString)r.Type)</code> }</td>
+                            <td class="api-type">@if (!string.IsNullOrEmpty(r.Type)) { <code>@((MarkupString)Breakable(r.Type))</code> }</td>
                         }
                         @if (HasDefault)
                         {
-                            <td class="api-default">@if (!string.IsNullOrEmpty(r.Default)) { <code>@((MarkupString)r.Default)</code> } else { <span class="api-none">—</span> }</td>
+                            <td class="api-default">@if (!string.IsNullOrEmpty(r.Default)) { <code>@((MarkupString)Breakable(r.Default))</code> } else { <span class="api-none">—</span> }</td>
                         }
                         <td class="api-desc">@((MarkupString)r.Description)</td>
                     </tr>
@@ -102,4 +102,7 @@
         ApiKind.Values       => new[] { "Value", "Description" },
         _                    => new[] { "Key", "Action" },
     };
+
+    /// <summary>Lets a long generic type wrap after "&lt;" and "," only, so DateTime stays whole and Func&lt;A,B,Task&lt;C&gt;&gt; folds at its joints.</summary>
+    private static string Breakable(string html) => html.Replace("&lt;", "&lt;<wbr>").Replace(",", ",<wbr>");
 }
