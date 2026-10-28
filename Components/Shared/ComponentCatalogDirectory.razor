@@ -1,7 +1,9 @@
 @namespace FlexCore.Showcase.Components.Shared
 
+@if (ShowWorkhorses)
+{
 <section class="popular-components-section">
-    <h2 class="popular-title">Most Popular UI components</h2>
+    <h2 class="popular-title">Start with the <span class="text-nowrap">workhorses <span aria-hidden="true">🐎</span></span></h2>
     <div class="popular-cards-grid">
         <a href="demo/grid" class="popular-card">
             <div class="popular-icon-box pink">
@@ -17,11 +19,11 @@
             <span class="popular-name">Charts</span>
         </a>
 
-        <a href="demo/charts/sunburst" class="popular-card">
+        <a href="demo/scheduler" class="popular-card">
             <div class="popular-icon-box teal">
-                <span class="bi bi-sun-fill"></span>
+                <span class="bi bi-calendar-week"></span>
             </div>
-            <span class="popular-name">Sunburst Chart</span>
+            <span class="popular-name">Scheduler</span>
         </a>
 
         <a href="demo/dialog" class="popular-card">
@@ -35,24 +37,25 @@
             <div class="popular-icon-box coral">
                 <span class="bi bi-file-earmark-richtext"></span>
             </div>
-            <span class="popular-name">Reports &amp; Writer</span>
+            <span class="popular-name">Report Writer</span>
         </a>
 
-        <a href="demo/buttons" class="popular-card">
+        <a href="demo/forms" class="popular-card">
             <div class="popular-icon-box green">
-                <span class="bi bi-hand-index-thumb"></span>
+                <span class="bi bi-ui-checks-grid"></span>
             </div>
-            <span class="popular-name">Buttons</span>
+            <span class="popular-name">Forms</span>
         </a>
     </div>
 </section>
+}
 
-<!-- ── Complete Component Directory (Syncfusion Multi-Column) ─ -->
+@* Complete component directory, multi-column. *@
 <section class="catalog-directory-section" id="components">
     <div class="directory-header">
-        <h2 class="directory-title">Blazor UI &amp; Data Visualization Components</h2>
+        <h2 class="directory-title">Everything in the <span class="text-nowrap">toolbox <span aria-hidden="true">🛠️</span></span></h2>
         <p class="directory-subtitle">
-            70+ Blazor controls for business apps: data grids, charts, maps, reports, scheduling and forms. They render in C# and SVG and need nothing from npm.
+            130+ controls under the MIT license. Everything listed here has a live demo and the code to copy.
         </p>
 
         <div class="catalog-search-wrapper">
@@ -254,6 +257,10 @@
 </section>
 
 @code {
+    /// <summary>Shows the six workhorse cards above the directory. The home page turns them off: it has its own four large
+    /// feature cards under the finish-line ribbon (2026-10-28).</summary>
+    [Parameter] public bool ShowWorkhorses { get; set; } = true;
+
     private string _searchTerm = "";
 
     // Tier orders a category (Baaria, 2026-10-26): 1 is the category's lead control (Data Grid always first), 2 the core controls,

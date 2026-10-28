@@ -6,7 +6,10 @@
 @* 2026-10-23 (developer meeting point 5, chart label clutter): the Inventory Allocation pie has four slices instead of five so its
    legend, an HTML flex row of 12 px entries about 100 px wide with 12 px gaps, stays on one line in the 575 px column at 1280 px
    ("Finishes (8%)" wrapped to a second row); the shares are rebalanced to 40/25/20/15. The pie draws no slice labels, so the
-   share stays in the legend text. The "charts" string in the code tab below is kept by hand and still matches the markup. *@
+   share stays in the legend text. The "charts" string in the code tab below is kept by hand and still matches the markup.
+   2026-10-28 (Baaria): the hero tabs are named in the travel agency's voice (Razor Sharp Trip Requests, Sales at Cruising Altitude,
+   The Front Desk, Invoices) and the window title is the agency's name; the tab icons still say grid, chart, ribbon, report. The charts now show bookings and trip
+   types instead of construction figures, so that pie is Trips by Type with the same four-slice, 40/25/20/15 legend. *@
 
 @* 2026-10-25 (Baaria, SC-344): the hero grid is a travel agency's quote desk, Inbox — Trip Requests. It replaced an example whose
    banner text, columns and names came from an earlier custom-quote inbox. Same grid features as before (1,000 windowed rows, frozen
@@ -23,24 +26,40 @@
    cards above the grid name the controls. Rows get an opaque background in app.css: frozen cells use background-color: inherit,
    and a row with no background let the scrolled cells show through the Request column. *@
 
-<PageTitle>FlexCore — Enterprise Blazor Component Suite for .NET</PageTitle>
+<PageTitle>FlexCore — Blazor controls for business apps</PageTitle>
 
 <div class="landing-container">
-    <!-- ── 1. Catchy One-Liner Before Grid ────────────────────────── -->
+    @* 1. Hero *@
     <div class="top-hero-compact">
         <div class="hero-tagline-badge">
             <span class="badge-pulse"></span>
-            <span>FlexCore v@_flexCoreVersion &bull; .NET 10 &bull; Rendered in C# and SVG &bull; No npm</span>
+            <span>Built for .NET 10 &middot; MIT licensed on NuGet <span aria-hidden="true">📦</span></span>
         </div>
+        @* 2026-10-28 (Baaria): hero rewritten. Each claim is checked: 100,000 rows on /demo/grid/row-selection-50k, Crystal import
+           via CrystalXmlReportLoader (XML exports), 137 standalone controls counted in the launch audit, both packages MIT.
+           The pill cycles grids, charts, reports in CSS (Home.razor.css, "word pill"); screen readers get the plain sentence.
+           Headline chosen by Baaria 2026-10-28 from the toolbox ideas. *@
         <h1 class="hero-oneliner">
-            Enterprise Blazor data grid with row windowing for large datasets, in-grid editing and built-in Excel export.
+            <span class="visually-hidden">The Blazor toolbox that does grids, charts and reports right.</span>
+            <span aria-hidden="true">The Blazor toolbox <br class="hero-br-lg" />that does <br class="hero-br-sm" /><span class="text-nowrap"><span class="word-pill"><span class="word-pill-mark"></span><span class="word-pill-words"><span>grids</span><span>charts</span><span>reports</span></span></span> right.</span></span>
         </h1>
+        <p class="hero-sub">
+            130+ Blazor controls for data-heavy apps.<br class="hero-br-lg" />
+            Written in C#, ready to drop straight into your project.
+        </p>
+        @* Two calls to action under the hero (2026-10-28, after notion.com). Plain links, not ButtonControl: it renders a <button>
+           with no Href, and these must stay real links (new tab, crawlers). "Quick Start" matches the top-bar button. "Documentation"
+           opens the component catalog: each control's page carries its parameter tables and code, and there is no separate docs site. *@
+        <div class="hero-actions">
+            <a href="get-started" class="hero-btn hero-btn-primary">Quick Start</a>
+            <a href="components" class="hero-btn hero-btn-secondary">Documentation</a>
+        </div>
     </div>
 
-    <!-- ── 2. Grid Brought Right to the Top ───────────────────────── -->
+    @* 2. Live grid *@
     <section id="live-showcase" class="showcase-section">
         <div class="showcase-shell">
-            <!-- Window titlebar (desktop app style) -->
+            @* Window title bar *@
             <div class="window-titlebar">
                 <div class="window-controls">
                     <span class="window-dot dot-red"></span>
@@ -49,33 +68,33 @@
                 </div>
                 <div class="window-title">
                     <span class="bi bi-window-sidebar"></span>
-                    <span>Inbox — Trip Requests</span>
+                    <span>Razor Sharp Getaways</span>
                 </div>
                 <div class="window-tags">
                     <span>FlexCore Grid v@_flexCoreVersion • .NET 10 • 1,000 Rows Virtualized</span>
                 </div>
             </div>
 
-            <!-- Hint Subtitle Banner -->
+            @* Hint banner *@
             <div class="grid-banner-hint">
                 <span class="bi bi-info-circle-fill" style="color: #0284c7;"></span>
                 <span><strong>Quote desk:</strong> trip requests arrive from the booking site. Double-click a request to open the quote editor, or type a quote straight into the grid.</span>
             </div>
 
-            <!-- Showcase Top Bar / Tabs -->
+            @* Tabs *@
             <div class="showcase-header">
                 <div class="showcase-tabs">
                     <button type="button" class="@($"tab-btn {(_activeTab == "grid" ? "active" : "")}")" @onclick="@(() => _activeTab = "grid")">
-                        <span class="bi bi-table"></span> FlexGrid (Trip Requests)
+                        <span class="bi bi-table"></span> Razor Sharp Trip Requests
                     </button>
                     <button type="button" class="@($"tab-btn {(_activeTab == "charts" ? "active" : "")}")" @onclick="@(() => _activeTab = "charts")">
-                        <span class="bi bi-bar-chart-line"></span> 30+ SVG Charts
+                        <span class="bi bi-bar-chart-line"></span> Sales at Cruising Altitude
                     </button>
                     <button type="button" class="@($"tab-btn {(_activeTab == "ribbon" ? "active" : "")}")" @onclick="@(() => _activeTab = "ribbon")">
-                        <span class="bi bi-menu-button-wide"></span> Office Ribbon
+                        <span class="bi bi-menu-button-wide"></span> The Front Desk
                     </button>
                     <button type="button" class="@($"tab-btn {(_activeTab == "reports" ? "active" : "")}")" @onclick="@(() => _activeTab = "reports")">
-                        <span class="bi bi-file-earmark-spreadsheet"></span> Enterprise Reporting
+                        <span class="bi bi-file-earmark-spreadsheet"></span> Invoices
                     </button>
                 </div>
 
@@ -84,7 +103,7 @@
                 </div>
             </div>
 
-            <!-- Showcase Active Tab Content -->
+            @* Active tab content *@
             <div class="showcase-body">
                 @* 2026-10-24 (Baaria): the Razor code is a tab over the example, not a drawer under it. The live example stays
                    mounted while hidden, so the grid keeps its state when the reader switches back. *@
@@ -415,12 +434,12 @@
                 {
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
                         <div>
-                            <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #0f172a;">Quarterly Revenue vs. Target (Pure SVG)</h4>
-                            <ChartControl Type="ChartType.Bar" Title="Performance Overview" Height="280px" Series="@_quarterlySeries" />
+                            <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #0f172a;">Bookings vs. target, by quarter</h4>
+                            <ChartControl Type="ChartType.Bar" Title="Bookings vs. Target" Height="280px" Series="@_quarterlySeries" />
                         </div>
                         <div>
-                            <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #0f172a;">Material Distribution Breakdown</h4>
-                            <ChartControl Type="ChartType.Pie" Title="Inventory Allocation" Height="280px" Series="@_pieSeries" />
+                            <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #0f172a;">Where the trips go</h4>
+                            <ChartControl Type="ChartType.Pie" Title="Trips by Type" Height="280px" Series="@_pieSeries" />
                         </div>
                     </div>
                 }
@@ -494,15 +513,120 @@
         </div>
     </section>
 
-    <!-- ── 3. Most Popular UI Components & Component Directory ── -->
-    <ComponentCatalogDirectory />
+    @* ── 3. Finish-line ribbon and the four big workhorses (2026-10-28, Baaria). They replace the six small workhorse cards on this
+       page; the components page keeps those. Every line is checked: 100,000 rows (/demo/grid/row-selection-50k); 42 values in
+       ChartType; CrystalXmlReportLoader, DrillDownFilter and ReportDesignerCanvasControl in FlexCore/Reports; SchedulerView has Day,
+       Week, Month, Timeline and Agenda, and Gantt is its own control. The pictures are plain SVG, decoration only. *@
+    <section class="workhorses-section">
+        <div class="finish-ribbon">
+            <h2 class="finish-ribbon-title">Everything you need to cross the finish <span class="text-nowrap">line <span class="finish-ribbon-flag" aria-hidden="true">🏁</span></span></h2>
+        </div>
+
+        <div class="workhorse-grid">
+            <a href="demo/grid" class="workhorse-card">
+                <div class="workhorse-art pink" aria-hidden="true">
+                    <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                        <rect x="20" y="14" width="200" height="16" rx="4" fill="#e11d48" opacity="0.85" />
+                        @for (var i = 0; i < 5; i++)
+                        {
+                            <rect x="20" y="@(36 + i * 15)" width="200" height="11" rx="3" fill="@(i == 2 ? "#fda4af" : "#ffffff")" />
+                            <rect x="26" y="@(39 + i * 15)" width="34" height="5" rx="2" fill="#fb7185" opacity="0.7" />
+                            <rect x="72" y="@(39 + i * 15)" width="58" height="5" rx="2" fill="#cbd5e1" />
+                            <rect x="150" y="@(39 + i * 15)" width="36" height="5" rx="2" fill="#cbd5e1" />
+                        }
+                    </svg>
+                </div>
+                <div class="workhorse-body">
+                    <h3 class="workhorse-name"><span class="workhorse-tile pink"><span class="bi bi-table"></span></span> Data Grid</h3>
+                    <p class="workhorse-desc">Scroll 100,000 rows, type straight into cells, then export the lot to Excel.</p>
+                    <ul class="workhorse-chips">
+                        <li>Virtual scrolling</li><li>Frozen columns</li><li>Tree grid</li><li>Excel export</li>
+                    </ul>
+                    <span class="workhorse-link">Explore the grid &rarr;</span>
+                </div>
+            </a>
+
+            <a href="demo/charts" class="workhorse-card">
+                <div class="workhorse-art purple" aria-hidden="true">
+                    <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                        <line x1="24" y1="104" x2="216" y2="104" stroke="#c4b5fd" stroke-width="2" />
+                        @{ var bars = new[] { 38, 56, 44, 70, 62, 84 }; }
+                        @for (var i = 0; i < bars.Length; i++)
+                        {
+                            <rect x="@(34 + i * 30)" y="@(104 - bars[i])" width="18" height="@bars[i]" rx="3" fill="#a855f7" opacity="0.75" />
+                        }
+                        <polyline points="43,58 73,40 103,50 133,26 163,32 193,12" fill="none" stroke="#7e22ce" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div class="workhorse-body">
+                    <h3 class="workhorse-name"><span class="workhorse-tile purple"><span class="bi bi-pie-chart-fill"></span></span> Charts</h3>
+                    <p class="workhorse-desc">40+ chart types drawn in SVG from C#, from sparklines and gauges to Sankey diagrams.</p>
+                    <ul class="workhorse-chips">
+                        <li>Bar &amp; line</li><li>Pie &amp; donut</li><li>Gauges</li><li>Financial</li>
+                    </ul>
+                    <span class="workhorse-link">Explore the charts &rarr;</span>
+                </div>
+            </a>
+
+            <a href="demo/reports/package-costs" class="workhorse-card">
+                <div class="workhorse-art coral" aria-hidden="true">
+                    <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                        <rect x="70" y="8" width="100" height="108" rx="6" fill="#ffffff" stroke="#fdba74" stroke-width="2" />
+                        <rect x="82" y="20" width="52" height="7" rx="2" fill="#ea580c" />
+                        @for (var i = 0; i < 4; i++)
+                        {
+                            <rect x="82" y="@(40 + i * 14)" width="44" height="5" rx="2" fill="#cbd5e1" />
+                            <rect x="136" y="@(40 + i * 14)" width="22" height="5" rx="2" fill="#fdba74" />
+                        }
+                        <line x1="82" y1="98" x2="158" y2="98" stroke="#ea580c" stroke-width="2" />
+                        <rect x="130" y="103" width="28" height="6" rx="2" fill="#ea580c" />
+                    </svg>
+                </div>
+                <div class="workhorse-body">
+                    <h3 class="workhorse-name"><span class="workhorse-tile coral"><span class="bi bi-file-earmark-richtext"></span></span> Reports</h3>
+                    <p class="workhorse-desc">Bring your Crystal Reports across and run them in the browser, with parameters and drill-down.</p>
+                    <ul class="workhorse-chips">
+                        <li>Crystal import</li><li>Parameters</li><li>Drill-down</li><li>Report designer</li>
+                    </ul>
+                    <span class="workhorse-link">Explore the reports &rarr;</span>
+                </div>
+            </a>
+
+            <a href="demo/scheduler" class="workhorse-card">
+                <div class="workhorse-art teal" aria-hidden="true">
+                    <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                        <rect x="20" y="12" width="200" height="14" rx="4" fill="#0d9488" opacity="0.85" />
+                        @for (var c = 0; c < 7; c++)
+                        {
+                            <line x1="@(20 + c * 200 / 7)" y1="30" x2="@(20 + c * 200 / 7)" y2="110" stroke="#99f6e4" stroke-width="1" />
+                        }
+                        <rect x="24" y="36" width="50" height="14" rx="3" fill="#14b8a6" />
+                        <rect x="82" y="56" width="78" height="14" rx="3" fill="#2dd4bf" />
+                        <rect x="110" y="34" width="44" height="14" rx="3" fill="#0f766e" opacity="0.8" />
+                        <rect x="168" y="76" width="46" height="14" rx="3" fill="#14b8a6" />
+                        <rect x="40" y="90" width="64" height="14" rx="3" fill="#5eead4" />
+                    </svg>
+                </div>
+                <div class="workhorse-body">
+                    <h3 class="workhorse-name"><span class="workhorse-tile teal"><span class="bi bi-calendar-week"></span></span> Scheduler</h3>
+                    <p class="workhorse-desc">Day, week, month, timeline and agenda views, plus a Gantt chart for the long jobs.</p>
+                    <ul class="workhorse-chips">
+                        <li>Day &amp; week</li><li>Month</li><li>Timeline</li><li>Gantt</li>
+                    </ul>
+                    <span class="workhorse-link">Explore the scheduler &rarr;</span>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    @* ── 4. The component directory ── *@
+    <ComponentCatalogDirectory ShowWorkhorses="false" />
 
 
-    <!-- ── 5. Why Choose FlexCore: Key Architectural Pillars ───────── -->
+    @* 5. Pillars *@
     <section class="pillars-section">
         <div class="section-header">
-            <span class="section-tag">Enterprise Architecture</span>
-            <h2 class="section-title">Engineered for Enterprise Demand</h2>
+            <h2 class="section-title">Engineered for Enterprise <span class="text-nowrap">Demand <span aria-hidden="true">🏗️</span></span></h2>
             <p class="section-desc">
                 Everything you need to deliver high-performance applications with the familiar productivity of desktop controls and the modern power of Blazor.
             </p>
@@ -559,11 +683,10 @@
         </div>
     </section>
 
-    <!-- ── 6. Comparison Matrix (Side-by-Side Evaluation) ─────────── -->
+    @* 6. Comparison table *@
     <section class="comparison-section">
         <div class="section-header">
-            <span class="section-tag">Feature Comparison</span>
-            <h2 class="section-title">How FlexCore Compares</h2>
+            <h2 class="section-title">How FlexCore <span class="text-nowrap">Compares <span aria-hidden="true">⚖️</span></span></h2>
             <p class="section-desc">
                 See why engineering teams choose FlexCore over bloated JS wrappers and rigid enterprise licensing.
             </p>
@@ -627,9 +750,9 @@
         </div>
     </section>
 
-    <!-- ── 7. Bottom Call to Action & Install Banner ──────────────── -->
+    @* 7. Call to action *@
     <div class="cta-banner">
-        <h2>Ready to Build Lightning-Fast Blazor Apps?</h2>
+        <h2>Ready to Build Lightning-Fast Blazor <span class="text-nowrap">Apps? <span aria-hidden="true">🚀</span></span></h2>
         <p>
             Start developing in minutes. Add the FlexCore NuGet package to your project and experience the power of pure Blazor desktop-grade UI controls.
         </p>
@@ -1128,7 +1251,7 @@
     {
         new()
         {
-            Name = "Actual Revenue ($K)",
+            Name = "Bookings ($K)",
             Color = "#0284c7",
             Type = ChartType.Bar,
             DataPoints = new()
@@ -1141,7 +1264,7 @@
         },
         new()
         {
-            Name = "Annual Target ($K)",
+            Name = "Target ($K)",
             Color = "#107c41",
             Type = ChartType.Bar,
             DataPoints = new()
@@ -1158,14 +1281,14 @@
     {
         new()
         {
-            Name = "Categories",
+            Name = "Trip types",
             Type = ChartType.Pie,
             DataPoints = new()
             {
-                new("Structural (40%)", 40, "#0284c7"),
-                new("Electrical (25%)", 25, "#7c3aed"),
-                new("Plumbing (20%)", 20, "#107c41"),
-                new("Mechanical (15%)", 15, "#d97706")
+                new("Beach (40%)", 40, "#0284c7"),
+                new("City (25%)", 25, "#7c3aed"),
+                new("Ski (20%)", 20, "#107c41"),
+                new("Safari (15%)", 15, "#d97706")
             }
         }
     };
@@ -1339,9 +1462,9 @@
 </GridControl>",
 
             "charts" =>
-@"<ChartControl Type=""ChartType.Bar"" Title=""Performance Overview"" Height=""280px"" Series=""@_quarterlySeries"" />
+@"<ChartControl Type=""ChartType.Bar"" Title=""Bookings vs. Target"" Height=""280px"" Series=""@_quarterlySeries"" />
 
-<ChartControl Type=""ChartType.Pie"" Title=""Inventory Allocation"" Height=""280px"" Series=""@_pieSeries"" />",
+<ChartControl Type=""ChartType.Pie"" Title=""Trips by Type"" Height=""280px"" Series=""@_pieSeries"" />",
 
             "ribbon" =>
 @"<RibbonControl>

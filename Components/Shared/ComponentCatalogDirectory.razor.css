@@ -1,15 +1,16 @@
-/* ── Most Popular UI Components (Syncfusion Style Top Cards) ── */
+/* ── Featured component cards ── */
 .popular-components-section {
-    margin: 36px 0 44px;
-    text-align: center;
+    margin: 56px 0 56px;
 }
 
+/* 2026-10-28: same heading scale as the home page sections (Home.razor.css .section-title), left-aligned. */
 .popular-title {
-    font-size: 24px;
-    font-weight: 800;
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.1;
     color: #0f172a;
-    margin-bottom: 24px;
-    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+    letter-spacing: -0.035em;
 }
 
 .popular-cards-grid {
@@ -66,27 +67,28 @@
     color: #1e293b;
 }
 
-/* ── Complete Component Directory (Syncfusion Style Multi-Column) ── */
+/* ── Complete component directory, multi-column ── */
 .catalog-directory-section {
     margin: 36px 0 64px;
 }
 
 .directory-header {
-    text-align: center;
+    text-align: left;
     max-width: 860px;
-    margin: 0 auto 36px;
+    margin: 0 0 36px;
 }
 
 .directory-title {
-    font-size: 28px;
-    font-weight: 800;
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.1;
     color: #0f172a;
-    letter-spacing: -0.02em;
-    margin-bottom: 12px;
+    letter-spacing: -0.035em;
+    margin-bottom: 14px;
 }
 
 .directory-subtitle {
-    font-size: 15px;
+    font-size: 18px;
     line-height: 1.6;
     color: #64748b;
     margin: 0 0 20px;
@@ -95,7 +97,7 @@
 .catalog-search-wrapper {
     position: relative;
     max-width: 520px;
-    margin: 0 auto;
+    margin: 0;
     display: flex;
     align-items: center;
 }

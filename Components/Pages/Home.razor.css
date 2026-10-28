@@ -5,7 +5,7 @@
     margin: 0 auto;
     padding: 12px 0 64px;
     color: #1e293b;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--site-font);
 }
 
 /* ── 1. Top Hero One-Liner (Compact & Punchy) ── */
@@ -47,12 +47,128 @@
 }
 
 .hero-oneliner {
-    font-size: 26px;
-    font-weight: 800;
-    line-height: 1.35;
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.06;
     color: #0f172a;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.045em;
     margin: 0;
+}
+
+.hero-sub {
+    font-size: 20px;
+    line-height: 1.5;
+    color: #475569;
+    max-width: 920px;
+    margin: 20px auto 0;
+}
+
+/* Hero calls to action: solid brand blue (the top bar's Quick Start colour) and a light tint, like notion.com's pair. */
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.hero-btn {
+    display: inline-flex;
+    align-items: center;
+    font-size: 17px;
+    font-weight: 600;
+    padding: 11px 22px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.hero-btn:hover { text-decoration: none; }
+.hero-btn-primary, .hero-btn-primary:hover { color: #ffffff; }
+.hero-btn-primary { background: #0284c7; }
+.hero-btn-primary:hover { background: #0369a1; }
+.hero-btn-secondary, .hero-btn-secondary:hover { color: #0369a1; }
+.hero-btn-secondary { background: #e0f2fe; }
+.hero-btn-secondary:hover { background: #bae6fd; }
+
+/* Word pill (2026-10-28, after notion.com): "The Blazor toolbox that does [grids] right." The three words share one grid cell and
+   take turns, 3 s each; the pill's colour follows the matching workhorse tile (Data Grid pink, Charts purple, Report Writer coral)
+   and its width follows the word, so the widths below are the words' widths in Inter 700 at -0.045em. */
+.word-pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.2em;
+    padding: 0.02em 0.36em 0.06em 0.3em;
+    border-radius: 9999px;
+    white-space: nowrap;
+    background: #ffe4e6;
+    animation: word-pill-bg 9s infinite;
+}
+
+/* One tile of the FlexCore logo (9-unit square, 2-unit corners; the brand mark in MainLayout.razor) in place of a dot. */
+.word-pill-mark {
+    align-self: center;
+    flex: none;
+    width: 0.28em;
+    height: 0.28em;
+    border-radius: 22%;
+    background: #e11d48;
+    animation: word-pill-mark 9s infinite;
+}
+
+.word-pill-words {
+    display: inline-grid;
+    justify-items: start;
+    width: var(--w-grids);
+    clip-path: inset(-0.1em -0.3em);
+    animation: word-pill-width 9s infinite;
+    --w-grids: 2.12em;
+    --w-reports: 3.07em;
+    --w-charts: 2.70em;
+}
+
+.word-pill-words > span {
+    grid-area: 1 / 1;
+    opacity: 0;
+    animation: word-pill-word 9s infinite;
+}
+
+.word-pill-words > span:nth-child(2) { animation-delay: 3s; }
+.word-pill-words > span:nth-child(3) { animation-delay: 6s; }
+
+@keyframes word-pill-word {
+    0% { opacity: 0; transform: translateY(0.45em); }
+    5%, 30% { opacity: 1; transform: none; }
+    34%, 100% { opacity: 0; transform: translateY(-0.45em); }
+}
+
+@keyframes word-pill-width {
+    0%, 30% { width: var(--w-grids); }
+    35%, 63% { width: var(--w-charts); }
+    68%, 96% { width: var(--w-reports); }
+    100% { width: var(--w-grids); }
+}
+
+@keyframes word-pill-bg {
+    0%, 30% { background: #ffe4e6; }
+    35%, 63% { background: #f3e8ff; }
+    68%, 96% { background: #ffedd5; }
+    100% { background: #ffe4e6; }
+}
+
+@keyframes word-pill-mark {
+    0%, 30% { background: #e11d48; }
+    35%, 63% { background: #9333ea; }
+    68%, 96% { background: #ea580c; }
+    100% { background: #e11d48; }
+}
+
+/* Desktop breaks after "toolbox", phones before the pill, so a changing pill width never moves words between lines. */
+.hero-br-sm { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .word-pill, .word-pill-mark, .word-pill-words, .word-pill-words > span { animation: none; }
+    .word-pill-words > span:first-child { opacity: 1; }
 }
 
 /* ── 2. Live Interactive Showcase (Grid at the Top) ── */
@@ -685,7 +801,7 @@
     cursor: pointer;
 }
 
-/* ── 3. Most Popular UI Components (Syncfusion Style Top Cards) ── */
+/* ── 3. Featured component cards ── */
 .popular-components-section {
     margin: 56px 0 44px;
     text-align: center;
@@ -753,7 +869,7 @@
     color: #1e293b;
 }
 
-/* ── 4. Complete Component Directory (Syncfusion Style Multi-Column) ── */
+/* ── 4. Complete component directory, multi-column ── */
 .catalog-directory-section {
     margin: 48px 0 72px;
 }
@@ -867,39 +983,190 @@
 .comp-list a:hover { color: #0284c7;
 }
 
+/* ── 3. Finish-line ribbon and the four big workhorses (2026-10-28) ──
+   The ribbon is a slightly tilted dark band with checkered edges, like a finish-line banner; the cards are a 2 x 2 grid (one
+   column on phones), each a link with an SVG picture on a tinted panel above its text. Tints match the workhorse tiles. */
+.workhorses-section {
+    margin: 64px 0 72px;
+}
+
+.finish-ribbon {
+    position: relative;
+    margin: 0 auto 36px;
+    padding: 26px 24px;
+    background: #0f172a;
+    border-radius: 10px;
+    text-align: center;
+    transform: rotate(-1deg);
+    box-shadow: 0 12px 28px -10px rgba(15, 23, 42, 0.35);
+}
+
+.finish-ribbon::before,
+.finish-ribbon::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: repeating-conic-gradient(#0f172a 0 25%, #ffffff 0 50%) 0 0 / 10px 10px;
+}
+
+.finish-ribbon::before { top: 0; border-radius: 10px 10px 0 0; }
+.finish-ribbon::after { bottom: 0; border-radius: 0 0 10px 10px; }
+
+.finish-ribbon-title {
+    margin: 0;
+    color: #ffffff;
+    font-size: clamp(26px, 3.4vw, 42px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+}
+
+.finish-ribbon-flag {   /* the black-and-white flag disappears on the dark band without a light chip behind it */
+    display: inline-block;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 0 0.12em;
+    font-size: 0.8em;
+    vertical-align: 0.08em;
+}
+
+.workhorse-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.workhorse-card {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.workhorse-card:hover {
+    color: inherit;
+    text-decoration: none;
+    transform: translateY(-4px);
+    box-shadow: 0 18px 36px -12px rgba(15, 23, 42, 0.18);
+}
+
+.workhorse-art {
+    height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.workhorse-art svg { width: 100%; max-width: 320px; height: 100%; }
+
+.workhorse-art.pink   { background: #fff1f2; }
+.workhorse-art.purple { background: #faf5ff; }
+.workhorse-art.coral  { background: #fff7ed; }
+.workhorse-art.teal   { background: #f0fdfa; }
+
+.workhorse-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 22px 24px 24px;
+    flex: 1;
+}
+
+.workhorse-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+}
+
+.workhorse-tile {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+}
+
+.workhorse-tile.pink   { background: #ffe4e6; color: #e11d48; }
+.workhorse-tile.purple { background: #f3e8ff; color: #9333ea; }
+.workhorse-tile.coral  { background: #ffedd5; color: #ea580c; }
+.workhorse-tile.teal   { background: #ccfbf1; color: #0d9488; }
+
+.workhorse-desc {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #475569;
+}
+
+.workhorse-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.workhorse-chips li {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
+    background: #f1f5f9;
+    border-radius: 9999px;
+    padding: 4px 10px;
+}
+
+.workhorse-link {
+    margin-top: auto;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0284c7;
+}
+
+.workhorse-card:hover .workhorse-link { color: #0369a1; }
+
 /* ── 5. Enterprise Architecture Pillars ── */
 .pillars-section {
     margin-bottom: 64px;
 }
 
+/* 2026-10-28: section heads are left-aligned and large, without the small uppercase label above them (after notion.com).
+   The same scale is used by .popular-title, .directory-title and the call to action. */
 .section-header {
-    text-align: center;
-    margin-bottom: 28px;
-}
-
-.section-tag {
-    display: inline-block;
-    color: #0284c7;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
+    text-align: left;
+    margin-bottom: 32px;
 }
 
 .section-title {
-    font-size: 30px;
-    font-weight: 800;
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.1;
     color: #0f172a;
-    letter-spacing: -0.02em;
-    margin-bottom: 12px;
+    letter-spacing: -0.035em;
+    margin-bottom: 14px;
 }
 
 .section-desc {
-    font-size: 15px;
+    font-size: 18px;
+    line-height: 1.5;
     color: #64748b;
     max-width: 720px;
-    margin: 0 auto;
+    margin: 0;
 }
 
 .pillars-grid {
@@ -1015,14 +1282,16 @@
 }
 
 .cta-banner h2 {
-    font-size: 30px;
-    font-weight: 800;
-    margin-bottom: 12px;
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    margin-bottom: 14px;
     color: #ffffff;
 }
 
 .cta-banner p {
-    font-size: 15px;
+    font-size: 18px;
     color: #cbd5e1;
     max-width: 620px;
     margin: 0 auto 24px;
@@ -1121,8 +1390,17 @@
 }
 
 @media (max-width: 768px) {
-    .hero-oneliner {
-        font-size: 22px;
+    .workhorse-grid { grid-template-columns: 1fr; }
+    .workhorse-art { height: 140px; }
+    .finish-ribbon { padding: 22px 16px; }
+    .hero-br-sm { display: inline; }
+    .hero-br-lg { display: none; }
+    .hero-btn {
+        font-size: 15px;
+        padding: 10px 16px;
+    }
+    .hero-sub {
+        font-size: 17px;
     }
     .popular-cards-grid {
         grid-template-columns: repeat(2, 1fr);
