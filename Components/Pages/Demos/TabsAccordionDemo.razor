@@ -11,6 +11,11 @@
    a document workspace: a pinned Home tab and closable documents. Sample data moved from a kitchen estimate to the site's travel
    theme. *@
 
+@* 2026-10-28: FlexCore 0.2.49+ gave TabStripControl (and TabControl through it) Theme, Orientation, a right-click menu for both,
+   overflow navigation and separators. The page CSS that drew folder tabs is gone: both examples use TabTheme.FolderTabs, the
+   document tabs example switches theme with a button group and orientation with the strip's own menu, and the doc tables carry
+   the new members (checked against TabStripControl.razor, TabStripModels.cs, TabStripControl.razor.css, Navigation/TabControl.razor). *@
+
 <PageTitle>Tabs & accordion — FlexCore Showcase</PageTitle>
 
 <FeatureDemoLayout Title="Tabs & accordion" Category="Components" ControlName="TabControl · TabStripControl · AccordionControl"
@@ -26,49 +31,50 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs" CssCode="@Code.FolderCss">
+        <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs">
             <Description><p>Panes are declared inline; only the selected one renders, so the Lines table is not in the page until its tab is chosen. The <code>TabItems</code> wrapper is optional. The outlined look is page CSS on a wrapper around the control (CSS tab); <code>TabControl</code> has no close button.</p></Description>
             <Demo>
-                <div class="folder-tabs">
-                    <TabControl @bind-SelectedIndex="_tab">
-                        <TabItems>
-                            <TabItem HeaderText="Summary">
-                                <dl class="summary">
-                                    <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
-                                    <dt>Status</dt><dd>Quoted, 3 lines</dd>
-                                    <dt>Total</dt><dd>$1,720</dd>
-                                </dl>
-                            </TabItem>
-                            <TabItem HeaderText="Lines">
-                                <table class="lines">
-                                    <thead><tr><th>Item</th><th>Qty</th><th class="num">Amount</th></tr></thead>
-                                    <tbody>
-                                        <tr><td>Return flights</td><td>2 seats</td><td class="num">$420</td></tr>
-                                        <tr><td>Old-town hotel</td><td>4 nights</td><td class="num">$1,120</td></tr>
-                                        <tr><td>Guided food tour</td><td>2 people</td><td class="num">$180</td></tr>
-                                    </tbody>
-                                </table>
-                            </TabItem>
-                            <TabItem HeaderText="Notes">
-                                <p class="m0">Quote valid 14 days. The travellers prefer a morning flight; the hotel holds the rooms until Friday.</p>
-                            </TabItem>
-                        </TabItems>
-                    </TabControl>
-                </div>
+                <TabControl @bind-SelectedIndex="_tab" Theme="TabTheme.FolderTabs">
+                    <TabItems>
+                        <TabItem HeaderText="Summary">
+                            <dl class="summary">
+                                <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
+                                <dt>Status</dt><dd>Quoted, 3 lines</dd>
+                                <dt>Total</dt><dd>$1,720</dd>
+                            </dl>
+                        </TabItem>
+                        <TabItem HeaderText="Lines">
+                            <table class="lines">
+                                <thead><tr><th>Item</th><th>Qty</th><th class="num">Amount</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Return flights</td><td>2 seats</td><td class="num">$420</td></tr>
+                                    <tr><td>Old-town hotel</td><td>4 nights</td><td class="num">$1,120</td></tr>
+                                    <tr><td>Guided food tour</td><td>2 people</td><td class="num">$180</td></tr>
+                                </tbody>
+                            </table>
+                        </TabItem>
+                        <TabItem HeaderText="Notes">
+                            <p class="m0">Quote valid 14 days. The travellers prefer a morning flight; the hotel holds the rooms until Friday.</p>
+                        </TabItem>
+                    </TabItems>
+                </TabControl>
                 <p class="result">Tab @(_tab + 1) of 3 selected</p>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="strip" Title="Document tabs" RazorCode="@Code.Strip" CSharpCode="@Code.StripCs" CssCode="@Code.FolderCss">
-            <Description><p>A tab strip laid out as a document workspace: Home is not <code>Closable</code>, so it has no ×; the documents are, and their × raises <code>OnTabClose</code> with the index, after which the page removes the item. The strip renders headers only; the page shows the selected item's <code>Tag</code> underneath. A disabled tab ignores clicks.</p></Description>
+        <DemoExample Id="strip" Title="Document tabs" RazorCode="@Code.Strip" CSharpCode="@Code.StripCs" CssCode="@Code.StripCss">
+            <Description><p>A tab strip laid out as a document workspace: Home is not <code>Closable</code>, so it has no ×; the documents are, and their × raises <code>OnTabClose</code> with the index, after which the page removes the item. The strip renders headers only; the page shows the selected item's <code>Tag</code> underneath. A disabled tab ignores clicks. <code>Theme</code> picks one of five built-in looks (the buttons set it); right-click the strip for the control's own menu, which also changes <code>Orientation</code>: Hybrid Vertical wraps the tabs onto rows, Horizontal keeps one scrolling row, Vertical turns the strip into a rail beside the pane. Both report back through <code>@@bind-Theme</code> and <code>@@bind-Orientation</code>, shown in the line under the strip.</p></Description>
+            <Controls>
+                <ButtonGroupControl Items="_themeItems" Values="@(new[] { _theme.ToString() })" ValuesChanged="SetTheme" Selection="ChoiceSelectionMode.Single" AriaLabel="Tab theme" />
+            </Controls>
             <Demo>
-                <div class="folder-tabs">
-                    <TabStripControl Items="_docs" @bind-SelectedIndex="_doc" OnTabClose="CloseDoc" />
+                <div class="@(_orientation == TabOrientation.Vertical ? "docs docs-vertical" : "docs")">
+                    <TabStripControl Items="_docs" @bind-SelectedIndex="_doc" OnTabClose="CloseDoc" @bind-Theme="_theme" @bind-Orientation="_orientation" AriaLabel="Documents" />
                     <div class="strip-pane">@(_docs.Count == 0 ? "No documents open." : _docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag)</div>
                 </div>
                 <div class="strip-actions">
                     <ButtonControl CssClass="btn-sm" OnClick="Reopen" Disabled="@(_closed.Count == 0)">Reopen last closed</ButtonControl>
-                    <span class="result">@_docs.Count open, @_closed.Count closed</span>
+                    <span class="result">@_docs.Count open, @_closed.Count closed · @_theme, @_orientation</span>
                 </div>
             </Demo>
         </DemoExample>
@@ -148,6 +154,17 @@
         new("Invoice", "bi bi-receipt") { Disabled = true, Tag = "Not issued yet." },
     };
     private readonly Stack<TabStripItem> _closed = new();
+    private TabTheme _theme = TabTheme.FolderTabs;
+    private TabOrientation _orientation = TabOrientation.HybridVertical;
+    private readonly SelectionItem[] _themeItems =
+    {
+        new("WindowsClassic", "Windows"), new("FolderTabs", "Folder"), new("ColorfulCards", "Cards"), new("Minimal", "Minimal"), new("Dark", "Dark")
+    };
+
+    private void SetTheme(IReadOnlyList<string> values)
+    {
+        if (values.Count > 0) _theme = Enum.Parse<TabTheme>(values[0]);
+    }
 
     private void CloseDoc(int index)
     {
@@ -175,6 +192,10 @@
             new("SelectedIndexChanged", "Fires when a different header is clicked.", "EventCallback&lt;int&gt;"),
             new("ChildContent", "<code>TabItem</code>s, optionally inside a <code>TabItems</code> wrapper. Order follows declaration.", "RenderFragment?"),
             new("CssClass", "Appended to the <code>fx-tabs</code> root. There is no <code>Style</code>; this control does not derive from <code>FlexControlBase</code>.", "string?", "null"),
+            new("Orientation", "Layout of the header strip, passed to its <code>TabStripControl</code>: <code>HybridVertical</code> wraps the headers onto rows, <code>Horizontal</code> keeps one scrolling row, <code>Vertical</code> puts a 220 px rail beside the pane. Two-way with <code>@bind-Orientation</code>. The strip's right-click menu and overflow buttons are always on here; the control has no switch for them.", "TabOrientation", "TabOrientation.HybridVertical"),
+            new("OrientationChanged", "After the right-click menu picks an orientation.", "EventCallback&lt;TabOrientation&gt;"),
+            new("Theme", "Colours of the header strip: <code>WindowsClassic</code>, <code>FolderTabs</code>, <code>ColorfulCards</code>, <code>Minimal</code> or <code>Dark</code>; see the strip's <code>Theme</code>. Two-way with <code>@bind-Theme</code>.", "TabTheme", "TabTheme.WindowsClassic"),
+            new("ThemeChanged", "After the right-click menu picks a theme.", "EventCallback&lt;TabTheme&gt;"),
         };
         public static readonly ApiRow[] TabItem =
         {
@@ -189,6 +210,15 @@
             new("SelectedIndexChanged", "Fires on a click on an enabled tab.", "EventCallback&lt;int&gt;"),
             new("OnTabClose", "Fires with the index when a closable tab's × is clicked. The strip does not remove the item.", "EventCallback&lt;int&gt;"),
             new("CssClass", "Appended to the <code>fx-tabstrip</code> root. Not a <code>FlexControlBase</code> control.", "string?", "null"),
+            new("AriaLabel", "<code>aria-label</code> of the <code>role=\"tablist\"</code> element.", "string", "\"Tabs\""),
+            new("Theme", "Writes the <code>--fx-tab-*</code> colour variables inline on the root (see CSS variables) and <code>data-tab-theme</code>: <code>WindowsClassic</code> (bevelled grey; the menu calls it VB6 / Windows), <code>FolderTabs</code>, <code>ColorfulCards</code> (five pastel fills rotating over the resting tabs), <code>Minimal</code>, <code>Dark</code>. Two-way with <code>@bind-Theme</code>.", "TabTheme", "TabTheme.WindowsClassic"),
+            new("ThemeChanged", "After the right-click menu changes the theme; the strip then scrolls the selected tab into view.", "EventCallback&lt;TabTheme&gt;"),
+            new("Orientation", "<code>HybridVertical</code> wraps the tabs onto rows and scrolls them vertically past 160 px; <code>Horizontal</code> is one row that scrolls sideways; <code>Vertical</code> is a 220 px rail of 52 px tabs with <code>height: 100%</code>, which the host lays out beside the content. Written to <code>data-tab-orientation</code>. Two-way with <code>@bind-Orientation</code>.", "TabOrientation", "TabOrientation.HybridVertical"),
+            new("OrientationChanged", "After the right-click menu changes the orientation; the strip then scrolls the selected tab into view.", "EventCallback&lt;TabOrientation&gt;"),
+            new("ShowOrientationMenu", "A right-click on the strip opens a context menu with the three orientations and five themes, the current ones ticked. False ignores the right-click.", "bool", "true"),
+            new("OnOrientationMenuRequested", "With a delegate, the right-click raises this with the mouse position instead of opening the built-in menu, for a host that draws its own (the report writer does).", "EventCallback&lt;MouseEventArgs&gt;"),
+            new("EnableOverflowNavigation", "Watches the strip's size and scroll position through the library's script and, when the tabs overflow, shows Previous and Next buttons that scroll them (left and right, or up and down); tab text is clipped with an ellipsis. Off, the tab row scrolls natively with no buttons.", "bool", "false"),
+            new("ShowSeparators", "Adds <code>fx-tabstrip-separated</code> to the root. The stylesheet has no rule for it yet, so it is a hook for the host's CSS.", "bool", "false"),
         };
         public static readonly ApiRow[] StripItem =
         {
@@ -218,60 +248,61 @@
         public static readonly ApiRow[] Css =
         {
             new("fx-tabs · fx-tab-headers · fx-tab-button (.active) · fx-tab-content", "Tab control root, header row, header buttons and the bordered pane."),
-            new("fx-tabstrip · fx-tabstrip-tab (-active, -disabled) · fx-tabstrip-icon · fx-tabstrip-text · fx-tabstrip-close", "Strip row with a bottom border, each tab with a 2px active underline, its icon, text and × button. The outlined look in the examples is page CSS over these classes."),
+            new("fx-tabstrip (data-tab-orientation, data-tab-theme) · fx-tabstrip-viewport · fx-tabstrip-tab (-active, -disabled) · fx-tabstrip-icon · fx-tabstrip-text · fx-tabstrip-close", "Strip root with the orientation and theme attributes; the scrolling <code>role=\"tablist\"</code>; each bordered tab (Tahoma, 12 px) with its icon, two-line text and × button. The active tab's bottom edge takes the pane colour."),
+            new("fx-tabstrip-navigation · fx-tabstrip-scroll · fx-tabstrip-navigable · fx-tabstrip-separated", "The Previous/Next buttons shown by <code>EnableOverflowNavigation</code>, and the root classes that parameter and <code>ShowSeparators</code> add."),
             new("fx-accordion · fx-accordion-item (.fx-accordion-expanded, .fx-accordion-disabled)", "Rounded bordered stack and each item; the expanded class rotates the arrow."),
             new("fx-accordion-header · -icon · -title · -arrow · -body", "Header button and its parts; the body carries the padding."),
         };
         public static readonly ApiRow[] Vars =
         {
-            new("--fx-tab-bg · --fx-tab-color · --fx-text-color", "Strip background, resting and hover text.", "#f9fafb · #6b7280 · #1f2937"),
-            new("--fx-tab-active-color · --fx-tab-active-border-color · --fx-tab-active-bg", "Active tab text, underline and fill.", "#1b6ec2 · #1b6ec2 · transparent"),
-            new("--fx-border-color · --fx-sidebar-item-hover-bg · --fx-text-muted", "Strip bottom border, hover fill, disabled text.", "#e5e7eb · #f3f4f6 · #d1d5db"),
-            new("--fx-font-size · --fx-zoom", "Tab font size and zoom factor.", "13px · 1"),
-            new("(none)", "<code>TabControl</code> and the accordion read no variables; their colours are fixed in the stylesheets.", "—"),
+            new("--fx-tab-bg · --fx-tab-item-bg · --fx-tab-color · --fx-tab-hover-bg", "Strip background, resting tab fill, text and hover fill. <code>Theme</code> writes all eleven <code>--fx-tab-*</code> variables inline on the root, so a page rule needs <code>!important</code> to override one.", "#e4e4e4 · #d4d4d4 · #222 · #dfdfdf"),
+            new("--fx-tab-active-bg · --fx-tab-active-color · --fx-tab-active-border-color", "Active tab fill and text, and its bottom edge; the theme sets the edge to the fill so the tab joins the pane.", "#f5f5f5 · #000 · #f5f5f5"),
+            new("--fx-tab-border · --fx-tab-separator-color · --fx-tab-radius · --fx-tab-shadow", "Tab and strip borders, the line before the scroll buttons, the top corner radius and the tab shadow.", "#7a7a7a · #7a7a7a · 3px · inset 1px 1px 0 #efefef, inset -1px 0 0 #a0a0a0"),
+            new("--fx-font-size · --fx-zoom · --fx-text-muted", "Read from the page, not set by the theme: tab font size, zoom factor and disabled text.", "12px · 1 · #d1d5db"),
+            new("(none)", "<code>TabControl</code> hands <code>Theme</code> and <code>Orientation</code> to its strip; the accordion reads no variables.", "—"),
         };
     }
 
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Tabs = @"<div class=""folder-tabs"">
-    <TabControl @bind-SelectedIndex=""_tab"">
-        <TabItems>
-            <TabItem HeaderText=""Summary"">
-                <dl class=""summary"">
-                    <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
-                    <dt>Status</dt><dd>Quoted, 3 lines</dd>
-                    <dt>Total</dt><dd>$1,720</dd>
-                </dl>
-            </TabItem>
-            <TabItem HeaderText=""Lines"">
-                <table class=""lines"">
-                    <thead><tr><th>Item</th><th>Qty</th><th class=""num"">Amount</th></tr></thead>
-                    <tbody>
-                        <tr><td>Return flights</td><td>2 seats</td><td class=""num"">$420</td></tr>
-                        <tr><td>Old-town hotel</td><td>4 nights</td><td class=""num"">$1,120</td></tr>
-                        <tr><td>Guided food tour</td><td>2 people</td><td class=""num"">$180</td></tr>
-                    </tbody>
-                </table>
-            </TabItem>
-            <TabItem HeaderText=""Notes"">
-                <p class=""m0"">Quote valid 14 days. The travellers prefer a morning flight; the hotel holds the rooms until Friday.</p>
-            </TabItem>
-        </TabItems>
-    </TabControl>
-</div>
+        public const string Tabs = @"<TabControl @bind-SelectedIndex=""_tab"" Theme=""TabTheme.FolderTabs"">
+    <TabItems>
+        <TabItem HeaderText=""Summary"">
+            <dl class=""summary"">
+                <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
+                <dt>Status</dt><dd>Quoted, 3 lines</dd>
+                <dt>Total</dt><dd>$1,720</dd>
+            </dl>
+        </TabItem>
+        <TabItem HeaderText=""Lines"">
+            <table class=""lines"">
+                <thead><tr><th>Item</th><th>Qty</th><th class=""num"">Amount</th></tr></thead>
+                <tbody>
+                    <tr><td>Return flights</td><td>2 seats</td><td class=""num"">$420</td></tr>
+                    <tr><td>Old-town hotel</td><td>4 nights</td><td class=""num"">$1,120</td></tr>
+                    <tr><td>Guided food tour</td><td>2 people</td><td class=""num"">$180</td></tr>
+                </tbody>
+            </table>
+        </TabItem>
+        <TabItem HeaderText=""Notes"">
+            <p class=""m0"">Quote valid 14 days. The travellers prefer a morning flight; the hotel holds the rooms until Friday.</p>
+        </TabItem>
+    </TabItems>
+</TabControl>
 <p class=""result"">Tab @(_tab + 1) of 3 selected</p>";
         public const string TabsCs = @"// Tab control
 private int _tab;";
 
-        public const string Strip = @"<div class=""folder-tabs"">
-    <TabStripControl Items=""_docs"" @bind-SelectedIndex=""_doc"" OnTabClose=""CloseDoc"" />
+        public const string Strip = @"<ButtonGroupControl Items=""_themeItems"" Values=""@(new[] { _theme.ToString() })"" ValuesChanged=""SetTheme"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Tab theme"" />
+
+<div class=""@(_orientation == TabOrientation.Vertical ? ""docs docs-vertical"" : ""docs"")"">
+    <TabStripControl Items=""_docs"" @bind-SelectedIndex=""_doc"" OnTabClose=""CloseDoc"" @bind-Theme=""_theme"" @bind-Orientation=""_orientation"" AriaLabel=""Documents"" />
     <div class=""strip-pane"">@(_docs.Count == 0 ? ""No documents open."" : _docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag)</div>
 </div>
 <div class=""strip-actions"">
     <ButtonControl CssClass=""btn-sm"" OnClick=""Reopen"" Disabled=""@(_closed.Count == 0)"">Reopen last closed</ButtonControl>
-    <span class=""result"">@_docs.Count open, @_closed.Count closed</span>
+    <span class=""result"">@_docs.Count open, @_closed.Count closed · @_theme, @_orientation</span>
 </div>";
         public const string StripCs = @"// Tab strip
 private int _doc;
@@ -284,6 +315,17 @@ private readonly List<TabStripItem> _docs = new()
     new(""Invoice"", ""bi bi-receipt"") { Disabled = true, Tag = ""Not issued yet."" },
 };
 private readonly Stack<TabStripItem> _closed = new();
+private TabTheme _theme = TabTheme.FolderTabs;
+private TabOrientation _orientation = TabOrientation.HybridVertical;
+private readonly SelectionItem[] _themeItems =
+{
+    new(""WindowsClassic"", ""Windows""), new(""FolderTabs"", ""Folder""), new(""ColorfulCards"", ""Cards""), new(""Minimal"", ""Minimal""), new(""Dark"", ""Dark"")
+};
+
+private void SetTheme(IReadOnlyList<string> values)
+{
+    if (values.Count > 0) _theme = Enum.Parse<TabTheme>(values[0]);
+}
 
 private void CloseDoc(int index)
 {
@@ -301,6 +343,11 @@ private void Reopen()
     _docs.Add(_closed.Pop());
     _doc = _docs.Count - 1;
 }";
+        public const string StripCss = @".docs { display: flex; flex-direction: column; }
+.docs .strip-pane { border: 1px solid #cbd5e1; border-top: 0; border-radius: 0 0 8px 8px; background: #fff; padding: 14px 16px; }
+.docs-vertical { flex-direction: row; align-items: stretch; min-height: 240px; }
+.docs-vertical ::deep .fx-tabstrip { flex: 0 0 220px; }
+.docs-vertical .strip-pane { flex: 1; border-top: 1px solid #cbd5e1; border-left: 0; border-radius: 0 8px 8px 0; }";
 
         public const string Accordion = @"<div class=""acc"">
     <AccordionControl Multiple=""true"">
@@ -311,69 +358,5 @@ private void Reopen()
     </AccordionControl>
 </div>";
 
-        public const string FolderCss = @".folder-tabs ::deep .fx-tab-headers,
-.folder-tabs ::deep .fx-tabstrip {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 0 0 0 4px;
-    overflow: visible;
-    background: transparent;
-    border-bottom: 1px solid #cbd5e1;
-}
-.folder-tabs ::deep .fx-tab-button,
-.folder-tabs ::deep .fx-tabstrip-tab {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: -1px;
-    padding: 7px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px 8px 0 0;
-    background: #f1f5f9;
-    color: #475569;
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: none;
-}
-.folder-tabs ::deep .fx-tab-button:not(.active):hover,
-.folder-tabs ::deep .fx-tabstrip-tab:not(.fx-tabstrip-tab-active):not(.fx-tabstrip-tab-disabled):hover {
-    background: #e2e8f0;
-    color: #0284c7;
-}
-.folder-tabs ::deep .fx-tab-button.active,
-.folder-tabs ::deep .fx-tabstrip-tab-active {
-    background: #ffffff;
-    border-bottom-color: #ffffff;
-    color: #0f172a;
-    font-weight: 600;
-    box-shadow: inset 0 2px 0 #0284c7;
-}
-.folder-tabs ::deep .fx-tabstrip-tab-active .fx-tabstrip-icon {
-    color: #0284c7;
-}
-.folder-tabs ::deep .fx-tabstrip-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    margin-left: 2px;
-    border-radius: 4px;
-    color: #94a3b8;
-    font-size: 15px;
-}
-.folder-tabs ::deep .fx-tabstrip-close:hover {
-    background: #e2e8f0;
-    color: #0f172a;
-}
-.folder-tabs ::deep .fx-tab-content,
-.folder-tabs .strip-pane {
-    border: 1px solid #cbd5e1;
-    border-top: 0;
-    border-radius: 0 0 8px 8px;
-    background: #ffffff;
-    padding: 14px 16px;
-}";
     }
 }

@@ -27,7 +27,7 @@
         <ChildContent>
             @if (_codes.Count > 0)
             {
-                <TabStripControl Items="_tabs" @bind-SelectedIndex="_tab" CssClass="ex-tabs" />
+                <TabStripControl Items="_tabs" @bind-SelectedIndex="_tab" CssClass="ex-tabs" Theme="TabTheme.Minimal" ShowOrientationMenu="false" />
             }
             <div class="ex-live" hidden="@(_tab != 0)">@Demo</div>
             @if (_tab > 0)
