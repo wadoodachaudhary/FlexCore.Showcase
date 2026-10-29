@@ -1,0 +1,42 @@
+@using Fx.ControlKit.Scheduling
+@using static FlexCore.Showcase.Components.Pages.Home
+
+@* 2026-10-29 (Baaria): the Bookings page of the home page's app window, a month of departures for the booked trip requests. The
+   home page's Razor tab prints this file's markup from the line below this comment to @code (FlexCore.Showcase.csproj embeds it).
+   Departures are timed rather than all-day: the Month view prints every entry's start time, so an all-day one read "12:00 AM"
+   (SchedulerControl.razor:13, library, owner-gated). *@
+<div class="gw-bookings">
+    @* Click a flight to open it, or switch to the Week or Agenda view *@
+    <SchedulerControl @bind-Events="_departures" @bind-Date="_date" @bind-View="_view" Height="560px" />
+</div>
+
+@code {
+    /// <summary>The agency's trip requests; every booked one becomes an all-day departure.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<TripRequest> Requests { get; set; } = [];
+
+    private IReadOnlyList<SchedulerEvent> _departures = [];
+    private DateTime _date = DateTime.Today;
+    private SchedulerView _view = SchedulerView.Month;
+
+    protected override void OnInitialized()
+    {
+        var booked = Requests.Where(r => r.Status == "Booked").OrderBy(r => r.Departure).ToList();
+        // Each departure gets a flight time between 06:00 and 19:45, picked from its request number
+        _departures = booked.Select(r =>
+        {
+            var takeOff = r.Departure.Date.AddHours(6 + r.Id * 7 % 14).AddMinutes(r.Id * 13 % 4 * 15);
+            return new SchedulerEvent
+            {
+                Id = r.Request,
+                Title = $"{r.Destination} · {r.Traveller}",
+                Description = $"{r.Request}, {r.TripTypeName}, {r.Travellers} travelling. {r.Itinerary}.",
+                Start = takeOff,
+                End = takeOff.AddHours(3)
+            };
+        }).ToList();
+
+        // The demo data covers 2026; open on this month while it has departures, otherwise on the first month that does
+        if (booked.Count > 0 && !booked.Any(r => r.Departure.Year == _date.Year && r.Departure.Month == _date.Month))
+            _date = booked.First(r => r.Departure >= _date.Date || r == booked[^1]).Departure.Date;
+    }
+}

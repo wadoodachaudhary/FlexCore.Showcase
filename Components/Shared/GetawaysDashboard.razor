@@ -1,0 +1,142 @@
+@using static FlexCore.Showcase.Components.Pages.Home
+@inject NotificationService Notifications
+
+@* 2026-10-29 (Baaria, after the app demo on blazor.radzen.com): the Dashboard page of the home page's app window. It reads the
+   same 1,000 trip requests as the Trip Requests page, so an edit or a new request there shows up here. The home page's Razor tab
+   prints this file's markup from the line below this comment to @code (FlexCore.Showcase.csproj embeds it), so keep the
+   comments inside the markup short and public. *@
+<div class="gw-dash">
+    <div class="gw-dash-head">
+        <div>
+            <h3 class="gw-greeting">Welcome back, Pippa</h3>
+            <p class="gw-greeting-sub">Here's the agency at a glance for @Today.ToString("dddd, MMMM d").</p>
+        </div>
+        <ButtonControl BareStyle="true" CssClass="gw-round-btn" IconCss="bi bi-arrow-clockwise" Title="Refresh" OnClick="Refresh" />
+    </div>
+
+    @* Each card opens the Trip Requests page on its view *@
+    <div class="gw-kpis">
+        @foreach (var k in Kpis)
+        {
+            <CardControl CssClass="gw-kpi" Elevation="0">
+                <ButtonControl BareStyle="true" CssClass="gw-kpi-btn" Title="@k.Tip" OnClick="@(() => OnShowRequests.InvokeAsync(k.View))">
+                    <span class="gw-kpi-label">@k.Label</span>
+                    <span class="gw-kpi-line"><span class="gw-kpi-value">@k.Value</span> <span class="gw-kpi-note">@k.Note</span></span>
+                </ButtonControl>
+            </CardControl>
+        }
+    </div>
+
+    <CardControl CssClass="gw-card">
+        <HeaderContent>
+            <div class="gw-card-head">
+                <h4 class="gw-card-title">Trip requests by month</h4>
+                <div class="gw-card-tools">
+                    <CheckBoxControl Label="Include declined" Checked="@_withDeclined" CheckedChanged="@(v => _withDeclined = v)" />
+                    <SegmentedControl Items="_ranges" @bind-Value="_range" AriaLabel="Months shown" CssClass="gw-range" />
+                </div>
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <ChartControl Type="ChartType.StackedBar" Height="420px" Series="@MonthlySeries" />
+        </ChildContent>
+    </CardControl>
+
+    @* Drag a header onto the bar above the grid to group by it; double-click a trip to open the request *@
+    <CardControl CssClass="gw-card">
+        <HeaderContent>
+            <div class="gw-card-head">
+                <h4 class="gw-card-title">Upcoming departures</h4>
+                <span class="gw-card-note">@Departures.Count booked trips</span>
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <GridControl TValue="TripRequest" DataSource="@Departures"
+                         AllowSorting="true"
+                         AllowGrouping="true"
+                         AllowPaging="true"
+                         PageSettingsRef="@_paging"
+                         EnableHover="true"
+                         EventsRef="@_events"
+                         CssClass="hero-grid-theme"
+                         Height="320px">
+                <GridColumnsBase>
+                    <GridColumn Field="@nameof(TripRequest.Request)" HeaderText="Request" Width="100px">
+                        <Template Context="row">
+                            <BadgeControl Text="@(((TripRequest)row).Request)" CssClass="grid-request-code" />
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(TripRequest.Traveller)" HeaderText="Lead traveller" Width="180px" />
+                    <GridColumn Field="@nameof(TripRequest.Destination)" HeaderText="Destination" Width="125px" />
+                    <GridColumn Field="@nameof(TripRequest.TripTypeName)" HeaderText="Trip" Width="190px" />
+                    <GridColumn Field="@nameof(TripRequest.Agent)" HeaderText="Agent" Width="150px" />
+                    <GridColumn Field="@nameof(TripRequest.Departure)" HeaderText="Departs" Width="120px" Type="ColumnType.Date" Format="MMM d, yyyy" />
+                </GridColumnsBase>
+            </GridControl>
+        </ChildContent>
+    </CardControl>
+</div>
+
+@code {
+    /// <summary>The agency's trip requests, shared with the Trip Requests page.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<TripRequest> Requests { get; set; } = [];
+
+    /// <summary>Opens the Trip Requests page on a view: "All", "New requests", "Quoted" or "Booked".</summary>
+    [Parameter] public EventCallback<string> OnShowRequests { get; set; }
+
+    /// <summary>Opens a request in the Trip Requests page's editor.</summary>
+    [Parameter] public EventCallback<TripRequest> OnOpenRequest { get; set; }
+
+    // The requests are generated over the 300 days up to today (Home.razor, GenerateRequests)
+    private static DateTime Today => DateTime.Today;
+
+    private bool _withDeclined;
+    private string _range = "6";
+    private static readonly SelectionItem[] _ranges = [new("3", "3M"), new("6", "6M"), new("12", "12M")];
+    private readonly PageSettings _paging = new() { PageSize = 6, PageSizes = [6, 12, 24] };
+    private readonly GridControlEvents<TripRequest> _events = new();
+
+    private sealed record Kpi(string Label, int Value, string Note, string View, string Tip);
+
+    private IEnumerable<Kpi> Kpis
+    {
+        get
+        {
+            var thisMonth = Requests.Count(r => r.Status == "Booked" && SameMonth(r.DateRequested, Today));
+            var lastMonth = Requests.Count(r => r.Status == "Booked" && SameMonth(r.DateRequested, Today.AddMonths(-1)));
+            var change = thisMonth - lastMonth;
+            yield return new("New requests", Requests.Count(r => r.Status == "New"), "need a quote", "New requests", "Show the new requests");
+            yield return new("Quoted", Requests.Count(r => r.Status == "Quoted"), "with the client", "Quoted", "Show the quoted requests");
+            yield return new("Booked this month", thisMonth, $"{(change >= 0 ? "+" : "")}{change} vs last month", "Booked", "Show the booked trips");
+            yield return new("Departing soon", Departures.Count(r => r.Departure < Today.AddDays(14)), "next 14 days", "Booked", "Show the booked trips");
+        }
+    }
+
+    private static bool SameMonth(DateTime a, DateTime b) => a.Year == b.Year && a.Month == b.Month;
+
+    private List<TripRequest> Departures =>
+        Requests.Where(r => r.Status == "Booked" && r.Departure >= Today).OrderBy(r => r.Departure).ToList();
+
+    // One stacked bar per month the requests were made in, split by where each request stands now
+    private List<ChartSeries> MonthlySeries
+    {
+        get
+        {
+            var months = Enumerable.Range(0, int.Parse(_range)).Select(i => Today.AddMonths(-i)).Reverse()
+                .Where(m => Requests.Any(r => SameMonth(r.DateRequested, m))).ToList();
+            var statuses = new List<(string Status, string Color)> { ("Booked", "#10b981"), ("Quoted", "#0284c7"), ("New", "#38bdf8") };
+            if (_withDeclined) statuses.Add(("Declined", "#6366f1"));
+            return statuses.Select(s => new ChartSeries(s.Status, ChartType.StackedBar,
+                months.Select(m => new ChartDataPoint(m.ToString("MMM"), Requests.Count(r => r.Status == s.Status && SameMonth(r.DateRequested, m)))),
+                s.Color)).ToList();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _events.OnRecordDoubleClick = EventCallback.Factory.Create<CellClickEventArgs<TripRequest>>(this, e =>
+            e.Data is null ? Task.CompletedTask : OnOpenRequest.InvokeAsync(e.Data));
+    }
+
+    private void Refresh() => Notifications.Info("Dashboard refreshed", $"{Requests.Count} trip requests, {Departures.Count} upcoming departures.");
+}

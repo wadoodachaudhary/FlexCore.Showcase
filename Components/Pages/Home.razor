@@ -33,7 +33,7 @@
     <div class="top-hero-compact">
         <div class="hero-tagline-badge">
             <span class="badge-pulse"></span>
-            <span>Built for .NET 10 &middot; MIT licensed on NuGet <span aria-hidden="true">📦</span></span>
+            <span>Built for .NET 10 <span aria-hidden="true">📦</span></span>
         </div>
         @* 2026-10-28 (Baaria): hero rewritten. Each claim is checked: 100,000 rows on /demo/grid/row-selection-50k, Crystal import
            via CrystalXmlReportLoader (XML exports), 137 standalone controls counted in the launch audit, both packages MIT.
@@ -56,7 +56,10 @@
         </div>
     </div>
 
-    @* 2. Live grid *@
+    @* 2. The app window (2026-10-29, Baaria, after the app demo on blazor.radzen.com): Razor Sharp Getaways as a working app, a
+       sidebar of pages, a top bar with the new-request bell and a profile menu, and a + button. The four former tabs are four of
+       its pages; Dashboard and Bookings are their own components (Shared/GetawaysDashboard.razor, GetawaysBookings.razor). Every
+       page works; only Settings, Help and the profile menu's items answer with a "not in this demo" note. *@
     <section id="live-showcase" class="showcase-section">
         <div class="showcase-shell">
             @* Window title bar *@
@@ -71,56 +74,104 @@
                     <span>Razor Sharp Getaways</span>
                 </div>
                 <div class="window-tags">
-                    <span>FlexCore Grid v@_flexCoreVersion • .NET 10 • 1,000 Rows Virtualized</span>
+                    <TabStripControl Items="_viewTabs" SelectedIndex="@(_showCode ? 1 : 0)" SelectedIndexChanged="@(i => _showCode = i == 1)" CssClass="hero-view-tabs" Orientation="TabOrientation.Horizontal" Theme="TabTheme.Minimal" ShowOrientationMenu="false" />
                 </div>
             </div>
 
-            @* Hint banner *@
-            <div class="grid-banner-hint">
-                <span class="bi bi-info-circle-fill" style="color: #0284c7;"></span>
-                <span><strong>Quote desk:</strong> trip requests arrive from the booking site. Double-click a request to open the quote editor, or type a quote straight into the grid.</span>
-            </div>
-
-            @* Tabs *@
-            <div class="showcase-header">
-                <div class="showcase-tabs">
-                    <button type="button" class="@($"tab-btn {(_activeTab == "grid" ? "active" : "")}")" @onclick="@(() => _activeTab = "grid")">
-                        <span class="bi bi-table"></span> Razor Sharp Trip Requests
-                    </button>
-                    <button type="button" class="@($"tab-btn {(_activeTab == "charts" ? "active" : "")}")" @onclick="@(() => _activeTab = "charts")">
-                        <span class="bi bi-bar-chart-line"></span> Sales at Cruising Altitude
-                    </button>
-                    <button type="button" class="@($"tab-btn {(_activeTab == "ribbon" ? "active" : "")}")" @onclick="@(() => _activeTab = "ribbon")">
-                        <span class="bi bi-menu-button-wide"></span> The Front Desk
-                    </button>
-                    <button type="button" class="@($"tab-btn {(_activeTab == "reports" ? "active" : "")}")" @onclick="@(() => _activeTab = "reports")">
-                        <span class="bi bi-file-earmark-spreadsheet"></span> Invoices
-                    </button>
-                </div>
-
-                <div class="showcase-controls">
-                    <TabStripControl Items="_viewTabs" SelectedIndex="@(_showCode ? 1 : 0)" SelectedIndexChanged="@(i => _showCode = i == 1)" CssClass="hero-view-tabs" Theme="TabTheme.Minimal" ShowOrientationMenu="false" />
-                </div>
-            </div>
-
-            @* Active tab content *@
-            <div class="showcase-body">
-                @* 2026-10-24 (Baaria): the Razor code is a tab over the example, not a drawer under it. The live example stays
-                   mounted while hidden, so the grid keeps its state when the reader switches back. *@
-                @if (_showCode)
-                {
-                    <div class="code-drawer">
-                        <div class="code-header">
-                            <span>Razor markup for the @(_activeTab.ToUpper()) tab</span>
-                            <button type="button" class="btn-copy-code" @onclick="CopyActiveCode">
-                                @(_copiedCode ? "✓ Copied!" : "📋 Copy Code")
-                            </button>
-                        </div>
-                        <pre><code>@GetActiveCodeSnippet()</code></pre>
+            <div class="@($"gw-app {(_navCollapsed ? "gw-nav-collapsed" : "")} {(_navOpen ? "gw-nav-open" : "")}")">
+                <aside class="gw-sidebar">
+                    <div class="gw-brand">
+                        <span class="gw-brand-mark bi bi-airplane-fill"></span>
+                        <span class="gw-brand-name">Razor Sharp Getaways</span>
                     </div>
+                    <TabStripControl Items="_navItems" SelectedIndex="@NavIndex" SelectedIndexChanged="@(i => Go(AppPages[i].Key))"
+                                     Orientation="TabOrientation.Vertical" Theme="TabTheme.Minimal" ShowOrientationMenu="false"
+                                     AriaLabel="Pages" CssClass="gw-nav" />
+                    <ButtonControl BareStyle="true" CssClass="gw-nav-extra" IconCss="bi bi-gear" Title="Settings" OnClick="@(() => NotInDemo("Settings"))">
+                        <span class="gw-nav-extra-text">Settings</span>
+                    </ButtonControl>
+                    <div class="gw-sidebar-foot">Razor Sharp Getaways v1.0<br />Built with FlexCore @_flexCoreVersion</div>
+                </aside>
+                @if (_navOpen)
+                {
+                    <div class="gw-scrim" @onclick="@(() => _navOpen = false)"></div>
                 }
-                <div class="@(_showCode ? "showcase-live is-hidden" : "showcase-live")">
-                @if (_activeTab == "grid")
+
+                <div class="gw-main">
+                    <AppBarControl CssClass="gw-appbar">
+                        <StartContent>
+                            <ButtonControl BareStyle="true" CssClass="gw-icon-btn" IconCss="bi bi-list" Title="Show or hide the menu" OnClick="ToggleMenu" />
+                            <span class="gw-page-title">@CurrentPage.Title</span>
+                        </StartContent>
+                        <EndContent>
+                            <ButtonControl @ref="_bell" BareStyle="true" CssClass="gw-icon-btn gw-bell" Title="Newest trip requests" DropDownCssClass="gw-menu gw-menu-wide">
+                                <ChildContent>
+                                    <span class="bi bi-bell"></span>
+                                    <BadgeControl IsDot="true" Variant="BadgeVariant.Danger" CssClass="gw-bell-dot" />
+                                </ChildContent>
+                                <DropDownContent>
+                                    <div class="gw-menu-head">Newest trip requests</div>
+                                    @foreach (var r in NewestRequests)
+                                    {
+                                        <ButtonControl BareStyle="true" CssClass="gw-menu-item gw-menu-request" OnClick="@(() => OpenRequestFromBell(r))">
+                                            <span class="agent-avatar" style="background:@r.AvatarBg">@r.AvatarInitials</span>
+                                            <span class="gw-menu-request-text"><strong>@r.Destination</strong> for @r.Traveller<small>@r.Request · @r.TripTypeName</small></span>
+                                        </ButtonControl>
+                                    }
+                                    <ButtonControl BareStyle="true" CssClass="gw-menu-item gw-menu-all" OnClick="@(() => { _bell?.CloseDropDown(); ShowRequests("New requests"); })">Show all new requests</ButtonControl>
+                                </DropDownContent>
+                            </ButtonControl>
+                            <ButtonControl BareStyle="true" CssClass="gw-icon-btn gw-help" IconCss="bi bi-question-circle" Title="Help" OnClick="@(() => NotInDemo("Help"))" />
+                            <ButtonControl @ref="_profile" BareStyle="true" CssClass="gw-profile" Title="Pippa Larkspur" DropDownCssClass="gw-menu">
+                                <ChildContent>
+                                    <AvatarControl Text="PL" AlternativeText="Pippa Larkspur" Size="34px" CssClass="gw-avatar" />
+                                    <span class="gw-profile-name">Pippa Larkspur</span>
+                                    <span class="bi bi-chevron-down gw-profile-caret"></span>
+                                </ChildContent>
+                                <DropDownContent>
+                                    @foreach (var (text, icon) in _profileMenu)
+                                    {
+                                        <ButtonControl BareStyle="true" CssClass="gw-menu-item" IconCss="@icon" OnClick="@(() => { _profile?.CloseDropDown(); NotInDemo(text); })">@text</ButtonControl>
+                                    }
+                                </DropDownContent>
+                            </ButtonControl>
+                        </EndContent>
+                    </AppBarControl>
+
+                    @if (_activeTab == "grid")
+                    {
+                        <div class="grid-banner-hint">
+                            <span class="bi bi-info-circle-fill" style="color: #0284c7;"></span>
+                            <span><strong>Quote desk:</strong> trip requests arrive from the booking site. Double-click a request to open the quote editor, or type a quote straight into the grid.</span>
+                        </div>
+                    }
+
+                    @* The page *@
+                    <div class="showcase-body gw-page">
+                        @* 2026-10-24 (Baaria): the Razor code is a tab over the example, not a drawer under it. The live page stays
+                           mounted while hidden, so the grid keeps its state when the reader switches back. *@
+                        @if (_showCode)
+                        {
+                            <div class="code-drawer">
+                                <div class="code-header">
+                                    <span>Razor markup for the @CurrentPage.Nav page</span>
+                                    <button type="button" class="btn-copy-code" @onclick="CopyActiveCode">
+                                        @(_copiedCode ? "✓ Copied!" : "📋 Copy Code")
+                                    </button>
+                                </div>
+                                <pre><code>@GetActiveCodeSnippet()</code></pre>
+                            </div>
+                        }
+                        <div class="@(_showCode ? "showcase-live is-hidden" : "showcase-live")">
+                @if (_activeTab == "dashboard")
+                {
+                    <GetawaysDashboard Requests="_requests" OnShowRequests="ShowRequests" OnOpenRequest="OpenRequest" />
+                }
+                else if (_activeTab == "bookings")
+                {
+                    <GetawaysBookings Requests="_requests" />
+                }
+                else if (_activeTab == "grid")
                 {
                     <div class="grid-card-toolbar">
                         <div class="toolbar-left">
@@ -485,7 +536,7 @@
                                     Load Crystal Reports (.rpt XML), bind session parameters, and stream to screen or print without Crystal runtime dependencies.
                                 </p>
                             </div>
-                            <a href="demo/reports/package-costs" class="btn-filter-pill" style="background:#0284c7; color:#fff; text-decoration:none;">
+                            <a href="demo/reports/package-costs" class="btn-filter-pill" style="background:var(--brand-button); color:#fff; text-decoration:none;">
                                 Open Full Report Demo &rarr;
                             </a>
                         </div>
@@ -508,6 +559,11 @@
                         </div>
                     </div>
                 }
+                        </div>
+                    </div>
+
+                    @* The + button: create a request, or jump to the page that makes a booking or an invoice *@
+                    <FabMenuControl Items="_fabItems" Title="Create" CssClass="gw-fab" />
                 </div>
             </div>
         </div>
@@ -650,13 +706,12 @@
 
     @* 5. Pillars, on the page's one coloured band (2026-10-28, Baaria, after the stats bar and blue band on telerik.com): a green
        strip of numbers straddles the top of a full-width indigo band, both colours from the logo. The numbers are checked: 137
-       standalone controls (launch audit), 42 ChartType values, 100,000 rows on /demo/grid/row-selection-50k, and both packages are
-       MIT on NuGet (the fourth was "0 npm packages" until Baaria found it weak). *@
+       standalone controls (launch audit), 42 ChartType values and 100,000 rows on /demo/grid/row-selection-50k. Three since
+       2026-10-29: Baaria dropped the fourth (first "0 npm packages", then "MIT licensed on NuGet"). *@
     <div class="stats-strip">
         <div class="stat"><span class="stat-num">130+</span><span class="stat-label">Blazor controls</span></div>
         <div class="stat"><span class="stat-num">40+</span><span class="stat-label">chart types</span></div>
         <div class="stat"><span class="stat-num">100K</span><span class="stat-label">rows in one grid</span></div>
-        <div class="stat"><span class="stat-num">MIT</span><span class="stat-label">licensed on NuGet</span></div>
     </div>
     <section class="pillars-section brand-band">
         <div class="section-header">
@@ -842,7 +897,7 @@
         <div class="doodle-head" @ref="_ctaHead">
             @* Rocket in place of the 🚀 emoji (2026-10-28), white ink for the dark banner, beside the heading like the other doodles.
                When the banner scrolls into view it rumbles, the flame flares, it lifts off with speed lines and puffs of smoke, hovers
-               and settles back on its pad. *@
+               and settles back on its pad. Its window is the FlexCore logo on a white plate, like the crane's load (2026-10-29). *@
             <svg class="doodle rocket-doodle" viewBox="0 0 170 150" aria-hidden="true">
                 <g class="rk-smoke" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round">
                     <path d="M50 140 a8 8 0 0 1 16 -2 a7 7 0 0 1 12 2" />
@@ -856,7 +911,11 @@
                     </g>
                     <path d="M68 78 L54 102 L69 98 Z M102 78 L116 102 L101 98 Z" fill="#6366f1" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" />
                     <path d="M85 16 C101 32 105 60 102 98 L68 98 C65 60 69 32 85 16 Z" fill="#0d3b66" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" />
-                    <circle cx="85" cy="52" r="9" fill="#38bdf8" stroke="#ffffff" stroke-width="3" />
+                    <rect x="74" y="41" width="22" height="22" rx="4" fill="#ffffff" />
+                    <rect x="77" y="44" width="7" height="7" rx="2" fill="#0284c7" />
+                    <rect x="86" y="44" width="7" height="7" rx="2" fill="#38bdf8" />
+                    <rect x="77" y="53" width="7" height="7" rx="2" fill="#6366f1" />
+                    <rect x="86" y="53" width="7" height="7" rx="2" fill="#10b981" />
                     <path d="M74 98 h22 v6 h-22 Z" fill="#ffffff" />
                 </g>
                 <g class="rk-lines" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round">
@@ -893,16 +952,79 @@
     private static readonly string _flexCoreVersion =
         typeof(Fx.ControlKit.ButtonControl).Assembly.GetName().Version is { } v ? $"{v.Major}.{v.Minor}.{v.Build}" : "";
 
-    private string _activeTab = "grid";
-    private static readonly string[] HeroTabs = ["grid", "charts", "ribbon", "reports"];
+    // The app window's pages: key (also the ?tab= value), menu text, menu icon, title in the top bar
+    private sealed record AppPage(string Key, string Nav, string Icon, string Title);
+    private static readonly AppPage[] AppPages =
+    [
+        new("dashboard", "Dashboard", "bi bi-speedometer2", "Dashboard"),
+        new("grid", "Trip Requests", "bi bi-table", "Razor Sharp Trip Requests"),
+        new("bookings", "Bookings", "bi bi-calendar-heart", "Bookings Calendar"),
+        new("charts", "Sales", "bi bi-bar-chart-line", "Sales at Cruising Altitude"),
+        new("ribbon", "Front Desk", "bi bi-menu-button-wide", "The Front Desk"),
+        new("reports", "Invoices", "bi bi-file-earmark-spreadsheet", "Invoices"),
+    ];
+    private readonly List<TabStripItem> _navItems = AppPages.Select(p => new TabStripItem(p.Nav, p.Icon)).ToList();
+    private string _activeTab = "dashboard";
+    private AppPage CurrentPage => AppPages.First(p => p.Key == _activeTab);
+    private int NavIndex => Array.FindIndex(AppPages, p => p.Key == _activeTab);
+    // The hamburger shrinks the menu to icons on wide screens and opens it over the page on phones; CSS shows the one that applies
+    private bool _navCollapsed;
+    private bool _navOpen;
+    private void ToggleMenu()
+    {
+        _navCollapsed = !_navCollapsed;
+        _navOpen = !_navOpen;
+    }
+    private ButtonControl? _bell;
+    private ButtonControl? _profile;
+    private static readonly (string Text, string Icon)[] _profileMenu =
+    [
+        ("My profile", "bi bi-person-circle"), ("Account settings", "bi bi-person-gear"),
+        ("Notifications", "bi bi-bell"), ("Sign out", "bi bi-box-arrow-right"),
+    ];
+    private List<FabMenuItem> _fabItems = [];
 
-    /// <summary>Hero tab named in the address, e.g. ?tab=ribbon (catalog row Office Ribbon); read on load, never written back.</summary>
+    /// <summary>App page named in the address, e.g. ?tab=ribbon (catalog row Office Ribbon); read on load, never written back.</summary>
     [SupplyParameterFromQuery(Name = "tab")] public string? Tab { get; set; }
 
     protected override void OnParametersSet()
     {
         var tab = Tab?.Trim().ToLowerInvariant();
-        if (tab is not null && HeroTabs.Contains(tab)) _activeTab = tab;
+        if (tab is not null && AppPages.Any(p => p.Key == tab)) _activeTab = tab;
+    }
+
+    private void Go(string key)
+    {
+        _activeTab = key;
+        _showCode = false;
+        _navOpen = false;
+    }
+
+    // The bits of the app this demo leaves out answer with a toast, as the menu items do on blazor.radzen.com
+    private void NotInDemo(string what) =>
+        Notifications.Info($"{what} is not part of this demo", "The menu's pages, the grid, the charts and the + button all work.");
+
+    private IEnumerable<TripRequest> NewestRequests => _requests.Where(r => r.Status == "New").OrderByDescending(r => r.DateRequested).Take(4);
+
+    private void ShowRequests(string view)
+    {
+        _selectedView = view;
+        _selectedTripType = "All";
+        _gridSearchTerm = "";
+        Go("grid");
+    }
+
+    private void OpenRequest(TripRequest r)
+    {
+        Go("grid");
+        _selectedRequest = r;
+        OpenPopupEdit(r);
+    }
+
+    private void OpenRequestFromBell(TripRequest r)
+    {
+        _bell?.CloseDropDown();
+        OpenRequest(r);
     }
     private bool _showCode = false;
     private readonly List<TabStripItem> _viewTabs = new() { new("Example", "bi bi-window"), new("Razor", "bi bi-code-slash") };
@@ -1217,7 +1339,8 @@
 
         var rnd = new Random(42);
         var list = new List<TripRequest>(count);
-        var startDate = new DateTime(2026, 1, 1);
+        // Requests from the last 300 days, so the app window's Dashboard always shows this month (2026-10-29)
+        var startDate = DateTime.Today.AddDays(-300);
 
         for (int i = 1; i <= count; i++)
         {
@@ -1225,7 +1348,7 @@
             var destination = destinations[rnd.Next(destinations.Length)];
             var type = tripTypes[rnd.Next(tripTypes.Length)];
             var quote = rnd.Next(type.Low / 10, type.High / 10) * 10m;
-            var requested = startDate.AddMinutes(rnd.Next(0, 180 * 24 * 60));
+            var requested = startDate.AddMinutes(rnd.Next(0, 300 * 24 * 60));
             var travellers = type.Code switch { "FAMILY" => rnd.Next(3, 7), "HONEYMOON" => 2, _ => rnd.Next(1, 5) };
 
             // five weekly fare samples for the route; the last one is the quote
@@ -1315,6 +1438,17 @@
         });
 
         LoadCostPreview();
+
+        _fabItems =
+        [
+            new("Trip request", "bi bi-suitcase-lg") { OnClick = EventCallback.Factory.Create(this, () => { Go("grid"); CreateNewRequest(); }) },
+            new("Booking", "bi bi-calendar-plus") { OnClick = EventCallback.Factory.Create(this, () =>
+            {
+                Go("bookings");
+                Notifications.Info("New booking", "Double-click a day on the calendar to add a departure.");
+            }) },
+            new("Invoice", "bi bi-receipt") { OnClick = EventCallback.Factory.Create(this, () => Go("reports")) },
+        ];
 
         _gridEvents.OnRecordDoubleClick = EventCallback.Factory.Create<CellClickEventArgs<TripRequest>>(this, e =>
         {
@@ -1486,6 +1620,8 @@
     {
         return _activeTab switch
         {
+            "dashboard" => AppSource.Markup("GetawaysDashboard.razor"),
+            "bookings" => AppSource.Markup("GetawaysBookings.razor"),
             "grid" =>
 @"<GridControl TValue=""TripRequest"" DataSource=""@FilteredRequests""
              @ref=""_grid""

@@ -8,6 +8,13 @@
     --brand-green: #10b981;
     --brand-stripe: linear-gradient(90deg, var(--brand-blue) 0 25%, var(--brand-sky) 25% 50%, var(--brand-indigo) 50% 75%, var(--brand-green) 75% 100%);
     --brand-stripe-down: linear-gradient(180deg, var(--brand-blue) 0 25%, var(--brand-sky) 25% 50%, var(--brand-indigo) 50% 75%, var(--brand-green) 75% 100%);
+    /* Buttons (2026-10-29, Baaria: the blue "screams basic business blue"): a deeper shade of the logo's indigo tile for filled
+       buttons, its palest tint for soft ones. Text-only hovers keep the menu blue (see the 2026-10-25 note near the end). */
+    --brand-button: #4f46e5;
+    --brand-button-hover: #4338ca;
+    --brand-button-soft: #eef2ff;
+    --brand-button-soft-hover: #e0e7ff;
+    --brand-button-soft-text: #4338ca;
 }
 
 /* Brand marks across the site (2026-10-28, Baaria: "apply the colour scheme throughout the site, including the demo pages"): a page
@@ -24,8 +31,8 @@ a, .btn-link {
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: var(--brand-button);
+    border-color: var(--brand-button-hover);
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
@@ -116,12 +123,12 @@ h1:focus {
 .footer-section { max-width: 1100px; margin: 32px auto; padding: 32px;
     border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
 
-/* Doodle headings (2026-10-28, Baaria): a small hand-drawn picture on the left of a section heading with the text beside it; on
-   phones the picture sits above the heading. Each picture's lines go through the fx-hand wobble filter (DoodleFilters.razor), and
+/* Doodle headings (2026-10-28, Baaria): a small hand-drawn picture on the left of a section heading with the text beside it, the
+   pair centred on the page since 2026-10-29; on phones the picture sits above the heading. Each picture's lines go through the fx-hand wobble filter (DoodleFilters.razor), and
    while its heading plays (fxToggleClassWhenVisible in App.razor adds is-playing) the filter flicks between three seeds so the
    ink "boils" like hand-drawn animation. The movements themselves live with each picture's page (Home.razor.css,
    ComponentCatalogDirectory.razor.css). */
-.doodle-head { display: flex; align-items: center; gap: 20px; }
+.doodle-head { display: flex; align-items: center; justify-content: center; gap: 20px; text-align: center; }
 .doodle { flex: none; width: 112px; height: auto; overflow: visible; filter: url(#fx-hand); }
 .doodle-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
 .doodle-head.is-playing .doodle { animation: doodle-boil 0.42s 7; }
@@ -134,7 +141,7 @@ h1:focus {
 }
 
 @media (max-width: 768px) {
-    .doodle-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .doodle-head { flex-direction: column; align-items: center; gap: 6px; }
     .doodle { width: 76px; }
 }
 
@@ -585,9 +592,9 @@ h1:focus {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: #e0f2fe;
-    color: #0369a1;
-    border: 1px solid #bae6fd;
+    background: var(--brand-button-soft);
+    color: var(--brand-button-soft-text);
+    border: 1px solid #c7d2fe;
     font-size: 11px;
     font-weight: 600;
     padding: 2px 7px;
@@ -598,14 +605,14 @@ h1:focus {
 }
 
 .btn-cell-popup-edit:hover {
-    background: #0284c7;
+    background: var(--brand-button);
     color: #ffffff;
-    border-color: #0284c7;
+    border-color: var(--brand-button);
 }
 
 .btn-cell-popup-edit:active {
-    background: #0369a1;
-    border-color: #0369a1;
+    background: var(--brand-button-hover);
+    border-color: var(--brand-button-hover);
     transform: scale(0.96);
 }
 
@@ -909,8 +916,8 @@ td:has(.fx-dropdown-grid.fx-open),
 }
 
 .btn-modal-save {
-    background: #0284c7;
-    border: 1px solid #0369a1;
+    background: var(--brand-button);
+    border: 1px solid var(--brand-button-hover);
     color: #ffffff;
     padding: 8px 18px;
     border-radius: 6px;
@@ -920,12 +927,12 @@ td:has(.fx-dropdown-grid.fx-open),
     align-items: center;
     gap: 6px;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
     transition: background-color 0.15s;
 }
 
 .btn-modal-save:hover {
-    background: #0369a1;
+    background: var(--brand-button-hover);
 }
 
 /* ── Modern DatePickerControl Enterprise Theme ── */
@@ -1758,86 +1765,6 @@ td:has(.fx-dropdown-grid.fx-open),
 }
 
 /* ── Showcase Landing Page Button Enhancements ───────────────────────── */
-.landing-container .showcase-tabs {
-    display: inline-flex !important;
-    align-items: center !important;
-    background: #f1f5f9 !important;
-    padding: 4px !important;
-    border-radius: 8px !important;
-    gap: 4px !important;
-    border: 1px solid #e2e8f0 !important;
-    overflow-x: auto !important;
-}
-
-.landing-container .tab-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    color: #64748b !important;
-    font-weight: 600 !important;
-    font-size: 13px !important;
-    padding: 7px 16px !important;
-    border-radius: 6px !important;
-    cursor: pointer !important;
-    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    white-space: nowrap !important;
-    user-select: none !important;
-    line-height: 1.4 !important;
-    box-shadow: none !important;
-}
-
-.landing-container .tab-btn:hover { color: #0284c7 !important;
-    background: rgba(255, 255, 255, 0.7) !important;
-}
-
-.landing-container .tab-btn.active {
-    background: #ffffff !important;
-    color: #0284c7 !important;
-    font-weight: 700 !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
-}
-
-.landing-container .tab-btn .bi {
-    font-size: 14px !important;
-    color: #94a3b8 !important;
-    transition: color 0.15s ease !important;
-}
-
-.landing-container .tab-btn.active .bi {
-    color: #0284c7 !important;
-}
-
-.landing-container .btn-code-toggle {
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    color: #334155 !important;
-    font-size: 12.5px !important;
-    font-weight: 600 !important;
-    padding: 7px 14px !important;
-    border-radius: 6px !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 7px !important;
-    transition: all 0.15s ease !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
-    outline: none !important;
-}
-
-.landing-container .btn-code-toggle:hover {
-    background: #f8fafc !important;
-    border-color: #94a3b8 !important;
-    color: #0284c7 !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
-}
-
-.landing-container .btn-code-toggle .bi {
-    color: #0284c7 !important;
-}
-
 .landing-container .btn-grid-action {
     display: inline-flex !important;
     align-items: center !important;
@@ -1867,14 +1794,14 @@ td:has(.fx-dropdown-grid.fx-open),
 }
 
 .landing-container .btn-new {
-    background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%) !important;
+    background: linear-gradient(180deg, var(--brand-button) 0%, var(--brand-button-hover) 100%) !important;
     color: #ffffff !important;
-    box-shadow: 0 1px 3px rgba(2, 132, 199, 0.35) !important;
+    box-shadow: 0 1px 3px rgba(79, 70, 229, 0.35) !important;
 }
 
 .landing-container .btn-new:hover {
-    background: #0274b0 !important;
-    box-shadow: 0 3px 8px rgba(2, 132, 199, 0.45) !important;
+    background: var(--brand-button-hover) !important;
+    box-shadow: 0 3px 8px rgba(79, 70, 229, 0.45) !important;
     transform: translateY(-1px) !important;
 }
 
@@ -1920,11 +1847,11 @@ td:has(.fx-dropdown-grid.fx-open),
 }
 
 .landing-container .btn-filter-pill.active {
-    background: #0284c7 !important;
-    border-color: #0284c7 !important;
+    background: var(--brand-button) !important;
+    border-color: var(--brand-button) !important;
     color: #ffffff !important;
     font-weight: 700 !important;
-    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4) !important;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.4) !important;
 }
 
 /* 2026-10-25 (Baaria): the library's tab strips (Example | Razor | C# on every example, the home hero's Example | Razor) follow the
@@ -1940,7 +1867,7 @@ td:has(.fx-dropdown-grid.fx-open),
 .fx-tabs .fx-tab-headers { flex-wrap: wrap; }
 .fx-tabs .fx-tab-headers .fx-tab-button { white-space: nowrap; padding: 8px 10px; }
 /* 2026-10-25 (Baaria): one hover design site-wide: text turns #0284c7 (the top menu's blue), neutral backgrounds tint #f1f5f9;
-   filled blue buttons still darken to #0369a1; the 2px bar is reserved for the active or open item. */
+   filled buttons are indigo (--brand-button, since 2026-10-29) and darken on hover; the 2px bar is reserved for the active or open item. */
 /* ── 2026-10-18, Baaria's review ─────────────────────────────────────────────
    Frozen header cells: GridControl.razor writes style="…position:sticky;left:…; position:relative;" on every header cell, so the
    later position:relative wins and a frozen column's header scrolls away while its body cells stay pinned (SC-292). Until the

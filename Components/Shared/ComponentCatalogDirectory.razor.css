@@ -3,8 +3,9 @@
     margin: 56px 0 56px;
 }
 
-/* 2026-10-28: same heading scale as the home page sections (Home.razor.css .section-title), left-aligned. */
+/* 2026-10-28: same heading scale as the home page sections (Home.razor.css .section-title), centred like them since 2026-10-29. */
 .popular-title {
+    text-align: center;
     font-size: clamp(32px, 4vw, 48px);
     font-weight: 700;
     line-height: 1.1;
@@ -73,7 +74,7 @@
 }
 
 .directory-header {
-    text-align: left;
+    text-align: center;
     margin: 0 0 36px;
 }
 
@@ -143,7 +144,7 @@
 .catalog-search-wrapper {
     position: relative;
     max-width: 520px;
-    margin: 0;
+    margin: 0 auto;
     display: flex;
     align-items: center;
 }

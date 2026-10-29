@@ -108,7 +108,7 @@
 
 .btn-nav-primary {
     white-space: nowrap;   /* keeps 'Quick Start' on one line next to the wider menu items (2026-10-13) */
-    background: #0284c7;
+    background: var(--brand-button);   /* app.css: the logo's indigo, 2026-10-29 */
     color: #ffffff;
     font-size: 13px;
     font-weight: 600;
@@ -122,7 +122,7 @@
 }
 
 .btn-nav-primary:hover {
-    background: #0369a1;
+    background: var(--brand-button-hover);
     color: #ffffff;
 }
 

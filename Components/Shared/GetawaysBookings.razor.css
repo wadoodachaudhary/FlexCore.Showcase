@@ -1,0 +1,24 @@
+/* Bookings page of the home page's app window (2026-10-29): SchedulerControl in the app's colours, through ::deep. */
+.gw-bookings ::deep .fx-scheduler { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; font-size: 13px; }
+.gw-bookings ::deep .fx-scheduler > .fx-toolbar { margin: 0; padding: 10px 12px; gap: 8px; border: 0; border-bottom: 1px solid #e2e8f0; border-radius: 0; background: #ffffff; }
+.gw-bookings ::deep .fx-scheduler .fx-button {
+    min-width: 0;
+    padding: 5px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: none;
+    color: #334155;
+    font-weight: 500;
+}
+.gw-bookings ::deep .fx-scheduler .fx-button:hover:not(:disabled) { border-color: #c7d2fe; background: var(--brand-button-soft); color: var(--brand-button-soft-text); }
+.gw-bookings ::deep .fx-month-day { border-color: #eef2f7; background: #ffffff; }
+.gw-bookings ::deep .fx-month-day > .fx-button:first-child { align-self: flex-start; padding: 2px 6px; border: 0; background: none; color: #475569; font-weight: 600; }
+.gw-bookings ::deep .fx-month-day .fx-button.fx-appointment {
+    padding: 3px 6px;
+    border: 0;
+    border-left: 3px solid var(--brand-button);
+    border-radius: 6px;
+    background: var(--brand-button-soft);
+    color: #1e1b4b;
+}

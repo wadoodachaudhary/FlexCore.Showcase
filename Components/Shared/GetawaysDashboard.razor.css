@@ -1,0 +1,66 @@
+/* Dashboard page of the home page's app window (2026-10-29). Cards are CardControl; ::deep reaches into the library parts. */
+.gw-dash { display: flex; flex-direction: column; gap: 18px; }
+
+.gw-dash-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.gw-greeting { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: #0f172a; }
+.gw-greeting-sub { margin: 4px 0 0; font-size: 14px; color: #64748b; }
+::deep .gw-round-btn {
+    flex: none;
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--brand-button);
+    border-radius: 50%;
+    background: #ffffff;
+    color: var(--brand-button);
+    font-size: 18px;
+    cursor: pointer;
+}
+::deep .gw-round-btn:hover { background: var(--brand-button-soft); }
+
+/* Figures: each card is one button that opens the matching view of Trip Requests */
+.gw-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+::deep .fx-card.gw-kpi { border-radius: 12px; }
+::deep .gw-kpi .fx-card-body { padding: 0; }
+::deep .gw-kpi-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 18px 16px;
+    border: 0;
+    background: none;
+    color: #0f172a;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+::deep .gw-kpi-btn:hover { background: #fafaff; }
+.gw-kpi-label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #475569; }
+.gw-kpi-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; }
+.gw-kpi-value { font-size: 38px; font-weight: 600; line-height: 1; letter-spacing: -0.03em; }
+.gw-kpi-note { font-size: 13.5px; color: #475569; }
+
+::deep .fx-card.gw-card { border-radius: 12px; overflow: visible; }
+::deep .gw-card > .fx-card-header { padding: 12px 18px; border-radius: 12px 12px 0 0; }
+.gw-card-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px 16px; }
+.gw-card-title { margin: 0; font-size: 16px; font-weight: 700; color: #0f172a; }
+.gw-card-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; font-size: 14px; }
+.gw-card-note { font-size: 13px; color: #64748b; }
+
+/* Month range as round segments */
+::deep .fx-segmented.gw-range { padding: 2px; border-color: #c7d2fe; border-radius: 999px; background: #ffffff; }
+::deep .gw-range label { padding: 4px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; color: #334155; }
+::deep .gw-range label:has(input:checked) { background: var(--brand-button-soft-hover); color: var(--brand-button-soft-text); }
+
+@media (max-width: 900px) {
+    .gw-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+    .gw-kpi-value { font-size: 30px; }
+    ::deep .gw-kpi-btn { padding: 12px 14px; }
+}

@@ -12,6 +12,11 @@
     <EmbeddedResource Include="Data\OurAirports\*.tsv" LogicalName="FlexCore.Showcase.Data.OurAirports.%(Filename)%(Extension)" />
   </ItemGroup>
 
+  <!-- The home page's app window shows these pages' own markup in its Razor tab (Components/Shared/AppSource.cs). -->
+  <ItemGroup>
+    <EmbeddedResource Include="Components\Shared\Getaways*.razor" LogicalName="FlexCore.Showcase.Source.%(Filename)%(Extension)" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\FlexCore\FlexCore.csproj" />
     <ProjectReference Include="..\FlexCore\FlexCore.Documents\FlexCore.Documents.csproj" />
