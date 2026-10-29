@@ -1,4 +1,5 @@
 using FlexCore.Showcase.Components;
+using FlexCore.Showcase.Seo;
 using FlexCore.Showcase.Services;
 using Fx.ControlKit.Notifications;
 using Fx.ControlKit.Reports;
@@ -47,11 +48,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+// One host for search engines (2026-10-29): www and the azurewebsites name 301 to flexcoreui.com. Before HTTPS redirection so
+// http://www... is a single hop. Seo/SeoEndpoints.cs; staging and platform probes are left alone.
+app.UseCanonicalHost();
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+app.MapSeoEndpoints();   // robots.txt, sitemap.xml, llms.txt from Seo/SiteMeta.Pages.cs
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

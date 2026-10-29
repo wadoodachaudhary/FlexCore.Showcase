@@ -1,0 +1,77 @@
+@namespace FlexCore.Showcase.Components.Shared
+@using System.Text.Json
+@using FlexCore.Showcase.Seo
+@inject NavigationManager Nav
+@implements IDisposable
+
+@* Head tags for the current page (2026-10-29): canonical URL, description, Open Graph and Twitter card, JSON-LD, and noindex on
+   the staging host and on pages that should stay out of search. Mounted once from Routes.razor, so it is interactive and follows
+   in-app navigation like <PageTitle> does; the words come from Seo/SiteMeta.Pages.cs, so no page needs editing to be covered.
+   A page that is not registered, or is registered as not indexed, gets only the noindex tag. The title stays each page's own <PageTitle>.
+   Blazor keeps only the last <HeadContent> rendered, so no page may add one of its own (scripts/check-seo.py checks); add to this
+   component or to the registry instead. *@
+<HeadContent>
+    @if (_page is { Index: true })
+    {
+        <link rel="canonical" href="@_url" />
+        @if (_markdown is not null)
+        {
+            <link rel="alternate" type="text/markdown" href="@_markdown" />
+        }
+        @if (_page.Description.Length > 0)
+        {
+            <meta name="description" content="@_page.Description" />
+        }
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="@SiteMeta.SiteName" />
+        <meta property="og:title" content="@_page.Title" />
+        <meta property="og:description" content="@_page.Description" />
+        <meta property="og:url" content="@_url" />
+        <meta property="og:image" content="@SiteMeta.OgImage" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="@SiteMeta.OgImageAlt" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="@_page.Title" />
+        <meta name="twitter:description" content="@_page.Description" />
+        <meta name="twitter:image" content="@SiteMeta.OgImage" />
+        <script type="application/ld+json">@((MarkupString)_jsonLd)</script>
+    }
+    @if (_noIndex)
+    {
+        <meta name="robots" content="noindex, nofollow" />
+    }
+</HeadContent>
+
+@code {
+    private PageMeta? _page;
+    private string _url = "";
+    private string? _markdown;
+    private string _jsonLd = "";
+    private bool _noIndex;
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += OnLocationChanged;
+        Compute();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        Compute();
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void Compute()
+    {
+        var uri = new Uri(Nav.Uri);
+        var path = SiteMeta.Normalize(Nav.ToBaseRelativePath(Nav.Uri));
+        _page = SiteMeta.Find(path);
+        _url = SiteMeta.Url(_page?.Path ?? path);
+        _markdown = _page is not null && PageDocs.Twin(_page.Path) is not null ? SiteMeta.Url(_page.MarkdownPath) : null;
+        _noIndex = SiteMeta.IsStaging(uri.Host) || _page is null || !_page.Index;
+        _jsonLd = _page is null ? "" : JsonSerializer.Serialize(StructuredData.For(_page, _url));
+    }
+
+    public void Dispose() => Nav.LocationChanged -= OnLocationChanged;
+}

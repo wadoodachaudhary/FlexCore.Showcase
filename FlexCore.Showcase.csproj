@@ -17,4 +17,13 @@
     <ProjectReference Include="..\FlexCore\FlexCore.Documents\FlexCore.Documents.csproj" />
   </ItemGroup>
 
+  <!-- Last commit date per page file, embedded for the sitemap's lastmod (Seo/PageDates.cs). A build without git embeds nothing. -->
+  <Target Name="PageDates" BeforeTargets="BeforeBuild">
+    <Exec Command="git log --format=%25cI --name-only -- Components/Pages &gt; &quot;$(IntermediateOutputPath)pagedates.txt&quot;"
+          WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="true" IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low" />
+    <ItemGroup>
+      <EmbeddedResource Include="$(IntermediateOutputPath)pagedates.txt" LogicalName="FlexCore.Showcase.Seo.pagedates.txt" Condition="Exists('$(IntermediateOutputPath)pagedates.txt')" />
+    </ItemGroup>
+  </Target>
+
 </Project>
