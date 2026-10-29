@@ -55,6 +55,9 @@ public static partial class SiteMeta
         new("signup", "Get the Community edition, or ask us anything", "FlexCore Community Edition: Sign up or Ask a Question",
             "Leave an email to get the FlexCore Community edition link when it ships, or ask a question; a person answers, usually within two working days.",
             "Start here", Controls: new[] { "FormControl", "FormItemControl" }, Keywords: new[] { "Community edition", "contact", "sign up" }),
+        new("faq", "Frequently asked questions", "FlexCore FAQ: License, .NET Support, Grid, Reports",
+            "What developers ask before adopting FlexCore: MIT license and Community edition, .NET 10 and render modes, grid scale, Crystal Reports, support, comparisons.",
+            "Start here", Keywords: new[] { "FAQ", "license", "MIT", "Community edition", "Blazor Server", "WebAssembly", "QuickGrid", "Crystal Reports" }),
 
         // Data Grid
         new("demo/grid", "Data Grid", "Blazor Data Grid (DataGrid, Table) — FlexCore",

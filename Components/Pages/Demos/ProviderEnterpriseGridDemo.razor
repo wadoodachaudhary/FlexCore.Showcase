@@ -136,11 +136,24 @@
             <DocSection Id="doc-griditemsresult-tvalue" Title="GridItemsResult&lt;TValue&gt;" Count='@DocSection.Label(Vocab.Result.Length, "properties")'>
                 <ApiTable Kind="ApiKind.Properties" Title="GridItemsResult&lt;TValue&gt;" Rows="Vocab.Result" />
                 <p>
-                A sort term is a <code>GridSortDescriptor</code> of <code>Field</code> and <code>Direction</code>; earlier terms rank higher. The
-                group records (<code>GridProviderGroup</code>, <code>GridProviderGroupRequest</code>, <code>GridProviderGroupKey</code>) and the grid's
-                provider parameters named in the overview are still to be written up from <code>Grid/GridControl.ItemsProvider.cs</code>,
-                <code>Grid/GridControl.ProviderGrouping.cs</code> and <code>Grid/GridControl.ProviderExport.cs</code>.
+                A sort term is a <code>GridSortDescriptor</code> of <code>Field</code> and <code>Direction</code>; earlier terms rank higher.
                 </p>
+            </DocSection>
+            <DocSection Id="doc-gridcontrol-provider-parameters" Title="GridControl provider parameters" Count='@DocSection.Label(Vocab.Provider.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl provider parameters" Rows="Vocab.Provider" />
+                <p>
+                The grouped example sets <code>ProviderGroupPageSize</code> to 2 and <code>ProviderGroupItemPageSize</code> to 75 so the
+                <em>Load more</em> rows appear after a few clicks; the defaults are 100 and 250.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-gridprovidergroup-tvalue" Title="GridProviderGroup&lt;TValue&gt; and the group request" Count='@DocSection.Label(Vocab.Group.Length + Vocab.GroupRequest.Length + Vocab.GroupKey.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridProviderGroup&lt;TValue&gt;" Rows="Vocab.Group" />
+                <ApiTable Kind="ApiKind.Properties" Title="GridProviderGroupRequest, the request's GroupRequest" Rows="Vocab.GroupRequest" />
+                <ApiTable Kind="ApiKind.Properties" Title="GridProviderGroupKey" Rows="Vocab.GroupKey" />
+            </DocSection>
+            <DocSection Id="doc-export-progress-and-aggregate-records" Title="Export progress and aggregate records" Count='@DocSection.Label(Vocab.Progress.Length + Vocab.Aggregate.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridProviderExportProgress" Rows="Vocab.Progress" />
+                <ApiTable Kind="ApiKind.Properties" Title="GridAggregateResult" Rows="Vocab.Aggregate" />
             </DocSection>
         </DocSections>
     </Vocabulary>
@@ -455,6 +468,60 @@
             new("ResultSetCount", "Entries in this result set; when omitted the grid uses TotalCount for root rows and group metadata for child ranges.", "int?", "null"),
             new("HasMore", "Continuation hint for providers whose result size is costly to count; the grid also infers it from known counts.", "bool", "false"),
             new("FilterValues", "Distinct values for a FilterValues request.", "IReadOnlyList&lt;GridProviderFilterValue&gt;", "empty"),
+        };
+        // GridControl.ItemsProvider.cs, GridControl.ProviderGrouping.cs and GridControl.ProviderExport.cs (0.2.49).
+        public static readonly ApiRow[] Provider =
+        {
+            new("ItemsProvider", "Delegate the grid calls for every range it needs. Set, it replaces <code>DataSource</code> and the local pipeline.", "GridItemsProvider&lt;TValue&gt;?", "null"),
+            new("ItemsProviderContextKey", "Opaque host value sent with every request. Changing it starts a new query generation and reloads from the first row.", "object?", "null"),
+            new("ItemKeySelector", "Stable identity used as the row key when provider calls return new objects for the same database row.", "Func&lt;TValue, object?&gt;?", "null"),
+            new("ItemsProviderCacheSize", "Completed ranges the grid keeps in memory; clamped to a small bounded range.", "int", "4"),
+            new("EnableProviderFilterValueRequests", "Sends <code>FilterValues</code> requests, with <code>FilterField</code> set, so the checklist filter can list a column's distinct values from the provider.", "bool", "false"),
+            new("ProviderFilterValueRequestSize", "Most distinct values asked for in one checklist menu.", "int", "1000"),
+            new("EnableProviderGrouping", "Lets the provider serve the group tree when group descriptors are active. Off, so existing flat providers keep their contract.", "bool", "false"),
+            new("ProviderGroupPageSize", "Most groups requested per lazy group page.", "int", "100"),
+            new("ProviderGroupItemPageSize", "Most leaf rows requested per lazy group page.", "int", "250"),
+            new("ProviderGroupsInitiallyCollapsed", "New provider groups arrive collapsed, so enabling remote grouping never loads the whole hierarchy at once.", "bool", "true"),
+            new("ExportAllProviderItems", "Exports page through the complete current query with <code>Export</code> requests instead of the loaded window only. Local <code>DataSource</code> exports are unaffected.", "bool", "false"),
+            new("ProviderExportPageSize", "Rows requested per export page.", "int", "1000"),
+            new("ProviderExportProgressChanged", "After every received export page, and on completion or cancellation.", "EventCallback&lt;GridProviderExportProgress&gt;"),
+        };
+        public static readonly ApiRow[] Group =
+        {
+            new("Field", "Field the group is keyed on.", "string"),
+            new("Key", "The group's value of that field.", "object?"),
+            new("DisplayText", "Caption text; null shows the key.", "string?"),
+            new("Count", "Rows in the group, counted through every level below it.", "int"),
+            new("GroupPath", "Stable path; when empty the grid derives one from the parent path, field and key.", "string?", "null"),
+            new("HasChildren", "True when expanding can reveal sub-groups or rows; false draws a leaf group.", "bool", "true"),
+            new("Groups", "Child groups supplied with the parent, so no <code>GroupChildren</code> request is needed for them.", "IReadOnlyList&lt;GridProviderGroup&lt;TValue&gt;&gt;", "empty"),
+            new("Items", "Leaf rows supplied with the group, so no <code>GroupItems</code> request is needed for them.", "IReadOnlyList&lt;TValue&gt;", "empty"),
+            new("Aggregates", "Aggregate values across every row in the group, for its caption and footer.", "IReadOnlyList&lt;GridAggregateResult&gt;", "empty"),
+            new("ChildCount", "Direct children at the next level, as distinct from the recursive <code>Count</code>.", "int?", "null"),
+        };
+        public static readonly ApiRow[] GroupRequest =
+        {
+            new("Level", "Zero-based grouping level of the parent whose children or rows are wanted.", "int"),
+            new("ParentKeys", "Field and value of each ancestor, from the root group down to the parent.", "IReadOnlyList&lt;GridProviderGroupKey&gt;"),
+            new("ParentPath", "The parent's <code>GroupPath</code>.", "string"),
+        };
+        public static readonly ApiRow[] GroupKey =
+        {
+            new("Field", "Field of one ancestor group.", "string"),
+            new("Value", "Its key value.", "object?"),
+        };
+        public static readonly ApiRow[] Progress =
+        {
+            new("ExportedRows", "Rows received so far.", "int"),
+            new("TotalRows", "Rows in the whole query when the provider reported a total; null otherwise.", "int?"),
+            new("IsCompleted", "True on the final notification.", "bool"),
+            new("IsCanceled", "True when the export stopped before the end.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Aggregate =
+        {
+            new("Field", "Field the value was computed over.", "string"),
+            new("Type", "Sum, Average, Count, Min or Max.", "AggregateType"),
+            new("Value", "The computed value, boxed.", "object?"),
         };
     }
 

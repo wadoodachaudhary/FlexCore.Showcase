@@ -1,0 +1,173 @@
+@page "/faq"
+
+@* 2026-10-29: the questions developers ask the other Blazor vendors before adopting a library (their FAQ blocks and licensing FAQs,
+   surveyed the same day), answered for FlexCore in one to three sentences each, every answer checkable against the code or the
+   linked page. Questions whose answer only the owner can give (browser matrix, support SLA, roadmap, security contact, paid
+   edition) are left out until that answer exists. Linked from the footer only. *@
+
+<PageTitle>FlexCore FAQ: License, .NET Support, Grid, Reports</PageTitle>
+
+<div class="docs-page">
+    <h1>Frequently asked questions</h1>
+    <p>
+        Short answers to what developers ask before they pick a Blazor component library. Each one can be checked against the code or
+        the page it links to. If your question is not here, <a href="signup">ask it</a>; a person answers.
+    </p>
+
+    <section>
+        <h2>License and availability</h2>
+
+        <h3 id="commercial">Can I use FlexCore in a commercial product, and what does it cost?</h3>
+        <p>
+            The FlexCore package on NuGet is released under the <a href="https://github.com/wadoodachaudhary/FlexCore/blob/main/LICENSE" target="_blank" rel="noopener">MIT license</a>:
+            use it, change it and ship it in commercial applications with no per-developer or runtime fee, as long as the copyright notice
+            travels with it.
+        </p>
+
+        <h3 id="license-key">Do I need a license key? Does anything expire or show a watermark?</h3>
+        <p>No. There is no key, no trial period and no watermark; the package you install is the package you deploy.</p>
+
+        <h3 id="community-edition">What is the Community edition and how do I get it?</h3>
+        <p>
+            A Community edition is in preparation and will be delivered as a download link by email. Leave your address on the
+            <a href="signup">sign-up page</a> and it arrives when it is ready; what it contains beyond the NuGet package is announced with it.
+        </p>
+
+        <h3 id="source">Can I read and change the source?</h3>
+        <p>
+            Yes. The source is public at <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" rel="noopener">github.com/wadoodachaudhary/FlexCore</a>
+            under the same MIT license: fork it, keep your changes private, or send a pull request.
+        </p>
+
+        <h3 id="redistribution">Can I deploy to any number of servers, or ship FlexCore inside a product my customers install?</h3>
+        <p>Yes. The MIT license puts no limit on developers, servers, end users or redistribution.</p>
+    </section>
+
+    <section>
+        <h2>Compatibility</h2>
+
+        <h3 id="dotnet-versions">Which .NET versions does FlexCore support?</h3>
+        <p>.NET 10: both packages target <code>net10.0</code>. Older frameworks are not supported today.</p>
+
+        <h3 id="render-modes">Does it work with Blazor Server, WebAssembly, Auto render mode, static server rendering and MAUI Hybrid?</h3>
+        <p>
+            Blazor Server with interactive rendering is what this site runs and what has been verified. The controls need an interactive render
+            mode, because clicks, keys and drags travel through Blazor events; under static server rendering they draw but do not react.
+            WebAssembly, Auto and MAUI Hybrid have not been verified yet; FlexCore references <code>Microsoft.Data.Sqlite</code>, so a
+            WebAssembly host would need testing before you rely on it.
+        </p>
+
+        <h3 id="javascript">Does FlexCore use JavaScript, npm or a CSS framework?</h3>
+        <p>
+            The controls render HTML and inline SVG from C#. A few ship a small script of their own inside the package: the dialog, the
+            splitter, the rich text editor, the text box's context menu, the grid's scroll-position reader, and the PDF viewer's bundled
+            pdf.js. There is no npm package, no bundler step and nothing fetched from a CDN. Styling is the library's own <code>fx-</code>
+            classes and CSS variables; it does not depend on Bootstrap or Tailwind and defines no global rules, so it sits beside whatever
+            stylesheet your application already has. Icons are the class names you pass in; this site uses Bootstrap Icons.
+        </p>
+
+        <h3 id="alongside">Can I use FlexCore next to MudBlazor, Radzen or Telerik, or migrate one page at a time?</h3>
+        <p>
+            Yes. Everything lives in the <code>Fx.ControlKit</code> namespaces and under the <code>fx-</code> CSS prefix, with no global
+            resets, so a page can mix libraries while you move it over.
+        </p>
+    </section>
+
+    <section>
+        <h2>Capabilities</h2>
+
+        <h3 id="how-many">How many controls are there, and which ones?</h3>
+        <p>
+            130-plus standalone controls (137 at the October 2026 count). <a href="components">All components</a> lists them in 13 groups,
+            each with a live demo and the code behind it.
+        </p>
+
+        <h3 id="large-data">Can the data grid handle large data sets?</h3>
+        <p>
+            Row windowing renders only the rows in view (<a href="demo/grid/row-selection-50k">100,000 generated rows</a> on this site),
+            column virtualization does the same for <a href="demo/grid/column-virtualization">wide grids</a>, and an <code>ItemsProvider</code>
+            lets your database serve rows, groups, totals and export pages <a href="demo/grid/provider-enterprise">as they are needed</a>.
+            <a href="demo/grid/enterprise-suite">Exports</a> to CSV, .xlsx and PDF take the rows as filtered and sorted.
+        </p>
+
+        <h3 id="theming">Can I theme it to match my brand? Dark mode? Right-to-left?</h3>
+        <p>
+            Each control reads <code>--fx-*</code> CSS variables for its colours, borders and sizes (the CSS variables table on its page lists
+            them), and <code>--fx-zoom</code> scales every control together. There is no built-in dark theme and no right-to-left layout
+            today. Built-in labels are English; numbers and dates follow .NET format strings and the current culture.
+        </p>
+
+        <h3 id="accessibility">Are the controls accessible?</h3>
+        <p>
+            Most demo pages have a <em>Keyboard and accessibility</em> section that states exactly what the control does and does not do:
+            roles, keys, focus order and the gaps. There is no WCAG conformance claim and no VPAT yet.
+        </p>
+
+        <h3 id="crystal-reports">Does the report writer run my Crystal Reports?</h3>
+        <p>
+            <a href="demo/reports/package-costs">ReportWriterControl</a> loads a Crystal Reports XML export, with its tables, joins, groups,
+            formulas and field placement, and renders it as paginated pages in the browser with a group tree, search, print and HTML, CSV and
+            Excel export; the data comes from an <code>IReportDataExecutor</code> you register. Native <code>.rpt</code> files need an
+            <code>IReportExporter</code> supplied by the host.
+        </p>
+
+        <h3 id="migration">I am moving a VB6 or WinForms application to the web. What is there for me?</h3>
+        <p>
+            MDI windows, a <a href="demo/tree/treeview-explorer">tree view</a> with the classic VB6 connector lines, Win32-style
+            <a href="demo/buttons">buttons</a> and <a href="demo/dialog">dialogs</a> with a system menu, a
+            <a href="demo/page-navigation">keyboard navigation graph</a> for forms worked without a mouse, and the report writer for
+            Crystal Reports.
+        </p>
+
+        <h3 id="ai-assistants">Does FlexCore work with AI coding assistants?</h3>
+        <p>
+            There is no MCP server yet. The documentation is published in the forms agents read well: <a href="llms.txt">/llms.txt</a>,
+            <a href="llms-full.txt">/llms-full.txt</a> and a Markdown twin of every page (add <code>.md</code> to its address), and every
+            code sample on this site starts with the <code>@@using</code> lines it needs, so it compiles when pasted.
+        </p>
+    </section>
+
+    <section>
+        <h2>Support and project</h2>
+
+        <h3 id="help">Where do I get help, and how quickly?</h3>
+        <p>
+            Bugs and feature requests go to <a href="https://github.com/wadoodachaudhary/FlexCore/issues" target="_blank" rel="noopener">GitHub issues</a>;
+            questions go through the <a href="signup">sign-up form</a> and are answered by a person, usually within two working days.
+        </p>
+
+        <h3 id="releases">How often does FlexCore release, and how stable is the API?</h3>
+        <p>
+            48 releases on NuGet between May and September 2026 (0.1.0 to 0.2.47); the demos here run 0.2.49. The version is still 0.x: new
+            parameters arrive most releases, and each page's documentation tables say which version they were checked against.
+        </p>
+
+        <h3 id="contribute">How do I request a feature or contribute?</h3>
+        <p>Open an issue on GitHub, or a pull request; contributions are taken under the MIT license.</p>
+    </section>
+
+    <section>
+        <h2>Comparison</h2>
+
+        <h3 id="versus">How is FlexCore different from MudBlazor, Radzen, Telerik or Syncfusion?</h3>
+        <p>
+            MudBlazor is a Material Design component library; Radzen Blazor is an MIT component set paired with the paid Radzen Blazor
+            Studio; Telerik UI for Blazor, Syncfusion and DevExpress are commercial suites licensed per developer. FlexCore is an MIT library
+            built around data-heavy line-of-business screens (data grid, tree grid, pivot table, report writer, scheduler, MDI) and around
+            moving VB6 and WinForms applications to the web, rendered from C# and SVG with no npm step.
+        </p>
+
+        <h3 id="quickgrid">How is the data grid different from QuickGrid?</h3>
+        <p>
+            QuickGrid, Microsoft's lightweight grid, covers sorting, paging and virtualization. <a href="demo/grid">GridControl</a> adds
+            filtering with Excel-style menus, grouping with aggregates, inline, dialog and batch editing, frozen columns, column
+            virtualization, provider-fed loading and Excel, CSV and PDF export.
+        </p>
+
+        <h3 id="start">How do I get started?</h3>
+        <p>
+            Install the package, add the namespaces, register two services and put a grid on a page: <a href="get-started">Get Started</a>
+            walks through it with a complete page.
+        </p>
+    </section>
+</div>

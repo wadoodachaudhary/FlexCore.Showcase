@@ -32,7 +32,7 @@
 
     <Examples>
         <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs">
-            <Description><p>Panes are declared inline; only the selected one renders, so the Lines table is not in the page until its tab is chosen. The <code>TabItems</code> wrapper is optional. The outlined look is page CSS on a wrapper around the control (CSS tab); <code>TabControl</code> has no close button.</p></Description>
+            <Description><p>Panes are declared inline; only the selected one renders, so the Lines table is not in the page until its tab is chosen. The <code>TabItems</code> wrapper is optional. The folder look is the library's <code>FolderTabs</code> theme; <code>TabControl</code> has no close button.</p></Description>
             <Demo>
                 <TabControl @bind-SelectedIndex="_tab" Theme="TabTheme.FolderTabs">
                     <TabItems>
@@ -133,7 +133,7 @@
 
     <Related>
         <ul>
-            <li>Tabbed document workspaces with closable pages and a tab well: <code>PageControl</code> in <a href="demo/workspace/page-control-bench">the page control bench</a>.</li>
+            <li>Dockable tab groups the user can split and float: <a href="demo/dock-manager">Dock manager</a>. Keyboard focus order across the controls of a page: <a href="demo/page-navigation">Page navigation</a>.</li>
             <li>Side-by-side and collapsible regions: <a href="demo/layout">Page layouts</a>. A navigation tree: <a href="demo/tree/treeview-explorer">Tree view</a>.</li>
         </ul>
     </Related>

@@ -105,8 +105,8 @@
     private readonly record struct Option(string Name, double Price);
     private readonly Option[] _options =
     {
-        new("Under-cabinet lighting", 220), new("Tile backsplash", 350), new("Laminate counters", 450),
-        new("Butcher-block counters", 900), new("Quartz counters", 1600), new("Granite counters", 1850),
+        new("Seat selection", 60), new("Lounge pass", 120), new("Travel insurance", 240),
+        new("City walking tour", 350), new("Spa day", 650), new("Helicopter transfer", 1600),
     };
     private List<Option> Matches => _options.Where(o => o.Price >= _budget.Start && o.Price <= _budget.End).ToList();
 
@@ -206,8 +206,8 @@ private readonly record struct Option(string Name, double Price);
 
 private readonly Option[] _options =
 {
-    new(""Under-cabinet lighting"", 220), new(""Tile backsplash"", 350), new(""Laminate counters"", 450),
-    new(""Butcher-block counters"", 900), new(""Quartz counters"", 1600), new(""Granite counters"", 1850),
+    new(""Seat selection"", 60), new(""Lounge pass"", 120), new(""Travel insurance"", 240),
+    new(""City walking tour"", 350), new(""Spa day"", 650), new(""Helicopter transfer"", 1600),
 };
 
 private List<Option> Matches => _options.Where(o => o.Price >= _budget.Start && o.Price <= _budget.End).ToList();";

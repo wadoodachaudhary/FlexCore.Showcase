@@ -85,7 +85,7 @@
             Every <code>ExportTo…Async</code> method is <code>ExportAsync</code> with a fixed <code>GridExportFormat</code>. The grid builds a
             <code>GridExportTable</code> from <code>VisibleColumns</code> and the filtered, sorted rows; <code>GridExporter</code> turns it into
             bytes with writers that live in the FlexCore assembly itself (<code>XlsxWriter</code> for .xlsx, <code>NativePdfDocument</code> for
-            PDF; no ClosedXML, and the <code>FlexCore.Documents</code> project the Showcase references for its spreadsheet and PDF viewers plays
+            PDF; no ClosedXML, and the <code>FlexCore.Documents</code> project the Showcase references for its PDF viewer plays
             no part); <code>GridExporter.SaveAsync</code> then hands the bytes to the browser.
         </p>
         <DocSections>
