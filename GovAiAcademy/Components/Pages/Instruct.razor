@@ -1,0 +1,341 @@
+@page "/instruct"
+@inject AcademyStore Store
+@inject AcademyAuthState Auth
+@inject NotificationService Notifications
+
+<PageTitle>Instructor desk — Gov AI Academy</PageTitle>
+
+<h1>Instructor desk</h1>
+
+@if (!Auth.CanInstruct || Auth.Current is null)
+{
+    <AlertControl Severity="AlertSeverity.Info" Title="Instructors and administrators">
+        Sign in as Amira Solano (instructor) or Casey Okonkwo (administrator) to record attendance.
+        Learners can see their record under My learning. They cannot change it.
+    </AlertControl>
+    <p><a class="text-link" href="signin">Sign in</a></p>
+}
+else
+{
+    <p class="lede">
+        Take roll for a class group. Select one or more rows, then mark present, excused, or absent.
+        This demo allows every instructor account to update every group. A production tenant should limit that with Entra app roles.
+    </p>
+
+    <RibbonControl>
+        <RibbonTab Title="Attendance">
+            <RibbonGroup Title="Mark selected">
+                <RibbonButton Text="Present" Icon="P" OnClick="@(() => AskMark(AttendanceStatus.Present))" />
+                <RibbonButton Text="Excused" Icon="E" OnClick="@(() => AskMark(AttendanceStatus.Excused))" />
+                <RibbonButton Text="Absent" Icon="A" OnClick="@(() => AskMark(AttendanceStatus.Absent))" />
+            </RibbonGroup>
+            <RibbonGroup Title="Class group">
+                <RibbonButton Text="Add meeting" Icon="+" OnClick="@(() => _addOpen = true)" />
+                <RibbonButton Text="Refresh" Icon="R" OnClick="Reload" />
+            </RibbonGroup>
+        </RibbonTab>
+    </RibbonControl>
+
+    <div class="filter-bar">
+        <div class="field">
+            <label id="cohort-label">Class group</label>
+            <DropDownListControl TItem="NamedOption" TValue="string"
+                                 DataSource="_cohortOptions"
+                                 TextFieldName="Label"
+                                 ValueFieldName="Id"
+                                 Value="@_cohortId"
+                                 ValueChanged="OnCohort"
+                                 AriaLabel="Class group"
+                                 Width="320px" />
+        </div>
+        <div class="field">
+            <label id="session-label">Meeting</label>
+            <DropDownListControl TItem="NamedOption" TValue="string"
+                                 DataSource="_sessionOptions"
+                                 TextFieldName="Label"
+                                 ValueFieldName="Id"
+                                 Value="@_sessionId"
+                                 ValueChanged="OnSession"
+                                 AriaLabel="Meeting"
+                                 Width="320px" />
+        </div>
+    </div>
+
+    <div class="catalog-layout">
+        <PageLayoutControl Height="100%">
+            <LeftPanelControl Width="250px" Collapsible="true">
+                <div class="panel-pad">
+                    <h2 style="margin-top:0;font-size:1rem;">Courses</h2>
+                    <TreeViewControl Nodes="_tree"
+                                     SelectedNode="_selectedNode"
+                                     SelectedNodeChanged="OnTree"
+                                     ShowIcons="true"
+                                     FolderStyle="TreeFolderStyle.Grey"
+                                     Height="620px" />
+                </div>
+            </LeftPanelControl>
+            <CenterPanelControl>
+                <div class="panel-pad">
+                    <GridControl @ref="_grid" TValue="RosterRow" DataSource="_rows"
+                                 AllowSorting="true" AllowFiltering="true" AllowSelection="true"
+                                 EnableHover="true" Height="520px" EventsRef="_events">
+                        <GridColumnsBase>
+                            <GridColumn Field="@nameof(RosterRow.LearnerName)" HeaderText="Learner" Width="160px" />
+                            <GridColumn Field="@nameof(RosterRow.JobTitle)" HeaderText="Job" Width="180px" />
+                            <GridColumn Field="@nameof(RosterRow.Agency)" HeaderText="Office" Width="220px" />
+                            <GridColumn Field="@nameof(RosterRow.SessionTitle)" HeaderText="Meeting" Width="160px" />
+                            <GridColumn Field="@nameof(RosterRow.SessionDate)" HeaderText="Date" Width="120px" Type="ColumnType.Date" Format="d" />
+                            <GridColumn Field="@nameof(RosterRow.Status)" HeaderText="Attendance" Width="120px" />
+                        </GridColumnsBase>
+                    </GridControl>
+                </div>
+            </CenterPanelControl>
+            <RightPanelControl Width="280px" Collapsible="true">
+                <div class="panel-pad">
+                    <h2 style="margin-top:0;font-size:1rem;">Selected learner</h2>
+                    @if (_selected is null)
+                    {
+                        <p class="muted">Select a row to see progress.</p>
+                    }
+                    else
+                    {
+                        <p><strong>@_selected.LearnerName</strong></p>
+                        <p>@_selected.JobTitle</p>
+                        <p>@_selected.Agency</p>
+                        <p>This meeting: @_selected.Status</p>
+                        @if (_selectedProgress is not null)
+                        {
+                            <ProgressBarControl Value="@_selectedProgress.Percent" Title="Course progress" Status="@_selectedProgress.PlainSummary" />
+                        }
+                    }
+                </div>
+            </RightPanelControl>
+        </PageLayoutControl>
+    </div>
+
+    <h2>Credited attendance so far</h2>
+    <ChartControl Type="ChartType.Bar" Title="Present or excused, meetings already held" Height="260px" Series="_chart" />
+
+    <DialogControl @bind-Visible="_confirm" Header="Record attendance" Width="520px" IsModal="true" ShowCloseIcon="true" CloseOnEscape="true">
+        <div class="panel-pad">
+            <p>Mark @_pendingIds.Count selected row(s) as <strong>@AcademyLabels.Attendance(_pendingStatus)</strong>?</p>
+            <p class="muted">This updates the sample roster in memory. Learners will see the new status on My learning.</p>
+            <div class="button-row">
+                <ButtonControl CssClass="btn-primary" OnClick="ConfirmMark">Record it</ButtonControl>
+                <ButtonControl CssClass="btn-secondary" OnClick="@(() => _confirm = false)">Cancel</ButtonControl>
+            </div>
+        </div>
+    </DialogControl>
+
+    <DialogControl @bind-Visible="_addOpen" Header="Add a class meeting" Width="560px" IsModal="true" ShowCloseIcon="true" CloseOnEscape="true">
+        <div class="panel-pad stack">
+            <div class="field">
+                <label for="meeting-title">Meeting title</label>
+                <TextBoxControl Value="@_newTitle" ValueChanged="@(v => _newTitle = v ?? "")" Placeholder="Make-up lab" Width="100%" HtmlAttributes="_titleAttrs" />
+            </div>
+            <div class="field">
+                <label for="meeting-place">Place</label>
+                <TextBoxControl Value="@_newPlace" ValueChanged="@(v => _newPlace = v ?? "")" Placeholder="Live online" Width="100%" HtmlAttributes="_placeAttrs" />
+            </div>
+            <div class="field">
+                <span class="field-label">Date</span>
+                <CalendarControl @bind-Value="_newDate" />
+            </div>
+            <div class="button-row">
+                <ButtonControl CssClass="btn-primary" OnClick="AddMeeting">Add meeting</ButtonControl>
+                <ButtonControl CssClass="btn-secondary" OnClick="@(() => _addOpen = false)">Cancel</ButtonControl>
+            </div>
+        </div>
+    </DialogControl>
+}
+
+@code {
+    private readonly GridControlEvents<RosterRow> _events = new();
+    private GridControl<RosterRow>? _grid;
+    private List<NamedOption> _cohortOptions = [];
+    private List<NamedOption> _sessionOptions = [];
+    private List<TreeNode> _tree = [];
+    private TreeNode? _selectedNode;
+    private List<RosterRow> _rows = [];
+    private List<ChartSeries> _chart = [];
+    private string _cohortId = "";
+    private string _sessionId = "";
+    private RosterRow? _selected;
+    private LearnerCourseProgress? _selectedProgress;
+    private bool _confirm;
+    private bool _addOpen;
+    private AttendanceStatus _pendingStatus = AttendanceStatus.Present;
+    private List<string> _pendingIds = [];
+    private string _newTitle = "Make-up lab";
+    private string _newPlace = "Live online";
+    private DateTime? _newDate = new DateTime(2026, 10, 15);
+    private readonly Dictionary<string, object> _titleAttrs = new() { ["id"] = "meeting-title", ["aria-label"] = "Meeting title" };
+    private readonly Dictionary<string, object> _placeAttrs = new() { ["id"] = "meeting-place", ["aria-label"] = "Meeting place" };
+
+    protected override void OnInitialized()
+    {
+        if (!Auth.CanInstruct)
+            return;
+        _events.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<RosterRow>>(this, OnRowSelected);
+        BuildTree();
+        _cohortId = _cohortOptions.FirstOrDefault()?.Id ?? "";
+        BuildSessions();
+        Reload();
+    }
+
+    private void BuildTree()
+    {
+        _cohortOptions = Store.Cohorts
+            .Select(c => new NamedOption
+            {
+                Id = c.Id,
+                Label = $"{c.Name} — {Store.FindCourse(c.CourseId)?.Title}"
+            })
+            .ToList();
+
+        _tree = Store.Courses
+            .Where(c => c.Approval == ApprovalStatus.Approved)
+            .OrderBy(c => c.Title)
+            .Select(course => new TreeNode
+            {
+                Text = course.Title,
+                Tag = "",
+                IsExpanded = true,
+                Children = Store.CohortsForCourse(course.Id)
+                    .Select(c => new TreeNode { Text = c.Name, Tag = c.Id, IsExpanded = true })
+                    .ToList()
+            })
+            .ToList();
+        _selectedNode = _tree.SelectMany(n => n.Children).FirstOrDefault();
+    }
+
+    private void BuildSessions()
+    {
+        var cohort = Store.FindCohort(_cohortId);
+        _sessionOptions = [new NamedOption { Id = "all", Label = "All meetings" }];
+        if (cohort is not null)
+        {
+            _sessionOptions.AddRange(cohort.Sessions.OrderBy(s => s.Starts).Select(s => new NamedOption
+            {
+                Id = s.Id,
+                Label = $"{s.Starts:MMM d} — {s.Title}"
+            }));
+        }
+
+        _sessionId = _sessionOptions.FirstOrDefault(s => s.Id.EndsWith("-s2", StringComparison.Ordinal))?.Id
+            ?? _sessionOptions.Skip(1).FirstOrDefault()?.Id
+            ?? "all";
+    }
+
+    private void OnCohort(string? id)
+    {
+        _cohortId = id ?? "";
+        _selected = null;
+        BuildSessions();
+        Reload();
+    }
+
+    private void OnSession(string? id)
+    {
+        _sessionId = string.IsNullOrWhiteSpace(id) ? "all" : id;
+        _selected = null;
+        Reload();
+    }
+
+    private void OnTree(TreeNode node)
+    {
+        _selectedNode = node;
+        if (node.Tag is string id && !string.IsNullOrWhiteSpace(id))
+        {
+            _cohortId = id;
+            BuildSessions();
+            Reload();
+        }
+    }
+
+    private void Reload()
+    {
+        if (string.IsNullOrWhiteSpace(_cohortId))
+        {
+            _rows = [];
+            return;
+        }
+
+        var session = _sessionId == "all" ? null : _sessionId;
+        _rows = Store.Roster(_cohortId, session).ToList();
+        _chart =
+        [
+            new ChartSeries
+            {
+                Name = "Percent credited",
+                DataPoints = Store.AttendanceRates().Select(p => new ChartDataPoint(p.CohortName, p.PresentRate)).ToList()
+            }
+        ];
+        if (_selected is not null)
+            _selected = _rows.FirstOrDefault(r => r.AttendanceId == _selected.AttendanceId);
+        LoadProgress();
+    }
+
+    private void OnRowSelected(RowSelectEventArgs<RosterRow> args)
+    {
+        _selected = args.Data;
+        LoadProgress();
+    }
+
+    private void LoadProgress()
+    {
+        _selectedProgress = _selected is null
+            ? null
+            : Store.Progress(_selected.PersonId, _selected.CourseId);
+    }
+
+    private void AskMark(AttendanceStatus status)
+    {
+        var selected = _grid?.GetSelectedRecords().ToList() ?? [];
+        if (selected.Count == 0 && _selected is not null)
+            selected = [_selected];
+        if (selected.Count == 0)
+        {
+            Notifications.Warning("Select at least one learner row first.");
+            return;
+        }
+
+        _pendingStatus = status;
+        _pendingIds = selected.Select(r => r.AttendanceId).ToList();
+        _confirm = true;
+    }
+
+    private void ConfirmMark()
+    {
+        if (Auth.Current is null)
+            return;
+        var count = Store.MarkAttendance(_pendingIds, _pendingStatus, Auth.Current.Id, Auth.Current.Role);
+        _confirm = false;
+        Reload();
+        Notifications.Success($"Recorded {AcademyLabels.Attendance(_pendingStatus)} for {count} row(s).");
+    }
+
+    private void AddMeeting()
+    {
+        if (Auth.Current is null)
+            return;
+        if (_newDate is null)
+        {
+            Notifications.Warning("Choose a date.");
+            return;
+        }
+
+        var session = Store.AddSession(_cohortId, _newTitle, _newDate.Value, _newPlace, Auth.Current.Role);
+        if (session is null)
+        {
+            Notifications.Warning("Add a meeting title and choose a class group.");
+            return;
+        }
+
+        _addOpen = false;
+        BuildSessions();
+        _sessionId = session.Id;
+        Reload();
+        Notifications.Success($"Added {session.Title} on {session.Starts:MMMM d}.");
+    }
+}
