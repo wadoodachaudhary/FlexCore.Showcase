@@ -92,8 +92,10 @@
     border: 0;
     background-color: var(--brand-button);
     color: white;
-    padding: 4px 24px;
-    border-radius: 4px;
+    padding: 9px 22px;
+    border-radius: 10px;
+    font: inherit;
+    font-weight: 600;
 }
 
     #components-reconnect-modal button:hover {

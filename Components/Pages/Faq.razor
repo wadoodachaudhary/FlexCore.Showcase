@@ -3,9 +3,12 @@
 @* 2026-10-29: the questions developers ask the other Blazor vendors before adopting a library (their FAQ blocks and licensing FAQs,
    surveyed the same day), answered for FlexCore in one to three sentences each, every answer checkable against the code or the
    linked page. Questions whose answer only the owner can give (browser matrix, support SLA, roadmap, security contact, paid
-   edition) are left out until that answer exists. Linked from the footer only. *@
+   edition) are left out until that answer exists. Linked from the footer only.
+   2026-10-29 (Baaria): the License and availability section (commercial use and cost, license key, Community edition, source,
+   redistribution) is out, and the contribute and comparison answers no longer name the license: licensing and availability are
+   being decided internally, and the answers would soon be wrong. Bring them back only once that is settled. *@
 
-<PageTitle>FlexCore FAQ: License, .NET Support, Grid, Reports</PageTitle>
+<PageTitle>FlexCore FAQ: .NET Support, Grid, Reports, Comparisons</PageTitle>
 
 <div class="docs-page">
     <h1>Frequently asked questions</h1>
@@ -13,35 +16,6 @@
         Short answers to what developers ask before they pick a Blazor component library. Each one can be checked against the code or
         the page it links to. If your question is not here, <a href="signup">ask it</a>; a person answers.
     </p>
-
-    <section>
-        <h2>License and availability</h2>
-
-        <h3 id="commercial">Can I use FlexCore in a commercial product, and what does it cost?</h3>
-        <p>
-            The FlexCore package on NuGet is released under the <a href="https://github.com/wadoodachaudhary/FlexCore/blob/main/LICENSE" target="_blank" rel="noopener">MIT license</a>:
-            use it, change it and ship it in commercial applications with no per-developer or runtime fee, as long as the copyright notice
-            travels with it.
-        </p>
-
-        <h3 id="license-key">Do I need a license key? Does anything expire or show a watermark?</h3>
-        <p>No. There is no key, no trial period and no watermark; the package you install is the package you deploy.</p>
-
-        <h3 id="community-edition">What is the Community edition and how do I get it?</h3>
-        <p>
-            A Community edition is in preparation and will be delivered as a download link by email. Leave your address on the
-            <a href="signup">sign-up page</a> and it arrives when it is ready; what it contains beyond the NuGet package is announced with it.
-        </p>
-
-        <h3 id="source">Can I read and change the source?</h3>
-        <p>
-            Yes. The source is public at <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" rel="noopener">github.com/wadoodachaudhary/FlexCore</a>
-            under the same MIT license: fork it, keep your changes private, or send a pull request.
-        </p>
-
-        <h3 id="redistribution">Can I deploy to any number of servers, or ship FlexCore inside a product my customers install?</h3>
-        <p>Yes. The MIT license puts no limit on developers, servers, end users or redistribution.</p>
-    </section>
 
     <section>
         <h2>Compatibility</h2>
@@ -143,7 +117,7 @@
         </p>
 
         <h3 id="contribute">How do I request a feature or contribute?</h3>
-        <p>Open an issue on GitHub, or a pull request; contributions are taken under the MIT license.</p>
+        <p>Open an issue on GitHub, or a pull request.</p>
     </section>
 
     <section>
@@ -152,7 +126,7 @@
         <h3 id="versus">How is FlexCore different from MudBlazor, Radzen, Telerik or Syncfusion?</h3>
         <p>
             MudBlazor is a Material Design component library; Radzen Blazor is an MIT component set paired with the paid Radzen Blazor
-            Studio; Telerik UI for Blazor, Syncfusion and DevExpress are commercial suites licensed per developer. FlexCore is an MIT library
+            Studio; Telerik UI for Blazor, Syncfusion and DevExpress are commercial suites licensed per developer. FlexCore is a library
             built around data-heavy line-of-business screens (data grid, tree grid, pivot table, report writer, scheduler, MDI) and around
             moving VB6 and WinForms applications to the web, rendered from C# and SVG with no npm step.
         </p>

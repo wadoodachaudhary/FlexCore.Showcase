@@ -4,12 +4,14 @@
 @implements IDisposable
 
 <div class="showcase-shell-layout">
-    @* Preview banner (owner decision 2026-10-13: keep the site open, point NuGet visitors at the sign-up form; wording "Community edition" per owner 2026-10-13). AlertControl is the library's own banner. *@
+    @* Preview banner (owner decision 2026-10-13: keep the site open, point NuGet visitors at the sign-up form; wording "Community edition" per owner 2026-10-13). AlertControl is the library's own banner.
+       2026-10-29 (Baaria): reworded to "Sign up for first access"; the NuGet, MIT and Community edition sentence is out while licensing
+       and availability are decided internally. *@
     @if (_showBanner)
     {
         <div class="preview-banner">
             <AlertControl Severity="AlertSeverity.Info" AllowClose="true" OnClose="@(() => _showBanner = false)" CssClass="preview-alert">
-                <strong>Preview site.</strong> The library is on <a href="https://www.nuget.org/packages/FlexCore" target="_blank" rel="noopener">NuGet</a> under the MIT license; the Community edition will follow by email. <a href="signup">Sign up or ask a question</a>.
+                <strong>Preview site.</strong> <a href="signup">Sign up for first access</a>, or ask us a question.
             </AlertControl>
         </div>
     }

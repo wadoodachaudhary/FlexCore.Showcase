@@ -48,7 +48,7 @@
         <DemoExample Id="gallery" Title="Gallery by purpose" RazorCode="@Code.Gallery" CSharpCode="@Code.GalleryCs">
             <Description><p>Every chart here is the same control with a different <code>Type</code>. Series data is bound; titles, heights, axes, legends and palettes are parameters.</p></Description>
             <Demo>
-<TabControl @bind-SelectedIndex="_tab">
+<TabControl @bind-SelectedIndex="_tab" CssClass="site-tabs" Orientation="TabOrientation.Horizontal" Theme="TabTheme.Minimal">
     <TabItem HeaderText="Comparison">
         <h2>Bar Charts</h2>
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.67">
@@ -478,7 +478,7 @@
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Gallery = @"<TabControl @bind-SelectedIndex=""_tab"">
+        public const string Gallery = @"<TabControl @bind-SelectedIndex=""_tab"" CssClass=""site-tabs"" Orientation=""TabOrientation.Horizontal"" Theme=""TabTheme.Minimal"">
     <TabItem HeaderText=""Comparison"">
         <h2>Bar Charts</h2>
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.67"">

@@ -43,8 +43,8 @@ public static partial class SiteMeta
     public static readonly PageMeta[] Pages =
     {
         // Start here. Home.razor keeps its own title (that page is edited elsewhere); the registry mirrors it.
-        new("", "The Blazor toolbox that does grids, charts and reports right.", "FlexCore — Blazor controls for business apps",
-            "130+ Blazor UI components for .NET 10: virtualized data grid, tree grid, pivot table, charts, scheduler, Gantt and report writer, in C# under the MIT license.",
+        new("", "The Blazor toolbox that does grids, charts and reports right.", "FlexCore: the Blazor toolbox that gets data right.",
+            "130+ Blazor UI components for .NET 10: virtualized data grid, tree grid, pivot table, charts, scheduler, Gantt and report writer, all in C#.",
             "Start here", Keywords: new[] { "Blazor component library", "Blazor UI components", "Blazor controls", ".NET 10" }),
         new("get-started", "Get Started", "Get Started with FlexCore — Blazor Components for .NET 10",
             "Install FlexCore from NuGet, add the Fx.ControlKit namespaces, register the dialog and toast services and put a first grid on a Blazor page; MIT license.",
@@ -55,9 +55,9 @@ public static partial class SiteMeta
         new("signup", "Get the Community edition, or ask us anything", "FlexCore Community Edition: Sign up or Ask a Question",
             "Leave an email to get the FlexCore Community edition link when it ships, or ask a question; a person answers, usually within two working days.",
             "Start here", Controls: new[] { "FormControl", "FormItemControl" }, Keywords: new[] { "Community edition", "contact", "sign up" }),
-        new("faq", "Frequently asked questions", "FlexCore FAQ: License, .NET Support, Grid, Reports",
-            "What developers ask before adopting FlexCore: MIT license and Community edition, .NET 10 and render modes, grid scale, Crystal Reports, support, comparisons.",
-            "Start here", Keywords: new[] { "FAQ", "license", "MIT", "Community edition", "Blazor Server", "WebAssembly", "QuickGrid", "Crystal Reports" }),
+        new("faq", "Frequently asked questions", "FlexCore FAQ: .NET Support, Grid, Reports, Comparisons",
+            "What developers ask before adopting FlexCore: .NET 10 and render modes, JavaScript, grid scale, Crystal Reports, support and comparisons.",
+            "Start here", Keywords: new[] { "FAQ", "Blazor Server", "WebAssembly", "QuickGrid", "Crystal Reports" }),
 
         // Data Grid
         new("demo/grid", "Data Grid", "Blazor Data Grid (DataGrid, Table) — FlexCore",

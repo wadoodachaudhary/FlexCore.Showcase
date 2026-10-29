@@ -15,8 +15,7 @@
 .ex ::deep .ex-tabs { margin: -1rem -1.15rem 14px; }   /* flush with the header; card body pads 1rem 1.15rem */
 /* 2026-10-28: TabStripControl gained themes (its default is WindowsClassic); the code tabs use Minimal in the site font with the
    active tab in the site blue. Theme sets the colour variables inline, so the override needs !important. */
-.ex ::deep .ex-tabs { --fx-tab-active-color: #0284c7 !important; --fx-tab-color: #64748b !important; }
-.ex ::deep .ex-tabs .fx-tabstrip-tab { font-family: inherit; font-size: 13px; font-weight: 500; }
+.ex ::deep .ex-tabs.site-tabs { max-width: none; padding: 8px 1.15rem; }   /* the tabs' look is the site-wide .site-tabs in app.css */
 .ex-live { padding: 2px 0 4px; }
 .ex-code-pane { position: relative; }
 .ex ::deep .ex-copy { position: absolute; top: 8px; right: 8px; }

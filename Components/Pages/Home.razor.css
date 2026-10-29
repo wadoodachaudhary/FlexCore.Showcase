@@ -16,36 +16,6 @@
     padding: 0 16px;
 }
 
-.hero-tagline-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #e0f2fe;
-    color: #0369a1;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 5px 14px;
-    border-radius: 9999px;
-    margin-bottom: 14px;
-    letter-spacing: 0.02em;
-    border: 1px solid #bae6fd;
-}
-
-.badge-pulse {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #0284c7;
-    box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
-    animation: pulse 1.8s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(2, 132, 199, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
-}
-
 .hero-oneliner {
     font-size: clamp(40px, 6.4vw, 76px);
     font-weight: 700;
@@ -173,7 +143,7 @@
 
 /* ── 2. Live Interactive Showcase (Grid at the Top) ── */
 .showcase-section {
-    margin-bottom: 56px;
+    margin-bottom: 80px;   /* 56px until 2026-10-29: more air under the app window */
 }
 
 .showcase-shell {
@@ -566,7 +536,7 @@
     align-items: center;
     gap: 6px;
     padding: 6px 14px;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 12.5px;
     font-weight: 600;
     border: none;
@@ -575,11 +545,11 @@
 }
 
 .btn-excel {
-    background: #107c41;
-    color: #ffffff;
+    background: var(--brand-button-soft);
+    color: var(--brand-button-soft-text);
 }
 .btn-excel:hover {
-    background: #0b5e31;
+    background: var(--brand-button-soft-hover);
 }
 
 .btn-new {
@@ -886,17 +856,16 @@
 }
 
 .btn-modal-cancel {
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    color: #475569;
+    background: var(--brand-button-soft);
+    border: 0;
+    color: var(--brand-button-soft-text);
     font-size: 13px;
     font-weight: 600;
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
 }
-.btn-modal-cancel:hover { background: #f1f5f9; color: #0284c7;
-}
+.btn-modal-cancel:hover { background: var(--brand-button-soft-hover); }
 
 .btn-modal-save {
     background: var(--brand-button);
@@ -905,7 +874,7 @@
     font-size: 13px;
     font-weight: 600;
     padding: 8px 18px;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -925,7 +894,7 @@
     min-height: 360px;
 }
 .showcase-live.is-hidden { display: none; }
-.hero-view-tabs { font-size: 12.5px; }
+.window-tags ::deep .hero-view-tabs.site-tabs { padding: 0; border-bottom: 0; }   /* in the window's title bar; look from .site-tabs in app.css */
 .code-drawer pre {
     margin: 0;
     font-family: "SF Mono", Menlo, Consolas, monospace;
@@ -948,10 +917,11 @@
     background: #1e293b;
     border: 1px solid #334155;
     color: #e2e8f0;
+    font-family: inherit;
     font-size: 11px;
     font-weight: 600;
     padding: 4px 10px;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
@@ -1479,7 +1449,7 @@
 
 /* ── 6. Comparison Table ── */
 .comparison-section {
-    margin-bottom: 64px;
+    margin-bottom: 72px;
 }
 
 .comparison-table-wrapper {
@@ -1526,6 +1496,12 @@
 }
 
 /* ── 7. Bottom Call To Action Banner ── */
+/* Divider between home sections (2026-10-29): the four logo colours as a short bar, like the one under each page title. The
+   sections around it give the space; the toolbox and the call to action get a matching top margin. */
+.section-divider { width: 128px; height: 8px; margin: 0 auto; border-radius: 4px; background: var(--brand-stripe); }
+.landing-container ::deep .catalog-directory-section { margin-top: 72px; }
+.section-divider + .cta-banner { margin-top: 72px; }
+
 .cta-banner {
     background: linear-gradient(135deg, #091e3a 0%, #0d3b66 100%);
     color: #ffffff;
@@ -1643,46 +1619,27 @@
     gap: 14px;
 }
 
-.btn-hero-primary {
-    background: #ffffff;
-    color: #0d3b66;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 10px 24px;
-    border-radius: 8px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.15s ease;
-}
-
-.btn-hero-primary:hover {
-    background: #f1f5f9;
-    transform: translateY(-2px);
-}
-
+/* The banner's buttons share the hero buttons' size, shape and type (2026-10-29, Baaria: every button like the home page's) */
+.btn-hero-primary,
 .btn-hero-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 10px 22px;
-    border-radius: 8px;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(6px);
-    transition: all 0.15s ease;
+    padding: 11px 22px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
 }
 
-.btn-hero-secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    transform: translateY(-2px);
-}
+.btn-hero-primary, .btn-hero-primary:hover { color: #ffffff; }
+.btn-hero-primary { background: var(--brand-button); }
+.btn-hero-primary:hover { background: var(--brand-button-hover); }
+
+.btn-hero-secondary, .btn-hero-secondary:hover { color: #ffffff; }
+.btn-hero-secondary { background: rgba(255, 255, 255, 0.12); }
+.btn-hero-secondary:hover { background: rgba(255, 255, 255, 0.22); }
 
 /* ── Responsive Rules ── */
 @media (max-width: 1200px) {

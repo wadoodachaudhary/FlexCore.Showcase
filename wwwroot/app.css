@@ -15,7 +15,39 @@
     --brand-button-soft: #eef2ff;
     --brand-button-soft-hover: #e0e7ff;
     --brand-button-soft-text: #4338ca;
+
+    /* The library's ButtonControl themed through its own variables (2026-10-29, Baaria: every button on the site like the home
+       page's, the demos' included): pale indigo at rest, darker on hover, no border, rounder corners. ToggleButtonControl,
+       ButtonGroupControl, SegmentedControl, PopupControl and DataFilterControl take their pressed or picked colour from --fx-accent.
+       What no variable covers is set in the "Buttons" block below. */
+    --fx-btn-bg: var(--brand-button-soft);
+    --fx-btn-color: var(--brand-button-soft-text);
+    --fx-btn-border: 1px solid transparent;
+    --fx-btn-border-color: transparent;
+    --fx-btn-radius: 8px;
+    --fx-btn-hover-bg: var(--brand-button-soft-hover);
+    --fx-btn-hover-border: 1px solid transparent;
+    --fx-btn-hover-border-color: transparent;
+    --fx-btn-active-bg: #c7d2fe;
+    --fx-accent: var(--brand-button);
 }
+
+/* Buttons: what the --fx-btn-* variables do not reach. The type and weight of the home page's buttons, and the indigo for the
+   variants whose colours the library fixes (btn-primary, btn-outline-primary). Each selector is one step stronger than the
+   library's scoped rule it replaces; the classic VB6 button (fx-button-classic) keeps its own look. Padding is left to the
+   library: its controls tighten it inside themselves (scheduler entries, pagers), and a site-wide padding would undo that. */
+:root .fx-button.fx-button:not(.fx-button-classic) {
+    font-family: inherit;
+    font-weight: 600;
+    line-height: 1.35;
+    transition: background-color 0.15s ease;
+}
+:root .fx-button.btn-sm.btn-sm:not(.fx-button-classic) { padding: 4px 10px; font-size: calc(12px * var(--fx-zoom, 1)); }
+:root .fx-button.btn-lg.btn-lg:not(.fx-button-classic) { padding: 10px 22px; font-size: calc(16px * var(--fx-zoom, 1)); border-radius: 10px; }
+:root .fx-button.btn-primary.btn-primary { background: var(--brand-button); border-color: var(--brand-button); color: #ffffff; }
+:root .fx-button.btn-primary.btn-primary:hover:not(:disabled) { background: var(--brand-button-hover); border-color: var(--brand-button-hover); }
+:root .fx-button.btn-outline-primary.btn-outline-primary { background: transparent; border-color: var(--brand-button); color: var(--brand-button-soft-text); }
+:root .fx-button.btn-outline-primary.btn-outline-primary:hover:not(:disabled) { background: var(--brand-button); color: #ffffff; }
 
 /* Brand marks across the site (2026-10-28, Baaria: "apply the colour scheme throughout the site, including the demo pages"): a page
    title gets a short four-colour bar under it and a section heading a logo tile in front of it, the tiles taking the logo's colours
@@ -900,11 +932,11 @@ td:has(.fx-dropdown-grid.fx-open),
 }
 
 .btn-modal-cancel {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #475569;
+    background: var(--brand-button-soft);
+    border: 0;
+    color: var(--brand-button-soft-text);
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -912,7 +944,7 @@ td:has(.fx-dropdown-grid.fx-open),
 }
 
 .btn-modal-cancel:hover {
-    background: #f1f5f9;
+    background: var(--brand-button-soft-hover);
 }
 
 .btn-modal-save {
@@ -1772,7 +1804,7 @@ td:has(.fx-dropdown-grid.fx-open),
     font-size: 12.5px !important;
     font-weight: 600 !important;
     padding: 7px 16px !important;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
     cursor: pointer !important;
     transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
     border: none !important;
@@ -1782,14 +1814,13 @@ td:has(.fx-dropdown-grid.fx-open),
 }
 
 .landing-container .btn-excel {
-    background: linear-gradient(180deg, #107c41 0%, #0c6936 100%) !important;
-    color: #ffffff !important;
-    box-shadow: 0 1px 3px rgba(16, 124, 65, 0.35) !important;
+    background: var(--brand-button-soft) !important;
+    color: var(--brand-button-soft-text) !important;
+    box-shadow: none !important;
 }
 
 .landing-container .btn-excel:hover {
-    background: #0b5e30 !important;
-    box-shadow: 0 3px 8px rgba(16, 124, 65, 0.45) !important;
+    background: var(--brand-button-soft-hover) !important;
     transform: translateY(-1px) !important;
 }
 
@@ -1858,14 +1889,6 @@ td:has(.fx-dropdown-grid.fx-open),
    same hover and active blue, through the control's own CSS variables. */
 .fx-tabstrip { --fx-tab-active-color: #0284c7; --fx-tab-active-border-color: #0284c7; }
 .fx-tabstrip-tab:hover:not(.fx-tabstrip-tab-disabled) { --fx-text-color: #0284c7; }
-/* TabControl (the chart gallery and the Tabs & accordion page): its colours sit in a scoped stylesheet with no variables, so these
-   selectors carry an extra class to outrank the scoped ones. Active: bold blue text and the 2px bar; hover: blue text on the tint. */
-.fx-tabs .fx-tab-headers .fx-tab-button.active { color: #0284c7; font-weight: 700; box-shadow: inset 0 -2px 0 #0284c7; }
-.fx-tabs .fx-tab-headers .fx-tab-button:not(.active):hover { color: #0284c7; background: #f1f5f9; }
-/* Labels stay on one line: 10px side padding fits the chart gallery's ten tabs in the 945px column at a 1280px window (14px wrapped
-   "Part-to-Whole" and "KPI cards"); on narrower screens the row wraps instead of squeezing the labels. */
-.fx-tabs .fx-tab-headers { flex-wrap: wrap; }
-.fx-tabs .fx-tab-headers .fx-tab-button { white-space: nowrap; padding: 8px 10px; }
 /* 2026-10-25 (Baaria): one hover design site-wide: text turns #0284c7 (the top menu's blue), neutral backgrounds tint #f1f5f9;
    filled buttons are indigo (--brand-button, since 2026-10-29) and darken on hover; the 2px bar is reserved for the active or open item. */
 /* ── 2026-10-18, Baaria's review ─────────────────────────────────────────────
@@ -1881,3 +1904,36 @@ td:has(.fx-dropdown-grid.fx-open),
 .fx-grid-content::-webkit-scrollbar-thumb { background: #b9b9b9; border-radius: 6px; border: 2px solid #f3f3f3; }
 .fx-grid-content::-webkit-scrollbar-thumb:hover { background: #8a8a8a; }
 .fx-grid-content::-webkit-scrollbar-corner { background: #f3f3f3; }
+
+/* Site tabs (2026-10-29, Baaria): the top menu's look for every tab row on the site: the code tabs (Example | Razor | C# | CSS)
+   on each example and over the home page's app window, the chart gallery and the Tabs & accordion page's tab control. Grey text;
+   a grey tint and blue text on hover; a pale blue tint with blue semibold text when open; an open code tab carries an X that goes
+   back to Example. TabStripControl writes its theme's colours inline, so these rules replace the properties themselves, one step
+   stronger than the library's scoped rules. The Tabs & accordion page's CSS tab prints the rules between the markers verbatim
+   (FlexCore.Showcase.csproj embeds this file for AppSource.Region). */
+/* code-tab:site-tabs */
+/* class="site-tabs" on a TabStripControl, or on a TabControl for its header row. :root and :is() lift the rules above the
+   strip's own styles and the colours its Theme writes inline. */
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) { padding: 6px 8px; gap: 4px; background: none; border: 0; border-bottom: 1px solid #f1f5f9; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-viewport { gap: 4px; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab {
+    min-height: 0;
+    margin: 0;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    box-shadow: none;
+    color: #475569;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+}
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab + .fx-tabstrip-tab { margin-left: 0; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab:hover:not(.fx-tabstrip-tab-disabled) { background: #f1f5f9; color: #0284c7; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab.fx-tabstrip-tab-active { padding: 6px 12px; background: #e0f2fe; color: #0284c7; font-weight: 600; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab .fx-tabstrip-close { width: 18px; height: 18px; margin: 0 -4px 0 2px; border-radius: 50%; color: #0284c7; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab .fx-tabstrip-close:hover { background: #bae6fd; color: #075985; }
+/* A TabControl's pane drops the box drawn under its tabs */
+:root .fx-tabs.site-tabs > .fx-tab-content { border: 0; padding: 16px 0 0; }
+/* /code-tab */

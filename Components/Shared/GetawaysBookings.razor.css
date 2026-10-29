@@ -14,17 +14,6 @@
 
 .gw-itinerary ::deep .fx-scheduler { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; font-size: 13px; }
 .gw-itinerary ::deep .fx-scheduler > .fx-toolbar { margin: 0; padding: 10px 12px; gap: 8px; border: 0; border-bottom: 1px solid #e2e8f0; border-radius: 0; background: #ffffff; }
-.gw-itinerary ::deep .fx-scheduler .fx-button {
-    min-width: 0;
-    padding: 5px 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: #ffffff;
-    box-shadow: none;
-    color: #334155;
-    font-weight: 500;
-}
-.gw-itinerary ::deep .fx-scheduler .fx-button:hover:not(:disabled) { border-color: #c7d2fe; background: var(--brand-button-soft); color: var(--brand-button-soft-text); }
 .gw-itinerary ::deep .fx-time-heading { background: #f8fafc; border-bottom-color: #e2e8f0; }
 .gw-itinerary ::deep .fx-time-heading > span { display: none; }   /* "Appointments", the name of the one column group */
 .gw-itinerary ::deep .fx-time-column { border-right-color: #eef2f7; }

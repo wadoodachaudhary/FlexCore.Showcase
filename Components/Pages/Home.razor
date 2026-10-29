@@ -21,15 +21,11 @@
    cards above the grid name the controls. Rows get an opaque background in app.css: frozen cells use background-color: inherit,
    and a row with no background let the scrolled cells show through the Request column. *@
 
-<PageTitle>FlexCore — Blazor controls for business apps</PageTitle>
+<PageTitle>FlexCore: the Blazor toolbox that gets data right.</PageTitle>
 
 <div class="landing-container">
     @* 1. Hero *@
     <div class="top-hero-compact">
-        <div class="hero-tagline-badge">
-            <span class="badge-pulse"></span>
-            <span>Built for .NET 10 <span aria-hidden="true">📦</span></span>
-        </div>
         @* 2026-10-28 (Baaria): hero rewritten. Each claim is checked: 100,000 rows on /demo/grid/row-selection-50k, Crystal import
            via CrystalXmlReportLoader (XML exports), 137 standalone controls counted in the launch audit, both packages MIT.
            The pill cycles grids, charts, reports in CSS (Home.razor.css, "word pill"); screen readers get the plain sentence.
@@ -69,7 +65,8 @@
                     <span>Razor Sharp Getaways</span>
                 </div>
                 <div class="window-tags">
-                    <TabStripControl Items="_viewTabs" SelectedIndex="@(_showCode ? 1 : 0)" SelectedIndexChanged="@(i => _showCode = i == 1)" CssClass="hero-view-tabs" Orientation="TabOrientation.Horizontal" Theme="TabTheme.Minimal" ShowOrientationMenu="false" />
+                    <TabStripControl Items="_viewTabs" SelectedIndex="_codeTab" SelectedIndexChanged="SetCodeTab" OnTabClose="@(_ => SetCodeTab(0))"
+                                     CssClass="hero-view-tabs site-tabs" Orientation="TabOrientation.Horizontal" Theme="TabTheme.Minimal" ShowOrientationMenu="false" />
                 </div>
             </div>
 
@@ -145,11 +142,11 @@
                     <div class="showcase-body gw-page">
                         @* 2026-10-24 (Baaria): the Razor code is a tab over the example, not a drawer under it. The live page stays
                            mounted while hidden, so the grid keeps its state when the reader switches back. *@
-                        @if (_showCode)
+                        @if (_codeTab > 0)
                         {
                             <div class="code-drawer">
                                 <div class="code-header">
-                                    <span>Razor markup for the @CurrentPage.Nav page</span>
+                                    <span>@(_codeTab == 2 ? "C#" : "Razor") for the @CurrentPage.Nav page</span>
                                     <button type="button" class="btn-copy-code" @onclick="CopyActiveCode">
                                         @(_copiedCode ? "✓ Copied!" : "📋 Copy Code")
                                     </button>
@@ -157,7 +154,7 @@
                                 <pre><code>@GetActiveCodeSnippet()</code></pre>
                             </div>
                         }
-                        <div class="@(_showCode ? "showcase-live is-hidden" : "showcase-live")">
+                        <div class="@(_codeTab > 0 ? "showcase-live is-hidden" : "showcase-live")">
                 @if (_activeTab == "dashboard")
                 {
                     <GetawaysDashboard Requests="_requests" OnShowRequests="ShowRequests" OnOpenRequest="OpenRequest" />
@@ -244,6 +241,7 @@
                         </div>
                     </div>
 
+                    @* code-tab:grid *@
                     <GridControl TValue="TripRequest" DataSource="@FilteredRequests"
                                  @ref="_grid"
                                  AllowSelection="true"
@@ -364,6 +362,7 @@
                             </GridColumn>
                         </GridColumnsBase>
                     </GridControl>
+                    @* /code-tab *@
 
                     <div class="grid-status-footer">
                         <div class="status-left">
@@ -478,6 +477,7 @@
                 }
                 else if (_activeTab == "reports")
                 {
+                    @* code-tab:reports *@
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                             <div>
@@ -508,6 +508,7 @@
                             </div>
                         </div>
                     </div>
+                    @* /code-tab *@
                 }
                         </div>
                     </div>
@@ -518,6 +519,9 @@
             </div>
         </div>
     </section>
+
+    @* Four-colour divider between home sections (2026-10-29, Baaria), the bar that sits under each page title *@
+    <div class="section-divider" aria-hidden="true"></div>
 
     @* ── 3. The four big workhorses (2026-10-28, Baaria). They replace the six small workhorse cards on this page; the components
        page keeps those. Every line is checked: 100,000 rows (/demo/grid/row-selection-50k); 42 values in ChartType;
@@ -651,6 +655,8 @@
     </section>
 
     @* ── 4. The component directory ── *@
+    @* Four-colour divider between home sections (2026-10-29, Baaria), the bar that sits under each page title *@
+    <div class="section-divider" aria-hidden="true"></div>
     <ComponentCatalogDirectory ShowWorkhorses="false" />
 
 
@@ -842,6 +848,9 @@
         </div>
     </section>
 
+    @* Four-colour divider between home sections (2026-10-29, Baaria), the bar that sits under each page title *@
+    <div class="section-divider" aria-hidden="true"></div>
+
     @* 7. Call to action *@
     <div class="cta-banner">
         <div class="doodle-head" @ref="_ctaHead">
@@ -887,7 +896,7 @@
         </div>
 
         <div class="cta-buttons">
-            <a href="get-started" class="btn-hero-primary" style="background: #ffffff; color: #0d3b66;">
+            <a href="get-started" class="btn-hero-primary">
                 Get Started Now
             </a>
             <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" class="btn-hero-secondary">
@@ -944,7 +953,7 @@
     private void Go(string key)
     {
         _activeTab = key;
-        _showCode = false;
+        SetCodeTab(0);
         _navOpen = false;
     }
 
@@ -974,14 +983,21 @@
         _bell?.CloseDropDown();
         OpenRequest(r);
     }
-    private bool _showCode = false;
-    private readonly List<TabStripItem> _viewTabs = new() { new("Example", "bi bi-window"), new("Razor", "bi bi-code-slash") };
+    // Example | Razor | C# over the app window (2026-10-29, Baaria): the open code tab carries an X that goes back to Example
+    private int _codeTab;
+    private readonly List<TabStripItem> _viewTabs = [new("Example", "bi bi-window"), new("Razor", "bi bi-code-slash"), new("C#", "bi bi-filetype-cs")];
+    private void SetCodeTab(int index)
+    {
+        _codeTab = index;
+        for (var i = 0; i < _viewTabs.Count; i++) _viewTabs[i].Closable = i > 0 && i == index;
+    }
     private bool _copiedInstall = false;
     private bool _copiedCode = false;
     private string _selectedTripType = "All";
     private string _selectedView = "All";   // opens on all 1,000 requests, the number the badges state
     private string _gridSearchTerm = "";
     private TripRequest? _selectedRequest;
+    // code-tab:grid-cs
     private GridControl<TripRequest>? _grid;
     private GridControlEvents<TripRequest> _gridEvents = new();
 
@@ -993,6 +1009,7 @@
         EditOnActiveCellClick = true,
         AllowEditOnDblClick = true
     };
+    // /code-tab
 
     // Filter pills; matched case-insensitively against TripRequest.TripType codes
     private List<string> _tripTypes = new()
@@ -1170,6 +1187,7 @@
         StateHasChanged();
     }
 
+    // code-tab:grid-cs
     // The last of the five weekly fare samples is the quote, so a new quote moves the sparkline's end and its percentage
     private static void ApplyQuoteToFares(TripRequest r)
     {
@@ -1177,8 +1195,10 @@
         r.FareHistory[^1] = (int)r.Quote;
         r.FareDeltaPercent = (int)Math.Round((r.FareHistory[^1] - r.FareHistory[0]) / (decimal)Math.Max(1, r.FareHistory[0]) * 100);
     }
+    // /code-tab
 
     // Reports tab preview (2026-10-26): the report page's default sheet, from the same query, so its figures are the report's own
+    // code-tab:reports-cs
     private string _costPreviewTitle = "";
     private (string Label, decimal Amount)[] _costPreview = [];
 
@@ -1203,7 +1223,9 @@
             .Select(g => ($"{g.Key} {blurbs.GetValueOrDefault(g.Key, "")}", g.Sum(r => (decimal)r["Formula_Amount"])))
             .ToArray();
     }
+    // /code-tab
 
+    // code-tab:grid-cs
     private void OnTripTypeChanged(TripRequest r, string? newType)
     {
         if (string.IsNullOrEmpty(newType)) return;
@@ -1214,6 +1236,7 @@
         Notifications.Success($"Updated {r.Request} trip type to {newType} via DropDownGridControl");
         StateHasChanged();
     }
+    // /code-tab
 
     private static string Initials(string name)
     {
@@ -1442,18 +1465,7 @@
         _requests = GenerateRequests(1000);
         _selectedRequest = _requests.FirstOrDefault();
 
-        _gridEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<TripRequest>>(this, e =>
-        {
-            _selectedRequest = e.Data;
-            StateHasChanged();
-        });
-
-        // A typed quote becomes the route's latest fare sample, so the sparkline, its percentage and the totals follow it
-        _gridEvents.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<TripRequest>>(this, e =>
-        {
-            if (e.ColumnName == nameof(TripRequest.Quote)) ApplyQuoteToFares(e.Data);
-        });
-
+        WireGridEvents();
         LoadCostPreview();
 
         _fabItems =
@@ -1466,6 +1478,23 @@
             }) },
             new("Invoice", "bi bi-receipt") { OnClick = EventCallback.Factory.Create(this, () => Go("reports")) },
         ];
+    }
+
+    // code-tab:grid-cs
+    // Selecting a row fills the status bar, a typed quote moves the fare trend, and a double-click opens the editor
+    private void WireGridEvents()
+    {
+        _gridEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<TripRequest>>(this, e =>
+        {
+            _selectedRequest = e.Data;
+            StateHasChanged();
+        });
+
+        // A typed quote becomes the route's latest fare sample, so the sparkline, its percentage and the totals follow it
+        _gridEvents.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<TripRequest>>(this, e =>
+        {
+            if (e.ColumnName == nameof(TripRequest.Quote)) ApplyQuoteToFares(e.Data);
+        });
 
         _gridEvents.OnRecordDoubleClick = EventCallback.Factory.Create<CellClickEventArgs<TripRequest>>(this, e =>
         {
@@ -1476,7 +1505,9 @@
             }
         });
     }
+    // /code-tab
 
+    // code-tab:grid-cs
     private IEnumerable<TripRequest> FilteredRequests
     {
         get
@@ -1547,6 +1578,7 @@
 
     // The grid writes the workbook itself and the browser downloads it
     private Task ExportToExcel() => _grid?.ExportToXlsxAsync("trip-requests.xlsx") ?? Task.CompletedTask;
+    // /code-tab
 
     private async Task CopyInstallCommand()
     {
@@ -1578,143 +1610,18 @@
         catch { }
     }
 
-    private string GetActiveCodeSnippet()
+    // Each page's Razor and C# come from the built source (AppSource): the Getaways pages' own files, and the parts of this file
+    // between "code-tab:" markers, so a tab always shows the page as it is built.
+    private string GetActiveCodeSnippet() => (_activeTab, _codeTab) switch
     {
-        return _activeTab switch
-        {
-            "dashboard" => AppSource.Markup("GetawaysDashboard.razor"),
-            "bookings" => AppSource.Markup("GetawaysBookings.razor"),
-            "grid" =>
-@"<GridControl TValue=""TripRequest"" DataSource=""@FilteredRequests""
-             @ref=""_grid""
-             AllowSelection=""true""
-             AllowSorting=""true""
-             AllowFiltering=""true""
-             AllowResizing=""true""
-             EnableHover=""true""
-             CssClass=""hero-grid-theme""
-             EditSettingsRef=""@_editSettings""
-             EventsRef=""@_gridEvents""
-             WindowOverscanRows=""15""
-             Height=""440px"">
-    <GridColumnsBase>
-        <GridColumn Field=""@nameof(TripRequest.Request)"" HeaderText=""Request"" Width=""100px""
-                    IsPrimaryKey=""true"" AllowEditing=""false""
-                    IsFrozen=""true"" FrozenPosition=""FrozenColumnPosition.Left"">
-            <Template Context=""row"">
-                @{ var r = (TripRequest)row; }
-                <BadgeControl Text=""@r.Request"" CssClass=""grid-request-code"" />
-            </Template>
-        </GridColumn>
-
-        <GridColumn Field=""@nameof(TripRequest.Agent)"" HeaderText=""Agent"" Width=""150px"" AllowEditing=""false"">
-            <Template Context=""row"">
-                @{ var r = (TripRequest)row; }
-                <div class=""agent-cell"">
-                    <span class=""agent-avatar"" style=""background:@r.AvatarBg"">@r.AvatarInitials</span>
-                    <span class=""agent-name"">@r.Agent</span>
-                </div>
-            </Template>
-        </GridColumn>
-
-        <GridColumn Field=""@nameof(TripRequest.Destination)"" HeaderText=""Destination"" Width=""130px"" AllowEditing=""false"" />
-
-        @* In-cell DropDownGridControl: a four-column lookup with search; the header sorts by the code *@
-        <GridColumn Field=""@nameof(TripRequest.TripType)"" HeaderText=""Trip type"" Width=""170px"" AllowEditing=""false"">
-            <Template Context=""row"">
-                @{ var r = (TripRequest)row; }
-                <div class=""grid-cell-dropdowngrid"">
-                    <DropDownGridControl TItem=""TripTypeLookup"" TValue=""string""
-                                         DataSource=""@_tripTypeLookup""
-                                         Value=""@r.TripType""
-                                         ValueChanged=""@(val => OnTripTypeChanged(r, val))""
-                                         TextFieldName=""@nameof(TripTypeLookup.Name)""
-                                         ValueFieldName=""@nameof(TripTypeLookup.Code)""
-                                         ClosedTextFieldName=""@nameof(TripTypeLookup.Code)""
-                                         PopupWidth=""490px""
-                                         PopupHeight=""220px""
-                                         RowHeight=""24""
-                                         ShowSearch=""true""
-                                         SearchPlaceholder=""Search trip types...""
-                                         AllowClear=""false""
-                                         Placeholder=""Select trip type..."">
-                        <Columns>
-                            <GridColumn Field=""@nameof(TripTypeLookup.Code)"" HeaderText=""Code"" Width=""95px"" />
-                            <GridColumn Field=""@nameof(TripTypeLookup.Name)"" HeaderText=""Trip type"" Width=""165px"" />
-                            <GridColumn Field=""@nameof(TripTypeLookup.Desk)"" HeaderText=""Desk"" Width=""90px"" />
-                            <GridColumn Field=""@nameof(TripTypeLookup.LeadTime)"" HeaderText=""Book ahead"" Width=""110px"" />
-                        </Columns>
-                    </DropDownGridControl>
-                </div>
-            </Template>
-        </GridColumn>
-
-        @* Fast typing: click the cell and type, the value commits on Enter or blur *@
-        <GridColumn Field=""@nameof(TripRequest.Quote)"" HeaderText=""Quote"" Width=""130px""
-                    Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right""
-                    AllowEditing=""true"" SelectAllOnEdit=""true"" />
-
-        @* Inline SVG sparkline: five weekly fare samples for the route, the last one is the quote; the header sorts by the change *@
-        <GridColumn Field=""@nameof(TripRequest.FareDeltaPercent)"" HeaderText=""Fare trend"" Width=""135px"" AllowFiltering=""false"" AllowEditing=""false"">
-            <Template Context=""row"">
-                @{
-                    var r = (TripRequest)row;
-                    var spark = GetSparklinePoints(r.FareHistory, 68, 22);
-                    var isUp = r.FareDeltaPercent >= 0;
-                    var color = isUp ? ""#10b981"" : ""#ef4444"";
-                    var fill = isUp ? ""rgba(16, 185, 129, 0.16)"" : ""rgba(239, 68, 68, 0.16)"";
-                    var deltaClass = isUp ? ""delta-up"" : ""delta-down"";
-                    var titleText = $""5-week fare trend: {(isUp ? ""+"" : """")}{r.FareDeltaPercent}%"";
-                    var deltaSign = isUp ? ""▲"" : ""▼"";
-                }
-                <div class=""sparkline-cell"" title=""@titleText"">
-                    <svg width=""68"" height=""22"" viewBox=""0 0 68 22"" class=""sparkline-svg"">
-                        <polygon points=""@spark.AreaPoints"" fill=""@fill"" />
-                        <polyline points=""@spark.PolylinePoints"" fill=""none"" stroke=""@color"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" />
-                        <circle cx=""@spark.LastX"" cy=""@spark.LastY"" r=""2.5"" fill=""@color"" />
-                    </svg>
-                    <span class=""sparkline-delta @deltaClass"">
-                        @deltaSign@Math.Abs(r.FareDeltaPercent)%
-                    </span>
-                </div>
-            </Template>
-        </GridColumn>
-
-        <GridColumn Field=""@nameof(TripRequest.Status)"" HeaderText=""Status"" Width=""110px"" AllowEditing=""false"">
-            <Template Context=""row"">
-                @{
-                    var r = (TripRequest)row;
-                    var statusBadge = GetStatusBadgeClass(r.Status);
-                }
-                <BadgeControl Text=""@r.Status"" CssClass=""@($""grid-badge {statusBadge}"")"" />
-            </Template>
-        </GridColumn>
-
-        @* The Edit button opens the popup editor; a double-click on the row does the same *@
-        <GridColumn Field=""@nameof(TripRequest.Itinerary)"" HeaderText=""Itinerary"" Width=""300px"" AllowEditing=""false"">
-            <Template Context=""row"">
-                @{ var r = (TripRequest)row; }
-                <div class=""desc-cell-wrapper"">
-                    <span class=""desc-text"" title=""@r.Itinerary"">@r.Itinerary</span>
-                    <button type=""button"" class=""btn-cell-popup-edit"" title=""Edit in Modal Popup""
-                            @onclick=""@(() => OpenPopupEdit(r))"" @onclick:stopPropagation=""true"">
-                        <span class=""bi bi-pencil-square""></span> Edit
-                    </button>
-                </div>
-            </Template>
-        </GridColumn>
-    </GridColumnsBase>
-</GridControl>",
-
-            "reports" =>
-@"// Crystal Reports XML / SQL Adaptive Reporting Pipeline
-builder.Services.AddScoped<CrystalXmlReportLoader>();
-builder.Services.AddScoped<IReportSessionContext, ShowcaseReportSessionContext>();
-builder.Services.AddScoped<IReportDataExecutor, ShowcaseReportDataExecutor>();
-
-<ReportWriterControl Definition=""@reportDef"" Executor=""@executor"" />",
-
-            _ => ""
-        };
-    }
+        ("dashboard", 2) => AppSource.Code("GetawaysDashboard.razor"),
+        ("dashboard", _) => AppSource.Markup("GetawaysDashboard.razor"),
+        ("bookings", 2) => AppSource.Code("GetawaysBookings.razor"),
+        ("bookings", _) => AppSource.Markup("GetawaysBookings.razor"),
+        ("grid", 2) => AppSource.Region("Home.razor", "grid-cs"),
+        ("grid", _) => AppSource.Region("Home.razor", "grid"),
+        ("reports", 2) => AppSource.Region("Home.razor", "reports-cs"),
+        ("reports", _) => AppSource.Region("Home.razor", "reports"),
+        _ => ""
+    };
 }

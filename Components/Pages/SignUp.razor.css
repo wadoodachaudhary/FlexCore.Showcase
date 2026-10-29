@@ -13,6 +13,9 @@
 .signup-form ::deep .fx-form-item label { font-size: 13px; font-weight: 600; color: #334155; }
 .signup-form ::deep .fx-form-item small { font-size: 12px; color: #64748b; }
 .signup-form ::deep .fx-form > button, .signup-form ::deep .fx-form ::deep button[type="submit"] { margin-top: 14px; }
+/* Send in the site's main-action style (2026-10-29); Send another keeps the site-wide pale indigo of a default button */
+.signup-form ::deep button[type="submit"].fx-button { padding: 9px 22px; border-radius: 10px; background: var(--brand-button); color: #ffffff; font-size: 15px; }
+.signup-form ::deep button[type="submit"].fx-button:hover:not(:disabled) { background: var(--brand-button-hover); }
 .status { font-size: 13px; color: #b91c1c; margin: 10px 0 0; }
 /* honeypot: off-screen, not display:none, so a naive bot still fills it */
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }

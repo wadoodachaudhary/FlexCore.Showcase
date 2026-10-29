@@ -69,13 +69,20 @@
 }
 
 /* ── Complete component directory, multi-column ── */
+/* One white box holds the heading, the doodle, the filter and the list (2026-10-29, Baaria: the folder tab of the morning "looks
+   weird, maybe just make it one big rectangle"). */
 .catalog-directory-section {
     margin: 36px 0 64px;
+    padding: 40px 32px 36px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
 }
 
 .directory-header {
     text-align: center;
-    margin: 0 0 36px;
+    margin: 0 0 32px;
 }
 
 /* The toolbox doodle left of the title (2026-10-28); layout and hand-drawn wobble come from .doodle-head and .doodle in app.css. */
@@ -143,7 +150,8 @@
 
 .catalog-search-wrapper {
     position: relative;
-    max-width: 520px;
+    width: 520px;
+    max-width: 100%;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -201,10 +209,8 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 32px;
     background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 36px 32px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    padding-top: 32px;
+    border-top: 1px solid #f1f5f9;
 }
 
 .directory-col {
@@ -226,8 +232,9 @@
     text-transform: uppercase;
     margin: 0 0 10px 0;
     padding-bottom: 6px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 3px solid var(--brand-blue);   /* the logo's dark blue (2026-10-29, Baaria) */
 }
+
 
 .comp-list {
     list-style: none;
@@ -302,6 +309,6 @@
     }
     .directory-columns-container {
         grid-template-columns: 1fr;
-        padding: 20px;
     }
+    .catalog-directory-section { padding: 24px 18px; }
 }

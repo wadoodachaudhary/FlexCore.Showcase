@@ -27,7 +27,8 @@
         <ChildContent>
             @if (_codes.Count > 0)
             {
-                <TabStripControl Items="_tabs" @bind-SelectedIndex="_tab" CssClass="ex-tabs" Theme="TabTheme.Minimal" ShowOrientationMenu="false" />
+                <TabStripControl Items="_tabs" SelectedIndex="_tab" SelectedIndexChanged="Select" OnTabClose="@(_ => Select(0))"
+                                 CssClass="ex-tabs site-tabs" Theme="TabTheme.Minimal" ShowOrientationMenu="false" />
             }
             <div class="ex-live" hidden="@(_tab != 0)">@Demo</div>
             @if (_tab > 0)
@@ -78,11 +79,19 @@
         Add("CSS", CssCode);
         if (_codes.Count > 0) _tabs.Insert(0, new TabStripItem("Example"));
         if (_tab > _codes.Count) _tab = 0;
+        Select(_tab);
         void Add(string name, string? code)
         {
             if (string.IsNullOrEmpty(code)) return;
             _tabs.Add(new TabStripItem(name)); _codes.Add(code);
         }
+    }
+
+    // The open code tab carries an X that goes back to Example (2026-10-29, Baaria)
+    private void Select(int index)
+    {
+        _tab = index;
+        for (var i = 0; i < _tabs.Count; i++) _tabs[i].Closable = i > 0 && i == index;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

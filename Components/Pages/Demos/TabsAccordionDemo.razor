@@ -16,6 +16,10 @@
    document tabs example switches theme with a button group and orientation with the strip's own menu, and the doc tables carry
    the new members (checked against TabStripControl.razor, TabStripModels.cs, TabStripControl.razor.css, Navigation/TabControl.razor). *@
 
+@* 2026-10-29 (Baaria): the tab control example takes the site's tab style (the top menu's look, as on every code tab and the chart
+   gallery): Minimal theme, one Horizontal row and the site-tabs class from app.css, whose rules the CSS tab prints through
+   AppSource.Region. The document tabs keep the library themes, since their buttons switch them and site-tabs would override all five. *@
+
 <PageTitle>Blazor Tabs, TabStrip and Accordion — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Tabs & accordion" Category="Components" ControlName="TabControl · TabStripControl · AccordionControl"
@@ -31,10 +35,10 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs">
-            <Description><p>Panes are declared inline; only the selected one renders, so the Lines table is not in the page until its tab is chosen. The <code>TabItems</code> wrapper is optional. The folder look is the library's <code>FolderTabs</code> theme; <code>TabControl</code> has no close button.</p></Description>
+        <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs" CssCode="@Code.TabsCss">
+            <Description><p>Panes are declared inline; only the selected one renders, so the Lines table is not in the page until its tab is chosen. The <code>TabItems</code> wrapper is optional. The look is this site's own tab style: the <code>Minimal</code> theme on one <code>Horizontal</code> row, restyled by the <code>site-tabs</code> class in the CSS tab. <code>TabControl</code> has no close button.</p></Description>
             <Demo>
-                <TabControl @bind-SelectedIndex="_tab" Theme="TabTheme.FolderTabs">
+                <TabControl @bind-SelectedIndex="_tab" CssClass="site-tabs" Orientation="TabOrientation.Horizontal" Theme="TabTheme.Minimal">
                     <TabItems>
                         <TabItem HeaderText="Summary">
                             <dl class="summary">
@@ -266,7 +270,7 @@
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Tabs = @"<TabControl @bind-SelectedIndex=""_tab"" Theme=""TabTheme.FolderTabs"">
+        public const string Tabs = @"<TabControl @bind-SelectedIndex=""_tab"" CssClass=""site-tabs"" Orientation=""TabOrientation.Horizontal"" Theme=""TabTheme.Minimal"">
     <TabItems>
         <TabItem HeaderText=""Summary"">
             <dl class=""summary"">
@@ -293,6 +297,7 @@
 <p class=""result"">Tab @(_tab + 1) of 3 selected</p>";
         public const string TabsCs = @"// Tab control
 private int _tab;";
+        public static string TabsCss => AppSource.Region("app.css", "site-tabs");   // the site stylesheet's own rules
 
         public const string Strip = @"<ButtonGroupControl Items=""_themeItems"" Values=""@(new[] { _theme.ToString() })"" ValuesChanged=""SetTheme"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Tab theme"" />
 
