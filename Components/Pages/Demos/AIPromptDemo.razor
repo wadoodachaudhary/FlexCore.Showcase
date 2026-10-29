@@ -16,7 +16,7 @@
 
 <FeatureDemoLayout Title="AI prompt" Category="Components" ControlName="AIPromptControl · AppBarControl · ToolbarControl"
                    Tagline="A prompt box with suggestions, command buttons, a response card and a history; your application supplies the model."
-                   SourcePath="AIPromptControl.razor; AIPromptModels.cs; LlmResultCard.razor; AppBarControl.razor; ToolbarControl.razor; ToolbarButtonControl.razor; ToolbarSeparatorControl.razor">
+                   SourcePath="AI/AIPromptControl.razor; AI/AIPromptModels.cs; Editor/LlmResultCard.razor; Layout/AppBarControl.razor; ToolbarControl.razor; ToolbarButtonControl.razor; ToolbarSeparatorControl.razor">
     <Overview>
         <p>
             <code>AIPromptControl</code> is the screen side of a text-generation feature: a multi-line prompt, suggestion buttons that fill it, a Generate
@@ -24,6 +24,13 @@
             control calls no service. You pass a <code>Generate</code> delegate that receives an <code>AIPromptRequest</code> (the prompt, and the command
             if one was clicked) with a <code>CancellationToken</code> and returns the response text; the control handles the busy state, cancelling, the
             error message and a history of responses. Both examples on this page pass a stub that returns canned text.
+        </p>
+        <p>
+            Wiring a real model is the host's job. Inside <code>Generate</code>, send <code>request.Prompt</code> (and
+            <code>request.Command.Instruction</code> when a command button was used) to whatever you call models with, an <code>HttpClient</code>
+            against your own endpoint or a vendor SDK, honour the <code>CancellationToken</code>, and return the text; the control shows it in the
+            result card and keeps the last <code>MaxHistory</code> responses. Nothing on this page calls a model: the stub waits 1.2 seconds and
+            returns canned text.
         </p>
         <p>
             The second example puts it on a desk screen: an <code>AppBarControl</code> for the title row, a <code>ToolbarControl</code> of

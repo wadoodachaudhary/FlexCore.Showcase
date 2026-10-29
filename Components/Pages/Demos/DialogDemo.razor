@@ -76,17 +76,19 @@
         </DemoExample>
 
         <DemoExample Id="service" Title="Message box, prompt and the dialog service" RazorCode="@Code.Service" CSharpCode="@Code.ServiceCs">
-            <Description><p><code>IDialogService</code> replaces <code>window.confirm</code>, <code>alert</code> and <code>prompt</code>: inject it anywhere and await the answer. A page can also own a <code>MessageBoxControl</code> and call <code>ShowAsync</code> for an icon, the .NET look, or a confirmation checkbox.</p></Description>
+            <Description><p><code>IDialogService</code> replaces <code>window.confirm</code>, <code>alert</code> and <code>prompt</code>: inject it anywhere and await the answer. A page can also own a <code>MessageBoxControl</code> and call <code>ShowAsync</code> for an icon, the .NET look, or a confirmation checkbox, or a <code>MultiLineEditControl</code> for a long-text prompt.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <ButtonControl OnClick="Confirm">Confirm</ButtonControl>
                     <ButtonControl OnClick="Prompt">Prompt</ButtonControl>
+                    <ButtonControl OnClick="Notes">Notes, multi-line</ButtonControl>
                     <ButtonControl OnClick="Alert">Alert</ButtonControl>
                     <ButtonControl OnClick="AskDotNet">Yes / No / Cancel, .NET look</ButtonControl>
                     <ButtonControl CssClass="btn-danger" OnClick="GatedDelete">Gated delete</ButtonControl>
                     <span class="result">@_answer</span>
                 </div>
                 <MessageBoxControl @ref="_box" />
+                <MultiLineEditControl @ref="_editor" />
             </Demo>
         </DemoExample>
     </Examples>
@@ -133,7 +135,7 @@
         <ul>
             <li>Buttons used in footers, and <code>DefaultButtonScope</code>: <a href="demo/buttons">Buttons</a>.</li>
             <li>Non-blocking messages: <a href="demo/notifications">Toasts</a>.</li>
-            <li><code>MultiLineEditControl</code>, the long-text prompt grids open from a cell: see the Methods table; no live demo yet.</li>
+            <li><code>MultiLineEditControl</code>, the long-text prompt grids open from a cell: the Notes button in the service example; see the Methods table.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
@@ -165,6 +167,8 @@
     //   builder.Services.AddScoped<Fx.ControlKit.Dialogs.IDialogService>(sp => sp.GetRequiredService<Fx.ControlKit.Dialogs.DialogService>());
     // and MainLayout.razor hosts <DialogHostControl />. This page has @inject IDialogService Dialogs at the top.
     private MessageBoxControl? _box;
+    private MultiLineEditControl? _editor;
+    private string _notes = "";
     private string? _answer;
     private async Task Confirm() => _answer = await Dialogs.ConfirmAsync("Delete 3 rows?", "Confirm") ? "Yes" : "No";
     private async Task Prompt()
@@ -173,6 +177,12 @@
         _answer = name is null ? "Cancelled" : $"Named \"{name}\"";
     }
     private Task Alert() => Dialogs.AlertAsync("Export finished. 240 rows written.", "Export");
+    private async Task Notes()
+    {
+        var text = await _editor!.ShowAsync(_notes, "Booking notes", 500, "Internal notes for the booking; 500 characters at most.");
+        if (text is not null) _notes = text;
+        _answer = text is null ? "Cancelled" : $"Notes: {text.Length} characters";
+    }
     private async Task AskDotNet() =>
         _answer = (await _box!.ShowAsync("Save changes to Report.docx?", "Editor", MessageBoxButtons.YesNoCancel, "question", MessageBoxLook.DotNet)).ToString();
     private async Task GatedDelete() =>
@@ -336,17 +346,21 @@ private DialogPosition? _winPos;";
         public const string Service = @"<div class=""demo-row"">
     <ButtonControl OnClick=""Confirm"">Confirm</ButtonControl>
     <ButtonControl OnClick=""Prompt"">Prompt</ButtonControl>
+    <ButtonControl OnClick=""Notes"">Notes, multi-line</ButtonControl>
     <ButtonControl OnClick=""Alert"">Alert</ButtonControl>
     <ButtonControl OnClick=""AskDotNet"">Yes / No / Cancel, .NET look</ButtonControl>
     <ButtonControl CssClass=""btn-danger"" OnClick=""GatedDelete"">Gated delete</ButtonControl>
     <span class=""result"">@_answer</span>
 </div>
-<MessageBoxControl @ref=""_box"" />";
+<MessageBoxControl @ref=""_box"" />
+<MultiLineEditControl @ref=""_editor"" />";
         public const string ServiceCs = @"// Service and message box. Set-up, once per app: Program.cs registers
 //   builder.Services.AddScoped<Fx.ControlKit.Dialogs.DialogService>();
 //   builder.Services.AddScoped<Fx.ControlKit.Dialogs.IDialogService>(sp => sp.GetRequiredService<Fx.ControlKit.Dialogs.DialogService>());
 // and MainLayout.razor hosts <DialogHostControl />. This page has @inject IDialogService Dialogs at the top.
 private MessageBoxControl? _box;
+private MultiLineEditControl? _editor;
+private string _notes = """";
 
 private string? _answer;
 
@@ -359,6 +373,13 @@ private async Task Prompt()
 }
 
 private Task Alert() => Dialogs.AlertAsync(""Export finished. 240 rows written."", ""Export"");
+
+private async Task Notes()
+{
+    var text = await _editor!.ShowAsync(_notes, ""Booking notes"", 500, ""Internal notes for the booking; 500 characters at most."");
+    if (text is not null) _notes = text;
+    _answer = text is null ? ""Cancelled"" : $""Notes: {text.Length} characters"";
+}
 
 private async Task AskDotNet() =>
     _answer = (await _box!.ShowAsync(""Save changes to Report.docx?"", ""Editor"", MessageBoxButtons.YesNoCancel, ""question"", MessageBoxLook.DotNet)).ToString();

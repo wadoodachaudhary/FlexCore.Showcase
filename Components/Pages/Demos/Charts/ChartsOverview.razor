@@ -4,6 +4,8 @@
 @* 2026-10-12: wrapped in FeatureDemoLayout as one example (the tabbed gallery, unchanged). "No JavaScript
    dependencies" reworded per the claims rule. ChartControl parameter table pending (SC-264).
    2026-10-20: ?tab=<slug> opens the gallery on that tab (catalog row Sparkline Charts); slugs in TabSlugs.
+   2026-10-29: nine more tiles (ComboBarLine, RangeBar, StepLine, MultiLine, RangeArea, HighLow, Pyramid, DotPlot, ArcGauge), so every
+   ChartType with a renderer is drawn on this page or on Financial & gauges.
    2026-10-23 (developer meeting point 5, label clutter): every SVG chart draws on a fixed viewBox (600x300; 300x300 for
    Pie, Donut, Radar, Gauge; 400x300 for Funnel) with xMidYMid meet, so rendered text = tile scale, and a tile taller
    than its width-bound height is blank. Each layout now sets CellAspectRatio so a tile is title + chart (+ legend)
@@ -70,6 +72,14 @@
                     <ChartControl Type="ChartType.StackedBar100" Title="Share of loaves and pastries, by day" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 100 })" Series="@_groupedBarSeries" />
                 </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row="2" Column="0" SizeX="1" SizeY="1">
+                    <ChartControl Type="ChartType.ComboBarLine" Title="Rooms sold and average rate in $, by month; the rate is drawn as a line too" Height="226px"
+                                  Series="@_comboSeries" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row="2" Column="1" SizeX="1" SizeY="1">
+                    <ChartControl Type="ChartType.RangeBar" Title="Transfer time from the airport, minutes, by hotel" Height="226px"
+                                  Series="@(new List<ChartSeries> { _transferRanges })" />
+                </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
     </TabItem>
@@ -96,6 +106,22 @@
                     <ChartControl Type="ChartType.StackedArea" Title="Stacked Area" Height="226px"
                                   Series="@_lineSeries" />
                 </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row="2" Column="0" SizeX="1" SizeY="1">
+                    <ChartControl Type="ChartType.StepLine" Title="Pool heater setting through the day, °C" Height="226px"
+                                  YAxis="@(new ChartAxis { Min = 20, Max = 32 })" Series="@(new List<ChartSeries> { _heaterSeries })" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row="2" Column="1" SizeX="1" SizeY="1">
+                    <ChartControl Type="ChartType.MultiLine" Title="Bookings per week, three desks" Height="226px"
+                                  Series="@_deskSeries" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row="3" Column="0" SizeX="1" SizeY="1">
+                    <ChartControl Type="ChartType.RangeArea" Title="Lisbon temperature band, °C, by month" Height="226px"
+                                  Series="@(new List<ChartSeries> { _lisbonRanges })" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row="3" Column="1" SizeX="1" SizeY="1">
+                    <ChartControl Type="ChartType.HighLow" Title="Daily high and low, one week in Kyoto, °C" Height="226px"
+                                  Series="@(new List<ChartSeries> { _kyotoWeek })" />
+                </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
     </TabItem>
@@ -117,6 +143,10 @@
                     <ChartControl Type="ChartType.Funnel" Title="Sales funnel, 1,000 visits to 180 won" Height="350px"
                                   Series="@(new List<ChartSeries> { _funnelSeries })" />
                 </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row="2" Column="0" SizeX="2" SizeY="1">
+                    <ChartControl Type="ChartType.Pyramid" Title="Room categories booked, 1,000 stays" Height="350px"
+                                  Series="@(new List<ChartSeries> { _roomPyramid })" />
+                </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
     </TabItem>
@@ -132,6 +162,10 @@
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="1" SizeY="1">
                     <ChartControl Type="ChartType.BoxPlot" Title="Exam scores by subject, one class" Height="400px"
                                   YAxis="@(new ChartAxis { Max = 100 })" Series="@_boxPlotSeries" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row="2" Column="0" SizeX="1" SizeY="1">
+                    <ChartControl Type="ChartType.DotPlot" Title="Complaints per 100 stays, by hotel" Height="400px"
+                                  Series="@(new List<ChartSeries> { _complaints })" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
@@ -177,6 +211,9 @@
                 <DashboardLayoutPanel Row="0" Column="2" SizeX="1" SizeY="2">
                     <ChartControl Type="ChartType.KpiCard" Title="Overdue"
                                   KpiValue="3.1%" KpiLabel="Loans overdue" KpiTrend="-0.4%" Height="180px" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row="2" Column="0" SizeX="1" SizeY="2">
+                    <ChartControl Type="ChartType.ArcGauge" Title="Occupancy this week, %" GaugeValue="78" GaugeMin="0" GaugeMax="100" Height="180px" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
@@ -302,6 +339,37 @@
         if (i >= 0) _tab = i;
     }
 
+
+    // Combo: the first series draws as bars, the second as a line
+    List<ChartSeries> _comboSeries = new()
+    {
+        new() { Name = "Rooms sold", DataPoints = new() { new("Jan", 310), new("Feb", 290), new("Mar", 350), new("Apr", 420), new("May", 480), new("Jun", 560) } },
+        new() { Name = "Average rate", DataPoints = new() { new("Jan", 95), new("Feb", 92), new("Mar", 110), new("Apr", 128), new("May", 140), new("Jun", 165) } }
+    };
+    // Range points carry the minimum in Value and the maximum in Value2 (ChartDataPoint.Range)
+    ChartSeries _transferRanges = new() { Name = "Minutes", DataPoints = new() {
+        ChartDataPoint.Range("Harbour", 15, 25), ChartDataPoint.Range("Hilltop", 30, 55), ChartDataPoint.Range("Old Town", 20, 40),
+        ChartDataPoint.Range("Beach", 45, 70), ChartDataPoint.Range("Airport", 5, 10) } };
+    ChartSeries _heaterSeries = new() { Name = "Setting", DataPoints = new() {
+        new("06:00", 24), new("08:00", 26), new("10:00", 28), new("12:00", 29), new("14:00", 29), new("16:00", 28), new("18:00", 27), new("20:00", 25), new("22:00", 23) } };
+    List<ChartSeries> _deskSeries = new()
+    {
+        new() { Name = "Boston", DataPoints = new() { new("W1", 42), new("W2", 48), new("W3", 51), new("W4", 47), new("W5", 58), new("W6", 63) } },
+        new() { Name = "Lisbon", DataPoints = new() { new("W1", 30), new("W2", 34), new("W3", 39), new("W4", 45), new("W5", 44), new("W6", 52) } },
+        new() { Name = "Kyoto", DataPoints = new() { new("W1", 18), new("W2", 22), new("W3", 25), new("W4", 31), new("W5", 36), new("W6", 35) } }
+    };
+    ChartSeries _lisbonRanges = new() { Name = "°C", DataPoints = new() {
+        ChartDataPoint.Range("Jan", 8, 15), ChartDataPoint.Range("Mar", 10, 18), ChartDataPoint.Range("May", 14, 23),
+        ChartDataPoint.Range("Jul", 18, 29), ChartDataPoint.Range("Sep", 17, 27), ChartDataPoint.Range("Nov", 11, 18) } };
+    // HighLow draws Value2 (high) to Value3 (low) of a Financial point; open and close are not drawn
+    ChartSeries _kyotoWeek = new() { Name = "°C", DataPoints = new() {
+        ChartDataPoint.Financial("Mon", 19, 24, 16, 20), ChartDataPoint.Financial("Tue", 20, 26, 17, 22), ChartDataPoint.Financial("Wed", 21, 27, 18, 23),
+        ChartDataPoint.Financial("Thu", 20, 25, 17, 21), ChartDataPoint.Financial("Fri", 18, 23, 15, 19), ChartDataPoint.Financial("Sat", 17, 22, 14, 18),
+        ChartDataPoint.Financial("Sun", 18, 24, 15, 20) } };
+    ChartSeries _roomPyramid = new() { Name = "Stays", DataPoints = new() { new("Standard", 520), new("Superior", 280), new("Deluxe", 140), new("Suite", 60) } };
+    // DotPlot scales its axis from the data and labels the ticks as whole numbers, so integer data reads best
+    ChartSeries _complaints = new() { Name = "Complaints", DataPoints = new() {
+        new("Harbour", 2), new("Hilltop", 5), new("Old Town", 7), new("Beach", 1), new("Airport", 9) } };
 
     // a bakery's week: Grouped compares the two lines per day, Stacked adds them (Saturday totals 680), StackedBar100 shows the mix
     List<ChartSeries> _groupedBarSeries = new()
@@ -434,6 +502,14 @@
                     <ChartControl Type=""ChartType.StackedBar100"" Title=""Share of loaves and pastries, by day"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 100 })"" Series=""@_groupedBarSeries"" />
                 </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""1"" SizeY=""1"">
+                    <ChartControl Type=""ChartType.ComboBarLine"" Title=""Rooms sold and average rate in $, by month; the rate is drawn as a line too"" Height=""226px""
+                                  Series=""@_comboSeries"" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row=""2"" Column=""1"" SizeX=""1"" SizeY=""1"">
+                    <ChartControl Type=""ChartType.RangeBar"" Title=""Transfer time from the airport, minutes, by hotel"" Height=""226px""
+                                  Series=""@(new List<ChartSeries> { _transferRanges })"" />
+                </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
     </TabItem>
@@ -460,6 +536,22 @@
                     <ChartControl Type=""ChartType.StackedArea"" Title=""Stacked Area"" Height=""226px""
                                   Series=""@_lineSeries"" />
                 </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""1"" SizeY=""1"">
+                    <ChartControl Type=""ChartType.StepLine"" Title=""Pool heater setting through the day, °C"" Height=""226px""
+                                  YAxis=""@(new ChartAxis { Min = 20, Max = 32 })"" Series=""@(new List<ChartSeries> { _heaterSeries })"" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row=""2"" Column=""1"" SizeX=""1"" SizeY=""1"">
+                    <ChartControl Type=""ChartType.MultiLine"" Title=""Bookings per week, three desks"" Height=""226px""
+                                  Series=""@_deskSeries"" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row=""3"" Column=""0"" SizeX=""1"" SizeY=""1"">
+                    <ChartControl Type=""ChartType.RangeArea"" Title=""Lisbon temperature band, °C, by month"" Height=""226px""
+                                  Series=""@(new List<ChartSeries> { _lisbonRanges })"" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row=""3"" Column=""1"" SizeX=""1"" SizeY=""1"">
+                    <ChartControl Type=""ChartType.HighLow"" Title=""Daily high and low, one week in Kyoto, °C"" Height=""226px""
+                                  Series=""@(new List<ChartSeries> { _kyotoWeek })"" />
+                </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
     </TabItem>
@@ -481,6 +573,10 @@
                     <ChartControl Type=""ChartType.Funnel"" Title=""Sales funnel, 1,000 visits to 180 won"" Height=""350px""
                                   Series=""@(new List<ChartSeries> { _funnelSeries })"" />
                 </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""2"" SizeY=""1"">
+                    <ChartControl Type=""ChartType.Pyramid"" Title=""Room categories booked, 1,000 stays"" Height=""350px""
+                                  Series=""@(new List<ChartSeries> { _roomPyramid })"" />
+                </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
     </TabItem>
@@ -496,6 +592,10 @@
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""1"" SizeY=""1"">
                     <ChartControl Type=""ChartType.BoxPlot"" Title=""Exam scores by subject, one class"" Height=""400px""
                                   YAxis=""@(new ChartAxis { Max = 100 })"" Series=""@_boxPlotSeries"" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""1"" SizeY=""1"">
+                    <ChartControl Type=""ChartType.DotPlot"" Title=""Complaints per 100 stays, by hotel"" Height=""400px""
+                                  Series=""@(new List<ChartSeries> { _complaints })"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
@@ -541,6 +641,9 @@
                 <DashboardLayoutPanel Row=""0"" Column=""2"" SizeX=""1"" SizeY=""2"">
                     <ChartControl Type=""ChartType.KpiCard"" Title=""Overdue""
                                   KpiValue=""3.1%"" KpiLabel=""Loans overdue"" KpiTrend=""-0.4%"" Height=""180px"" />
+                </DashboardLayoutPanel>
+                <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""1"" SizeY=""2"">
+                    <ChartControl Type=""ChartType.ArcGauge"" Title=""Occupancy this week, %"" GaugeValue=""78"" GaugeMin=""0"" GaugeMax=""100"" Height=""180px"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
@@ -599,6 +702,37 @@ protected override void OnParametersSet()
     if (i >= 0) _tab = i;
 }
 
+
+// Combo: the first series draws as bars, the second as a line
+List<ChartSeries> _comboSeries = new()
+{
+    new() { Name = ""Rooms sold"", DataPoints = new() { new(""Jan"", 310), new(""Feb"", 290), new(""Mar"", 350), new(""Apr"", 420), new(""May"", 480), new(""Jun"", 560) } },
+    new() { Name = ""Average rate"", DataPoints = new() { new(""Jan"", 95), new(""Feb"", 92), new(""Mar"", 110), new(""Apr"", 128), new(""May"", 140), new(""Jun"", 165) } }
+};
+// Range points carry the minimum in Value and the maximum in Value2 (ChartDataPoint.Range)
+ChartSeries _transferRanges = new() { Name = ""Minutes"", DataPoints = new() {
+    ChartDataPoint.Range(""Harbour"", 15, 25), ChartDataPoint.Range(""Hilltop"", 30, 55), ChartDataPoint.Range(""Old Town"", 20, 40),
+    ChartDataPoint.Range(""Beach"", 45, 70), ChartDataPoint.Range(""Airport"", 5, 10) } };
+ChartSeries _heaterSeries = new() { Name = ""Setting"", DataPoints = new() {
+    new(""06:00"", 24), new(""08:00"", 26), new(""10:00"", 28), new(""12:00"", 29), new(""14:00"", 29), new(""16:00"", 28), new(""18:00"", 27), new(""20:00"", 25), new(""22:00"", 23) } };
+List<ChartSeries> _deskSeries = new()
+{
+    new() { Name = ""Boston"", DataPoints = new() { new(""W1"", 42), new(""W2"", 48), new(""W3"", 51), new(""W4"", 47), new(""W5"", 58), new(""W6"", 63) } },
+    new() { Name = ""Lisbon"", DataPoints = new() { new(""W1"", 30), new(""W2"", 34), new(""W3"", 39), new(""W4"", 45), new(""W5"", 44), new(""W6"", 52) } },
+    new() { Name = ""Kyoto"", DataPoints = new() { new(""W1"", 18), new(""W2"", 22), new(""W3"", 25), new(""W4"", 31), new(""W5"", 36), new(""W6"", 35) } }
+};
+ChartSeries _lisbonRanges = new() { Name = ""°C"", DataPoints = new() {
+    ChartDataPoint.Range(""Jan"", 8, 15), ChartDataPoint.Range(""Mar"", 10, 18), ChartDataPoint.Range(""May"", 14, 23),
+    ChartDataPoint.Range(""Jul"", 18, 29), ChartDataPoint.Range(""Sep"", 17, 27), ChartDataPoint.Range(""Nov"", 11, 18) } };
+// HighLow draws Value2 (high) to Value3 (low) of a Financial point; open and close are not drawn
+ChartSeries _kyotoWeek = new() { Name = ""°C"", DataPoints = new() {
+    ChartDataPoint.Financial(""Mon"", 19, 24, 16, 20), ChartDataPoint.Financial(""Tue"", 20, 26, 17, 22), ChartDataPoint.Financial(""Wed"", 21, 27, 18, 23),
+    ChartDataPoint.Financial(""Thu"", 20, 25, 17, 21), ChartDataPoint.Financial(""Fri"", 18, 23, 15, 19), ChartDataPoint.Financial(""Sat"", 17, 22, 14, 18),
+    ChartDataPoint.Financial(""Sun"", 18, 24, 15, 20) } };
+ChartSeries _roomPyramid = new() { Name = ""Stays"", DataPoints = new() { new(""Standard"", 520), new(""Superior"", 280), new(""Deluxe"", 140), new(""Suite"", 60) } };
+// DotPlot scales its axis from the data and labels the ticks as whole numbers, so integer data reads best
+ChartSeries _complaints = new() { Name = ""Complaints"", DataPoints = new() {
+    new(""Harbour"", 2), new(""Hilltop"", 5), new(""Old Town"", 7), new(""Beach"", 1), new(""Airport"", 9) } };
 
 // a bakery's week: Grouped compares the two lines per day, Stacked adds them (Saturday totals 680), StackedBar100 shows the mix
 List<ChartSeries> _groupedBarSeries = new()

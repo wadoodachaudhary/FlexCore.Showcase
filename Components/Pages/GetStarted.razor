@@ -19,6 +19,10 @@
         <pre><code>&lt;ProjectReference Include="..\path\to\FlexCore\FlexCore.csproj" /&gt;</code></pre>
 
         <p>Source: <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank">github.com/wadoodachaudhary/FlexCore</a></p>
+        <p>
+            Icons: the report writer's toolbar uses Bootstrap Icons class names, and the examples on this site pass <code>bi-*</code> classes to
+            <code>IconCss</code>; link the Bootstrap Icons stylesheet in <code>App.razor</code> if you use either.
+        </p>
     </section>
 
     <section>
@@ -46,7 +50,8 @@
             <code>Fx.ControlKit</code> holds the buttons, inputs, pickers, cards and tree view; <code>.Grid</code> the data grid, tree grid,
             pivot table and drop-down grid. Others: <code>Fx.ControlKit.Maps</code>, <code>.Scheduling</code>, <code>.Gantt</code>, <code>.Diagram</code>, <code>.Editor</code>,
             <code>.Data</code>, <code>.Docking</code>, <code>.Reports</code> and <code>.AI</code>; <code>Fx.ControlKit.Pdf</code> comes with the
-            FlexCore.Documents package. Every Razor tab on this site starts with the <code>&#64;using</code> lines its example needs.
+            FlexCore.Documents package, which is not on NuGet yet: reference <code>FlexCore.Documents/FlexCore.Documents.csproj</code> from the
+            repository. Every Razor tab on this site starts with the <code>&#64;using</code> lines its example needs.
         </p>
     </section>
 

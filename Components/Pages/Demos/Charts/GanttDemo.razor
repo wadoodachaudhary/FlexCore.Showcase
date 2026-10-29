@@ -40,9 +40,13 @@
 
     <Examples>
         <DemoExample Id="schedule" Title="Project schedule" RazorCode="@Code.Schedule" CSharpCode="@Code.ScheduleCs">
-            <Description><p>Nine tasks in two phases with dependencies between them. Add opens the dialog for a new task; select a row and Edit or Delete act on it, as does a double-click on the row. Drag a bar to move its task, drag either end to change its length, or put the focus on an end handle and press the arrow keys. A change that breaks a rule (an end before its start, a task starting before a predecessor finishes, a delete while other tasks still point at the task) is refused with a message under the toolbar. The line under the chart is built from the list <code>TasksChanged</code> delivers. The chart opens in the Month view, 8 px a day, so the whole plan is in sight without scrolling; the timescale dropdown switches to the wider views.</p></Description>
+            <Description><p>Nine tasks in two phases with dependencies between them. Add opens the dialog for a new task; select a row and Edit or Delete act on it, as does a double-click on the row. Drag a bar to move its task, drag either end to change its length, or put the focus on an end handle and press the arrow keys. A change that breaks a rule (an end before its start, a task starting before a predecessor finishes, a delete while other tasks still point at the task) is refused with a message under the toolbar. The line under the chart is built from the list <code>TasksChanged</code> delivers. The chart opens in the Month view, 8 px a day, so the whole plan is in sight without scrolling; the timescale dropdown switches to the wider views. <em>Drag bars</em> off removes the end handles and ignores drags (the dialog still edits); <em>Enforce dependencies</em> off lets a task start before its predecessor ends.</p></Description>
+            <Controls>
+                <ToggleButtonControl Selected="@_drag" SelectedChanged="v => _drag = v">Drag bars</ToggleButtonControl>
+                <ToggleButtonControl Selected="@_enforce" SelectedChanged="v => _enforce = v">Enforce dependencies</ToggleButtonControl>
+            </Controls>
             <Demo>
-                <GanttControl Tasks="@_tasks" TasksChanged="t => _tasks = t" View="GanttView.Month" Height="380px" />
+                <GanttControl Tasks="@_tasks" TasksChanged="t => _tasks = t" AllowTaskDrag="@_drag" EnforceDependencies="@_enforce" View="GanttView.Month" Height="380px" />
                 <p class="result">@Summary</p>
             </Demo>
         </DemoExample>
@@ -142,6 +146,7 @@
 
 @code {
     private IReadOnlyList<GanttTask> _tasks = Plan();
+    private bool _drag = true, _enforce = true;
     private string Summary => _tasks.Count == 0
         ? "No tasks."
         : $"{_tasks.Count} tasks, {_tasks.Min(t => t.Start):d} to {_tasks.Max(t => t.End):d}; {_tasks.Count(t => t.Progress == 100)} complete.";
@@ -179,9 +184,10 @@
     // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
     private static class Code
     {
-        public const string Schedule = @"<GanttControl Tasks=""@_tasks"" TasksChanged=""t => _tasks = t"" View=""GanttView.Month"" Height=""380px"" />
+        public const string Schedule = @"<GanttControl Tasks=""@_tasks"" TasksChanged=""t => _tasks = t"" AllowTaskDrag=""@_drag"" EnforceDependencies=""@_enforce"" View=""GanttView.Month"" Height=""380px"" />
 <p class=""result"">@Summary</p>";
         public const string ScheduleCs = @"private IReadOnlyList<GanttTask> _tasks = Plan();
+private bool _drag = true, _enforce = true;
 
 private string Summary => _tasks.Count == 0
     ? ""No tasks.""

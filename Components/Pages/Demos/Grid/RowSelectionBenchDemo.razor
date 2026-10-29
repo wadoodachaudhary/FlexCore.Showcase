@@ -72,12 +72,12 @@
                         <GridColumn Field="@nameof(SRow.Qty)" HeaderText="Qty" Width="85px" Type="ColumnType.Number" TextAlign="TextAlign.Right" SelectAllOnEdit="true" />
                         <GridColumn Field="@nameof(SRow.UnitCost)" HeaderText="Unit Cost" Width="95px" Type="ColumnType.Number" Format="N2" TextAlign="TextAlign.Right" SelectAllOnEdit="true" />
                         <GridColumn Field="@nameof(SRow.Active)" HeaderText="Active" Width="75px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
-                        <GridColumn Field="@nameof(SRow.C07)" HeaderText="C07 Spec" Width="100px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(SRow.C08)" HeaderText="C08 Code" Width="100px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(SRow.C09)" HeaderText="C09 Phase" Width="100px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(SRow.C10)" HeaderText="C10 Lot" Width="100px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(SRow.C11)" HeaderText="C11 Zone" Width="100px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(SRow.C12)" HeaderText="C12 Bin" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Season)" HeaderText="Season" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Currency)" HeaderText="Currency" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Board)" HeaderText="Board" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Desk)" HeaderText="Desk" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Supplier)" HeaderText="Supplier" Width="120px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Ref)" HeaderText="Booking ref" Width="100px" AllowEditing="false" />
                     </GridColumnsBase>
                 </GridControl>
                 <p class="result">@Summary</p>
@@ -122,12 +122,12 @@
         public decimal Qty { get; set; }
         public decimal UnitCost { get; set; }
         public bool Active { get; set; }
-        public string C07 { get; set; } = "Spec-07";
-        public string C08 { get; set; } = "CD-08";
-        public string C09 { get; set; } = "PH-09";
-        public string C10 { get; set; } = "LOT-10";
-        public string C11 { get; set; } = "ZN-11";
-        public string C12 { get; set; } = "BIN-12";
+        public string Season { get; set; } = "";
+        public string Currency { get; set; } = "";
+        public string Board { get; set; } = "";
+        public string Desk { get; set; } = "";
+        public string Supplier { get; set; } = "";
+        public string Ref { get; set; } = "";
     }
 
     private readonly SelectionItem[] _rowCountItems = { new("1000", "1,000"), new("5000", "5,000"), new("20000", "20,000"), new("50000", "50,000"), new("100000", "100,000") };
@@ -173,6 +173,10 @@
     {
         var sw = Stopwatch.StartNew();
         var categories = new[] { "Flights", "Hotels", "Transfers", "Excursions", "Cruises", "Rail", "Insurance", "Car hire" };
+        var seasons = new[] { "Summer", "Autumn", "Winter", "Spring" };
+        var currencies = new[] { "EUR", "USD", "GBP" };
+        var boards = new[] { "Room only", "Bed and breakfast", "Half board", "All inclusive" };
+        var desks = new[] { "Boston", "Lisbon", "Kyoto", "Cape Town", "Manila" };
         var rand = new Random(77);
         var list = new List<SRow>(_rowCount);
         for (var i = 1; i <= _rowCount; i++)
@@ -182,6 +186,7 @@
             {
                 Item = $"ITM-{i:D6}", Description = $"{cat} rate line #{i}", Category = cat,
                 Qty = rand.Next(1, 100), UnitCost = Math.Round((decimal)(rand.NextDouble() * 180 + 12), 2), Active = i % 5 != 0,
+                Season = seasons[i % 4], Currency = currencies[i % 3], Board = boards[i % 4], Desk = desks[i % 5], Supplier = $"Supplier {i % 97 + 1:D2}", Ref = $"RSG-{i:D6}",
             });
         }
         _rows = list;
@@ -281,12 +286,12 @@
         <GridColumn Field=""@nameof(SRow.Qty)"" HeaderText=""Qty"" Width=""85px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" SelectAllOnEdit=""true"" />
         <GridColumn Field=""@nameof(SRow.UnitCost)"" HeaderText=""Unit Cost"" Width=""95px"" Type=""ColumnType.Number"" Format=""N2"" TextAlign=""TextAlign.Right"" SelectAllOnEdit=""true"" />
         <GridColumn Field=""@nameof(SRow.Active)"" HeaderText=""Active"" Width=""75px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" />
-        <GridColumn Field=""@nameof(SRow.C07)"" HeaderText=""C07 Spec"" Width=""100px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(SRow.C08)"" HeaderText=""C08 Code"" Width=""100px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(SRow.C09)"" HeaderText=""C09 Phase"" Width=""100px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(SRow.C10)"" HeaderText=""C10 Lot"" Width=""100px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(SRow.C11)"" HeaderText=""C11 Zone"" Width=""100px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(SRow.C12)"" HeaderText=""C12 Bin"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Season)"" HeaderText=""Season"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Currency)"" HeaderText=""Currency"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Board)"" HeaderText=""Board"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Desk)"" HeaderText=""Desk"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Supplier)"" HeaderText=""Supplier"" Width=""120px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Ref)"" HeaderText=""Booking ref"" Width=""100px"" AllowEditing=""false"" />
     </GridColumnsBase>
 </GridControl>
 <p class=""result"">@Summary</p>";
@@ -298,12 +303,12 @@
     public decimal Qty { get; set; }
     public decimal UnitCost { get; set; }
     public bool Active { get; set; }
-    public string C07 { get; set; } = ""Spec-07"";
-    public string C08 { get; set; } = ""CD-08"";
-    public string C09 { get; set; } = ""PH-09"";
-    public string C10 { get; set; } = ""LOT-10"";
-    public string C11 { get; set; } = ""ZN-11"";
-    public string C12 { get; set; } = ""BIN-12"";
+    public string Season { get; set; } = """";
+    public string Currency { get; set; } = """";
+    public string Board { get; set; } = """";
+    public string Desk { get; set; } = """";
+    public string Supplier { get; set; } = """";
+    public string Ref { get; set; } = """";
 }
 
 private readonly SelectionItem[] _rowCountItems = { new(""1000"", ""1,000""), new(""5000"", ""5,000""), new(""20000"", ""20,000""), new(""50000"", ""50,000""), new(""100000"", ""100,000"") };
@@ -361,6 +366,10 @@ private void Rebuild()
 {
     var sw = Stopwatch.StartNew();
     var categories = new[] { ""Flights"", ""Hotels"", ""Transfers"", ""Excursions"", ""Cruises"", ""Rail"", ""Insurance"", ""Car hire"" };
+    var seasons = new[] { ""Summer"", ""Autumn"", ""Winter"", ""Spring"" };
+    var currencies = new[] { ""EUR"", ""USD"", ""GBP"" };
+    var boards = new[] { ""Room only"", ""Bed and breakfast"", ""Half board"", ""All inclusive"" };
+    var desks = new[] { ""Boston"", ""Lisbon"", ""Kyoto"", ""Cape Town"", ""Manila"" };
     var rand = new Random(77);
     var list = new List<SRow>(_rowCount);
     for (var i = 1; i <= _rowCount; i++)
@@ -370,6 +379,7 @@ private void Rebuild()
         {
             Item = $""ITM-{i:D6}"", Description = $""{cat} rate line #{i}"", Category = cat,
             Qty = rand.Next(1, 100), UnitCost = Math.Round((decimal)(rand.NextDouble() * 180 + 12), 2), Active = i % 5 != 0,
+            Season = seasons[i % 4], Currency = currencies[i % 3], Board = boards[i % 4], Desk = desks[i % 5], Supplier = $""Supplier {i % 97 + 1:D2}"", Ref = $""RSG-{i:D6}"",
         });
     }
     _rows = list;

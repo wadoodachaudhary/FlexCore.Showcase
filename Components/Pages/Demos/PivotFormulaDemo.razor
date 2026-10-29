@@ -53,11 +53,13 @@
         </DemoExample>
 
         <DemoExample Id="grouped" Title="Grouped rows, subtotals and two measures" RazorCode="@Code.Grouped" CSharpCode="@Code.GroupedCs">
-            <Description><p>The same airports as full <code>Airport</code> records; with no builder, the page decides which fields are pivoted. Two row fields: Continent spans its countries and a "<em>continent</em> Total" row closes each group. Two measures: Airports (a <code>Count</code>) and Longest runway (a <code>Max</code>) sit side by side under each airport type and under Total, each with its own format and label. The table opens sorted by the Airports total, largest first, so each continent lists its countries by airport count; rows stay inside their continent when sorted by a value. Click a header to sort by that column (ascending, then descending, then off); Shift-click adds a key. The buttons set <code>SortDescriptors</code> from the page with the generated names of the Total columns, and the line below shows the keys the control reports through <code>SortDescriptorsChanged</code>, whichever side changed them.</p></Description>
+            <Description><p>The same airports as full <code>Airport</code> records; with no builder, the page decides which fields are pivoted. Two row fields: Continent spans its countries and a "<em>continent</em> Total" row closes each group. Two measures: Airports (a <code>Count</code>) and Longest runway (a <code>Max</code>) sit side by side under each airport type and under Total, each with its own format and label. The table opens sorted by the Airports total, largest first, so each continent lists its countries by airport count; rows stay inside their continent when sorted by a value. Click a header to sort by that column (ascending, then descending, then off); Shift-click adds a key. The buttons set <code>SortDescriptors</code> from the page with the generated names of the Total columns, and the line below shows the keys the control reports through <code>SortDescriptorsChanged</code>, whichever side changed them. <em>Grand totals</em> and <em>Subtotals</em> switch the Total column and the continent Total rows off and on.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [MostAirports])">Most airports first</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [LongestRunway])">Longest runway first</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [])">Clear sort</ButtonControl>
+                <ToggleButtonControl Selected="@_grand" SelectedChanged="v => _grand = v">Grand totals</ToggleButtonControl>
+                <ToggleButtonControl Selected="@_sub" SelectedChanged="v => _sub = v">Subtotals</ToggleButtonControl>
             </Controls>
             <Demo>
                 <PivotControl TValue="Airport"
@@ -67,6 +69,8 @@
                               ValueFields="@_measures"
                               SortDescriptors="@_sorts"
                               SortDescriptorsChanged="s => _sorts = s"
+                              ShowGrandTotals="@_grand"
+                              ShowSubTotals="@_sub"
                               Height="480px" />
                 <p class="result">Sort: @SortText</p>
             </Demo>
@@ -178,6 +182,7 @@
         new() { Field = "LongestRunwayFt", Aggregation = AggregateType.Max, Format = "N0", Label = "Longest runway (ft)" }
     ];
     // A Total column's field name is "__Total_" + the measure's Field + "_" + its Aggregation.
+    private bool _grand = true, _sub = true;
     private static readonly PivotSortDescriptor MostAirports = new("__Total_Code_Count", SortDirection.Descending);
     private static readonly PivotSortDescriptor LongestRunway = new("__Total_LongestRunwayFt_Max", SortDirection.Descending);
     private IReadOnlyList<PivotSortDescriptor> _sorts = [MostAirports];
@@ -242,9 +247,12 @@ private sealed record AirportFacts(string Continent, string Type, string Runway,
               ValueFields=""@_measures""
               SortDescriptors=""@_sorts""
               SortDescriptorsChanged=""s => _sorts = s""
+              ShowGrandTotals=""@_grand""
+              ShowSubTotals=""@_sub""
               Height=""480px"" />
 <p class=""result"">Sort: @SortText</p>";
-        public const string GroupedCs = @"private readonly string[] _byType = [""Type""];
+        public const string GroupedCs = @"private bool _grand = true, _sub = true;
+private readonly string[] _byType = [""Type""];
 
 // Grouped: Continent and Country on the full Airport records.
 private readonly string[] _byContinentAndCountry = [""Continent"", ""Country""];

@@ -2,13 +2,14 @@
 @using FlexCore.Showcase.Components.Shared
 
 @* 2026-10-12: new page on FeatureDemoLayout; two examples (toggle button, button group) per the 1–2 examples rule. Facts checked against ToggleButtonControl.razor,
-   ButtonGroupControl.razor, their stylesheets, FlexControlBase.cs and ContentModels.cs (FlexCore 0.2.48). *@
+   ButtonGroupControl.razor, their stylesheets, FlexControlBase.cs and ContentModels.cs (FlexCore 0.2.48).
+   2026-10-29: third example, SegmentedControl (SegmentedControl.razor, 0.2.49): a RadioGroupControl drawn as one bar; it was documented only. *@
 
 <PageTitle>Blazor Toggle Button and Button Group — FlexCore</PageTitle>
 
-<FeatureDemoLayout Title="Toggle buttons" Category="Components" ControlName="ToggleButtonControl · ButtonGroupControl"
-                   Tagline="A button that stays pressed, and a group that picks one value or many."
-                   SourcePath="ToggleButtonControl.razor; ButtonGroupControl.razor">
+<FeatureDemoLayout Title="Toggle buttons" Category="Components" ControlName="ToggleButtonControl · ButtonGroupControl · SegmentedControl"
+                   Tagline="A button that stays pressed, a group that picks one value or many, and a segmented bar for one choice."
+                   SourcePath="ToggleButtonControl.razor; ButtonGroupControl.razor; SegmentedControl.razor">
     <Overview>
         <p>
             <code>ToggleButtonControl</code> is a <a href="demo/buttons">ButtonControl</a> with a pressed state: <code>Selected</code> binds
@@ -16,6 +17,7 @@
             list of <code>SelectionItem</code>s and keeps the selection for you: one value or many, horizontal or vertical, with Arrow,
             Home and End moving focus between them.
         </p>
+        <p>This site sets <code>--fx-accent</code> and the <code>--fx-btn-*</code> variables to its own indigo, so the examples show that look; the tables list the library's defaults.</p>
     </Overview>
 
     <Examples>
@@ -49,6 +51,15 @@
                 </div>
             </Demo>
         </DemoExample>
+        <DemoExample Id="segmented" Title="Segmented control" RazorCode="@Code.Segmented" CSharpCode="@Code.SegmentedCs">
+            <Description><p><code>SegmentedControl</code> is a <code>RadioGroupControl</code> drawn as one bar: a list of <code>SelectionItem</code>s, one <code>Value</code> bound two ways, <code>Orientation</code> to stack it. As in any radio group, one segment holds the Tab stop and the arrow keys move the choice.</p></Description>
+            <Demo>
+                <div class="stack">
+                    <SegmentedControl Items="_viewItems" @bind-Value="_calendarView" AriaLabel="Calendar view" />
+                    <span class="result">@_calendarView</span>
+                </div>
+            </Demo>
+        </DemoExample>
     </Examples>
 
     <Vocabulary>
@@ -58,6 +69,9 @@
             </DocSection>
             <DocSection Id="doc-buttongroupcontrol-parameters" Title="ButtonGroupControl parameters" Count='@DocSection.Label(Vocab.Group.Length, "parameters")'>
                 <ApiTable Kind="ApiKind.Parameters" Title="ButtonGroupControl parameters" Rows="Vocab.Group" />
+            </DocSection>
+            <DocSection Id="doc-segmentedcontrol-parameters" Title="SegmentedControl parameters" Count='@DocSection.Label(Vocab.Segmented.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="SegmentedControl parameters" Rows="Vocab.Segmented" />
             </DocSection>
             <DocSection Id="doc-selectionitem" Title="SelectionItem" Count='@DocSection.Label(Vocab.Item.Length, "properties")'>
                 <ApiTable Kind="ApiKind.Properties" Title="SelectionItem" Rows="Vocab.Item" />
@@ -113,6 +127,10 @@
     };
     private IReadOnlyList<string> _days = new[] { "mon", "tue", "wed", "thu", "fri" };
 
+    // Segmented
+    private readonly SelectionItem[] _viewItems = { new("day", "Day"), new("week", "Week"), new("month", "Month") };
+    private string _calendarView = "week";
+
     // Vocabulary rows, one per public member (0.2.48). Base-class parameters marked (base).
     private static class Vocab
     {
@@ -140,6 +158,15 @@
             new("Enabled (base)", "false disables every button.", "bool", "true"),
             new("Visible (base)", "false renders nothing.", "bool", "true"),
             new("CssClass / Style (base)", "On the group element.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Segmented =
+        {
+            new("Items", "The segments: <code>Value</code>, <code>Text</code> and <code>Disabled</code> are used; <code>IconCss</code> is not drawn.", "IReadOnlyList&lt;SelectionItem&gt;", "empty"),
+            new("Value", "Value of the chosen segment. Two-way with <code>@bind-Value</code>.", "string", "\"\""),
+            new("ValueChanged", "Fires when a segment is chosen.", "EventCallback&lt;string&gt;"),
+            new("Orientation", "<code>Vertical</code> stacks the segments.", "FlexOrientation", "Horizontal"),
+            new("AriaLabel", "Accessible name of the radio group.", "string", "\"Segments\""),
+            new("Enabled / CssClass / Style (base)", "<code>Enabled</code> false disables every segment; the class and inline style land on the <code>fx-segmented</code> wrapper.", "", ""),
         };
         public static readonly ApiRow[] Item =
         {
@@ -194,6 +221,13 @@ private string FormatState => string.Join("" "", new[] { (_bold, ""B""), (_itali
         <span class=""result"">@(_days.Count == 0 ? ""none"" : string.Join("", "", _days))</span>
     </div>
 </div>";
+        public const string Segmented = @"<div class=""stack"">
+    <SegmentedControl Items=""_viewItems"" @bind-Value=""_calendarView"" AriaLabel=""Calendar view"" />
+    <span class=""result"">@_calendarView</span>
+</div>";
+        public const string SegmentedCs = @"// Segmented
+private readonly SelectionItem[] _viewItems = { new(""day"", ""Day""), new(""week"", ""Week""), new(""month"", ""Month"") };
+private string _calendarView = ""week"";";
         public const string GroupCs = @"// Group
 private readonly SelectionItem[] _alignItems =
 {
