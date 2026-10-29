@@ -3,13 +3,8 @@
 @inject NotificationService Notifications
 @inject IReportDataExecutor ReportData
 
-@* 2026-10-23 (developer meeting point 5, chart label clutter): the Inventory Allocation pie has four slices instead of five so its
-   legend, an HTML flex row of 12 px entries about 100 px wide with 12 px gaps, stays on one line in the 575 px column at 1280 px
-   ("Finishes (8%)" wrapped to a second row); the shares are rebalanced to 40/25/20/15. The pie draws no slice labels, so the
-   share stays in the legend text. The "charts" string in the code tab below is kept by hand and still matches the markup.
-   2026-10-28 (Baaria): the hero tabs are named in the travel agency's voice (Razor Sharp Trip Requests, Sales at Cruising Altitude,
-   The Front Desk, Invoices) and the window title is the agency's name; the tab icons still say grid, chart, ribbon, report. The charts now show bookings and trip
-   types instead of construction figures, so that pie is Trips by Type with the same four-slice, 40/25/20/15 legend. *@
+@* 2026-10-28 (Baaria): the agency's pages are named in its own voice (Razor Sharp Trip Requests) and the window title is the
+   agency's name. 2026-10-29 (Baaria): the Sales (charts) and Front Desk (ribbon) pages were removed; the Dashboard carries a chart. *@
 
 @* 2026-10-25 (Baaria, SC-344): the hero grid is a travel agency's quote desk, Inbox — Trip Requests. It replaced an example whose
    banner text, columns and names came from an earlier custom-quote inbox. Same grid features as before (1,000 windowed rows, frozen
@@ -58,7 +53,7 @@
 
     @* 2. The app window (2026-10-29, Baaria, after the app demo on blazor.radzen.com): Razor Sharp Getaways as a working app, a
        sidebar of pages, a top bar with the new-request bell and a profile menu, and a + button. The four former tabs are four of
-       its pages; Dashboard and Bookings are their own components (Shared/GetawaysDashboard.razor, GetawaysBookings.razor). Every
+       its pages; Dashboard and Itinerary are their own components (Shared/GetawaysDashboard.razor, GetawaysBookings.razor). Every
        page works; only Settings, Help and the profile menu's items answer with a "not in this demo" note. *@
     <section id="live-showcase" class="showcase-section">
         <div class="showcase-shell">
@@ -481,51 +476,6 @@
                         </div>
                     }
                 }
-                else if (_activeTab == "charts")
-                {
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-                        <div>
-                            <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #0f172a;">Bookings vs. target, by quarter</h4>
-                            <ChartControl Type="ChartType.Bar" Title="Bookings vs. Target" Height="280px" Series="@_quarterlySeries" />
-                        </div>
-                        <div>
-                            <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #0f172a;">Where the trips go</h4>
-                            <ChartControl Type="ChartType.Pie" Title="Trips by Type" Height="280px" Series="@_pieSeries" />
-                        </div>
-                    </div>
-                }
-                else if (_activeTab == "ribbon")
-                {
-                    <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
-                        <RibbonControl>
-                            <RibbonTab Title="Home">
-                                <RibbonGroup Title="Clipboard">
-                                    <RibbonButton Text="Paste" Icon="bi-clipboard" OnClick="@OnPaste" />
-                                    <RibbonButton Text="Copy" Icon="bi-files" OnClick="@OnCopy" />
-                                </RibbonGroup>
-                                <RibbonGroup Title="Actions">
-                                    <RibbonButton Text="New Order" Icon="bi-plus-circle" OnClick="@OnNewOrder" />
-                                    <RibbonButton Text="Save Batch" Icon="bi-save" OnClick="@OnSaveBatch" />
-                                </RibbonGroup>
-                                <RibbonGroup Title="Export">
-                                    <RibbonButton Text="Excel (XLSX)" Icon="bi-file-earmark-excel" OnClick="@OnExportRibbonExcel" />
-                                    <RibbonButton Text="Print PDF" Icon="bi-printer" OnClick="@OnPrintPdf" />
-                                </RibbonGroup>
-                            </RibbonTab>
-                            <RibbonTab Title="View &amp; Filter">
-                                <RibbonGroup Title="Display Options">
-                                    <RibbonButton Text="Toggle Grid" Icon="bi-table" OnClick="@OnToggleGrid" />
-                                    <RibbonButton Text="Freeze Headers" Icon="bi-pin-angle" OnClick="@OnFreezeHeaders" />
-                                </RibbonGroup>
-                            </RibbonTab>
-                        </RibbonControl>
-                        <div style="padding: 24px; background: #fafbfc; text-align: center; color: #64748b;">
-                            <p style="margin: 0; font-size: 14px;">
-                                💡 <strong>Interactive Ribbon:</strong> Click any of the ribbon buttons above to see live event handling and toast notifications!
-                            </p>
-                        </div>
-                    </div>
-                }
                 else if (_activeTab == "reports")
                 {
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px;">
@@ -641,7 +591,7 @@
                 </div>
                 <div class="workhorse-body">
                     <h3 class="workhorse-name"><span class="workhorse-tile indigo"><span class="bi bi-pie-chart-fill"></span></span> Charts</h3>
-                    <p class="workhorse-desc">40+ chart types drawn in SVG from C#, from sparklines and gauges to Sankey diagrams.</p>
+                    <p class="workhorse-desc">35+ chart types drawn in SVG from C#, from sparklines and gauges to Sankey diagrams.</p>
                     <ul class="workhorse-chips">
                         <li>Bar &amp; line</li><li>Pie &amp; donut</li><li>Gauges</li><li>Financial</li>
                     </ul>
@@ -710,7 +660,7 @@
        2026-10-29: Baaria dropped the fourth (first "0 npm packages", then "MIT licensed on NuGet"). *@
     <div class="stats-strip">
         <div class="stat"><span class="stat-num">130+</span><span class="stat-label">Blazor controls</span></div>
-        <div class="stat"><span class="stat-num">40+</span><span class="stat-label">chart types</span></div>
+        <div class="stat"><span class="stat-num">35+</span><span class="stat-label">chart types</span></div>
         <div class="stat"><span class="stat-num">100K</span><span class="stat-label">rows in one grid</span></div>
     </div>
     <section class="pillars-section brand-band">
@@ -958,9 +908,7 @@
     [
         new("dashboard", "Dashboard", "bi bi-speedometer2", "Dashboard"),
         new("grid", "Trip Requests", "bi bi-table", "Razor Sharp Trip Requests"),
-        new("bookings", "Bookings", "bi bi-calendar-heart", "Bookings Calendar"),
-        new("charts", "Sales", "bi bi-bar-chart-line", "Sales at Cruising Altitude"),
-        new("ribbon", "Front Desk", "bi bi-menu-button-wide", "The Front Desk"),
+        new("bookings", "Itinerary", "bi bi-calendar-heart", "Trip Itinerary"),
         new("reports", "Invoices", "bi bi-file-earmark-spreadsheet", "Invoices"),
     ];
     private readonly List<TabStripItem> _navItems = AppPages.Select(p => new TabStripItem(p.Nav, p.Icon)).ToList();
@@ -984,7 +932,7 @@
     ];
     private List<FabMenuItem> _fabItems = [];
 
-    /// <summary>App page named in the address, e.g. ?tab=ribbon (catalog row Office Ribbon); read on load, never written back.</summary>
+    /// <summary>App page named in the address, e.g. ?tab=bookings; read on load, never written back.</summary>
     [SupplyParameterFromQuery(Name = "tab")] public string? Tab { get; set; }
 
     protected override void OnParametersSet()
@@ -1002,7 +950,7 @@
 
     // The bits of the app this demo leaves out answer with a toast, as the menu items do on blazor.radzen.com
     private void NotInDemo(string what) =>
-        Notifications.Info($"{what} is not part of this demo", "The menu's pages, the grid, the charts and the + button all work.");
+        Notifications.Info($"{what} is not part of this demo", "The menu's pages, the grid, the chart and the + button all work.");
 
     private IEnumerable<TripRequest> NewestRequests => _requests.Where(r => r.Status == "New").OrderByDescending(r => r.DateRequested).Take(4);
 
@@ -1148,10 +1096,11 @@
         StateHasChanged();
     }
 
-    // New Request opens the same editor on a blank request; Save adds it to the top of the list
+    // New Request opens the same editor on a blank request; Save adds it to the top of the list. The agent is Pippa Larkspur, the
+    // one signed in to the app window (top bar), who handles her share of the other requests too.
     private void CreateNewRequest()
     {
-        var agent = Agents[0];
+        var agent = Agents.First(a => a.Name == "Pippa Larkspur");
         _originalRequestRef = null;
         _editingRequest = new TripRequest
         {
@@ -1294,42 +1243,68 @@
 
     private static List<TripRequest> GenerateRequests(int count)
     {
-        var destinations = new[]
-        {
-            "Lisbon", "Kyoto", "Reykjavik", "Cape Town", "Queenstown", "Marrakech",
-            "Vancouver", "Santorini", "Banff", "Hoi An", "Patagonia", "Amalfi Coast"
-        };
-
-        var tripTypes = new (string Code, string Name, int Low, int High, string ItineraryA, string ItineraryB)[]
+        // Each trip type goes only to places that offer it (2026-10-29, Baaria: no ski trips to Marrakech), and both itineraries of a
+        // type read true for every one of its places.
+        var tripTypes = new (string Code, string Name, int Low, int High, string ItineraryA, string ItineraryB, string[] Places)[]
         {
             ("BEACH", "Beach & island resorts", 1800, 5200,
                 "Seven nights in a sea-view room, two adults, late August",
-                "Overwater bungalow for five nights with a snorkelling day trip"),
+                "Five nights by the beach with a snorkelling day trip",
+                ["Santorini", "Amalfi Coast", "Cape Town", "Hoi An"]),
             ("CITY", "City breaks & culture", 600, 2400,
                 "Long weekend with museum passes and a guided food tour",
-                "Four nights near the old town with an opera ticket for two"),
+                "Four nights near the old town with a cooking class for two",
+                ["Lisbon", "Kyoto", "Marrakech", "Vancouver", "Reykjavik"]),
             ("SKI", "Ski & snowboard", 2200, 6800,
                 "Ski-in ski-out chalet for six, lessons for two beginners",
-                "Week of lift passes with a half-day guided off-piste tour"),
+                "Week of lift passes with a half-day guided off-piste tour",
+                ["Banff", "Queenstown", "Vancouver", "Patagonia"]),
             ("SAFARI", "Safari & wildlife", 5500, 14500,
-                "Four nights on safari with a hot-air balloon flight at dawn",
-                "Gorilla trekking permit for two with three nights at the lodge"),
+                "Four nights at a wildlife lodge with a guided dawn trek",
+                "Whale and bird watching by boat, three nights at the lodge",
+                ["Cape Town", "Patagonia", "Banff", "Reykjavik"]),
             ("CRUISE", "Ocean & river cruises", 2800, 9800,
-                "Ten-night river cruise, balcony cabin, all excursions included",
-                "Fjords cruise for two with a glacier hike and the drinks package"),
+                "Ten-night cruise, balcony cabin, all excursions included",
+                "Coastal cruise for two with the drinks package",
+                ["Santorini", "Amalfi Coast", "Lisbon", "Vancouver", "Reykjavik"]),
             ("RAIL", "Scenic rail journeys", 1500, 5400,
                 "First-class rail pass with two overnight sleeper legs",
-                "Mountain railway loop with three nights in alpine villages"),
+                "Scenic railway loop with three nights in small towns",
+                ["Kyoto", "Banff", "Vancouver", "Hoi An"]),
             ("FAMILY", "Family holidays", 2400, 7600,
-                "Half-term beach week with a kids' club and a family suite",
-                "Theme park passes for four with a connecting-rooms hotel"),
+                "Half-term week with a kids' club and a family suite",
+                "Theme park passes for four with a connecting-rooms hotel",
+                ["Lisbon", "Vancouver", "Queenstown", "Cape Town", "Kyoto"]),
             ("HONEYMOON", "Honeymoons & celebrations", 4200, 12800,
-                "Private villa with a sunset catamaran and a couples' spa day",
-                "Two islands in ten nights, seaplane transfer, champagne on arrival")
+                "Private villa with a sunset dinner and a couples' spa day",
+                "Ten nights in two boutique hotels, champagne on arrival",
+                ["Santorini", "Amalfi Coast", "Lisbon", "Hoi An", "Kyoto", "Marrakech"])
         };
 
-        var firstNames = new[] { "Clementine", "Barnaby", "Juniper", "Mortimer", "Petunia", "Thaddeus", "Winifred", "Archibald", "Lavender", "Ebenezer", "Delphine", "Rufus" };
-        var lastNames = new[] { "Thistlewood", "Marmalade", "Gooseberry", "Snodgrass", "Bumblesby", "Applebottom", "Featherstone", "Higglebottom", "Pennywhistle", "Wobblesworth", "Peppercorn", "Puddleby" };
+        // 200 first names from many places (2026-10-29, Baaria: more diversity); a first name may repeat, a surname may not
+        var firstNames = new[]
+        {
+            "Clementine", "Barnaby", "Juniper", "Mortimer", "Petunia", "Thaddeus", "Winifred", "Archibald", "Lavender", "Ebenezer",
+            "Delphine", "Rufus", "Octavia", "Bartholomew", "Cornelia", "Florian", "Hyacinth", "Ignatius", "Leopold", "Millicent",
+            "Rosamund", "Silas", "Tobias", "Ursula", "Wilhelmina", "Augustus", "Beatrix", "Cuthbert", "Dorothea", "Edmund",
+            "Felicity", "Gideon", "Henrietta", "Ottoline", "Quentin", "Seraphina", "Amara", "Kwame", "Zainab", "Chidi",
+            "Nia", "Tendai", "Folake", "Kofi", "Imani", "Sefu", "Adaeze", "Thabo", "Wanjiru", "Jabari",
+            "Ayodele", "Makena", "Oluwaseun", "Zuri", "Babajide", "Nkechi", "Priya", "Arjun", "Ananya", "Rohan",
+            "Kavya", "Vikram", "Meera", "Aarav", "Ishaan", "Lakshmi", "Farhan", "Nadia", "Sanjay", "Divya",
+            "Rahul", "Anjali", "Kiran", "Tara", "Dev", "Sunita", "Kenji", "Mei", "Hiroshi", "Yuna",
+            "Jiho", "Lian", "Takumi", "Sakura", "Wei", "Haruka", "Minjun", "Xiaoling", "Daichi", "Soo-ah",
+            "Ren", "Aiko", "Jun", "Hana", "Bao", "Yuki", "Linh", "Arief", "Siti", "Malia",
+            "Thanh", "Dewi", "Kalani", "Rizal", "Intan", "Narong", "Ploy", "Bayani", "Mateo", "Valentina",
+            "Santiago", "Camila", "Diego", "Lucía", "Joaquín", "Ximena", "Rafael", "Paloma", "Emilio", "Renata",
+            "Tomás", "Inés", "Alejandro", "Catalina", "Bruno", "Marisol", "Gonzalo", "Itzel", "Layla", "Omar",
+            "Yasmin", "Karim", "Leila", "Tariq", "Samira", "Rami", "Dalia", "Hassan", "Noor", "Faris",
+            "Amira", "Youssef", "Zara", "Idris", "Astrid", "Lars", "Ingrid", "Sven", "Freya", "Matteo",
+            "Giulia", "Luca", "Chiara", "Aurélie", "Étienne", "Margaux", "Henrik", "Saoirse", "Niamh", "Cormac",
+            "Siobhan", "Declan", "Anouk", "Joris", "Katarzyna", "Mikołaj", "Zofia", "Dmitri", "Anastasia", "Elif",
+            "Emre", "Selin", "Nikos", "Eleni", "Moana", "Tane", "Aroha", "Keoni", "Leilani", "Nalani",
+            "Wiremu", "Ahanu", "Kai", "Harper", "Jasper", "Willa", "Felix", "Hazel", "Theo", "Ivy",
+            "Rowan", "Maeve", "Otis", "Poppy", "Ezra", "Wren", "Arlo", "Iris", "Milo", "Esme"
+        };
         var statuses = new[] { "New", "New", "Quoted", "Booked", "Declined" };
         var notes = new[]
         {
@@ -1339,14 +1314,31 @@
 
         var rnd = new Random(42);
         var list = new List<TripRequest>(count);
+
+        // Every lead traveller has a surname no one else has (2026-10-29, Baaria): two requests under one surname would read as one
+        // family booking twice, and families travel together. 40 starts by 25 endings make 1,000 made-up surnames, dealt out in a
+        // shuffled order; none is an agent's surname.
+        var starts = new[]
+        {
+            "Thistle", "Goose", "Bumble", "Apple", "Feather", "Higgle", "Parsnip", "Wobble", "Pepper", "Puddle",
+            "Butter", "Crumble", "Dapple", "Fiddle", "Ginger", "Marrow", "Kettle", "Nettle", "Pickle", "Quince",
+            "Ripple", "Toffee", "Whistle", "Bramble", "Cobble", "Dimple", "Gumdrop", "Muffin", "Noodle", "Pebble",
+            "Rumble", "Sprocket", "Tumble", "Waffle", "Biscuit", "Doodle", "Jingle", "Mumble", "Wiggle", "Pudding"
+        };
+        var endings = new[]
+        {
+            "wood", "bottom", "berry", "sby", "worth", "stone", "by", "ford", "field", "brook", "wick", "ton", "ridge",
+            "more", "well", "dale", "shaw", "cott", "mere", "ley", "holt", "thorpe", "combe", "hurst", "gate"
+        };
+        var surnames = starts.SelectMany(st => endings.Select(en => st + en)).OrderBy(_ => rnd.Next()).ToArray();
         // Requests from the last 300 days, so the app window's Dashboard always shows this month (2026-10-29)
         var startDate = DateTime.Today.AddDays(-300);
 
         for (int i = 1; i <= count; i++)
         {
             var agent = Agents[rnd.Next(Agents.Length)];
-            var destination = destinations[rnd.Next(destinations.Length)];
             var type = tripTypes[rnd.Next(tripTypes.Length)];
+            var destination = type.Places[rnd.Next(type.Places.Length)];
             var quote = rnd.Next(type.Low / 10, type.High / 10) * 10m;
             var requested = startDate.AddMinutes(rnd.Next(0, 300 * 24 * 60));
             var travellers = type.Code switch { "FAMILY" => rnd.Next(3, 7), "HONEYMOON" => 2, _ => rnd.Next(1, 5) };
@@ -1368,7 +1360,7 @@
                 AvatarBg = agent.Color,
                 DateRequested = requested,
                 Destination = destination,
-                Traveller = $"{firstNames[rnd.Next(firstNames.Length)]} {lastNames[rnd.Next(lastNames.Length)]}",
+                Traveller = $"{firstNames[rnd.Next(firstNames.Length)]} {surnames[(i - 1) % surnames.Length]}",
                 Travellers = travellers,
                 Departure = requested.Date.AddDays(rnd.Next(30, 200)),
                 TripType = type.Code,
@@ -1380,6 +1372,31 @@
                 FareHistory = fares,
                 FareDeltaPercent = delta
             });
+        }
+
+        // LIS-0586 is the trip the Itinerary page lays out (GetawaysBookings.razor, 2026-10-29, Baaria): a Lisbon honeymoon for two,
+        // booked by Pippa Larkspur, the agent signed in to the window, and leaving tomorrow so it heads Upcoming departures.
+        if (list.Count >= 586)
+        {
+            var pippa = Agents.First(a => a.Name == "Pippa Larkspur");
+            var trip = list[585];
+            trip.Request = "LIS-0586";
+            trip.Destination = "Lisbon";
+            trip.Traveller = $"Wei {surnames[585]}";
+            trip.Travellers = 2;
+            trip.Agent = pippa.Name;
+            trip.AvatarInitials = pippa.Initials;
+            trip.AvatarBg = pippa.Color;
+            trip.TripType = "HONEYMOON";
+            trip.TripTypeName = "Honeymoons & celebrations";
+            trip.Status = "Booked";
+            trip.DateRequested = DateTime.Today.AddDays(-40);
+            trip.Departure = DateTime.Today.AddDays(1);
+            trip.Itinerary = "Five nights in Alfama with a day in Sintra, a fado dinner and a sunset sail on the Tagus";
+            trip.Notes = "Celebrating their wedding; asked for a quiet room";
+            trip.Quote = 6480;
+            trip.FareHistory = [6120, 6260, 6350, 6420, 6480];
+            trip.FareDeltaPercent = 6;
         }
 
         return list;
@@ -1442,10 +1459,10 @@
         _fabItems =
         [
             new("Trip request", "bi bi-suitcase-lg") { OnClick = EventCallback.Factory.Create(this, () => { Go("grid"); CreateNewRequest(); }) },
-            new("Booking", "bi bi-calendar-plus") { OnClick = EventCallback.Factory.Create(this, () =>
+            new("Itinerary entry", "bi bi-calendar-plus") { OnClick = EventCallback.Factory.Create(this, () =>
             {
                 Go("bookings");
-                Notifications.Info("New booking", "Double-click a day on the calendar to add a departure.");
+                Notifications.Info("New itinerary entry", "Double-click a free time on the itinerary to add an entry.");
             }) },
             new("Invoice", "bi bi-receipt") { OnClick = EventCallback.Factory.Create(this, () => Go("reports")) },
         ];
@@ -1528,63 +1545,8 @@
         _ => "grid-badge-gray"
     };
 
-    private List<ChartSeries> _quarterlySeries = new()
-    {
-        new()
-        {
-            Name = "Bookings ($K)",
-            Color = "#0284c7",
-            Type = ChartType.Bar,
-            DataPoints = new()
-            {
-                new("Q1", 240),
-                new("Q2", 365),
-                new("Q3", 480),
-                new("Q4", 620)
-            }
-        },
-        new()
-        {
-            Name = "Target ($K)",
-            Color = "#107c41",
-            Type = ChartType.Bar,
-            DataPoints = new()
-            {
-                new("Q1", 210),
-                new("Q2", 320),
-                new("Q3", 430),
-                new("Q4", 550)
-            }
-        }
-    };
-
-    private List<ChartSeries> _pieSeries = new()
-    {
-        new()
-        {
-            Name = "Trip types",
-            Type = ChartType.Pie,
-            DataPoints = new()
-            {
-                new("Beach (40%)", 40, "#0284c7"),
-                new("City (25%)", 25, "#7c3aed"),
-                new("Ski (20%)", 20, "#107c41"),
-                new("Safari (15%)", 15, "#d97706")
-            }
-        }
-    };
-
     // The grid writes the workbook itself and the browser downloads it
     private Task ExportToExcel() => _grid?.ExportToXlsxAsync("trip-requests.xlsx") ?? Task.CompletedTask;
-
-    private void OnPaste() => Notifications.Info("Pasted from clipboard.");
-    private void OnCopy() => Notifications.Info("Copied to clipboard.");
-    private void OnNewOrder() => Notifications.Success("Created new order ticket.");
-    private void OnSaveBatch() => Notifications.Success("Batch saved successfully.");
-    private void OnExportRibbonExcel() => Notifications.Success("Excel export requested.");
-    private void OnPrintPdf() => Notifications.Warning("Report queued to PDF virtual spooler.");
-    private void OnToggleGrid() => Notifications.Info("Toggled grid outlines.");
-    private void OnFreezeHeaders() => Notifications.Info("Header row pinned.");
 
     private async Task CopyInstallCommand()
     {
@@ -1743,24 +1705,6 @@
         </GridColumn>
     </GridColumnsBase>
 </GridControl>",
-
-            "charts" =>
-@"<ChartControl Type=""ChartType.Bar"" Title=""Bookings vs. Target"" Height=""280px"" Series=""@_quarterlySeries"" />
-
-<ChartControl Type=""ChartType.Pie"" Title=""Trips by Type"" Height=""280px"" Series=""@_pieSeries"" />",
-
-            "ribbon" =>
-@"<RibbonControl>
-    <RibbonTab Title=""Home"">
-        <RibbonGroup Title=""Clipboard"">
-            <RibbonButton Text=""Paste"" Icon=""bi-clipboard"" OnClick=""@OnPaste"" />
-            <RibbonButton Text=""Copy"" Icon=""bi-files"" OnClick=""@OnCopy"" />
-        </RibbonGroup>
-        <RibbonGroup Title=""Export"">
-            <RibbonButton Text=""Excel (XLSX)"" Icon=""bi-file-earmark-excel"" OnClick=""@OnExportExcel"" />
-        </RibbonGroup>
-    </RibbonTab>
-</RibbonControl>",
 
             "reports" =>
 @"// Crystal Reports XML / SQL Adaptive Reporting Pipeline

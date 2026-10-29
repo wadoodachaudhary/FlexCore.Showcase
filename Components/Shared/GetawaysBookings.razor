@@ -1,42 +1,75 @@
 @using Fx.ControlKit.Scheduling
 @using static FlexCore.Showcase.Components.Pages.Home
 
-@* 2026-10-29 (Baaria): the Bookings page of the home page's app window, a month of departures for the booked trip requests. The
-   home page's Razor tab prints this file's markup from the line below this comment to @code (FlexCore.Showcase.csproj embeds it).
-   Departures are timed rather than all-day: the Month view prints every entry's start time, so an all-day one read "12:00 AM"
-   (SchedulerControl.razor:13, library, owner-gated). *@
-<div class="gw-bookings">
-    @* Click a flight to open it, or switch to the Week or Agenda view *@
-    <SchedulerControl @bind-Events="_departures" @bind-Date="_date" @bind-View="_view" Height="560px" />
+@* 2026-10-29 (Baaria): the Itinerary page of the home page's app window. It used to show a month of every booked departure; it
+   now lays out one trip, LIS-0586, from the flight out to the flight home, which shows far more of the scheduler. Home.razor's
+   GenerateRequests makes LIS-0586 a Lisbon honeymoon booked by Pippa Larkspur and leaving tomorrow. SchedulerEvent has no colour
+   of its own (colour comes only from Resources, and each resource takes a column per day), so every entry starts with an emoji
+   for its kind and GetawaysBookings.razor.css colours the blocks by it. The home page's Razor tab prints this file's markup from
+   the line below this comment to @code (FlexCore.Showcase.csproj embeds it). *@
+<div class="gw-itinerary">
+    <div class="gw-trip-head">
+        <div>
+            <h3 class="gw-trip-title">@_trip.Request · @_trip.Destination honeymoon</h3>
+            <p class="gw-trip-sub">@_trip.Traveller, @_trip.Travellers travelling · @_trip.Departure.ToString("ddd d MMM") to @_trip.Departure.AddDays(Nights).ToString("ddd d MMM") · Agent: @_trip.Agent</p>
+        </div>
+        <ul class="gw-legend" aria-label="Kinds of entry">
+            <li class="k-flight">✈️ Flight</li>
+            <li class="k-transfer">🚐 Transfer</li>
+            <li class="k-hotel">🏨 Hotel</li>
+            <li class="k-activity">🗺️ Activity</li>
+            <li class="k-meal">🍽️ Meal</li>
+        </ul>
+    </div>
+    @* The whole trip in one multi-day view; click an entry to edit it, double-click a free time to add one *@
+    <SchedulerControl @bind-Events="_plan" @bind-Date="_date" @bind-View="_view" MultiDayCount="@(Nights + 1)"
+                      StartHour="7" EndHour="23" Height="560px" />
 </div>
 
 @code {
-    /// <summary>The agency's trip requests; every booked one becomes an all-day departure.</summary>
+    /// <summary>The agency's trip requests; the page shows the one keyed LIS-0586.</summary>
     [Parameter, EditorRequired] public IReadOnlyList<TripRequest> Requests { get; set; } = [];
 
-    private IReadOnlyList<SchedulerEvent> _departures = [];
-    private DateTime _date = DateTime.Today;
-    private SchedulerView _view = SchedulerView.Month;
+    private const int Nights = 5;
+    private TripRequest _trip = new();
+    private IReadOnlyList<SchedulerEvent> _plan = [];
+    private DateTime _date;
+    private SchedulerView _view = SchedulerView.MultiDay;
+
+    // Day of the trip, start, end, entry; the emoji at the start of each title is its kind
+    private static readonly (int Day, string From, string To, string Title)[] Plan =
+    [
+        (0, "07:40", "11:55", "✈️ Flight to Lisbon"),
+        (0, "12:30", "13:15", "🚐 Transfer to the hotel in Alfama"),
+        (0, "14:00", "15:00", "🏨 Check in"),
+        (0, "19:30", "21:30", "🍽️ Welcome dinner on the terrace"),
+        (1, "10:00", "12:30", "🗺️ Old town walk with a guide"),
+        (1, "13:00", "14:00", "🍽️ Lunch at the market hall"),
+        (1, "20:00", "22:30", "🍽️ Fado dinner"),
+        (2, "09:00", "17:00", "🗺️ Day in Sintra: palaces and gardens"),
+        (2, "18:30", "20:30", "🍽️ Seafood dinner in Cascais"),
+        (3, "10:00", "12:30", "🗺️ Spa morning for two"),
+        (3, "18:00", "20:00", "🗺️ Sunset sail on the Tagus"),
+        (4, "10:00", "13:00", "🗺️ Belém tower and monastery"),
+        (4, "13:30", "14:30", "🍽️ Custard tarts in Belém"),
+        (4, "16:00", "19:00", "🍽️ Cooking class for two"),
+        (5, "09:30", "10:15", "🏨 Check out"),
+        (5, "10:15", "11:00", "🚐 Transfer to the airport"),
+        (5, "12:20", "16:30", "✈️ Flight home"),
+    ];
 
     protected override void OnInitialized()
     {
-        var booked = Requests.Where(r => r.Status == "Booked").OrderBy(r => r.Departure).ToList();
-        // Each departure gets a flight time between 06:00 and 19:45, picked from its request number
-        _departures = booked.Select(r =>
+        _trip = Requests.FirstOrDefault(r => r.Request == "LIS-0586") ?? Requests.FirstOrDefault() ?? new TripRequest { Departure = DateTime.Today };
+        var day0 = _trip.Departure.Date;
+        _date = day0;
+        var entries = Plan.Select(p => new SchedulerEvent
         {
-            var takeOff = r.Departure.Date.AddHours(6 + r.Id * 7 % 14).AddMinutes(r.Id * 13 % 4 * 15);
-            return new SchedulerEvent
-            {
-                Id = r.Request,
-                Title = $"{r.Destination} · {r.Traveller}",
-                Description = $"{r.Request}, {r.TripTypeName}, {r.Travellers} travelling. {r.Itinerary}.",
-                Start = takeOff,
-                End = takeOff.AddHours(3)
-            };
+            Title = p.Title,
+            Start = day0.AddDays(p.Day) + TimeSpan.Parse(p.From, System.Globalization.CultureInfo.InvariantCulture),
+            End = day0.AddDays(p.Day) + TimeSpan.Parse(p.To, System.Globalization.CultureInfo.InvariantCulture)
         }).ToList();
-
-        // The demo data covers 2026; open on this month while it has departures, otherwise on the first month that does
-        if (booked.Count > 0 && !booked.Any(r => r.Departure.Year == _date.Year && r.Departure.Month == _date.Month))
-            _date = booked.First(r => r.Departure >= _date.Date || r == booked[^1]).Departure.Date;
+        entries.Insert(0, new SchedulerEvent { Title = $"🏨 {Nights} nights in Alfama", Start = day0, End = day0.AddDays(Nights), AllDay = true });
+        _plan = entries;
     }
 }

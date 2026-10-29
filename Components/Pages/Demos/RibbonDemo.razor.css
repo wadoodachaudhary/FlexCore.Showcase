@@ -1,0 +1,9 @@
+.result { display: block; margin-top: 10px; font-size: 13px; color: #475569; }
+
+/* Pressed: the page's own class on the ribbon button (it is the library's element, hence ::deep) */
+.format-ribbon ::deep .fx-ribbon-button.is-on { background: #e0e7ff; border-color: #a5b4fc; }
+
+.note-text { margin: 12px 4px 0; color: #334155; line-height: 1.5; }
+.note-text.bold { font-weight: 700; }
+.note-text.italic { font-style: italic; }
+.note-text.highlight { background: #fef08a; }

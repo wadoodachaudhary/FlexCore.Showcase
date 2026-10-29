@@ -16,3 +16,49 @@
 .status { font-size: 13px; color: #b91c1c; margin: 10px 0 0; }
 /* honeypot: off-screen, not display:none, so a naive bot still fills it */
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
+
+/* Mailbox doodle over the form (2026-10-29). The ink and its boil come from .doodle / .doodle-head in app.css. Coming into view
+   (is-playing, added by fxToggleClassWhenVisible): the box hops, the door drops open and stays open, the flag waves. After a send
+   (is-sent): the letter flies in through the open door, the door shuts and the flag goes up and stays up. */
+.mailbox-head { margin: -6px 0 10px; }
+.mailbox-head .doodle { width: 150px; }
+.mb-door { transform-origin: 48px 96px; }
+.mb-flag { transform-origin: 134px 74px; transform: rotate(90deg); }   /* down: pointing back along the box; up: 0deg */
+.mb-letter { opacity: 0; transform-box: fill-box; transform-origin: 50% 50%; }
+
+.mailbox-head.is-playing .mb-box { animation: mb-hop 0.9s ease-out; }
+.mailbox-head.is-playing .mb-door { animation: mb-door-open 0.6s 0.5s ease-out forwards; }
+.mailbox-head.is-playing .mb-flag { animation: mb-flag-wave 1s 0.2s ease-in-out; }
+
+.mailbox-head.is-sent .mb-door { animation: mb-door-shut 1.8s ease-in-out forwards; }
+.mailbox-head.is-sent .mb-letter { animation: mb-letter-in 1.2s ease-in forwards; }
+.mailbox-head.is-sent .mb-flag { animation: mb-flag-up 0.7s 1.4s cubic-bezier(0.3, 1.6, 0.5, 1) forwards; }
+.mailbox-head.is-sent .doodle { animation: doodle-boil 0.42s 5; }
+
+@keyframes mb-hop {
+    0%, 55%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-8px); }
+    72% { transform: translateY(-3px); }
+}
+@keyframes mb-door-open { to { transform: scaleY(0.16); } }
+@keyframes mb-flag-wave {
+    0%, 100% { transform: rotate(90deg); }
+    30% { transform: rotate(70deg); }
+    60% { transform: rotate(96deg); }
+}
+@keyframes mb-door-shut {
+    0%, 62% { transform: scaleY(0.16); }
+    82% { transform: scaleY(1.05); }
+    100% { transform: scaleY(1); }
+}
+@keyframes mb-letter-in {
+    0% { opacity: 1; transform: translate(-110px, -60px) rotate(-30deg); }
+    70% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+    100% { opacity: 0; transform: translate(0, 6px) scale(0.5); }
+}
+@keyframes mb-flag-up { from { transform: rotate(90deg); } to { transform: rotate(0deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .mailbox-head .mb-box, .mailbox-head .mb-door, .mailbox-head .mb-letter, .mailbox-head .mb-flag, .mailbox-head.is-sent .doodle { animation: none; }
+    .mailbox-head.is-sent .mb-flag { transform: rotate(0deg); }
+}

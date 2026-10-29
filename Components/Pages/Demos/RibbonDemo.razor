@@ -1,0 +1,250 @@
+@page "/demo/ribbon"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-10-29 (Baaria): own page for the ribbon, which had only been shown as the home page window's Front Desk tab until that tab
+   was removed. Facts checked against RibbonControl.razor, RibbonTab.razor, RibbonGroup.razor, RibbonButton.razor and
+   RibbonControl.razor.css (FlexCore 0.2.49) and in the browser: the first tab is open on load, only the open tab's groups are in
+   the page, Icon is printed as text (an icon-font class name shows as words), and the tab headers are divs with no keyboard
+   access. *@
+
+<PageTitle>Blazor Ribbon Control — FlexCore</PageTitle>
+
+<FeatureDemoLayout Title="Ribbon" Category="Components" ControlName="RibbonControl"
+                   Tagline="An Office-style command bar: tabs across the top, each holding titled groups of buttons."
+                   SourcePath="RibbonControl.razor;RibbonTab.razor;RibbonGroup.razor;RibbonButton.razor;RibbonControl.razor.css">
+    <Overview>
+        <p>
+            <code>RibbonControl</code> lays out <code>RibbonTab</code> children as a strip of tab headers. The open tab shows its
+            <code>RibbonGroup</code>s side by side, each with its title underneath, and every group holds <code>RibbonButton</code>s.
+            A large button stacks its glyph above the label and starts a group; small buttons put the glyph beside the label and wrap
+            into columns. The first tab is open when the ribbon appears, and clicking a header opens another. No JavaScript.
+        </p>
+        <p>The buttons hold no state of their own. The page decides what each one does, when it is disabled and how it looks pressed.</p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="tabs" Title="Tabs, groups and buttons" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs">
+            <Description><p>A travel agency's front desk. Paste is disabled until Cut or Copy has put a booking on the clipboard. Rest the pointer on Hold to see a <code>Tooltip</code> that differs from the label.</p></Description>
+            <Demo>
+                <RibbonControl>
+                    <RibbonTab Title="Home">
+                        <RibbonGroup Title="Clipboard">
+                            <RibbonButton Text="Paste" Icon="📋" Large="true" Disabled="@(_clipboard is null)" OnClick="@(() => Did($"Pasted {_clipboard}"))" />
+                            <RibbonButton Text="Cut" Icon="✂️" OnClick="@(() => Clip("Cut"))" />
+                            <RibbonButton Text="Copy" Icon="📄" OnClick="@(() => Clip("Copied"))" />
+                        </RibbonGroup>
+                        <RibbonGroup Title="Booking">
+                            <RibbonButton Text="New booking" Icon="✈️" Large="true" OnClick="@(() => Did("Started a new booking"))" />
+                            <RibbonButton Text="Hold" Icon="⏸️" Tooltip="Hold the seats for 24 hours" OnClick="@(() => Did("Held the seats"))" />
+                            <RibbonButton Text="Cancel" Icon="✖️" OnClick="@(() => Did("Cancelled the booking"))" />
+                        </RibbonGroup>
+                    </RibbonTab>
+                    <RibbonTab Title="Extras">
+                        <RibbonGroup Title="Add to the trip">
+                            <RibbonButton Text="Transfer" Icon="🚐" Large="true" OnClick="@(() => Did("Added an airport transfer"))" />
+                            <RibbonButton Text="Insurance" Icon="🛡️" OnClick="@(() => Did("Added travel insurance"))" />
+                            <RibbonButton Text="Excursion" Icon="🗺️" OnClick="@(() => Did("Added an excursion"))" />
+                        </RibbonGroup>
+                    </RibbonTab>
+                </RibbonControl>
+                <span class="result">@(_last ?? "Click a button, or open the Extras tab.")</span>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="pressed" Title="Pressed and disabled states" RazorCode="@Code.Pressed" CSharpCode="@Code.PressedCs" CssCode="@Code.PressedCss">
+            <Description><p>The buttons format the note under the ribbon. Bold, Italic and Highlight show as pressed through <code>CssClass</code>; Larger and Smaller are disabled at the ends of the size range.</p></Description>
+            <Demo>
+                <div class="format-ribbon">
+                    <RibbonControl>
+                        <RibbonTab Title="Format">
+                            <RibbonGroup Title="Style">
+                                <RibbonButton Text="Bold" Icon="B" CssClass="@On(_bold)" OnClick="@(() => _bold = !_bold)" />
+                                <RibbonButton Text="Italic" Icon="I" CssClass="@On(_italic)" OnClick="@(() => _italic = !_italic)" />
+                                <RibbonButton Text="Highlight" Icon="🖍️" CssClass="@On(_highlight)" OnClick="@(() => _highlight = !_highlight)" />
+                            </RibbonGroup>
+                            <RibbonGroup Title="Text size">
+                                <RibbonButton Text="Larger" Icon="A+" Disabled="@(_size >= 22)" OnClick="@(() => _size += 2)" />
+                                <RibbonButton Text="Smaller" Icon="A−" Disabled="@(_size <= 12)" OnClick="@(() => _size -= 2)" />
+                            </RibbonGroup>
+                        </RibbonTab>
+                    </RibbonControl>
+                </div>
+                <p class="note-text @(_bold ? "bold" : "") @(_italic ? "italic" : "") @(_highlight ? "highlight" : "")" style="font-size:@(_size)px">
+                    Meet the group at the old town gate at nine. Bring water, a hat and comfortable shoes.
+                </p>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <DocSections>
+            <DocSection Id="doc-ribbon" Title="RibbonControl" Count='@DocSection.Label(Vocab.Ribbon.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="RibbonControl" Rows="Vocab.Ribbon" />
+                <p class="note">Tabs join the strip in the order they first render and stay on it: there is no parameter or method to open a tab from code, and a tab removed later keeps its header. The four components accept no other attributes.</p>
+            </DocSection>
+            <DocSection Id="doc-tab" Title="RibbonTab" Count='@DocSection.Label(Vocab.Tab.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="RibbonTab" Rows="Vocab.Tab" />
+            </DocSection>
+            <DocSection Id="doc-group" Title="RibbonGroup" Count='@DocSection.Label(Vocab.Group.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="RibbonGroup" Rows="Vocab.Group" />
+            </DocSection>
+            <DocSection Id="doc-button" Title="RibbonButton" Count='@DocSection.Label(Vocab.Button.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="RibbonButton" Rows="Vocab.Button" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+            <DocSection Id="doc-css-variables" Title="CSS variables" Count='@DocSection.Label(Vocab.Vars.Length, "variables")'>
+                <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+                <p class="note">Colours, borders and spacing are fixed in the control's stylesheet.</p>
+            </DocSection>
+        </DocSections>
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>Each <code>RibbonButton</code> is a native <code>&lt;button type="button"&gt;</code>, so Tab reaches it and Enter or Space runs it. Its <code>title</code> is the tooltip, or the label when there is none. A disabled button gets the <code>disabled</code> attribute and drops out of the Tab order.</li>
+            <li>The glyph is plain text inside the button, so a screen reader reads an emoji glyph before the label.</li>
+            <li>The tab headers are <code>&lt;div&gt;</code>s with no role, no <code>tabindex</code> and no key handling: the keyboard cannot open another tab, and the strip is not announced as tabs. Put commands that keyboard users need on the first tab, or offer them elsewhere too.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>A single row of commands: <code>ToolbarControl</code> in an app bar on the <a href="demo/ai-prompt#app-bar">AI prompt</a> page.</li>
+            <li>Tabs that switch page content: <a href="demo/tabs-accordion#tabs">Tabs &amp; accordion</a>.</li>
+            <li>Plain buttons, with a dropdown mode: <a href="demo/buttons">Buttons</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    private string? _clipboard, _last;
+    private bool _bold, _italic, _highlight;
+    private int _size = 16;
+
+    // The front desk's clipboard holds the booking on screen
+    private void Clip(string verb)
+    {
+        _clipboard = "booking LIS-0001";
+        _last = $"{verb} {_clipboard}";
+    }
+
+    private void Did(string what) => _last = what;
+
+    // A pressed button carries the page's "is-on" class
+    private static string On(bool pressed) => pressed ? "is-on" : "";
+
+    // Vocabulary rows, one per public member (0.2.49)
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Ribbon =
+        {
+            new("ChildContent", "The <code>RibbonTab</code>s.", "RenderFragment?", "null"),
+            new("CssClass", "Added to the outer <code>fx-ribbon</code> element.", "string", "\"\""),
+        };
+        public static readonly ApiRow[] Tab =
+        {
+            new("Title", "Text of the tab's header.", "string", "\"\""),
+            new("ChildContent", "The tab's <code>RibbonGroup</code>s, rendered only while the tab is open.", "RenderFragment?", "null"),
+            new("Parent (cascading)", "Supplied by the enclosing <code>RibbonControl</code>. A tab outside one renders nothing.", "RibbonControl?", "null"),
+        };
+        public static readonly ApiRow[] Group =
+        {
+            new("Title", "Caption under the group. No caption row when empty.", "string", "\"\""),
+            new("ChildContent", "The group's buttons, or any other markup.", "RenderFragment?", "null"),
+        };
+        public static readonly ApiRow[] Button =
+        {
+            new("Text", "Label.", "string", "\"\""),
+            new("Icon", "Glyph before the label, printed as text: use an emoji or a few characters. An icon-font class name shows as words, and markup is not rendered.", "string", "\"\""),
+            new("Large", "Glyph at 20px above the label, 64px wide at least. Off: a 14px glyph left of the label.", "bool", "false"),
+            new("Tooltip", "The button's <code>title</code>. The label when empty.", "string", "\"\""),
+            new("Disabled", "Sets the <code>disabled</code> attribute and fades the button to half opacity.", "bool", "false"),
+            new("CssClass", "Extra classes on the <code>&lt;button&gt;</code>, for example a pressed state.", "string", "\"\""),
+            new("OnClick", "Runs on click.", "EventCallback", "none"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-ribbon", "Outer box: light grey with a bottom border, 12px text."),
+            new("fx-ribbon-tabs · fx-ribbon-tab-btn · .active", "The header strip and one header; the open header joins the body below it."),
+            new("fx-ribbon-body · fx-ribbon-tab-content", "At least 92px tall; the open tab's groups in a row."),
+            new("fx-ribbon-group · fx-ribbon-group-body · fx-ribbon-group-title", "One group, at least 80px wide with a divider on its right; its buttons wrap, the 10px caption sits underneath."),
+            new("fx-ribbon-button · fx-ribbon-button-large · .disabled", "A button; transparent until hovered. Large stacks the glyph over the label."),
+            new("fx-ribbon-button-icon · fx-ribbon-button-text", "The glyph and the label inside a button."),
+        };
+        public static readonly ApiRow[] Vars =
+        {
+            new("--fx-zoom", "Scales every font size in the ribbon, as across the library.", "1"),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Tabs = @"<RibbonControl>
+    <RibbonTab Title=""Home"">
+        <RibbonGroup Title=""Clipboard"">
+            <RibbonButton Text=""Paste"" Icon=""📋"" Large=""true"" Disabled=""@(_clipboard is null)"" OnClick=""@(() => Did($""Pasted {_clipboard}""))"" />
+            <RibbonButton Text=""Cut"" Icon=""✂️"" OnClick=""@(() => Clip(""Cut""))"" />
+            <RibbonButton Text=""Copy"" Icon=""📄"" OnClick=""@(() => Clip(""Copied""))"" />
+        </RibbonGroup>
+        <RibbonGroup Title=""Booking"">
+            <RibbonButton Text=""New booking"" Icon=""✈️"" Large=""true"" OnClick=""@(() => Did(""Started a new booking""))"" />
+            <RibbonButton Text=""Hold"" Icon=""⏸️"" Tooltip=""Hold the seats for 24 hours"" OnClick=""@(() => Did(""Held the seats""))"" />
+            <RibbonButton Text=""Cancel"" Icon=""✖️"" OnClick=""@(() => Did(""Cancelled the booking""))"" />
+        </RibbonGroup>
+    </RibbonTab>
+    <RibbonTab Title=""Extras"">
+        <RibbonGroup Title=""Add to the trip"">
+            <RibbonButton Text=""Transfer"" Icon=""🚐"" Large=""true"" OnClick=""@(() => Did(""Added an airport transfer""))"" />
+            <RibbonButton Text=""Insurance"" Icon=""🛡️"" OnClick=""@(() => Did(""Added travel insurance""))"" />
+            <RibbonButton Text=""Excursion"" Icon=""🗺️"" OnClick=""@(() => Did(""Added an excursion""))"" />
+        </RibbonGroup>
+    </RibbonTab>
+</RibbonControl>
+<span class=""result"">@(_last ?? ""Click a button, or open the Extras tab."")</span>";
+        public const string TabsCs = @"private string? _clipboard, _last;
+
+// The front desk's clipboard holds the booking on screen
+private void Clip(string verb)
+{
+    _clipboard = ""booking LIS-0001"";
+    _last = $""{verb} {_clipboard}"";
+}
+
+private void Did(string what) => _last = what;";
+
+        public const string Pressed = @"<div class=""format-ribbon"">
+    <RibbonControl>
+        <RibbonTab Title=""Format"">
+            <RibbonGroup Title=""Style"">
+                <RibbonButton Text=""Bold"" Icon=""B"" CssClass=""@On(_bold)"" OnClick=""@(() => _bold = !_bold)"" />
+                <RibbonButton Text=""Italic"" Icon=""I"" CssClass=""@On(_italic)"" OnClick=""@(() => _italic = !_italic)"" />
+                <RibbonButton Text=""Highlight"" Icon=""🖍️"" CssClass=""@On(_highlight)"" OnClick=""@(() => _highlight = !_highlight)"" />
+            </RibbonGroup>
+            <RibbonGroup Title=""Text size"">
+                <RibbonButton Text=""Larger"" Icon=""A+"" Disabled=""@(_size >= 22)"" OnClick=""@(() => _size += 2)"" />
+                <RibbonButton Text=""Smaller"" Icon=""A−"" Disabled=""@(_size <= 12)"" OnClick=""@(() => _size -= 2)"" />
+            </RibbonGroup>
+        </RibbonTab>
+    </RibbonControl>
+</div>
+<p class=""note-text @(_bold ? ""bold"" : """") @(_italic ? ""italic"" : """") @(_highlight ? ""highlight"" : """")"" style=""font-size:@(_size)px"">
+    Meet the group at the old town gate at nine. Bring water, a hat and comfortable shoes.
+</p>";
+        public const string PressedCs = @"private bool _bold, _italic, _highlight;
+
+private int _size = 16;
+
+// A pressed button carries the page's ""is-on"" class
+private static string On(bool pressed) => pressed ? ""is-on"" : """";";
+        public const string PressedCss = @"/* Pressed: the page's own class on the ribbon button (it is the library's element, hence ::deep) */
+.format-ribbon ::deep .fx-ribbon-button.is-on { background: #e0e7ff; border-color: #a5b4fc; }
+
+.note-text { margin: 12px 4px 0; color: #334155; line-height: 1.5; }
+.note-text.bold { font-weight: 700; }
+.note-text.italic { font-style: italic; }
+.note-text.highlight { background: #fef08a; }";
+    }
+}

@@ -4,6 +4,7 @@
 @inject ISignupStore Store
 @inject NavigationManager Nav
 @inject ILogger<SignUp> Log
+@inject IJSRuntime JS
 
 @* 2026-10-13: sign-up and question form (owner decision: site stays open, the Community edition ships by email). Built on the library's
    FormControl / FormItemControl so the form is itself a FlexCore example. Submissions go to ISignupStore (a JSON-lines file
@@ -30,6 +31,36 @@
         </section>
 
         <section class="signup-form" aria-live="polite">
+            @* Hand-drawn mailbox (2026-10-29, Baaria), the same ink as the home page doodles. When the form comes into view the box
+               hops and its door drops open; after a send the letter flies in, the door shuts and the flag goes up. *@
+            <div class="@($"doodle-head mailbox-head {(_saved is null ? "" : "is-sent")}")" @ref="_mailbox">
+                <svg class="doodle mailbox-doodle" viewBox="0 0 170 150" aria-hidden="true">
+                    <path d="M22 140 q20 -4 40 0 t40 0 t40 0 t20 0" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" />
+                    <g class="mb-box">
+                        <rect x="86" y="96" width="12" height="44" rx="2" fill="#ffffff" stroke="#0f172a" stroke-width="3" />
+                        <path d="M46 96 V64 Q46 42 68 42 H124 Q146 42 146 64 V96 Z" fill="#6366f1" stroke="#0f172a" stroke-width="3" stroke-linejoin="round" />
+                        <rect x="95" y="57" width="22" height="22" rx="4" fill="#ffffff" />
+                        <rect x="98" y="60" width="7" height="7" rx="2" fill="#0284c7" />
+                        <rect x="107" y="60" width="7" height="7" rx="2" fill="#38bdf8" />
+                        <rect x="98" y="69" width="7" height="7" rx="2" fill="#6366f1" />
+                        <rect x="107" y="69" width="7" height="7" rx="2" fill="#10b981" />
+                        <g class="mb-flag">
+                            <path d="M134 74 V30" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+                            <path d="M134 30 H152 V42 H134 Z" fill="#ef4444" stroke="#0f172a" stroke-width="2.5" stroke-linejoin="round" />
+                            <circle cx="134" cy="74" r="3" fill="#0f172a" />
+                        </g>
+                        <path d="M28 96 V66 Q28 44 48 44 Q68 44 68 66 V96 Z" fill="#1e1b4b" stroke="#0f172a" stroke-width="3" stroke-linejoin="round" />
+                        <g class="mb-letter">
+                            <rect x="36" y="70" width="24" height="16" rx="2" fill="#ffffff" stroke="#0f172a" stroke-width="2" />
+                            <path d="M36 71 L48 80 L60 71" fill="none" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                        </g>
+                        <g class="mb-door">
+                            <path d="M28 96 V66 Q28 44 48 44 Q68 44 68 66 V96 Z" fill="#818cf8" stroke="#0f172a" stroke-width="3" stroke-linejoin="round" />
+                            <circle cx="48" cy="72" r="3" fill="#0f172a" />
+                        </g>
+                    </g>
+                </svg>
+            </div>
             @if (_saved is { } saved)
             {
                 <AlertControl Severity="AlertSeverity.Success" Title="@($"Thanks, {saved.Name}.")"
@@ -66,6 +97,12 @@
     private string? _website;          // honeypot
     private int _submissions;          // per circuit
     private bool _blocked => _submissions >= 3;
+    private ElementReference _mailbox;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await JS.InvokeVoidAsync("fxToggleClassWhenVisible", _mailbox, "is-playing");
+    }
 
     private async Task SubmitAsync(EditContext _)
     {
