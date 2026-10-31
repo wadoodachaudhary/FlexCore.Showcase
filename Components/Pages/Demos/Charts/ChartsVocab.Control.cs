@@ -36,7 +36,29 @@ public static partial class ChartsVocab
         new("ShowValues", "Legacy HTML bar mode only: writes each value, formatted with <code>ValueFormat</code>, beside a <code>Bars</code> bar or above a <code>DataSource</code> bar. Never read by the SVG types, whose values live in hover <code>&lt;title&gt;</code> tooltips.", "bool", "false"),
         new("ShowAxisLabels", "Legacy <code>DataSource</code> mode only: renders the bottom axis row of <code>ValueLabels</code> captions, and only when that list has entries. Not read in <code>Bars</code> mode or by any SVG type.", "bool", "true"),
         new("ValueFormat", "Format string for the legacy value captions shown by <code>ShowValues</code> (the hover tooltips there always use <code>N2</code>), and for the value text of <code>Gauge</code>, <code>ArcGauge</code>, <code>RadialGauge</code> and <code>LinearGauge</code> through <code>GaugeVisualControl</code>, where this default overrides that control's own <code>0.##</code>, so a gauge shows two decimals unless you set it. Not read by any other SVG type.", "string", "\"N2\""),
-        // 24 rows
+        // Tooltips (2026-10-31): one card per hovered shape, Blazor events only, no script.
+        new("ShowTooltips", "Shows a card when the pointer is over a bar, slice, point, cell, flow or marker, with the label, the series and the value, and the share of the whole for <code>Pie</code>, <code>Donut</code>, <code>Funnel</code> and <code>Pyramid</code>. Off, the shapes keep their native <code>&lt;title&gt;</code> text. Gauges, KPI cards and sparklines have no card.", "bool", "true"),
+        new("TooltipValueFormat", ".NET numeric format for the numbers in the default card. Unset, whole numbers print as <code>N0</code> and the rest as <code>N2</code>.", "string?", "null"),
+        new("TooltipFormat", "Text pattern that replaces the card's rows: <code>{series}</code> <code>{label}</code> <code>{category}</code> <code>{title}</code> <code>{value}</code> <code>{value2}</code>…<code>{value5}</code> <code>{percent}</code> <code>{open}</code> <code>{high}</code> <code>{low}</code> <code>{close}</code> <code>{min}</code> <code>{max}</code> <code>{size}</code>; a format after a colon applies to numbers (<code>{value:N0}</code>); <code>\n</code> starts a new row.", "string?", "null"),
+        new("TooltipFormatter", "Code-side text for the card's rows, lines separated by <code>\n</code>; return null to fall back to <code>TooltipFormat</code> or the default rows.", "Func&lt;ChartTooltipContext, string?&gt;?", "null"),
+        new("TooltipTemplate", "Replaces the whole card content; the context is the hovered shape.", "RenderFragment&lt;ChartTooltipContext&gt;?", "null"),
+        new("PointHover", "Raised with the context when the pointer enters a shape and with null when it leaves the shape or the chart.", "EventCallback&lt;ChartTooltipContext?&gt;"),
+        // 30 rows
+    };
+
+    /// <summary>ChartTooltipContext (Charts/ChartModels.cs), what TooltipFormatter, TooltipTemplate and PointHover receive.</summary>
+    public static readonly ApiRow[] Tooltip =
+    {
+        new("Type", "The chart type that drew the shape.", "ChartType"),
+        new("Series / SeriesIndex", "The series the shape belongs to and its position in <code>Series</code>; heatmap rows are series.", "ChartSeries / int"),
+        new("Point / PointIndex", "The data point and its position in the series' <code>DataPoints</code>.", "ChartDataPoint / int"),
+        new("Title", "First line of the default card: the category, slice or item label; <code>row / column</code> on a heatmap, <code>source → target</code> on a Sankey.", "string"),
+        new("Label", "The point's label; for scatter and bubble the x value as typed.", "string"),
+        new("Value", "The point's main value; the median for a box plot, the close for a candlestick, the maximum for a range.", "double"),
+        new("Color", "Fill colour of the hovered shape, drawn as the swatch.", "string"),
+        new("Percentage", "Share of the total in percent for <code>Pie</code>, <code>Donut</code>, <code>Funnel</code> and <code>Pyramid</code>; null elsewhere.", "double?"),
+        new("SeriesName", "The series name, or null when it is empty.", "string?"),
+        new("Fields", "The rows the default card shows, already formatted: <code>ChartTooltipField(Name, Value)</code>, for example Open, High, Low and Close for a candlestick or Min, Q1, Median, Q3 and Max for a box plot.", "IReadOnlyList&lt;ChartTooltipField&gt;"),
     };
 
     public static readonly ApiRow[] GaugeKpi =

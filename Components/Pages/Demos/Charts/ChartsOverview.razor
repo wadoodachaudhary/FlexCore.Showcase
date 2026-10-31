@@ -6,6 +6,8 @@
    2026-10-20: ?tab=<slug> opens the gallery on that tab (catalog row Sparkline Charts); slugs in TabSlugs.
    2026-10-29: nine more tiles (ComboBarLine, RangeBar, StepLine, MultiLine, RangeArea, HighLow, Pyramid, DotPlot, ArcGauge), so every
    ChartType with a renderer is drawn on this page or on Financial & gauges.
+   2026-10-31: second example for the hover tooltips the library gained the same day (ShowTooltips, TooltipFormat, TooltipTemplate,
+   PointHover; ChartTooltipContext table under Documentation).
    2026-10-23 (developer meeting point 5, label clutter): every SVG chart draws on a fixed viewBox (600x300; 300x300 for
    Pie, Donut, Radar, Gauge; 400x300 for Funnel) with xMidYMid meet, so rendered text = tile scale, and a tile taller
    than its width-bound height is blank. Each layout now sets CellAspectRatio so a tile is title + chart (+ legend)
@@ -41,6 +43,8 @@
             Charts with a page of their own are not repeated here: the drill-down <a href="demo/charts/sunburst">sunburst</a>, the
             <a href="demo/gantt">Gantt chart</a>, the <a href="demo/gauges">gauges and stock chart</a> and the <a href="demo/charts/map-story">map story</a>;
             candlestick, OHLC, bullet, range, Sankey and the radial and linear gauge types are on <a href="demo/advanced-charts">Financial &amp; gauges</a>.
+            Every bar, slice, point, cell and flow shows a card on hover with its label, series and value; the second example shows the
+            default card, a <code>TooltipFormat</code> pattern, a <code>TooltipTemplate</code> and the <code>PointHover</code> event.
         </p>
     </Overview>
 
@@ -262,6 +266,37 @@
 </TabControl>
             </Demo>
         </DemoExample>
+        <DemoExample Id="tooltips" Title="Tooltips: default card, format pattern, template" RazorCode="@Code.Tooltips" CSharpCode="@Code.TooltipsCs">
+            <Description><p>Hover any bar, slice or point. The default card shows the label, the series when there are several, and the value; pie, donut, funnel and pyramid add the share of the whole. <code>TooltipFormat</code> rewrites the rows with placeholders, <code>TooltipTemplate</code> replaces the card, and <code>PointHover</code> hands the page the same context; the line under the tiles prints it. The card is Blazor markup positioned at the pointer, one event per shape and none per pixel, and it opens towards the middle of the drawing.</p></Description>
+            <Demo>
+<DashboardLayoutControl Columns="3" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="1">
+    <DashboardLayoutPanels>
+        <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
+            <ChartControl Type="ChartType.GroupedBar" Title="Default card" Height="226px" YAxis="@(new ChartAxis { Max = 400 })"
+                          Series="@_groupedBarSeries" PointHover="h => _hovered = h" />
+        </DashboardLayoutPanel>
+        <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
+            <ChartControl Type="ChartType.Donut" Title="TooltipFormat" Height="226px"
+                          TooltipFormat="{label}: {value:N0} people&#10;{percent} of 120 asked"
+                          Series="@(new List<ChartSeries> { _colourSeries })" PointHover="h => _hovered = h" />
+        </DashboardLayoutPanel>
+        <DashboardLayoutPanel Row="0" Column="2" SizeX="1" SizeY="1">
+            <ChartControl Type="ChartType.Line" Title="TooltipTemplate" Height="226px" Series="@_lineSeries" PointHover="h => _hovered = h">
+                <TooltipTemplate Context="t">
+                    <div class="tip-week">@t.Label</div>
+                    <div>@t.SeriesName: <b>@t.Value cm</b></div>
+                    @if (t.PointIndex > 0)
+                    {
+                        <div class="tip-note">+@(t.Value - t.Series.DataPoints[t.PointIndex - 1].Value) cm since the week before</div>
+                    }
+                </TooltipTemplate>
+            </ChartControl>
+        </DashboardLayoutPanel>
+    </DashboardLayoutPanels>
+</DashboardLayoutControl>
+<p class="result">@(_hovered is null ? "PointHover: nothing under the pointer." : $"PointHover: {_hovered.Title}, {_hovered.SeriesName ?? "one series"}, {_hovered.Value}{(_hovered.Percentage is { } s ? $", {s:0.#}% of the whole" : "")}")</p>
+            </Demo>
+        </DemoExample>
     </Examples>
 
     <Vocabulary>
@@ -288,6 +323,9 @@
             </DocSection>
             <DocSection Id="doc-chartdatapoint" Title="ChartDataPoint" Count='@DocSection.Label(ChartsVocab.Point.Length, "properties")'>
                 <ApiTable Kind="ApiKind.Properties" Title="ChartDataPoint" Rows="ChartsVocab.Point" />
+            </DocSection>
+            <DocSection Id="doc-charttooltipcontext" Title="ChartTooltipContext, what the tooltip hands you" Count='@DocSection.Label(ChartsVocab.Tooltip.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="ChartTooltipContext" Rows="ChartsVocab.Tooltip" />
             </DocSection>
             <DocSection Id="doc-chartaxis" Title="ChartAxis" Count='@DocSection.Label(ChartsVocab.Axis.Length, "properties")'>
                 <ApiTable Kind="ApiKind.Properties" Title="ChartAxis" Rows="ChartsVocab.Axis" />
@@ -370,6 +408,10 @@
     // DotPlot scales its axis from the data and labels the ticks as whole numbers, so integer data reads best
     ChartSeries _complaints = new() { Name = "Complaints", DataPoints = new() {
         new("Harbour", 2), new("Hilltop", 5), new("Old Town", 7), new("Beach", 1), new("Airport", 9) } };
+
+    // Tooltips example: the last context PointHover delivered, and the favourite-colour survey as a named series
+    private ChartTooltipContext? _hovered;
+    ChartSeries _colourSeries = new() { Name = "People", DataPoints = new() { new("Blue", 42), new("Green", 30), new("Red", 24), new("Purple", 15), new("Yellow", 9) } };
 
     // a bakery's week: Grouped compares the two lines per day, Stacked adds them (Saturday totals 680), StackedBar100 shows the mix
     List<ChartSeries> _groupedBarSeries = new()
@@ -690,6 +732,36 @@
         </div>
     </TabItem>
 </TabControl>";
+        public const string Tooltips = @"<DashboardLayoutControl Columns=""3"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""1"">
+    <DashboardLayoutPanels>
+        <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
+            <ChartControl Type=""ChartType.GroupedBar"" Title=""Default card"" Height=""226px"" YAxis=""@(new ChartAxis { Max = 400 })""
+                          Series=""@_groupedBarSeries"" PointHover=""h => _hovered = h"" />
+        </DashboardLayoutPanel>
+        <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""1"">
+            <ChartControl Type=""ChartType.Donut"" Title=""TooltipFormat"" Height=""226px""
+                          TooltipFormat=""{label}: {value:N0} people&#10;{percent} of 120 asked""
+                          Series=""@(new List<ChartSeries> { _colourSeries })"" PointHover=""h => _hovered = h"" />
+        </DashboardLayoutPanel>
+        <DashboardLayoutPanel Row=""0"" Column=""2"" SizeX=""1"" SizeY=""1"">
+            <ChartControl Type=""ChartType.Line"" Title=""TooltipTemplate"" Height=""226px"" Series=""@_lineSeries"" PointHover=""h => _hovered = h"">
+                <TooltipTemplate Context=""t"">
+                    <div class=""tip-week"">@t.Label</div>
+                    <div>@t.SeriesName: <b>@t.Value cm</b></div>
+                    @if (t.PointIndex > 0)
+                    {
+                        <div class=""tip-note"">+@(t.Value - t.Series.DataPoints[t.PointIndex - 1].Value) cm since the week before</div>
+                    }
+                </TooltipTemplate>
+            </ChartControl>
+        </DashboardLayoutPanel>
+    </DashboardLayoutPanels>
+</DashboardLayoutControl>
+<p class=""result"">@(_hovered is null ? ""PointHover: nothing under the pointer."" : $""PointHover: {_hovered.Title}, {_hovered.SeriesName ?? ""one series""}, {_hovered.Value}{(_hovered.Percentage is { } s ? $"", {s:0.#}% of the whole"" : """")}"")</p>";
+        public const string TooltipsCs = @"// Tooltips example: the last context PointHover delivered, and the favourite-colour survey as a named series
+private ChartTooltipContext? _hovered;
+ChartSeries _colourSeries = new() { Name = ""People"", DataPoints = new() { new(""Blue"", 42), new(""Green"", 30), new(""Red"", 24), new(""Purple"", 15), new(""Yellow"", 9) } };
+// _groupedBarSeries and _lineSeries are the gallery's (see the Gallery C# tab).";
         public const string GalleryCs = @"/// <summary>Tab named in the address, e.g. demo/charts?tab=sparkline; read when the page loads, never written back.</summary>
 [SupplyParameterFromQuery(Name = ""tab"")] public string? Tab { get; set; }
 private int _tab;

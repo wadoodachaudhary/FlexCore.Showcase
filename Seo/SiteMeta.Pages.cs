@@ -139,9 +139,9 @@ public static partial class SiteMeta
 
         // Charts
         new("demo/charts", "Charts", "Blazor Charts (Line, Bar, Pie, Area, Scatter) — FlexCore",
-            "ChartControl draws line, bar, area, pie, donut, scatter, treemap, funnel, heatmap, sparkline and KPI charts as SVG from C#, with no npm or third-party script.",
+            "ChartControl draws line, bar, area, pie, donut, scatter, treemap, funnel, heatmap, sparkline and KPI charts as SVG from C#, with hover tooltips and no npm.",
             "Charts", Controls: new[] { "ChartControl", "ChartSeries", "ChartDataPoint" },
-            Keywords: new[] { "Blazor charts", "chart component", "line chart", "bar chart", "pie chart", "area chart", "scatter chart", "sparkline", "SVG charts" }),
+            Keywords: new[] { "Blazor charts", "chart component", "line chart", "bar chart", "pie chart", "area chart", "scatter chart", "sparkline", "SVG charts", "chart tooltip" }),
         new("demo/advanced-charts", "Financial & gauges", "Blazor Candlestick, OHLC and Sankey Charts — FlexCore",
             "Seven more ChartControl types for finance and operations screens: candlestick and OHLC, bullet and range column, a Sankey flow, and radial and linear gauges.",
             "Charts", Controls: new[] { "ChartControl", "ChartDataPoint" },

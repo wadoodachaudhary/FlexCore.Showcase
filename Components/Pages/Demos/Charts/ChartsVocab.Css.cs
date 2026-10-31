@@ -62,7 +62,7 @@ public static partial class ChartsVocab
     public static readonly ApiRow[] Methods =
     {
         new("ChartSvg.Markup(ChartType type, IReadOnlyList&lt;ChartSeries&gt; series, string? title = null, bool showLegend = true, string? width = \"100%\", string? height = \"300px\")",
-            "Static, in <code>Fx.ControlKit.Charts</code>. Renders a <code>ChartControl</code> with these six parameters through one process-wide <code>HtmlRenderer</code> (calls serialised by a lock) and returns its HTML, svg included, for callers that cannot host a component; report pagination uses it. <code>Legend</code> is <code>new ChartLegend { Visible = showLegend }</code>, <code>Animate</code> is false and a null title becomes an empty string. The string carries the class names and scope attributes but no stylesheet.",
+            "A string, so it carries no hover tooltips. Static, in <code>Fx.ControlKit.Charts</code>. Renders a <code>ChartControl</code> with these six parameters through one process-wide <code>HtmlRenderer</code> (calls serialised by a lock) and returns its HTML, svg included, for callers that cannot host a component; report pagination uses it. <code>Legend</code> is <code>new ChartLegend { Visible = showLegend }</code>, <code>Animate</code> is false and a null title becomes an empty string. The string carries the class names and scope attributes but no stylesheet.",
             "string"),
     };
 }
