@@ -41,7 +41,7 @@
         </DemoExample>
         <DemoExample Id="airports" Title="Airports per country, then one country's airports" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs" CssCode="@Code.AirportsCss">
             <Description>
-                <p>The 4,009 airports from the <a href="demo/grid">Data Grid</a> page, counted per country: one airport is the palest beige, the United States' 634 the deepest red. The colours step at 1, 3, 10, 30 and 100 airports because half of the countries have four or fewer. Click a country to open it on the plain map with one marker per airport (blue for large, teal for medium, grey for small). In the three countries with more than 200 airports (the United States, China and Canada), markers close together merge into a numbered circle that zooms in when clicked. Clicking a marker lists the airport's runways. Small territories such as French Polynesia have no outline at this scale. Data: <a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports</a>, public domain.</p>
+                <p>The 4,009 airports from the <a href="demo/grid">Data Grid</a> page, counted per country: one airport is the palest blue, the United States' 634 the deepest. The colours step at 1, 3, 10, 30 and 100 airports because half of the countries have four or fewer. Click a country to open it on the plain map with one marker per airport (rose for large, amber for medium, grey for small). In the three countries with more than 200 airports (the United States, China and Canada), markers close together merge into a numbered circle that zooms in when clicked. Clicking a marker lists the airport's runways. Small territories such as French Polynesia have no outline at this scale. Data: <a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports</a>, public domain.</p>
             </Description>
             <Demo>
                 @if (_country is null)
@@ -129,6 +129,7 @@
     protected override void OnInitialized()
     {
         _story = MapStory.LoadBundledUnemployment();
+        _story.Stops = ChartPalette.Scale.Select((color, i) => new ChoroplethStop { At = i / (ChartPalette.Scale.Length - 1d), Color = color }).ToList();
         _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), "europe");
         BuildAirportMap();
     }
@@ -136,7 +137,7 @@
     // Airports (2026-10-26): the OurAirports snapshot (Data/AirportData.cs) counted per country on a choropleth; a click on a country
     // opens it on the plain map with one marker per airport, coloured by size.
     static readonly MapGeographyCatalog _geography = MapGeographyCatalog.Bundled();
-    static readonly string[] _stepColors = { "#FAF3E3", "#F5DFAF", "#EFB86E", "#E07B3C", "#C0362C", "#7A0F1C" };
+    static readonly string[] _stepColors = ChartPalette.Scale;
 
     readonly Dictionary<string, List<Airport>> _byCountry = AirportData.Airports
         .GroupBy(a => a.CountryCode).ToDictionary(g => g.Key, g => g.ToList());
@@ -202,7 +203,7 @@
             .OrderBy(f => f.Id == shape.Id)
             .Select(f => new MapShape(f.Id, f.Name, f.Polygons.SelectMany(polygon => polygon).ToList(),
                 Fill: f.Id == shape.Id ? _airportScale.Color(airports.Count, 1, _maxAirports) : "#F1F5F9",
-                Stroke: f.Id == shape.Id ? "#7A0F1C" : "#CBD5E1"))
+                Stroke: f.Id == shape.Id ? "#0c4a6e" : "#CBD5E1"))
             .ToList();
         return Task.CompletedTask;
     }
@@ -211,7 +212,7 @@
 
     void BackToWorld() { _country = null; _picked = null; }
 
-    static string TypeColor(string type) => type switch { "Large" => "#1D4ED8", "Medium" => "#0D9488", _ => "#64748B" };
+    static string TypeColor(string type) => type switch { "Large" => ChartPalette.Rose, "Medium" => ChartPalette.Amber, _ => "#64748B" };
 
     static bool Overlaps(MapFeature feature, IReadOnlyList<MapMarker> markers)
     {
@@ -269,16 +270,20 @@
     // Code tabs are verbatim
     private static class Code
     {
+        // The map scale and marker colours, printed from Components/Shared/ChartPalette.cs
+        private static string PaletteCs => "\n\n" + AppSource.Region("ChartPalette.cs", "chart-palette");
+
         public const string Story = @"<MapStoryControl Story=""_story"" Width=""960"" Height=""640"" />";
-        public const string StoryCs = @"MapStory _story = null!;
+        public static string StoryCs => @"MapStory _story = null!;
 string _europeSvg = """";
 
 protected override void OnInitialized()
 {
     _story = MapStory.LoadBundledUnemployment();
+    _story.Stops = ChartPalette.Scale.Select((color, i) => new ChoroplethStop { At = i / (ChartPalette.Scale.Length - 1d), Color = color }).ToList();
     _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), ""europe"");
     BuildAirportMap();
-}";
+}" + PaletteCs;
         public const string Airports = @"@if (_country is null)
 {
     <MapControl Choropleth=""_airportLayout"" ShapeClick=""OpenCountry"" Width=""960"" Height=""560""
@@ -312,12 +317,13 @@ else
         </div>
     }
 }";
-        public const string AirportsCs = @"MapStory _story = null!;
+        public static string AirportsCs => @"MapStory _story = null!;
 string _europeSvg = """";
 
 protected override void OnInitialized()
 {
     _story = MapStory.LoadBundledUnemployment();
+    _story.Stops = ChartPalette.Scale.Select((color, i) => new ChoroplethStop { At = i / (ChartPalette.Scale.Length - 1d), Color = color }).ToList();
     _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), ""europe"");
     BuildAirportMap();
 }
@@ -325,7 +331,7 @@ protected override void OnInitialized()
 // Airports (2026-10-26): the OurAirports snapshot (Data/AirportData.cs) counted per country on a choropleth; a click on a country
 // opens it on the plain map with one marker per airport, coloured by size.
 static readonly MapGeographyCatalog _geography = MapGeographyCatalog.Bundled();
-static readonly string[] _stepColors = { ""#FAF3E3"", ""#F5DFAF"", ""#EFB86E"", ""#E07B3C"", ""#C0362C"", ""#7A0F1C"" };
+static readonly string[] _stepColors = ChartPalette.Scale;
 
 readonly Dictionary<string, List<Airport>> _byCountry = AirportData.Airports
     .GroupBy(a => a.CountryCode).ToDictionary(g => g.Key, g => g.ToList());
@@ -391,7 +397,7 @@ Task OpenCountry(MapShape shape)
         .OrderBy(f => f.Id == shape.Id)
         .Select(f => new MapShape(f.Id, f.Name, f.Polygons.SelectMany(polygon => polygon).ToList(),
             Fill: f.Id == shape.Id ? _airportScale.Color(airports.Count, 1, _maxAirports) : ""#F1F5F9"",
-            Stroke: f.Id == shape.Id ? ""#7A0F1C"" : ""#CBD5E1""))
+            Stroke: f.Id == shape.Id ? ""#0c4a6e"" : ""#CBD5E1""))
         .ToList();
     return Task.CompletedTask;
 }
@@ -400,7 +406,7 @@ void PickAirport(MapMarker marker) => _picked = _byCountry[_country!].First(a =>
 
 void BackToWorld() { _country = null; _picked = null; }
 
-static string TypeColor(string type) => type switch { ""Large"" => ""#1D4ED8"", ""Medium"" => ""#0D9488"", _ => ""#64748B"" };
+static string TypeColor(string type) => type switch { ""Large"" => ChartPalette.Rose, ""Medium"" => ChartPalette.Amber, _ => ""#64748B"" };
 
 static bool Overlaps(MapFeature feature, IReadOnlyList<MapMarker> markers)
 {
@@ -422,26 +428,27 @@ static (GeoPoint Center, int Zoom) Fit(IReadOnlyList<GeoPoint> points, int width
         if (bottomRight.X - topLeft.X <= width - 80 && bottomRight.Y - topLeft.Y <= height - 80) return (center, zoom);
     }
     return (center, 1);
-}";
+}" + PaletteCs;
         public const string AirportsCss = @".country-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; font-size: 14px; color: #334155; }
 .marker-key { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; margin-left: auto; }
 .marker-key i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #cbd5e1; }
-.marker-key .large { background: #1D4ED8; }
-.marker-key .medium { background: #0D9488; }
+.marker-key .large { background: #e11d48; }
+.marker-key .medium { background: #d97706; }
 .marker-key .small { background: #64748B; }
 .airport-card { margin-top: 10px; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; font-size: 13px; color: #334155; }
 .airport-card p { margin: 0 0 6px; }
 .airport-card ul { margin: 0 0 6px; padding-left: 18px; }
 .airport-card a { color: #0284c7; }";
         public const string Svg = @"<div class=""map-story-static"">@((MarkupString)_europeSvg)</div>";
-        public const string SvgCs = @"MapStory _story = null!;
+        public static string SvgCs => @"MapStory _story = null!;
 string _europeSvg = """";
 
 protected override void OnInitialized()
 {
     _story = MapStory.LoadBundledUnemployment();
+    _story.Stops = ChartPalette.Scale.Select((color, i) => new ChoroplethStop { At = i / (ChartPalette.Scale.Length - 1d), Color = color }).ToList();
     _europeSvg = _story.RenderSvg(MapGeographyCatalog.Bundled(), ""europe"");
     BuildAirportMap();
-}";
+}" + PaletteCs;
     }
 }

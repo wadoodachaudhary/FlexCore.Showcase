@@ -46,15 +46,15 @@
             </Controls>
             <Demo>
                 <div class="four">
-                    <div><p class="pane-title">Arc</p><ArcGaugeControl Value="@_value" Ranges="@_ranges" AriaLabel="Utilisation" Height="300px" /></div>
+                    <div><p class="pane-title">Arc</p><ArcGaugeControl Value="@_value" Ranges="@_ranges" Color="@ChartPalette.Blue" AriaLabel="Utilisation" Height="300px" /></div>
                     <div>
                         <p class="pane-title">Circular</p>
-                        <CircularGaugeControl Value="@_value" TickCount="10" Color="#0f766e" AriaLabel="Progress" Height="300px">
+                        <CircularGaugeControl Value="@_value" TickCount="10" Color="@ChartPalette.Green" AriaLabel="Progress" Height="300px">
                             <ValueTemplate Context="g"><strong class="ring-value">@g.Value of @g.Max</strong></ValueTemplate>
                         </CircularGaugeControl>
                     </div>
-                    <div><p class="pane-title">Radial</p><RadialGaugeControl Value="@_value" Pointers="@_target" Color="#7c3aed" AriaLabel="Throughput" Height="300px" /></div>
-                    <div><p class="pane-title">Linear</p><LinearGaugeControl Value="@_value" Ranges="@_ranges" Pointers="@_target" LabelFormat="0'%'" ValueFormat="0'%'" AriaLabel="Capacity" Height="150px" /></div>
+                    <div><p class="pane-title">Radial</p><RadialGaugeControl Value="@_value" Pointers="@_target" Color="@ChartPalette.Indigo" AriaLabel="Throughput" Height="300px" /></div>
+                    <div><p class="pane-title">Linear</p><LinearGaugeControl Value="@_value" Ranges="@_ranges" Pointers="@_target" Color="@ChartPalette.Blue" LabelFormat="0'%'" ValueFormat="0'%'" AriaLabel="Capacity" Height="150px" /></div>
                 </div>
             </Demo>
         </DemoExample>
@@ -67,7 +67,7 @@
                 <ButtonControl CssClass="btn-sm" OnClick="() => _type = _type == ChartType.Candlestick ? ChartType.Ohlc : ChartType.Candlestick">Show as @(_type == ChartType.Candlestick ? "OHLC" : "candlesticks")</ButtonControl>
             </Controls>
             <Demo>
-                <StockChartControl @ref="_stock" DataSource="@_prices" Type="@_type" Start="@_firstShown" Height="400px" ShowNavigator="false" RangeChanged="r => _range = Describe(r.Start, r.End)" />
+                <StockChartControl @ref="_stock" DataSource="@_prices" Type="@_type" UpColor="@ChartPalette.Green" DownColor="@ChartPalette.Rose" Start="@_firstShown" Height="400px" ShowNavigator="false" RangeChanged="r => _range = Describe(r.Start, r.End)" />
                 <p class="result">Range: @_range</p>
             </Demo>
         </DemoExample>
@@ -136,8 +136,8 @@
 
 @code {
     private double _value = 65;
-    private readonly IReadOnlyList<GaugeRange> _ranges = [new(0, 40, "#16a34a", "Healthy"), new(40, 75, "#f59e0b", "Busy"), new(75, 100, "#dc2626", "Saturated")];
-    private readonly IReadOnlyList<GaugePointer> _target = [new(80, "#dc2626", "Target")];
+    private readonly IReadOnlyList<GaugeRange> _ranges = [new(0, 40, ChartPalette.Green, "Healthy"), new(40, 75, ChartPalette.Amber, "Busy"), new(75, 100, ChartPalette.Rose, "Saturated")];
+    private readonly IReadOnlyList<GaugePointer> _target = [new(80, ChartPalette.Rose, "Target")];
 
     private StockChartControl? _stock;
     private ChartType _type = ChartType.Candlestick;
@@ -175,32 +175,35 @@
     // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
     private static class Code
     {
+        // The palette the gauges use, printed from Components/Shared/ChartPalette.cs
+        private static string PaletteCs => "\n\n" + AppSource.Region("ChartPalette.cs", "chart-palette");
+
         public const string Gauges = @"<ButtonControl CssClass=""btn-sm"" OnClick=""() => _value = Math.Max(0, _value - 10)"" Disabled=""@(_value <= 0)"">−10</ButtonControl>
 <ButtonControl CssClass=""btn-sm"" OnClick=""() => _value = Math.Min(100, _value + 10)"" Disabled=""@(_value >= 100)"">+10</ButtonControl>
 
 <div class=""four"">
-    <div><p class=""pane-title"">Arc</p><ArcGaugeControl Value=""@_value"" Ranges=""@_ranges"" AriaLabel=""Utilisation"" Height=""300px"" /></div>
+    <div><p class=""pane-title"">Arc</p><ArcGaugeControl Value=""@_value"" Ranges=""@_ranges"" Color=""@ChartPalette.Blue"" AriaLabel=""Utilisation"" Height=""300px"" /></div>
     <div>
         <p class=""pane-title"">Circular</p>
-        <CircularGaugeControl Value=""@_value"" TickCount=""10"" Color=""#0f766e"" AriaLabel=""Progress"" Height=""300px"">
+        <CircularGaugeControl Value=""@_value"" TickCount=""10"" Color=""@ChartPalette.Green"" AriaLabel=""Progress"" Height=""300px"">
             <ValueTemplate Context=""g""><strong class=""ring-value"">@g.Value of @g.Max</strong></ValueTemplate>
         </CircularGaugeControl>
     </div>
-    <div><p class=""pane-title"">Radial</p><RadialGaugeControl Value=""@_value"" Pointers=""@_target"" Color=""#7c3aed"" AriaLabel=""Throughput"" Height=""300px"" /></div>
-    <div><p class=""pane-title"">Linear</p><LinearGaugeControl Value=""@_value"" Ranges=""@_ranges"" Pointers=""@_target"" LabelFormat=""0'%'"" ValueFormat=""0'%'"" AriaLabel=""Capacity"" Height=""150px"" /></div>
+    <div><p class=""pane-title"">Radial</p><RadialGaugeControl Value=""@_value"" Pointers=""@_target"" Color=""@ChartPalette.Indigo"" AriaLabel=""Throughput"" Height=""300px"" /></div>
+    <div><p class=""pane-title"">Linear</p><LinearGaugeControl Value=""@_value"" Ranges=""@_ranges"" Pointers=""@_target"" Color=""@ChartPalette.Blue"" LabelFormat=""0'%'"" ValueFormat=""0'%'"" AriaLabel=""Capacity"" Height=""150px"" /></div>
 </div>";
-        public const string GaugesCs = @"private double _value = 65;
+        public static string GaugesCs => @"private double _value = 65;
 
-private readonly IReadOnlyList<GaugeRange> _ranges = [new(0, 40, ""#16a34a"", ""Healthy""), new(40, 75, ""#f59e0b"", ""Busy""), new(75, 100, ""#dc2626"", ""Saturated"")];
+private readonly IReadOnlyList<GaugeRange> _ranges = [new(0, 40, ChartPalette.Green, ""Healthy""), new(40, 75, ChartPalette.Amber, ""Busy""), new(75, 100, ChartPalette.Rose, ""Saturated"")];
 
-private readonly IReadOnlyList<GaugePointer> _target = [new(80, ""#dc2626"", ""Target"")];";
+private readonly IReadOnlyList<GaugePointer> _target = [new(80, ChartPalette.Rose, ""Target"")];" + PaletteCs;
         public const string Stock = @"<ButtonControl CssClass=""btn-sm"" OnClick=""() => _stock!.SetRangeAsync(_prices[^5].DateValue, null)"">Last 5 trading days</ButtonControl>
 <ButtonControl CssClass=""btn-sm"" OnClick=""() => _stock!.SetRangeAsync(_firstShown, null)"">Last 14 trading days</ButtonControl>
 <ButtonControl CssClass=""btn-sm"" OnClick=""() => _type = _type == ChartType.Candlestick ? ChartType.Ohlc : ChartType.Candlestick"">Show as @(_type == ChartType.Candlestick ? ""OHLC"" : ""candlesticks"")</ButtonControl>
 
-<StockChartControl @ref=""_stock"" DataSource=""@_prices"" Type=""@_type"" Start=""@_firstShown"" Height=""400px"" ShowNavigator=""false"" RangeChanged=""r => _range = Describe(r.Start, r.End)"" />
+<StockChartControl @ref=""_stock"" DataSource=""@_prices"" Type=""@_type"" UpColor=""@ChartPalette.Green"" DownColor=""@ChartPalette.Rose"" Start=""@_firstShown"" Height=""400px"" ShowNavigator=""false"" RangeChanged=""r => _range = Describe(r.Start, r.End)"" />
 <p class=""result"">Range: @_range</p>";
-        public const string StockCs = @"private StockChartControl? _stock;
+        public static string StockCs => @"private StockChartControl? _stock;
 
 private ChartType _type = ChartType.Candlestick;
 
@@ -235,7 +238,7 @@ public GaugesDemo()
 }
 
 private string Describe(DateTime start, DateTime end) =>
-    $""{start:MMM d} to {end:MMM d}, {_prices.Count(p => p.DateValue >= start && p.DateValue <= end)} trading days."";";
+    $""{start:MMM d} to {end:MMM d}, {_prices.Count(p => p.DateValue >= start && p.DateValue <= end)} trading days."";" + PaletteCs;
     }
 
     private static class Vocab
@@ -264,6 +267,9 @@ private string Describe(DateTime start, DateTime end) =>
             new("Height", "Height of the main chart; the navigator adds 90 px.", "string", "\"340px\""),
             new("ValueFormat", "Numeric format of the price axis and values.", "string", "\"N2\""),
             new("ShowNavigator", "Shows the strip of closing prices with the start and end sliders.", "bool", "true"),
+            new("ColorPalette", "Handed to both inner charts: the high-low line and the navigator's closing-price line take entry 0.", "string[]?", "null"),
+            new("UpColor", "Handed to the price chart: rising candles and OHLC bars. Unset, the built-in green.", "string?", "null"),
+            new("DownColor", "Handed to the price chart: falling candles and OHLC bars. Unset, the built-in red.", "string?", "null"),
         };
         public static readonly ApiRow[] StockEvents =
         {

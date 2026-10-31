@@ -34,8 +34,8 @@
             <Description><p>Both read the same series; <code>Candlestick</code> fills the body, <code>Ohlc</code> draws ticks.</p></Description>
             <Demo>
                 <div class="two">
-                    <ChartControl Type="ChartType.Candlestick" Title="BAKE, one week of trading" Series="_candlestickSeries" Height="248px" />
-                    <ChartControl Type="ChartType.Ohlc" Title="BAKE, the same week as OHLC" Series="_candlestickSeries" Height="248px" />
+                    <ChartControl Type="ChartType.Candlestick" UpColor="@ChartPalette.Green" DownColor="@ChartPalette.Rose" Title="BAKE, one week of trading" Series="_candlestickSeries" Height="248px" />
+                    <ChartControl Type="ChartType.Ohlc" UpColor="@ChartPalette.Green" DownColor="@ChartPalette.Rose" Title="BAKE, the same week as OHLC" Series="_candlestickSeries" Height="248px" />
                 </div>
             </Demo>
         </DemoExample>
@@ -44,10 +44,10 @@
             <Description><p><code>Bullet</code> shows actual against target bands, <code>RangeColumn</code> floats a minimum to maximum bar, <code>Sankey</code> draws weighted flows between nodes.</p></Description>
             <Demo>
                 <div class="stack">
-                    <ChartControl Type="ChartType.Bullet" Title="Monthly budget, spent against planned" Series="_bulletSeries" Height="240px" />
+                    <ChartControl Type="ChartType.Bullet" ColorPalette="@ChartPalette.Site" Title="Monthly budget, spent against planned" Series="_bulletSeries" Height="240px" />
                     <div class="two">
-                        <ChartControl Type="ChartType.RangeColumn" Title="Temperature this week, low to high °C" Series="_rangeSeries" Height="232px" />
-                        <ChartControl Type="ChartType.Sankey" Title="Recycling, kg by bin and what it becomes" Series="_sankeySeries" Height="243px" />
+                        <ChartControl Type="ChartType.RangeColumn" ColorPalette="@ChartPalette.Site" Title="Temperature this week, low to high °C" Series="_rangeSeries" Height="232px" />
+                        <ChartControl Type="ChartType.Sankey" ColorPalette="@ChartPalette.Site" Title="Recycling, kg by bin and what it becomes" Series="_sankeySeries" Height="243px" />
                     </div>
                 </div>
             </Demo>
@@ -57,8 +57,8 @@
             <Description><p>One series, two gauge types. The standalone <code>ArcGaugeControl</code>, <code>CircularGaugeControl</code>, <code>RadialGaugeControl</code> and <code>LinearGaugeControl</code> have <a href="demo/gauges">a page of their own</a>.</p></Description>
             <Demo>
                 <div class="gauges">
-                    <ChartControl Type="ChartType.RadialGauge" Title="Rain barrel, percent full" Series="_gaugeSeries" Height="300px" />
-                    <ChartControl Type="ChartType.LinearGauge" Title="Same reading, linear" Series="_gaugeSeries" Height="105px" />
+                    <ChartControl Type="ChartType.RadialGauge" ColorPalette="@ChartPalette.Site" Title="Rain barrel, percent full" Series="_gaugeSeries" Height="300px" />
+                    <ChartControl Type="ChartType.LinearGauge" ColorPalette="@ChartPalette.Site" Title="Same reading, linear" Series="_gaugeSeries" Height="105px" />
                 </div>
             </Demo>
         </DemoExample>
@@ -98,7 +98,7 @@
 
     private List<ChartSeries> _bulletSeries = new()
     {
-        // one month in dollars: the dark bar is what was spent, the red line what was planned
+        // one month in dollars: the bar is what was spent, the line across it what was planned
         new ChartSeries("Household budget", ChartType.Bullet, new[]
         {
             ChartDataPoint.Bullet("Groceries", 420, 400),
@@ -145,11 +145,14 @@
     // Code tabs are verbatim
     private static class Code
     {
+        // The palette the charts pass, printed from Components/Shared/ChartPalette.cs
+        private static string PaletteCs => "\n\n" + AppSource.Region("ChartPalette.cs", "chart-palette");
+
         public const string Financial = @"<div class=""two"">
-    <ChartControl Type=""ChartType.Candlestick"" Title=""BAKE, one week of trading"" Series=""_candlestickSeries"" Height=""248px"" />
-    <ChartControl Type=""ChartType.Ohlc"" Title=""BAKE, the same week as OHLC"" Series=""_candlestickSeries"" Height=""248px"" />
+    <ChartControl Type=""ChartType.Candlestick"" UpColor=""@ChartPalette.Green"" DownColor=""@ChartPalette.Rose"" Title=""BAKE, one week of trading"" Series=""_candlestickSeries"" Height=""248px"" />
+    <ChartControl Type=""ChartType.Ohlc"" UpColor=""@ChartPalette.Green"" DownColor=""@ChartPalette.Rose"" Title=""BAKE, the same week as OHLC"" Series=""_candlestickSeries"" Height=""248px"" />
 </div>";
-        public const string FinancialCs = @"private List<ChartSeries> _candlestickSeries = new()
+        public static string FinancialCs => @"private List<ChartSeries> _candlestickSeries = new()
 {
     // BAKE is a fictional bakery chain; one trading week of open, high, low, close (the axis runs from the lowest low to the highest high)
     new ChartSeries(""BAKE"", ChartType.Candlestick, new[]
@@ -160,17 +163,17 @@
         ChartDataPoint.Financial(""Thu"", 126, 132, 120, 131),
         ChartDataPoint.Financial(""Fri"", 131, 155, 128, 149)
     })
-};";
+};" + PaletteCs;
         public const string Comparisons = @"<div class=""stack"">
-    <ChartControl Type=""ChartType.Bullet"" Title=""Monthly budget, spent against planned"" Series=""_bulletSeries"" Height=""240px"" />
+    <ChartControl Type=""ChartType.Bullet"" ColorPalette=""@ChartPalette.Site"" Title=""Monthly budget, spent against planned"" Series=""_bulletSeries"" Height=""240px"" />
     <div class=""two"">
-        <ChartControl Type=""ChartType.RangeColumn"" Title=""Temperature this week, low to high °C"" Series=""_rangeSeries"" Height=""232px"" />
-        <ChartControl Type=""ChartType.Sankey"" Title=""Recycling, kg by bin and what it becomes"" Series=""_sankeySeries"" Height=""243px"" />
+        <ChartControl Type=""ChartType.RangeColumn"" ColorPalette=""@ChartPalette.Site"" Title=""Temperature this week, low to high °C"" Series=""_rangeSeries"" Height=""232px"" />
+        <ChartControl Type=""ChartType.Sankey"" ColorPalette=""@ChartPalette.Site"" Title=""Recycling, kg by bin and what it becomes"" Series=""_sankeySeries"" Height=""243px"" />
     </div>
 </div>";
-        public const string ComparisonsCs = @"private List<ChartSeries> _bulletSeries = new()
+        public static string ComparisonsCs => @"private List<ChartSeries> _bulletSeries = new()
 {
-    // one month in dollars: the dark bar is what was spent, the red line what was planned
+    // one month in dollars: the bar is what was spent, the line across it what was planned
     new ChartSeries(""Household budget"", ChartType.Bullet, new[]
     {
         ChartDataPoint.Bullet(""Groceries"", 420, 400),
@@ -204,17 +207,17 @@ private List<ChartSeries> _sankeySeries = new()
         ChartDataPoint.Sankey(""Food"", ""Compost"", 80),
         ChartDataPoint.Sankey(""Plastic"", ""Fleece"", 50)
     })
-};";
+};" + PaletteCs;
         public const string Gauges = @"<div class=""gauges"">
-    <ChartControl Type=""ChartType.RadialGauge"" Title=""Rain barrel, percent full"" Series=""_gaugeSeries"" Height=""300px"" />
-    <ChartControl Type=""ChartType.LinearGauge"" Title=""Same reading, linear"" Series=""_gaugeSeries"" Height=""105px"" />
+    <ChartControl Type=""ChartType.RadialGauge"" ColorPalette=""@ChartPalette.Site"" Title=""Rain barrel, percent full"" Series=""_gaugeSeries"" Height=""300px"" />
+    <ChartControl Type=""ChartType.LinearGauge"" ColorPalette=""@ChartPalette.Site"" Title=""Same reading, linear"" Series=""_gaugeSeries"" Height=""105px"" />
 </div>";
-        public const string GaugesCs = @"private List<ChartSeries> _gaugeSeries = new()
+        public static string GaugesCs => @"private List<ChartSeries> _gaugeSeries = new()
 {
     new ChartSeries(""Rain barrel"", ChartType.RadialGauge, new[]
     {
         new ChartDataPoint(""Percent full"", 82.5)
     })
-};";
+};" + PaletteCs;
     }
 }

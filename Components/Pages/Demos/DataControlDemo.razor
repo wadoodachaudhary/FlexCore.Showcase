@@ -65,7 +65,7 @@
                             }
                         </GridColumnsBase>
                     </GridControl>
-                    <ChartControl Type="ChartType.Bar" Title="Amount by order" Series="@_series" YAxis="_amountAxis" Height="232px" />
+                    <ChartControl Type="ChartType.Bar" ColorPalette="@ChartPalette.Site" Title="Amount by order" Series="@_series" YAxis="_amountAxis" Height="232px" />
                 </div>
                 <pre class="csv">@_csv</pre>
                 <p class="result @(_error is null ? null : "bad")">@Status</p>
@@ -211,6 +211,9 @@
     // Code tabs are verbatim
     private static class Code
     {
+        // The palette the charts pass, printed from Components/Shared/ChartPalette.cs
+        private static string PaletteCs => "\n\n" + AppSource.Region("ChartPalette.cs", "chart-palette");
+
         public const string Frame = @"<TextBoxControl @bind-Value=""_filterText"" Placeholder=""Amount > 1000"" Width=""220px"" />
 <ButtonControl CssClass=""btn-sm btn-primary"" OnClick=""ApplyFilter"">Apply filter</ButtonControl>
 <ButtonGroupControl Items=""_sortItems"" Values=""@(new[] { _sortKey })"" ValuesChanged=""PickSort"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Sort"" />
@@ -228,11 +231,11 @@
             }
         </GridColumnsBase>
     </GridControl>
-    <ChartControl Type=""ChartType.Bar"" Title=""Amount by order"" Series=""@_series"" YAxis=""_amountAxis"" Height=""232px"" />
+    <ChartControl Type=""ChartType.Bar"" ColorPalette=""@ChartPalette.Site"" Title=""Amount by order"" Series=""@_series"" YAxis=""_amountAxis"" Height=""232px"" />
 </div>
 <pre class=""csv"">@_csv</pre>
 <p class=""result @(_error is null ? null : ""bad"")"">@Status</p>";
-        public const string FrameCs = @"// Eight orders typed as text, then converted once: Amount -> decimal, Open -> bool, Ordered -> DateTime.
+        public static string FrameCs => @"// Eight orders typed as text, then converted once: Amount -> decimal, Open -> bool, Ordered -> DateTime.
 private readonly DataControl _frame = DataControl.DataFrame(
     data: new Dictionary<string, object?>
     {
@@ -298,6 +301,6 @@ private void Refresh()
     _rows = _frame.ToGridRows().ToList();
     _series = _frame.ToChartSeries(""Order"", ""Amount"");
     _csv = _frame.ToCsv();
-}";
+}" + PaletteCs;
     }
 }

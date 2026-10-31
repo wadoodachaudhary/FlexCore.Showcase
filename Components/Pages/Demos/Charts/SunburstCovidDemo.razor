@@ -50,39 +50,39 @@
                     All Continents
                 </button>
                 <button type="button" class="btn btn-sm @(_activeContinentFilter == "Asia" ? "text-white" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "Asia" ? "#4db6ac" : "");"
+                        style="background: @(_activeContinentFilter == "Asia" ? "#0284c7" : "");"
                         @onclick='() => FilterByContinent("Asia")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#63c6c1;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#0284c7;"></span>
                     Asia (15.9M)
                 </button>
                 <button type="button" class="btn btn-sm @(_activeContinentFilter == "North America" ? "text-white" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "North America" ? "#e53935" : "");"
+                        style="background: @(_activeContinentFilter == "North America" ? "#d97706" : "");"
                         @onclick='() => FilterByContinent("North America")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#e25b45;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#d97706;"></span>
                     North America (14.6M)
                 </button>
                 <button type="button" class="btn btn-sm @(_activeContinentFilter == "Europe" ? "text-white" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "Europe" ? "#8bc34a" : "");"
+                        style="background: @(_activeContinentFilter == "Europe" ? "#059669" : "");"
                         @onclick='() => FilterByContinent("Europe")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#adc965;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#059669;"></span>
                     Europe (13.5M)
                 </button>
                 <button type="button" class="btn btn-sm @(_activeContinentFilter == "South America" ? "text-white" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "South America" ? "#5c6bc0" : "");"
+                        style="background: @(_activeContinentFilter == "South America" ? "#c026d3" : "");"
                         @onclick='() => FilterByContinent("South America")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#7C79A2;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#c026d3;"></span>
                     South America (10.7M)
                 </button>
                 <button type="button" class="btn btn-sm @(_activeContinentFilter == "Africa" ? "text-white" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "Africa" ? "#f59e0b" : "");"
+                        style="background: @(_activeContinentFilter == "Africa" ? "#6366f1" : "");"
                         @onclick='() => FilterByContinent("Africa")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#FBAF0A;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#6366f1;"></span>
                     Africa (2.1M)
                 </button>
-                <button type="button" class="btn btn-sm @(_activeContinentFilter == "Oceania" ? "text-dark" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "Oceania" ? "#FFC1A6" : "");"
+                <button type="button" class="btn btn-sm @(_activeContinentFilter == "Oceania" ? "text-white" : "btn-light border")"
+                        style="background: @(_activeContinentFilter == "Oceania" ? "#e11d48" : "");"
                         @onclick='() => FilterByContinent("Oceania")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#FFC1A6;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#e11d48;"></span>
                     Oceania (49.9K)
                 </button>
             </div>
@@ -120,7 +120,7 @@
                                           MetricName="@(_useDeathsAsMetric ? "Deaths" : "Cases")"
                                           SecondaryMetricName="@(_useDeathsAsMetric ? "Cases" : "Deaths")"
                                           CenterTitle="@(_useDeathsAsMetric ? "TOTAL DEATHS" : "TOTAL CASES")"
-                                          CenterColor="@(_useDeathsAsMetric ? "#e53935" : "#56abf6")"
+                                          CenterColor="@(_useDeathsAsMetric ? "#e11d48" : "#38bdf8")"
                                           ValueFormat="N0"
                                           EnableDrilldown="true"
                                           ShowBreadcrumb="true"
@@ -193,7 +193,7 @@
                         var pctWorld = (cases / CovidDataService.WorldTotalCases) * 100.0;
 
                         <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="d-inline-block rounded-circle" style="width:14px; height:14px; background: @(node.Color ?? "#56abf6");"></span>
+                            <span class="d-inline-block rounded-circle" style="width:14px; height:14px; background: @(node.Color ?? "#38bdf8");"></span>
                             <h5 class="mb-0 fw-bold">@node.Name</h5>
                             @if (node.CustomAttributes.TryGetValue("IsoCode", out var iso) && iso is string isoStr && !string.IsNullOrEmpty(isoStr))
                             {
@@ -529,39 +529,39 @@
                     All Continents
                 </button>
                 <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""Asia"" ? ""text-white"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""Asia"" ? ""#4db6ac"" : """");""
+                        style=""background: @(_activeContinentFilter == ""Asia"" ? ""#0284c7"" : """");""
                         @onclick='() => FilterByContinent(""Asia"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#63c6c1;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#0284c7;""></span>
                     Asia (15.9M)
                 </button>
                 <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""North America"" ? ""text-white"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""North America"" ? ""#e53935"" : """");""
+                        style=""background: @(_activeContinentFilter == ""North America"" ? ""#d97706"" : """");""
                         @onclick='() => FilterByContinent(""North America"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#e25b45;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#d97706;""></span>
                     North America (14.6M)
                 </button>
                 <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""Europe"" ? ""text-white"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""Europe"" ? ""#8bc34a"" : """");""
+                        style=""background: @(_activeContinentFilter == ""Europe"" ? ""#059669"" : """");""
                         @onclick='() => FilterByContinent(""Europe"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#adc965;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#059669;""></span>
                     Europe (13.5M)
                 </button>
                 <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""South America"" ? ""text-white"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""South America"" ? ""#5c6bc0"" : """");""
+                        style=""background: @(_activeContinentFilter == ""South America"" ? ""#c026d3"" : """");""
                         @onclick='() => FilterByContinent(""South America"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#7C79A2;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#c026d3;""></span>
                     South America (10.7M)
                 </button>
                 <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""Africa"" ? ""text-white"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""Africa"" ? ""#f59e0b"" : """");""
+                        style=""background: @(_activeContinentFilter == ""Africa"" ? ""#6366f1"" : """");""
                         @onclick='() => FilterByContinent(""Africa"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#FBAF0A;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#6366f1;""></span>
                     Africa (2.1M)
                 </button>
-                <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""Oceania"" ? ""text-dark"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""Oceania"" ? ""#FFC1A6"" : """");""
+                <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""Oceania"" ? ""text-white"" : ""btn-light border"")""
+                        style=""background: @(_activeContinentFilter == ""Oceania"" ? ""#e11d48"" : """");""
                         @onclick='() => FilterByContinent(""Oceania"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#FFC1A6;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#e11d48;""></span>
                     Oceania (49.9K)
                 </button>
             </div>
@@ -599,7 +599,7 @@
                                           MetricName=""@(_useDeathsAsMetric ? ""Deaths"" : ""Cases"")""
                                           SecondaryMetricName=""@(_useDeathsAsMetric ? ""Cases"" : ""Deaths"")""
                                           CenterTitle=""@(_useDeathsAsMetric ? ""TOTAL DEATHS"" : ""TOTAL CASES"")""
-                                          CenterColor=""@(_useDeathsAsMetric ? ""#e53935"" : ""#56abf6"")""
+                                          CenterColor=""@(_useDeathsAsMetric ? ""#e11d48"" : ""#38bdf8"")""
                                           ValueFormat=""N0""
                                           EnableDrilldown=""true""
                                           ShowBreadcrumb=""true""
@@ -672,7 +672,7 @@
                         var pctWorld = (cases / CovidDataService.WorldTotalCases) * 100.0;
 
                         <div class=""d-flex align-items-center gap-2 mb-3"">
-                            <span class=""d-inline-block rounded-circle"" style=""width:14px; height:14px; background: @(node.Color ?? ""#56abf6"");""></span>
+                            <span class=""d-inline-block rounded-circle"" style=""width:14px; height:14px; background: @(node.Color ?? ""#38bdf8"");""></span>
                             <h5 class=""mb-0 fw-bold"">@node.Name</h5>
                             @if (node.CustomAttributes.TryGetValue(""IsoCode"", out var iso) && iso is string isoStr && !string.IsNullOrEmpty(isoStr))
                             {
@@ -953,7 +953,7 @@ private void HandleNodeHover(SunburstNode? node)
             new("MetricName", "Label of the first total in the tooltip, as <code>Total Cases:</code>. Used nowhere else.", "string", "\"Cases\""),
             new("SecondaryMetricName", "Label of the second total in the tooltip, shown only when the node has a <code>SecondaryValue</code> or its <code>TotalSecondaryValue</code> is above zero.", "string", "\"Deaths\""),
             new("CenterTitle", "Upper line of the hub while the view is at <code>RootNode</code>; after a drill-down the hub shows the current node's <code>Name</code> upper-cased instead.", "string", "\"TOTAL CASES\""),
-            new("CenterColor", "Fill of the hub when the current node, the root included, has no <code>Color</code>; a node with a colour wins. Hovering a hub that can zoom out darkens the fill 15 percent.", "string", "\"#56abf6\""),
+            new("CenterColor", "Fill of the hub when the current node, the root included, has no <code>Color</code>; a node with a colour wins. Hovering a hub that can zoom out darkens the fill 15 percent.", "string", "\"#38bdf8\""),
             new("EnableDrilldown", "True: clicking a segment that has children makes it the current root, clicking the hub goes up one level, and the tooltip adds a drill hint. False: segment clicks still raise <code>OnNodeClick</code> and the hub does nothing. The breadcrumb buttons navigate either way.", "bool", "true"),
             new("ShowBreadcrumb", "Renders the pill above the drawing: a root button with <code>RootNode.Name</code>, or World, then one button per ancestor down to the current node. Each button jumps there, with or without <code>EnableDrilldown</code>.", "bool", "true"),
             new("ShowLabels", "Writes each node's <code>Name</code> along its segment, rotated to the mid angle and turned to stay readable on the left half. Segments under 0.045 radians get no label, 0.065 on ring 2; longer names are cut to about one character per 7.5 units of arc, three at least, with an ellipsis.", "bool", "true"),

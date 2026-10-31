@@ -58,30 +58,30 @@
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.67">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Bar" Title="Ice cream scoops sold in July, by flavour" Height="226px"
+                    <ChartControl Type="ChartType.Bar" ColorPalette="@ChartPalette.Site" Title="Ice cream scoops sold in July, by flavour" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 400 })"
                                   Series="@(new List<ChartSeries> { new() { Name = "Scoops", DataPoints = new() {
                                       new("Vanilla", 310), new("Chocolate", 280), new("Strawberry", 190),
                                       new("Mint", 120), new("Pistachio", 90), new("Lemon", 60) } } })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.GroupedBar" Title="Loaves and pastries sold, by day" Height="226px"
+                    <ChartControl Type="ChartType.GroupedBar" ColorPalette="@ChartPalette.Site" Title="Loaves and pastries sold, by day" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 400 })" Series="@_groupedBarSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.StackedBar" Title="Items sold per day, loaves plus pastries" Height="226px"
+                    <ChartControl Type="ChartType.StackedBar" ColorPalette="@ChartPalette.Site" Title="Items sold per day, loaves plus pastries" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 800 })" Series="@_groupedBarSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.StackedBar100" Title="Share of loaves and pastries, by day" Height="226px"
+                    <ChartControl Type="ChartType.StackedBar100" ColorPalette="@ChartPalette.Site" Title="Share of loaves and pastries, by day" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 100 })" Series="@_groupedBarSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="2" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.ComboBarLine" Title="Rooms sold and average rate in $, by month; the rate is drawn as a line too" Height="226px"
+                    <ChartControl Type="ChartType.ComboBarLine" ColorPalette="@ChartPalette.Site" Title="Rooms sold and average rate in $, by month; the rate is drawn as a line too" Height="226px"
                                   Series="@_comboSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="2" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.RangeBar" Title="Transfer time from the airport, minutes, by hotel" Height="226px"
+                    <ChartControl Type="ChartType.RangeBar" ColorPalette="@ChartPalette.Site" Title="Transfer time from the airport, minutes, by hotel" Height="226px"
                                   Series="@(new List<ChartSeries> { _transferRanges })" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -93,37 +93,37 @@
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.67">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Line" Title="Sunflower and bean height, cm by week" Height="226px"
+                    <ChartControl Type="ChartType.Line" ColorPalette="@ChartPalette.Site" Title="Sunflower and bean height, cm by week" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 80 })" Series="@_lineSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Area" Title="Sunflower height, cm by week" Height="226px"
+                    <ChartControl Type="ChartType.Area" ColorPalette="@ChartPalette.Site" Title="Sunflower height, cm by week" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 80 })"
                                   Series="@(new List<ChartSeries> { _lineSeries[0] })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Spline" Title="Sunflower height, smoothed" Height="226px"
+                    <ChartControl Type="ChartType.Spline" ColorPalette="@ChartPalette.Site" Title="Sunflower height, smoothed" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 80 })"
                                   Series="@(new List<ChartSeries> { _lineSeries[0] })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.StackedArea" Title="Stacked Area" Height="226px"
+                    <ChartControl Type="ChartType.StackedArea" ColorPalette="@ChartPalette.Site" Title="Stacked Area" Height="226px"
                                   Series="@_lineSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="2" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.StepLine" Title="Pool heater setting through the day, °C" Height="226px"
+                    <ChartControl Type="ChartType.StepLine" ColorPalette="@ChartPalette.Site" Title="Pool heater setting through the day, °C" Height="226px"
                                   YAxis="@(new ChartAxis { Min = 20, Max = 32 })" Series="@(new List<ChartSeries> { _heaterSeries })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="2" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.MultiLine" Title="Bookings per week, three desks" Height="226px"
+                    <ChartControl Type="ChartType.MultiLine" ColorPalette="@ChartPalette.Site" Title="Bookings per week, three desks" Height="226px"
                                   Series="@_deskSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="3" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.RangeArea" Title="Lisbon temperature band, °C, by month" Height="226px"
+                    <ChartControl Type="ChartType.RangeArea" ColorPalette="@ChartPalette.Site" Title="Lisbon temperature band, °C, by month" Height="226px"
                                   Series="@(new List<ChartSeries> { _lisbonRanges })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="3" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.HighLow" Title="Daily high and low, one week in Kyoto, °C" Height="226px"
+                    <ChartControl Type="ChartType.HighLow" ColorPalette="@ChartPalette.Site" Title="Daily high and low, one week in Kyoto, °C" Height="226px"
                                   Series="@(new List<ChartSeries> { _kyotoWeek })" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -144,11 +144,11 @@
                                   Series="@(new List<ChartSeries> { _pieSeries })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="2" SizeY="1">
-                    <ChartControl Type="ChartType.Funnel" Title="Sales funnel, 1,000 visits to 180 won" Height="350px"
+                    <ChartControl Type="ChartType.Funnel" ColorPalette="@ChartPalette.Site" Title="Sales funnel, 1,000 visits to 180 won" Height="350px"
                                   Series="@(new List<ChartSeries> { _funnelSeries })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="2" Column="0" SizeX="2" SizeY="1">
-                    <ChartControl Type="ChartType.Pyramid" Title="Room categories booked, 1,000 stays" Height="350px"
+                    <ChartControl Type="ChartType.Pyramid" ColorPalette="@ChartPalette.Site" Title="Room categories booked, 1,000 stays" Height="350px"
                                   Series="@(new List<ChartSeries> { _roomPyramid })" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -160,15 +160,15 @@
         <DashboardLayoutControl Columns="1" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.48">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Histogram" Title="Response time of 172 requests, ms" Height="400px"
+                    <ChartControl Type="ChartType.Histogram" ColorPalette="@ChartPalette.Site" Title="Response time of 172 requests, ms" Height="400px"
                                   YAxis="@(new ChartAxis { Max = 60 })" Series="@_histogramSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.BoxPlot" Title="Exam scores by subject, one class" Height="400px"
+                    <ChartControl Type="ChartType.BoxPlot" ColorPalette="@ChartPalette.Site" Title="Exam scores by subject, one class" Height="400px"
                                   YAxis="@(new ChartAxis { Max = 100 })" Series="@_boxPlotSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="2" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.DotPlot" Title="Complaints per 100 stays, by hotel" Height="400px"
+                    <ChartControl Type="ChartType.DotPlot" ColorPalette="@ChartPalette.Site" Title="Complaints per 100 stays, by hotel" Height="400px"
                                   Series="@(new List<ChartSeries> { _complaints })" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -180,11 +180,11 @@
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.67">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Scatter" Title="Study hours against exam score" Height="226px"
+                    <ChartControl Type="ChartType.Scatter" ColorPalette="@ChartPalette.Site" Title="Study hours against exam score" Height="226px"
                                   Series="@_scatterSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Bubble" Title="Ad spend against sales, sized by store count" Height="226px"
+                    <ChartControl Type="ChartType.Bubble" ColorPalette="@ChartPalette.Site" Title="Ad spend against sales, sized by store count" Height="226px"
                                   Series="@_bubbleSeries" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -194,7 +194,7 @@
     <TabItem HeaderText="Multivariate">
         <h2>Radar / Spider Chart</h2>
         <div class="demo-frame">
-            <ChartControl Type="ChartType.Radar" Title="Two developers' self-rated skills" Height="400px"
+            <ChartControl Type="ChartType.Radar" ColorPalette="@ChartPalette.Site" Title="Two developers' self-rated skills" Height="400px"
                           Series="@_radarSeries" />
         </div>
     </TabItem>
@@ -217,7 +217,7 @@
                                   KpiValue="3.1%" KpiLabel="Loans overdue" KpiTrend="-0.4%" Height="180px" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="2" Column="0" SizeX="1" SizeY="2">
-                    <ChartControl Type="ChartType.ArcGauge" Title="Occupancy this week, %" GaugeValue="78" GaugeMin="0" GaugeMax="100" Height="180px" />
+                    <ChartControl Type="ChartType.ArcGauge" ColorPalette="@ChartPalette.Site" Title="Occupancy this week, %" GaugeValue="78" GaugeMin="0" GaugeMax="100" Height="180px" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
@@ -228,11 +228,11 @@
         <DashboardLayoutControl Columns="1" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.48">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Waterfall" Title="Revenue to net income, $k" Height="400px"
+                    <ChartControl Type="ChartType.Waterfall" UpColor="@ChartPalette.Green" DownColor="@ChartPalette.Rose" Title="Revenue to net income, $k" Height="400px"
                                   YAxis="@(new ChartAxis { Max = 600 })" Series="@_waterfallSeries" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="1" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Pareto" Title="Defects by type, 100 logged" Height="400px"
+                    <ChartControl Type="ChartType.Pareto" ColorPalette="@ChartPalette.Site" Title="Defects by type, 100 logged" Height="400px"
                                   YAxis="@(new ChartAxis { Max = 50, TickCount = 6 })" Series="@_paretoSeries" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -242,7 +242,7 @@
     <TabItem HeaderText="Heatmap">
         <h2>Heatmap Matrix</h2>
         <div class="demo-frame">
-            <ChartControl Type="ChartType.Heatmap" Title="Office coffee machine, cups per hour" Height="400px"
+            <ChartControl Type="ChartType.Heatmap" ColorPalette="@ChartPalette.Site" Title="Office coffee machine, cups per hour" Height="400px"
                           Legend="@(new ChartLegend { Visible = false })" Series="@_heatmapSeries" />
         </div>
     </TabItem>
@@ -250,15 +250,15 @@
     <TabItem HeaderText="Sparkline">
         <h2>Inline Sparklines</h2>
         <div class="demo-frame">
-            <p>Kilometres run each day: <ChartControl Type="ChartType.Sparkline" Width="120px" Height="24px"
+            <p>Kilometres run each day: <ChartControl Type="ChartType.Sparkline" ColorPalette="@ChartPalette.Site" Width="120px" Height="24px"
                           Series="@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("", 6), new("", 9), new("", 7), new("", 11), new("", 8), new("", 12), new("", 10) } } })" /></p>
             <p>Pages read each day: <ChartControl Type="ChartType.Sparkline" Width="120px" Height="24px"
-                          ColorPalette="@(new[] { "#16a34a" })"
+                          ColorPalette="@(new[] { ChartPalette.Green })"
                           Series="@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("", 5), new("", 12), new("", 8), new("", 20), new("", 18), new("", 25), new("", 30) } } })" /></p>
             <p>Minutes late each morning: <ChartControl Type="ChartType.Sparkline" Width="120px" Height="24px"
-                          ColorPalette="@(new[] { "#dc2626" })"
+                          ColorPalette="@(new[] { ChartPalette.Rose })"
                           Series="@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("", 8), new("", 3), new("", 5), new("", 2), new("", 6), new("", 1), new("", 3) } } })" /></p>
         </div>
@@ -272,7 +272,7 @@
 <DashboardLayoutControl Columns="3" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="1">
     <DashboardLayoutPanels>
         <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-            <ChartControl Type="ChartType.GroupedBar" Title="Default card" Height="226px" YAxis="@(new ChartAxis { Max = 400 })"
+            <ChartControl Type="ChartType.GroupedBar" ColorPalette="@ChartPalette.Site" Title="Default card" Height="226px" YAxis="@(new ChartAxis { Max = 400 })"
                           Series="@_groupedBarSeries" PointHover="h => _hovered = h" />
         </DashboardLayoutPanel>
         <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
@@ -281,7 +281,7 @@
                           Series="@(new List<ChartSeries> { _colourSeries })" PointHover="h => _hovered = h" />
         </DashboardLayoutPanel>
         <DashboardLayoutPanel Row="0" Column="2" SizeX="1" SizeY="1">
-            <ChartControl Type="ChartType.Line" Title="TooltipTemplate" Height="226px" Series="@_lineSeries" PointHover="h => _hovered = h">
+            <ChartControl Type="ChartType.Line" ColorPalette="@ChartPalette.Site" Title="TooltipTemplate" Height="226px" Series="@_lineSeries" PointHover="h => _hovered = h">
                 <TooltipTemplate Context="t">
                     <div class="tip-week">@t.Label</div>
                     <div>@t.SeriesName: <b>@t.Value cm</b></div>
@@ -409,9 +409,11 @@
     ChartSeries _complaints = new() { Name = "Complaints", DataPoints = new() {
         new("Harbour", 2), new("Hilltop", 5), new("Old Town", 7), new("Beach", 1), new("Airport", 9) } };
 
-    // Tooltips example: the last context PointHover delivered, and the favourite-colour survey as a named series
+    // Tooltips example: the last context PointHover delivered, and the favourite-colour survey as a named series, each slice in the colour it names
     private ChartTooltipContext? _hovered;
-    ChartSeries _colourSeries = new() { Name = "People", DataPoints = new() { new("Blue", 42), new("Green", 30), new("Red", 24), new("Purple", 15), new("Yellow", 9) } };
+    ChartSeries _colourSeries = new() { Name = "People", DataPoints = new() {
+        new("Blue", 42) { Color = ChartPalette.Blue }, new("Green", 30) { Color = ChartPalette.Green }, new("Red", 24) { Color = ChartPalette.Rose },
+        new("Purple", 15) { Color = ChartPalette.Violet }, new("Yellow", 9) { Color = ChartPalette.Amber } } };
 
     // a bakery's week: Grouped compares the two lines per day, Stacked adds them (Saturday totals 680), StackedBar100 shows the mix
     List<ChartSeries> _groupedBarSeries = new()
@@ -430,7 +432,10 @@
     ChartSeries _pieSeries = new()
     {
         Name = "People",
-        DataPoints = new() { new("Blue", 42), new("Green", 30), new("Red", 24), new("Purple", 15), new("Yellow", 9) }
+        // each slice wears the colour it names; Yellow takes the palette amber, which holds 3:1 on white where a true yellow does not
+        DataPoints = new() {
+            new("Blue", 42) { Color = ChartPalette.Blue }, new("Green", 30) { Color = ChartPalette.Green }, new("Red", 24) { Color = ChartPalette.Rose },
+            new("Purple", 15) { Color = ChartPalette.Violet }, new("Yellow", 9) { Color = ChartPalette.Amber } }
     };
 
     ChartSeries _funnelSeries = new()
@@ -520,36 +525,39 @@
     // Code tabs are verbatim
     private static class Code
     {
+        // The palette the charts pass, printed from Components/Shared/ChartPalette.cs
+        private static string PaletteCs => "\n\n" + AppSource.Region("ChartPalette.cs", "chart-palette");
+
         public const string Gallery = @"<TabControl @bind-SelectedIndex=""_tab"" CssClass=""site-tabs"" Orientation=""TabOrientation.Horizontal"" Theme=""TabTheme.Minimal"">
     <TabItem HeaderText=""Comparison"">
         <h2>Bar Charts</h2>
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.67"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Bar"" Title=""Ice cream scoops sold in July, by flavour"" Height=""226px""
+                    <ChartControl Type=""ChartType.Bar"" ColorPalette=""@ChartPalette.Site"" Title=""Ice cream scoops sold in July, by flavour"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 400 })""
                                   Series=""@(new List<ChartSeries> { new() { Name = ""Scoops"", DataPoints = new() {
                                       new(""Vanilla"", 310), new(""Chocolate"", 280), new(""Strawberry"", 190),
                                       new(""Mint"", 120), new(""Pistachio"", 90), new(""Lemon"", 60) } } })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.GroupedBar"" Title=""Loaves and pastries sold, by day"" Height=""226px""
+                    <ChartControl Type=""ChartType.GroupedBar"" ColorPalette=""@ChartPalette.Site"" Title=""Loaves and pastries sold, by day"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 400 })"" Series=""@_groupedBarSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.StackedBar"" Title=""Items sold per day, loaves plus pastries"" Height=""226px""
+                    <ChartControl Type=""ChartType.StackedBar"" ColorPalette=""@ChartPalette.Site"" Title=""Items sold per day, loaves plus pastries"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 800 })"" Series=""@_groupedBarSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.StackedBar100"" Title=""Share of loaves and pastries, by day"" Height=""226px""
+                    <ChartControl Type=""ChartType.StackedBar100"" ColorPalette=""@ChartPalette.Site"" Title=""Share of loaves and pastries, by day"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 100 })"" Series=""@_groupedBarSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.ComboBarLine"" Title=""Rooms sold and average rate in $, by month; the rate is drawn as a line too"" Height=""226px""
+                    <ChartControl Type=""ChartType.ComboBarLine"" ColorPalette=""@ChartPalette.Site"" Title=""Rooms sold and average rate in $, by month; the rate is drawn as a line too"" Height=""226px""
                                   Series=""@_comboSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""2"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.RangeBar"" Title=""Transfer time from the airport, minutes, by hotel"" Height=""226px""
+                    <ChartControl Type=""ChartType.RangeBar"" ColorPalette=""@ChartPalette.Site"" Title=""Transfer time from the airport, minutes, by hotel"" Height=""226px""
                                   Series=""@(new List<ChartSeries> { _transferRanges })"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -561,37 +569,37 @@
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.67"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Line"" Title=""Sunflower and bean height, cm by week"" Height=""226px""
+                    <ChartControl Type=""ChartType.Line"" ColorPalette=""@ChartPalette.Site"" Title=""Sunflower and bean height, cm by week"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 80 })"" Series=""@_lineSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Area"" Title=""Sunflower height, cm by week"" Height=""226px""
+                    <ChartControl Type=""ChartType.Area"" ColorPalette=""@ChartPalette.Site"" Title=""Sunflower height, cm by week"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 80 })""
                                   Series=""@(new List<ChartSeries> { _lineSeries[0] })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Spline"" Title=""Sunflower height, smoothed"" Height=""226px""
+                    <ChartControl Type=""ChartType.Spline"" ColorPalette=""@ChartPalette.Site"" Title=""Sunflower height, smoothed"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 80 })""
                                   Series=""@(new List<ChartSeries> { _lineSeries[0] })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.StackedArea"" Title=""Stacked Area"" Height=""226px""
+                    <ChartControl Type=""ChartType.StackedArea"" ColorPalette=""@ChartPalette.Site"" Title=""Stacked Area"" Height=""226px""
                                   Series=""@_lineSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.StepLine"" Title=""Pool heater setting through the day, °C"" Height=""226px""
+                    <ChartControl Type=""ChartType.StepLine"" ColorPalette=""@ChartPalette.Site"" Title=""Pool heater setting through the day, °C"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Min = 20, Max = 32 })"" Series=""@(new List<ChartSeries> { _heaterSeries })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""2"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.MultiLine"" Title=""Bookings per week, three desks"" Height=""226px""
+                    <ChartControl Type=""ChartType.MultiLine"" ColorPalette=""@ChartPalette.Site"" Title=""Bookings per week, three desks"" Height=""226px""
                                   Series=""@_deskSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""3"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.RangeArea"" Title=""Lisbon temperature band, °C, by month"" Height=""226px""
+                    <ChartControl Type=""ChartType.RangeArea"" ColorPalette=""@ChartPalette.Site"" Title=""Lisbon temperature band, °C, by month"" Height=""226px""
                                   Series=""@(new List<ChartSeries> { _lisbonRanges })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""3"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.HighLow"" Title=""Daily high and low, one week in Kyoto, °C"" Height=""226px""
+                    <ChartControl Type=""ChartType.HighLow"" ColorPalette=""@ChartPalette.Site"" Title=""Daily high and low, one week in Kyoto, °C"" Height=""226px""
                                   Series=""@(new List<ChartSeries> { _kyotoWeek })"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -612,11 +620,11 @@
                                   Series=""@(new List<ChartSeries> { _pieSeries })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""2"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Funnel"" Title=""Sales funnel, 1,000 visits to 180 won"" Height=""350px""
+                    <ChartControl Type=""ChartType.Funnel"" ColorPalette=""@ChartPalette.Site"" Title=""Sales funnel, 1,000 visits to 180 won"" Height=""350px""
                                   Series=""@(new List<ChartSeries> { _funnelSeries })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""2"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Pyramid"" Title=""Room categories booked, 1,000 stays"" Height=""350px""
+                    <ChartControl Type=""ChartType.Pyramid"" ColorPalette=""@ChartPalette.Site"" Title=""Room categories booked, 1,000 stays"" Height=""350px""
                                   Series=""@(new List<ChartSeries> { _roomPyramid })"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -628,15 +636,15 @@
         <DashboardLayoutControl Columns=""1"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.48"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Histogram"" Title=""Response time of 172 requests, ms"" Height=""400px""
+                    <ChartControl Type=""ChartType.Histogram"" ColorPalette=""@ChartPalette.Site"" Title=""Response time of 172 requests, ms"" Height=""400px""
                                   YAxis=""@(new ChartAxis { Max = 60 })"" Series=""@_histogramSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.BoxPlot"" Title=""Exam scores by subject, one class"" Height=""400px""
+                    <ChartControl Type=""ChartType.BoxPlot"" ColorPalette=""@ChartPalette.Site"" Title=""Exam scores by subject, one class"" Height=""400px""
                                   YAxis=""@(new ChartAxis { Max = 100 })"" Series=""@_boxPlotSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.DotPlot"" Title=""Complaints per 100 stays, by hotel"" Height=""400px""
+                    <ChartControl Type=""ChartType.DotPlot"" ColorPalette=""@ChartPalette.Site"" Title=""Complaints per 100 stays, by hotel"" Height=""400px""
                                   Series=""@(new List<ChartSeries> { _complaints })"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -648,11 +656,11 @@
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.67"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Scatter"" Title=""Study hours against exam score"" Height=""226px""
+                    <ChartControl Type=""ChartType.Scatter"" ColorPalette=""@ChartPalette.Site"" Title=""Study hours against exam score"" Height=""226px""
                                   Series=""@_scatterSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Bubble"" Title=""Ad spend against sales, sized by store count"" Height=""226px""
+                    <ChartControl Type=""ChartType.Bubble"" ColorPalette=""@ChartPalette.Site"" Title=""Ad spend against sales, sized by store count"" Height=""226px""
                                   Series=""@_bubbleSeries"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -662,7 +670,7 @@
     <TabItem HeaderText=""Multivariate"">
         <h2>Radar / Spider Chart</h2>
         <div class=""demo-frame"">
-            <ChartControl Type=""ChartType.Radar"" Title=""Two developers' self-rated skills"" Height=""400px""
+            <ChartControl Type=""ChartType.Radar"" ColorPalette=""@ChartPalette.Site"" Title=""Two developers' self-rated skills"" Height=""400px""
                           Series=""@_radarSeries"" />
         </div>
     </TabItem>
@@ -685,7 +693,7 @@
                                   KpiValue=""3.1%"" KpiLabel=""Loans overdue"" KpiTrend=""-0.4%"" Height=""180px"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""2"" Column=""0"" SizeX=""1"" SizeY=""2"">
-                    <ChartControl Type=""ChartType.ArcGauge"" Title=""Occupancy this week, %"" GaugeValue=""78"" GaugeMin=""0"" GaugeMax=""100"" Height=""180px"" />
+                    <ChartControl Type=""ChartType.ArcGauge"" ColorPalette=""@ChartPalette.Site"" Title=""Occupancy this week, %"" GaugeValue=""78"" GaugeMin=""0"" GaugeMax=""100"" Height=""180px"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
         </DashboardLayoutControl>
@@ -696,11 +704,11 @@
         <DashboardLayoutControl Columns=""1"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.48"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Waterfall"" Title=""Revenue to net income, $k"" Height=""400px""
+                    <ChartControl Type=""ChartType.Waterfall"" UpColor=""@ChartPalette.Green"" DownColor=""@ChartPalette.Rose"" Title=""Revenue to net income, $k"" Height=""400px""
                                   YAxis=""@(new ChartAxis { Max = 600 })"" Series=""@_waterfallSeries"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""1"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Pareto"" Title=""Defects by type, 100 logged"" Height=""400px""
+                    <ChartControl Type=""ChartType.Pareto"" ColorPalette=""@ChartPalette.Site"" Title=""Defects by type, 100 logged"" Height=""400px""
                                   YAxis=""@(new ChartAxis { Max = 50, TickCount = 6 })"" Series=""@_paretoSeries"" />
                 </DashboardLayoutPanel>
             </DashboardLayoutPanels>
@@ -710,7 +718,7 @@
     <TabItem HeaderText=""Heatmap"">
         <h2>Heatmap Matrix</h2>
         <div class=""demo-frame"">
-            <ChartControl Type=""ChartType.Heatmap"" Title=""Office coffee machine, cups per hour"" Height=""400px""
+            <ChartControl Type=""ChartType.Heatmap"" ColorPalette=""@ChartPalette.Site"" Title=""Office coffee machine, cups per hour"" Height=""400px""
                           Legend=""@(new ChartLegend { Visible = false })"" Series=""@_heatmapSeries"" />
         </div>
     </TabItem>
@@ -718,15 +726,15 @@
     <TabItem HeaderText=""Sparkline"">
         <h2>Inline Sparklines</h2>
         <div class=""demo-frame"">
-            <p>Kilometres run each day: <ChartControl Type=""ChartType.Sparkline"" Width=""120px"" Height=""24px""
+            <p>Kilometres run each day: <ChartControl Type=""ChartType.Sparkline"" ColorPalette=""@ChartPalette.Site"" Width=""120px"" Height=""24px""
                           Series=""@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("""", 6), new("""", 9), new("""", 7), new("""", 11), new("""", 8), new("""", 12), new("""", 10) } } })"" /></p>
             <p>Pages read each day: <ChartControl Type=""ChartType.Sparkline"" Width=""120px"" Height=""24px""
-                          ColorPalette=""@(new[] { ""#16a34a"" })""
+                          ColorPalette=""@(new[] { ChartPalette.Green })""
                           Series=""@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("""", 5), new("""", 12), new("""", 8), new("""", 20), new("""", 18), new("""", 25), new("""", 30) } } })"" /></p>
             <p>Minutes late each morning: <ChartControl Type=""ChartType.Sparkline"" Width=""120px"" Height=""24px""
-                          ColorPalette=""@(new[] { ""#dc2626"" })""
+                          ColorPalette=""@(new[] { ChartPalette.Rose })""
                           Series=""@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("""", 8), new("""", 3), new("""", 5), new("""", 2), new("""", 6), new("""", 1), new("""", 3) } } })"" /></p>
         </div>
@@ -735,7 +743,7 @@
         public const string Tooltips = @"<DashboardLayoutControl Columns=""3"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""1"">
     <DashboardLayoutPanels>
         <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-            <ChartControl Type=""ChartType.GroupedBar"" Title=""Default card"" Height=""226px"" YAxis=""@(new ChartAxis { Max = 400 })""
+            <ChartControl Type=""ChartType.GroupedBar"" ColorPalette=""@ChartPalette.Site"" Title=""Default card"" Height=""226px"" YAxis=""@(new ChartAxis { Max = 400 })""
                           Series=""@_groupedBarSeries"" PointHover=""h => _hovered = h"" />
         </DashboardLayoutPanel>
         <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""1"">
@@ -744,7 +752,7 @@
                           Series=""@(new List<ChartSeries> { _colourSeries })"" PointHover=""h => _hovered = h"" />
         </DashboardLayoutPanel>
         <DashboardLayoutPanel Row=""0"" Column=""2"" SizeX=""1"" SizeY=""1"">
-            <ChartControl Type=""ChartType.Line"" Title=""TooltipTemplate"" Height=""226px"" Series=""@_lineSeries"" PointHover=""h => _hovered = h"">
+            <ChartControl Type=""ChartType.Line"" ColorPalette=""@ChartPalette.Site"" Title=""TooltipTemplate"" Height=""226px"" Series=""@_lineSeries"" PointHover=""h => _hovered = h"">
                 <TooltipTemplate Context=""t"">
                     <div class=""tip-week"">@t.Label</div>
                     <div>@t.SeriesName: <b>@t.Value cm</b></div>
@@ -758,11 +766,13 @@
     </DashboardLayoutPanels>
 </DashboardLayoutControl>
 <p class=""result"">@(_hovered is null ? ""PointHover: nothing under the pointer."" : $""PointHover: {_hovered.Title}, {_hovered.SeriesName ?? ""one series""}, {_hovered.Value}{(_hovered.Percentage is { } s ? $"", {s:0.#}% of the whole"" : """")}"")</p>";
-        public const string TooltipsCs = @"// Tooltips example: the last context PointHover delivered, and the favourite-colour survey as a named series
+        public static string TooltipsCs => @"// Tooltips example: the last context PointHover delivered, and the favourite-colour survey as a named series, each slice in the colour it names
 private ChartTooltipContext? _hovered;
-ChartSeries _colourSeries = new() { Name = ""People"", DataPoints = new() { new(""Blue"", 42), new(""Green"", 30), new(""Red"", 24), new(""Purple"", 15), new(""Yellow"", 9) } };
-// _groupedBarSeries and _lineSeries are the gallery's (see the Gallery C# tab).";
-        public const string GalleryCs = @"/// <summary>Tab named in the address, e.g. demo/charts?tab=sparkline; read when the page loads, never written back.</summary>
+ChartSeries _colourSeries = new() { Name = ""People"", DataPoints = new() {
+    new(""Blue"", 42) { Color = ChartPalette.Blue }, new(""Green"", 30) { Color = ChartPalette.Green }, new(""Red"", 24) { Color = ChartPalette.Rose },
+    new(""Purple"", 15) { Color = ChartPalette.Violet }, new(""Yellow"", 9) { Color = ChartPalette.Amber } } };
+// _groupedBarSeries and _lineSeries are the gallery's (see the Gallery C# tab)." + PaletteCs;
+        public static string GalleryCs => @"/// <summary>Tab named in the address, e.g. demo/charts?tab=sparkline; read when the page loads, never written back.</summary>
 [SupplyParameterFromQuery(Name = ""tab"")] public string? Tab { get; set; }
 private int _tab;
 private static readonly string[] TabSlugs =
@@ -823,7 +833,10 @@ List<ChartSeries> _lineSeries = new()
 ChartSeries _pieSeries = new()
 {
     Name = ""People"",
-    DataPoints = new() { new(""Blue"", 42), new(""Green"", 30), new(""Red"", 24), new(""Purple"", 15), new(""Yellow"", 9) }
+    // each slice wears the colour it names; Yellow takes the palette amber, which holds 3:1 on white where a true yellow does not
+    DataPoints = new() {
+        new(""Blue"", 42) { Color = ChartPalette.Blue }, new(""Green"", 30) { Color = ChartPalette.Green }, new(""Red"", 24) { Color = ChartPalette.Rose },
+        new(""Purple"", 15) { Color = ChartPalette.Violet }, new(""Yellow"", 9) { Color = ChartPalette.Amber } }
 };
 
 ChartSeries _funnelSeries = new()
@@ -907,6 +920,6 @@ List<ChartSeries> _heatmapSeries = new()
     new() { Name = ""Wed"", DataPoints = new() { new(""9am"", 4), new(""10am"", 7), new(""11am"", 6), new(""12pm"", 8), new(""1pm"", 5), new(""2pm"", 9), new(""3pm"", 8), new(""4pm"", 7) } },
     new() { Name = ""Thu"", DataPoints = new() { new(""9am"", 5), new(""10am"", 8), new(""11am"", 7), new(""12pm"", 6), new(""1pm"", 7), new(""2pm"", 6), new(""3pm"", 5), new(""4pm"", 4) } },
     new() { Name = ""Fri"", DataPoints = new() { new(""9am"", 6), new(""10am"", 4), new(""11am"", 5), new(""12pm"", 3), new(""1pm"", 2), new(""2pm"", 4), new(""3pm"", 3), new(""4pm"", 2) } }
-};";
+};" + PaletteCs;
     }
 }

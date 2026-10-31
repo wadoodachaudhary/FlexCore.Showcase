@@ -253,6 +253,14 @@
 .nav-dd-all { font-weight: 600; color: #0f172a; border-bottom: 1px solid #f1f5f9; border-radius: 6px 6px 0 0; margin-bottom: 4px; }
 .nav-dd-head { padding: 8px 10px 2px; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; }
 
+/* 993-1100 px (2026-10-31, Baaria): brand, menu and actions need 1,078 px, so at 1000 px the Quick Start and GitHub buttons ran
+   50 px past the edge. Dropping the group icons (the carets stay) and narrowing the side padding fits them down to the drawer's
+   992 px breakpoint. */
+@media (min-width: 993px) and (max-width: 1100px) {
+    .top-nav-bar { padding: 0 20px; }
+    .top-nav-menu ::deep .nav-menu-item .bi:not(.nav-caret) { display: none; }
+}
+
 /* ── Phone drawer (hard-coded: no FlexCore off-canvas control yet) ── */
 .nav-toggle { position: absolute; opacity: 0; pointer-events: none; }
 .nav-burger { display: none; cursor: pointer; }

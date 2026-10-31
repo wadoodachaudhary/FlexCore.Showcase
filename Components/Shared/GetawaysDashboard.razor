@@ -14,33 +14,35 @@
         <ButtonControl BareStyle="true" CssClass="gw-round-btn" IconCss="bi bi-arrow-clockwise" Title="Refresh" OnClick="Refresh" />
     </div>
 
-    @* Each card opens the Trip Requests page on its view *@
-    <div class="gw-kpis">
-        @foreach (var k in Kpis)
-        {
-            <CardControl CssClass="gw-kpi" Elevation="0">
-                <ButtonControl BareStyle="true" CssClass="gw-kpi-btn" Title="@k.Tip" OnClick="@(() => OnShowRequests.InvokeAsync(k.View))">
-                    <span class="gw-kpi-label">@k.Label</span>
-                    <span class="gw-kpi-line"><span class="gw-kpi-value">@k.Value</span> <span class="gw-kpi-note">@k.Note</span></span>
-                </ButtonControl>
-            </CardControl>
-        }
-    </div>
+    <div class="gw-overview">
+        @* Each card opens the Trip Requests page on its view *@
+        <div class="gw-kpis">
+            @foreach (var k in Kpis)
+            {
+                <CardControl CssClass="gw-kpi" Elevation="0">
+                    <ButtonControl BareStyle="true" CssClass="gw-kpi-btn" Title="@k.Tip" OnClick="@(() => OnShowRequests.InvokeAsync(k.View))">
+                        <span class="gw-kpi-label">@k.Label</span>
+                        <span class="gw-kpi-line"><span class="gw-kpi-value">@k.Value</span> <span class="gw-kpi-note">@k.Note</span></span>
+                    </ButtonControl>
+                </CardControl>
+            }
+        </div>
 
-    <CardControl CssClass="gw-card">
-        <HeaderContent>
-            <div class="gw-card-head">
-                <h4 class="gw-card-title">Trip requests by month</h4>
-                <div class="gw-card-tools">
-                    <CheckBoxControl Label="Include declined" Checked="@_withDeclined" CheckedChanged="@(v => _withDeclined = v)" />
-                    <SegmentedControl Items="_ranges" @bind-Value="_range" AriaLabel="Months shown" CssClass="gw-range" />
+        <CardControl CssClass="gw-card">
+            <HeaderContent>
+                <div class="gw-card-head">
+                    <h4 class="gw-card-title">Trip requests by month</h4>
+                    <div class="gw-card-tools">
+                        <CheckBoxControl Label="Include declined" Checked="@_withDeclined" CheckedChanged="@(v => _withDeclined = v)" />
+                        <SegmentedControl Items="_ranges" @bind-Value="_range" AriaLabel="Months shown" CssClass="gw-range" />
+                    </div>
                 </div>
-            </div>
-        </HeaderContent>
-        <ChildContent>
-            <ChartControl Type="ChartType.StackedBar" Height="420px" Series="@MonthlySeries" />
-        </ChildContent>
-    </CardControl>
+            </HeaderContent>
+            <ChildContent>
+                <ChartControl Type="ChartType.StackedBar" Height="260px" Series="@MonthlySeries" />
+            </ChildContent>
+        </CardControl>
+    </div>
 
     @* Drag a header onto the bar above the grid to group by it; double-click a trip to open the request *@
     <CardControl CssClass="gw-card">

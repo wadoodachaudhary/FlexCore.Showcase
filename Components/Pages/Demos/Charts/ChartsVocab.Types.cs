@@ -104,8 +104,8 @@ public static partial class ChartsVocab
             "Reads <code>Label</code> as the numeric X and <code>Value</code> as Y, several series in the series colour at 70 percent opacity. " +
             "600x300 viewBox, Y ticks fixed at 5, no X tick labels."),
         new("Heatmap",
-            "A grid of cells: one row per series (the series <code>Name</code> is the row label), one column per <code>Label</code> of the first series, each cell shaded by <code>Value</code> on a fixed white-to-blue ramp between the data minimum and maximum. " +
-            "<code>Category</code>, a point's <code>Color</code> and <code>ColorPalette</code> are not read. " +
+            "A grid of cells: one row per series (the series <code>Name</code> is the row label), one column per <code>Label</code> of the first series, each cell shaded by <code>Value</code> between the data minimum and maximum: from a 10 percent tint of <code>ColorPalette</code> entry 0 to the colour itself when that entry is a hex colour, otherwise on a fixed white-to-blue ramp. " +
+            "<code>Category</code>, a point's <code>Color</code> and the series colours are not read (each row is a series). " +
             "600x300 viewBox with no colour scale or legend; every row label is cut at 10 characters and every column label at 8, with no thinning."),
 
         // Ranking
@@ -141,32 +141,32 @@ public static partial class ChartsVocab
             "The same arc as <code>ArcGauge</code> plus a needle, which is drawn whether or not <code>GaugeCircular</code> is set. " +
             "Same inputs as <code>Gauge</code>. 300x300 viewBox, <code>Height</code> default 260px. Not in the gallery."),
         new("Bullet",
-            "One horizontal row per point: three fixed grey bands at 60, 85 and 100 percent of the width, a dark bar for the actual value and a red target line. " +
-            "Reads from the first series <code>Value</code> as actual and <code>Value2</code> as target (default <code>Value</code>); the scale ends at 1.2 times the largest of the two; <code>Category</code>, <code>Color</code> and <code>ColorPalette</code> are not read. " +
+            "One horizontal row per point: three fixed grey bands at 60, 85 and 100 percent of the width, a bar for the actual value (dark slate unless a point's <code>Color</code>, the series <code>Color</code> or <code>ColorPalette</code> entry 0 is set) and a target line (red unless <code>ColorPalette</code> entry 1 is set). " +
+            "Reads from the first series <code>Value</code> as actual and <code>Value2</code> as target (default <code>Value</code>); the scale ends at 1.2 times the largest of the two; <code>Category</code> is not read. " +
             "Draws on a 600 by max(120, rows x 60) viewBox with rows 50 apart and prints no numbers at all: no ticks, no values, only each row's <code>Label</code>, not cut. Not in the gallery."),
 
         // Financial
         new("Candlestick",
-            "A wick from high to low and a body from open to close per point, green when close is at or above open and red otherwise, in fixed colours. " +
+            "A wick from high to low and a body from open to close per point, green when close is at or above open and red otherwise, or <code>UpColor</code> and <code>DownColor</code> when set. " +
             "Reads from the first series <code>Value</code> = open, <code>Value2</code> = high, <code>Value3</code> = low, <code>Value4</code> = close (each defaulting to <code>Value</code>); <code>DateValue</code>, a point's <code>Color</code> and <code>ColorPalette</code> are not read. " +
             "Draws on a 600x320 viewBox, <code>Height</code> default 320px, Y ticks fixed at 5 with one decimal, the scale from the lowest low to the highest high with no padding, every point labelled, cut at 8 characters. Not in the gallery."),
         new("Ohlc",
-            "A vertical high-low line with a left tick at open and a right tick at close, green or red by direction, from the financial branch. " +
+            "A vertical high-low line with a left tick at open and a right tick at close, green or red by direction (<code>UpColor</code>, <code>DownColor</code>), from the financial branch. " +
             "Same fields as <code>Candlestick</code>: <code>Value</code> open, <code>Value2</code> high, <code>Value3</code> low, <code>Value4</code> close, first series only. " +
             "600x320 viewBox, Y ticks fixed at 5, labels cut at 8 characters. Not in the gallery."),
         new("HighLow",
-            "A single 2.5px vertical line per point from <code>Value3</code> (low) to <code>Value2</code> (high) in a fixed blue; open and close are not drawn. " +
-            "Reads the first series; a point's <code>Color</code> and <code>ColorPalette</code> are ignored. " +
+            "A single 2.5px vertical line per point from <code>Value3</code> (low) to <code>Value2</code> (high) in blue, or a point's <code>Color</code>, the series <code>Color</code> or <code>ColorPalette</code> entry 0; open and close are not drawn. " +
+            "Reads the first series. " +
             "600x320 viewBox, Y ticks fixed at 5, labels cut at 8 characters. Not in the gallery."),
 
         // Range intervals
         new("RangeBar",
-            "A vertical bar per point from <code>Value</code> (minimum) to <code>Value2</code> (maximum, default <code>Value</code>), at least 3 units tall, in a fixed blue at 85 percent opacity. " +
-            "Reads the first series; a point's <code>Color</code> and <code>ColorPalette</code> are ignored; the Y axis spans the data extent, widened by 10 either side when flat. " +
+            "A vertical bar per point from <code>Value</code> (minimum) to <code>Value2</code> (maximum, default <code>Value</code>), at least 3 units tall, at 85 percent opacity in blue, or a point's <code>Color</code>, the series <code>Color</code> or <code>ColorPalette</code> entry 0. " +
+            "Reads the first series; the Y axis spans the data extent, widened by 10 either side when flat. " +
             "600x300 viewBox, Y ticks fixed at 5, every point labelled, cut at 8 characters. " +
             "Despite the name the bars are vertical: the range branch has no horizontal variant. Not in the gallery."),
         new("RangeColumn",
-            "Drawn by the range branch with no check on the type, so it is identical to <code>RangeBar</code>: vertical minimum-to-maximum bars from <code>Value</code> and <code>Value2</code> of the first series, fixed blue, 600x300 viewBox, Y ticks fixed at 5, labels cut at 8 characters. " +
+            "Drawn by the range branch with no check on the type, so it is identical to <code>RangeBar</code>: vertical minimum-to-maximum bars from <code>Value</code> and <code>Value2</code> of the first series, same colours, 600x300 viewBox, Y ticks fixed at 5, labels cut at 8 characters. " +
             "Not in the gallery."),
         new("RangeArea",
             "Also identical to <code>RangeBar</code>: the range branch draws bars for all three range types and has no area or band variant. " +
@@ -174,8 +174,8 @@ public static partial class ChartsVocab
 
         // Flow and project
         new("Sankey",
-            "A ribbon per point from a left source node to a right target node, with curved sides, in fixed blues. " +
-            "Reads the first series: <code>Label</code> is the source, <code>Category</code> the destination, <code>Value</code> the flow (ribbon height is the flow's share of 80 percent of the plot height, at least 8 units); a point's <code>Color</code> is ignored. " +
+            "A ribbon per point from a left source node to a right target node, with curved sides, in blues unless coloured: source nodes and ribbons take the series <code>Color</code> or <code>ColorPalette</code> entry 0, target nodes entry 1, and a point's <code>Color</code> paints its own ribbon. " +
+            "Reads the first series: <code>Label</code> is the source, <code>Category</code> the destination, <code>Value</code> the flow (ribbon height is the flow's share of 80 percent of the plot height, at least 8 units). " +
             "Draws on a 650x340 viewBox, <code>Height</code> default 340px, labels not cut. " +
             "Every flow gets its own source and target node, so a name that appears in several flows is drawn once per flow rather than merged, and the column grows by 10 units per flow without being clamped to the height. Not in the gallery."),
         new("Gantt",
@@ -187,10 +187,10 @@ public static partial class ChartsVocab
         new("Waterfall",
             "Floating bars that step along a running total, joined by dashed connectors. " +
             "Reads <code>Label</code> and <code>Value</code> from the first series; every point is added to the running total, so there is no way to mark a point as a subtotal or total bar. " +
-            "Colours are a fixed green for positive and red for negative values unless a point's <code>Color</code> is set; <code>ColorPalette</code> is ignored. " +
+            "Positive steps are green and negative ones red, or <code>UpColor</code> and <code>DownColor</code>; a point's <code>Color</code> wins over both and <code>ColorPalette</code> is not read. " +
             "600x300 viewBox, Y ticks fixed at 5, <code>YAxis.Min</code>/<code>Max</code> honoured, every point labelled, cut at 8 characters."),
         new("Pareto",
-            "Falls to the bar branch: columns of the first series in data order (not sorted) plus a cumulative-percentage polyline in a fixed red, scaled so that 100 percent is the top of the plot, with no second axis. " +
+            "Falls to the bar branch: columns of the first series in data order (not sorted) plus a cumulative-percentage polyline in red (or <code>ColorPalette</code> entry 1 when the palette has one), scaled so that 100 percent is the top of the plot, with no second axis. " +
             "Reads <code>Label</code> and <code>Value</code>; with more than one series the extra series become grouped columns while the line still follows the first. " +
             "600x300 viewBox, Y ticks from <code>YAxis.TickCount</code> (default 5), every category labelled, cut at 10 characters."),
 

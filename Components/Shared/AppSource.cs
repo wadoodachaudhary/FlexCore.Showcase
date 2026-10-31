@@ -5,7 +5,8 @@ namespace FlexCore.Showcase.Components.Shared;
 
 /// <summary>
 /// Source of the home page's app window for its Razor and C# tabs (2026-10-29), and of the site-tabs rules in app.css for the Tabs &amp;
-/// accordion page's CSS tab. FlexCore.Showcase.csproj embeds the Getaways*.razor pages, Home.razor and wwwroot/app.css, so every tab
+/// accordion page's CSS tab, and of ChartPalette.cs for the chart pages' C# tabs. FlexCore.Showcase.csproj embeds the Getaways*.razor
+/// pages, ChartPalette.cs, Home.razor and wwwroot/app.css, so every tab
 /// shows the code exactly as it is built:
 /// <see cref="Markup"/> and <see cref="Code"/> split a page into its markup (after its opening maintainer comment) and the body of
 /// its @code block; <see cref="Region"/> collects the parts of a file between "code-tab:name" and "/code-tab" marker lines.

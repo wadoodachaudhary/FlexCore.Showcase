@@ -153,15 +153,15 @@
 
     private static GanttTask[] Plan() =>
     [
-        new() { Id = "design", Title = "Design", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = "#0f766e" },
-        new() { Id = "wire", Title = "Wireframes", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = "design" },
-        new() { Id = "visual", Title = "Visual design", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = "design", Predecessors = "wire" },
-        new() { Id = "build", Title = "Build", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = "#0f766e" },
-        new() { Id = "front", Title = "Front end", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = "build", Predecessors = "visual" },
-        new() { Id = "api", Title = "API", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = "build", Predecessors = "wire" },
-        new() { Id = "content", Title = "Content", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60 },
-        new() { Id = "qa", Title = "Test", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = "front,api" },
-        new() { Id = "launch", Title = "Launch", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = "qa,content", Color = "#dc2626" },
+        new() { Id = "design", Title = "Design", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = ChartPalette.Indigo },
+        new() { Id = "wire", Title = "Wireframes", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = "design", Color = ChartPalette.Blue },
+        new() { Id = "visual", Title = "Visual design", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = "design", Predecessors = "wire", Color = ChartPalette.Blue },
+        new() { Id = "build", Title = "Build", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = ChartPalette.Indigo },
+        new() { Id = "front", Title = "Front end", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = "build", Predecessors = "visual", Color = ChartPalette.Blue },
+        new() { Id = "api", Title = "API", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = "build", Predecessors = "wire", Color = ChartPalette.Blue },
+        new() { Id = "content", Title = "Content", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60, Color = ChartPalette.Blue },
+        new() { Id = "qa", Title = "Test", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = "front,api", Color = ChartPalette.Blue },
+        new() { Id = "launch", Title = "Launch", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = "qa,content", Color = ChartPalette.Rose },
     ];
 
     private readonly IReadOnlyList<GanttTask> _plan = Plan();
@@ -184,9 +184,12 @@
     // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
     private static class Code
     {
+        // The palette the tasks use, printed from Components/Shared/ChartPalette.cs
+        private static string PaletteCs => "\n\n" + AppSource.Region("ChartPalette.cs", "chart-palette");
+
         public const string Schedule = @"<GanttControl Tasks=""@_tasks"" TasksChanged=""t => _tasks = t"" AllowTaskDrag=""@_drag"" EnforceDependencies=""@_enforce"" View=""GanttView.Month"" Height=""380px"" />
 <p class=""result"">@Summary</p>";
-        public const string ScheduleCs = @"private IReadOnlyList<GanttTask> _tasks = Plan();
+        public static string ScheduleCs => @"private IReadOnlyList<GanttTask> _tasks = Plan();
 private bool _drag = true, _enforce = true;
 
 private string Summary => _tasks.Count == 0
@@ -195,16 +198,16 @@ private string Summary => _tasks.Count == 0
 
 private static GanttTask[] Plan() =>
 [
-    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = ""#0f766e"" },
-    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = ""design"" },
-    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = ""design"", Predecessors = ""wire"" },
-    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = ""#0f766e"" },
-    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = ""build"", Predecessors = ""visual"" },
-    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = ""build"", Predecessors = ""wire"" },
-    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60 },
-    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = ""front,api"" },
-    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = ""qa,content"", Color = ""#dc2626"" },
-];";
+    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = ChartPalette.Indigo },
+    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = ""design"", Color = ChartPalette.Blue },
+    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = ""design"", Predecessors = ""wire"", Color = ChartPalette.Blue },
+    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = ChartPalette.Indigo },
+    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = ""build"", Predecessors = ""visual"", Color = ChartPalette.Blue },
+    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = ""build"", Predecessors = ""wire"", Color = ChartPalette.Blue },
+    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60, Color = ChartPalette.Blue },
+    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = ""front,api"", Color = ChartPalette.Blue },
+    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = ""qa,content"", Color = ChartPalette.Rose },
+];" + PaletteCs;
         public const string Views = @"@foreach (var v in Enum.GetValues<GanttView>())
 {
     <ButtonControl CssClass=""btn-sm"" Disabled=""@(_view == v)"" OnClick=""() => _view = v"">@v</ButtonControl>
@@ -216,25 +219,25 @@ private static GanttTask[] Plan() =>
     </TaskTemplate>
 </GanttControl>
 <p class=""result"">View: @_view.</p>";
-        public const string ViewsCs = @"private readonly IReadOnlyList<GanttTask> _plan = Plan();
+        public static string ViewsCs => @"private readonly IReadOnlyList<GanttTask> _plan = Plan();
 
 private GanttView _view = GanttView.Month;
 
 private static GanttTask[] Plan() =>
 [
-    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = ""#0f766e"" },
-    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = ""design"" },
-    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = ""design"", Predecessors = ""wire"" },
-    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = ""#0f766e"" },
-    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = ""build"", Predecessors = ""visual"" },
-    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = ""build"", Predecessors = ""wire"" },
-    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60 },
-    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = ""front,api"" },
-    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = ""qa,content"", Color = ""#dc2626"" },
-];";
+    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = ChartPalette.Indigo },
+    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = ""design"", Color = ChartPalette.Blue },
+    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = ""design"", Predecessors = ""wire"", Color = ChartPalette.Blue },
+    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = ChartPalette.Indigo },
+    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = ""build"", Predecessors = ""visual"", Color = ChartPalette.Blue },
+    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = ""build"", Predecessors = ""wire"", Color = ChartPalette.Blue },
+    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60, Color = ChartPalette.Blue },
+    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = ""front,api"", Color = ChartPalette.Blue },
+    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = ""qa,content"", Color = ChartPalette.Rose },
+];" + PaletteCs;
         public const string Veto = @"<GanttControl Tasks=""@_guarded"" TasksChanged=""t => _guarded = t"" TaskChanging=""Guard"" View=""GanttView.Month"" Height=""380px"" />
 <p class=""result"">@_decision</p>";
-        public const string VetoCs = @"private IReadOnlyList<GanttTask> _guarded = Plan();
+        public static string VetoCs => @"private IReadOnlyList<GanttTask> _guarded = Plan();
 
 private string _decision = ""No changes yet."";
 
@@ -251,16 +254,16 @@ private void Guard(GanttTaskChangingArgs args)
 
 private static GanttTask[] Plan() =>
 [
-    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = ""#0f766e"" },
-    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = ""design"" },
-    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = ""design"", Predecessors = ""wire"" },
-    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = ""#0f766e"" },
-    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = ""build"", Predecessors = ""visual"" },
-    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = ""build"", Predecessors = ""wire"" },
-    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60 },
-    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = ""front,api"" },
-    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = ""qa,content"", Color = ""#dc2626"" },
-];";
+    new() { Id = ""design"", Title = ""Design"", Start = new(2026, 11, 2), End = new(2026, 11, 27), Progress = 90, Color = ChartPalette.Indigo },
+    new() { Id = ""wire"", Title = ""Wireframes"", Start = new(2026, 11, 2), End = new(2026, 11, 13), Progress = 100, ParentId = ""design"", Color = ChartPalette.Blue },
+    new() { Id = ""visual"", Title = ""Visual design"", Start = new(2026, 11, 13), End = new(2026, 11, 27), Progress = 80, ParentId = ""design"", Predecessors = ""wire"", Color = ChartPalette.Blue },
+    new() { Id = ""build"", Title = ""Build"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 35, Color = ChartPalette.Indigo },
+    new() { Id = ""front"", Title = ""Front end"", Start = new(2026, 11, 27), End = new(2026, 12, 8), Progress = 40, ParentId = ""build"", Predecessors = ""visual"", Color = ChartPalette.Blue },
+    new() { Id = ""api"", Title = ""API"", Start = new(2026, 11, 27), End = new(2026, 12, 11), Progress = 30, ParentId = ""build"", Predecessors = ""wire"", Color = ChartPalette.Blue },
+    new() { Id = ""content"", Title = ""Content"", Start = new(2026, 11, 9), End = new(2026, 11, 30), Progress = 60, Color = ChartPalette.Blue },
+    new() { Id = ""qa"", Title = ""Test"", Start = new(2026, 12, 11), End = new(2026, 12, 18), Predecessors = ""front,api"", Color = ChartPalette.Blue },
+    new() { Id = ""launch"", Title = ""Launch"", Start = new(2026, 12, 18), End = new(2026, 12, 26), Predecessors = ""qa,content"", Color = ChartPalette.Rose },
+];" + PaletteCs;
     }
 
     private static class Vocab

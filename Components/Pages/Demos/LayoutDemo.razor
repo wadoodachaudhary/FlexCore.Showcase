@@ -115,10 +115,10 @@
                             </DashboardLayoutPanel>
                         }
                         <DashboardLayoutPanel Row="ChartsRow" Column="0" SizeX="2" SizeY="3">
-                            <CardControl Elevation="0" CssClass="dash-card"><ChartControl Type="ChartType.Line" Title="Traffic" Height="200px" Series="_traffic" /></CardControl>
+                            <CardControl Elevation="0" CssClass="dash-card"><ChartControl Type="ChartType.Line" ColorPalette="@ChartPalette.Site" Title="Traffic" Height="200px" Series="_traffic" /></CardControl>
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel Row="ChartsRow" Column="2" SizeY="3">
-                            <CardControl Elevation="0" CssClass="dash-card"><ChartControl Type="ChartType.Donut" Title="Sources" Height="200px" InnerRadius="0.5" Series="_sources" /></CardControl>
+                            <CardControl Elevation="0" CssClass="dash-card"><ChartControl Type="ChartType.Donut" ColorPalette="@ChartPalette.Site" Title="Sources" Height="200px" InnerRadius="0.5" Series="_sources" /></CardControl>
                         </DashboardLayoutPanel>
                     </DashboardLayoutPanels>
                 </DashboardLayoutControl>
@@ -409,6 +409,9 @@
     // Code tabs are verbatim
     private static class Code
     {
+        // The palette the charts pass, printed from Components/Shared/ChartPalette.cs
+        private static string PaletteCs => "\n\n" + AppSource.Region("ChartPalette.cs", "chart-palette");
+
         public const string Shell = @"<div class=""frame"">
     <PageLayoutControl Height=""340px"">
         <LeftPanelControl Width=""170px"" Collapsible=""true"" @bind-Collapsed=""_leftCollapsed"">
@@ -523,16 +526,16 @@ protected override void OnInitialized() { _selected = _data[""Requests""][1]; La
             </DashboardLayoutPanel>
         }
         <DashboardLayoutPanel Row=""ChartsRow"" Column=""0"" SizeX=""2"" SizeY=""3"">
-            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Line"" Title=""Traffic"" Height=""200px"" Series=""_traffic"" /></CardControl>
+            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Line"" ColorPalette=""@ChartPalette.Site"" Title=""Traffic"" Height=""200px"" Series=""_traffic"" /></CardControl>
         </DashboardLayoutPanel>
         <DashboardLayoutPanel Row=""ChartsRow"" Column=""2"" SizeY=""3"">
-            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Donut"" Title=""Sources"" Height=""200px"" InnerRadius=""0.5"" Series=""_sources"" /></CardControl>
+            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Donut"" ColorPalette=""@ChartPalette.Site"" Title=""Sources"" Height=""200px"" InnerRadius=""0.5"" Series=""_sources"" /></CardControl>
         </DashboardLayoutPanel>
     </DashboardLayoutPanels>
 </DashboardLayoutControl>
 </div>
 <span class=""result"">@(_focus is null ? ""Three KPI cards on row 0, charts on rows 2–4."" : $""{_kpis.First(k => k.Key == _focus).Label} spans the row; the others moved down."")</span>";
-        public const string DashboardCs = @"// Dashboard: placements come from state so a click re-flows the grid.
+        public static string DashboardCs => @"// Dashboard: placements come from state so a click re-flows the grid.
 private sealed record Kpi(string Key, string Value, string Label, string Trend, string Detail);
 
 private readonly Kpi[] _kpis =
@@ -569,7 +572,7 @@ private readonly List<ChartSeries> _traffic = new()
 private readonly List<ChartSeries> _sources = new()
 {
     new() { Name = ""Traffic"", DataPoints = new() { new(""Organic"", 55), new(""Paid"", 25), new(""Referral"", 15), new(""Direct"", 5) } }
-};";
+};" + PaletteCs;
 
         public const string GridStack = @"<div class=""summary"">
     <StackLayoutControl Orientation=""FlexOrientation.Vertical"" Gap=""14px"">

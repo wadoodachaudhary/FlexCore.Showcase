@@ -27,7 +27,7 @@
 ::deep .gw-kpi-btn {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;   /* centred (2026-10-31, Baaria) */
     gap: 8px;
     width: 100%;
     padding: 14px 18px 16px;
@@ -35,14 +35,30 @@
     background: none;
     color: #0f172a;
     font: inherit;
-    text-align: left;
+    text-align: center;
     cursor: pointer;
 }
 ::deep .gw-kpi-btn:hover { background: #fafaff; }
 .gw-kpi-label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #475569; }
-.gw-kpi-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; }
+.gw-kpi-line { display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 4px 8px; }
 .gw-kpi-value { font-size: 38px; font-weight: 600; line-height: 1; letter-spacing: -0.03em; }
 .gw-kpi-note { font-size: 13.5px; color: #475569; }
+
+/* Figures beside the chart on a wide screen (2026-10-31, Baaria): the window is 780 px tall, and with figures, chart and departures
+   stacked the departures began below its edge. Side by side, the four figures share the chart card's height and Upcoming
+   departures opens with its first two rows in view. The chart card stops at 640 px: ChartControl draws on a fixed 2:1 canvas,
+   520 px wide at its 260 px height, so a wider card would only add blank sides. */
+.gw-overview { display: flex; flex-direction: column; gap: 18px; }
+@media (min-width: 1200px) {
+    .gw-overview { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 640px); gap: 14px; }
+    .gw-overview .gw-kpis { grid-template-columns: minmax(0, 1fr); grid-auto-rows: 1fr; gap: 12px; }
+    ::deep .fx-card.gw-kpi { display: flex; flex-direction: column; }
+    ::deep .gw-kpi .fx-card-body { flex: 1; display: flex; }
+    ::deep .gw-kpi-btn { justify-content: center; gap: 6px; padding: 10px 18px 12px; }
+}
+/* The chart writes its axis labels as font-size="10" on that canvas, about 8.7 px at 260 px tall; a CSS size beats the attribute,
+   and 14 canvas units come out near 12 px, the legend's size */
+::deep .fx-chart svg text { font-size: 14px; }
 
 ::deep .fx-card.gw-card { border-radius: 12px; overflow: visible; }
 ::deep .gw-card > .fx-card-header { padding: 12px 18px; border-radius: 12px 12px 0 0; }
