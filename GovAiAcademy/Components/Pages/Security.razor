@@ -1,0 +1,52 @@
+@page "/security"
+
+<PageTitle>Security — Gov AI Academy</PageTitle>
+
+<h1>Security</h1>
+<p class="lede">
+    This application is built for public-sector training. The demo you are running is a sample.
+    It is not an official government system.
+</p>
+
+<h2>What is already in place</h2>
+<ul class="fact-list">
+    <li>HTTPS redirection and HSTS when the site is not in Development.</li>
+    <li>Security headers: nosniff, no framing, a referrer policy, and a content security policy that still allows the Blazor circuit.</li>
+    <li>Antiforgery on the Blazor endpoints.</li>
+    <li>Forwarded headers so Azure App Service can tell the app the public request was HTTPS.</li>
+    <li>No client secret, certificate, or connection string in source control.</li>
+    <li>Sample people use <code>example.com</code> addresses. Offices are fictional.</li>
+    <li>Roster and attendance live in memory. A restart clears marks made during the demo.</li>
+</ul>
+
+<h2>What you must not put in this demo</h2>
+<AlertControl Severity="AlertSeverity.Warning" Title="Keep real work out of the sample">
+    Do not type controlled unclassified information, personal data, non-public procurement files, or live security logs into the lab editor or any prompt box.
+    Class packets in the catalog are fictional.
+</AlertControl>
+
+<h2>Entra ID for a government tenant</h2>
+<p>
+    Production sign-in should be Microsoft Entra ID, not the sample account list.
+    Set <code>Authentication:Mode</code> to <code>EntraId</code>. The production settings file already does that.
+    This build does not call Microsoft Entra yet. Adding the package without a tenant would fail closed at startup, so the handshake is documented and left for the host agency.
+</p>
+<ol class="fact-list">
+    <li>Ask the tenant administrator which cloud the workforce tenant is in. Do not guess.</li>
+    <li>Azure Government, including many GCC High tenants, uses <code>https://login.microsoftonline.us/</code>. Commercial tenants use <code>https://login.microsoftonline.com/</code>.</li>
+    <li>Register a single-tenant web app. Redirect URI: <code>https://&lt;academy-host&gt;/signin-oidc</code>. Front-channel logout: <code>https://&lt;academy-host&gt;/signout-callback-oidc</code>.</li>
+    <li>Create app roles named Learner, Instructor, and Administrator. Assign them to groups.</li>
+    <li>Store the client secret or certificate in Key Vault. Expose it to the app as <code>Authentication__Entra__ClientSecret</code>. Never commit the value.</li>
+    <li>Add the <code>Microsoft.Identity.Web</code> package and the authentication middleware shown in the Academy README.</li>
+    <li>Delegated permissions to start with: <code>openid</code>, <code>profile</code>, <code>email</code>, and <code>User.Read</code>. Add more only if a reviewed design needs them.</li>
+</ol>
+
+<h2>Hosting notes</h2>
+<ul class="fact-list">
+    <li>Deploy to a separate App Service. Do not publish this app onto <code>flexcore</code> or <code>flexcore-showcase</code>.</li>
+    <li>Turn on HTTPS only, TLS 1.2 or higher, and disable FTP.</li>
+    <li>Blazor Server keeps a circuit on one instance. The Bicep template turns on client affinity. Scale-out later needs Azure SignalR Service or another backplane.</li>
+    <li>Put the app behind the agency network controls you already use. The Bicep sample does not create a private endpoint.</li>
+</ul>
+
+<p><a class="text-link" href="curriculum">How approved courses are designed</a></p>

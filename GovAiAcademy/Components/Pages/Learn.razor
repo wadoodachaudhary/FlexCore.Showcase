@@ -1,0 +1,97 @@
+@page "/learn"
+@inject AcademyStore Store
+@inject AcademyAuthState Auth
+
+<PageTitle>My learning — Gov AI Academy</PageTitle>
+
+<h1>My learning</h1>
+
+@if (!Auth.IsSignedIn || Auth.Current is null)
+{
+    <AlertControl Severity="AlertSeverity.Info" Title="Sign in to see your classes">
+        Use a sample learner account. Jordan Hale is already enrolled in two class groups.
+    </AlertControl>
+    <p><a class="text-link" href="signin">Sign in</a></p>
+}
+else
+{
+    <p class="lede">
+        @Auth.Current.DisplayName, @Auth.Current.JobTitle at @Auth.Current.Agency.
+        Completion needs instructor-recorded attendance and the required exercises. You cannot mark your own attendance.
+    </p>
+
+    <TabControl>
+        <TabItem HeaderText="Classes">
+            @if (_enrollments.Count == 0)
+            {
+                <p>You are not in a class group yet. <a href="catalog">Browse approved courses</a> and request a seat.</p>
+            }
+            @foreach (var row in _enrollments)
+            {
+                <div class="note-box" style="margin-bottom:12px;">
+                    <h2 style="margin-top:0;">@row.CourseTitle</h2>
+                    <p>@row.CohortName · @row.Level · @row.Delivery</p>
+                    <p>Next or latest meeting: @row.NextSession.ToString("MMMM d, yyyy") — @row.NextSessionTitle</p>
+                    <ProgressBarControl Value="@row.ProgressPercent" Title="Progress toward completion" Status="@row.ProgressNote" />
+                    <p><a class="text-link" href="@($"learn/{row.CourseId}")">Open lab</a> · <a href="@($"courses/{row.CourseId}")">Course details</a></p>
+                </div>
+            }
+        </TabItem>
+        <TabItem HeaderText="Attendance">
+            <p>This is the instructor’s record. If a meeting is not marked, it has not been taken yet or the roll is still open.</p>
+            <GridControl TValue="RosterRow" DataSource="_attendance" AllowSorting="true" AllowFiltering="true"
+                         AllowSelection="true" Height="360px" EnableHover="true">
+                <GridColumnsBase>
+                    <GridColumn Field="@nameof(RosterRow.SessionTitle)" HeaderText="Meeting" Width="280px" />
+                    <GridColumn Field="@nameof(RosterRow.SessionDate)" HeaderText="Date" Width="140px" Type="ColumnType.Date" Format="d" />
+                    <GridColumn Field="@nameof(RosterRow.Status)" HeaderText="Attendance" Width="140px" />
+                </GridColumnsBase>
+            </GridControl>
+        </TabItem>
+        <TabItem HeaderText="Exercises">
+            <p>Check an exercise when you have done the task in the lab. This does not replace attendance.</p>
+            @foreach (var course in _courses)
+            {
+                <h2>@course.Title</h2>
+                <div class="check-list">
+                    @foreach (var exercise in course.Exercises)
+                    {
+                        var id = exercise.Id;
+                        <CheckBoxControl Checked="@Store.IsExerciseComplete(Auth.Current.Id, id)"
+                                         CheckedChanged="@(done => Toggle(id, done))"
+                                         Label="@exercise.Title" />
+                    }
+                </div>
+            }
+        </TabItem>
+    </TabControl>
+}
+
+@code {
+    private List<EnrollmentRow> _enrollments = [];
+    private List<RosterRow> _attendance = [];
+    private List<Course> _courses = [];
+
+    protected override void OnInitialized() => Reload();
+
+    private void Reload()
+    {
+        if (Auth.Current is null)
+            return;
+        _enrollments = Store.EnrollmentsFor(Auth.Current.Id).ToList();
+        _attendance = Store.AttendanceFor(Auth.Current.Id).ToList();
+        _courses = _enrollments
+            .Select(e => Store.FindCourse(e.CourseId))
+            .Where(c => c is not null)
+            .Cast<Course>()
+            .ToList();
+    }
+
+    private void Toggle(string exerciseId, bool done)
+    {
+        if (Auth.Current is null)
+            return;
+        Store.SetExerciseComplete(Auth.Current.Id, exerciseId, done);
+        Reload();
+    }
+}

@@ -1,0 +1,162 @@
+@page "/"
+@inject AcademyStore Store
+
+<PageTitle>Gov AI Academy</PageTitle>
+
+<section class="hero">
+    <p class="muted" style="color:#d6e4ee;margin-bottom:6px;">For public-sector officers</p>
+    <h1>Instructor-led AI classes for the work you already do</h1>
+    <p class="lede">
+        Gov AI Academy is a place to run live classes for government staff, from non-technical officers to technical evaluators.
+        Approved courses are applied practice with an instructor. They are not a shelf of videos.
+    </p>
+    <div class="button-row">
+        <a class="text-link" href="catalog">Browse courses</a>
+        <a class="text-link" href="curriculum">See how a course gets approved</a>
+        <a class="text-link" href="signin">Sign in with a sample account</a>
+    </div>
+</section>
+
+<h2>Who the classes are for</h2>
+<p>You do not need to be a programmer. Each approved course names the job it is built for.</p>
+<div class="card-grid">
+    <CardControl Title="Foundation" Subtitle="Non-technical officers" Elevation="1">
+        <p>Writers, coordinators, and program staff practice on their own memos and status notes. The instructor stays in the room.</p>
+    </CardControl>
+    <CardControl Title="Practitioner" Subtitle="Role paths" Elevation="1">
+        <p>Policy, acquisition, cybersecurity, data, and program leads practice the judgment their job already requires.</p>
+    </CardControl>
+    <CardControl Title="Advanced / technical" Subtitle="Evaluators and duty officers" Elevation="1">
+        <p>Staff who review pilots or queues practice confirmation, logging, and stop rules. They do not train models in class.</p>
+    </CardControl>
+</div>
+
+<h2>Security posture</h2>
+<AlertControl Severity="AlertSeverity.Info" Title="Gov-ready defaults, sample data today">
+    This demo uses HTTPS redirection, security headers, and an Entra ID configuration path.
+    Sign-in here is a development stand-in. No client secret is stored in the repository.
+    <a href="security">Read the security notes</a>.
+</AlertControl>
+
+<div class="kpi-grid">
+    <ChartControl Type="ChartType.KpiCard" KpiValue="@_approved" KpiLabel="Approved courses" KpiTrend="Above baseline" Height="120px" />
+    <ChartControl Type="ChartType.KpiCard" KpiValue="@_cohorts" KpiLabel="Live class groups" KpiTrend="Sample roster" Height="120px" />
+    <ChartControl Type="ChartType.KpiCard" KpiValue="@_paths" KpiLabel="Role paths" KpiTrend="Policy to cyber" Height="120px" />
+</div>
+
+<h2>What an approved class looks like</h2>
+<p>Use the steps to see the order. You can move between them.</p>
+<StepperControl Steps="_steps" @bind-Value="_step" Linear="false" AriaLabel="How a class works" />
+<div class="note-box" style="margin-top:12px;">
+    <h3>@_steps[_step].Title</h3>
+    <p>@_steps[_step].Description</p>
+</div>
+
+<h2>Sample catalog at a glance</h2>
+<div class="split">
+    <ChartControl Type="ChartType.Bar" Title="Approved courses by level" Height="260px" Series="_levelSeries" />
+    <ChartControl Type="ChartType.Donut" Title="Approved courses by delivery" Height="260px" InnerRadius="0.55" Series="_deliverySeries" />
+</div>
+
+<h2>Attendance already on the sample roster</h2>
+<p>Rates count meetings already held. Present and excused both count. Future meetings are not in the rate yet.</p>
+<ChartControl Type="ChartType.Bar" Title="Credited attendance so far" Height="280px" Series="_attendanceSeries" />
+
+<h2>A class week, in order</h2>
+<TimelineControl>
+    <TimelineItemControl Title="Before class" Time="Agency prep" PointColor="BadgeVariant.Info">
+        The training lead swaps in local templates, the approved-tool list, and a redacted work sample.
+    </TimelineItemControl>
+    <TimelineItemControl Title="Live meetings" Time="Instructor-led" PointColor="BadgeVariant.Primary">
+        Learners practice in a cohort. The instructor records attendance at each meeting.
+    </TimelineItemControl>
+    <TimelineItemControl Title="Exercises" Time="Applied" PointColor="BadgeVariant.Success">
+        Required exercises are checked off. A recording, by itself, does not complete the course.
+    </TimelineItemControl>
+</TimelineControl>
+
+@code {
+    private readonly List<WizardStepDescriptor> _steps =
+    [
+        new()
+        {
+            Key = "join",
+            Title = "Join a live class group",
+            Description = "You enroll in a cohort: a class that meets together online, in person, or both. A recording library is not an approved course."
+        },
+        new()
+        {
+            Key = "practice",
+            Title = "Practice on your own work",
+            Description = "Labs use your role, your template, and your approved tools. The instructor shows where to swap in agency examples."
+        },
+        new()
+        {
+            Key = "attendance",
+            Title = "The instructor records attendance",
+            Description = "Completion is verified by attendance. Present or excused meetings count. An unexcused absence blocks completion."
+        },
+        new()
+        {
+            Key = "checklist",
+            Title = "Finish the exercise checklist",
+            Description = "Each required exercise is a guided task. Checking the box is part of completion, together with attendance."
+        }
+    ];
+
+    private int _step;
+    private string _approved = "0";
+    private string _cohorts = "0";
+    private string _paths = "0";
+    private List<ChartSeries> _levelSeries = [];
+    private List<ChartSeries> _deliverySeries = [];
+    private List<ChartSeries> _attendanceSeries = [];
+
+    protected override void OnInitialized()
+    {
+        var approved = Store.Courses.Where(c => c.Approval == ApprovalStatus.Approved).ToList();
+        _approved = approved.Count.ToString();
+        _cohorts = Store.Cohorts.Count.ToString();
+        _paths = approved.Select(c => c.Role).Distinct().Count().ToString();
+
+        _levelSeries =
+        [
+            new ChartSeries
+            {
+                Name = "Courses",
+                DataPoints = Enum.GetValues<CourseLevel>()
+                    .Select(level => new ChartDataPoint(ShortLevel(level), approved.Count(c => c.Level == level)))
+                    .ToList()
+            }
+        ];
+        _deliverySeries =
+        [
+            new ChartSeries
+            {
+                Name = "Delivery",
+                DataPoints = approved
+                    .GroupBy(c => c.Delivery)
+                    .Select(g => new ChartDataPoint(AcademyLabels.Delivery(g.Key), g.Count()))
+                    .ToList()
+            }
+        ];
+        _attendanceSeries =
+        [
+            new ChartSeries
+            {
+                Name = "Percent credited",
+                DataPoints = Store.AttendanceRates()
+                    .Select(p => new ChartDataPoint(p.CohortName, p.PresentRate))
+                    .ToList()
+            }
+        ];
+    }
+
+    private static string ShortLevel(CourseLevel level) => level switch
+    {
+        CourseLevel.Foundation => "Foundation",
+        CourseLevel.Practitioner => "Practitioner",
+        CourseLevel.AdvancedTechnical => "Advanced",
+        _ => level.ToString()
+    };
+}

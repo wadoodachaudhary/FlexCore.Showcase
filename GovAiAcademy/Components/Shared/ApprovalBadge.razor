@@ -1,0 +1,12 @@
+@if (Status == ApprovalStatus.Approved)
+{
+    <BadgeControl Text="Approved" Variant="BadgeVariant.Success" />
+}
+else
+{
+    <BadgeControl Text="In review — not approved" Variant="BadgeVariant.Warning" />
+}
+
+@code {
+    [Parameter, EditorRequired] public ApprovalStatus Status { get; set; }
+}
