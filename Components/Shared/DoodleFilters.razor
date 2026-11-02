@@ -1,0 +1,21 @@
+@namespace FlexCore.Showcase.Components.Shared
+
+@* Hand-drawn look for the site's doodles (2026-10-28, Baaria: "all animations should have a hand-drawn effect"). Three copies of
+   one wobble filter that differ only in their noise seed: a doodle at rest uses fx-hand, and while it plays (app.css, .doodle)
+   it flicks between the three, the "boiling line" of hand-drawn animation. Rendered once by MainLayout; a zero-size SVG rather than
+   display:none, because some browsers ignore filters inside an undisplayed SVG. *@
+<svg class="doodle-filters" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+        @foreach (var (id, seed) in _filters)
+        {
+            <filter id="@id" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="@seed" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        }
+    </defs>
+</svg>
+
+@code {
+    private static readonly (string Id, int Seed)[] _filters = [("fx-hand", 3), ("fx-hand-b", 7), ("fx-hand-c", 12)];
+}

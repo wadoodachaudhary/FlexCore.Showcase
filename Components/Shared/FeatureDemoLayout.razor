@@ -127,7 +127,9 @@
     private readonly List<DocSection> _sections = new();   // DocSections inside Documentation (2026-10-25)
 
     protected override void OnParametersSet() =>
-        _crumbs = new() { new("Home", ""), new(Category, CategoryHref), new(Title) };
+        _crumbs = Title == Category
+            ? new() { new("Home", ""), new(Title) }                              // an overview page is its own category
+            : new() { new("Home", ""), new(Category, CategoryHref), new(Title) };
 
     /// <summary>Called by each DemoExample on init; feeds the "On this page" list.</summary>
     public void Register(string id, string title)

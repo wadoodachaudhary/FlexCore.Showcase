@@ -3,10 +3,8 @@
 @inject NotificationService Notifications
 @inject IReportDataExecutor ReportData
 
-@* 2026-10-23 (developer meeting point 5, chart label clutter): the Inventory Allocation pie has four slices instead of five so its
-   legend, an HTML flex row of 12 px entries about 100 px wide with 12 px gaps, stays on one line in the 575 px column at 1280 px
-   ("Finishes (8%)" wrapped to a second row); the shares are rebalanced to 40/25/20/15. The pie draws no slice labels, so the
-   share stays in the legend text. The "charts" string in the code tab below is kept by hand and still matches the markup. *@
+@* 2026-10-28 (Baaria): the agency's pages are named in its own voice (Razor Sharp Trip Requests) and the window title is the
+   agency's name. 2026-10-29 (Baaria): the Sales (charts) and Front Desk (ribbon) pages were removed; the Dashboard carries a chart. *@
 
 @* 2026-10-25 (Baaria, SC-344): the hero grid is a travel agency's quote desk, Inbox — Trip Requests. It replaced an example whose
    banner text, columns and names came from an earlier custom-quote inbox. Same grid features as before (1,000 windowed rows, frozen
@@ -23,24 +21,39 @@
    cards above the grid name the controls. Rows get an opaque background in app.css: frozen cells use background-color: inherit,
    and a row with no background let the scrolled cells show through the Request column. *@
 
-<PageTitle>FlexCore — Enterprise Blazor Component Suite for .NET</PageTitle>
+<PageTitle>FlexCore: the Blazor toolbox that gets data right.</PageTitle>
 
 <div class="landing-container">
-    <!-- ── 1. Catchy One-Liner Before Grid ────────────────────────── -->
+    @* 1. Hero *@
     <div class="top-hero-compact">
-        <div class="hero-tagline-badge">
-            <span class="badge-pulse"></span>
-            <span>FlexCore v@_flexCoreVersion Enterprise Suite &bull; .NET 10 &bull; C# and SVG rendering &bull; No npm or third-party JavaScript</span>
-        </div>
+        @* 2026-10-28 (Baaria): hero rewritten. Each claim is checked: 100,000 rows on /demo/grid/row-selection-50k, Crystal import
+           via CrystalXmlReportLoader (XML exports), 137 standalone controls counted in the launch audit, both packages MIT.
+           The pill cycles grids, charts, reports in CSS (Home.razor.css, "word pill"); screen readers get the plain sentence.
+           Headline chosen by Baaria 2026-10-28 from the toolbox ideas. *@
         <h1 class="hero-oneliner">
-            Enterprise Blazor data grid with row windowing for large datasets, in-grid editing and built-in Excel export.
+            <span class="visually-hidden">The Blazor toolbox that does grids, charts and reports right.</span>
+            <span aria-hidden="true">The Blazor toolbox <br class="hero-br-lg" />that does <br class="hero-br-sm" /><span class="text-nowrap"><span class="word-pill"><span class="word-pill-mark"></span><span class="word-pill-words"><span>grids</span><span>charts</span><span>reports</span></span></span> right.</span></span>
         </h1>
+        <p class="hero-sub">
+            130+ Blazor controls for data-heavy apps.<br class="hero-br-lg" />
+            Written in C#, ready to drop straight into your project.
+        </p>
+        @* Two calls to action under the hero (2026-10-28, after notion.com). Plain links, not ButtonControl: it renders a <button>
+           with no Href, and these must stay real links (new tab, crawlers). "Quick Start" matches the top-bar button. "Documentation"
+           opens the component catalog: each control's page carries its parameter tables and code, and there is no separate docs site. *@
+        <div class="hero-actions">
+            <a href="get-started" class="hero-btn hero-btn-primary">Quick Start</a>
+            <a href="components" class="hero-btn hero-btn-secondary">Documentation</a>
+        </div>
     </div>
 
-    <!-- ── 2. Grid Brought Right to the Top ───────────────────────── -->
+    @* 2. The app window (2026-10-29, Baaria, after the app demo on blazor.radzen.com): Razor Sharp Getaways as a working app, a
+       sidebar of pages, a top bar with the new-request bell and a profile menu, and a + button. The four former tabs are four of
+       its pages; Dashboard and Itinerary are their own components (Shared/GetawaysDashboard.razor, GetawaysBookings.razor). Every
+       page works; only Settings, Help and the profile menu's items answer with a "not in this demo" note. *@
     <section id="live-showcase" class="showcase-section">
         <div class="showcase-shell">
-            <!-- Window titlebar (desktop app style) -->
+            @* Window title bar *@
             <div class="window-titlebar">
                 <div class="window-controls">
                     <span class="window-dot dot-red"></span>
@@ -49,59 +62,108 @@
                 </div>
                 <div class="window-title">
                     <span class="bi bi-window-sidebar"></span>
-                    <span>Inbox — Trip Requests</span>
+                    <span>Razor Sharp Getaways</span>
                 </div>
                 <div class="window-tags">
-                    <span>FlexCore Grid v@_flexCoreVersion • .NET 10 • 1,000 Rows Virtualized</span>
+                    <TabStripControl Items="_viewTabs" SelectedIndex="_codeTab" SelectedIndexChanged="SetCodeTab" OnTabClose="@(_ => SetCodeTab(0))"
+                                     CssClass="hero-view-tabs site-tabs" Orientation="TabOrientation.Horizontal" Theme="TabTheme.Minimal" ShowOrientationMenu="false" />
                 </div>
             </div>
 
-            <!-- Hint Subtitle Banner -->
-            <div class="grid-banner-hint">
-                <span class="bi bi-info-circle-fill" style="color: #0284c7;"></span>
-                <span><strong>Quote desk:</strong> trip requests arrive from the booking site. Double-click a request to open the quote editor, or type a quote straight into the grid.</span>
-            </div>
-
-            <!-- Showcase Top Bar / Tabs -->
-            <div class="showcase-header">
-                <div class="showcase-tabs">
-                    <button type="button" class="@($"tab-btn {(_activeTab == "grid" ? "active" : "")}")" @onclick="@(() => _activeTab = "grid")">
-                        <span class="bi bi-table"></span> FlexGrid (Trip Requests)
-                    </button>
-                    <button type="button" class="@($"tab-btn {(_activeTab == "charts" ? "active" : "")}")" @onclick="@(() => _activeTab = "charts")">
-                        <span class="bi bi-bar-chart-line"></span> 30+ SVG Charts
-                    </button>
-                    <button type="button" class="@($"tab-btn {(_activeTab == "ribbon" ? "active" : "")}")" @onclick="@(() => _activeTab = "ribbon")">
-                        <span class="bi bi-menu-button-wide"></span> Office Ribbon
-                    </button>
-                    <button type="button" class="@($"tab-btn {(_activeTab == "reports" ? "active" : "")}")" @onclick="@(() => _activeTab = "reports")">
-                        <span class="bi bi-file-earmark-spreadsheet"></span> Enterprise Reporting
-                    </button>
-                </div>
-
-                <div class="showcase-controls">
-                    <TabStripControl Items="_viewTabs" SelectedIndex="@(_showCode ? 1 : 0)" SelectedIndexChanged="@(i => _showCode = i == 1)" CssClass="hero-view-tabs" />
-                </div>
-            </div>
-
-            <!-- Showcase Active Tab Content -->
-            <div class="showcase-body">
-                @* 2026-10-24 (Baaria): the Razor code is a tab over the example, not a drawer under it. The live example stays
-                   mounted while hidden, so the grid keeps its state when the reader switches back. *@
-                @if (_showCode)
-                {
-                    <div class="code-drawer">
-                        <div class="code-header">
-                            <span>Razor markup for the @(_activeTab.ToUpper()) tab</span>
-                            <button type="button" class="btn-copy-code" @onclick="CopyActiveCode">
-                                @(_copiedCode ? "✓ Copied!" : "📋 Copy Code")
-                            </button>
-                        </div>
-                        <pre><code>@GetActiveCodeSnippet()</code></pre>
+            <div class="@($"gw-app {(_navCollapsed ? "gw-nav-collapsed" : "")} {(_navOpen ? "gw-nav-open" : "")}")">
+                <aside class="gw-sidebar">
+                    <div class="gw-brand">
+                        <span class="gw-brand-mark bi bi-airplane-fill"></span>
+                        <span class="gw-brand-name">Razor Sharp Getaways</span>
                     </div>
+                    <TabStripControl Items="_navItems" SelectedIndex="@NavIndex" SelectedIndexChanged="@(i => Go(AppPages[i].Key))"
+                                     Orientation="TabOrientation.Vertical" Theme="TabTheme.Minimal" ShowOrientationMenu="false"
+                                     AriaLabel="Pages" CssClass="gw-nav" />
+                    <ButtonControl BareStyle="true" CssClass="gw-nav-extra" IconCss="bi bi-gear" Title="Settings" OnClick="@(() => NotInDemo("Settings"))">
+                        <span class="gw-nav-extra-text">Settings</span>
+                    </ButtonControl>
+                    <div class="gw-sidebar-foot">Razor Sharp Getaways v1.0<br />Built with FlexCore @_flexCoreVersion</div>
+                </aside>
+                @if (_navOpen)
+                {
+                    <div class="gw-scrim" @onclick="@(() => _navOpen = false)"></div>
                 }
-                <div class="@(_showCode ? "showcase-live is-hidden" : "showcase-live")">
-                @if (_activeTab == "grid")
+
+                <div class="gw-main">
+                    <AppBarControl CssClass="gw-appbar">
+                        <StartContent>
+                            <ButtonControl BareStyle="true" CssClass="gw-icon-btn" IconCss="bi bi-list" Title="Show or hide the menu" OnClick="ToggleMenu" />
+                            <span class="gw-page-title">@CurrentPage.Title</span>
+                        </StartContent>
+                        <EndContent>
+                            <ButtonControl @ref="_bell" BareStyle="true" CssClass="gw-icon-btn gw-bell" Title="Newest trip requests" DropDownCssClass="gw-menu gw-menu-wide">
+                                <ChildContent>
+                                    <span class="bi bi-bell"></span>
+                                    <BadgeControl IsDot="true" Variant="BadgeVariant.Danger" CssClass="gw-bell-dot" />
+                                </ChildContent>
+                                <DropDownContent>
+                                    <div class="gw-menu-head">Newest trip requests</div>
+                                    @foreach (var r in NewestRequests)
+                                    {
+                                        <ButtonControl BareStyle="true" CssClass="gw-menu-item gw-menu-request" OnClick="@(() => OpenRequestFromBell(r))">
+                                            <span class="agent-avatar" style="background:@r.AvatarBg">@r.AvatarInitials</span>
+                                            <span class="gw-menu-request-text"><strong>@r.Destination</strong> for @r.Traveller<small>@r.Request · @r.TripTypeName</small></span>
+                                        </ButtonControl>
+                                    }
+                                    <ButtonControl BareStyle="true" CssClass="gw-menu-item gw-menu-all" OnClick="@(() => { _bell?.CloseDropDown(); ShowRequests("New requests"); })">Show all new requests</ButtonControl>
+                                </DropDownContent>
+                            </ButtonControl>
+                            <ButtonControl BareStyle="true" CssClass="gw-icon-btn gw-help" IconCss="bi bi-question-circle" Title="Help" OnClick="@(() => NotInDemo("Help"))" />
+                            <ButtonControl @ref="_profile" BareStyle="true" CssClass="gw-profile" Title="Pippa Larkspur" DropDownCssClass="gw-menu">
+                                <ChildContent>
+                                    <AvatarControl Text="PL" AlternativeText="Pippa Larkspur" Size="34px" CssClass="gw-avatar" />
+                                    <span class="gw-profile-name">Pippa Larkspur</span>
+                                    <span class="bi bi-chevron-down gw-profile-caret"></span>
+                                </ChildContent>
+                                <DropDownContent>
+                                    @foreach (var (text, icon) in _profileMenu)
+                                    {
+                                        <ButtonControl BareStyle="true" CssClass="gw-menu-item" IconCss="@icon" OnClick="@(() => { _profile?.CloseDropDown(); NotInDemo(text); })">@text</ButtonControl>
+                                    }
+                                </DropDownContent>
+                            </ButtonControl>
+                        </EndContent>
+                    </AppBarControl>
+
+                    @if (_activeTab == "grid")
+                    {
+                        <div class="grid-banner-hint">
+                            <span class="bi bi-info-circle-fill" style="color: #0284c7;"></span>
+                            <span><strong>Quote desk:</strong> trip requests arrive from the booking site. Double-click a request to open the quote editor, or type a quote straight into the grid.</span>
+                        </div>
+                    }
+
+                    @* The page *@
+                    <div class="showcase-body gw-page">
+                        @* 2026-10-24 (Baaria): the Razor code is a tab over the example, not a drawer under it. The live page stays
+                           mounted while hidden, so the grid keeps its state when the reader switches back. *@
+                        @if (_codeTab > 0)
+                        {
+                            <div class="code-drawer">
+                                <div class="code-header">
+                                    <span>@(_codeTab == 2 ? "C#" : "Razor") for the @CurrentPage.Nav page</span>
+                                    <button type="button" class="btn-copy-code" @onclick="CopyActiveCode">
+                                        @(_copiedCode ? "✓ Copied!" : "📋 Copy Code")
+                                    </button>
+                                </div>
+                                <pre><code>@GetActiveCodeSnippet()</code></pre>
+                            </div>
+                        }
+                        <div class="@(_codeTab > 0 ? "showcase-live is-hidden" : "showcase-live")">
+                @if (_activeTab == "dashboard")
+                {
+                    <GetawaysDashboard Requests="_requests" OnShowRequests="ShowRequests" OnOpenRequest="OpenRequest" />
+                }
+                else if (_activeTab == "bookings")
+                {
+                    <GetawaysBookings Requests="_requests" />
+                }
+                else if (_activeTab == "grid")
                 {
                     <div class="grid-card-toolbar">
                         <div class="toolbar-left">
@@ -122,7 +184,7 @@
                                 <TextBoxControl Value="@_gridSearchTerm"
                                                 ValueChanged="@(v => { _gridSearchTerm = v ?? ""; StateHasChanged(); })"
                                                 placeholder="Search requests, destinations, agents..."
-                                                CssClass="grid-search-input" />
+                                                CssClass="grid-search-input" UpdateOnInput="true" />
                             </div>
                         </div>
 
@@ -179,6 +241,7 @@
                         </div>
                     </div>
 
+                    @* code-tab:grid *@
                     <GridControl TValue="TripRequest" DataSource="@FilteredRequests"
                                  @ref="_grid"
                                  AllowSelection="true"
@@ -299,6 +362,7 @@
                             </GridColumn>
                         </GridColumnsBase>
                     </GridControl>
+                    @* /code-tab *@
 
                     <div class="grid-status-footer">
                         <div class="status-left">
@@ -411,53 +475,9 @@
                         </div>
                     }
                 }
-                else if (_activeTab == "charts")
-                {
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-                        <div>
-                            <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #0f172a;">Quarterly Revenue vs. Target (Pure SVG)</h4>
-                            <ChartControl Type="ChartType.Bar" Title="Performance Overview" Height="280px" Series="@_quarterlySeries" />
-                        </div>
-                        <div>
-                            <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #0f172a;">Material Distribution Breakdown</h4>
-                            <ChartControl Type="ChartType.Pie" Title="Inventory Allocation" Height="280px" Series="@_pieSeries" />
-                        </div>
-                    </div>
-                }
-                else if (_activeTab == "ribbon")
-                {
-                    <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
-                        <RibbonControl>
-                            <RibbonTab Title="Home">
-                                <RibbonGroup Title="Clipboard">
-                                    <RibbonButton Text="Paste" Icon="bi-clipboard" OnClick="@OnPaste" />
-                                    <RibbonButton Text="Copy" Icon="bi-files" OnClick="@OnCopy" />
-                                </RibbonGroup>
-                                <RibbonGroup Title="Actions">
-                                    <RibbonButton Text="New Order" Icon="bi-plus-circle" OnClick="@OnNewOrder" />
-                                    <RibbonButton Text="Save Batch" Icon="bi-save" OnClick="@OnSaveBatch" />
-                                </RibbonGroup>
-                                <RibbonGroup Title="Export">
-                                    <RibbonButton Text="Excel (XLSX)" Icon="bi-file-earmark-excel" OnClick="@OnExportRibbonExcel" />
-                                    <RibbonButton Text="Print PDF" Icon="bi-printer" OnClick="@OnPrintPdf" />
-                                </RibbonGroup>
-                            </RibbonTab>
-                            <RibbonTab Title="View &amp; Filter">
-                                <RibbonGroup Title="Display Options">
-                                    <RibbonButton Text="Toggle Grid" Icon="bi-table" OnClick="@OnToggleGrid" />
-                                    <RibbonButton Text="Freeze Headers" Icon="bi-pin-angle" OnClick="@OnFreezeHeaders" />
-                                </RibbonGroup>
-                            </RibbonTab>
-                        </RibbonControl>
-                        <div style="padding: 24px; background: #fafbfc; text-align: center; color: #64748b;">
-                            <p style="margin: 0; font-size: 14px;">
-                                💡 <strong>Interactive Ribbon:</strong> Click any of the ribbon buttons above to see live event handling and toast notifications!
-                            </p>
-                        </div>
-                    </div>
-                }
                 else if (_activeTab == "reports")
                 {
+                    @* code-tab:reports *@
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                             <div>
@@ -466,7 +486,7 @@
                                     Load Crystal Reports (.rpt XML), bind session parameters, and stream to screen or print without Crystal runtime dependencies.
                                 </p>
                             </div>
-                            <a href="demo/reports/package-costs" class="btn-filter-pill" style="background:#0284c7; color:#fff; text-decoration:none;">
+                            <a href="demo/reports/package-costs" class="btn-filter-pill" style="background:var(--brand-button); color:#fff; text-decoration:none;">
                                 Open Full Report Demo &rarr;
                             </a>
                         </div>
@@ -488,23 +508,200 @@
                             </div>
                         </div>
                     </div>
+                    @* /code-tab *@
                 }
+                        </div>
+                    </div>
+
+                    @* The + button: create a request, or jump to the page that makes a booking or an invoice *@
+                    <FabMenuControl Items="_fabItems" Title="Create" CssClass="gw-fab" />
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ── 3. Most Popular UI Components & Component Directory ── -->
-    <ComponentCatalogDirectory />
+    @* Four-colour divider between home sections (2026-10-29, Baaria), the bar that sits under each page title *@
+    <div class="section-divider" aria-hidden="true"></div>
+
+    @* ── 3. The four big workhorses (2026-10-28, Baaria). They replace the six small workhorse cards on this page; the components
+       page keeps those. Every line is checked: 100,000 rows (/demo/grid/row-selection-50k); 42 values in ChartType;
+       CrystalXmlReportLoader, DrillDownFilter and ReportDesignerCanvasControl in FlexCore/Reports; SchedulerView has Day, Week, Month,
+       Timeline and Agenda, and Gantt is its own control. The pictures are plain SVG, decoration only, in the logo's four colours.
+       The heading is a plain section heading with a hand-drawn chequered flag beside it (it replaced a dark finish-line ribbon that
+       read as cartoonish); the flag waves each time the heading scrolls into view: fxToggleClassWhenVisible (App.razor) adds
+       is-playing and Home.razor.css does the rest. The picture sits left of the heading text, like the crane and the scale below. *@
+    <section class="workhorses-section">
+        <div class="doodle-head workhorses-head" @ref="_workhorsesHead">
+            <svg class="doodle finish-flag" viewBox="0 0 170 150" aria-hidden="true">
+                <g class="flag-sway">
+                    <path d="M37 142 C38 110 39 62 40 16" fill="none" stroke="#0f172a" stroke-width="4" stroke-linecap="round" />
+                    <circle cx="40" cy="12" r="5" fill="#0f172a" />
+                    @for (var col = 0; col < FlagColumns; col++)
+                    {
+                        var c = col;
+                        <g class="flag-col" style="@($"--d: {c * 90}ms; --a: {1 + c * 2}px")">
+                            @foreach (var cell in _flagCells.Where(f => f.Col == c))
+                            {
+                                <polygon points="@cell.Points" fill="@(cell.Dark ? "#0f172a" : "#ffffff")" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                            }
+                        </g>
+                    }
+                </g>
+                <g class="flag-wind" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M157 34 q5 -3 10 0" />
+                    <path d="M155 54 q6 -3 12 0" />
+                    <path d="M158 74 q4 -2 8 0" />
+                </g>
+                <path d="M17 143 q10 -4 20 0 t20 0" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+            <h2 class="section-title">Everything you need to cross the finish line</h2>
+        </div>
+
+        <div class="workhorse-grid">
+            <a href="demo/grid" class="workhorse-card">
+                <div class="workhorse-art blue" aria-hidden="true">
+                    <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                        <rect x="20" y="14" width="200" height="16" rx="4" fill="#0284c7" opacity="0.85" />
+                        @for (var i = 0; i < 5; i++)
+                        {
+                            <rect x="20" y="@(36 + i * 15)" width="200" height="11" rx="3" fill="@(i == 2 ? "#7dd3fc" : "#ffffff")" />
+                            <rect x="26" y="@(39 + i * 15)" width="34" height="5" rx="2" fill="#38bdf8" opacity="0.7" />
+                            <rect x="72" y="@(39 + i * 15)" width="58" height="5" rx="2" fill="#cbd5e1" />
+                            <rect x="150" y="@(39 + i * 15)" width="36" height="5" rx="2" fill="#cbd5e1" />
+                        }
+                    </svg>
+                </div>
+                <div class="workhorse-body">
+                    <h3 class="workhorse-name"><span class="workhorse-tile blue"><span class="bi bi-table"></span></span> Data Grid</h3>
+                    <p class="workhorse-desc">Scroll 100,000 rows, type straight into cells, then export the lot to Excel.</p>
+                    <ul class="workhorse-chips">
+                        <li>Virtual scrolling</li><li>Frozen columns</li><li>Tree grid</li><li>Excel export</li>
+                    </ul>
+                    <span class="workhorse-link">Explore the grid &rarr;</span>
+                </div>
+            </a>
+
+            <a href="demo/charts" class="workhorse-card">
+                <div class="workhorse-art indigo" aria-hidden="true">
+                    <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                        <line x1="24" y1="104" x2="216" y2="104" stroke="#c7d2fe" stroke-width="2" />
+                        @{ var bars = new[] { 38, 56, 44, 70, 62, 84 }; }
+                        @for (var i = 0; i < bars.Length; i++)
+                        {
+                            <rect x="@(34 + i * 30)" y="@(104 - bars[i])" width="18" height="@bars[i]" rx="3" fill="#818cf8" opacity="0.75" />
+                        }
+                        <polyline points="43,58 73,40 103,50 133,26 163,32 193,12" fill="none" stroke="#4338ca" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div class="workhorse-body">
+                    <h3 class="workhorse-name"><span class="workhorse-tile indigo"><span class="bi bi-pie-chart-fill"></span></span> Charts</h3>
+                    <p class="workhorse-desc">35+ chart types drawn in SVG from C#, from sparklines and gauges to Sankey diagrams.</p>
+                    <ul class="workhorse-chips">
+                        <li>Bar &amp; line</li><li>Pie &amp; donut</li><li>Gauges</li><li>Financial</li>
+                    </ul>
+                    <span class="workhorse-link">Explore the charts &rarr;</span>
+                </div>
+            </a>
+
+            <a href="demo/reports/package-costs" class="workhorse-card">
+                <div class="workhorse-art green" aria-hidden="true">
+                    <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                        <rect x="70" y="8" width="100" height="108" rx="6" fill="#ffffff" stroke="#6ee7b7" stroke-width="2" />
+                        <rect x="82" y="20" width="52" height="7" rx="2" fill="#059669" />
+                        @for (var i = 0; i < 4; i++)
+                        {
+                            <rect x="82" y="@(40 + i * 14)" width="44" height="5" rx="2" fill="#cbd5e1" />
+                            <rect x="136" y="@(40 + i * 14)" width="22" height="5" rx="2" fill="#6ee7b7" />
+                        }
+                        <line x1="82" y1="98" x2="158" y2="98" stroke="#059669" stroke-width="2" />
+                        <rect x="130" y="103" width="28" height="6" rx="2" fill="#059669" />
+                    </svg>
+                </div>
+                <div class="workhorse-body">
+                    <h3 class="workhorse-name"><span class="workhorse-tile green"><span class="bi bi-file-earmark-richtext"></span></span> Reports</h3>
+                    <p class="workhorse-desc">Bring your Crystal Reports across and run them in the browser, with parameters and drill-down.</p>
+                    <ul class="workhorse-chips">
+                        <li>Crystal import</li><li>Parameters</li><li>Drill-down</li><li>Report designer</li>
+                    </ul>
+                    <span class="workhorse-link">Explore the reports &rarr;</span>
+                </div>
+            </a>
+
+            <a href="demo/scheduler" class="workhorse-card">
+                <div class="workhorse-art sky" aria-hidden="true">
+                    <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                        <rect x="20" y="12" width="200" height="14" rx="4" fill="#0ea5e9" opacity="0.85" />
+                        @for (var c = 0; c < 7; c++)
+                        {
+                            <line x1="@(20 + c * 200 / 7)" y1="30" x2="@(20 + c * 200 / 7)" y2="110" stroke="#bae6fd" stroke-width="1" />
+                        }
+                        <rect x="24" y="36" width="50" height="14" rx="3" fill="#38bdf8" />
+                        <rect x="82" y="56" width="78" height="14" rx="3" fill="#7dd3fc" />
+                        <rect x="110" y="34" width="44" height="14" rx="3" fill="#0369a1" opacity="0.8" />
+                        <rect x="168" y="76" width="46" height="14" rx="3" fill="#38bdf8" />
+                        <rect x="40" y="90" width="64" height="14" rx="3" fill="#bae6fd" />
+                    </svg>
+                </div>
+                <div class="workhorse-body">
+                    <h3 class="workhorse-name"><span class="workhorse-tile sky"><span class="bi bi-calendar-week"></span></span> Scheduler</h3>
+                    <p class="workhorse-desc">Day, week, month, timeline and agenda views, plus a Gantt chart for the long jobs.</p>
+                    <ul class="workhorse-chips">
+                        <li>Day &amp; week</li><li>Month</li><li>Timeline</li><li>Gantt</li>
+                    </ul>
+                    <span class="workhorse-link">Explore the scheduler &rarr;</span>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    @* ── 4. The component directory ── *@
+    @* Four-colour divider between home sections (2026-10-29, Baaria), the bar that sits under each page title *@
+    <div class="section-divider" aria-hidden="true"></div>
+    <ComponentCatalogDirectory ShowWorkhorses="false" />
 
 
-    <!-- ── 5. Why Choose FlexCore: Key Architectural Pillars ───────── -->
-    <section class="pillars-section">
+    @* 5. Pillars, on the page's one coloured band (2026-10-28, Baaria, after the stats bar and blue band on telerik.com): a green
+       strip of numbers straddles the top of a full-width indigo band, both colours from the logo. The numbers are checked: 137
+       standalone controls (launch audit), 42 ChartType values and 100,000 rows on /demo/grid/row-selection-50k. Three since
+       2026-10-29: Baaria dropped the fourth (first "0 npm packages", then "MIT licensed on NuGet"). *@
+    <div class="stats-strip">
+        <div class="stat"><span class="stat-num">130+</span><span class="stat-label">Blazor controls</span></div>
+        <div class="stat"><span class="stat-num">35+</span><span class="stat-label">chart types</span></div>
+        <div class="stat"><span class="stat-num">100K</span><span class="stat-label">rows in one grid</span></div>
+    </div>
+    <section class="pillars-section brand-band">
         <div class="section-header">
-            <span class="section-tag">Enterprise Architecture</span>
-            <h2 class="section-title">Engineered for Enterprise Demand</h2>
+            <div class="doodle-head" @ref="_pillarsHead">
+                @* Crane in place of the 🏗️ emoji (2026-10-28): white ink for the indigo band. It lowers the FlexCore logo to the ground and
+                   hoists it back with a swing when the heading scrolls into view. The cable and load are clipped at the jib so the cable
+                   never shows above it. *@
+                <svg class="doodle crane-doodle" viewBox="0 0 170 150" aria-hidden="true">
+                    <defs><clipPath id="crane-below-jib"><rect x="0" y="31" width="170" height="125" /></clipPath></defs>
+                    <g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M40 140 V30 M52 140 V30" stroke-width="3" />
+                        <path d="M40 140 L52 122 L40 104 L52 86 L40 68 L52 50 L40 32" stroke-width="2" />
+                        <path d="M22 30 H156" stroke-width="3" />
+                        <path d="M46 30 V10 M46 10 L22 30 M46 10 L156 30" stroke-width="2" />
+                        <path d="M20 141 q12 -4 24 0 t24 0 M98 141 q12 -4 22 0 t22 0" stroke-width="2.5" />
+                    </g>
+                    <rect x="22" y="31" width="12" height="10" rx="2" fill="#ffffff" />
+                    <rect x="113" y="27" width="14" height="7" rx="2" fill="#ffffff" />
+                    <g clip-path="url(#crane-below-jib)">
+                        <g class="cr-load">
+                            <path d="M120 0 V62" stroke="#ffffff" stroke-width="2" />
+                            <path d="M120 62 v5 a4 4 0 1 1 -4 4 M120 70 L108 74 M120 70 L132 74" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+                            <rect x="106" y="74" width="28" height="28" rx="5" fill="#ffffff" />
+                            <rect x="109" y="77" width="10" height="10" rx="2" fill="#0284c7" />
+                            <rect x="121" y="77" width="10" height="10" rx="2" fill="#38bdf8" />
+                            <rect x="109" y="89" width="10" height="10" rx="2" fill="#6366f1" />
+                            <rect x="121" y="89" width="10" height="10" rx="2" fill="#10b981" />
+                        </g>
+                    </g>
+                </svg>
+                <h2 class="section-title">Engineered for Enterprise Demand</h2>
+            </div>
             <p class="section-desc">
-                Everything you need to deliver high-performance applications with the familiar productivity of desktop controls and the modern power of Blazor.
+                The desktop-app power business users expect, rebuilt for the browser in Blazor.
             </p>
         </div>
 
@@ -519,9 +716,9 @@
 
             <div class="pillar-card">
                 <div class="pillar-icon purple">🛡️</div>
-                <h3 class="pillar-title">No Third-Party JavaScript</h3>
+                <h3 class="pillar-title">No npm, No Bundler</h3>
                 <p class="pillar-desc">
-                    Rendering is C# and SVG. No npm packages or webpack. The library ships its own interop scripts for focus, scrolling and clipboard, loaded on demand.
+                    Controls render in C# and SVG. The core package ships its own scripts and loads each one only when a control needs it. The separate PDF package bundles pdf.js and pdf-lib.
                 </p>
             </div>
 
@@ -529,7 +726,7 @@
                 <div class="pillar-icon green">🏢</div>
                 <h3 class="pillar-title">Legacy VB / WinForms Migration</h3>
                 <p class="pillar-desc">
-                    Engineered with 1-to-1 paradigm compatibility for VB6, WinForms, ActiveX grids, and Crystal Reports modernizations. Migrate decades of logic without rewrites.
+                    For teams moving VB6 and WinForms apps to the web: MDI windows, a classic VB6 look for the tree view, and a report writer that runs Crystal Reports XML exports as tabular reports.
                 </p>
             </div>
 
@@ -559,11 +756,35 @@
         </div>
     </section>
 
-    <!-- ── 6. Comparison Matrix (Side-by-Side Evaluation) ─────────── -->
+    @* 6. Comparison table *@
     <section class="comparison-section">
         <div class="section-header">
-            <span class="section-tag">Feature Comparison</span>
-            <h2 class="section-title">How FlexCore Compares</h2>
+            <div class="doodle-head" @ref="_compareHead">
+                @* Balance scale in place of the ⚖️ emoji (2026-10-28): the beam rocks when the heading scrolls into view and settles with
+                   the FlexCore logo's pan low and the feather's pan high. The pans stay level: they move up and down with the beam ends
+                   (Home.razor.css works out each pan's offset from the beam angle). *@
+                <svg class="doodle scale-doodle" viewBox="0 0 170 150" aria-hidden="true">
+                    <path d="M85 128 V34" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+                    <path d="M62 140 L108 140 L99 128 L71 128 Z" fill="#ffffff" stroke="#0f172a" stroke-width="3" stroke-linejoin="round" />
+                    <circle cx="85" cy="30" r="5" fill="#0f172a" />
+                    <g class="sc-beam"><path d="M30 34 H140" stroke="#0f172a" stroke-width="4" stroke-linecap="round" /></g>
+                    <g class="sc-pan sc-left">
+                        <path d="M30 34 L16 82 M30 34 L44 82" fill="none" stroke="#0f172a" stroke-width="2" />
+                        <rect x="20" y="61" width="10" height="10" rx="2" fill="#0284c7" />
+                        <rect x="31" y="61" width="10" height="10" rx="2" fill="#38bdf8" />
+                        <rect x="20" y="72" width="10" height="10" rx="2" fill="#6366f1" />
+                        <rect x="31" y="72" width="10" height="10" rx="2" fill="#10b981" />
+                        <path d="M12 82 Q30 100 48 82 Z" fill="#ffffff" stroke="#0f172a" stroke-width="3" stroke-linejoin="round" />
+                    </g>
+                    <g class="sc-pan sc-right">
+                        <path d="M140 34 L126 82 M140 34 L154 82" fill="none" stroke="#0f172a" stroke-width="2" />
+                        <path d="M131 80 C137 66 147 59 155 56 C151 65 144 74 131 80 Z" fill="#ffffff" stroke="#0f172a" stroke-width="2" stroke-linejoin="round" />
+                        <path d="M131 80 L151 60" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M122 82 Q140 100 158 82 Z" fill="#ffffff" stroke="#0f172a" stroke-width="3" stroke-linejoin="round" />
+                    </g>
+                </svg>
+                <h2 class="section-title">How FlexCore Compares</h2>
+            </div>
             <p class="section-desc">
                 See why engineering teams choose FlexCore over bloated JS wrappers and rigid enterprise licensing.
             </p>
@@ -627,9 +848,41 @@
         </div>
     </section>
 
-    <!-- ── 7. Bottom Call to Action & Install Banner ──────────────── -->
+    @* Four-colour divider between home sections (2026-10-29, Baaria), the bar that sits under each page title *@
+    <div class="section-divider" aria-hidden="true"></div>
+
+    @* 7. Call to action *@
     <div class="cta-banner">
-        <h2>Ready to Build Lightning-Fast Blazor Apps?</h2>
+        <div class="doodle-head" @ref="_ctaHead">
+            @* Rocket in place of the 🚀 emoji (2026-10-28), white ink for the dark banner, beside the heading like the other doodles.
+               When the banner scrolls into view it rumbles, the flame flares, it lifts off with speed lines and puffs of smoke, hovers
+               and settles back on its pad. Its window is the FlexCore logo on a white plate, like the crane's load (2026-10-29). *@
+            <svg class="doodle rocket-doodle" viewBox="0 0 170 150" aria-hidden="true">
+                <g class="rk-smoke" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M50 140 a8 8 0 0 1 16 -2 a7 7 0 0 1 12 2" />
+                    <path d="M92 140 a7 7 0 0 1 12 -2 a8 8 0 0 1 16 2" />
+                </g>
+                <path d="M40 143 q15 -4 30 0 t30 0 t30 0" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                <g class="rk-rocket">
+                    <g class="rk-flame">
+                        <path d="M76 104 Q85 138 94 104 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" />
+                        <path d="M80 104 Q85 124 90 104 Z" fill="#ffffff" />
+                    </g>
+                    <path d="M68 78 L54 102 L69 98 Z M102 78 L116 102 L101 98 Z" fill="#6366f1" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" />
+                    <path d="M85 16 C101 32 105 60 102 98 L68 98 C65 60 69 32 85 16 Z" fill="#0d3b66" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" />
+                    <rect x="74" y="41" width="22" height="22" rx="4" fill="#ffffff" />
+                    <rect x="77" y="44" width="7" height="7" rx="2" fill="#0284c7" />
+                    <rect x="86" y="44" width="7" height="7" rx="2" fill="#38bdf8" />
+                    <rect x="77" y="53" width="7" height="7" rx="2" fill="#6366f1" />
+                    <rect x="86" y="53" width="7" height="7" rx="2" fill="#10b981" />
+                    <path d="M74 98 h22 v6 h-22 Z" fill="#ffffff" />
+                </g>
+                <g class="rk-lines" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M46 84 v18" /><path d="M124 84 v18" /><path d="M56 106 v12" /><path d="M114 106 v12" />
+                </g>
+            </svg>
+            <h2>Ready to Build Lightning-Fast Blazor Apps?</h2>
+        </div>
         <p>
             Start developing in minutes. Add the FlexCore NuGet package to your project and experience the power of pure Blazor desktop-grade UI controls.
         </p>
@@ -643,7 +896,7 @@
         </div>
 
         <div class="cta-buttons">
-            <a href="get-started" class="btn-hero-primary" style="background: #ffffff; color: #0d3b66;">
+            <a href="get-started" class="btn-hero-primary">
                 Get Started Now
             </a>
             <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" class="btn-hero-secondary">
@@ -658,25 +911,93 @@
     private static readonly string _flexCoreVersion =
         typeof(Fx.ControlKit.ButtonControl).Assembly.GetName().Version is { } v ? $"{v.Major}.{v.Minor}.{v.Build}" : "";
 
-    private string _activeTab = "grid";
-    private static readonly string[] HeroTabs = ["grid", "charts", "ribbon", "reports"];
+    // The app window's pages: key (also the ?tab= value), menu text, menu icon, title in the top bar
+    private sealed record AppPage(string Key, string Nav, string Icon, string Title);
+    private static readonly AppPage[] AppPages =
+    [
+        new("dashboard", "Dashboard", "bi bi-speedometer2", "Dashboard"),
+        new("grid", "Trip Requests", "bi bi-table", "Razor Sharp Trip Requests"),
+        new("bookings", "Itinerary", "bi bi-calendar-heart", "Trip Itinerary"),
+        new("reports", "Invoices", "bi bi-file-earmark-spreadsheet", "Invoices"),
+    ];
+    private readonly List<TabStripItem> _navItems = AppPages.Select(p => new TabStripItem(p.Nav, p.Icon)).ToList();
+    private string _activeTab = "dashboard";
+    private AppPage CurrentPage => AppPages.First(p => p.Key == _activeTab);
+    private int NavIndex => Array.FindIndex(AppPages, p => p.Key == _activeTab);
+    // The hamburger shrinks the menu to icons on wide screens and opens it over the page on phones; CSS shows the one that applies
+    private bool _navCollapsed;
+    private bool _navOpen;
+    private void ToggleMenu()
+    {
+        _navCollapsed = !_navCollapsed;
+        _navOpen = !_navOpen;
+    }
+    private ButtonControl? _bell;
+    private ButtonControl? _profile;
+    private static readonly (string Text, string Icon)[] _profileMenu =
+    [
+        ("My profile", "bi bi-person-circle"), ("Account settings", "bi bi-person-gear"),
+        ("Notifications", "bi bi-bell"), ("Sign out", "bi bi-box-arrow-right"),
+    ];
+    private List<FabMenuItem> _fabItems = [];
 
-    /// <summary>Hero tab named in the address, e.g. ?tab=ribbon (catalog row Office Ribbon); read on load, never written back.</summary>
+    /// <summary>App page named in the address, e.g. ?tab=bookings; read on load, never written back.</summary>
     [SupplyParameterFromQuery(Name = "tab")] public string? Tab { get; set; }
 
     protected override void OnParametersSet()
     {
         var tab = Tab?.Trim().ToLowerInvariant();
-        if (tab is not null && HeroTabs.Contains(tab)) _activeTab = tab;
+        if (tab is not null && AppPages.Any(p => p.Key == tab)) _activeTab = tab;
     }
-    private bool _showCode = false;
-    private readonly List<TabStripItem> _viewTabs = new() { new("Example", "bi bi-window"), new("Razor", "bi bi-code-slash") };
+
+    private void Go(string key)
+    {
+        _activeTab = key;
+        SetCodeTab(0);
+        _navOpen = false;
+    }
+
+    // The bits of the app this demo leaves out answer with a toast, as the menu items do on blazor.radzen.com
+    private void NotInDemo(string what) =>
+        Notifications.Info($"{what} is not part of this demo", "The menu's pages, the grid, the chart and the + button all work.");
+
+    private IEnumerable<TripRequest> NewestRequests => _requests.Where(r => r.Status == "New").OrderByDescending(r => r.DateRequested).Take(4);
+
+    private void ShowRequests(string view)
+    {
+        _selectedView = view;
+        _selectedTripType = "All";
+        _gridSearchTerm = "";
+        Go("grid");
+    }
+
+    private void OpenRequest(TripRequest r)
+    {
+        Go("grid");
+        _selectedRequest = r;
+        OpenPopupEdit(r);
+    }
+
+    private void OpenRequestFromBell(TripRequest r)
+    {
+        _bell?.CloseDropDown();
+        OpenRequest(r);
+    }
+    // Example | Razor | C# over the app window (2026-10-29, Baaria): the open code tab carries an X that goes back to Example
+    private int _codeTab;
+    private readonly List<TabStripItem> _viewTabs = [new("Example", "bi bi-window"), new("Razor", "bi bi-code-slash"), new("C#", "bi bi-filetype-cs")];
+    private void SetCodeTab(int index)
+    {
+        _codeTab = index;
+        for (var i = 0; i < _viewTabs.Count; i++) _viewTabs[i].Closable = i > 0 && i == index;
+    }
     private bool _copiedInstall = false;
     private bool _copiedCode = false;
     private string _selectedTripType = "All";
     private string _selectedView = "All";   // opens on all 1,000 requests, the number the badges state
     private string _gridSearchTerm = "";
     private TripRequest? _selectedRequest;
+    // code-tab:grid-cs
     private GridControl<TripRequest>? _grid;
     private GridControlEvents<TripRequest> _gridEvents = new();
 
@@ -688,6 +1009,7 @@
         EditOnActiveCellClick = true,
         AllowEditOnDblClick = true
     };
+    // /code-tab
 
     // Filter pills; matched case-insensitively against TripRequest.TripType codes
     private List<string> _tripTypes = new()
@@ -791,10 +1113,11 @@
         StateHasChanged();
     }
 
-    // New Request opens the same editor on a blank request; Save adds it to the top of the list
+    // New Request opens the same editor on a blank request; Save adds it to the top of the list. The agent is Pippa Larkspur, the
+    // one signed in to the app window (top bar), who handles her share of the other requests too.
     private void CreateNewRequest()
     {
-        var agent = Agents[0];
+        var agent = Agents.First(a => a.Name == "Pippa Larkspur");
         _originalRequestRef = null;
         _editingRequest = new TripRequest
         {
@@ -864,6 +1187,7 @@
         StateHasChanged();
     }
 
+    // code-tab:grid-cs
     // The last of the five weekly fare samples is the quote, so a new quote moves the sparkline's end and its percentage
     private static void ApplyQuoteToFares(TripRequest r)
     {
@@ -871,8 +1195,10 @@
         r.FareHistory[^1] = (int)r.Quote;
         r.FareDeltaPercent = (int)Math.Round((r.FareHistory[^1] - r.FareHistory[0]) / (decimal)Math.Max(1, r.FareHistory[0]) * 100);
     }
+    // /code-tab
 
     // Reports tab preview (2026-10-26): the report page's default sheet, from the same query, so its figures are the report's own
+    // code-tab:reports-cs
     private string _costPreviewTitle = "";
     private (string Label, decimal Amount)[] _costPreview = [];
 
@@ -897,7 +1223,9 @@
             .Select(g => ($"{g.Key} {blurbs.GetValueOrDefault(g.Key, "")}", g.Sum(r => (decimal)r["Formula_Amount"])))
             .ToArray();
     }
+    // /code-tab
 
+    // code-tab:grid-cs
     private void OnTripTypeChanged(TripRequest r, string? newType)
     {
         if (string.IsNullOrEmpty(newType)) return;
@@ -908,6 +1236,7 @@
         Notifications.Success($"Updated {r.Request} trip type to {newType} via DropDownGridControl");
         StateHasChanged();
     }
+    // /code-tab
 
     private static string Initials(string name)
     {
@@ -925,54 +1254,80 @@
 
     private static readonly (string Name, string Initials, string Color)[] Agents =
     {
-        ("Maya Okafor", "MO", "#0284c7"),
-        ("Luca Bianchi", "LB", "#7c3aed"),
-        ("Priya Nair", "PN", "#10b981"),
-        ("Tomás Herrera", "TH", "#d97706"),
-        ("Ingrid Solberg", "IS", "#e11d48"),
-        ("Kenji Watanabe", "KW", "#0891b2"),
-        ("Amara Diallo", "AD", "#4f46e5"),
-        ("Oliver Grant", "OG", "#059669")
+        ("Marigold Teacup", "MT", "#0284c7"),
+        ("Percival Crumpet", "PC", "#7c3aed"),
+        ("Tabitha Inkwell", "TI", "#10b981"),
+        ("Horace Nutmeg", "HN", "#d97706"),
+        ("Rosalind Fizzwick", "RF", "#e11d48"),
+        ("Cornelius Quill", "CQ", "#0891b2"),
+        ("Pippa Larkspur", "PL", "#4f46e5"),
+        ("Ambrose Hobnob", "AH", "#059669")
     };
 
     private static List<TripRequest> GenerateRequests(int count)
     {
-        var destinations = new[]
-        {
-            "Lisbon", "Kyoto", "Reykjavik", "Cape Town", "Queenstown", "Marrakech",
-            "Vancouver", "Santorini", "Banff", "Hoi An", "Patagonia", "Amalfi Coast"
-        };
-
-        var tripTypes = new (string Code, string Name, int Low, int High, string ItineraryA, string ItineraryB)[]
+        // Each trip type goes only to places that offer it (2026-10-29, Baaria: no ski trips to Marrakech), and both itineraries of a
+        // type read true for every one of its places.
+        var tripTypes = new (string Code, string Name, int Low, int High, string ItineraryA, string ItineraryB, string[] Places)[]
         {
             ("BEACH", "Beach & island resorts", 1800, 5200,
                 "Seven nights in a sea-view room, two adults, late August",
-                "Overwater bungalow for five nights with a snorkelling day trip"),
+                "Five nights by the beach with a snorkelling day trip",
+                ["Santorini", "Amalfi Coast", "Cape Town", "Hoi An"]),
             ("CITY", "City breaks & culture", 600, 2400,
                 "Long weekend with museum passes and a guided food tour",
-                "Four nights near the old town with an opera ticket for two"),
+                "Four nights near the old town with a cooking class for two",
+                ["Lisbon", "Kyoto", "Marrakech", "Vancouver", "Reykjavik"]),
             ("SKI", "Ski & snowboard", 2200, 6800,
                 "Ski-in ski-out chalet for six, lessons for two beginners",
-                "Week of lift passes with a half-day guided off-piste tour"),
+                "Week of lift passes with a half-day guided off-piste tour",
+                ["Banff", "Queenstown", "Vancouver", "Patagonia"]),
             ("SAFARI", "Safari & wildlife", 5500, 14500,
-                "Four nights on safari with a hot-air balloon flight at dawn",
-                "Gorilla trekking permit for two with three nights at the lodge"),
+                "Four nights at a wildlife lodge with a guided dawn trek",
+                "Whale and bird watching by boat, three nights at the lodge",
+                ["Cape Town", "Patagonia", "Banff", "Reykjavik"]),
             ("CRUISE", "Ocean & river cruises", 2800, 9800,
-                "Ten-night river cruise, balcony cabin, all excursions included",
-                "Fjords cruise for two with a glacier hike and the drinks package"),
+                "Ten-night cruise, balcony cabin, all excursions included",
+                "Coastal cruise for two with the drinks package",
+                ["Santorini", "Amalfi Coast", "Lisbon", "Vancouver", "Reykjavik"]),
             ("RAIL", "Scenic rail journeys", 1500, 5400,
                 "First-class rail pass with two overnight sleeper legs",
-                "Mountain railway loop with three nights in alpine villages"),
+                "Scenic railway loop with three nights in small towns",
+                ["Kyoto", "Banff", "Vancouver", "Hoi An"]),
             ("FAMILY", "Family holidays", 2400, 7600,
-                "Half-term beach week with a kids' club and a family suite",
-                "Theme park passes for four with a connecting-rooms hotel"),
+                "Half-term week with a kids' club and a family suite",
+                "Theme park passes for four with a connecting-rooms hotel",
+                ["Lisbon", "Vancouver", "Queenstown", "Cape Town", "Kyoto"]),
             ("HONEYMOON", "Honeymoons & celebrations", 4200, 12800,
-                "Private villa with a sunset catamaran and a couples' spa day",
-                "Two islands in ten nights, seaplane transfer, champagne on arrival")
+                "Private villa with a sunset dinner and a couples' spa day",
+                "Ten nights in two boutique hotels, champagne on arrival",
+                ["Santorini", "Amalfi Coast", "Lisbon", "Hoi An", "Kyoto", "Marrakech"])
         };
 
-        var firstNames = new[] { "Noah", "Emma", "Liam", "Olivia", "Arjun", "Sofia", "Mateo", "Chloe", "Yusuf", "Hana", "Felix", "Zara" };
-        var lastNames = new[] { "Lindqvist", "Moreau", "Okonkwo", "Tanaka", "Fischer", "Ramos", "Byrne", "Haddad", "Novak", "Petrova", "Mensah", "Castillo" };
+        // 200 first names from many places (2026-10-29, Baaria: more diversity); a first name may repeat, a surname may not
+        var firstNames = new[]
+        {
+            "Clementine", "Barnaby", "Juniper", "Mortimer", "Petunia", "Thaddeus", "Winifred", "Archibald", "Lavender", "Ebenezer",
+            "Delphine", "Rufus", "Octavia", "Bartholomew", "Cornelia", "Florian", "Hyacinth", "Ignatius", "Leopold", "Millicent",
+            "Rosamund", "Silas", "Tobias", "Ursula", "Wilhelmina", "Augustus", "Beatrix", "Cuthbert", "Dorothea", "Edmund",
+            "Felicity", "Gideon", "Henrietta", "Ottoline", "Quentin", "Seraphina", "Amara", "Kwame", "Zainab", "Chidi",
+            "Nia", "Tendai", "Folake", "Kofi", "Imani", "Sefu", "Adaeze", "Thabo", "Wanjiru", "Jabari",
+            "Ayodele", "Makena", "Oluwaseun", "Zuri", "Babajide", "Nkechi", "Priya", "Arjun", "Ananya", "Rohan",
+            "Kavya", "Vikram", "Meera", "Aarav", "Ishaan", "Lakshmi", "Farhan", "Nadia", "Sanjay", "Divya",
+            "Rahul", "Anjali", "Kiran", "Tara", "Dev", "Sunita", "Kenji", "Mei", "Hiroshi", "Yuna",
+            "Jiho", "Lian", "Takumi", "Sakura", "Wei", "Haruka", "Minjun", "Xiaoling", "Daichi", "Soo-ah",
+            "Ren", "Aiko", "Jun", "Hana", "Bao", "Yuki", "Linh", "Arief", "Siti", "Malia",
+            "Thanh", "Dewi", "Kalani", "Rizal", "Intan", "Narong", "Ploy", "Bayani", "Mateo", "Valentina",
+            "Santiago", "Camila", "Diego", "Lucía", "Joaquín", "Ximena", "Rafael", "Paloma", "Emilio", "Renata",
+            "Tomás", "Inés", "Alejandro", "Catalina", "Bruno", "Marisol", "Gonzalo", "Itzel", "Layla", "Omar",
+            "Yasmin", "Karim", "Leila", "Tariq", "Samira", "Rami", "Dalia", "Hassan", "Noor", "Faris",
+            "Amira", "Youssef", "Zara", "Idris", "Astrid", "Lars", "Ingrid", "Sven", "Freya", "Matteo",
+            "Giulia", "Luca", "Chiara", "Aurélie", "Étienne", "Margaux", "Henrik", "Saoirse", "Niamh", "Cormac",
+            "Siobhan", "Declan", "Anouk", "Joris", "Katarzyna", "Mikołaj", "Zofia", "Dmitri", "Anastasia", "Elif",
+            "Emre", "Selin", "Nikos", "Eleni", "Moana", "Tane", "Aroha", "Keoni", "Leilani", "Nalani",
+            "Wiremu", "Ahanu", "Kai", "Harper", "Jasper", "Willa", "Felix", "Hazel", "Theo", "Ivy",
+            "Rowan", "Maeve", "Otis", "Poppy", "Ezra", "Wren", "Arlo", "Iris", "Milo", "Esme"
+        };
         var statuses = new[] { "New", "New", "Quoted", "Booked", "Declined" };
         var notes = new[]
         {
@@ -982,15 +1337,33 @@
 
         var rnd = new Random(42);
         var list = new List<TripRequest>(count);
-        var startDate = new DateTime(2026, 1, 1);
+
+        // Every lead traveller has a surname no one else has (2026-10-29, Baaria): two requests under one surname would read as one
+        // family booking twice, and families travel together. 40 starts by 25 endings make 1,000 made-up surnames, dealt out in a
+        // shuffled order; none is an agent's surname.
+        var starts = new[]
+        {
+            "Thistle", "Goose", "Bumble", "Apple", "Feather", "Higgle", "Parsnip", "Wobble", "Pepper", "Puddle",
+            "Butter", "Crumble", "Dapple", "Fiddle", "Ginger", "Marrow", "Kettle", "Nettle", "Pickle", "Quince",
+            "Ripple", "Toffee", "Whistle", "Bramble", "Cobble", "Dimple", "Gumdrop", "Muffin", "Noodle", "Pebble",
+            "Rumble", "Sprocket", "Tumble", "Waffle", "Biscuit", "Doodle", "Jingle", "Mumble", "Wiggle", "Pudding"
+        };
+        var endings = new[]
+        {
+            "wood", "bottom", "berry", "sby", "worth", "stone", "by", "ford", "field", "brook", "wick", "ton", "ridge",
+            "more", "well", "dale", "shaw", "cott", "mere", "ley", "holt", "thorpe", "combe", "hurst", "gate"
+        };
+        var surnames = starts.SelectMany(st => endings.Select(en => st + en)).OrderBy(_ => rnd.Next()).ToArray();
+        // Requests from the last 300 days, so the app window's Dashboard always shows this month (2026-10-29)
+        var startDate = DateTime.Today.AddDays(-300);
 
         for (int i = 1; i <= count; i++)
         {
             var agent = Agents[rnd.Next(Agents.Length)];
-            var destination = destinations[rnd.Next(destinations.Length)];
             var type = tripTypes[rnd.Next(tripTypes.Length)];
+            var destination = type.Places[rnd.Next(type.Places.Length)];
             var quote = rnd.Next(type.Low / 10, type.High / 10) * 10m;
-            var requested = startDate.AddMinutes(rnd.Next(0, 180 * 24 * 60));
+            var requested = startDate.AddMinutes(rnd.Next(0, 300 * 24 * 60));
             var travellers = type.Code switch { "FAMILY" => rnd.Next(3, 7), "HONEYMOON" => 2, _ => rnd.Next(1, 5) };
 
             // five weekly fare samples for the route; the last one is the quote
@@ -1010,7 +1383,7 @@
                 AvatarBg = agent.Color,
                 DateRequested = requested,
                 Destination = destination,
-                Traveller = $"{firstNames[rnd.Next(firstNames.Length)]} {lastNames[rnd.Next(lastNames.Length)]}",
+                Traveller = $"{firstNames[rnd.Next(firstNames.Length)]} {surnames[(i - 1) % surnames.Length]}",
                 Travellers = travellers,
                 Departure = requested.Date.AddDays(rnd.Next(30, 200)),
                 TripType = type.Code,
@@ -1024,7 +1397,67 @@
             });
         }
 
+        // LIS-0586 is the trip the Itinerary page lays out (GetawaysBookings.razor, 2026-10-29, Baaria): a Lisbon honeymoon for two,
+        // booked by Pippa Larkspur, the agent signed in to the window, and leaving tomorrow so it heads Upcoming departures.
+        if (list.Count >= 586)
+        {
+            var pippa = Agents.First(a => a.Name == "Pippa Larkspur");
+            var trip = list[585];
+            trip.Request = "LIS-0586";
+            trip.Destination = "Lisbon";
+            trip.Traveller = $"Wei {surnames[585]}";
+            trip.Travellers = 2;
+            trip.Agent = pippa.Name;
+            trip.AvatarInitials = pippa.Initials;
+            trip.AvatarBg = pippa.Color;
+            trip.TripType = "HONEYMOON";
+            trip.TripTypeName = "Honeymoons & celebrations";
+            trip.Status = "Booked";
+            trip.DateRequested = DateTime.Today.AddDays(-40);
+            trip.Departure = DateTime.Today.AddDays(1);
+            trip.Itinerary = "Five nights in Alfama with a day in Sintra, a fado dinner and a sunset sail on the Tagus";
+            trip.Notes = "Celebrating their wedding; asked for a quiet room";
+            trip.Quote = 6480;
+            trip.FareHistory = [6120, 6260, 6350, 6420, 6480];
+            trip.FareDeltaPercent = 6;
+        }
+
         return list;
+    }
+
+    // Finish flag left of "Everything you need to cross the finish line": 5 columns of 4 chequered cells whose corners are nudged by
+    // -1, 0 or +1 px so the drawing looks hand-made. Whole numbers only, so the points never depend on the server's culture.
+    private const int FlagColumns = 5;
+    private static readonly (int Col, string Points, bool Dark)[] _flagCells = BuildFlagCells();
+    private ElementReference _workhorsesHead;
+
+    private static (int Col, string Points, bool Dark)[] BuildFlagCells()
+    {
+        const int left = 44, top = 22, w = 22, h = 17;
+        static int Nudge(int col, int row, int corner) => (col * 7 + row * 13 + corner * 5) % 3 - 1;
+        var cells = new List<(int, string, bool)>();
+        for (var col = 0; col < FlagColumns; col++)
+            for (var row = 0; row < 4; row++)
+            {
+                int x = left + col * w, y = top + row * h;
+                cells.Add((col,
+                    $"{x + Nudge(col, row, 0)},{y + Nudge(col, row, 1)} {x + w + Nudge(col, row, 2)},{y + Nudge(col, row, 3)} " +
+                    $"{x + w + Nudge(col, row, 4)},{y + h + Nudge(col, row, 5)} {x + Nudge(col, row, 6)},{y + h + Nudge(col, row, 7)}",
+                    (col + row) % 2 == 0));
+            }
+        return cells.ToArray();
+    }
+
+    // The four doodle headings (flag, crane, scale, rocket) play each time they scroll into view.
+    private ElementReference _pillarsHead;
+    private ElementReference _compareHead;
+    private ElementReference _ctaHead;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        foreach (var head in new[] { _workhorsesHead, _pillarsHead, _compareHead, _ctaHead })
+            await JS.InvokeVoidAsync("fxToggleClassWhenVisible", head, "is-playing");
     }
 
     protected override void OnInitialized()
@@ -1032,6 +1465,25 @@
         _requests = GenerateRequests(1000);
         _selectedRequest = _requests.FirstOrDefault();
 
+        WireGridEvents();
+        LoadCostPreview();
+
+        _fabItems =
+        [
+            new("Trip request", "bi bi-suitcase-lg") { OnClick = EventCallback.Factory.Create(this, () => { Go("grid"); CreateNewRequest(); }) },
+            new("Itinerary entry", "bi bi-calendar-plus") { OnClick = EventCallback.Factory.Create(this, () =>
+            {
+                Go("bookings");
+                Notifications.Info("New itinerary entry", "Double-click a free time on the itinerary to add an entry.");
+            }) },
+            new("Invoice", "bi bi-receipt") { OnClick = EventCallback.Factory.Create(this, () => Go("reports")) },
+        ];
+    }
+
+    // code-tab:grid-cs
+    // Selecting a row fills the status bar, a typed quote moves the fare trend, and a double-click opens the editor
+    private void WireGridEvents()
+    {
         _gridEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<TripRequest>>(this, e =>
         {
             _selectedRequest = e.Data;
@@ -1044,8 +1496,6 @@
             if (e.ColumnName == nameof(TripRequest.Quote)) ApplyQuoteToFares(e.Data);
         });
 
-        LoadCostPreview();
-
         _gridEvents.OnRecordDoubleClick = EventCallback.Factory.Create<CellClickEventArgs<TripRequest>>(this, e =>
         {
             if (e.Data != null)
@@ -1055,7 +1505,9 @@
             }
         });
     }
+    // /code-tab
 
+    // code-tab:grid-cs
     private IEnumerable<TripRequest> FilteredRequests
     {
         get
@@ -1124,63 +1576,9 @@
         _ => "grid-badge-gray"
     };
 
-    private List<ChartSeries> _quarterlySeries = new()
-    {
-        new()
-        {
-            Name = "Actual Revenue ($K)",
-            Color = "#0284c7",
-            Type = ChartType.Bar,
-            DataPoints = new()
-            {
-                new("Q1", 240),
-                new("Q2", 365),
-                new("Q3", 480),
-                new("Q4", 620)
-            }
-        },
-        new()
-        {
-            Name = "Annual Target ($K)",
-            Color = "#107c41",
-            Type = ChartType.Bar,
-            DataPoints = new()
-            {
-                new("Q1", 210),
-                new("Q2", 320),
-                new("Q3", 430),
-                new("Q4", 550)
-            }
-        }
-    };
-
-    private List<ChartSeries> _pieSeries = new()
-    {
-        new()
-        {
-            Name = "Categories",
-            Type = ChartType.Pie,
-            DataPoints = new()
-            {
-                new("Structural (40%)", 40, "#0284c7"),
-                new("Electrical (25%)", 25, "#7c3aed"),
-                new("Plumbing (20%)", 20, "#107c41"),
-                new("Mechanical (15%)", 15, "#d97706")
-            }
-        }
-    };
-
     // The grid writes the workbook itself and the browser downloads it
     private Task ExportToExcel() => _grid?.ExportToXlsxAsync("trip-requests.xlsx") ?? Task.CompletedTask;
-
-    private void OnPaste() => Notifications.Info("Pasted from clipboard.");
-    private void OnCopy() => Notifications.Info("Copied to clipboard.");
-    private void OnNewOrder() => Notifications.Success("Created new order ticket.");
-    private void OnSaveBatch() => Notifications.Success("Batch saved successfully.");
-    private void OnExportRibbonExcel() => Notifications.Success("Excel export requested.");
-    private void OnPrintPdf() => Notifications.Warning("Report queued to PDF virtual spooler.");
-    private void OnToggleGrid() => Notifications.Info("Toggled grid outlines.");
-    private void OnFreezeHeaders() => Notifications.Info("Header row pinned.");
+    // /code-tab
 
     private async Task CopyInstallCommand()
     {
@@ -1212,159 +1610,18 @@
         catch { }
     }
 
-    private string GetActiveCodeSnippet()
+    // Each page's Razor and C# come from the built source (AppSource): the Getaways pages' own files, and the parts of this file
+    // between "code-tab:" markers, so a tab always shows the page as it is built.
+    private string GetActiveCodeSnippet() => (_activeTab, _codeTab) switch
     {
-        return _activeTab switch
-        {
-            "grid" =>
-@"<GridControl TValue=""TripRequest"" DataSource=""@FilteredRequests""
-             @ref=""_grid""
-             AllowSelection=""true""
-             AllowSorting=""true""
-             AllowFiltering=""true""
-             AllowResizing=""true""
-             EnableHover=""true""
-             CssClass=""hero-grid-theme""
-             EditSettingsRef=""@_editSettings""
-             EventsRef=""@_gridEvents""
-             WindowOverscanRows=""15""
-             Height=""440px"">
-    <GridColumnsBase>
-        <GridColumn Field=""@nameof(TripRequest.Request)"" HeaderText=""Request"" Width=""100px""
-                    IsPrimaryKey=""true"" AllowEditing=""false""
-                    IsFrozen=""true"" FrozenPosition=""FrozenColumnPosition.Left"">
-            <Template Context=""row"">
-                @{ var r = (TripRequest)row; }
-                <BadgeControl Text=""@r.Request"" CssClass=""grid-request-code"" />
-            </Template>
-        </GridColumn>
-
-        <GridColumn Field=""@nameof(TripRequest.Agent)"" HeaderText=""Agent"" Width=""150px"" AllowEditing=""false"">
-            <Template Context=""row"">
-                @{ var r = (TripRequest)row; }
-                <div class=""agent-cell"">
-                    <span class=""agent-avatar"" style=""background:@r.AvatarBg"">@r.AvatarInitials</span>
-                    <span class=""agent-name"">@r.Agent</span>
-                </div>
-            </Template>
-        </GridColumn>
-
-        <GridColumn Field=""@nameof(TripRequest.Destination)"" HeaderText=""Destination"" Width=""130px"" AllowEditing=""false"" />
-
-        @* In-cell DropDownGridControl: a four-column lookup with search; the header sorts by the code *@
-        <GridColumn Field=""@nameof(TripRequest.TripType)"" HeaderText=""Trip type"" Width=""170px"" AllowEditing=""false"">
-            <Template Context=""row"">
-                @{ var r = (TripRequest)row; }
-                <div class=""grid-cell-dropdowngrid"">
-                    <DropDownGridControl TItem=""TripTypeLookup"" TValue=""string""
-                                         DataSource=""@_tripTypeLookup""
-                                         Value=""@r.TripType""
-                                         ValueChanged=""@(val => OnTripTypeChanged(r, val))""
-                                         TextFieldName=""@nameof(TripTypeLookup.Name)""
-                                         ValueFieldName=""@nameof(TripTypeLookup.Code)""
-                                         ClosedTextFieldName=""@nameof(TripTypeLookup.Code)""
-                                         PopupWidth=""490px""
-                                         PopupHeight=""220px""
-                                         RowHeight=""24""
-                                         ShowSearch=""true""
-                                         SearchPlaceholder=""Search trip types...""
-                                         AllowClear=""false""
-                                         Placeholder=""Select trip type..."">
-                        <Columns>
-                            <GridColumn Field=""@nameof(TripTypeLookup.Code)"" HeaderText=""Code"" Width=""95px"" />
-                            <GridColumn Field=""@nameof(TripTypeLookup.Name)"" HeaderText=""Trip type"" Width=""165px"" />
-                            <GridColumn Field=""@nameof(TripTypeLookup.Desk)"" HeaderText=""Desk"" Width=""90px"" />
-                            <GridColumn Field=""@nameof(TripTypeLookup.LeadTime)"" HeaderText=""Book ahead"" Width=""110px"" />
-                        </Columns>
-                    </DropDownGridControl>
-                </div>
-            </Template>
-        </GridColumn>
-
-        @* Fast typing: click the cell and type, the value commits on Enter or blur *@
-        <GridColumn Field=""@nameof(TripRequest.Quote)"" HeaderText=""Quote"" Width=""130px""
-                    Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right""
-                    AllowEditing=""true"" SelectAllOnEdit=""true"" />
-
-        @* Inline SVG sparkline: five weekly fare samples for the route, the last one is the quote; the header sorts by the change *@
-        <GridColumn Field=""@nameof(TripRequest.FareDeltaPercent)"" HeaderText=""Fare trend"" Width=""135px"" AllowFiltering=""false"" AllowEditing=""false"">
-            <Template Context=""row"">
-                @{
-                    var r = (TripRequest)row;
-                    var spark = GetSparklinePoints(r.FareHistory, 68, 22);
-                    var isUp = r.FareDeltaPercent >= 0;
-                    var color = isUp ? ""#10b981"" : ""#ef4444"";
-                    var fill = isUp ? ""rgba(16, 185, 129, 0.16)"" : ""rgba(239, 68, 68, 0.16)"";
-                    var deltaClass = isUp ? ""delta-up"" : ""delta-down"";
-                    var titleText = $""5-week fare trend: {(isUp ? ""+"" : """")}{r.FareDeltaPercent}%"";
-                    var deltaSign = isUp ? ""▲"" : ""▼"";
-                }
-                <div class=""sparkline-cell"" title=""@titleText"">
-                    <svg width=""68"" height=""22"" viewBox=""0 0 68 22"" class=""sparkline-svg"">
-                        <polygon points=""@spark.AreaPoints"" fill=""@fill"" />
-                        <polyline points=""@spark.PolylinePoints"" fill=""none"" stroke=""@color"" stroke-width=""2"" stroke-linecap=""round"" stroke-linejoin=""round"" />
-                        <circle cx=""@spark.LastX"" cy=""@spark.LastY"" r=""2.5"" fill=""@color"" />
-                    </svg>
-                    <span class=""sparkline-delta @deltaClass"">
-                        @deltaSign@Math.Abs(r.FareDeltaPercent)%
-                    </span>
-                </div>
-            </Template>
-        </GridColumn>
-
-        <GridColumn Field=""@nameof(TripRequest.Status)"" HeaderText=""Status"" Width=""110px"" AllowEditing=""false"">
-            <Template Context=""row"">
-                @{
-                    var r = (TripRequest)row;
-                    var statusBadge = GetStatusBadgeClass(r.Status);
-                }
-                <BadgeControl Text=""@r.Status"" CssClass=""@($""grid-badge {statusBadge}"")"" />
-            </Template>
-        </GridColumn>
-
-        @* The Edit button opens the popup editor; a double-click on the row does the same *@
-        <GridColumn Field=""@nameof(TripRequest.Itinerary)"" HeaderText=""Itinerary"" Width=""300px"" AllowEditing=""false"">
-            <Template Context=""row"">
-                @{ var r = (TripRequest)row; }
-                <div class=""desc-cell-wrapper"">
-                    <span class=""desc-text"" title=""@r.Itinerary"">@r.Itinerary</span>
-                    <button type=""button"" class=""btn-cell-popup-edit"" title=""Edit in Modal Popup""
-                            @onclick=""@(() => OpenPopupEdit(r))"" @onclick:stopPropagation=""true"">
-                        <span class=""bi bi-pencil-square""></span> Edit
-                    </button>
-                </div>
-            </Template>
-        </GridColumn>
-    </GridColumnsBase>
-</GridControl>",
-
-            "charts" =>
-@"<ChartControl Type=""ChartType.Bar"" Title=""Performance Overview"" Height=""280px"" Series=""@_quarterlySeries"" />
-
-<ChartControl Type=""ChartType.Pie"" Title=""Inventory Allocation"" Height=""280px"" Series=""@_pieSeries"" />",
-
-            "ribbon" =>
-@"<RibbonControl>
-    <RibbonTab Title=""Home"">
-        <RibbonGroup Title=""Clipboard"">
-            <RibbonButton Text=""Paste"" Icon=""bi-clipboard"" OnClick=""@OnPaste"" />
-            <RibbonButton Text=""Copy"" Icon=""bi-files"" OnClick=""@OnCopy"" />
-        </RibbonGroup>
-        <RibbonGroup Title=""Export"">
-            <RibbonButton Text=""Excel (XLSX)"" Icon=""bi-file-earmark-excel"" OnClick=""@OnExportExcel"" />
-        </RibbonGroup>
-    </RibbonTab>
-</RibbonControl>",
-
-            "reports" =>
-@"// Crystal Reports XML / SQL Adaptive Reporting Pipeline
-builder.Services.AddScoped<CrystalXmlReportLoader>();
-builder.Services.AddScoped<IReportSessionContext, ShowcaseReportSessionContext>();
-builder.Services.AddScoped<IReportDataExecutor, ShowcaseReportDataExecutor>();
-
-<ReportWriterControl Definition=""@reportDef"" Executor=""@executor"" />",
-
-            _ => ""
-        };
-    }
+        ("dashboard", 2) => AppSource.Code("GetawaysDashboard.razor"),
+        ("dashboard", _) => AppSource.Markup("GetawaysDashboard.razor"),
+        ("bookings", 2) => AppSource.Code("GetawaysBookings.razor"),
+        ("bookings", _) => AppSource.Markup("GetawaysBookings.razor"),
+        ("grid", 2) => AppSource.Region("Home.razor", "grid-cs"),
+        ("grid", _) => AppSource.Region("Home.razor", "grid"),
+        ("reports", 2) => AppSource.Region("Home.razor", "reports-cs"),
+        ("reports", _) => AppSource.Region("Home.razor", "reports"),
+        _ => ""
+    };
 }

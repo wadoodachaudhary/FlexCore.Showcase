@@ -42,6 +42,7 @@ public static class SiteNav
             new("Page navigation", "demo/page-navigation"),               // PageControl: keyboard navigation graph (2026-10-20)
             new("Dock manager", "demo/dock-manager"),           // own page since 2026-10-19; was the tour's Docking tab
             new("Tabs & accordion", "demo/tabs-accordion"),
+            new("Ribbon", "demo/ribbon"),                       // own page since 2026-10-29; was the home window's Front Desk tab
             new("Tree view", "demo/tree/treeview-explorer"),
             new("Display", null),
             new("Cards", "demo/cards"),

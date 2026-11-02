@@ -5,7 +5,7 @@
    FabMenuControl.razor.css and BadgeModels.cs (FlexCore 0.2.48). The control is position:fixed; each card
    pins its instance inside a stage with two scoped overrides (CSS tab of the first example) so two can show. *@
 
-<PageTitle>Floating action button — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Floating Action Button (FAB) — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Floating action button" Category="Components" ControlName="FabMenuControl"
                    Tagline="A round button fixed to the corner of the screen that fans out a menu of actions."
@@ -15,7 +15,7 @@
             <code>FabMenuControl</code> renders a 56px round trigger fixed 2rem from the bottom-right of the viewport. Clicking it dims
             the page behind a backdrop and slides up one labelled round button per <code>FabMenuItem</code>, first item nearest the
             trigger. That open state is what other libraries call a speed dial. Picking an action closes the menu and runs the item's
-            <code>OnClick</code>. No JavaScript.
+            <code>OnClick</code>. The control imports no script of its own.
         </p>
         <p>On this page each example pins its instance inside a grey stage so two can be shown at once. In an app, leave the position alone.</p>
     </Overview>

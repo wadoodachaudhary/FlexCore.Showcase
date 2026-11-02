@@ -21,7 +21,7 @@
    under every filter.
    2026-10-26 (Baaria): sample content moved to the travel theme. *@
 
-<PageTitle>Data control — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor DataTable Wrapper: DataControl — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Data control" Category="Data Grid" CategoryHref="demo/grid" ControlName="DataControl"
                    Tagline="One in-memory table behind a grid, a chart and a CSV: filter and sort it once and every view follows."
@@ -65,7 +65,7 @@
                             }
                         </GridColumnsBase>
                     </GridControl>
-                    <ChartControl Type="ChartType.Bar" Title="Amount by order" Series="@_series" YAxis="_amountAxis" Height="232px" />
+                    <ChartControl Type="ChartType.Bar" ColorPalette="@ChartPalette.Site" Title="Amount by order" Series="@_series" YAxis="_amountAxis" Height="232px" />
                 </div>
                 <pre class="csv">@_csv</pre>
                 <p class="result @(_error is null ? null : "bad")">@Status</p>
@@ -110,7 +110,7 @@
         data: new Dictionary<string, object?>
         {
             ["Order"] = new[] { "A100", "A101", "A102", "A103", "A104", "A105", "A106", "A107" },
-            ["Customer"] = new[] { "Alvarez", "Moreau", "Brennan", "Lindqvist", "Alvarez", "Moreau", "Brennan", "Alvarez" },
+            ["Customer"] = new[] { "Peppercorn", "Marmalade", "Puddleby", "Thistlewood", "Peppercorn", "Marmalade", "Puddleby", "Peppercorn" },
             ["Amount"] = new[] { "1280.50", "845.25", "2210.00", "1640.75", "420.00", "1995.10", "760.40", "3120.00" },
             ["Open"] = new[] { "true", "false", "true", "true", "false", "true", "false", "true" },
             ["Ordered"] = new[] { "2026-09-02", "2026-09-05", "2026-09-09", "2026-09-12", "2026-09-15", "2026-09-19", "2026-09-23", "2026-09-30" },
@@ -211,6 +211,9 @@
     // Code tabs are verbatim
     private static class Code
     {
+        // The palette the charts pass, printed from Components/Shared/ChartPalette.cs
+        private static string PaletteCs => "\n\n" + AppSource.Region("ChartPalette.cs", "chart-palette");
+
         public const string Frame = @"<TextBoxControl @bind-Value=""_filterText"" Placeholder=""Amount > 1000"" Width=""220px"" />
 <ButtonControl CssClass=""btn-sm btn-primary"" OnClick=""ApplyFilter"">Apply filter</ButtonControl>
 <ButtonGroupControl Items=""_sortItems"" Values=""@(new[] { _sortKey })"" ValuesChanged=""PickSort"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Sort"" />
@@ -228,16 +231,16 @@
             }
         </GridColumnsBase>
     </GridControl>
-    <ChartControl Type=""ChartType.Bar"" Title=""Amount by order"" Series=""@_series"" YAxis=""_amountAxis"" Height=""232px"" />
+    <ChartControl Type=""ChartType.Bar"" ColorPalette=""@ChartPalette.Site"" Title=""Amount by order"" Series=""@_series"" YAxis=""_amountAxis"" Height=""232px"" />
 </div>
 <pre class=""csv"">@_csv</pre>
 <p class=""result @(_error is null ? null : ""bad"")"">@Status</p>";
-        public const string FrameCs = @"// Eight orders typed as text, then converted once: Amount -> decimal, Open -> bool, Ordered -> DateTime.
+        public static string FrameCs => @"// Eight orders typed as text, then converted once: Amount -> decimal, Open -> bool, Ordered -> DateTime.
 private readonly DataControl _frame = DataControl.DataFrame(
     data: new Dictionary<string, object?>
     {
         [""Order""] = new[] { ""A100"", ""A101"", ""A102"", ""A103"", ""A104"", ""A105"", ""A106"", ""A107"" },
-        [""Customer""] = new[] { ""Alvarez"", ""Moreau"", ""Brennan"", ""Lindqvist"", ""Alvarez"", ""Moreau"", ""Brennan"", ""Alvarez"" },
+        [""Customer""] = new[] { ""Peppercorn"", ""Marmalade"", ""Puddleby"", ""Thistlewood"", ""Peppercorn"", ""Marmalade"", ""Puddleby"", ""Peppercorn"" },
         [""Amount""] = new[] { ""1280.50"", ""845.25"", ""2210.00"", ""1640.75"", ""420.00"", ""1995.10"", ""760.40"", ""3120.00"" },
         [""Open""] = new[] { ""true"", ""false"", ""true"", ""true"", ""false"", ""true"", ""false"", ""true"" },
         [""Ordered""] = new[] { ""2026-09-02"", ""2026-09-05"", ""2026-09-09"", ""2026-09-12"", ""2026-09-15"", ""2026-09-19"", ""2026-09-23"", ""2026-09-30"" },
@@ -298,6 +301,6 @@ private void Refresh()
     _rows = _frame.ToGridRows().ToList();
     _series = _frame.ToChartSeries(""Order"", ""Amount"");
     _csv = _frame.ToCsv();
-}";
+}" + PaletteCs;
     }
 }

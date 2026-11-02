@@ -22,7 +22,7 @@
    2026-10-25 (Baaria, SC-344): the example runs on the operator's rate card (Data/BenchModels.cs RateCardItem, BenchDataStore.RateCard)
    instead of the earlier estimating items. *@
 
-<PageTitle>Export &amp; templates — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Grid Export to Excel and CSV — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Export &amp; templates" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
                    Tagline="Export the rows you see to CSV or a real .xlsx workbook, and render a column through your own markup."
@@ -85,7 +85,7 @@
             Every <code>ExportTo…Async</code> method is <code>ExportAsync</code> with a fixed <code>GridExportFormat</code>. The grid builds a
             <code>GridExportTable</code> from <code>VisibleColumns</code> and the filtered, sorted rows; <code>GridExporter</code> turns it into
             bytes with writers that live in the FlexCore assembly itself (<code>XlsxWriter</code> for .xlsx, <code>NativePdfDocument</code> for
-            PDF; no ClosedXML, and the <code>FlexCore.Documents</code> project the Showcase references for its spreadsheet and PDF viewers plays
+            PDF; no ClosedXML, and the <code>FlexCore.Documents</code> project the Showcase references for its PDF viewer plays
             no part); <code>GridExporter.SaveAsync</code> then hands the bytes to the browser.
         </p>
         <DocSections>

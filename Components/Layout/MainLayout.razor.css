@@ -5,7 +5,7 @@
     min-height: 100vh;
     background-color: #f8fafc;
     color: #0f172a;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--site-font);
 }
 
 /* Sticky Top Navigation Bar */
@@ -17,7 +17,7 @@
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;   /* under the logo stripe below */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -108,7 +108,7 @@
 
 .btn-nav-primary {
     white-space: nowrap;   /* keeps 'Quick Start' on one line next to the wider menu items (2026-10-13) */
-    background: #0284c7;
+    background: var(--brand-button);   /* app.css: the logo's indigo, 2026-10-29 */
     color: #ffffff;
     font-size: 13px;
     font-weight: 600;
@@ -122,7 +122,7 @@
 }
 
 .btn-nav-primary:hover {
-    background: #0369a1;
+    background: var(--brand-button-hover);
     color: #ffffff;
 }
 
@@ -153,11 +153,27 @@
 
 /* Site Footer */
 .showcase-site-footer {
+    position: relative;
     background: #ffffff;
     border-top: 1px solid #e2e8f0;
     padding: 24px 32px;
     margin-top: auto;
 }
+
+/* 2026-10-28 (Baaria): the logo's four colours as a thin stripe along the bottom of the top bar and the top of the footer. */
+.top-nav-bar::after,
+.showcase-site-footer::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--brand-stripe);
+    pointer-events: none;
+}
+
+.top-nav-bar::after { bottom: -1px; }
+.showcase-site-footer::before { top: -1px; }
 
 .footer-container {
     max-width: 1320px;
@@ -237,6 +253,14 @@
 .nav-dd-all { font-weight: 600; color: #0f172a; border-bottom: 1px solid #f1f5f9; border-radius: 6px 6px 0 0; margin-bottom: 4px; }
 .nav-dd-head { padding: 8px 10px 2px; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; }
 
+/* 993-1100 px (2026-10-31, Baaria): brand, menu and actions need 1,078 px, so at 1000 px the Quick Start and GitHub buttons ran
+   50 px past the edge. Dropping the group icons (the carets stay) and narrowing the side padding fits them down to the drawer's
+   992 px breakpoint. */
+@media (min-width: 993px) and (max-width: 1100px) {
+    .top-nav-bar { padding: 0 20px; }
+    .top-nav-menu ::deep .nav-menu-item .bi:not(.nav-caret) { display: none; }
+}
+
 /* ── Phone drawer (hard-coded: no FlexCore off-canvas control yet) ── */
 .nav-toggle { position: absolute; opacity: 0; pointer-events: none; }
 .nav-burger { display: none; cursor: pointer; }
@@ -260,7 +284,7 @@
         color: #0f172a; text-decoration: none; cursor: pointer; list-style: none; border-radius: 6px;
     }
     .nav-drawer-group > summary::-webkit-details-marker { display: none; }
-    .nav-drawer-group > summary::after { content: "\\203A"; margin-left: auto; color: #94a3b8; transition: transform .15s; }
+    .nav-drawer-group > summary::after { content: "\203A"; margin-left: auto; color: #94a3b8; transition: transform .15s; }
     .nav-drawer-group[open] > summary::after { transform: rotate(90deg); }
     .nav-drawer-link { display: block; padding: 8px 8px 8px 34px; font-size: 14px; color: #334155; text-decoration: none; border-radius: 6px; }
     .nav-drawer-link:hover { background: #f1f5f9; }

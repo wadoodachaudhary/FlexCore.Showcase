@@ -5,7 +5,7 @@
     margin: 0 auto;
     padding: 12px 0 64px;
     color: #1e293b;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--site-font);
 }
 
 /* ── 1. Top Hero One-Liner (Compact & Punchy) ── */
@@ -16,48 +16,134 @@
     padding: 0 16px;
 }
 
-.hero-tagline-badge {
+.hero-oneliner {
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.06;
+    color: #0f172a;
+    letter-spacing: -0.045em;
+    margin: 0;
+}
+
+.hero-sub {
+    font-size: 20px;
+    line-height: 1.5;
+    color: #475569;
+    max-width: 920px;
+    margin: 20px auto 0;
+}
+
+/* Hero calls to action: solid brand blue (the top bar's Quick Start colour) and a light tint, like notion.com's pair. */
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.hero-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    background: #e0f2fe;
-    color: #0369a1;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 5px 14px;
+    font-size: 17px;
+    font-weight: 600;
+    padding: 11px 22px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.hero-btn:hover { text-decoration: none; }
+.hero-btn-primary, .hero-btn-primary:hover { color: #ffffff; }
+.hero-btn-primary { background: var(--brand-button); }
+.hero-btn-primary:hover { background: var(--brand-button-hover); }
+.hero-btn-secondary, .hero-btn-secondary:hover { color: var(--brand-button-soft-text); }
+.hero-btn-secondary { background: var(--brand-button-soft); }
+.hero-btn-secondary:hover { background: var(--brand-button-soft-hover); }
+
+/* Word pill (2026-10-28, after notion.com): "The Blazor toolbox that does [grids] right." The three words share one grid cell and
+   take turns, 3 s each; the pill and its square take the logo's colours (grids blue, charts indigo, reports green)
+   and its width follows the word, so the widths below are the words' widths in Inter 700 at -0.045em. */
+.word-pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.2em;
+    padding: 0.02em 0.36em 0.06em 0.3em;
     border-radius: 9999px;
-    margin-bottom: 14px;
-    letter-spacing: 0.02em;
-    border: 1px solid #bae6fd;
+    white-space: nowrap;
+    background: #e0f2fe;
+    animation: word-pill-bg 9s infinite;
 }
 
-.badge-pulse {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #0284c7;
-    box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
-    animation: pulse 1.8s infinite;
+/* One tile of the FlexCore logo (9-unit square, 2-unit corners; the brand mark in MainLayout.razor) in place of a dot. */
+.word-pill-mark {
+    align-self: center;
+    flex: none;
+    width: 0.28em;
+    height: 0.28em;
+    border-radius: 22%;
+    background: var(--brand-blue);
+    animation: word-pill-mark 9s infinite;
 }
 
-@keyframes pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(2, 132, 199, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
+.word-pill-words {
+    display: inline-grid;
+    justify-items: start;
+    width: var(--w-grids);
+    clip-path: inset(-0.1em -0.3em);
+    animation: word-pill-width 9s infinite;
+    --w-grids: 2.12em;
+    --w-reports: 3.07em;
+    --w-charts: 2.70em;
 }
 
-.hero-oneliner {
-    font-size: 26px;
-    font-weight: 800;
-    line-height: 1.35;
-    color: #0f172a;
-    letter-spacing: -0.02em;
-    margin: 0;
+.word-pill-words > span {
+    grid-area: 1 / 1;
+    opacity: 0;
+    animation: word-pill-word 9s infinite;
+}
+
+.word-pill-words > span:nth-child(2) { animation-delay: 3s; }
+.word-pill-words > span:nth-child(3) { animation-delay: 6s; }
+
+@keyframes word-pill-word {
+    0% { opacity: 0; transform: translateY(0.45em); }
+    5%, 30% { opacity: 1; transform: none; }
+    34%, 100% { opacity: 0; transform: translateY(-0.45em); }
+}
+
+@keyframes word-pill-width {
+    0%, 30% { width: var(--w-grids); }
+    35%, 63% { width: var(--w-charts); }
+    68%, 96% { width: var(--w-reports); }
+    100% { width: var(--w-grids); }
+}
+
+@keyframes word-pill-bg {
+    0%, 30% { background: #e0f2fe; }
+    35%, 63% { background: #e0e7ff; }
+    68%, 96% { background: #d1fae5; }
+    100% { background: #e0f2fe; }
+}
+
+@keyframes word-pill-mark {
+    0%, 30% { background: var(--brand-blue); }
+    35%, 63% { background: var(--brand-indigo); }
+    68%, 96% { background: var(--brand-green); }
+    100% { background: var(--brand-blue); }
+}
+
+/* Desktop breaks after "toolbox", phones before the pill, so a changing pill width never moves words between lines. */
+.hero-br-sm { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .word-pill, .word-pill-mark, .word-pill-words, .word-pill-words > span { animation: none; }
+    .word-pill-words > span:first-child { opacity: 1; }
 }
 
 /* ── 2. Live Interactive Showcase (Grid at the Top) ── */
 .showcase-section {
-    margin-bottom: 56px;
+    margin-bottom: 80px;   /* 56px until 2026-10-29: more air under the app window */
 }
 
 .showcase-shell {
@@ -104,12 +190,261 @@
 }
 
 .window-tags {
-    font-size: 11px;
+    display: flex;
+    align-items: center;
+}
+
+/* ── The app window (2026-10-29, Baaria, after the app demo on blazor.radzen.com): a sidebar of pages, a top bar and the page,
+   at a fixed height with the page scrolling inside, as in a real app. The library parts (vertical TabStripControl, AppBarControl,
+   ButtonControl menus, AvatarControl, FabMenuControl) take the site's colours through ::deep; the demo pages keep their defaults.
+   Wide screens: the hamburger shrinks the menu to its icons. Phones: the menu starts as icons and the hamburger opens it. ── */
+.gw-app {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+    height: 780px;
+    background: #f8fafc;
+    transition: grid-template-columns 0.2s ease;
+}
+.gw-app.gw-nav-collapsed { grid-template-columns: 68px minmax(0, 1fr); }
+
+.gw-sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    background: #f5f6ff;
+    border-right: 1px solid #e0e7ff;
+    padding: 16px 10px 14px;
+}
+.gw-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 2px 6px 18px;
+    font-size: 15px;
     font-weight: 700;
-    color: #0369a1;
-    background: #e0f2fe;
-    padding: 2px 8px;
-    border-radius: 4px;
+    letter-spacing: -0.01em;
+    color: #1e1b4b;
+    white-space: nowrap;
+}
+.gw-brand-mark {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--brand-button);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+
+/* The menu is a vertical TabStripControl */
+.gw-sidebar ::deep .fx-tabstrip.gw-nav {
+    width: auto;
+    height: auto;
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: none;
+}
+.gw-sidebar ::deep .gw-nav .fx-tabstrip-viewport { padding: 0; gap: 4px; }
+.gw-sidebar ::deep .gw-nav .fx-tabstrip-tab,
+.gw-sidebar ::deep .gw-nav-extra {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 42px;
+    margin: 0;
+    padding: 0 13px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    box-shadow: none;
+    color: #334155;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.gw-sidebar ::deep .gw-nav .fx-tabstrip-text { display: inline; overflow: visible; white-space: nowrap; line-height: 1.25; }
+.gw-sidebar ::deep .gw-nav .fx-tabstrip-tab::before,
+.gw-sidebar ::deep .gw-nav .fx-tabstrip-tab::after { display: none; }
+.gw-sidebar ::deep .gw-nav .fx-tabstrip-tab:hover,
+.gw-sidebar ::deep .gw-nav-extra:hover { background: #eceeff; color: var(--brand-button-soft-text); }
+.gw-sidebar ::deep .gw-nav .fx-tabstrip-tab.fx-tabstrip-tab-active {
+    background: var(--brand-button-soft-hover);
+    color: var(--brand-button-soft-text);
+    font-weight: 600;
+}
+.gw-sidebar ::deep .gw-nav .fx-tabstrip-icon,
+.gw-sidebar ::deep .gw-nav-extra .bi { flex: none; width: 18px; font-size: 17px; text-align: center; }
+.gw-sidebar ::deep .gw-nav-extra { margin-top: 4px; }
+.gw-sidebar-foot {
+    margin-top: auto;
+    padding: 0 8px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+/* Menu shrunk to icons: wide screens after the hamburger, phones until it */
+.gw-app.gw-nav-collapsed .gw-brand-name,
+.gw-app.gw-nav-collapsed .gw-sidebar-foot,
+.gw-app.gw-nav-collapsed .gw-nav-extra-text,
+.gw-app.gw-nav-collapsed .gw-sidebar ::deep .fx-tabstrip-text { display: none; }
+.gw-app.gw-nav-collapsed .gw-sidebar ::deep .gw-nav .fx-tabstrip-tab,
+.gw-app.gw-nav-collapsed .gw-sidebar ::deep .gw-nav-extra { justify-content: center; padding: 0; }
+.gw-scrim { display: none; }
+
+.gw-main {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+.gw-main ::deep .fx-app-bar.gw-appbar { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 6px 14px; }
+.gw-main ::deep .gw-appbar .fx-toolbar { min-height: 48px; margin: 0; padding: 0; border: 0; background: none; }
+.gw-main ::deep .gw-appbar .fx-app-bar-start { min-width: 0; }
+.gw-page-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.gw-main ::deep .gw-icon-btn {
+    position: relative;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: #334155;
+    font-size: 19px;
+    cursor: pointer;
+}
+.gw-main ::deep .gw-icon-btn:hover { background: #f1f5f9; color: var(--brand-button-soft-text); }
+.gw-main ::deep .gw-bell-dot { position: absolute; top: 8px; right: 9px; }
+.gw-main ::deep .gw-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 10px 3px 3px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: #0f172a;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.gw-main ::deep .gw-profile:hover { background: #f1f5f9; }
+.gw-main ::deep .gw-avatar { background: var(--brand-button-soft-hover); color: var(--brand-button-soft-text); font-size: 13px; }
+.gw-profile-caret { font-size: 12px; color: #64748b; }
+
+/* The bell's and the profile's menus (ButtonControl DropDownContent), opened to the left of their button */
+.gw-main ::deep .fx-button-dd-panel.gw-menu {
+    left: auto;
+    right: 0;
+    margin-top: 8px;
+    min-width: 220px;
+    padding: 6px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 14px 30px -10px rgba(15, 23, 42, 0.3);
+}
+.gw-main ::deep .fx-button-dd-panel.gw-menu-wide { width: 340px; }
+.gw-main ::deep .gw-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: #1e293b;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+.gw-main ::deep .gw-menu-item:hover { background: var(--brand-button-soft); color: var(--brand-button-soft-text); }
+.gw-main ::deep .gw-menu-all { justify-content: center; margin-top: 2px; border-top: 1px solid #f1f5f9; border-radius: 0 0 8px 8px; font-weight: 600; color: var(--brand-button-soft-text); }
+.gw-menu-head { padding: 8px 12px 6px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; }
+.gw-menu-request-text { display: flex; flex-direction: column; min-width: 0; font-size: 13.5px; line-height: 1.35; }
+.gw-menu-request-text small { font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* The page scrolls inside the window; the bottom padding keeps the last row clear of the + button */
+.showcase-body.gw-page {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 20px 24px 96px;
+    background: #f8fafc;
+}
+
+/* The + button sits in the window's corner instead of the screen's; its backdrop still catches the click-away, without dimming */
+.gw-main ::deep .fx-fab-host.gw-fab { position: absolute; right: 26px; bottom: 22px; z-index: 30; }
+.gw-main ::deep .gw-fab .fx-fab-backdrop { background: transparent; }
+.gw-main ::deep .gw-fab .fx-fab-trigger { background: var(--brand-button); }
+.gw-main ::deep .gw-fab .fx-fab-trigger:hover:not(:disabled) { background: var(--brand-button-hover); }
+.gw-main ::deep .gw-fab .fx-fab-action-btn { background: var(--brand-button-soft-hover); color: var(--brand-button-soft-text); }
+
+@media (max-width: 768px) {
+    .window-title { display: none; }
+    .gw-app,
+    .gw-app.gw-nav-collapsed { position: relative; height: 720px; grid-template-columns: 60px minmax(0, 1fr); }
+    .gw-sidebar { padding: 12px 6px; }
+
+    /* Icons only until the hamburger opens the menu over the page */
+    .gw-app:not(.gw-nav-open) .gw-brand-name,
+    .gw-app:not(.gw-nav-open) .gw-sidebar-foot,
+    .gw-app:not(.gw-nav-open) .gw-nav-extra-text,
+    .gw-app:not(.gw-nav-open) .gw-sidebar ::deep .fx-tabstrip-text { display: none; }
+    .gw-app:not(.gw-nav-open) .gw-sidebar ::deep .gw-nav .fx-tabstrip-tab,
+    .gw-app:not(.gw-nav-open) .gw-sidebar ::deep .gw-nav-extra { justify-content: center; padding: 0; }
+    .gw-app.gw-nav-open .gw-brand-name,
+    .gw-app.gw-nav-open .gw-sidebar-foot,
+    .gw-app.gw-nav-open .gw-nav-extra-text,
+    .gw-app.gw-nav-open .gw-sidebar ::deep .fx-tabstrip-text { display: revert; }
+    .gw-app.gw-nav-open .gw-sidebar ::deep .gw-nav .fx-tabstrip-tab,
+    .gw-app.gw-nav-open .gw-sidebar ::deep .gw-nav-extra { justify-content: flex-start; padding: 0 13px; }
+    .gw-app.gw-nav-open .gw-sidebar {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 210;       /* over the app bar, whose AppBarControl ZIndex is 100 */
+        width: 220px;
+        padding: 12px 10px;
+        box-shadow: 14px 0 30px -14px rgba(15, 23, 42, 0.4);
+    }
+    .gw-app.gw-nav-open .gw-scrim { display: block; position: absolute; inset: 0; z-index: 209; background: rgba(15, 23, 42, 0.25); }
+
+    .gw-main ::deep .gw-appbar .fx-toolbar-items { flex-wrap: nowrap; gap: 4px; }
+    .gw-main ::deep .gw-help,
+    .gw-main ::deep .gw-profile-name,
+    .gw-profile-caret { display: none; }
+    .gw-main ::deep .gw-profile { padding: 3px; }
+    .gw-page-title { font-size: 15px; }
+    .gw-main ::deep .fx-button-dd-panel.gw-menu-wide { width: min(300px, 80vw); }
+    .showcase-body.gw-page { padding: 14px 12px 90px; }
 }
 
 .grid-banner-hint {
@@ -121,101 +456,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-}
-
-.showcase-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 10px 18px;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.showcase-tabs {
-    display: inline-flex;
-    align-items: center;
-    background: #f1f5f9;
-    padding: 4px;
-    border-radius: 8px;
-    gap: 4px;
-    border: 1px solid #e2e8f0;
-    overflow-x: auto;
-}
-
-.tab-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #64748b;
-    font-weight: 600;
-    font-size: 13px;
-    padding: 7px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-    white-space: nowrap;
-    user-select: none;
-    line-height: 1.4;
-}
-
-.tab-btn:hover { color: #0284c7; background: rgba(255, 255, 255, 0.7);
-}
-
-.tab-btn.active {
-    background: #ffffff;
-    color: #0284c7;
-    font-weight: 700;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.tab-btn .bi {
-    font-size: 14px;
-    color: #94a3b8;
-    transition: color 0.15s ease;
-}
-
-.tab-btn.active .bi {
-    color: #0284c7;
-}
-
-.showcase-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.btn-code-toggle {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #334155;
-    font-size: 12.5px;
-    font-weight: 600;
-    padding: 7px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    transition: all 0.15s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    outline: none;
-}
-
-.btn-code-toggle:hover {
-    background: #f8fafc;
-    border-color: #94a3b8;
-    color: #0284c7;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-.btn-code-toggle .bi {
-    color: #0284c7;
 }
 
 .showcase-body {
@@ -296,7 +536,7 @@
     align-items: center;
     gap: 6px;
     padding: 6px 14px;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 12.5px;
     font-weight: 600;
     border: none;
@@ -305,19 +545,19 @@
 }
 
 .btn-excel {
-    background: #107c41;
-    color: #ffffff;
+    background: var(--brand-button-soft);
+    color: var(--brand-button-soft-text);
 }
 .btn-excel:hover {
-    background: #0b5e31;
+    background: var(--brand-button-soft-hover);
 }
 
 .btn-new {
-    background: #0284c7;
+    background: var(--brand-button);
     color: #ffffff;
 }
 .btn-new:hover {
-    background: #0369a1;
+    background: var(--brand-button-hover);
 }
 
 /* Category Filter Bar */
@@ -354,16 +594,16 @@
 }
 
 .btn-filter-pill.active {
-    background: #0284c7;
-    border-color: #0284c7;
+    background: var(--brand-button);
+    border-color: var(--brand-button);
     color: #ffffff;
     font-weight: 600;
 }
 
-/* Grid Performance Highlights Banner */
+/* Grid Performance Highlights Banner (190px: the four fit one row beside the app window's menu) */
 .grid-perf-highlights {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     gap: 10px;
     margin-bottom: 14px;
     background: #f8fafc;
@@ -474,7 +714,7 @@
 .btn-cell-popup-edit {
     background: #f1f5f9;
     border: 1px solid #cbd5e1;
-    color: #0284c7;
+    color: var(--brand-button-soft-text);
     font-size: 11px;
     font-weight: 600;
     padding: 2px 8px;
@@ -484,9 +724,9 @@
     transition: all 0.15s ease;
 }
 .btn-cell-popup-edit:hover {
-    background: #0284c7;
+    background: var(--brand-button);
     color: #ffffff;
-    border-color: #0284c7;
+    border-color: var(--brand-button);
 }
 
 .grid-status-footer {
@@ -616,33 +856,32 @@
 }
 
 .btn-modal-cancel {
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    color: #475569;
+    background: var(--brand-button-soft);
+    border: 0;
+    color: var(--brand-button-soft-text);
     font-size: 13px;
     font-weight: 600;
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
 }
-.btn-modal-cancel:hover { background: #f1f5f9; color: #0284c7;
-}
+.btn-modal-cancel:hover { background: var(--brand-button-soft-hover); }
 
 .btn-modal-save {
-    background: #0284c7;
+    background: var(--brand-button);
     border: none;
     color: #ffffff;
     font-size: 13px;
     font-weight: 600;
     padding: 8px 18px;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
 .btn-modal-save:hover {
-    background: #0369a1;
+    background: var(--brand-button-hover);
 }
 
 /* Code panel: since 2026-10-24 a tab over the live example (the example stays mounted, hidden) */
@@ -655,7 +894,7 @@
     min-height: 360px;
 }
 .showcase-live.is-hidden { display: none; }
-.hero-view-tabs { font-size: 12.5px; }
+.window-tags ::deep .hero-view-tabs.site-tabs { padding: 0; border-bottom: 0; }   /* in the window's title bar; look from .site-tabs in app.css */
 .code-drawer pre {
     margin: 0;
     font-family: "SF Mono", Menlo, Consolas, monospace;
@@ -678,14 +917,15 @@
     background: #1e293b;
     border: 1px solid #334155;
     color: #e2e8f0;
+    font-family: inherit;
     font-size: 11px;
     font-weight: 600;
     padding: 4px 10px;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
-/* ── 3. Most Popular UI Components (Syncfusion Style Top Cards) ── */
+/* ── 3. Featured component cards ── */
 .popular-components-section {
     margin: 56px 0 44px;
     text-align: center;
@@ -753,7 +993,7 @@
     color: #1e293b;
 }
 
-/* ── 4. Complete Component Directory (Syncfusion Style Multi-Column) ── */
+/* ── 4. Complete component directory, multi-column ── */
 .catalog-directory-section {
     margin: 48px 0 72px;
 }
@@ -867,36 +1107,288 @@
 .comp-list a:hover { color: #0284c7;
 }
 
+/* ── 3. The four big workhorses (2026-10-28) ──
+   A normal section heading with a hand-drawn chequered flag on the right (Notion-style ink doodle, inline SVG in Home.razor), then
+   a 2 x 2 grid of cards (one column on phones), each a link with an SVG picture on a tinted panel above its text. The four tints
+   are the logo's four colours. */
+.workhorses-section {
+    margin: 64px 0 72px;
+}
+
+.workhorses-head { margin-bottom: 28px; }
+
+/* Doodle headings (layout and hand-drawn wobble in app.css): the heading text sits beside the picture, so no margin of its own. */
+.doodle-head .section-title { margin: 0; }
+.section-header .doodle-head { margin-bottom: 14px; }
+
+/* The wave: each flag column bobs and skews a little later and a little further than the one nearer the pole, the pole sways,
+   and three wind strokes blow past. Three beats, then still; it plays again the next time the heading scrolls into view. */
+.flag-col { transform-box: fill-box; transform-origin: 50% 50%; }
+.flag-sway { transform-origin: 37px 142px; }
+.flag-wind { opacity: 0; }
+
+.workhorses-head.is-playing .flag-col { animation: flag-ripple 0.8s ease-in-out var(--d) 3; }
+.workhorses-head.is-playing .flag-sway { animation: flag-sway 0.8s ease-in-out 3; }
+.workhorses-head.is-playing .flag-wind { animation: flag-wind 2.4s ease-out; }
+
+@keyframes flag-ripple {
+    0%, 100% { transform: translateY(0) skewY(0deg); }
+    25% { transform: translateY(calc(var(--a) * -1)) skewY(-5deg); }
+    75% { transform: translateY(var(--a)) skewY(5deg); }
+}
+
+@keyframes flag-sway {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-3deg); }
+}
+
+@keyframes flag-wind {
+    0% { opacity: 0; transform: translateX(-8px); }
+    20%, 70% { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: translateX(8px); }
+}
+
+/* Crane (Engineered for Enterprise Demand): the load lowers to the ground, waits, is hoisted back with a small overshoot and swings
+   on its cable from the trolley before it settles. */
+.cr-load { transform-origin: 120px 30px; }
+.doodle-head.is-playing .cr-load { animation: crane-lift 3s ease-in-out; }
+
+@keyframes crane-lift {
+    0% { transform: translateY(0) rotate(0deg); }
+    25%, 35% { transform: translateY(36px) rotate(0deg); }
+    62% { transform: translateY(-6px) rotate(0deg); }
+    70% { transform: translateY(0) rotate(6deg); }
+    79% { transform: translateY(0) rotate(-4deg); }
+    88% { transform: translateY(0) rotate(2deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* Scale (How FlexCore Compares): the beam rocks and settles at -10deg, the logo's end low. Each pan rides its beam end, 55 units
+   from the pivot: an angle a moves the left pan by -55 sin a and the right pan by +55 sin a, so the keyframes below pair up. */
+.sc-beam { transform-origin: 85px 34px; transform: rotate(-10deg); }
+.sc-left { transform: translateY(9.5px); }
+.sc-right { transform: translateY(-9.5px); }
+.doodle-head.is-playing .sc-beam { animation: scale-beam 2.8s ease-in-out; }
+.doodle-head.is-playing .sc-left { animation: scale-left 2.8s ease-in-out; }
+.doodle-head.is-playing .sc-right { animation: scale-right 2.8s ease-in-out; }
+
+@keyframes scale-beam {
+    0%, 100% { transform: rotate(-10deg); }
+    20% { transform: rotate(8deg); }
+    40% { transform: rotate(-12deg); }
+    60% { transform: rotate(4deg); }
+    80% { transform: rotate(-11deg); }
+}
+
+@keyframes scale-left {
+    0%, 100% { transform: translateY(9.5px); }
+    20% { transform: translateY(-7.7px); }
+    40% { transform: translateY(11.4px); }
+    60% { transform: translateY(-3.8px); }
+    80% { transform: translateY(10.5px); }
+}
+
+@keyframes scale-right {
+    0%, 100% { transform: translateY(-9.5px); }
+    20% { transform: translateY(7.7px); }
+    40% { transform: translateY(-11.4px); }
+    60% { transform: translateY(3.8px); }
+    80% { transform: translateY(-10.5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workhorses-head.is-playing .flag-col,
+    .workhorses-head.is-playing .flag-sway,
+    .workhorses-head.is-playing .flag-wind,
+    .doodle-head.is-playing .cr-load,
+    .doodle-head.is-playing .sc-beam,
+    .doodle-head.is-playing .sc-left,
+    .doodle-head.is-playing .sc-right { animation: none; }
+}
+
+.workhorse-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.workhorse-card {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.workhorse-card:hover {
+    color: inherit;
+    text-decoration: none;
+    transform: translateY(-4px);
+    box-shadow: 0 18px 36px -12px rgba(15, 23, 42, 0.18);
+}
+
+.workhorse-art {
+    height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.workhorse-art svg { width: 100%; max-width: 320px; height: 100%; }
+
+.workhorse-art.blue   { background: #e0f2fe; }
+.workhorse-art.indigo { background: #eef2ff; }
+.workhorse-art.green  { background: #ecfdf5; }
+.workhorse-art.sky    { background: #f0f9ff; }
+
+.workhorse-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 22px 24px 24px;
+    flex: 1;
+}
+
+.workhorse-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+}
+
+.workhorse-tile {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+}
+
+.workhorse-tile.blue   { background: #e0f2fe; color: var(--brand-blue); }
+.workhorse-tile.indigo { background: #e0e7ff; color: var(--brand-indigo); }
+.workhorse-tile.green  { background: #d1fae5; color: #059669; }
+.workhorse-tile.sky    { background: #e0f2fe; color: #0ea5e9; }
+
+.workhorse-desc {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #475569;
+}
+
+.workhorse-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.workhorse-chips li {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
+    background: #f1f5f9;
+    border-radius: 9999px;
+    padding: 4px 10px;
+}
+
+.workhorse-link {
+    margin-top: auto;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0284c7;
+}
+
+.workhorse-card:hover .workhorse-link { color: #0369a1; }
+
 /* ── 5. Enterprise Architecture Pillars ── */
 .pillars-section {
     margin-bottom: 64px;
 }
 
-.section-header {
-    text-align: center;
-    margin-bottom: 28px;
+/* The page's one coloured band (2026-10-28, after telerik.com): full width indigo from the logo, drawn with the box-shadow trick
+   (the shadow fills the viewport sideways, clip-path trims it to the band's height), so nothing overflows the page. The green strip
+   of numbers sits just before it in the markup and pulls its lower half down over the band's top edge. */
+.brand-band {
+    position: relative;
+    background: #4f46e5;
+    box-shadow: 0 0 0 100vmax #4f46e5;
+    clip-path: inset(0 -100vmax);
+    padding: 72px 0 72px;
+    margin-bottom: 72px;
 }
 
-.section-tag {
-    display: inline-block;
-    color: #0284c7;
-    font-size: 12px;
+.brand-band .section-title { color: #ffffff; }
+.brand-band .section-desc { color: #e0e7ff; }
+.brand-band .pillar-card { border-color: transparent; box-shadow: 0 10px 24px -12px rgba(15, 23, 42, 0.45); }
+
+.stats-strip {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0 auto -44px;
+    max-width: 1100px;
+    background: var(--brand-green);
+    border-radius: 6px;
+    box-shadow: 0 14px 30px -14px rgba(15, 23, 42, 0.4);
+}
+
+.stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+    padding: 22px 16px;
+    color: #052e2b;
+}
+
+.stat + .stat { border-left: 1px solid rgba(5, 46, 43, 0.18); }
+
+.stat-num {
+    font-size: clamp(30px, 3.6vw, 48px);
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
+    letter-spacing: -0.04em;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* 2026-10-28: section heads are large, without the small uppercase label above them (after notion.com); centred since 2026-10-29.
+   The same scale is used by .popular-title, .directory-title and the call to action. */
+.section-header {
+    text-align: center;
+    margin-bottom: 32px;
 }
 
 .section-title {
-    font-size: 30px;
-    font-weight: 800;
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.1;
     color: #0f172a;
-    letter-spacing: -0.02em;
-    margin-bottom: 12px;
+    letter-spacing: -0.035em;
+    margin-bottom: 14px;
 }
 
 .section-desc {
-    font-size: 15px;
+    font-size: 18px;
+    line-height: 1.5;
     color: #64748b;
     max-width: 720px;
     margin: 0 auto;
@@ -957,7 +1449,7 @@
 
 /* ── 6. Comparison Table ── */
 .comparison-section {
-    margin-bottom: 64px;
+    margin-bottom: 72px;
 }
 
 .comparison-table-wrapper {
@@ -1004,6 +1496,12 @@
 }
 
 /* ── 7. Bottom Call To Action Banner ── */
+/* Divider between home sections (2026-10-29): the four logo colours as a short bar, like the one under each page title. The
+   sections around it give the space; the toolbox and the call to action get a matching top margin. */
+.section-divider { width: 128px; height: 8px; margin: 0 auto; border-radius: 4px; background: var(--brand-stripe); }
+.landing-container ::deep .catalog-directory-section { margin-top: 72px; }
+.section-divider + .cta-banner { margin-top: 72px; }
+
 .cta-banner {
     background: linear-gradient(135deg, #091e3a 0%, #0d3b66 100%);
     color: #ffffff;
@@ -1015,14 +1513,66 @@
 }
 
 .cta-banner h2 {
-    font-size: 30px;
-    font-weight: 800;
-    margin-bottom: 12px;
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    margin: 0;
     color: #ffffff;
 }
 
+/* The banner is centred, so its rocket and heading are centred as a pair (stacked and centred on phones). */
+.cta-banner .doodle-head { justify-content: center; align-items: center; margin-bottom: 14px; }
+
+/* Rocket: rumble with the flame flaring, lift off with speed lines and smoke, hover, settle back. The flame scales from the nozzle. */
+.rk-flame { transform-box: fill-box; transform-origin: 50% 0%; transform: scaleY(0.6); }
+.rk-lines, .rk-smoke { opacity: 0; }
+.rk-smoke { transform-box: fill-box; transform-origin: 50% 100%; }
+.doodle-head.is-playing .rk-rocket { animation: rocket-fly 3s ease-in-out; }
+.doodle-head.is-playing .rk-flame { animation: rocket-flame 3s ease-in-out; }
+.doodle-head.is-playing .rk-lines { animation: rocket-lines 3s ease-out; }
+.doodle-head.is-playing .rk-smoke { animation: rocket-smoke 3s ease-out; }
+
+@keyframes rocket-fly {
+    0% { transform: translate(0, 0); }
+    5%, 15% { transform: translate(-1.5px, 0); }
+    10%, 20% { transform: translate(1.5px, 0); }
+    25% { transform: translate(0, 0); }
+    50%, 72% { transform: translate(0, -28px); }
+    61% { transform: translate(0, -23px); }
+    90% { transform: translate(0, 2px); }
+    100% { transform: translate(0, 0); }
+}
+
+@keyframes rocket-flame {
+    0%, 100% { transform: scaleY(0.6); }
+    8%, 18% { transform: scaleY(1.1); }
+    13%, 23% { transform: scaleY(0.85); }
+    30%, 70% { transform: scaleY(1.35); }
+    90% { transform: scaleY(0.8); }
+}
+
+@keyframes rocket-lines {
+    0%, 26% { opacity: 0; transform: translateY(-6px); }
+    36%, 60% { opacity: 1; transform: translateY(6px); }
+    72%, 100% { opacity: 0; transform: translateY(12px); }
+}
+
+@keyframes rocket-smoke {
+    0%, 20% { opacity: 0; transform: scale(0.8); }
+    32% { opacity: 1; transform: scale(1); }
+    60%, 100% { opacity: 0; transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .doodle-head.is-playing .rk-rocket,
+    .doodle-head.is-playing .rk-flame,
+    .doodle-head.is-playing .rk-lines,
+    .doodle-head.is-playing .rk-smoke { animation: none; }
+}
+
 .cta-banner p {
-    font-size: 15px;
+    font-size: 18px;
     color: #cbd5e1;
     max-width: 620px;
     margin: 0 auto 24px;
@@ -1069,46 +1619,27 @@
     gap: 14px;
 }
 
-.btn-hero-primary {
-    background: #ffffff;
-    color: #0d3b66;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 10px 24px;
-    border-radius: 8px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.15s ease;
-}
-
-.btn-hero-primary:hover {
-    background: #f1f5f9;
-    transform: translateY(-2px);
-}
-
+/* The banner's buttons share the hero buttons' size, shape and type (2026-10-29, Baaria: every button like the home page's) */
+.btn-hero-primary,
 .btn-hero-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 10px 22px;
-    border-radius: 8px;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(6px);
-    transition: all 0.15s ease;
+    padding: 11px 22px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
 }
 
-.btn-hero-secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    transform: translateY(-2px);
-}
+.btn-hero-primary, .btn-hero-primary:hover { color: #ffffff; }
+.btn-hero-primary { background: var(--brand-button); }
+.btn-hero-primary:hover { background: var(--brand-button-hover); }
+
+.btn-hero-secondary, .btn-hero-secondary:hover { color: #ffffff; }
+.btn-hero-secondary { background: rgba(255, 255, 255, 0.12); }
+.btn-hero-secondary:hover { background: rgba(255, 255, 255, 0.22); }
 
 /* ── Responsive Rules ── */
 @media (max-width: 1200px) {
@@ -1121,8 +1652,17 @@
 }
 
 @media (max-width: 768px) {
-    .hero-oneliner {
-        font-size: 22px;
+    .workhorse-grid { grid-template-columns: 1fr; }
+    .workhorse-art { height: 140px; }
+    .stat { flex-direction: column; align-items: center; gap: 4px; padding: 16px 8px; text-align: center; }
+    .hero-br-sm { display: inline; }
+    .hero-br-lg { display: none; }
+    .hero-btn {
+        font-size: 15px;
+        padding: 10px 16px;
+    }
+    .hero-sub {
+        font-size: 17px;
     }
     .popular-cards-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -1138,11 +1678,7 @@
     .grid-search-input {
         width: 100%;
     }
-    .showcase-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
 }
 
-/* 2026-10-20: ?tab=ribbon#live-showcase (catalog row Office Ribbon) scrolls here; keep the section under the sticky header. */
+/* 2026-10-20: a #live-showcase link (e.g. ?tab=bookings#live-showcase) scrolls here; keep the section under the sticky header. */
 .showcase-section { scroll-margin-top: 76px; }

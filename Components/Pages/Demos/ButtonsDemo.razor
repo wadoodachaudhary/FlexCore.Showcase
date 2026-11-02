@@ -8,7 +8,7 @@
    2026-10-20: code tabs generated from this file (gencode). The CSS tab that showed a .classic/.compact retheme was dropped:
    nothing in the example used it, so it did not match the markup; a retheme example is a follow-up. *@
 
-<PageTitle>Buttons — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Button Component — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Buttons" Category="Components" ControlName="ButtonControl"
                    Tagline="One native button, styled through CSS variables, with an optional dropdown."
@@ -19,6 +19,7 @@
             from <code>--fx-btn-*</code> variables, and any attribute it does not recognise is forwarded to the element.
             Give it <code>DropDownContent</code> and it becomes a popup trigger that closes on click-away without JavaScript.
         </p>
+        <p>This site themes its buttons: it sets the <code>--fx-btn-*</code> variables to its pale indigo, gives <code>btn-primary</code> and <code>btn-outline-primary</code> its own indigo, and sets the type and padding in its stylesheet. The examples show that look; the tables list the library's defaults.</p>
     </Overview>
 
     <Examples>
@@ -103,7 +104,7 @@
             <li><code>SaveButtonControl</code> and <code>CancelButtonControl</code> are presets of this control.</li>
             <li><code>ToolbarControl</code> and <code>ToolbarButtonControl</code>: <a href="demo/ai-prompt#app-bar">AI prompt</a>, in an app bar.</li>
             <li>Default button on Enter: <a href="demo/dialog">Dialogs</a>.</li>
-            <li><code>RibbonControl</code>: <a href="">home page</a>.</li>
+            <li><code>RibbonControl</code>: <a href="demo/ribbon">Ribbon</a>.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>

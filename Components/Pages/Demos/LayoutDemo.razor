@@ -14,7 +14,7 @@
    Layout/StackLayoutControl.razor, ContentModels.cs, FlexControlBase.cs and BadgeControl.razor in FlexCore 0.2.49.
    2026-10-26 (Baaria): sample content moved to the travel theme. *@
 
-<PageTitle>Page layouts — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Splitter, Panels and Dashboard Layout — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Page layouts" Category="Components" ControlName="PageLayoutControl · SplitterControl · DashboardLayoutControl · GridLayoutControl · StackLayoutControl"
                    Tagline="An application shell with collapsible side panels and a splitter, a dashboard grid, and grid and stack layouts for the content of a panel."
@@ -115,10 +115,10 @@
                             </DashboardLayoutPanel>
                         }
                         <DashboardLayoutPanel Row="ChartsRow" Column="0" SizeX="2" SizeY="3">
-                            <CardControl Elevation="0" CssClass="dash-card"><ChartControl Type="ChartType.Line" Title="Traffic" Height="200px" Series="_traffic" /></CardControl>
+                            <CardControl Elevation="0" CssClass="dash-card"><ChartControl Type="ChartType.Line" ColorPalette="@ChartPalette.Site" Title="Traffic" Height="200px" Series="_traffic" /></CardControl>
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel Row="ChartsRow" Column="2" SizeY="3">
-                            <CardControl Elevation="0" CssClass="dash-card"><ChartControl Type="ChartType.Donut" Title="Sources" Height="200px" InnerRadius="0.5" Series="_sources" /></CardControl>
+                            <CardControl Elevation="0" CssClass="dash-card"><ChartControl Type="ChartType.Donut" ColorPalette="@ChartPalette.Site" Title="Sources" Height="200px" InnerRadius="0.5" Series="_sources" /></CardControl>
                         </DashboardLayoutPanel>
                     </DashboardLayoutPanels>
                 </DashboardLayoutControl>
@@ -230,15 +230,15 @@
     {
         ["Requests"] = new[]
         {
-            new Item("LIS-0001 Moreau", "3 lines · Quoted · $1,720", new[] { ("Traveller", "Emma Moreau"), ("Status", "Quoted"), ("Lines", "3"), ("Total", "$1,720") }),
-            new Item("KYO-0001 Lindqvist", "6 lines · Draft · $4,860 · last saved today 09:12", new[] { ("Traveller", "Ana Lindqvist"), ("Status", "Draft"), ("Lines", "6"), ("Total", "$4,860") }),
-            new Item("AMF-0002 Brennan", "9 lines · Booked · $6,240", new[] { ("Traveller", "Liam Brennan"), ("Status", "Booked"), ("Lines", "9"), ("Total", "$6,240") }),
+            new Item("LIS-0001 Marmalade", "3 lines · Quoted · $1,720", new[] { ("Traveller", "Clementine Marmalade"), ("Status", "Quoted"), ("Lines", "3"), ("Total", "$1,720") }),
+            new Item("KYO-0001 Thistlewood", "6 lines · Draft · $4,860 · last saved today 09:12", new[] { ("Traveller", "Juniper Thistlewood"), ("Status", "Draft"), ("Lines", "6"), ("Total", "$4,860") }),
+            new Item("AMF-0002 Puddleby", "9 lines · Booked · $6,240", new[] { ("Traveller", "Barnaby Puddleby"), ("Status", "Booked"), ("Lines", "9"), ("Total", "$6,240") }),
         },
         ["Suppliers"] = new[]
         {
-            new Item("Meridian Airways", "Net 30 · 3 open bookings", new[] { ("Contact", "J. Ortiz"), ("Terms", "Net 30"), ("Open bookings", "3") }),
-            new Item("Hotel Lisbon Central", "Net 15 · 1 open booking", new[] { ("Contact", "P. Reyes"), ("Terms", "Net 15"), ("Open bookings", "1") }),
-            new Item("Lisbon Walks", "Prepaid · no open bookings", new[] { ("Contact", "M. Chen"), ("Terms", "Prepaid"), ("Open bookings", "0") }),
+            new Item("Meridian Airways", "Net 30 · 3 open bookings", new[] { ("Contact", "H. Quickfoot"), ("Terms", "Net 30"), ("Open bookings", "3") }),
+            new Item("Hotel Lisbon Central", "Net 15 · 1 open booking", new[] { ("Contact", "P. Teacup"), ("Terms", "Net 15"), ("Open bookings", "1") }),
+            new Item("Lisbon Walks", "Prepaid · no open bookings", new[] { ("Contact", "M. Butterworth"), ("Terms", "Prepaid"), ("Open bookings", "0") }),
         },
         ["Settings"] = new[]
         {
@@ -409,6 +409,9 @@
     // Code tabs are verbatim
     private static class Code
     {
+        // The palette the charts pass, printed from Components/Shared/ChartPalette.cs
+        private static string PaletteCs => "\n\n" + AppSource.Region("ChartPalette.cs", "chart-palette");
+
         public const string Shell = @"<div class=""frame"">
     <PageLayoutControl Height=""340px"">
         <LeftPanelControl Width=""170px"" Collapsible=""true"" @bind-Collapsed=""_leftCollapsed"">
@@ -482,15 +485,15 @@ private readonly Dictionary<string, Item[]> _data = new()
 {
     [""Requests""] = new[]
     {
-        new Item(""LIS-0001 Moreau"", ""3 lines · Quoted · $1,720"", new[] { (""Traveller"", ""Emma Moreau""), (""Status"", ""Quoted""), (""Lines"", ""3""), (""Total"", ""$1,720"") }),
-        new Item(""KYO-0001 Lindqvist"", ""6 lines · Draft · $4,860 · last saved today 09:12"", new[] { (""Traveller"", ""Ana Lindqvist""), (""Status"", ""Draft""), (""Lines"", ""6""), (""Total"", ""$4,860"") }),
-        new Item(""AMF-0002 Brennan"", ""9 lines · Booked · $6,240"", new[] { (""Traveller"", ""Liam Brennan""), (""Status"", ""Booked""), (""Lines"", ""9""), (""Total"", ""$6,240"") }),
+        new Item(""LIS-0001 Marmalade"", ""3 lines · Quoted · $1,720"", new[] { (""Traveller"", ""Clementine Marmalade""), (""Status"", ""Quoted""), (""Lines"", ""3""), (""Total"", ""$1,720"") }),
+        new Item(""KYO-0001 Thistlewood"", ""6 lines · Draft · $4,860 · last saved today 09:12"", new[] { (""Traveller"", ""Juniper Thistlewood""), (""Status"", ""Draft""), (""Lines"", ""6""), (""Total"", ""$4,860"") }),
+        new Item(""AMF-0002 Puddleby"", ""9 lines · Booked · $6,240"", new[] { (""Traveller"", ""Barnaby Puddleby""), (""Status"", ""Booked""), (""Lines"", ""9""), (""Total"", ""$6,240"") }),
     },
     [""Suppliers""] = new[]
     {
-        new Item(""Meridian Airways"", ""Net 30 · 3 open bookings"", new[] { (""Contact"", ""J. Ortiz""), (""Terms"", ""Net 30""), (""Open bookings"", ""3"") }),
-        new Item(""Hotel Lisbon Central"", ""Net 15 · 1 open booking"", new[] { (""Contact"", ""P. Reyes""), (""Terms"", ""Net 15""), (""Open bookings"", ""1"") }),
-        new Item(""Lisbon Walks"", ""Prepaid · no open bookings"", new[] { (""Contact"", ""M. Chen""), (""Terms"", ""Prepaid""), (""Open bookings"", ""0"") }),
+        new Item(""Meridian Airways"", ""Net 30 · 3 open bookings"", new[] { (""Contact"", ""H. Quickfoot""), (""Terms"", ""Net 30""), (""Open bookings"", ""3"") }),
+        new Item(""Hotel Lisbon Central"", ""Net 15 · 1 open booking"", new[] { (""Contact"", ""P. Teacup""), (""Terms"", ""Net 15""), (""Open bookings"", ""1"") }),
+        new Item(""Lisbon Walks"", ""Prepaid · no open bookings"", new[] { (""Contact"", ""M. Butterworth""), (""Terms"", ""Prepaid""), (""Open bookings"", ""0"") }),
     },
     [""Settings""] = new[]
     {
@@ -523,16 +526,16 @@ protected override void OnInitialized() { _selected = _data[""Requests""][1]; La
             </DashboardLayoutPanel>
         }
         <DashboardLayoutPanel Row=""ChartsRow"" Column=""0"" SizeX=""2"" SizeY=""3"">
-            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Line"" Title=""Traffic"" Height=""200px"" Series=""_traffic"" /></CardControl>
+            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Line"" ColorPalette=""@ChartPalette.Site"" Title=""Traffic"" Height=""200px"" Series=""_traffic"" /></CardControl>
         </DashboardLayoutPanel>
         <DashboardLayoutPanel Row=""ChartsRow"" Column=""2"" SizeY=""3"">
-            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Donut"" Title=""Sources"" Height=""200px"" InnerRadius=""0.5"" Series=""_sources"" /></CardControl>
+            <CardControl Elevation=""0"" CssClass=""dash-card""><ChartControl Type=""ChartType.Donut"" ColorPalette=""@ChartPalette.Site"" Title=""Sources"" Height=""200px"" InnerRadius=""0.5"" Series=""_sources"" /></CardControl>
         </DashboardLayoutPanel>
     </DashboardLayoutPanels>
 </DashboardLayoutControl>
 </div>
 <span class=""result"">@(_focus is null ? ""Three KPI cards on row 0, charts on rows 2–4."" : $""{_kpis.First(k => k.Key == _focus).Label} spans the row; the others moved down."")</span>";
-        public const string DashboardCs = @"// Dashboard: placements come from state so a click re-flows the grid.
+        public static string DashboardCs => @"// Dashboard: placements come from state so a click re-flows the grid.
 private sealed record Kpi(string Key, string Value, string Label, string Trend, string Detail);
 
 private readonly Kpi[] _kpis =
@@ -569,7 +572,7 @@ private readonly List<ChartSeries> _traffic = new()
 private readonly List<ChartSeries> _sources = new()
 {
     new() { Name = ""Traffic"", DataPoints = new() { new(""Organic"", 55), new(""Paid"", 25), new(""Referral"", 15), new(""Direct"", 5) } }
-};";
+};" + PaletteCs;
 
         public const string GridStack = @"<div class=""summary"">
     <StackLayoutControl Orientation=""FlexOrientation.Vertical"" Gap=""14px"">

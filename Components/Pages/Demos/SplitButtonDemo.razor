@@ -4,7 +4,7 @@
 @* 2026-10-12: new page on FeatureDemoLayout; two examples per the 1–2 rule (Item values dropped, Value stays in the table). Facts checked against SplitButtonControl.razor,
    SplitButtonItem.cs and SplitButtonControl.razor.css in FlexCore 0.2.48. *@
 
-<PageTitle>Split button — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Split Button — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Split button" Category="Components" ControlName="SplitButtonControl"
                    Tagline="A default action, with its alternatives behind the caret."
@@ -13,7 +13,7 @@
         <p>
             <code>SplitButtonControl</code> renders two native buttons side by side. The main half fires <code>OnClick</code>;
             the caret half opens a menu built from <code>Items</code>, followed by any markup in <code>MenuContent</code>.
-            A click-away backdrop closes the menu; no JavaScript. Use it when one action is the default and the others are
+            A click-away backdrop closes the menu; the control imports no script of its own. Use it when one action is the default and the others are
             variants of it. When there is no default action, use <a href="demo/buttons#dropdown">ButtonControl's dropdown mode</a>.
         </p>
     </Overview>
