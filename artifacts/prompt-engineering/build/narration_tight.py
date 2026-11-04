@@ -1,0 +1,299 @@
+"""Tighter spoken track so the briefing lands near 30 minutes at a clear pace."""
+
+NARRATION = {
+    "01": (
+        "Welcome to Gov A I Academy course 210, Prompt Engineering for Government Officers. "
+        "This unclassified briefing is for officers whose work is non-technical or only partly technical. "
+        "You will not write code. You will learn to assign work to a generative model with the care you already use when you task a colleague. "
+        "The briefing runs about thirty minutes. In the facilitated session your instructor takes attendance, plays or teaches these slides, and then leads the labs. "
+        "The figure beside the slides is an illustrated instructor, and this soundtrack is synthetic narration, so another section can replay the lesson. Your facilitator still owns questions and completion. "
+        "Every example is fictional. Do not improve it with facts from your real workload."
+    ),
+    "02": (
+        "Treat this room, and any practice tool, as an official setting. "
+        "Attendance is recorded at the start, at each lab check, and at dismissal. Watching the video alone does not complete the course. "
+        "You will finish three exercises built from fictional public facts on the worksheets. "
+        "Use only a tool your agency has already approved for training. If none is approved, write the prompts on paper. The skill is the writing and the judgment. "
+        "The boundary does not bend. No classified information. No controlled unclassified information. No personal data, personnel matters, investigative details, source-selection material, or attorney work product. "
+        "If you would not leave the text on a shared printer, do not put it in a prompt."
+    ),
+    "03": (
+        "By the end of the facilitated session you should be able to do four things without a template in your lap. "
+        "Build a prompt that names the role, the context you are willing to share, the task, the constraints, and the output. "
+        "Bind the model to a source you provide, so it does not fill gaps with confident invention. "
+        "Revise in passes, asking for gaps and then for a tighter format, instead of treating the first reply as finished work. "
+        "And reject an output that is unfit for official use, in a sentence a supervisor can follow. "
+        "You are not becoming a model designer. You remain the accountable officer when a draft appears quickly."
+    ),
+    "04": (
+        "The Department of Labor published its Artificial Intelligence Literacy Framework in Training and Employment Notice 07-25, dated February 13, 2026. "
+        "The notice is voluntary guidance. It defines A I literacy as a foundational set of competencies for using and evaluating generative tools. "
+        "It names five areas: understand how these systems behave, explore real uses, direct them with clear instructions, evaluate the output, and use them responsibly. "
+        "The Department is explicit that literacy is a baseline, and that many roles need greater depth. "
+        "This academy treats that framework as the floor you should already meet, including the fact that fluent text can still be false. "
+        "Course 210 drills applied direction for ordinary unclassified office work: a repeatable structure, source binding, a fixed revision sequence, and a written accept-or-reject decision. "
+        "Instructor-led practice, with attendance and exercises, is the point of the session."
+    ),
+    "05": (
+        "A prompt is the full instruction you give a generative model. It may be one sentence or a short brief. Either way, it is the assignment. "
+        "A search box does well with keywords because it retrieves pages that already exist. A generative model writes new text that resembles a useful answer. "
+        "If the assignment is thin, the model still writes. It guesses the audience, the tone, the missing facts, and the format. That guess is how a draft sounds polished and still misses the job. "
+        "Write the prompt the way you would task a new hire who is quick, literal, and unable to see your files or the conversation in the hallway. "
+        "If that new hire would have to stop and ask, put the answer in the prompt before you send it."
+    ),
+    "06": (
+        "You do not need the mathematics. You do need a picture that keeps you honest. "
+        "A model is adjusted on very large collections of text. When you submit a prompt, the product produces a continuation that fits those patterns, shaped by safety rules and by any instructions your agency added outside your view. "
+        "It is not opening your system of record unless an approved connection was built and you were told so. "
+        "The same prompt can produce different wording on a second try. Treat that as normal. "
+        "A smooth paragraph is not evidence. A confident date, quotation, or citation is not a source until you check it against a record you trust. "
+        "Your prompt steers the draft. The officer who uses the text remains responsible for it."
+    ),
+    "07": (
+        "Most weak drafts fail in one of three ways, and all three can look successful at a glance. "
+        "The first is invented specifics: a meeting date, a quotation, a dollar figure, or a statute that was never in your prompt. Grammar makes the invention easy to miss. "
+        "The second is the right tone for the wrong reader. Nothing is false, and the work is still unfit. "
+        "The third is a skipped obligation. The draft answers a neighboring question and never reaches the decision you needed. Length makes it feel complete. "
+        "Hunt those three failures before you edit style. Style is cheap to fix. A fabricated fact in a memo that leaves the office is not. "
+        "Name the failure in plain language. That sentence becomes your next prompt."
+    ),
+    "08": (
+        "Before you write a clever prompt, pass a shorter test. "
+        "Is this task allowed on this tool under your agency's current policy? Approval for training is not approval for casework. "
+        "Can you do the job with facts you are allowed to paste? If the useful version requires material you cannot enter, choose a different task or no task. "
+        "Will a person review the result before anyone relies on it? A draft forwarded untouched is an official communication wearing a costume. "
+        "If any answer is no, do not prompt. Use the template, the specialist, the counsel, or the system of record. "
+        "Prompt engineering does not expand your authority. Speed is a reason for a stricter test, not a looser one."
+    ),
+    "09": (
+        "Memorize the categories, not a vendor's marketing page. "
+        "Never put classified information into a prompt, including a paraphrase that still conveys it. This course is not a classified channel. "
+        "Never put controlled unclassified information, or drafts your office treats as controlled, into a tool that is not authorized for that information. If you are unsure of the marking, leave it out and ask. "
+        "Never put personal data: Social Security numbers, home addresses, personal phone numbers, medical details, or a personnel action. "
+        "Never put investigative details, source-selection material, or attorney-client work. Never put a password, a token, or a badge number, even as an example. "
+        "Assume the prompt and the reply can be logged, reviewed, and retained. If a colleague hands you text to drop in, you still own the refusal."
+    ),
+    "10": (
+        "We will use one structure for the rest of the course. Five parts: role, context, task, constraints, and output. "
+        "The initials R C T C O are only a memory aid. The order on the page can change. The presence of each part should not. "
+        "Officers who already write decent prompts usually have a clear task and a missing constraint, or a clear format and no source. The structure makes the missing part visible before you send it. "
+        "You can keep the labels in the prompt. Models follow labeled instructions, and you can see next week what you asked. "
+        "We will take the five parts one at a time, then assemble them."
+    ),
+    "11": (
+        "Role tells the model what kind of staff work to imitate. "
+        "Use a job you would actually assign: a staff assistant preparing a read-ahead, a correspondence clerk answering a public question, a training coordinator drafting practice items. Name the reader in the same line. "
+        "Skip theater. Asking the model to act as a famous person, a judge, or the head of your agency adds costume, not accountability. "
+        "A role does not give the model authority to decide, to sign, or to speak for the government. "
+        "A clean line sounds like this. You are a staff assistant in a municipal library office. You write for the library board. A human supervisor will edit the draft."
+    ),
+    "12": (
+        "The task is the job, stated with a verb a supervisor could grade. "
+        "Outline a one-page read-ahead. Compare two published options. Turn notes into an action list. Rewrite a paragraph in plain language. Draft five study questions. "
+        "Name the finished use in the same breath. A comparison for a briefing book is not a comparison for a press statement. "
+        "Give the model one job. A summary, a recommendation, and a speech in the same prompt usually blend into something that serves none of them. The second job can be the next prompt, after you check the first result. "
+        "If you cannot say the task in one sentence, you are not ready to send it. That pause is also where you notice material that does not belong in the tool."
+    ),
+    "13": (
+        "Context is the material you deliberately hand over. It is not everything you know. "
+        "Paste a short public fact or the fictional scenario from the worksheet, and label it Source. Then fence it. This text is the only factual source for the assignment. "
+        "If something important must stay out, say so in general terms. Do not describe the sensitive material in order to exclude it. A description can be a disclosure. "
+        "A line such as, internal deliberations and personal data are not included, and you must not infer them, is enough. "
+        "Do not write, based on what you know about our director or our pending case. The model does not know your office. If it answers as if it does, it is improvising."
+    ),
+    "14": (
+        "Constraints are the fences. Put them in the prompt so the first draft trips over fewer of them. "
+        "The most important fence in government work is source binding. Use only the source provided. If a fact, date, name, or figure is absent, write the words not in source. Do not estimate. "
+        "Forbid invented quotations and invented citations. If a person will add a citation later, say, leave a bracket that reads citation needed. "
+        "Set length in words. Two hundred words is an instruction. Be brief is a mood. "
+        "For a public reader, ask for plain language and short sentences. Say what to leave out: no recommendation, no greeting, no background history, unless you actually want them. "
+        "Add one protective line. This draft is not an official position and must be reviewed by a person before use."
+    ),
+    "15": (
+        "Output is the shape of the reply. Decide it before you send the prompt. "
+        "Name the headings, or specify a table and its columns. Say how many items you want, and a ceiling for each. "
+        "Ask for a last line titled Gaps. That is where the model must admit what the source did not contain, and it is the first place you will look. "
+        "Five headings and a gaps line are checkable in under a minute. The request, write it nicely, is not. "
+        "If the reply ignores the shape, send one follow-up that repeats the shape. Do not silently repair it and move on. You are building your own habit as well as correcting the draft."
+    ),
+    "16": (
+        "Put the five parts together, then stop and read the prompt once, as if you were the colleague who must live with the draft. "
+        "Role: the job and the reader. Context: the only source. Task: one verb and the use. Constraints: source binding, length, and prohibitions. Output: headings and a gaps line. "
+        "On that read-through, ask three questions. Did I include a fact I am not allowed to share? Did I ask for two jobs? Did I leave a hole that will be filled by invention? "
+        "If the prompt fails any of those, fix the prompt. Do not plan to repair the damage after a fluent answer arrives. "
+        "In daily work you may shorten the labels. Do not shorten them so far that a part disappears."
+    ),
+    "17": (
+        "Here is a prompt that feels normal and works badly. Write a smart memo about the library hours thing. Use what you know about our board, and make us look good. "
+        "There is no role and no reader. There is no source. The task is not a verb you can grade. Smart and look good ask for costume. "
+        "Use what you know about our board invites the model to invent a relationship to your organization. Make us look good invites spin. "
+        "Even with nothing pasted, the reply is likely to manufacture dates, quotes, and a cheerful recommendation. If real board history were pasted underneath, the same prompt could also become a disclosure. "
+        "Do not send it and hope to edit the damage. Rebuild it."
+    ),
+    "18": (
+        "Listen for the five parts in the rebuilt prompt. "
+        "You are a staff assistant writing for the Harbor Town Library Board, a fictional public body. "
+        "Use only this flyer fact. Harbor Town may trial Saturday hours at Riverside Library, from nine in the morning until one in the afternoon, for three months. The board meets on the first Tuesday. The flyer estimates about four hundred twenty dollars a week for two part-time clerks. "
+        "The task is a one-page read-ahead. Do not invent quotations, costs, or votes. If a point is missing, write not in source. The draft is not an official position. "
+        "Use five headings: Purpose, Decision needed, Facts from the flyer, Options, and Questions for the board. End with Gaps. Stay under two hundred fifty words. "
+        "The town is invented and the numbers exist only inside the prompt. You can grade the reply by tracing every figure to that one flyer sentence."
+    ),
+    "19": (
+        "The five-part card is the method. The next habits are how it survives a Tuesday when someone needs a draft before a meeting. "
+        "Give the model one job. Name the reader and the use. Bind the source. Demand a shape you can check. Set tone and limits so the draft cannot borrow the authority of the office. "
+        "None of this requires a special product feature. These are writing habits. "
+        "If you keep only one habit after this course, keep source binding. It prevents the failure that is hardest to see and easiest to forward."
+    ),
+    "20": (
+        "One job per prompt feels slower. It is faster once you count the time you spend untangling a blended draft. "
+        "Ask for the outline. Read it. Then ask for one section of prose, or for the table, or for the study questions. "
+        "When a single-job prompt fails, the next message is obvious. When a combined prompt fails, you often cannot tell which instruction was ignored. "
+        "Keep each prompt short enough to reread. A crowded prompt is where officers accidentally paste a second document. "
+        "You would not ask a colleague for the outline, the final letter, and the hearing questions in one breath. You are allowed to be sequential. The tool will wait."
+    ),
+    "21": (
+        "Name the reader and the use every time. A library board, a division chief, a colleague at the front counter, and a member of the public do not need the same words. "
+        "The use matters as much as the reader. A read-ahead can surface open questions. A public reply should not surface internal doubts as if they were policy. Personal notes must not read like a decision. "
+        "Add a travel line when the text might leave the office. This draft is for internal discussion and is not cleared for release. Or, this draft uses only the public source and is written so it could be posted. "
+        "That line keeps a false voice of authority out of the draft, and it reminds you which review path the text must take if you keep it."
+    ),
+    "22": (
+        "Source binding separates a training exercise from a rumor generator. "
+        "Put the allowed text in the prompt and write, use only this source. Require the phrase not in source wherever a detail is missing. You want the holes labeled, not smoothed over. "
+        "Then check. Pick two concrete claims in the reply and find them in the source. If you cannot find them, the draft fails, even if the prose is excellent. "
+        "If the source is too sensitive to paste, you do not have a prompt problem. You have a task you should not run. "
+        "A careful paraphrase of controlled or personal information is still that information. Choose a smaller public or fictional task, or do the work without the model."
+    ),
+    "23": (
+        "A checkable shape is a kindness to the person who will read this ten minutes before a meeting. "
+        "Pick one shape and ask for it by name: headings, a table, or a numbered list. Cap the size. Under two hundred fifty words, or no more than six rows, or one sentence per bullet. "
+        "Always end with Gaps. On a good day that line says none. On a normal day it tells you what a person still has to look up. "
+        "If you asked for a table and received a block of prose, do not start editing the prose. Send a short correction that repeats the table. "
+        "Editing a misshapen draft hides the fact that the prompt was ignored."
+    ),
+    "24": (
+        "Tone is a constraint. Set it on purpose. "
+        "For the public, ask for plain language and short sentences. For a briefing, ask for neutral wording and no adjectives that sell a side. "
+        "Forbid slogans, praise of the agency, and any sentence that pressures the reader. Those lines creep in when a prompt says make us look good. "
+        "The model does not speak for the office. Do not ask it to decide, to sign, to apologize for the agency, or to predict a vote. "
+        "You may ask for options that are actually in the source. A recommendation, if you want one, must be labeled as a staff option for a human to accept or discard. "
+        "The official position begins only when a person with authority adopts the words through your normal process."
+    ),
+    "25": (
+        "Getting more from a prompt rarely means writing a longer first message. It means running a short sequence on purpose. "
+        "Work in passes. Show one short example of the shape you want. Ask for assumptions and gaps before polish. Ask for a critique against your constraints, then a revision. Chain tasks so each prompt starts from checked text. "
+        "Officers who call the tool hit or miss are often sending one prompt and grading it as final. "
+        "Treat the first reply as a proof. The value is in the second and third messages, which are shorter and stricter."
+    ),
+    "26": (
+        "Use four passes when the product might leave your desk. "
+        "Pass one asks for structure only. Headings or a table. No flourish. You are checking whether the assignment was understood. "
+        "Pass two fills that structure from the source and marks every hole with not in source. You are checking fidelity. "
+        "Pass three applies the reader, the length, and the tone. You are checking fitness for use. "
+        "Pass four is yours. You check the concrete claims. Only then do you ask for a clean copy that includes corrections you state in writing. "
+        "You may collapse the first two passes for a six-line action list. Do not collapse the human check. "
+        "Write the pass number at the top of the follow-up so the work does not drift back into a vague rewrite."
+    ),
+    "27": (
+        "Adjectives wear out. Professional and concise mean different things in every office. A short example teaches the pattern. "
+        "Provide one finished bullet and say, match this pattern. Do not copy its facts into the other rows. "
+        "Fact: the flyer estimates about four hundred twenty dollars a week. Status: in source. "
+        "Fact: the board has already voted. Status: not in source. "
+        "The model can imitate that pair more reliably than it can imitate the word thoroughly. "
+        "Build the example from the allowed source or from fiction written for the exercise. Do not paste a resident's letter, a personnel file, or a closed case. Names are not the only identifiers."
+    ),
+    "28": (
+        "Polish hides assumptions. Ask for them while the draft is still rough. "
+        "A reliable follow-up is: list the assumptions you made that I did not state. Then list facts that would change this outline if they were in the source. Do not add those facts. Label them unknown. "
+        "Read that list before you ask for smoother sentences. You will often find an assumed vote, an assumed legal authority, or an assumed public reaction. "
+        "If an assumption is wrong and harmless, correct it with a sentence of allowed fact. "
+        "If an assumption is dangerous, or the missing fact is something you are not allowed to type, stop. Rewrite the task so it can be finished with the source you have, or finish it without the model."
+    ),
+    "29": (
+        "You can ask the model to audit its own draft if you treat the audit as a lead, not as clearance. "
+        "Paste the constraint list back and say: quote each sentence that breaks a constraint. Name the constraint. Do not revise yet. "
+        "Read the critique. Add anything it missed, especially a fact that is not in the source. "
+        "Then say: revise only the sentences you quoted and the ones I added. Leave the rest. Keep the Gaps line. "
+        "Save the critique in your notes. It shows you did not accept the first draft. "
+        "Do not ask the model to make the text perfect or legally sound. Ask it to compare the text with the fences you wrote."
+    ),
+    "30": (
+        "A long chat feels powerful and becomes sloppy. Later replies may follow a casual aside you typed twenty minutes ago. "
+        "Chain the work instead. Each prompt should fit on one page. When you move to the next pass, paste the checked text and restate the source rule in one sentence. Use only the flyer fact already given. Do not add new facts. "
+        "Start a new conversation when the task changes, and always start a new one when the sensitivity might change. Do not continue a practice chat into real work. "
+        "If the tool keeps history, assume an administrator can read the chain. Each message should be able to survive that review on its own."
+    ),
+    "31": (
+        "The next examples are patterns for ordinary office work. Harbor Town is fictional, and the figures exist only in the text you are given. "
+        "You will hear a board read-ahead, a reply to a public question, a comparison of two options, notes turned into actions, and study questions for a staff huddle. "
+        "Listen for source binding, and for the thing each prompt refuses to do. None of them asks the model to decide for the board, to invent a law, or to sound like a final agency letter. "
+        "You may reuse the structure with a public source your supervisor has cleared for the tool. The structure is not permission to paste a live case."
+    ),
+    "32": (
+        "The read-ahead is the pattern to copy when a board must skim an issue in three minutes. The prompt asks for an outline, not a speech and not a recommendation. "
+        "The source is four flyer facts. Saturday hours at Riverside Library, nine to one, a three-month trial, a meeting on the first Tuesday, and about four hundred twenty dollars a week for two part-time clerks. "
+        "The constraints refuse invented public comment. A sentence such as, residents have asked for this change, is fluent fiction, and it must not reach a board packet. "
+        "If the flyer lists no options, the options heading should say not in source. "
+        "Your check takes one minute. Every number matches. No quotation appears. The gaps line is present. The draft does not congratulate the board."
+    ),
+    "33": (
+        "A resident asks whether Saturday hours are already approved. The source says only that the board will discuss a three-month trial, and that no vote is recorded. "
+        "The draft must use plain language, must not say the hours are approved, must not guess the vote, and must invite the resident to the public meeting without inventing a room number. Four sentences, then a gaps line. "
+        "This is the pattern to use when the true answer is narrower than the question. The model should say what is known and stop. "
+        "Watch for sneaky certainty. The board is expected to approve, or the hours will begin next month, fails the prompt even when it sounds helpful. "
+        "The supervisor, not the model, decides whether any warmer sentence is justified by facts that never entered the tool."
+    ),
+    "34": (
+        "The comparison refuses to pick a winner. "
+        "Option A is the three-month Saturday trial at about four hundred twenty dollars a week. Option B is no trial: the library stays closed on Saturdays, and the source states no new weekly cost. "
+        "The role is an analyst preparing a neutral table for a division chief. The prompt forbids a recommendation, and it forbids imported claims about equity, safety, or traffic. Those topics may matter in real life. They are not in this source. "
+        "The table has three columns: Option, What the source says, and Not in source. A closing sentence names the decision owner. The board, not this draft. "
+        "That sentence keeps a tidy table from being mistaken for a decision that has already been made."
+    ),
+    "35": (
+        "These meeting notes are already sanitized. They contain roles, not personal histories. Discuss the Saturday trial. The clerk will confirm the flyer cost with finance. The supervisor will ask counsel whether the meeting notice is already scheduled. "
+        "The prompt forbids new owners and invented due dates. A deadline you did not set is a fact you will have to walk back. "
+        "The shape is a numbered list: action, owner, and due date or the phrase not in source. "
+        "Use this pattern in the office only after the notes themselves are safe to paste. Raw notes often contain an aside about a person or a legal risk. Delete those asides. Do not hide them behind an initial. "
+        "If you cannot make the notes safe, write the action list yourself."
+    ),
+    "36": (
+        "The last pattern builds a ten-minute huddle for new front-desk staff. "
+        "The source is the flyer facts plus one approved sentence: The board will discuss a trial. I cannot predict the vote. "
+        "Ask for five practice questions. Every answer must be in the source. No trick questions. No legal advice. "
+        "After each question, require the answer in one sentence and the source phrase it rests on. If that phrase is not really in the source, the item fails. "
+        "This is a strong use of a model because the creativity required is small and the check is concrete. It is a poor use if you ask the model to invent policy. "
+        "In the lab you will write this kind of prompt from the worksheet, not from an agency fact sheet."
+    ),
+    "37": (
+        "Use a quality gate with three doors, and write the door you chose in one sentence. "
+        "Reject when the draft does the wrong job, when it invents a material fact, or when sensitive information entered the thread. If sensitive information entered, follow your agency's incident steps. Do not ask the model to forget. Assume the text remains in a log. "
+        "Revise when the job is right and the problems are fixable: shape, length, tone, or a messy but labeled gap. "
+        "Accept as a draft only when the claims you checked match the source, the gaps are honest, and a named person will review the text before it is used. "
+        "Accept does not mean cleared, signed, or ready for the public. Those are later acts, done by people, in the systems your office already uses."
+    ),
+    "38": (
+        "Your agency's artificial intelligence use policy governs, together with the way your office has implemented the tool. This briefing cannot authorize a product, and it cannot waive a marking. "
+        "A chat may itself be a record. Do not keep the official copy only in the chat. "
+        "When a person clears language for use, copy it into the official system: the correspondence log, the board book, the training repository. If policy says to note that a tool assisted, note it in the prescribed way. "
+        "You own the words you adopt. The vendor does not sign your memo. A disclaimer in a prompt does not move responsibility to the software. "
+        "No classified information. No controlled information the tool is not authorized to hold. No personal data. "
+        "If a colleague calls those rules fussiness, repeat the printer test."
+    ),
+    "39": (
+        "Your facilitator will pause here and move the section into the labs. Attendance is checked again before the first exercise. "
+        "Lab 1 takes about twenty minutes. You rebuild a thin prompt about a fictional park-volunteer flyer so that all five parts are present. Paper is enough. "
+        "Lab 2 takes about twenty-five minutes. You write pass two and pass three for a public reply, using only the worksheet fact sheet. If an approved tool is available you may run them. If it is not, you exchange papers and mark invented claims by hand. "
+        "Lab 3 takes about twenty-five minutes. The prompt you are given overshares: a home street, a child's first name, and a remark about a coworker. You strip it, you rewrite a safe task, and you choose a door. The original thread is a reject, because personal data already entered. "
+        "Adding a real story from your week fails the exercise."
+    ),
+    "40": (
+        "You assign the work, and you answer for it. "
+        "A prompt is an assignment: a role, a context you are allowed to share, one task, constraints that bind the source, and an output you can check. "
+        "You get more from the tool by working in passes, by showing a short example, and by asking for gaps before polish. "
+        "You protect the public by keeping classified information, unauthorized controlled information, and personal data out of the thread. "
+        "The official word begins only when a person adopts the text through the process your office already trusts. "
+        "To complete course 210, stay for the labs and turn in the three worksheets. Your facilitator records attendance and completion. "
+        "Thank you for the care you bring to a tool that can write faster than it can be responsible. The responsibility stays with you."
+    ),
+}
