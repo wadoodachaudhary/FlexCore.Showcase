@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Package Cost Sheet: Razor Sharp Getaways' cost breakdown for one package in one departure season. Four group levels (region,
+  package, cost group, supplier), a sum in every group footer and a grand total in the report footer. Written in the Crystal XML
+  export shape that CrystalXmlReportLoader reads, with a single table and a handful of fields.
+
+  The rows come from RazorSharpGetaways.Data.PackageCostSheet through the app's IReportDataExecutor (Data/GetawaysReportServices.cs);
+  no database is involved. The Package parameter's pick list is the agency's package list (Data/TripPackages.cs).
+-->
+<Report Name="" FileName="Package Cost Sheet.rpt" HasSavedData="False">
+  <Summaryinfo KeywordsinReport="" ReportAuthor="Razor Sharp Getaways" ReportComments="Cost sheet of one package in one season" ReportSubject="" ReportTitle="Package Cost Sheet" />
+  <ReportOptions EnableSaveDataWithReport="False" EnableSavePreviewPicture="True" EnableSaveSummariesWithReport="True" EnableUseDummyData="False" initialDataContext="" initialReportPartName="" />
+  <PrintOptions PageContentHeight="11520" PageContentWidth="15120" PaperOrientation="Landscape" PaperSize="PaperLetter" PaperSource="FormSource" PrinterDuplex="Default" PrinterName="">
+    <PageMargins bottomMargin="360" leftMargin="360" rightMargin="360" topMargin="360" />
+    <PageMarginConditionFormulas />
+  </PrintOptions>
+  <SubReports />
+  <Database>
+    <TableLinks />
+    <Tables>
+      <Table Alias="PackageCostLines" ClassName="CrystalReports.Table" Name="PackageCostLines">
+        <ConnectionInfo Database_DLL="crdb_odbc.dll" QE_DatabaseName="Demo" QE_DatabaseType="ODBC (RDO)" SSO_Enabled="False" UserName="demo" Password="" />
+        <Fields>
+          <Field Description="" FormulaForm="{PackageCostLines.Region}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="PackageCostLines.Region" Name="Region" ShortName="Region" Type="crFieldValueTypeStringField" UseCount="2" />
+          <Field Description="" FormulaForm="{PackageCostLines.Package}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="PackageCostLines.Package" Name="Package" ShortName="Package" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{PackageCostLines.Season}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="PackageCostLines.Season" Name="Season" ShortName="Season" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{PackageCostLines.CostGroup}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="4" LongName="PackageCostLines.CostGroup" Name="CostGroup" ShortName="CostGroup" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{PackageCostLines.CostGroupDesc}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="102" LongName="PackageCostLines.CostGroupDesc" Name="CostGroupDesc" ShortName="CostGroupDesc" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{PackageCostLines.Supplier}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="122" LongName="PackageCostLines.Supplier" Name="Supplier" ShortName="Supplier" Type="crFieldValueTypeStringField" UseCount="2" />
+          <Field Description="" FormulaForm="{PackageCostLines.Service}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="PackageCostLines.Service" Name="Service" ShortName="Service" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{PackageCostLines.ServiceDesc}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="402" LongName="PackageCostLines.ServiceDesc" Name="ServiceDesc" ShortName="ServiceDesc" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{PackageCostLines.Qty}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="PackageCostLines.Qty" Name="Qty" ShortName="Qty" Type="crFieldValueTypeNumberField" UseCount="2" />
+          <Field Description="" FormulaForm="{PackageCostLines.Unit}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="22" LongName="PackageCostLines.Unit" Name="Unit" ShortName="Unit" Type="crFieldValueTypeStringField" UseCount="1" />
+          <Field Description="" FormulaForm="{PackageCostLines.Rate}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="8" LongName="PackageCostLines.Rate" Name="Rate" ShortName="Rate" Type="crFieldValueTypeNumberField" UseCount="2" />
+          <Field Description="" FormulaForm="{PackageCostLines.Notes}" HeadingText="" IsRecurring="True" Kind="crFieldKindDBField" Length="202" LongName="PackageCostLines.Notes" Name="Notes" ShortName="Notes" Type="crFieldValueTypeStringField" UseCount="1" />
+        </Fields>
+      </Table>
+    </Tables>
+  </Database>
+  <DataDefinition>
+    <GroupSelectionFormula />
+    <RecordSelectionFormula> (  {PackageCostLines.Package} = {?Package}  AND  {PackageCostLines.Season} = {?Season}  )  </RecordSelectionFormula>
+    <Groups>
+      <Group ConditionField="{PackageCostLines.Region}" />
+      <Group ConditionField="{@PackageDesc}" />
+      <Group ConditionField="{@GroupDesc}" />
+      <Group ConditionField="{PackageCostLines.Supplier}" />
+    </Groups>
+    <SortFields>
+      <SortField Field="{PackageCostLines.Region}" SortDirection="AscendingOrder" SortType="GroupSortField" />
+      <SortField Field="{@PackageDesc}" SortDirection="AscendingOrder" SortType="GroupSortField" />
+      <SortField Field="{@GroupDesc}" SortDirection="AscendingOrder" SortType="GroupSortField" />
+      <SortField Field="{PackageCostLines.Supplier}" SortDirection="AscendingOrder" SortType="GroupSortField" />
+    </SortFields>
+    <FormulaFieldDefinitions>
+      <FormulaFieldDefinition FormulaName="{@Amount}" Kind="FormulaField" Name="Amount" NumberOfBytes="8" ValueType="NumberField" Syntax="crFormulaSyntaxCrystal">{PackageCostLines.Qty}*{PackageCostLines.Rate}</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@GroupDesc}" Kind="FormulaField" Name="GroupDesc" NumberOfBytes="344" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">{PackageCostLines.CostGroup}+" "+{PackageCostLines.CostGroupDesc}</FormulaFieldDefinition>
+      <FormulaFieldDefinition FormulaName="{@PackageDesc}" Kind="FormulaField" Name="PackageDesc" NumberOfBytes="444" ValueType="StringField" Syntax="crFormulaSyntaxCrystal">{PackageCostLines.Package}+", "+{PackageCostLines.Season}</FormulaFieldDefinition>
+    </FormulaFieldDefinitions>
+    <GroupNameFieldDefinitions>
+      <GroupNameFieldDefinition FormulaName="GroupName ({PackageCostLines.Region})" Group="CrystalDecisions.CrystalReports.Engine.Group" GroupNameFieldName="Group #1 Name: PackageCostLines.Region" Kind="GroupNameField" Name="GroupName ({PackageCostLines.Region})" NumberOfBytes="65534" ValueType="StringField" />
+      <GroupNameFieldDefinition FormulaName="GroupName ({@PackageDesc})" Group="CrystalDecisions.CrystalReports.Engine.Group" GroupNameFieldName="Group #2 Name: @PackageDesc" Kind="GroupNameField" Name="GroupName ({@PackageDesc})" NumberOfBytes="65534" ValueType="StringField" />
+      <GroupNameFieldDefinition FormulaName="GroupName ({@GroupDesc})" Group="CrystalDecisions.CrystalReports.Engine.Group" GroupNameFieldName="Group #3 Name: @GroupDesc" Kind="GroupNameField" Name="GroupName ({@GroupDesc})" NumberOfBytes="65534" ValueType="StringField" />
+      <GroupNameFieldDefinition FormulaName="GroupName ({PackageCostLines.Supplier})" Group="CrystalDecisions.CrystalReports.Engine.Group" GroupNameFieldName="Group #4 Name: PackageCostLines.Supplier" Kind="GroupNameField" Name="GroupName ({PackageCostLines.Supplier})" NumberOfBytes="65534" ValueType="StringField" />
+    </GroupNameFieldDefinitions>
+    <ParameterFieldDefinitions>
+      <ParameterFieldDefinition AllowCustomCurrentValues="False" EnableAllowEditingDefaultValue="True" EnableAllowMultipleValue="False" EnableNullValue="False" FormulaName="{?Package}" HasCurrentValue="True" IsOptionalPrompt="False" Kind="ParameterField" Name="Package" NumberOfBytes="65534" ParameterFieldName="Package" ParameterFieldUsage="InUse, ShowOnPanel, EditableOnPanel, DataFetching" ParameterType="ReportParameter" ParameterValueKind="StringParameter" PromptText="Package:" ReportName="" ValueType="StringField">
+        <ParameterDefaultValues>
+          <ParameterDefaultValue Description="Lisbon Explorer" Value="Lisbon Explorer" />
+          <ParameterDefaultValue Description="Amalfi Coast Drive" Value="Amalfi Coast Drive" />
+          <ParameterDefaultValue Description="Kyoto Classic" Value="Kyoto Classic" />
+          <ParameterDefaultValue Description="Hoi An Lantern Trail" Value="Hoi An Lantern Trail" />
+          <ParameterDefaultValue Description="Cape Winelands" Value="Cape Winelands" />
+          <ParameterDefaultValue Description="Marrakech to the Dunes" Value="Marrakech to the Dunes" />
+          <ParameterDefaultValue Description="Santorini Blue Domes" Value="Santorini Blue Domes" />
+          <ParameterDefaultValue Description="Reykjavik Northern Lights" Value="Reykjavik Northern Lights" />
+          <ParameterDefaultValue Description="Vancouver and the Islands" Value="Vancouver and the Islands" />
+          <ParameterDefaultValue Description="Banff Mountain Week" Value="Banff Mountain Week" />
+          <ParameterDefaultValue Description="Queenstown Adventure" Value="Queenstown Adventure" />
+          <ParameterDefaultValue Description="Patagonia Trek" Value="Patagonia Trek" />
+        </ParameterDefaultValues>
+        <ParameterInitialValues />
+        <ParameterCurrentValues>
+          <ParameterCurrentValue Description="Lisbon Explorer" Value="Lisbon Explorer" />
+        </ParameterCurrentValues>
+      </ParameterFieldDefinition>
+      <ParameterFieldDefinition AllowCustomCurrentValues="False" EnableAllowEditingDefaultValue="True" EnableAllowMultipleValue="False" EnableNullValue="False" FormulaName="{?Season}" HasCurrentValue="True" IsOptionalPrompt="False" Kind="ParameterField" Name="Season" NumberOfBytes="65534" ParameterFieldName="Season" ParameterFieldUsage="InUse, ShowOnPanel, EditableOnPanel, DataFetching" ParameterType="ReportParameter" ParameterValueKind="StringParameter" PromptText="Departure season:" ReportName="" ValueType="StringField">
+        <ParameterDefaultValues>
+          <ParameterDefaultValue Description="Spring" Value="Spring" />
+          <ParameterDefaultValue Description="Summer" Value="Summer" />
+          <ParameterDefaultValue Description="Autumn" Value="Autumn" />
+          <ParameterDefaultValue Description="Winter" Value="Winter" />
+        </ParameterDefaultValues>
+        <ParameterInitialValues />
+        <ParameterCurrentValues>
+          <ParameterCurrentValue Description="Spring" Value="Spring" />
+        </ParameterCurrentValues>
+      </ParameterFieldDefinition>
+    </ParameterFieldDefinitions>
+    <RunningTotalFieldDefinitions />
+    <SQLExpressionFields />
+    <SummaryFields>
+      <SummaryFieldDefinition FormulaName="Sum ({@Amount}, {PackageCostLines.Supplier})" Group="CrystalDecisions.CrystalReports.Engine.Group" Kind="SummaryField" Name="Sum ({@Amount}, {PackageCostLines.Supplier})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+      <SummaryFieldDefinition FormulaName="Sum ({@Amount}, {@GroupDesc})" Group="CrystalDecisions.CrystalReports.Engine.Group" Kind="SummaryField" Name="Sum ({@Amount}, {@GroupDesc})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+      <SummaryFieldDefinition FormulaName="Sum ({@Amount}, {@PackageDesc})" Group="CrystalDecisions.CrystalReports.Engine.Group" Kind="SummaryField" Name="Sum ({@Amount}, {@PackageDesc})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+      <SummaryFieldDefinition FormulaName="Sum ({@Amount})" Kind="SummaryField" Name="Sum ({@Amount})" NumberOfBytes="8" Operation="Sum" OperationParameter="0" SummarizedField="CrystalDecisions.CrystalReports.Engine.FormulaFieldDefinition" ValueType="NumberField" />
+    </SummaryFields>
+  </DataDefinition>
+  <CustomFunctions />
+  <ReportDefinition>
+    <Areas>
+      <Area Kind="ReportHeader" Name="ReportHeaderArea1">
+        <AreaFormat EnableHideForDrillDown="True" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="220" Kind="ReportHeader" Name="ReportHeaderSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects />
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="PageHeader" Name="PageHeaderArea1">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="372" Kind="PageHeader" Name="PageHeaderSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <TextObject Name="ReportTitle" Kind="TextObject" Top="24" Left="60" Width="15048" Height="312" MaxNumberOfLines="0">
+                <Text>PACKAGE COST SHEET</Text>
+                <Color Name="Black" A="255" R="0" G="0" B="0" />
+                <Font Bold="True" FontFamily="Arial" Height="19" IsSystemFont="False" Italic="False" Name="Arial" Size="12" SizeinPoints="12" Strikeout="False" Style="Bold" Underline="False" Unit="Point" />
+                <FontColorConditionFormulas />
+                <Border BottomLineStyle="NoLine" HasDropShadow="False" LeftLineStyle="NoLine" RightLineStyle="NoLine" TopLineStyle="NoLine">
+                  <BorderConditionFormulas />
+                  <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+                  <BorderColor Name="Black" A="255" R="0" G="0" B="0" />
+                </Border>
+                <ObjectFormat CssClass="" EnableCanGrow="False" EnableCloseAtPageBreak="True" EnableKeepTogether="True" EnableSuppress="False" HorizontalAlignment="HorizontalCenterAlign" />
+                <ObjectFormatConditionFormulas />
+              </TextObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupHeader" Name="GroupHeaderArea1">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="240" Kind="GroupHeader" Name="GroupHeaderSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="GroupNameRegion1" Kind="FieldObject" Top="0" Left="0" Width="11340" Height="216" DataSource="GroupName ({PackageCostLines.Region})">
+                <Font Bold="True" FontFamily="Arial" Height="13" IsSystemFont="False" Italic="False" Name="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" Underline="False" Unit="Point" />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupHeader" Name="GroupHeaderArea2">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="True" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="450" Kind="GroupHeader" Name="GroupHeaderSection2">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="GroupNamePackage1" Kind="FieldObject" Top="0" Left="60" Width="11268" Height="224" DataSource="GroupName ({@PackageDesc})">
+                <Font Bold="True" FontFamily="Arial" Height="13" IsSystemFont="False" Italic="False" Name="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" Underline="False" Unit="Point" />
+              </FieldObject>
+              <FieldHeadingObject Name="HService" Kind="FieldHeadingObject" Top="240" Left="424" Width="900" Height="180" FieldObjectName="Service1" MaxNumberOfLines="0">
+                <Text>Service</Text>
+                <Font Bold="True" FontFamily="Arial" Height="11" IsSystemFont="False" Italic="False" Name="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Bold" Underline="True" Unit="Point" />
+              </FieldHeadingObject>
+              <FieldHeadingObject Name="HServiceDesc" Kind="FieldHeadingObject" Top="240" Left="1560" Width="5400" Height="180" FieldObjectName="ServiceDesc1" MaxNumberOfLines="0">
+                <Text>Description</Text>
+                <Font Bold="True" FontFamily="Arial" Height="11" IsSystemFont="False" Italic="False" Name="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Bold" Underline="True" Unit="Point" />
+              </FieldHeadingObject>
+              <FieldHeadingObject Name="HQty" Kind="FieldHeadingObject" Top="240" Left="7260" Width="658" Height="180" FieldObjectName="Qty1" MaxNumberOfLines="0">
+                <Text>Qty</Text>
+                <Font Bold="True" FontFamily="Arial" Height="11" IsSystemFont="False" Italic="False" Name="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Bold" Underline="True" Unit="Point" />
+              </FieldHeadingObject>
+              <FieldHeadingObject Name="HUnit" Kind="FieldHeadingObject" Top="240" Left="8152" Width="1032" Height="180" FieldObjectName="Unit1" MaxNumberOfLines="0">
+                <Text>Unit</Text>
+                <Font Bold="True" FontFamily="Arial" Height="11" IsSystemFont="False" Italic="False" Name="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Bold" Underline="True" Unit="Point" />
+              </FieldHeadingObject>
+              <FieldHeadingObject Name="HRate" Kind="FieldHeadingObject" Top="240" Left="9308" Width="992" Height="180" FieldObjectName="Rate1" MaxNumberOfLines="0">
+                <Text>Rate</Text>
+                <Font Bold="True" FontFamily="Arial" Height="11" IsSystemFont="False" Italic="False" Name="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Bold" Underline="True" Unit="Point" />
+              </FieldHeadingObject>
+              <FieldHeadingObject Name="HAmount" Kind="FieldHeadingObject" Top="240" Left="10300" Width="1320" Height="180" FieldObjectName="Amount1" MaxNumberOfLines="0">
+                <Text>Amount</Text>
+                <Font Bold="True" FontFamily="Arial" Height="11" IsSystemFont="False" Italic="False" Name="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Bold" Underline="True" Unit="Point" />
+              </FieldHeadingObject>
+              <FieldHeadingObject Name="HNotes" Kind="FieldHeadingObject" Top="240" Left="11784" Width="3200" Height="180" FieldObjectName="Notes1" MaxNumberOfLines="0">
+                <Text>Notes</Text>
+                <Font Bold="True" FontFamily="Arial" Height="11" IsSystemFont="False" Italic="False" Name="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Bold" Underline="True" Unit="Point" />
+              </FieldHeadingObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupHeader" Name="GroupHeaderArea3">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="220" Kind="GroupHeader" Name="GroupHeaderSection3">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="GroupDesc1" Kind="FieldObject" Top="24" Left="192" Width="11148" Height="180" DataSource="{@GroupDesc}">
+                <Font Bold="True" FontFamily="Arial" Height="11" IsSystemFont="False" Italic="False" Name="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Bold" Underline="False" Unit="Point" />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupHeader" Name="GroupHeaderArea4">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="216" Kind="GroupHeader" Name="GroupHeaderSection4">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="Supplier1" Kind="FieldObject" Top="12" Left="420" Width="10896" Height="180" DataSource="GroupName ({PackageCostLines.Supplier})">
+                <Font Bold="True" FontFamily="Arial" Height="11" IsSystemFont="False" Italic="False" Name="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Bold" Underline="False" Unit="Point" />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="Detail" Name="DetailArea1">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="220" Kind="Detail" Name="DetailSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="Service1" Kind="FieldObject" Top="0" Left="552" Width="900" Height="180" DataSource="{PackageCostLines.Service}" />
+              <FieldObject Name="ServiceDesc1" Kind="FieldObject" Top="0" Left="1560" Width="5400" Height="180" DataSource="{PackageCostLines.ServiceDesc}" />
+              <FieldObject Name="Qty1" Kind="FieldObject" Top="0" Left="7260" Width="658" Height="180" DataSource="{PackageCostLines.Qty}" />
+              <FieldObject Name="Unit1" Kind="FieldObject" Top="0" Left="8152" Width="1032" Height="180" DataSource="{PackageCostLines.Unit}" />
+              <FieldObject Name="Rate1" Kind="FieldObject" Top="0" Left="9308" Width="992" Height="180" DataSource="{PackageCostLines.Rate}" />
+              <FieldObject Name="Amount1" Kind="FieldObject" Top="0" Left="10428" Width="1320" Height="180" DataSource="{@Amount}" />
+              <FieldObject Name="Notes1" Kind="FieldObject" Top="20" Left="11852" Width="3200" Height="180" DataSource="{PackageCostLines.Notes}" />
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupFooter" Name="GroupFooterArea4">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="280" Kind="GroupFooter" Name="GroupFooterSection4">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="SumAmountSupplier" Kind="FieldObject" Top="40" Left="10428" Width="1308" Height="192" DataSource="Sum ({@Amount}, {PackageCostLines.Supplier})">
+                <Font Bold="True" FontFamily="Arial" Height="11" IsSystemFont="False" Italic="False" Name="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Bold" Underline="False" Unit="Point" />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupFooter" Name="GroupFooterArea3">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="280" Kind="GroupFooter" Name="GroupFooterSection3">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="SumAmountGroup" Kind="FieldObject" Top="40" Left="10389" Width="1347" Height="192" DataSource="Sum ({@Amount}, {@GroupDesc})">
+                <Font Bold="True" FontFamily="Arial" Height="11" IsSystemFont="False" Italic="False" Name="Arial" Size="8" SizeinPoints="8" Strikeout="False" Style="Bold" Underline="False" Unit="Point" />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupFooter" Name="GroupFooterArea2">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="320" Kind="GroupFooter" Name="GroupFooterSection2">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="SumAmountPackage" Kind="FieldObject" Top="80" Left="10415" Width="1321" Height="192" DataSource="Sum ({@Amount}, {@PackageDesc})">
+                <Font Bold="True" FontFamily="Arial" Height="13" IsSystemFont="False" Italic="False" Name="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" Underline="False" Unit="Point" />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="GroupFooter" Name="GroupFooterArea1">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="0" Kind="GroupFooter" Name="GroupFooterSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="True" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects />
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="ReportFooter" Name="ReportFooterArea1">
+        <AreaFormat EnableHideForDrillDown="True" EnableKeepTogether="False" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="320" Kind="ReportFooter" Name="ReportFooterSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <TextObject Name="GrandTotalLabel" Kind="TextObject" Top="80" Left="8152" Width="2148" Height="192" MaxNumberOfLines="0">
+                <Text>Package total</Text>
+                <Font Bold="True" FontFamily="Arial" Height="13" IsSystemFont="False" Italic="False" Name="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" Underline="False" Unit="Point" />
+              </TextObject>
+              <FieldObject Name="SumAmountTotal" Kind="FieldObject" Top="80" Left="10415" Width="1321" Height="192" DataSource="Sum ({@Amount})">
+                <Font Bold="True" FontFamily="Arial" Height="13" IsSystemFont="False" Italic="False" Name="Arial" Size="9" SizeinPoints="9" Strikeout="False" Style="Bold" Underline="False" Unit="Point" />
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="PageFooter" Name="PageFooterArea1">
+        <AreaFormat EnableHideForDrillDown="False" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" />
+        <Sections>
+          <Section Height="220" Kind="PageFooter" Name="PageFooterSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="True" EnableNewPageAfter="False" EnableNewPageBefore="False" EnablePrintAtBottomOfPage="False" EnableResetPageNumberAfter="False" EnableSuppress="False" EnableSuppressIfBlank="False" EnableUnderlaySection="False">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="White" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="PageNofM1" Kind="FieldObject" Top="24" Left="60" Width="15000" Height="180" DataSource="PageNofM" />
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+    </Areas>
+  </ReportDefinition>
+</Report>

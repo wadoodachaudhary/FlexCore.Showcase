@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- FlexCore from NuGet. The FlexCore site (flexcoreui.com) runs these same pages against the library's source. -->
+    <PackageReference Include="FlexCore" Version="0.2.49" />
+  </ItemGroup>
+
+</Project>

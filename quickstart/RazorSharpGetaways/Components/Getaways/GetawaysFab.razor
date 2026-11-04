@@ -1,0 +1,23 @@
+@* The + button in the window's corner: a new trip request, an itinerary entry or an invoice. The host takes each to its page. *@
+@namespace RazorSharpGetaways.Components.Getaways
+@using Fx.ControlKit
+
+<FabMenuControl Items="_items" Title="Create" CssClass="gw-fab" />
+
+@code {
+    [Parameter] public EventCallback OnNewRequest { get; set; }
+    [Parameter] public EventCallback OnItineraryEntry { get; set; }
+    [Parameter] public EventCallback OnInvoice { get; set; }
+
+    private List<FabMenuItem> _items = [];
+
+    protected override void OnInitialized()
+    {
+        _items =
+        [
+            new("Trip request", "bi bi-suitcase-lg") { OnClick = EventCallback.Factory.Create(this, () => OnNewRequest.InvokeAsync()) },
+            new("Itinerary entry", "bi bi-calendar-plus") { OnClick = EventCallback.Factory.Create(this, () => OnItineraryEntry.InvokeAsync()) },
+            new("Invoice", "bi bi-receipt") { OnClick = EventCallback.Factory.Create(this, () => OnInvoice.InvokeAsync()) },
+        ];
+    }
+}

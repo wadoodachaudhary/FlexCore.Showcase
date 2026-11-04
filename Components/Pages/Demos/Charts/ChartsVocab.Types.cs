@@ -30,6 +30,9 @@ public static partial class ChartsVocab
             "600x300 viewBox, Y ticks from <code>YAxis.TickCount</code> (default 5), labels cut at 10 characters."),
 
         // Trend over time
+        new("Surface",
+            "Added in 0.2.50 for printed reports: with <code>PrintWidthPoints</code> and <code>PrintHeightPoints</code> set it is drawn by the printed stage chart as a bitmap. " +
+            "In SVG mode it has no case of its own and falls to the default branch, which draws it as <code>Bar</code>. Not in the gallery."),
         new("Line",
             "Straight segments through evenly spaced points with a 3px marker at each. " +
             "Reads <code>Label</code> as the X text and <code>Value</code>; X positions come from the point index, not from <code>Label</code> or <code>DateValue</code>; several series draw in the series colour; <code>IsEmpty</code> breaks the line (for this type only). " +

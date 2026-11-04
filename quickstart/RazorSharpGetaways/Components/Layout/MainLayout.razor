@@ -1,0 +1,88 @@
+@* The app window: the menu (GetawaysSidebar), the top bar (GetawaysAppBar), the routed page and the + button (GetawaysFab). The
+   FlexCore site's home page renders these same parts inside its demo frame. The Settings page's choices reach the window as a
+   class (the colour scheme) and a style (the text size) on its root. *@
+@inherits LayoutComponentBase
+@implements IDisposable
+@using Fx.ControlKit.Dialogs
+@using Fx.ControlKit.Notifications
+@inject NavigationManager Nav
+@inject GetawaysAppSettings Settings
+@inject NotificationService Notifications
+
+<div class="@WindowClass" style="@Settings.WindowStyle">
+    <GetawaysSidebar SelectedIndex="@PageIndex" OnSelect="@(i => Nav.NavigateTo(GetawaysPages.All[i].Route))" />
+    @if (_navOpen)
+    {
+        <div class="gw-scrim" @onclick="@(() => _navOpen = false)"></div>
+    }
+    <div class="gw-main">
+        <GetawaysAppBar Title="@CurrentPage.Title" OnMenuClick="ToggleMenu"
+                        OnOpenRequest="@(r => Nav.NavigateTo($"requests?open={r.Id}"))"
+                        OnShowNewRequests="ShowNewRequests" />
+        <div class="gw-page">
+            @Body
+        </div>
+        <GetawaysFab OnNewRequest="@(() => Nav.NavigateTo("requests?new=true"))"
+                     OnItineraryEntry="ItineraryEntry"
+                     OnInvoice="@(() => Nav.NavigateTo("invoices"))" />
+    </div>
+</div>
+
+@* Toasts and service dialogs render through these two hosts; without them NotificationService and IDialogService show nothing *@
+<NotificationDisplayControl />
+<DialogHostControl />
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    // The menu button shrinks the menu to icons on wide screens and opens it over the page on phones; CSS shows the one that applies
+    private bool _navOpen;
+
+    private string WindowClass =>
+        $"gw-app {Settings.SchemeClass} {(Settings.SidebarIcons ? "gw-nav-collapsed" : "")} {(_navOpen ? "gw-nav-open" : "")}";
+
+    private string CurrentPath => Nav.ToBaseRelativePath(Nav.Uri).Split('?', '#')[0].Trim('/');
+    private GetawaysPage CurrentPage => GetawaysPages.All.FirstOrDefault(p => p.Route == CurrentPath) ?? GetawaysPages.All[0];
+    private int PageIndex => Array.IndexOf(GetawaysPages.All, CurrentPage);
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += OnLocationChanged;
+        Settings.Changed += StateHasChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        _navOpen = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ToggleMenu()
+    {
+        Settings.SidebarIcons = !Settings.SidebarIcons;
+        _navOpen = !_navOpen;
+    }
+
+    private void ShowNewRequests()
+    {
+        Settings.RequestsView = "New requests";
+        Settings.NotifyChanged();
+        Nav.NavigateTo("requests");
+    }
+
+    private void ItineraryEntry()
+    {
+        Nav.NavigateTo("itinerary");
+        Notifications.Info("New itinerary entry", "Double-click an empty slot on the itinerary to add an entry.");
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= OnLocationChanged;
+        Settings.Changed -= StateHasChanged;
+    }
+}

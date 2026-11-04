@@ -1,0 +1,419 @@
+@* The Trip Requests page, the agency's quote desk: 1,000 requests in a windowed GridControl with a frozen key column, an in-cell
+   DropDownGridControl lookup, a Quote cell that takes typing straight away, a Sparkline chart and badges in every row, filter chips,
+   a search box, a status bar and a DialogControl editor. It reads the shared TripRequestStore and the Settings page's grid choices. *@
+@namespace RazorSharpGetaways.Components.Getaways
+@using Fx.ControlKit
+@using Fx.ControlKit.Charts
+@using Fx.ControlKit.Grid
+@using Fx.ControlKit.Notifications
+@using RazorSharpGetaways.Data
+@implements IDisposable
+@inject TripRequestStore Store
+@inject GetawaysAppSettings Settings
+@inject NotificationService Notifications
+
+<div class="gw-requests">
+    <AlertControl Severity="AlertSeverity.Info" ShowIcon="true" CssClass="gw-hint">
+        <strong>Quote desk:</strong> trip requests arrive from the booking site. Double-click a request to open the quote editor, or type a quote straight into the grid.
+    </AlertControl>
+
+    <ToolbarControl CssClass="gw-toolbar" ShowCaptionsToggle="false">
+        <ChildContent>
+            <span class="gw-toolbar-label">View:</span>
+            <DropDownListControl TValue="string" TItem="SelectionItem" DataSource="@ViewOptions" TextFieldName="Text" ValueFieldName="Value"
+                                 Value="@Settings.RequestsView" ValueChanged="@(v => Settings.RequestsView = v ?? "All")"
+                                 Width="210px" CssClass="gw-view" AriaLabel="View" />
+            <SearchBoxControl Value="@_search" ValueChanged="@(v => _search = v ?? "")" DebounceDelayMs="150"
+                              Placeholder="Search requests, destinations, agents..." CssClass="gw-search" aria-label="Search requests" />
+        </ChildContent>
+        <TrailingContent>
+            <ButtonControl IconCss="bi bi-file-earmark-excel" OnClick="ExportToExcel">Export to Excel</ButtonControl>
+            <ButtonControl CssClass="btn-primary" IconCss="bi bi-plus-lg" OnClick="CreateNewRequest">New Request</ButtonControl>
+        </TrailingContent>
+    </ToolbarControl>
+
+    <div class="gw-filter">
+        <span class="gw-filter-label">Trip type:</span>
+        <ChipListControl CssClass="gw-types" Items="_tripTypeChips" Selection="ChoiceSelectionMode.Single" Removable="false" AriaLabel="Trip type"
+                         SelectedIds="@(new[] { _tripType })" SelectedIdsChanged="@(ids => _tripType = ids.FirstOrDefault() ?? "All")" />
+    </div>
+
+    @AboveGrid
+
+    <GridControl TValue="TripRequest" DataSource="@FilteredRequests"
+                 @ref="_grid"
+                 AllowSelection="true"
+                 AllowSorting="true"
+                 AllowFiltering="true"
+                 AllowResizing="true"
+                 EnableHover="true"
+                 Theme="@Settings.GridThemeValue"
+                 Density="@Settings.GridDensity"
+                 GridLines="@Settings.GridLines"
+                 EnableAltRow="@Settings.AlternateRows"
+                 CssClass="@Settings.GridCss"
+                 EditSettingsRef="@_editSettings"
+                 EventsRef="@_gridEvents"
+                 WindowOverscanRows="15"
+                 Height="440px">
+        <GridColumnsBase>
+            <GridColumn Field="@nameof(TripRequest.Request)" HeaderText="Request" Width="100px"
+                        IsPrimaryKey="true" AllowEditing="false"
+                        IsFrozen="true" FrozenPosition="FrozenColumnPosition.Left">
+                <Template Context="row">
+                    @{ var r = (TripRequest)row; }
+                    <BadgeControl Text="@r.Request" CssClass="gw-code" />
+                </Template>
+            </GridColumn>
+
+            <GridColumn Field="@nameof(TripRequest.Agent)" HeaderText="Agent" Width="150px" AllowEditing="false">
+                <Template Context="row">
+                    @{ var r = (TripRequest)row; }
+                    <div class="gw-agent">
+                        <AvatarControl Text="@r.Agent" AlternativeText="@r.Agent" Size="24px" CssClass="gw-agent-avatar" Style="@($"background:{r.AvatarBg}")" />
+                        <span class="gw-agent-name">@r.Agent</span>
+                    </div>
+                </Template>
+            </GridColumn>
+
+            <GridColumn Field="@nameof(TripRequest.Destination)" HeaderText="Destination" Width="130px" AllowEditing="false" />
+
+            @* In-cell DropDownGridControl: a four-column lookup with search; the header sorts by the code *@
+            <GridColumn Field="@nameof(TripRequest.TripType)" HeaderText="Trip type" Width="170px" AllowEditing="false">
+                <Template Context="row">
+                    @{ var r = (TripRequest)row; }
+                    <div class="gw-cell-lookup">
+                        <DropDownGridControl TItem="TripTypeLookup" TValue="string"
+                                             DataSource="@TripRequestStore.TripTypes"
+                                             Value="@r.TripType"
+                                             ValueChanged="@(val => OnTripTypeChanged(r, val))"
+                                             TextFieldName="@nameof(TripTypeLookup.Name)"
+                                             ValueFieldName="@nameof(TripTypeLookup.Code)"
+                                             ClosedTextFieldName="@nameof(TripTypeLookup.Code)"
+                                             PopupWidth="490px"
+                                             PopupHeight="220px"
+                                             RowHeight="24"
+                                             ShowSearch="true"
+                                             SearchPlaceholder="Search trip types..."
+                                             AllowClear="false"
+                                             Placeholder="Select trip type...">
+                            <Columns>
+                                <GridColumn Field="@nameof(TripTypeLookup.Code)" HeaderText="Code" Width="95px" />
+                                <GridColumn Field="@nameof(TripTypeLookup.Name)" HeaderText="Trip type" Width="165px" />
+                                <GridColumn Field="@nameof(TripTypeLookup.Desk)" HeaderText="Desk" Width="90px" />
+                                <GridColumn Field="@nameof(TripTypeLookup.LeadTime)" HeaderText="Book ahead" Width="110px" />
+                            </Columns>
+                        </DropDownGridControl>
+                    </div>
+                </Template>
+            </GridColumn>
+
+            @* Fast typing: click the cell and type, the value commits on Enter or blur *@
+            <GridColumn Field="@nameof(TripRequest.Quote)" HeaderText="Quote" Width="130px"
+                        Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right"
+                        AllowEditing="true" SelectAllOnEdit="true" />
+
+            @* Sparkline: five weekly fare samples for the route, the last one is the quote; the header sorts by the change *@
+            <GridColumn Field="@nameof(TripRequest.FareDeltaPercent)" HeaderText="Fare trend" Width="135px" AllowFiltering="false" AllowEditing="false">
+                <Template Context="row">
+                    @{
+                        var r = (TripRequest)row;
+                        var up = r.FareDeltaPercent >= 0;
+                    }
+                    <div class="gw-trend" title="@($"5-week fare trend: {(up ? "+" : "")}{r.FareDeltaPercent}%")">
+                        <ChartControl Type="ChartType.Sparkline" Width="68px" Height="22px" CssClass="gw-spark" Legend="NoLegend" Series="@FareSeries(r, up)" />
+                        <BadgeControl Text="@($"{(up ? "▲" : "▼")}{Math.Abs(r.FareDeltaPercent)}%")" CssClass="@(up ? "gw-delta gw-delta-up" : "gw-delta gw-delta-down")" />
+                    </div>
+                </Template>
+            </GridColumn>
+
+            <GridColumn Field="@nameof(TripRequest.Status)" HeaderText="Status" Width="110px" AllowEditing="false">
+                <Template Context="row">
+                    @{ var r = (TripRequest)row; }
+                    <BadgeControl Text="@r.Status" CssClass="@($"gw-badge {StatusBadge(r.Status)}")" />
+                </Template>
+            </GridColumn>
+
+            @* The Edit button opens the editor; a double-click on the row does the same *@
+            <GridColumn Field="@nameof(TripRequest.Itinerary)" HeaderText="Itinerary" Width="300px" AllowEditing="false">
+                <Template Context="row">
+                    @{ var r = (TripRequest)row; }
+                    <div class="gw-desc">
+                        <span class="gw-desc-text" title="@r.Itinerary">@r.Itinerary</span>
+                        <ButtonControl BareStyle="true" CssClass="gw-cell-edit" IconCss="bi bi-pencil-square" Title="Edit in the quote editor"
+                                       StopPropagation="true" OnClick="@(() => OpenEditor(r))">Edit</ButtonControl>
+                    </div>
+                </Template>
+            </GridColumn>
+        </GridColumnsBase>
+    </GridControl>
+
+    <StatusBarControl CssClass="gw-status">
+        <div class="fx-statusbar-panel fx-statusbar-spring">
+            <span>Showing <strong>@FilteredRequests.Count()</strong> of <strong>@Store.Requests.Count</strong> requests</span>
+            @if (_selected is not null)
+            {
+                <span class="gw-status-selected">• Selected: <strong>@_selected.Request</strong> (@_selected.Destination) — <strong>@_selected.Quote.ToString("C2")</strong></span>
+            }
+        </div>
+        <div class="fx-statusbar-panel gw-status-total">Total quoted: <strong>@FilteredRequests.Sum(r => r.Quote).ToString("C2")</strong></div>
+    </StatusBarControl>
+
+    @* The quote editor: a modal DialogControl over a copy of the request; Save writes the copy back, Add puts a new request first *@
+    <DialogControl Visible="_editorOpen" VisibleChanged="@(v => { if (!v) CloseEditor(); })"
+                   IsModal="true" CloseOnOverlayClick="true" CloseOnEscape="true" ShowCloseIcon="true"
+                   Width="600px" CssClass="gw-editor" AriaLabel="@(_isNew ? "New trip request" : "Edit trip request")">
+        <HeaderContent>
+            <span class="gw-editor-head">
+                <BadgeControl Text="@(_isNew ? "New" : _editing?.Request ?? "")" CssClass="gw-editor-badge" />
+                <span class="gw-editor-titles">
+                    <span class="gw-editor-title">@(_isNew ? "New Trip Request" : "Edit Trip Request")</span>
+                    <span class="gw-editor-sub">@(_isNew ? "Fill in the request, then Add" : $"{_editing?.Traveller} • {_editing?.Destination}")</span>
+                </span>
+            </span>
+        </HeaderContent>
+        <ChildContent>
+            @if (_editing is not null)
+            {
+                <div class="gw-form">
+                    <div class="gw-form-2">
+                        <div class="gw-field">
+                            <label>Agent</label>
+                            <TextBoxControl CssClass="gw-input" Value="@_editing.Agent" ValueChanged="@(v => _editing.Agent = v ?? "")" />
+                        </div>
+                        <div class="gw-field">
+                            <label>Destination</label>
+                            <TextBoxControl CssClass="gw-input" Value="@_editing.Destination" ValueChanged="@(v => _editing.Destination = v ?? "")" />
+                        </div>
+                    </div>
+                    <div class="gw-form-2">
+                        <div class="gw-field">
+                            <label>Lead traveller</label>
+                            <TextBoxControl CssClass="gw-input" Value="@_editing.Traveller" ValueChanged="@(v => _editing.Traveller = v ?? "")" />
+                        </div>
+                        <div class="gw-field">
+                            <label>Travellers</label>
+                            <NumericTextBoxControl TValue="int" Min="1" Max="12" Width="100%" CssClass="gw-input" Value="@_editing.Travellers" ValueChanged="@(v => _editing.Travellers = v)" />
+                        </div>
+                    </div>
+                    <div class="gw-form-2">
+                        <div class="gw-field">
+                            <label>Trip type</label>
+                            <DropDownListControl TValue="string" TItem="TripTypeLookup" Width="100%" DataSource="@TripRequestStore.TripTypes"
+                                                 Value="@_editing.TripType" ValueChanged="@(v => _editing.TripType = v ?? "")"
+                                                 TextFieldName="Display" ValueFieldName="Code" CssClass="gw-select" />
+                        </div>
+                        <div class="gw-field">
+                            <label>Quote ($)</label>
+                            <NumericTextBoxControl TValue="decimal" Step="10" Width="100%" CssClass="gw-input" Value="@_editing.Quote" ValueChanged="@(v => _editing.Quote = v)" />
+                        </div>
+                    </div>
+                    <div class="gw-form-2">
+                        <div class="gw-field">
+                            <label>Status</label>
+                            <DropDownListControl TValue="string" TItem="string" Width="100%" DataSource="@TripRequestStore.Statuses"
+                                                 Value="@_editing.Status" ValueChanged="@(v => _editing.Status = v ?? "")" CssClass="gw-select" />
+                        </div>
+                        <div class="gw-field">
+                            <label>Date requested</label>
+                            <DatePickerControl Value="@_editing.DateRequested" ValueChanged="@(d => { if (d.HasValue) _editing.DateRequested = d.Value; })"
+                                               Format="MM/dd/yyyy" CssClass="gw-date" />
+                        </div>
+                    </div>
+                    <div class="gw-field">
+                        <label>Itinerary &amp; requirements</label>
+                        <TextBoxControl Multiline="true" Rows="3" CssClass="gw-textarea" Value="@_editing.Itinerary" ValueChanged="@(v => _editing.Itinerary = v ?? "")" />
+                    </div>
+                    <div class="gw-field">
+                        <label>Notes for the agent</label>
+                        <TextBoxControl CssClass="gw-input" Value="@_editing.Notes" ValueChanged="@(v => _editing.Notes = v ?? "")" />
+                    </div>
+                </div>
+            }
+        </ChildContent>
+        <FooterContent>
+            <ButtonControl OnClick="CloseEditor">Cancel</ButtonControl>
+            <ButtonControl CssClass="btn-primary" IconCss="bi bi-check-lg" OnClick="SaveEdit">@(_isNew ? "Add Request" : "Save Request")</ButtonControl>
+        </FooterContent>
+    </DialogControl>
+</div>
+
+@code {
+    /// <summary>Opens the editor on this request when the value changes; the Dashboard, the bell and the Itinerary arrive with it.</summary>
+    [Parameter] public int? OpenRequestId { get; set; }
+
+    /// <summary>Opens the editor on a blank request when it turns true; the + button arrives with it.</summary>
+    [Parameter] public bool StartNew { get; set; }
+
+    /// <summary>Content between the filters and the grid; the FlexCore site puts its feature strip here.</summary>
+    [Parameter] public RenderFragment? AboveGrid { get; set; }
+
+    private static readonly string[] TripTypeFilters = ["All", "Beach", "City", "Ski", "Safari", "Cruise", "Rail", "Family", "Honeymoon"];
+    private static readonly ChipItem[] _tripTypeChips = TripTypeFilters.Select(t => new ChipItem(t, t)).ToArray();
+    private static readonly ChartLegend NoLegend = new() { Visible = false };
+
+    private string _tripType = "All";
+    private string _search = "";
+    private TripRequest? _selected;
+    private int? _lastOpenId;
+    private bool _lastStartNew;
+
+    private GridControl<TripRequest>? _grid;
+    private readonly GridControlEvents<TripRequest> _gridEvents = new();
+    private readonly EditSettings _editSettings = new()
+    {
+        AllowEditing = true,
+        Mode = EditMode.Batch,
+        EditOnEnterKey = true,
+        EditOnActiveCellClick = true,
+        AllowEditOnDblClick = true
+    };
+
+    // Editor state
+    private bool _editorOpen;
+    private bool _isNew;
+    private TripRequest? _editing;
+    private TripRequest? _original;
+
+    private List<SelectionItem> ViewOptions =>
+    [
+        new("All", $"All requests ({Store.Requests.Count})"),
+        new("New requests", $"New requests ({Store.Requests.Count(r => r.Status == "New")})"),
+        new("Quoted", $"Quoted ({Store.Requests.Count(r => r.Status == "Quoted")})"),
+        new("Booked", $"Booked ({Store.Requests.Count(r => r.Status == "Booked")})"),
+    ];
+
+    private IEnumerable<TripRequest> FilteredRequests
+    {
+        get
+        {
+            var list = Store.Requests.AsEnumerable();
+            if (_tripType != "All")
+                list = list.Where(r => r.TripType.Equals(_tripType, StringComparison.OrdinalIgnoreCase));
+            if (Settings.RequestsView != "All")
+            {
+                var status = Settings.RequestsView == "New requests" ? "New" : Settings.RequestsView;
+                list = list.Where(r => r.Status == status);
+            }
+            if (!string.IsNullOrWhiteSpace(_search))
+            {
+                var term = _search.Trim();
+                list = list.Where(r =>
+                    r.Request.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    r.Agent.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    r.Traveller.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    r.Destination.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    r.Itinerary.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    r.TripType.Contains(term, StringComparison.OrdinalIgnoreCase));
+            }
+            return list;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        Settings.Changed += StateHasChanged;
+
+        // Selecting a row fills the status bar, a typed quote moves the fare trend, and a double-click opens the editor
+        _gridEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<TripRequest>>(this, e => _selected = e.Data);
+        _gridEvents.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<TripRequest>>(this, e =>
+        {
+            if (e.ColumnName == nameof(TripRequest.Quote)) TripRequestStore.ApplyQuoteToFares(e.Data);
+        });
+        _gridEvents.OnRecordDoubleClick = EventCallback.Factory.Create<CellClickEventArgs<TripRequest>>(this, e =>
+        {
+            if (e.Data is null) return;
+            _selected = e.Data;
+            OpenEditor(e.Data);
+        });
+    }
+
+    // The host hands over a request to open, or asks for a new one, through the parameters; each is acted on once per change
+    protected override void OnParametersSet()
+    {
+        if (OpenRequestId != _lastOpenId)
+        {
+            _lastOpenId = OpenRequestId;
+            if (OpenRequestId is int id && Store.Requests.FirstOrDefault(r => r.Id == id) is { } request)
+            {
+                _selected = request;
+                OpenEditor(request);
+            }
+        }
+        if (StartNew != _lastStartNew)
+        {
+            _lastStartNew = StartNew;
+            if (StartNew) CreateNewRequest();
+        }
+    }
+
+    public void Dispose() => Settings.Changed -= StateHasChanged;
+
+    private static List<ChartSeries> FareSeries(TripRequest r, bool up) =>
+    [
+        new("Fare", ChartType.Sparkline, r.FareHistory.Select((fare, i) => new ChartDataPoint($"Week {i + 1}", fare)), up ? "#10b981" : "#ef4444")
+    ];
+
+    private static string StatusBadge(string status) => status switch
+    {
+        "Booked" => "gw-badge-green",
+        "Quoted" => "gw-badge-blue",
+        "New" => "gw-badge-amber",
+        "Declined" => "gw-badge-rose",
+        _ => "gw-badge-gray"
+    };
+
+    private void OnTripTypeChanged(TripRequest r, string? newType)
+    {
+        if (string.IsNullOrEmpty(newType)) return;
+        r.TripType = newType;
+        r.TripTypeName = TripRequestStore.TripTypes.FirstOrDefault(t => t.Code.Equals(newType, StringComparison.OrdinalIgnoreCase))?.Name ?? newType;
+        Notifications.Success($"Updated {r.Request} trip type to {newType}");
+    }
+
+    // The grid writes the workbook itself and the browser downloads it
+    private Task ExportToExcel() => _grid?.ExportToXlsxAsync("trip-requests.xlsx") ?? Task.CompletedTask;
+
+    private void OpenEditor(TripRequest request)
+    {
+        _original = request;
+        _editing = request.Clone();
+        _isNew = false;
+        _editorOpen = true;
+    }
+
+    private void CreateNewRequest()
+    {
+        _original = null;
+        _editing = Store.NewRequest();
+        _isNew = true;
+        _editorOpen = true;
+    }
+
+    private void SaveEdit()
+    {
+        if (_editing is not null)
+        {
+            if (_isNew)
+            {
+                var added = Store.Add(_editing);
+                _selected = added;
+                Notifications.Success($"Added request {added.Request} for {added.Destination}.");
+            }
+            else if (_original is not null)
+            {
+                Store.Save(_original, _editing);
+                Notifications.Success($"Saved request {_original.Request}.");
+            }
+        }
+        CloseEditor();
+    }
+
+    private void CloseEditor()
+    {
+        _editorOpen = false;
+        _isNew = false;
+        _editing = null;
+        _original = null;
+    }
+}

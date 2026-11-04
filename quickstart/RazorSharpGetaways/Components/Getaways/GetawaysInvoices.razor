@@ -1,0 +1,89 @@
+@* The Invoices page: the Package Cost Sheet, a Crystal Reports XML export (wwwroot/reports), run by ReportWriterControl for one
+   booked trip. The trip's destination picks the package and its departure the season; its nights, party size, quote and request key
+   go along as extra seeds, which Data/PackageCostSheet.cs reads to cost the sheet for that booking. The writer's toolbar prints and
+   exports the sheet, and its Parameters button reruns it for any package and season. *@
+@namespace RazorSharpGetaways.Components.Getaways
+@using System.Globalization
+@using Fx.ControlKit
+@using Fx.ControlKit.Reports
+@using RazorSharpGetaways.Data
+@inject TripRequestStore Store
+@inject IWebHostEnvironment Env
+
+<div class="gw-invoices">
+    <div class="gw-invoice-head">
+        <div>
+            <h3 class="gw-invoice-title">Package cost sheet</h3>
+            <p class="gw-invoice-sub">
+                @if (_trip is null)
+                {
+                    <text>No booked trips to cost.</text>
+                }
+                else
+                {
+                    <text>@_trip.Request · @_package.Name, @_trip.Nights nights, @_season departure · @_trip.Traveller, @_trip.Travellers travelling · quoted @_trip.Quote.ToString("C0")</text>
+                }
+            </p>
+        </div>
+        <div class="gw-invoice-tools">
+            <span class="gw-toolbar-label">Booked trip:</span>
+            <DropDownListControl TValue="string" TItem="SelectionItem" DataSource="@_trips" TextFieldName="Text" ValueFieldName="Value"
+                                 Value="@_tripKey" ValueChanged="PickTrip" Width="330px" CssClass="gw-view" AriaLabel="Booked trip" />
+        </div>
+    </div>
+    <div class="gw-report">
+        <ReportWriterControl @ref="_writer" />
+    </div>
+</div>
+
+@code {
+    private ReportWriterControl? _writer;
+    private List<SelectionItem> _trips = [];
+    private string _tripKey = "";
+    private TripRequest? _trip;
+    private TripPackage _package = TripPackages.All[0];
+    private string _season = TripPackages.Seasons[0];
+
+    protected override void OnInitialized()
+    {
+        var booked = Store.BookedDepartures.ToList();
+        _trips = booked.Select(r => new SelectionItem(r.Request, $"{r.Request} · {r.Destination} · {r.Traveller}")).ToList();
+        Select(booked.FirstOrDefault(r => r.Request == "LIS-0586") ?? booked.FirstOrDefault());
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Run on first paint, so the page opens on a finished sheet
+        if (firstRender) await RunSheet();
+    }
+
+    private void Select(TripRequest? trip)
+    {
+        _trip = trip;
+        _tripKey = trip?.Request ?? "";
+        if (trip is null) return;
+        _package = TripPackages.ForDestination(trip.Destination);
+        _season = TripPackages.SeasonOf(trip.Departure);
+    }
+
+    private async Task PickTrip(string? key)
+    {
+        Select(Store.Requests.FirstOrDefault(r => r.Request == key));
+        await RunSheet();
+    }
+
+    private async Task RunSheet()
+    {
+        if (_writer is null || _trip is null) return;
+        var path = Path.Combine(Env.WebRootPath, "reports", "Package Cost Sheet.xml");
+        await _writer.ShowReportAsync(path, new Dictionary<string, string>
+        {
+            ["Package"] = _package.Name,
+            ["Season"] = _season,
+            ["Pax"] = _trip.Travellers.ToString(CultureInfo.InvariantCulture),
+            ["Nights"] = _trip.Nights.ToString(CultureInfo.InvariantCulture),
+            ["Quote"] = _trip.Quote.ToString(CultureInfo.InvariantCulture),
+            ["Request"] = _trip.Request,
+        });
+    }
+}

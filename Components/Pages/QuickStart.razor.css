@@ -1,0 +1,23 @@
+/* Quick Start page (2026-11-04): the download button in the home page's primary button style, and the pages table. */
+.qs-download { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin: 4px 0 28px; }
+.qs-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 10px;
+    background: var(--brand-button);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+.qs-button:hover { background: var(--brand-button-hover); color: #ffffff; text-decoration: none; }
+.qs-note { font-size: 13.5px; color: #64748b; }
+
+.qs-pages { width: 100%; border-collapse: collapse; margin: 6px 0 14px; font-size: 14px; }
+.qs-pages th, .qs-pages td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
+.qs-pages th { font-weight: 600; color: #334155; background: #f8fafc; }
+.qs-pages td:first-child { font-weight: 600; white-space: nowrap; }
+.qs-pages td:last-child { color: #475569; }

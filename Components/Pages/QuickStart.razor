@@ -1,0 +1,74 @@
+@page "/quick-start"
+@using FlexCore.Showcase.Services
+
+@* 2026-11-04 (Baaria): the Quick Start is a download, not a walkthrough: Razor Sharp Getaways, the app in the home page's window, as a
+   complete Blazor Server project. The zip is built from quickstart/RazorSharpGetaways on every build of this site
+   (FlexCore.Showcase.csproj) and served from the assembly (Services/QuickStartDownload.cs), so it is always the code the home page
+   runs. Get Started stays the step-by-step for an existing app. *@
+
+<PageTitle>FlexCore Quick Start: a Blazor App to Download and Run</PageTitle>
+
+<div class="docs-page">
+    <h1>Quick Start</h1>
+    <p>
+        Razor Sharp Getaways, the travel agency's back office in the window on the <a href="./">home page</a>, as a project of its own:
+        five pages on the FlexCore controls, in-memory data, nothing to configure. Download it, run it, read it, change it.
+    </p>
+
+    <p class="qs-download">
+        <a class="qs-button" href="@QuickStartDownload.Path" download><span class="bi bi-download"></span> Download Razor Sharp Getaways (zip)</a>
+        <span class="qs-note">A Blazor Server project for .NET 10 that references the FlexCore package from NuGet.</span>
+    </p>
+
+    <section>
+        <h2>Run it</h2>
+        <ol>
+            <li>Unzip the download. You get a folder, <code>RazorSharpGetaways</code>, with the project file inside.</li>
+            <li>Install the <a href="https://dotnet.microsoft.com/download/dotnet/10.0" target="_blank" rel="noopener">.NET 10 SDK</a> if it is not on the machine.</li>
+            <li>In that folder, run the project. The first run restores the FlexCore package; then the address is printed, open it.
+                <pre><code>dotnet run</code></pre>
+            </li>
+        </ol>
+        <p>
+            If the browser warns about the certificate, trust the development certificate once with <code>dotnet dev-certs https --trust</code>,
+            or open the http address the run prints.
+        </p>
+    </section>
+
+    <section>
+        <h2>What is in it</h2>
+        <table class="qs-pages">
+            <thead><tr><th>Page</th><th>What it shows</th><th>FlexCore controls</th></tr></thead>
+            <tbody>
+                <tr><td>Dashboard</td><td>Four figures, trip requests by month, upcoming departures; drag the cards about</td><td>GridLayoutControl, CardControl, ChartControl, GridControl, SegmentedControl</td></tr>
+                <tr><td>Trip Requests</td><td>1,000 requests, typed quotes, an in-cell lookup, filter chips, search, a quote editor</td><td>GridControl, DropDownGridControl, ChipListControl, SearchBoxControl, ToolbarControl, StatusBarControl, DialogControl</td></tr>
+                <tr><td>Itinerary</td><td>One booked trip, from the flight out to the flight home</td><td>SchedulerControl</td></tr>
+                <tr><td>Invoices</td><td>The package cost sheet of a booked trip, a Crystal Reports XML export</td><td>ReportWriterControl</td></tr>
+                <tr><td>Settings</td><td>Colour scheme, text size, grid look and dashboard layout, with a live preview</td><td>ColorPaletteControl, SliderControl, SwitchControl, DropDownListControl</td></tr>
+            </tbody>
+        </table>
+        <p>
+            The window itself is a vertical TabStripControl for the menu, an AppBarControl with ButtonControl menus and an AvatarControl, and
+            a FabMenuControl for the + button. The folder layout is the one <code>dotnet new blazor</code> makes, plus <code>Components/Getaways</code>
+            for the pages, <code>Data</code> for the in-memory store and the report's rows, and <code>wwwroot/getaways.css</code> for the look.
+            The README inside says where everything is and how the FlexCore services are registered.
+        </p>
+    </section>
+
+    <section>
+        <h2>The same code as the home page</h2>
+        <p>
+            This site's home page runs these same files inside its demo frame, and the Razor and C# tabs over that window print them. A change
+            to the download is a change to the demo, and the other way round, so what you download is what you tried.
+        </p>
+    </section>
+
+    <section>
+        <h2>Next</h2>
+        <p>
+            <a href="get-started">Get Started</a> is the same wiring for an app of your own: install the package, add the namespaces, register
+            the services, mount the hosts, put a grid on a page. <a href="components">All components</a> lists every control with a live demo
+            and its code, and the <a href="faq">FAQ</a> answers what developers ask before they pick a library.
+        </p>
+    </section>
+</div>

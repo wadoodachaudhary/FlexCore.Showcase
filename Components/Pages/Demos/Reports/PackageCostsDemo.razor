@@ -5,6 +5,7 @@
 @using Fx.ControlKit.Reports
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Components.Shared
+@using RazorSharpGetaways.Data
 @inject IWebHostEnvironment Env
 
 @* 2026-10-18: moved onto FeatureDemoLayout (Saturday list). Same report, same auto-run on first paint. Changes, closing SC-220 to
@@ -18,7 +19,8 @@
    checked with scratchpad/vocabcheck.py. ShowReportAsync seeds a literal "DivisionID" from the session context (lines ~1317 and ~1549),
    a host name inside the library; noted in SC-253.
    2026-10-25 (Baaria, SC-344): the report is a tour operator's Package Cost Sheet (wwwroot/reports/Package Cost Sheet.xml, data from
-   Data/TravelData.cs through Services/ShowcaseReportDataExecutor.cs). It replaced an earlier cut-down cost report. Same
+   Data/TravelData.cs through a data executor; since 2026-11-04 the Quick Start project's, quickstart/RazorSharpGetaways/Data). It
+   replaced an earlier cut-down cost report. Same
    shape: four group levels with a sum in every footer; new: a grand total in the report footer (the loader's GrandTotals). The page
    file moved from ModelCostsDemo to PackageCostsDemo and the old address is kept as an alias.
    2026-10-25 (catalog audit SC-345): the page loads through ShowReportAsync with Package and Season as seeds instead of ShowXmlReport.
@@ -91,10 +93,10 @@
 
 @code {
     private ReportWriterControl? _writer;
-    private readonly string[] _packages = TravelData.Packages.Select(p => p.Name).ToArray();
-    private readonly string[] _seasons = TravelData.Seasons;
-    private string _package = TravelData.Packages[0].Name;
-    private string _season = TravelData.Seasons[0];
+    private readonly string[] _packages = TripPackages.All.Select(p => p.Name).ToArray();
+    private readonly string[] _seasons = TripPackages.Seasons;
+    private string _package = TripPackages.All[0].Name;
+    private string _season = TripPackages.Seasons[0];
     private bool _running;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -128,17 +130,18 @@
     }
 
     // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed). The data executor this site
-    // registers is Services/ShowcaseReportDataExecutor.cs; Program.cs shows the registrations.
+    // registers is the Quick Start project's, quickstart/RazorSharpGetaways/Data/GetawaysReportServices.cs (2026-11-04); Program.cs
+    // shows the registrations. The packages come from the same project's TripPackages, the agency's full list of twelve.
     private static class Code
     {
         public const string Report = @"<div class=""report-frame"">
     <ReportWriterControl @ref=""_writer"" />
 </div>";
         public const string ReportCs = @"private ReportWriterControl? _writer;
-private readonly string[] _packages = TravelData.Packages.Select(p => p.Name).ToArray();
-private readonly string[] _seasons = TravelData.Seasons;
-private string _package = TravelData.Packages[0].Name;
-private string _season = TravelData.Seasons[0];
+private readonly string[] _packages = TripPackages.All.Select(p => p.Name).ToArray();
+private readonly string[] _seasons = TripPackages.Seasons;
+private string _package = TripPackages.All[0].Name;
+private string _season = TripPackages.Seasons[0];
 private bool _running;
 
 protected override async Task OnAfterRenderAsync(bool firstRender)

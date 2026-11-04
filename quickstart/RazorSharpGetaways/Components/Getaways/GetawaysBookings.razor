@@ -1,17 +1,17 @@
+@* The Itinerary: one booked trip, LIS-0586, laid out in SchedulerControl from the flight out to the flight home. SchedulerEvent has
+   no colour of its own (colour comes only from Resources, and each resource takes a column per day), so every entry starts with an
+   emoji for its kind and getaways.css colours the blocks by it. The view comes from the Settings page. *@
+@namespace RazorSharpGetaways.Components.Getaways
 @using Fx.ControlKit.Scheduling
-@using static FlexCore.Showcase.Components.Pages.Home
+@using RazorSharpGetaways.Data
+@inject TripRequestStore Store
+@inject GetawaysAppSettings Settings
 
-@* 2026-10-29 (Baaria): the Itinerary page of the home page's app window. It used to show a month of every booked departure; it
-   now lays out one trip, LIS-0586, from the flight out to the flight home, which shows far more of the scheduler. Home.razor's
-   GenerateRequests makes LIS-0586 a Lisbon honeymoon booked by Pippa Larkspur and leaving tomorrow. SchedulerEvent has no colour
-   of its own (colour comes only from Resources, and each resource takes a column per day), so every entry starts with an emoji
-   for its kind and GetawaysBookings.razor.css colours the blocks by it. The home page's Razor tab prints this file's markup from
-   the line below this comment to @code (FlexCore.Showcase.csproj embeds it). *@
 <div class="gw-itinerary">
     <div class="gw-trip-head">
         <div>
             <h3 class="gw-trip-title">@_trip.Request · @_trip.Destination honeymoon</h3>
-            <p class="gw-trip-sub">@_trip.Traveller, @_trip.Travellers travelling · @_trip.Departure.ToString("ddd d MMM") to @_trip.Departure.AddDays(Nights).ToString("ddd d MMM") · Agent: @_trip.Agent</p>
+            <p class="gw-trip-sub">@_trip.Traveller, @_trip.Travellers travelling · @_trip.Departure.ToString("ddd d MMM") to @_trip.Departure.AddDays(_trip.Nights).ToString("ddd d MMM") · Agent: @_trip.Agent</p>
         </div>
         <ul class="gw-legend" aria-label="Kinds of entry">
             <li class="k-flight">✈️ Flight</li>
@@ -21,20 +21,16 @@
             <li class="k-meal">🍽️ Meal</li>
         </ul>
     </div>
-    @* The whole trip in one multi-day view; click an entry to edit it, double-click a free time to add one *@
-    <SchedulerControl @bind-Events="_plan" @bind-Date="_date" @bind-View="_view" MultiDayCount="@(Nights + 1)"
+    @* The whole trip in one multi-day view; click an entry to edit it, double-click an empty slot to add one *@
+    <SchedulerControl @bind-Events="_plan" @bind-Date="_date" @bind-View="Settings.ItineraryView" MultiDayCount="@(_trip.Nights + 1)"
                       StartHour="7" EndHour="23" Height="560px" />
 </div>
 
 @code {
-    /// <summary>The agency's trip requests; the page shows the one keyed LIS-0586.</summary>
-    [Parameter, EditorRequired] public IReadOnlyList<TripRequest> Requests { get; set; } = [];
-
-    private const int Nights = 5;
+    // The plan below is LIS-0586's five nights; the trip's own Nights drives the view and the hotel stay
     private TripRequest _trip = new();
     private IReadOnlyList<SchedulerEvent> _plan = [];
     private DateTime _date;
-    private SchedulerView _view = SchedulerView.MultiDay;
 
     // Day of the trip, start, end, entry; the emoji at the start of each title is its kind
     private static readonly (int Day, string From, string To, string Title)[] Plan =
@@ -60,7 +56,7 @@
 
     protected override void OnInitialized()
     {
-        _trip = Requests.FirstOrDefault(r => r.Request == "LIS-0586") ?? Requests.FirstOrDefault() ?? new TripRequest { Departure = DateTime.Today };
+        _trip = Store.ItineraryTrip ?? new TripRequest { Departure = DateTime.Today, Nights = 5 };
         var day0 = _trip.Departure.Date;
         _date = day0;
         var entries = Plan.Select(p => new SchedulerEvent
@@ -69,7 +65,7 @@
             Start = day0.AddDays(p.Day) + TimeSpan.Parse(p.From, System.Globalization.CultureInfo.InvariantCulture),
             End = day0.AddDays(p.Day) + TimeSpan.Parse(p.To, System.Globalization.CultureInfo.InvariantCulture)
         }).ToList();
-        entries.Insert(0, new SchedulerEvent { Title = $"🏨 {Nights} nights in Alfama", Start = day0, End = day0.AddDays(Nights), AllDay = true });
+        entries.Insert(0, new SchedulerEvent { Title = $"🏨 {_trip.Nights} nights in Alfama", Start = day0, End = day0.AddDays(_trip.Nights), AllDay = true });
         _plan = entries;
     }
 }

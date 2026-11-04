@@ -1,0 +1,83 @@
+@* The top bar: the menu button and the page title on the left; on the right the bell with the newest requests, Help and the
+   signed-in agent's profile menu. The bell's entries hand a request to the host to open; Help and the profile items answer with
+   a toast, as this app has no pages for them. *@
+@namespace RazorSharpGetaways.Components.Getaways
+@using Fx.ControlKit
+@using Fx.ControlKit.Layout
+@using Fx.ControlKit.Notifications
+@using RazorSharpGetaways.Data
+@inject TripRequestStore Store
+@inject NotificationService Notifications
+
+<AppBarControl CssClass="gw-appbar">
+    <StartContent>
+        <ButtonControl BareStyle="true" CssClass="gw-icon-btn" IconCss="bi bi-list" Title="Show or hide the menu" OnClick="OnMenuClick" />
+        <span class="gw-page-title">@Title</span>
+    </StartContent>
+    <EndContent>
+        <ButtonControl @ref="_bell" BareStyle="true" CssClass="gw-icon-btn gw-bell" Title="Newest trip requests" DropDownCssClass="gw-menu gw-menu-wide">
+            <ChildContent>
+                <span class="bi bi-bell"></span>
+                <BadgeControl IsDot="true" Variant="BadgeVariant.Danger" CssClass="gw-bell-dot" />
+            </ChildContent>
+            <DropDownContent>
+                <div class="gw-menu-head">Newest trip requests</div>
+                @foreach (var r in Store.Newest(4))
+                {
+                    <ButtonControl BareStyle="true" CssClass="gw-menu-item gw-menu-request" OnClick="@(() => Open(r))">
+                        <AvatarControl Text="@r.Agent" AlternativeText="@r.Agent" Size="24px" CssClass="gw-agent-avatar" Style="@($"background:{r.AvatarBg}")" />
+                        <span class="gw-menu-request-text"><strong>@r.Destination</strong> for @r.Traveller<small>@r.Request · @r.TripTypeName</small></span>
+                    </ButtonControl>
+                }
+                <ButtonControl BareStyle="true" CssClass="gw-menu-item gw-menu-all" OnClick="ShowAllNew">Show all new requests</ButtonControl>
+            </DropDownContent>
+        </ButtonControl>
+        <ButtonControl BareStyle="true" CssClass="gw-icon-btn gw-help" IconCss="bi bi-question-circle" Title="Help" OnClick="@(() => NotInDemo("Help"))" />
+        <ButtonControl @ref="_profile" BareStyle="true" CssClass="gw-profile" Title="@TripRequestStore.SignedInAgent" DropDownCssClass="gw-menu">
+            <ChildContent>
+                <AvatarControl Text="@TripRequestStore.SignedInAgent" AlternativeText="@TripRequestStore.SignedInAgent" Size="34px" CssClass="gw-avatar" />
+                <span class="gw-profile-name">@TripRequestStore.SignedInAgent</span>
+                <span class="bi bi-chevron-down gw-profile-caret"></span>
+            </ChildContent>
+            <DropDownContent>
+                @foreach (var (text, icon) in GetawaysPages.ProfileMenu)
+                {
+                    <ButtonControl BareStyle="true" CssClass="gw-menu-item" IconCss="@icon" OnClick="@(() => { _profile?.CloseDropDown(); NotInDemo(text); })">@text</ButtonControl>
+                }
+            </DropDownContent>
+        </ButtonControl>
+    </EndContent>
+</AppBarControl>
+
+@code {
+    /// <summary>The open page's title.</summary>
+    [Parameter] public string Title { get; set; } = "";
+
+    /// <summary>The menu button: the host shrinks the menu to icons, or opens it over the page on a phone.</summary>
+    [Parameter] public EventCallback OnMenuClick { get; set; }
+
+    /// <summary>A request picked from the bell; the host opens it in the Trip Requests editor.</summary>
+    [Parameter] public EventCallback<TripRequest> OnOpenRequest { get; set; }
+
+    /// <summary>"Show all new requests"; the host opens the Trip Requests page on its New view.</summary>
+    [Parameter] public EventCallback OnShowNewRequests { get; set; }
+
+    private ButtonControl? _bell;
+    private ButtonControl? _profile;
+
+    private Task Open(TripRequest request)
+    {
+        _bell?.CloseDropDown();
+        return OnOpenRequest.InvokeAsync(request);
+    }
+
+    private Task ShowAllNew()
+    {
+        _bell?.CloseDropDown();
+        return OnShowNewRequests.InvokeAsync();
+    }
+
+    // The parts of the app this demo leaves out answer with a toast
+    private void NotInDemo(string what) =>
+        Notifications.Info($"{what} is not part of this demo", "The menu's pages, the grid, the chart and the + button all work.");
+}

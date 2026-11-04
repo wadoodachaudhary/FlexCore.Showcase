@@ -3,6 +3,7 @@ using FlexCore.Showcase.Seo;
 using FlexCore.Showcase.Services;
 using Fx.ControlKit.Notifications;
 using Fx.ControlKit.Reports;
+using RazorSharpGetaways.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,18 +24,24 @@ builder.Services.AddScoped<BenchDataStore>();
 builder.Services.Configure<FlexCore.Showcase.Services.Signups.SignupOptions>(builder.Configuration.GetSection("Signups"));
 builder.Services.AddSingleton<FlexCore.Showcase.Services.Signups.ISignupStore, FlexCore.Showcase.Services.Signups.FileSignupStore>();
 
-// Report pipeline — stub services that synthesize demo data instead of hitting a DB.
+// The home page's app window is the Quick Start project (quickstart/RazorSharpGetaways, 2026-11-04): its trip requests and its
+// Settings page's choices, one instance per circuit, as in the download.
+builder.Services.AddScoped<TripRequestStore>();
+builder.Services.AddScoped<GetawaysAppSettings>();
+
+// Report pipeline: the Quick Start project's in-memory data executor, session context and no-op exporter stand in for a database
+// (quickstart/RazorSharpGetaways/Data/GetawaysReportServices.cs); the Report writer page and the window's Invoices page share them.
 builder.Services.AddSingleton(new ReportOptions
 {
     SchemaPrefix = "",                                       // showcase XML doesn't use a schema
     SessionAutoInjectParameters = { "DivisionID", "UserId" }, // auto-fill from session ctx
 });
 builder.Services.AddScoped<CrystalXmlReportLoader>();
-builder.Services.AddScoped<IReportSessionContext, ShowcaseReportSessionContext>();
-builder.Services.AddScoped<IReportDataExecutor, ShowcaseReportDataExecutor>();
+builder.Services.AddScoped<IReportSessionContext, GetawaysReportSession>();
+builder.Services.AddScoped<IReportDataExecutor, GetawaysReportData>();
 // IReportExporter is logically optional (only needed for .rpt binaries) but
 // Blazor's @inject can't see C# nullability — register a no-op stub.
-builder.Services.AddScoped<IReportExporter, NoopReportExporter>();
+builder.Services.AddScoped<IReportExporter, NoReportExporter>();
 builder.Services.AddScoped<IReportViewerSettings, InMemoryReportViewerSettings>();
 builder.Services.AddScoped<IReportPickListProvider, EmptyReportPickListProvider>();
 
@@ -57,6 +64,7 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapSeoEndpoints();   // robots.txt, sitemap.xml, llms.txt from Seo/SiteMeta.Pages.cs
+app.MapQuickStartDownload();   // /downloads/razor-sharp-getaways.zip, the Quick Start project zipped at build (Services/QuickStartDownload.cs)
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

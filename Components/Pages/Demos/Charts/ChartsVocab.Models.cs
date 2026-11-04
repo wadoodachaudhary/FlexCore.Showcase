@@ -48,6 +48,8 @@ public static partial class ChartsVocab
         new("Format", "Declared, but never read: tick labels are whole numbers everywhere except the financial charts, which print one decimal.", "string?", "null"),
         new("ShowGridLines", "Declared, but never read: the dashed grid lines are always drawn.", "bool", "true"),
         new("TickCount", "Number of tick labels on the value axis, first to last inclusive, read from <code>YAxis</code> by the Bar and Line families only; null means 5. Scatter, Bubble, Waterfall, Box Plot, Dot Plot and Histogram always draw 5; Gantt, the financial and Range charts always draw 4 intervals.", "int?", "null"),
+        new("AutoSkipLabels", "Added in 0.2.50. Omits category captions that would overlap; every point is still plotted. Read through <code>ChartAxisLabelLayout</code> by the Bar family's category captions, the Line family's x captions and the financial charts' labels in SVG mode, and by the printed bar, 3-D and stage scenes.", "bool", "true"),
+        new("MinimumLabelGap", "Added in 0.2.50. Smallest gap kept between visible category captions, in SVG units or print points; the printed category scene uses 0.15 of the font size when no axis is given.", "double", "4"),
     };
 
     /// <summary>ChartLegend: the Legend parameter.</summary>

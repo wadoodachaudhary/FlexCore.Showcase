@@ -1,0 +1,17 @@
+@page "/"
+@inject NavigationManager Nav
+@inject GetawaysAppSettings Settings
+
+<PageTitle>Dashboard · Razor Sharp Getaways</PageTitle>
+
+<GetawaysDashboard OnShowRequests="ShowRequests" OnOpenRequest="@(r => Nav.NavigateTo($"requests?open={r.Id}"))" />
+
+@code {
+    // A figure card opens the Trip Requests page on its view
+    private void ShowRequests(string view)
+    {
+        Settings.RequestsView = view;
+        Settings.NotifyChanged();
+        Nav.NavigateTo("requests");
+    }
+}

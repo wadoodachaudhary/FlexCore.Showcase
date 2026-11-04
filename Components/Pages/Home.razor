@@ -1,7 +1,9 @@
 @page "/"
+@implements IDisposable
 @inject IJSRuntime JS
 @inject NotificationService Notifications
-@inject IReportDataExecutor ReportData
+@inject TripRequestStore Store
+@inject GetawaysAppSettings Settings
 
 @* 2026-10-28 (Baaria): the agency's pages are named in its own voice (Razor Sharp Trip Requests) and the window title is the
    agency's name. 2026-10-29 (Baaria): the Sales (charts) and Front Desk (ribbon) pages were removed; the Dashboard carries a chart. *@
@@ -42,15 +44,18 @@
            with no Href, and these must stay real links (new tab, crawlers). "Quick Start" matches the top-bar button. "Documentation"
            opens the component catalog: each control's page carries its parameter tables and code, and there is no separate docs site. *@
         <div class="hero-actions">
-            <a href="get-started" class="hero-btn hero-btn-primary">Quick Start</a>
+            <a href="quick-start" class="hero-btn hero-btn-primary">Quick Start</a>
             <a href="components" class="hero-btn hero-btn-secondary">Documentation</a>
         </div>
     </div>
 
-    @* 2. The app window (2026-10-29, Baaria, after the app demo on blazor.radzen.com): Razor Sharp Getaways as a working app, a
-       sidebar of pages, a top bar with the new-request bell and a profile menu, and a + button. The four former tabs are four of
-       its pages; Dashboard and Itinerary are their own components (Shared/GetawaysDashboard.razor, GetawaysBookings.razor). Every
-       page works; only Settings, Help and the profile menu's items answer with a "not in this demo" note. *@
+
+    @* 2. The app window (2026-10-29, Baaria, after the app demo on blazor.radzen.com): Razor Sharp Getaways as a working app. Since
+       2026-11-04 (Baaria) the window is also the Quick Start project, quickstart/RazorSharpGetaways: its pages, window parts, data
+       and stylesheet are that project's files, compiled into this site from there (FlexCore.Showcase.csproj), so the download and the
+       demo cannot drift. This file keeps only what is the site's: the frame, the Example | Razor | C# tabs over the window, and the
+       feature strip above the grid. Pages are switched here, not routed; ?tab= names one (the old keys grid, bookings and reports
+       still work). *@
     <section id="live-showcase" class="showcase-section">
         <div class="showcase-shell">
             @* Window title bar *@
@@ -62,7 +67,7 @@
                 </div>
                 <div class="window-title">
                     <span class="bi bi-window-sidebar"></span>
-                    <span>Razor Sharp Getaways</span>
+                    <span>@GetawaysPages.AppName</span>
                 </div>
                 <div class="window-tags">
                     <TabStripControl Items="_viewTabs" SelectedIndex="_codeTab" SelectedIndexChanged="SetCodeTab" OnTabClose="@(_ => SetCodeTab(0))"
@@ -70,455 +75,92 @@
                 </div>
             </div>
 
-            <div class="@($"gw-app {(_navCollapsed ? "gw-nav-collapsed" : "")} {(_navOpen ? "gw-nav-open" : "")}")">
-                <aside class="gw-sidebar">
-                    <div class="gw-brand">
-                        <span class="gw-brand-mark bi bi-airplane-fill"></span>
-                        <span class="gw-brand-name">Razor Sharp Getaways</span>
-                    </div>
-                    <TabStripControl Items="_navItems" SelectedIndex="@NavIndex" SelectedIndexChanged="@(i => Go(AppPages[i].Key))"
-                                     Orientation="TabOrientation.Vertical" Theme="TabTheme.Minimal" ShowOrientationMenu="false"
-                                     AriaLabel="Pages" CssClass="gw-nav" />
-                    <ButtonControl BareStyle="true" CssClass="gw-nav-extra" IconCss="bi bi-gear" Title="Settings" OnClick="@(() => NotInDemo("Settings"))">
-                        <span class="gw-nav-extra-text">Settings</span>
-                    </ButtonControl>
-                    <div class="gw-sidebar-foot">Razor Sharp Getaways v1.0<br />Built with FlexCore @_flexCoreVersion</div>
-                </aside>
+            <div class="@($"gw-app {Settings.SchemeClass} {(Settings.SidebarIcons ? "gw-nav-collapsed" : "")} {(_navOpen ? "gw-nav-open" : "")}")" style="@Settings.WindowStyle">
+                <GetawaysSidebar SelectedIndex="@GetawaysPages.IndexOf(_page)" OnSelect="@(i => Go(GetawaysPages.All[i].Key))" />
                 @if (_navOpen)
                 {
                     <div class="gw-scrim" @onclick="@(() => _navOpen = false)"></div>
                 }
 
                 <div class="gw-main">
-                    <AppBarControl CssClass="gw-appbar">
-                        <StartContent>
-                            <ButtonControl BareStyle="true" CssClass="gw-icon-btn" IconCss="bi bi-list" Title="Show or hide the menu" OnClick="ToggleMenu" />
-                            <span class="gw-page-title">@CurrentPage.Title</span>
-                        </StartContent>
-                        <EndContent>
-                            <ButtonControl @ref="_bell" BareStyle="true" CssClass="gw-icon-btn gw-bell" Title="Newest trip requests" DropDownCssClass="gw-menu gw-menu-wide">
-                                <ChildContent>
-                                    <span class="bi bi-bell"></span>
-                                    <BadgeControl IsDot="true" Variant="BadgeVariant.Danger" CssClass="gw-bell-dot" />
-                                </ChildContent>
-                                <DropDownContent>
-                                    <div class="gw-menu-head">Newest trip requests</div>
-                                    @foreach (var r in NewestRequests)
-                                    {
-                                        <ButtonControl BareStyle="true" CssClass="gw-menu-item gw-menu-request" OnClick="@(() => OpenRequestFromBell(r))">
-                                            <span class="agent-avatar" style="background:@r.AvatarBg">@r.AvatarInitials</span>
-                                            <span class="gw-menu-request-text"><strong>@r.Destination</strong> for @r.Traveller<small>@r.Request · @r.TripTypeName</small></span>
-                                        </ButtonControl>
-                                    }
-                                    <ButtonControl BareStyle="true" CssClass="gw-menu-item gw-menu-all" OnClick="@(() => { _bell?.CloseDropDown(); ShowRequests("New requests"); })">Show all new requests</ButtonControl>
-                                </DropDownContent>
-                            </ButtonControl>
-                            <ButtonControl BareStyle="true" CssClass="gw-icon-btn gw-help" IconCss="bi bi-question-circle" Title="Help" OnClick="@(() => NotInDemo("Help"))" />
-                            <ButtonControl @ref="_profile" BareStyle="true" CssClass="gw-profile" Title="Pippa Larkspur" DropDownCssClass="gw-menu">
-                                <ChildContent>
-                                    <AvatarControl Text="PL" AlternativeText="Pippa Larkspur" Size="34px" CssClass="gw-avatar" />
-                                    <span class="gw-profile-name">Pippa Larkspur</span>
-                                    <span class="bi bi-chevron-down gw-profile-caret"></span>
-                                </ChildContent>
-                                <DropDownContent>
-                                    @foreach (var (text, icon) in _profileMenu)
-                                    {
-                                        <ButtonControl BareStyle="true" CssClass="gw-menu-item" IconCss="@icon" OnClick="@(() => { _profile?.CloseDropDown(); NotInDemo(text); })">@text</ButtonControl>
-                                    }
-                                </DropDownContent>
-                            </ButtonControl>
-                        </EndContent>
-                    </AppBarControl>
+                    <GetawaysAppBar Title="@CurrentPage.Title" OnMenuClick="ToggleMenu" OnOpenRequest="OpenRequest" OnShowNewRequests="@(() => ShowRequests("New requests"))" />
 
-                    @if (_activeTab == "grid")
-                    {
-                        <div class="grid-banner-hint">
-                            <span class="bi bi-info-circle-fill" style="color: #0284c7;"></span>
-                            <span><strong>Quote desk:</strong> trip requests arrive from the booking site. Double-click a request to open the quote editor, or type a quote straight into the grid.</span>
-                        </div>
-                    }
-
-                    @* The page *@
-                    <div class="showcase-body gw-page">
+                    <div class="gw-page">
                         @* 2026-10-24 (Baaria): the Razor code is a tab over the example, not a drawer under it. The live page stays
                            mounted while hidden, so the grid keeps its state when the reader switches back. *@
                         @if (_codeTab > 0)
                         {
                             <div class="code-drawer">
                                 <div class="code-header">
-                                    <span>@(_codeTab == 2 ? "C#" : "Razor") for the @CurrentPage.Nav page</span>
-                                    <button type="button" class="btn-copy-code" @onclick="CopyActiveCode">
-                                        @(_copiedCode ? "✓ Copied!" : "📋 Copy Code")
-                                    </button>
+                                    <span>@(_codeTab == 2 ? "C#" : "Razor") for the @CurrentPage.Nav page, quickstart/RazorSharpGetaways</span>
+                                    <ButtonControl BareStyle="true" CssClass="btn-copy-code" OnClick="CopyActiveCode">@(_copiedCode ? "✓ Copied!" : "📋 Copy Code")</ButtonControl>
                                 </div>
                                 <pre><code>@GetActiveCodeSnippet()</code></pre>
                             </div>
                         }
                         <div class="@(_codeTab > 0 ? "showcase-live is-hidden" : "showcase-live")">
-                @if (_activeTab == "dashboard")
-                {
-                    <GetawaysDashboard Requests="_requests" OnShowRequests="ShowRequests" OnOpenRequest="OpenRequest" />
-                }
-                else if (_activeTab == "bookings")
-                {
-                    <GetawaysBookings Requests="_requests" />
-                }
-                else if (_activeTab == "grid")
-                {
-                    <div class="grid-card-toolbar">
-                        <div class="toolbar-left">
-                            <div class="view-select-group">
-                                <label class="view-label">View:</label>
-                                <DropDownListControl TValue="string" TItem="ViewOption"
-                                                     DataSource="@ViewOptions"
-                                                     Value="@_selectedView"
-                                                     ValueChanged="@(v => { _selectedView = v ?? "All"; StateHasChanged(); })"
-                                                     TextFieldName="Label"
-                                                     ValueFieldName="Key"
-                                                     Width="210px"
-                                                     CssClass="view-flex-dropdown" />
-                            </div>
-
-                            <div class="search-input-wrapper">
-                                <span class="bi bi-search search-icon"></span>
-                                <TextBoxControl Value="@_gridSearchTerm"
-                                                ValueChanged="@(v => { _gridSearchTerm = v ?? ""; StateHasChanged(); })"
-                                                placeholder="Search requests, destinations, agents..."
-                                                CssClass="grid-search-input" UpdateOnInput="true" />
-                            </div>
-                        </div>
-
-                        <div class="toolbar-right">
-                            <button type="button" class="btn-grid-action btn-excel" @onclick="ExportToExcel">
-                                <span class="bi bi-file-earmark-excel"></span> Export to Excel
-                            </button>
-                            <button type="button" class="btn-grid-action btn-new" @onclick="CreateNewRequest">
-                                <span class="bi bi-plus-lg"></span> New Request
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="category-filter-bar">
-                        <span class="filter-bar-label">Trip type:</span>
-                        @foreach (var type in _tripTypes)
-                        {
-                            <button type="button"
-                                    class="@($"btn-filter-pill {(_selectedTripType == type ? "active" : "")}")"
-                                    @onclick="@(() => _selectedTripType = type)">
-                                @type
-                            </button>
-                        }
-                    </div>
-
-                    <div class="grid-perf-highlights">
-                        <div class="perf-badge-item">
-                            <span class="perf-badge-icon">⚡</span>
-                            <div class="perf-badge-text">
-                                <strong>1,000 Rows Live Virtualized</strong>
-                                <span>Only the rows in view plus an overscan band are rendered as you scroll</span>
-                            </div>
-                        </div>
-                        <div class="perf-badge-item">
-                            <span class="perf-badge-icon">⌨️</span>
-                            <div class="perf-badge-text">
-                                <strong>Instant In-Grid Typing</strong>
-                                <span>Click any Quote cell to type directly — keystrokes stay in the browser until commit</span>
-                            </div>
-                        </div>
-                        <div class="perf-badge-item">
-                            <span class="perf-badge-icon">🎛️</span>
-                            <div class="perf-badge-text">
-                                <strong>DropDownGridControl</strong>
-                                <span>Multi-column trip-type picker with search &amp; sort</span>
-                            </div>
-                        </div>
-                        <div class="perf-badge-item">
-                            <span class="perf-badge-icon">✏️</span>
-                            <div class="perf-badge-text">
-                                <strong>Modal Popup Editor</strong>
-                                <span>Click [✏ Edit] on Itinerary for the full request editor</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    @* code-tab:grid *@
-                    <GridControl TValue="TripRequest" DataSource="@FilteredRequests"
-                                 @ref="_grid"
-                                 AllowSelection="true"
-                                 AllowSorting="true"
-                                 AllowFiltering="true"
-                                 AllowResizing="true"
-                                 EnableHover="true"
-                                 CssClass="hero-grid-theme"
-                                 EditSettingsRef="@_editSettings"
-                                 EventsRef="@_gridEvents"
-                                 WindowOverscanRows="15"
-                                 Height="440px">
-                        <GridColumnsBase>
-                            <GridColumn Field="@nameof(TripRequest.Request)" HeaderText="Request" Width="100px"
-                                        IsPrimaryKey="true" AllowEditing="false"
-                                        IsFrozen="true" FrozenPosition="FrozenColumnPosition.Left">
-                                <Template Context="row">
-                                    @{ var r = (TripRequest)row; }
-                                    <BadgeControl Text="@r.Request" CssClass="grid-request-code" />
-                                </Template>
-                            </GridColumn>
-
-                            <GridColumn Field="@nameof(TripRequest.Agent)" HeaderText="Agent" Width="150px" AllowEditing="false">
-                                <Template Context="row">
-                                    @{ var r = (TripRequest)row; }
-                                    <div class="agent-cell">
-                                        <span class="agent-avatar" style="background:@r.AvatarBg">@r.AvatarInitials</span>
-                                        <span class="agent-name">@r.Agent</span>
-                                    </div>
-                                </Template>
-                            </GridColumn>
-
-                            <GridColumn Field="@nameof(TripRequest.Destination)" HeaderText="Destination" Width="130px" AllowEditing="false" />
-
-                            @* In-cell DropDownGridControl: a four-column lookup with search; the header sorts by the code *@
-                            <GridColumn Field="@nameof(TripRequest.TripType)" HeaderText="Trip type" Width="170px" AllowEditing="false">
-                                <Template Context="row">
-                                    @{ var r = (TripRequest)row; }
-                                    <div class="grid-cell-dropdowngrid">
-                                        <DropDownGridControl TItem="TripTypeLookup" TValue="string"
-                                                             DataSource="@_tripTypeLookup"
-                                                             Value="@r.TripType"
-                                                             ValueChanged="@(val => OnTripTypeChanged(r, val))"
-                                                             TextFieldName="@nameof(TripTypeLookup.Name)"
-                                                             ValueFieldName="@nameof(TripTypeLookup.Code)"
-                                                             ClosedTextFieldName="@nameof(TripTypeLookup.Code)"
-                                                             PopupWidth="490px"
-                                                             PopupHeight="220px"
-                                                             RowHeight="24"
-                                                             ShowSearch="true"
-                                                             SearchPlaceholder="Search trip types..."
-                                                             AllowClear="false"
-                                                             Placeholder="Select trip type...">
-                                            <Columns>
-                                                <GridColumn Field="@nameof(TripTypeLookup.Code)" HeaderText="Code" Width="95px" />
-                                                <GridColumn Field="@nameof(TripTypeLookup.Name)" HeaderText="Trip type" Width="165px" />
-                                                <GridColumn Field="@nameof(TripTypeLookup.Desk)" HeaderText="Desk" Width="90px" />
-                                                <GridColumn Field="@nameof(TripTypeLookup.LeadTime)" HeaderText="Book ahead" Width="110px" />
-                                            </Columns>
-                                        </DropDownGridControl>
-                                    </div>
-                                </Template>
-                            </GridColumn>
-
-                            @* Fast typing: click the cell and type, the value commits on Enter or blur *@
-                            <GridColumn Field="@nameof(TripRequest.Quote)" HeaderText="Quote" Width="130px"
-                                        Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right"
-                                        AllowEditing="true" SelectAllOnEdit="true" />
-
-                            @* Inline SVG sparkline: five weekly fare samples for the route, the last one is the quote; the header sorts by the change *@
-                            <GridColumn Field="@nameof(TripRequest.FareDeltaPercent)" HeaderText="Fare trend" Width="135px" AllowFiltering="false" AllowEditing="false">
-                                <Template Context="row">
-                                    @{
-                                        var r = (TripRequest)row;
-                                        var spark = GetSparklinePoints(r.FareHistory, 68, 22);
-                                        var isUp = r.FareDeltaPercent >= 0;
-                                        var color = isUp ? "#10b981" : "#ef4444";
-                                        var fill = isUp ? "rgba(16, 185, 129, 0.16)" : "rgba(239, 68, 68, 0.16)";
-                                        var deltaClass = isUp ? "delta-up" : "delta-down";
-                                        var titleText = $"5-week fare trend: {(isUp ? "+" : "")}{r.FareDeltaPercent}%";
-                                        var deltaSign = isUp ? "▲" : "▼";
-                                    }
-                                    <div class="sparkline-cell" title="@titleText">
-                                        <svg width="68" height="22" viewBox="0 0 68 22" class="sparkline-svg">
-                                            <polygon points="@spark.AreaPoints" fill="@fill" />
-                                            <polyline points="@spark.PolylinePoints" fill="none" stroke="@color" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                            <circle cx="@spark.LastX" cy="@spark.LastY" r="2.5" fill="@color" />
-                                        </svg>
-                                        <span class="sparkline-delta @deltaClass">
-                                            @deltaSign@Math.Abs(r.FareDeltaPercent)%
-                                        </span>
-                                    </div>
-                                </Template>
-                            </GridColumn>
-
-                            <GridColumn Field="@nameof(TripRequest.Status)" HeaderText="Status" Width="110px" AllowEditing="false">
-                                <Template Context="row">
-                                    @{
-                                        var r = (TripRequest)row;
-                                        var statusBadge = GetStatusBadgeClass(r.Status);
-                                    }
-                                    <BadgeControl Text="@r.Status" CssClass="@($"grid-badge {statusBadge}")" />
-                                </Template>
-                            </GridColumn>
-
-                            @* The Edit button opens the popup editor; a double-click on the row does the same *@
-                            <GridColumn Field="@nameof(TripRequest.Itinerary)" HeaderText="Itinerary" Width="300px" AllowEditing="false">
-                                <Template Context="row">
-                                    @{ var r = (TripRequest)row; }
-                                    <div class="desc-cell-wrapper">
-                                        <span class="desc-text" title="@r.Itinerary">@r.Itinerary</span>
-                                        <button type="button" class="btn-cell-popup-edit" title="Edit in Modal Popup"
-                                                @onclick="@(() => OpenPopupEdit(r))" @onclick:stopPropagation="true">
-                                            <span class="bi bi-pencil-square"></span> Edit
-                                        </button>
-                                    </div>
-                                </Template>
-                            </GridColumn>
-                        </GridColumnsBase>
-                    </GridControl>
-                    @* /code-tab *@
-
-                    <div class="grid-status-footer">
-                        <div class="status-left">
-                            <span>Showing <strong>@FilteredRequests.Count()</strong> of <strong>@_requests.Count</strong> requests</span>
-                            @if (_selectedRequest != null)
+                            @switch (_page)
                             {
-                                <span class="status-selected-highlight">
-                                    • Selected: <strong>@_selectedRequest.Request</strong> (@_selectedRequest.Destination) — <strong>@_selectedRequest.Quote.ToString("C2")</strong>
-                                </span>
+                                case "requests":
+                                    <GetawaysRequests OpenRequestId="_openRequestId" StartNew="_startNew">
+                                        <AboveGrid>
+                                            @* The site's feature strip; the download's page has nothing here *@
+                                            <div class="grid-perf-highlights">
+                                                <div class="perf-badge-item">
+                                                    <span class="perf-badge-icon">⚡</span>
+                                                    <div class="perf-badge-text">
+                                                        <strong>1,000 Rows Live Virtualized</strong>
+                                                        <span>Only the rows in view plus an overscan band are rendered as you scroll</span>
+                                                    </div>
+                                                </div>
+                                                <div class="perf-badge-item">
+                                                    <span class="perf-badge-icon">⌨️</span>
+                                                    <div class="perf-badge-text">
+                                                        <strong>Instant In-Grid Typing</strong>
+                                                        <span>Click any Quote cell to type directly — keystrokes stay in the browser until commit</span>
+                                                    </div>
+                                                </div>
+                                                <div class="perf-badge-item">
+                                                    <span class="perf-badge-icon">🎛️</span>
+                                                    <div class="perf-badge-text">
+                                                        <strong>DropDownGridControl</strong>
+                                                        <span>Multi-column trip-type picker with search &amp; sort</span>
+                                                    </div>
+                                                </div>
+                                                <div class="perf-badge-item">
+                                                    <span class="perf-badge-icon">✏️</span>
+                                                    <div class="perf-badge-text">
+                                                        <strong>DialogControl Editor</strong>
+                                                        <span>Click [✏ Edit] on Itinerary for the full request editor</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </AboveGrid>
+                                    </GetawaysRequests>
+                                    break;
+                                case "itinerary":
+                                    <GetawaysBookings />
+                                    break;
+                                case "invoices":
+                                    <GetawaysInvoices />
+                                    break;
+                                case "settings":
+                                    <GetawaysSettings OnOpenDashboard="@(() => Go("dashboard"))" />
+                                    break;
+                                default:
+                                    <GetawaysDashboard OnShowRequests="ShowRequests" OnOpenRequest="OpenRequest" />
+                                    break;
                             }
-                        </div>
-                        <div class="status-right">
-                            <span>Total quoted: <strong>@FilteredRequests.Sum(r => r.Quote).ToString("C2")</strong></span>
-                        </div>
-                    </div>
-
-                    @if (_isPopupEditorOpen && _editingRequest != null)
-                    {
-                        <div class="modal-backdrop-blur" @onclick="ClosePopupEdit">
-                            <div class="edit-modal-card" @onclick:stopPropagation="true">
-                                <div class="modal-card-header">
-                                    <div class="modal-header-titles">
-                                        <BadgeControl Text="@(_isNewRequest ? "New" : _editingRequest.Request)" CssClass="modal-badge-request" />
-                                        <div>
-                                            <h3 class="modal-h3">@(_isNewRequest ? "New Trip Request" : "Edit Trip Request")</h3>
-                                            <p class="modal-sub">@(_isNewRequest ? "Fill in the request, then Add" : $"{_editingRequest.Traveller} • {_editingRequest.Destination}")</p>
-                                        </div>
-                                    </div>
-                                    <button type="button" class="btn-close-modal" @onclick="ClosePopupEdit" title="Close">&times;</button>
-                                </div>
-
-                                <div class="modal-card-body">
-                                    <div class="modal-grid-2">
-                                        <div class="modal-field">
-                                            <label>Agent</label>
-                                            <TextBoxControl CssClass="modal-input" Value="@_editingRequest.Agent" ValueChanged="@(v => _editingRequest.Agent = v ?? "")" />
-                                        </div>
-                                        <div class="modal-field">
-                                            <label>Destination</label>
-                                            <TextBoxControl CssClass="modal-input" Value="@_editingRequest.Destination" ValueChanged="@(v => _editingRequest.Destination = v ?? "")" />
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-grid-2">
-                                        <div class="modal-field">
-                                            <label>Lead traveller</label>
-                                            <TextBoxControl CssClass="modal-input" Value="@_editingRequest.Traveller" ValueChanged="@(v => _editingRequest.Traveller = v ?? "")" />
-                                        </div>
-                                        <div class="modal-field">
-                                            <label>Travellers</label>
-                                            <NumericTextBoxControl TValue="int" Min="1" Max="12" Width="100%" CssClass="modal-input" Value="@_editingRequest.Travellers" ValueChanged="@(v => _editingRequest.Travellers = v)" />
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-grid-2">
-                                        <div class="modal-field">
-                                            <label>Trip type</label>
-                                            <DropDownListControl TValue="string" TItem="TripTypeLookup"
-                                                                 Width="100%"
-                                                                 DataSource="@_tripTypeLookup"
-                                                                 Value="@_editingRequest.TripType"
-                                                                 ValueChanged="@(v => _editingRequest.TripType = v ?? "")"
-                                                                 TextFieldName="Display"
-                                                                 ValueFieldName="Code"
-                                                                 CssClass="modal-flex-dropdown" />
-                                        </div>
-                                        <div class="modal-field">
-                                            <label>Quote ($)</label>
-                                            <NumericTextBoxControl TValue="decimal" Step="10" Width="100%" CssClass="modal-input" Value="@_editingRequest.Quote" ValueChanged="@(v => _editingRequest.Quote = v)" />
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-grid-2">
-                                        <div class="modal-field">
-                                            <label>Status</label>
-                                            <DropDownListControl TValue="string" TItem="string"
-                                                                 Width="100%"
-                                                                 DataSource="@_statusOptions"
-                                                                 Value="@_editingRequest.Status"
-                                                                 ValueChanged="@(v => _editingRequest.Status = v ?? "")"
-                                                                 CssClass="modal-flex-dropdown" />
-                                        </div>
-                                        <div class="modal-field">
-                                            <label>Date requested</label>
-                                            <DatePickerControl Value="@_modalDateRequested"
-                                                               ValueChanged="@(dt => { if (_editingRequest != null && dt.HasValue) _editingRequest.DateRequested = dt.Value; })"
-                                                               Format="MM/dd/yyyy"
-                                                               CssClass="modal-flex-datepicker" />
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-field">
-                                        <label>Itinerary &amp; requirements</label>
-                                        <TextBoxControl Multiline="true" Rows="3" CssClass="modal-textarea" Value="@_editingRequest.Itinerary" ValueChanged="@(v => _editingRequest.Itinerary = v ?? "")" />
-                                    </div>
-
-                                    <div class="modal-field">
-                                        <label>Notes for the agent</label>
-                                        <TextBoxControl CssClass="modal-input" Value="@_editingRequest.Notes" ValueChanged="@(v => _editingRequest.Notes = v ?? "")" />
-                                    </div>
-                                </div>
-
-                                <div class="modal-card-footer">
-                                    <button type="button" class="btn-modal-cancel" @onclick="ClosePopupEdit">Cancel</button>
-                                    <button type="button" class="btn-modal-save" @onclick="SavePopupEdit">
-                                        <span class="bi bi-check-lg"></span> @(_isNewRequest ? "Add Request" : "Save Request")
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                }
-                else if (_activeTab == "reports")
-                {
-                    @* code-tab:reports *@
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                            <div>
-                                <h3 style="margin: 0 0 4px; font-size: 18px; color: #0f172a;">Crystal Reports &amp; Paginated Print Engine</h3>
-                                <p style="margin: 0; font-size: 13px; color: #64748b;">
-                                    Load Crystal Reports (.rpt XML), bind session parameters, and stream to screen or print without Crystal runtime dependencies.
-                                </p>
-                            </div>
-                            <a href="demo/reports/package-costs" class="btn-filter-pill" style="background:var(--brand-button); color:#fff; text-decoration:none;">
-                                Open Full Report Demo &rarr;
-                            </a>
-                        </div>
-                        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 18px; font-family: monospace; font-size: 13px; color: #334155;">
-                            <div style="color: #0d3b66; font-weight: 700; border-bottom: 2px solid #0d3b66; padding-bottom: 6px; margin-bottom: 12px; display: flex; justify-content: space-between;">
-                                <span>PACKAGE COST SHEET</span>
-                                <span>@_costPreviewTitle | As of: @DateTime.Today.ToString("d")</span>
-                            </div>
-                            @foreach (var line in _costPreview)
-                            {
-                                <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
-                                    <span>@line.Label</span>
-                                    <span style="font-weight: 600;">@line.Amount.ToString("C2")</span>
-                                </div>
-                            }
-                            <div style="display: flex; justify-content: space-between; padding: 6px 0; margin-top: 8px; border-top: 2px solid #cbd5e1; font-weight: 700; color: #0f172a;">
-                                <span>PACKAGE TOTAL:</span>
-                                <span>@_costPreview.Sum(l => l.Amount).ToString("C2")</span>
-                            </div>
-                        </div>
-                    </div>
-                    @* /code-tab *@
-                }
                         </div>
                     </div>
 
                     @* The + button: create a request, or jump to the page that makes a booking or an invoice *@
-                    <FabMenuControl Items="_fabItems" Title="Create" CssClass="gw-fab" />
+                    <GetawaysFab OnNewRequest="NewRequest" OnItineraryEntry="ItineraryEntry" OnInvoice="@(() => Go("invoices"))" />
                 </div>
             </div>
         </div>
     </section>
+
 
     @* Four-colour divider between home sections (2026-10-29, Baaria), the bar that sits under each page title *@
     <div class="section-divider" aria-hidden="true"></div>
@@ -698,19 +340,22 @@
                         </g>
                     </g>
                 </svg>
-                <h2 class="section-title">Engineered for Enterprise Demand</h2>
+                <h2 class="section-title">Engineered for Enterprise Growth</h2>
             </div>
             <p class="section-desc">
                 The desktop-app power business users expect, rebuilt for the browser in Blazor.
             </p>
         </div>
 
+        @* 2026-11-04 (Baaria): card text rewritten to say what each one saves a team. Each line checks out: 100,000 rows on
+           /demo/grid/row-selection-50k; MdiHost, GridTheme.Vb6Windows, TreeViewControl.UseVb6TreeStyle and CrystalXmlReportLoader, with no
+           Crystal package in FlexCore.csproj; AggregateRows and ExportToXlsxAsync; IReportDataExecutor, IReportSessionContext, IGridSettingsStore. *@
         <div class="pillars-grid">
             <div class="pillar-card">
                 <div class="pillar-icon blue">⚡</div>
                 <h3 class="pillar-title">Ultra-Fast Virtualization</h3>
                 <p class="pillar-desc">
-                    Row windowing renders only the rows in view plus an overscan band, so tens of thousands of rows scroll without the DOM growing. Excel-like keyboard navigation, sorting and filtering.
+                    Big datasets stop being a performance project. Scroll 100,000 rows while the grid renders only a small window of them.
                 </p>
             </div>
 
@@ -718,7 +363,7 @@
                 <div class="pillar-icon purple">🛡️</div>
                 <h3 class="pillar-title">No npm, No Bundler</h3>
                 <p class="pillar-desc">
-                    Controls render in C# and SVG. The core package ships its own scripts and loads each one only when a control needs it. The separate PDF package bundles pdf.js and pdf-lib.
+                    No node_modules to audit and no JavaScript build to maintain. Add the package and your team stays in C#.
                 </p>
             </div>
 
@@ -726,7 +371,7 @@
                 <div class="pillar-icon green">🏢</div>
                 <h3 class="pillar-title">Legacy VB / WinForms Migration</h3>
                 <p class="pillar-desc">
-                    For teams moving VB6 and WinForms apps to the web: MDI windows, a classic VB6 look for the tree view, and a report writer that runs Crystal Reports XML exports as tabular reports.
+                    Move to the web and keep the screens users already know: MDI windows, VB6-style grids and trees, and Crystal Reports XML exports with no Crystal runtime.
                 </p>
             </div>
 
@@ -734,7 +379,7 @@
                 <div class="pillar-icon amber">📊</div>
                 <h3 class="pillar-title">Excel-Grade Grid Power</h3>
                 <p class="pillar-desc">
-                    Frozen columns, hierarchical TreeGrids, column reordering, aggregate footers, inline cell editing, and Excel export built in.
+                    The spreadsheet features users demand, already built: frozen columns, tree grids, totals, in-cell editing, and Excel export.
                 </p>
             </div>
 
@@ -742,7 +387,7 @@
                 <div class="pillar-icon rose">🎨</div>
                 <h3 class="pillar-title">Adaptive Layout &amp; MDI</h3>
                 <p class="pillar-desc">
-                    IDE-style collapsible Left/Right panels, splitters, tab strips, and multi-document MDI window management designed for power-user desktop web apps.
+                    Stop hand-building app shells. Collapsible panels, splitters, tab strips, and multi-document windows are ready to drop in.
                 </p>
             </div>
 
@@ -750,7 +395,7 @@
                 <div class="pillar-icon cyan">🔌</div>
                 <h3 class="pillar-title">Pluggable &amp; Host-Agnostic</h3>
                 <p class="pillar-desc">
-                    Every external dependency is exposed as a clean C# interface. Easily wire your own EF Core, Dapper, SQL Server, session context, or custom reporting backend.
+                    Keep your stack. Report data, session context, and saved grid settings plug in through C# interfaces, so EF Core, Dapper, or raw SQL all fit.
                 </p>
             </div>
         </div>
@@ -907,82 +552,73 @@
 </div>
 
 @code {
-    // Library version read from the FlexCore assembly so the badge cannot drift (was a hard-coded v0.2.31).
-    private static readonly string _flexCoreVersion =
-        typeof(Fx.ControlKit.ButtonControl).Assembly.GetName().Version is { } v ? $"{v.Major}.{v.Minor}.{v.Build}" : "";
+    // The window hosts the Quick Start project's pages (quickstart/RazorSharpGetaways/Components/Getaways); this block keeps only the
+    // site's own state: which page is open, the code tabs, and the handing over of a request to open.
+    private string _page = "dashboard";
+    private GetawaysPage CurrentPage => GetawaysPages.Find(_page);
+    // Addresses in the wild still name the pages by their old keys
+    private static readonly Dictionary<string, string> TabAliases = new() { ["grid"] = "requests", ["bookings"] = "itinerary", ["reports"] = "invoices" };
 
-    // The app window's pages: key (also the ?tab= value), menu text, menu icon, title in the top bar
-    private sealed record AppPage(string Key, string Nav, string Icon, string Title);
-    private static readonly AppPage[] AppPages =
-    [
-        new("dashboard", "Dashboard", "bi bi-speedometer2", "Dashboard"),
-        new("grid", "Trip Requests", "bi bi-table", "Razor Sharp Trip Requests"),
-        new("bookings", "Itinerary", "bi bi-calendar-heart", "Trip Itinerary"),
-        new("reports", "Invoices", "bi bi-file-earmark-spreadsheet", "Invoices"),
-    ];
-    private readonly List<TabStripItem> _navItems = AppPages.Select(p => new TabStripItem(p.Nav, p.Icon)).ToList();
-    private string _activeTab = "dashboard";
-    private AppPage CurrentPage => AppPages.First(p => p.Key == _activeTab);
-    private int NavIndex => Array.FindIndex(AppPages, p => p.Key == _activeTab);
-    // The hamburger shrinks the menu to icons on wide screens and opens it over the page on phones; CSS shows the one that applies
-    private bool _navCollapsed;
-    private bool _navOpen;
-    private void ToggleMenu()
-    {
-        _navCollapsed = !_navCollapsed;
-        _navOpen = !_navOpen;
-    }
-    private ButtonControl? _bell;
-    private ButtonControl? _profile;
-    private static readonly (string Text, string Icon)[] _profileMenu =
-    [
-        ("My profile", "bi bi-person-circle"), ("Account settings", "bi bi-person-gear"),
-        ("Notifications", "bi bi-bell"), ("Sign out", "bi bi-box-arrow-right"),
-    ];
-    private List<FabMenuItem> _fabItems = [];
-
-    /// <summary>App page named in the address, e.g. ?tab=bookings; read on load, never written back.</summary>
+    /// <summary>App page named in the address, e.g. ?tab=itinerary; read on load, never written back.</summary>
     [SupplyParameterFromQuery(Name = "tab")] public string? Tab { get; set; }
 
     protected override void OnParametersSet()
     {
         var tab = Tab?.Trim().ToLowerInvariant();
-        if (tab is not null && AppPages.Any(p => p.Key == tab)) _activeTab = tab;
+        if (tab is null) return;
+        if (TabAliases.TryGetValue(tab, out var key)) tab = key;
+        if (GetawaysPages.All.Any(p => p.Key == tab)) _page = tab;
+    }
+
+    // The Settings page raises Changed; the window repaints with the new scheme, text size and menu width
+    protected override void OnInitialized() => Settings.Changed += StateHasChanged;
+    public void Dispose() => Settings.Changed -= StateHasChanged;
+
+    // The menu button shrinks the menu to icons on wide screens and opens it over the page on phones; CSS shows the one that applies
+    private bool _navOpen;
+    private void ToggleMenu()
+    {
+        Settings.SidebarIcons = !Settings.SidebarIcons;
+        _navOpen = !_navOpen;
     }
 
     private void Go(string key)
     {
-        _activeTab = key;
+        _page = key;
         SetCodeTab(0);
         _navOpen = false;
     }
 
-    // The bits of the app this demo leaves out answer with a toast, as the menu items do on blazor.radzen.com
-    private void NotInDemo(string what) =>
-        Notifications.Info($"{what} is not part of this demo", "The menu's pages, the grid, the chart and the + button all work.");
-
-    private IEnumerable<TripRequest> NewestRequests => _requests.Where(r => r.Status == "New").OrderByDescending(r => r.DateRequested).Take(4);
-
     private void ShowRequests(string view)
     {
-        _selectedView = view;
-        _selectedTripType = "All";
-        _gridSearchTerm = "";
-        Go("grid");
+        Settings.RequestsView = view;
+        Settings.NotifyChanged();
+        Go("requests");
     }
 
-    private void OpenRequest(TripRequest r)
+    // A request to open, or a new one to start, is handed to the Trip Requests page through its parameters and cleared after the
+    // render that delivers it, so the next bell click or + press is a fresh change (the download does the same through the address)
+    private int? _openRequestId;
+    private bool _startNew;
+
+    private void OpenRequest(TripRequest request)
     {
-        Go("grid");
-        _selectedRequest = r;
-        OpenPopupEdit(r);
+        _openRequestId = request.Id;
+        Go("requests");
     }
 
-    private void OpenRequestFromBell(TripRequest r)
+    private void NewRequest()
     {
-        _bell?.CloseDropDown();
-        OpenRequest(r);
+        _startNew = true;
+        Go("requests");
     }
+
+    private void ItineraryEntry()
+    {
+        Go("itinerary");
+        Notifications.Info("New itinerary entry", "Double-click an empty slot on the itinerary to add an entry.");
+    }
+
     // Example | Razor | C# over the app window (2026-10-29, Baaria): the open code tab carries an X that goes back to Example
     private int _codeTab;
     private readonly List<TabStripItem> _viewTabs = [new("Example", "bi bi-window"), new("Razor", "bi bi-code-slash"), new("C#", "bi bi-filetype-cs")];
@@ -993,437 +629,6 @@
     }
     private bool _copiedInstall = false;
     private bool _copiedCode = false;
-    private string _selectedTripType = "All";
-    private string _selectedView = "All";   // opens on all 1,000 requests, the number the badges state
-    private string _gridSearchTerm = "";
-    private TripRequest? _selectedRequest;
-    // code-tab:grid-cs
-    private GridControl<TripRequest>? _grid;
-    private GridControlEvents<TripRequest> _gridEvents = new();
-
-    private EditSettings _editSettings = new()
-    {
-        AllowEditing = true,
-        Mode = EditMode.Batch,
-        EditOnEnterKey = true,
-        EditOnActiveCellClick = true,
-        AllowEditOnDblClick = true
-    };
-    // /code-tab
-
-    // Filter pills; matched case-insensitively against TripRequest.TripType codes
-    private List<string> _tripTypes = new()
-    {
-        "All", "Beach", "City", "Ski", "Safari", "Cruise", "Rail", "Family", "Honeymoon"
-    };
-
-    public class ViewOption
-    {
-        public string Key { get; set; } = "";
-        public string Label { get; set; } = "";
-    }
-
-    private List<ViewOption> ViewOptions => new()
-    {
-        new() { Key = "All", Label = $"All requests ({_requests.Count})" },
-        new() { Key = "New requests", Label = $"New requests ({_requests.Count(r => r.Status == "New")})" },
-        new() { Key = "Quoted", Label = $"Quoted ({_requests.Count(r => r.Status == "Quoted")})" },
-        new() { Key = "Booked", Label = $"Booked ({_requests.Count(r => r.Status == "Booked")})" },
-    };
-
-    public class TripTypeLookup
-    {
-        public string Code { get; set; } = "";
-        public string Name { get; set; } = "";
-        public string Desk { get; set; } = "";
-        public string LeadTime { get; set; } = "";
-        public string Display => $"{Code} - {Name}";
-    }
-
-    private List<TripTypeLookup> _tripTypeLookup = new()
-    {
-        new() { Code = "BEACH", Name = "Beach & island resorts", Desk = "Leisure", LeadTime = "6-8 wks" },
-        new() { Code = "CITY", Name = "City breaks & culture", Desk = "Leisure", LeadTime = "2-3 wks" },
-        new() { Code = "SKI", Name = "Ski & snowboard", Desk = "Adventure", LeadTime = "8-12 wks" },
-        new() { Code = "SAFARI", Name = "Safari & wildlife", Desk = "Adventure", LeadTime = "12-16 wks" },
-        new() { Code = "CRUISE", Name = "Ocean & river cruises", Desk = "Cruise", LeadTime = "10-14 wks" },
-        new() { Code = "RAIL", Name = "Scenic rail journeys", Desk = "Touring", LeadTime = "4-6 wks" },
-        new() { Code = "FAMILY", Name = "Family holidays", Desk = "Leisure", LeadTime = "6-8 wks" },
-        new() { Code = "HONEYMOON", Name = "Honeymoons & celebrations", Desk = "Luxury", LeadTime = "8-10 wks" },
-    };
-
-    private static readonly List<string> _statusOptions = new() { "New", "Quoted", "Booked", "Declined" };
-
-    public class TripRequest
-    {
-        public int Id { get; set; }
-        public string Request { get; set; } = "";
-        public string Agent { get; set; } = "";
-        public string AvatarBg { get; set; } = "#0284c7";
-        public string AvatarInitials { get; set; } = "";
-        public DateTime DateRequested { get; set; }
-        public string Destination { get; set; } = "";
-        public string Traveller { get; set; } = "";
-        public int Travellers { get; set; } = 2;
-        public DateTime Departure { get; set; }
-        public string TripType { get; set; } = "";
-        public string TripTypeName { get; set; } = "";
-        public string Itinerary { get; set; } = "";
-        public string Notes { get; set; } = "";
-        public decimal Quote { get; set; }
-        public string Status { get; set; } = "New";
-        public List<int> FareHistory { get; set; } = new();
-        public int FareDeltaPercent { get; set; }
-    }
-
-    private List<TripRequest> _requests = new();
-
-    // Popup editor state
-    private bool _isPopupEditorOpen = false;
-    private bool _isNewRequest = false;
-    private TripRequest? _editingRequest = null;
-    private TripRequest? _originalRequestRef = null;
-
-    private DateTime? _modalDateRequested
-    {
-        get => _editingRequest?.DateRequested;
-        set
-        {
-            if (_editingRequest != null && value.HasValue)
-            {
-                _editingRequest.DateRequested = value.Value;
-            }
-        }
-    }
-
-    private static TripRequest Clone(TripRequest r) => new()
-    {
-        Id = r.Id, Request = r.Request, Agent = r.Agent, AvatarBg = r.AvatarBg, AvatarInitials = r.AvatarInitials,
-        DateRequested = r.DateRequested, Destination = r.Destination, Traveller = r.Traveller, Travellers = r.Travellers,
-        Departure = r.Departure, TripType = r.TripType, TripTypeName = r.TripTypeName, Itinerary = r.Itinerary, Notes = r.Notes,
-        Quote = r.Quote, Status = r.Status, FareHistory = new List<int>(r.FareHistory), FareDeltaPercent = r.FareDeltaPercent
-    };
-
-    private void OpenPopupEdit(TripRequest request)
-    {
-        _originalRequestRef = request;
-        _editingRequest = Clone(request);
-        _isNewRequest = false;
-        _isPopupEditorOpen = true;
-        StateHasChanged();
-    }
-
-    // New Request opens the same editor on a blank request; Save adds it to the top of the list. The agent is Pippa Larkspur, the
-    // one signed in to the app window (top bar), who handles her share of the other requests too.
-    private void CreateNewRequest()
-    {
-        var agent = Agents.First(a => a.Name == "Pippa Larkspur");
-        _originalRequestRef = null;
-        _editingRequest = new TripRequest
-        {
-            Agent = agent.Name, AvatarInitials = agent.Initials, AvatarBg = agent.Color,
-            DateRequested = DateTime.Today, Departure = DateTime.Today.AddDays(90),
-            Destination = "Lisbon", TripType = "CITY", TripTypeName = "City breaks & culture",
-            Travellers = 2, Status = "New"
-        };
-        _isNewRequest = true;
-        _isPopupEditorOpen = true;
-        StateHasChanged();
-    }
-
-    private void SavePopupEdit()
-    {
-        if (_editingRequest != null)
-        {
-            var saved = _editingRequest;
-            saved.TripTypeName = _tripTypeLookup.FirstOrDefault(t => t.Code.Equals(saved.TripType, StringComparison.OrdinalIgnoreCase))?.Name ?? saved.TripType;
-            saved.AvatarInitials = Initials(saved.Agent);
-            var known = Agents.FirstOrDefault(a => a.Name.Equals(saved.Agent, StringComparison.OrdinalIgnoreCase));
-            if (known.Name != null) saved.AvatarBg = known.Color;
-
-            if (_isNewRequest)
-            {
-                saved.Id = _requests.Count + 1;
-                saved.Request = RequestKey(saved.Destination, saved.Id);
-                saved.FareHistory = Enumerable.Repeat((int)saved.Quote, 5).ToList();
-                saved.FareDeltaPercent = 0;
-                _requests.Insert(0, saved);
-                _selectedRequest = saved;
-                Notifications.Success($"Added request {saved.Request} for {saved.Destination}.");
-            }
-            else if (_originalRequestRef != null)
-            {
-                var o = _originalRequestRef;
-                o.Agent = saved.Agent;
-                o.AvatarInitials = saved.AvatarInitials;
-                o.AvatarBg = saved.AvatarBg;
-                o.Destination = saved.Destination;
-                o.Traveller = saved.Traveller;
-                o.Travellers = saved.Travellers;
-                o.TripType = saved.TripType;
-                o.TripTypeName = saved.TripTypeName;
-                o.Quote = saved.Quote;
-                ApplyQuoteToFares(o);
-                o.Status = saved.Status;
-                o.DateRequested = saved.DateRequested;
-                o.Itinerary = saved.Itinerary;
-                o.Notes = saved.Notes;
-                Notifications.Success($"Saved request {o.Request}.");
-            }
-        }
-        _isPopupEditorOpen = false;
-        _isNewRequest = false;
-        _editingRequest = null;
-        _originalRequestRef = null;
-        StateHasChanged();
-    }
-
-    private void ClosePopupEdit()
-    {
-        _isPopupEditorOpen = false;
-        _isNewRequest = false;
-        _editingRequest = null;
-        _originalRequestRef = null;
-        StateHasChanged();
-    }
-
-    // code-tab:grid-cs
-    // The last of the five weekly fare samples is the quote, so a new quote moves the sparkline's end and its percentage
-    private static void ApplyQuoteToFares(TripRequest r)
-    {
-        if (r.FareHistory.Count == 0) return;
-        r.FareHistory[^1] = (int)r.Quote;
-        r.FareDeltaPercent = (int)Math.Round((r.FareHistory[^1] - r.FareHistory[0]) / (decimal)Math.Max(1, r.FareHistory[0]) * 100);
-    }
-    // /code-tab
-
-    // Reports tab preview (2026-10-26): the report page's default sheet, from the same query, so its figures are the report's own
-    // code-tab:reports-cs
-    private string _costPreviewTitle = "";
-    private (string Label, decimal Amount)[] _costPreview = [];
-
-    private void LoadCostPreview()
-    {
-        var package = FlexCore.Showcase.Data.TravelData.Packages[0];
-        var season = FlexCore.Showcase.Data.TravelData.Seasons[0];
-        var table = ReportData.Execute(
-            "SELECT CostGroup AS PackageCostLines_CostGroup, Amount AS Formula_Amount FROM PackageCostLines",
-            new Dictionary<string, object> { ["Package"] = package.Name, ["Season"] = season });
-        var blurbs = new Dictionary<string, string>
-        {
-            ["A"] = "Transport : Flights, transfers and rail",
-            ["B"] = $"Accommodation : {package.Nights} nights with breakfast",
-            ["C"] = "Experiences : Tours, tickets and a cooking class",
-            ["D"] = "Services : Insurance, guide and booking fees",
-        };
-        _costPreviewTitle = $"{package.Name}, {season}";
-        _costPreview = table.Rows.Cast<System.Data.DataRow>()
-            .GroupBy(r => (string)r["PackageCostLines_CostGroup"])
-            .OrderBy(g => g.Key)
-            .Select(g => ($"{g.Key} {blurbs.GetValueOrDefault(g.Key, "")}", g.Sum(r => (decimal)r["Formula_Amount"])))
-            .ToArray();
-    }
-    // /code-tab
-
-    // code-tab:grid-cs
-    private void OnTripTypeChanged(TripRequest r, string? newType)
-    {
-        if (string.IsNullOrEmpty(newType)) return;
-        r.TripType = newType;
-        var lookup = _tripTypeLookup.FirstOrDefault(t => t.Code.Equals(newType, StringComparison.OrdinalIgnoreCase));
-        if (lookup != null)
-            r.TripTypeName = lookup.Name;
-        Notifications.Success($"Updated {r.Request} trip type to {newType} via DropDownGridControl");
-        StateHasChanged();
-    }
-    // /code-tab
-
-    private static string Initials(string name)
-    {
-        var letters = string.Concat(name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(p => char.ToUpperInvariant(p[0])));
-        return letters.Length > 2 ? letters[..2] : letters;
-    }
-
-    // Request keys are the first three letters of the destination plus a running number, e.g. LIS-0001
-    private static string RequestKey(string destination, int id)
-    {
-        var word = destination.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
-        var code = new string(word.Where(char.IsLetter).Take(3).ToArray()).ToUpperInvariant().PadRight(3, 'X');
-        return $"{code}-{id:D4}";
-    }
-
-    private static readonly (string Name, string Initials, string Color)[] Agents =
-    {
-        ("Marigold Teacup", "MT", "#0284c7"),
-        ("Percival Crumpet", "PC", "#7c3aed"),
-        ("Tabitha Inkwell", "TI", "#10b981"),
-        ("Horace Nutmeg", "HN", "#d97706"),
-        ("Rosalind Fizzwick", "RF", "#e11d48"),
-        ("Cornelius Quill", "CQ", "#0891b2"),
-        ("Pippa Larkspur", "PL", "#4f46e5"),
-        ("Ambrose Hobnob", "AH", "#059669")
-    };
-
-    private static List<TripRequest> GenerateRequests(int count)
-    {
-        // Each trip type goes only to places that offer it (2026-10-29, Baaria: no ski trips to Marrakech), and both itineraries of a
-        // type read true for every one of its places.
-        var tripTypes = new (string Code, string Name, int Low, int High, string ItineraryA, string ItineraryB, string[] Places)[]
-        {
-            ("BEACH", "Beach & island resorts", 1800, 5200,
-                "Seven nights in a sea-view room, two adults, late August",
-                "Five nights by the beach with a snorkelling day trip",
-                ["Santorini", "Amalfi Coast", "Cape Town", "Hoi An"]),
-            ("CITY", "City breaks & culture", 600, 2400,
-                "Long weekend with museum passes and a guided food tour",
-                "Four nights near the old town with a cooking class for two",
-                ["Lisbon", "Kyoto", "Marrakech", "Vancouver", "Reykjavik"]),
-            ("SKI", "Ski & snowboard", 2200, 6800,
-                "Ski-in ski-out chalet for six, lessons for two beginners",
-                "Week of lift passes with a half-day guided off-piste tour",
-                ["Banff", "Queenstown", "Vancouver", "Patagonia"]),
-            ("SAFARI", "Safari & wildlife", 5500, 14500,
-                "Four nights at a wildlife lodge with a guided dawn trek",
-                "Whale and bird watching by boat, three nights at the lodge",
-                ["Cape Town", "Patagonia", "Banff", "Reykjavik"]),
-            ("CRUISE", "Ocean & river cruises", 2800, 9800,
-                "Ten-night cruise, balcony cabin, all excursions included",
-                "Coastal cruise for two with the drinks package",
-                ["Santorini", "Amalfi Coast", "Lisbon", "Vancouver", "Reykjavik"]),
-            ("RAIL", "Scenic rail journeys", 1500, 5400,
-                "First-class rail pass with two overnight sleeper legs",
-                "Scenic railway loop with three nights in small towns",
-                ["Kyoto", "Banff", "Vancouver", "Hoi An"]),
-            ("FAMILY", "Family holidays", 2400, 7600,
-                "Half-term week with a kids' club and a family suite",
-                "Theme park passes for four with a connecting-rooms hotel",
-                ["Lisbon", "Vancouver", "Queenstown", "Cape Town", "Kyoto"]),
-            ("HONEYMOON", "Honeymoons & celebrations", 4200, 12800,
-                "Private villa with a sunset dinner and a couples' spa day",
-                "Ten nights in two boutique hotels, champagne on arrival",
-                ["Santorini", "Amalfi Coast", "Lisbon", "Hoi An", "Kyoto", "Marrakech"])
-        };
-
-        // 200 first names from many places (2026-10-29, Baaria: more diversity); a first name may repeat, a surname may not
-        var firstNames = new[]
-        {
-            "Clementine", "Barnaby", "Juniper", "Mortimer", "Petunia", "Thaddeus", "Winifred", "Archibald", "Lavender", "Ebenezer",
-            "Delphine", "Rufus", "Octavia", "Bartholomew", "Cornelia", "Florian", "Hyacinth", "Ignatius", "Leopold", "Millicent",
-            "Rosamund", "Silas", "Tobias", "Ursula", "Wilhelmina", "Augustus", "Beatrix", "Cuthbert", "Dorothea", "Edmund",
-            "Felicity", "Gideon", "Henrietta", "Ottoline", "Quentin", "Seraphina", "Amara", "Kwame", "Zainab", "Chidi",
-            "Nia", "Tendai", "Folake", "Kofi", "Imani", "Sefu", "Adaeze", "Thabo", "Wanjiru", "Jabari",
-            "Ayodele", "Makena", "Oluwaseun", "Zuri", "Babajide", "Nkechi", "Priya", "Arjun", "Ananya", "Rohan",
-            "Kavya", "Vikram", "Meera", "Aarav", "Ishaan", "Lakshmi", "Farhan", "Nadia", "Sanjay", "Divya",
-            "Rahul", "Anjali", "Kiran", "Tara", "Dev", "Sunita", "Kenji", "Mei", "Hiroshi", "Yuna",
-            "Jiho", "Lian", "Takumi", "Sakura", "Wei", "Haruka", "Minjun", "Xiaoling", "Daichi", "Soo-ah",
-            "Ren", "Aiko", "Jun", "Hana", "Bao", "Yuki", "Linh", "Arief", "Siti", "Malia",
-            "Thanh", "Dewi", "Kalani", "Rizal", "Intan", "Narong", "Ploy", "Bayani", "Mateo", "Valentina",
-            "Santiago", "Camila", "Diego", "Lucía", "Joaquín", "Ximena", "Rafael", "Paloma", "Emilio", "Renata",
-            "Tomás", "Inés", "Alejandro", "Catalina", "Bruno", "Marisol", "Gonzalo", "Itzel", "Layla", "Omar",
-            "Yasmin", "Karim", "Leila", "Tariq", "Samira", "Rami", "Dalia", "Hassan", "Noor", "Faris",
-            "Amira", "Youssef", "Zara", "Idris", "Astrid", "Lars", "Ingrid", "Sven", "Freya", "Matteo",
-            "Giulia", "Luca", "Chiara", "Aurélie", "Étienne", "Margaux", "Henrik", "Saoirse", "Niamh", "Cormac",
-            "Siobhan", "Declan", "Anouk", "Joris", "Katarzyna", "Mikołaj", "Zofia", "Dmitri", "Anastasia", "Elif",
-            "Emre", "Selin", "Nikos", "Eleni", "Moana", "Tane", "Aroha", "Keoni", "Leilani", "Nalani",
-            "Wiremu", "Ahanu", "Kai", "Harper", "Jasper", "Willa", "Felix", "Hazel", "Theo", "Ivy",
-            "Rowan", "Maeve", "Otis", "Poppy", "Ezra", "Wren", "Arlo", "Iris", "Milo", "Esme"
-        };
-        var statuses = new[] { "New", "New", "Quoted", "Booked", "Declined" };
-        var notes = new[]
-        {
-            "Flexible on dates by a few days", "Prefers a morning departure", "Repeat client, knows the agent",
-            "Asked for a travel insurance quote", "Needs an accessible room", "Travelling with an infant"
-        };
-
-        var rnd = new Random(42);
-        var list = new List<TripRequest>(count);
-
-        // Every lead traveller has a surname no one else has (2026-10-29, Baaria): two requests under one surname would read as one
-        // family booking twice, and families travel together. 40 starts by 25 endings make 1,000 made-up surnames, dealt out in a
-        // shuffled order; none is an agent's surname.
-        var starts = new[]
-        {
-            "Thistle", "Goose", "Bumble", "Apple", "Feather", "Higgle", "Parsnip", "Wobble", "Pepper", "Puddle",
-            "Butter", "Crumble", "Dapple", "Fiddle", "Ginger", "Marrow", "Kettle", "Nettle", "Pickle", "Quince",
-            "Ripple", "Toffee", "Whistle", "Bramble", "Cobble", "Dimple", "Gumdrop", "Muffin", "Noodle", "Pebble",
-            "Rumble", "Sprocket", "Tumble", "Waffle", "Biscuit", "Doodle", "Jingle", "Mumble", "Wiggle", "Pudding"
-        };
-        var endings = new[]
-        {
-            "wood", "bottom", "berry", "sby", "worth", "stone", "by", "ford", "field", "brook", "wick", "ton", "ridge",
-            "more", "well", "dale", "shaw", "cott", "mere", "ley", "holt", "thorpe", "combe", "hurst", "gate"
-        };
-        var surnames = starts.SelectMany(st => endings.Select(en => st + en)).OrderBy(_ => rnd.Next()).ToArray();
-        // Requests from the last 300 days, so the app window's Dashboard always shows this month (2026-10-29)
-        var startDate = DateTime.Today.AddDays(-300);
-
-        for (int i = 1; i <= count; i++)
-        {
-            var agent = Agents[rnd.Next(Agents.Length)];
-            var type = tripTypes[rnd.Next(tripTypes.Length)];
-            var destination = type.Places[rnd.Next(type.Places.Length)];
-            var quote = rnd.Next(type.Low / 10, type.High / 10) * 10m;
-            var requested = startDate.AddMinutes(rnd.Next(0, 300 * 24 * 60));
-            var travellers = type.Code switch { "FAMILY" => rnd.Next(3, 7), "HONEYMOON" => 2, _ => rnd.Next(1, 5) };
-
-            // five weekly fare samples for the route; the last one is the quote
-            var first = (int)(quote * (100 + rnd.Next(-12, 13)) / 100);
-            var fares = new List<int> { first };
-            for (int k = 1; k < 4; k++)
-                fares.Add(first + (int)(((int)quote - first) * k / 4m) + rnd.Next(-150, 151));
-            fares.Add((int)quote);
-            int delta = (int)Math.Round((fares[4] - fares[0]) / (decimal)Math.Max(1, fares[0]) * 100);
-
-            list.Add(new TripRequest
-            {
-                Id = i,
-                Request = RequestKey(destination, i),
-                Agent = agent.Name,
-                AvatarInitials = agent.Initials,
-                AvatarBg = agent.Color,
-                DateRequested = requested,
-                Destination = destination,
-                Traveller = $"{firstNames[rnd.Next(firstNames.Length)]} {surnames[(i - 1) % surnames.Length]}",
-                Travellers = travellers,
-                Departure = requested.Date.AddDays(rnd.Next(30, 200)),
-                TripType = type.Code,
-                TripTypeName = type.Name,
-                Itinerary = rnd.Next(2) == 0 ? type.ItineraryA : type.ItineraryB,
-                Notes = notes[rnd.Next(notes.Length)],
-                Quote = quote,
-                Status = statuses[rnd.Next(statuses.Length)],
-                FareHistory = fares,
-                FareDeltaPercent = delta
-            });
-        }
-
-        // LIS-0586 is the trip the Itinerary page lays out (GetawaysBookings.razor, 2026-10-29, Baaria): a Lisbon honeymoon for two,
-        // booked by Pippa Larkspur, the agent signed in to the window, and leaving tomorrow so it heads Upcoming departures.
-        if (list.Count >= 586)
-        {
-            var pippa = Agents.First(a => a.Name == "Pippa Larkspur");
-            var trip = list[585];
-            trip.Request = "LIS-0586";
-            trip.Destination = "Lisbon";
-            trip.Traveller = $"Wei {surnames[585]}";
-            trip.Travellers = 2;
-            trip.Agent = pippa.Name;
-            trip.AvatarInitials = pippa.Initials;
-            trip.AvatarBg = pippa.Color;
-            trip.TripType = "HONEYMOON";
-            trip.TripTypeName = "Honeymoons & celebrations";
-            trip.Status = "Booked";
-            trip.DateRequested = DateTime.Today.AddDays(-40);
-            trip.Departure = DateTime.Today.AddDays(1);
-            trip.Itinerary = "Five nights in Alfama with a day in Sintra, a fado dinner and a sunset sail on the Tagus";
-            trip.Notes = "Celebrating their wedding; asked for a quiet room";
-            trip.Quote = 6480;
-            trip.FareHistory = [6120, 6260, 6350, 6420, 6480];
-            trip.FareDeltaPercent = 6;
-        }
-
-        return list;
-    }
 
     // Finish flag left of "Everything you need to cross the finish line": 5 columns of 4 chequered cells whose corners are nudged by
     // -1, 0 or +1 px so the drawing looks hand-made. Whole numbers only, so the points never depend on the server's culture.
@@ -1455,130 +660,18 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender) return;
-        foreach (var head in new[] { _workhorsesHead, _pillarsHead, _compareHead, _ctaHead })
-            await JS.InvokeVoidAsync("fxToggleClassWhenVisible", head, "is-playing");
-    }
-
-    protected override void OnInitialized()
-    {
-        _requests = GenerateRequests(1000);
-        _selectedRequest = _requests.FirstOrDefault();
-
-        WireGridEvents();
-        LoadCostPreview();
-
-        _fabItems =
-        [
-            new("Trip request", "bi bi-suitcase-lg") { OnClick = EventCallback.Factory.Create(this, () => { Go("grid"); CreateNewRequest(); }) },
-            new("Itinerary entry", "bi bi-calendar-plus") { OnClick = EventCallback.Factory.Create(this, () =>
-            {
-                Go("bookings");
-                Notifications.Info("New itinerary entry", "Double-click a free time on the itinerary to add an entry.");
-            }) },
-            new("Invoice", "bi bi-receipt") { OnClick = EventCallback.Factory.Create(this, () => Go("reports")) },
-        ];
-    }
-
-    // code-tab:grid-cs
-    // Selecting a row fills the status bar, a typed quote moves the fare trend, and a double-click opens the editor
-    private void WireGridEvents()
-    {
-        _gridEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<TripRequest>>(this, e =>
+        if (firstRender)
         {
-            _selectedRequest = e.Data;
+            foreach (var head in new[] { _workhorsesHead, _pillarsHead, _compareHead, _ctaHead })
+                await JS.InvokeVoidAsync("fxToggleClassWhenVisible", head, "is-playing");
+        }
+        if (_openRequestId is not null || _startNew)
+        {
+            _openRequestId = null;
+            _startNew = false;
             StateHasChanged();
-        });
-
-        // A typed quote becomes the route's latest fare sample, so the sparkline, its percentage and the totals follow it
-        _gridEvents.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<TripRequest>>(this, e =>
-        {
-            if (e.ColumnName == nameof(TripRequest.Quote)) ApplyQuoteToFares(e.Data);
-        });
-
-        _gridEvents.OnRecordDoubleClick = EventCallback.Factory.Create<CellClickEventArgs<TripRequest>>(this, e =>
-        {
-            if (e.Data != null)
-            {
-                _selectedRequest = e.Data;
-                OpenPopupEdit(e.Data);
-            }
-        });
-    }
-    // /code-tab
-
-    // code-tab:grid-cs
-    private IEnumerable<TripRequest> FilteredRequests
-    {
-        get
-        {
-            var list = _requests.AsEnumerable();
-
-            if (_selectedTripType != "All")
-                list = list.Where(r => r.TripType.Equals(_selectedTripType, StringComparison.OrdinalIgnoreCase));
-
-            if (_selectedView != "All")
-            {
-                var status = _selectedView == "New requests" ? "New" : _selectedView;
-                list = list.Where(r => r.Status == status);
-            }
-
-            if (!string.IsNullOrWhiteSpace(_gridSearchTerm))
-            {
-                var term = _gridSearchTerm.Trim();
-                list = list.Where(r =>
-                    r.Request.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    r.Agent.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    r.Traveller.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    r.Destination.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    r.Itinerary.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    r.TripType.Contains(term, StringComparison.OrdinalIgnoreCase));
-            }
-
-            return list;
         }
     }
-
-    private record SparklineCoord(string PolylinePoints, string AreaPoints, double LastX, double LastY);
-
-    private SparklineCoord GetSparklinePoints(List<int> values, double width, double height)
-    {
-        if (values == null || values.Count < 2)
-            return new SparklineCoord("0,11 68,11", "0,11 68,11 68,22 0,22", 68, 11);
-
-        int min = values.Min();
-        int max = values.Max();
-        int range = Math.Max(1, max - min);
-        double padY = 3.0;
-        double usableHeight = height - (padY * 2);
-
-        var coords = new List<(double X, double Y)>();
-        for (int i = 0; i < values.Count; i++)
-        {
-            double x = (i / (double)(values.Count - 1)) * (width - 6) + 3;
-            double norm = (values[i] - min) / (double)range;
-            double y = (height - padY) - (norm * usableHeight);
-            coords.Add((Math.Round(x, 1), Math.Round(y, 1)));
-        }
-
-        string polyline = string.Join(" ", coords.Select(c => $"{c.X.ToString(System.Globalization.CultureInfo.InvariantCulture)},{c.Y.ToString(System.Globalization.CultureInfo.InvariantCulture)}"));
-        string area = $"{polyline} {coords.Last().X.ToString(System.Globalization.CultureInfo.InvariantCulture)},{height.ToString(System.Globalization.CultureInfo.InvariantCulture)} {coords.First().X.ToString(System.Globalization.CultureInfo.InvariantCulture)},{height.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
-
-        return new SparklineCoord(polyline, area, coords.Last().X, coords.Last().Y);
-    }
-
-    private string GetStatusBadgeClass(string status) => status switch
-    {
-        "Booked" => "grid-badge-green",
-        "Quoted" => "grid-badge-blue",
-        "New" => "grid-badge-amber",
-        "Declined" => "grid-badge-rose",
-        _ => "grid-badge-gray"
-    };
-
-    // The grid writes the workbook itself and the browser downloads it
-    private Task ExportToExcel() => _grid?.ExportToXlsxAsync("trip-requests.xlsx") ?? Task.CompletedTask;
-    // /code-tab
 
     private async Task CopyInstallCommand()
     {
@@ -1610,18 +703,19 @@
         catch { }
     }
 
-    // Each page's Razor and C# come from the built source (AppSource): the Getaways pages' own files, and the parts of this file
-    // between "code-tab:" markers, so a tab always shows the page as it is built.
-    private string GetActiveCodeSnippet() => (_activeTab, _codeTab) switch
+    // Each page's Razor and C# come from the Quick Start project's files as built (AppSource; FlexCore.Showcase.csproj embeds them),
+    // so a tab always shows the page as it runs here and as it is in the download.
+    private string GetActiveCodeSnippet() => (_page, _codeTab) switch
     {
-        ("dashboard", 2) => AppSource.Code("GetawaysDashboard.razor"),
-        ("dashboard", _) => AppSource.Markup("GetawaysDashboard.razor"),
-        ("bookings", 2) => AppSource.Code("GetawaysBookings.razor"),
-        ("bookings", _) => AppSource.Markup("GetawaysBookings.razor"),
-        ("grid", 2) => AppSource.Region("Home.razor", "grid-cs"),
-        ("grid", _) => AppSource.Region("Home.razor", "grid"),
-        ("reports", 2) => AppSource.Region("Home.razor", "reports-cs"),
-        ("reports", _) => AppSource.Region("Home.razor", "reports"),
-        _ => ""
+        ("requests", 2) => AppSource.Code("GetawaysRequests.razor"),
+        ("requests", _) => AppSource.Markup("GetawaysRequests.razor"),
+        ("itinerary", 2) => AppSource.Code("GetawaysBookings.razor"),
+        ("itinerary", _) => AppSource.Markup("GetawaysBookings.razor"),
+        ("invoices", 2) => AppSource.Code("GetawaysInvoices.razor"),
+        ("invoices", _) => AppSource.Markup("GetawaysInvoices.razor"),
+        ("settings", 2) => AppSource.Code("GetawaysSettings.razor") + "\n\n" + AppSource.Region("GetawaysAppSettings.cs", "settings"),
+        ("settings", _) => AppSource.Markup("GetawaysSettings.razor"),
+        (_, 2) => AppSource.Code("GetawaysDashboard.razor"),
+        _ => AppSource.Markup("GetawaysDashboard.razor"),
     };
 }

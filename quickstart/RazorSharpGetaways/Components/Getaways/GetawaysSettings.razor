@@ -1,0 +1,225 @@
+@* The Settings page. Every control changes the shared GetawaysAppSettings, which raises Changed so the whole window answers at
+   once, and the preview shows the grids and the chart while their own pages are closed. GridControl reads Theme only when it is
+   created, so the preview grid carries a @key that names the theme. *@
+@namespace RazorSharpGetaways.Components.Getaways
+@using Microsoft.JSInterop
+@using Fx.ControlKit
+@using Fx.ControlKit.Charts
+@using Fx.ControlKit.Grid
+@using Fx.ControlKit.Layout
+@using Fx.ControlKit.Notifications
+@using RazorSharpGetaways.Data
+@inject TripRequestStore Store
+@inject GetawaysAppSettings Settings
+@inject IJSRuntime JS
+@inject NotificationService Notifications
+
+<div class="gw-settings">
+    <div class="gw-set-head">
+        <div>
+            <h3 class="gw-set-title">Make it yours</h3>
+            <p class="gw-set-sub">Every change applies to the whole window at once and lasts for this visit.</p>
+        </div>
+        <ButtonControl IconCss="bi bi-arrow-counterclockwise" OnClick="@(() => Change(Settings.Reset))">Reset to defaults</ButtonControl>
+    </div>
+
+    <GridLayoutControl CssClass="gw-set-columns" Columns="minmax(0, 1fr) minmax(0, 1fr)" Gap="14px" AlignItems="start">
+        <GridLayoutItemControl>
+            <div class="gw-set-stack">
+                <CardControl CssClass="gw-set-card" Elevation="0">
+                    <HeaderContent><h4 class="gw-set-card-title">Look</h4></HeaderContent>
+                    <ChildContent>
+                        <div class="gw-set-row">
+                            <div class="gw-set-label">Colour scheme</div>
+                            <ColorPaletteControl CssClass="gw-schemes" Colors="@_accents" Columns="4" TileSize="44px" Value="@Settings.Scheme.Accent" ValueChanged="PickScheme" AriaLabel="Colour scheme" />
+                            <p class="gw-set-note"><strong>@Settings.Scheme.Name.</strong> @Settings.Scheme.Blurb</p>
+                        </div>
+                        <div class="gw-set-row">
+                            <div class="gw-set-label">Text size <span class="gw-set-value">@Settings.TextSize%</span></div>
+                            <SliderControl Min="90" Max="120" Step="5" ShowValue="false" Value="@Settings.TextSize" ValueChanged="@(v => Change(() => Settings.TextSize = (int)Math.Round(v)))" aria-label="Text size" />
+                        </div>
+                    </ChildContent>
+                </CardControl>
+
+                <CardControl CssClass="gw-set-card" Elevation="0">
+                    <HeaderContent><h4 class="gw-set-card-title">Views</h4></HeaderContent>
+                    <ChildContent>
+                        <div class="gw-set-row gw-set-row-menu">
+                            <div class="gw-set-label">Menu</div>
+                            <SegmentedControl CssClass="gw-seg" Items="_sidebar" AriaLabel="Menu" Value="@(Settings.SidebarIcons ? "icons" : "full")"
+                                              ValueChanged="@(v => Change(() => Settings.SidebarIcons = v == "icons"))" />
+                        </div>
+                        <div class="gw-set-row">
+                            <div class="gw-set-label">Trip Requests shows</div>
+                            <SegmentedControl CssClass="gw-seg" Items="_requestViews" AriaLabel="Trip Requests shows" Value="@Settings.RequestsView"
+                                              ValueChanged="@(v => Change(() => Settings.RequestsView = v))" />
+                        </div>
+                        <div class="gw-set-row">
+                            <div class="gw-set-label">Itinerary view</div>
+                            <SegmentedControl CssClass="gw-seg" Items="_itineraryViews" AriaLabel="Itinerary view" Value="@Settings.ItineraryView.ToString()"
+                                              ValueChanged="@(v => Change(() => Settings.ItineraryView = Enum.Parse<Fx.ControlKit.Scheduling.SchedulerView>(v)))" />
+                        </div>
+                        <div class="gw-set-row">
+                            <div class="gw-set-label">Dashboard chart</div>
+                            <SegmentedControl CssClass="gw-seg" Items="_chartTypes" AriaLabel="Dashboard chart" Value="@Settings.DashboardChart.ToString()"
+                                              ValueChanged="@(v => Change(() => Settings.DashboardChart = Enum.Parse<ChartType>(v)))" />
+                        </div>
+                    </ChildContent>
+                </CardControl>
+
+                <CardControl CssClass="gw-set-card" Elevation="0">
+                    <HeaderContent><h4 class="gw-set-card-title">Dashboard layout</h4></HeaderContent>
+                    <ChildContent>
+                        <div class="gw-set-row">
+                            <div class="gw-set-label">Arrangement @(Settings.Preset == "" ? "(arranged by hand)" : "")</div>
+                            <div class="gw-presets" role="group" aria-label="Dashboard arrangement">
+                                @foreach (var (key, text) in _presets)
+                                {
+                                    <ButtonControl BareStyle="true" CssClass="@($"gw-preset {(Settings.Preset == key ? "is-on" : "")}")" aria-pressed="@(Settings.Preset == key ? "true" : "false")"
+                                                   OnClick="@(() => Change(() => Settings.ApplyPreset(key)))">
+                                        <span class="@($"gw-thumb gw-thumb-{key}")" aria-hidden="true"><i class="t-f"></i><i class="t-c"></i><i class="t-d"></i></span>
+                                        <span class="gw-preset-text">@text</span>
+                                    </ButtonControl>
+                                }
+                            </div>
+                        </div>
+                        <div class="gw-set-row">
+                            <div class="gw-set-label">Cards shown</div>
+                            <div class="gw-set-switches">
+                                @foreach (var key in _cards)
+                                {
+                                    <SwitchControl Label="@GetawaysAppSettings.CardTitle(key)" Checked="@(!Settings.HiddenCards.Contains(key))"
+                                                   CheckedChanged="@(v => Change(() => Settings.SetCardShown(key, v)))" />
+                                }
+                            </div>
+                        </div>
+                        <ButtonControl IconCss="bi bi-arrows-move" OnClick="OpenCustomise">Rearrange on the dashboard</ButtonControl>
+                    </ChildContent>
+                </CardControl>
+
+                <CardControl CssClass="gw-set-card" Elevation="0">
+                    <HeaderContent><h4 class="gw-set-card-title">Grids</h4></HeaderContent>
+                    <ChildContent>
+                        <div class="gw-set-row">
+                            <div class="gw-set-label">Theme</div>
+                            <DropDownListControl TValue="string" TItem="SelectionItem" DataSource="@_gridThemes" TextFieldName="Text" ValueFieldName="Value" Width="100%" AriaLabel="Grid theme"
+                                                 Value="@(Settings.GridTheme?.ToString() ?? "scheme")" ValueChanged="PickGridTheme" />
+                        </div>
+                        <div class="gw-set-row">
+                            <div class="gw-set-label">Row height</div>
+                            <SegmentedControl CssClass="gw-seg" Items="_densities" AriaLabel="Row height" Value="@Settings.GridDensity.ToString()"
+                                              ValueChanged="@(v => Change(() => Settings.GridDensity = Enum.Parse<GridDensity>(v)))" />
+                        </div>
+                        <div class="gw-set-row">
+                            <div class="gw-set-label">Grid lines</div>
+                            <SegmentedControl CssClass="gw-seg" Items="_gridLines" AriaLabel="Grid lines" Value="@Settings.GridLines.ToString()"
+                                              ValueChanged="@(v => Change(() => Settings.GridLines = Enum.Parse<GridLines>(v)))" />
+                        </div>
+                        <SwitchControl Label="Alternate row colours" Checked="@Settings.AlternateRows" CheckedChanged="@(v => Change(() => Settings.AlternateRows = v))" />
+                    </ChildContent>
+                </CardControl>
+            </div>
+        </GridLayoutItemControl>
+
+        @* The preview stays in view while the settings beside it scroll *@
+        <GridLayoutItemControl CssClass="gw-set-sticky">
+            <CardControl CssClass="gw-set-card" Elevation="0">
+                <HeaderContent><h4 class="gw-set-card-title">Preview</h4></HeaderContent>
+                <ChildContent>
+                    <div class="gw-preview-buttons">
+                        <ButtonControl CssClass="btn-primary">Primary</ButtonControl>
+                        <ButtonControl>Secondary</ButtonControl>
+                    </div>
+                    <div class="gw-preview-chart">
+                        <ChartControl Type="@Settings.DashboardChart" Height="170px" Series="@Settings.MonthlySeries(Store.Requests, 6, false)" />
+                    </div>
+                    <GridControl @key="@($"theme-{Settings.GridTheme}")" TValue="TripRequest" DataSource="@_rows"
+                                 Theme="@Settings.GridThemeValue" Density="@Settings.GridDensity" GridLines="@Settings.GridLines" EnableAltRow="@Settings.AlternateRows"
+                                 CssClass="@Settings.GridCss" EnableHover="true" Height="210px">
+                        <GridColumnsBase>
+                            <GridColumn Field="@nameof(TripRequest.Request)" HeaderText="Request" Width="90px" />
+                            <GridColumn Field="@nameof(TripRequest.Destination)" HeaderText="Destination" Width="115px" />
+                            <GridColumn Field="@nameof(TripRequest.Agent)" HeaderText="Agent" Width="135px" />
+                            <GridColumn Field="@nameof(TripRequest.Status)" HeaderText="Status" Width="85px" />
+                        </GridColumnsBase>
+                    </GridControl>
+                </ChildContent>
+            </CardControl>
+        </GridLayoutItemControl>
+    </GridLayoutControl>
+
+    <CardControl CssClass="gw-set-card gw-set-code" Elevation="0">
+        <HeaderContent>
+            <div class="gw-set-code-head">
+                <h4 class="gw-set-card-title">Code for this look</h4>
+                <ButtonControl CssClass="btn-sm" IconCss="@(_copied ? "bi bi-check-lg" : "bi bi-clipboard")" OnClick="CopyCode">@(_copied ? "Copied" : "Copy")</ButtonControl>
+            </div>
+        </HeaderContent>
+        <ChildContent>
+            <pre class="gw-set-pre"><code>@Settings.ToRazor()</code></pre>
+        </ChildContent>
+    </CardControl>
+</div>
+
+@code {
+    /// <summary>Opens the Dashboard page, where the cards can be dragged.</summary>
+    [Parameter] public EventCallback OnOpenDashboard { get; set; }
+
+    private static readonly string[] _accents = GetawaysAppSettings.Schemes.Select(s => s.Accent).ToArray();
+    private static readonly string[] _cards = [GetawaysAppSettings.Figures, GetawaysAppSettings.Chart, GetawaysAppSettings.Departures];
+    private static readonly (string Key, string Text)[] _presets =
+        [("side", "Side by side"), ("stacked", "Stacked"), ("chart", "Chart first"), ("departures", "Departures first")];
+    private static readonly SelectionItem[] _sidebar = [new("full", "Full"), new("icons", "Icons only")];
+    private static readonly SelectionItem[] _requestViews = [new("All", "All"), new("New requests", "New"), new("Quoted", "Quoted"), new("Booked", "Booked")];
+    private static readonly SelectionItem[] _itineraryViews =
+        [new("MultiDay", "Whole trip"), new("Day", "Day"), new("Week", "Week"), new("Month", "Month"), new("Agenda", "Agenda")];
+    private static readonly SelectionItem[] _chartTypes = [new("StackedBar", "Stacked"), new("GroupedBar", "Grouped"), new("MultiLine", "Lines"), new("Area", "Areas")];
+    private static readonly SelectionItem[] _densities = [new("Default", "Comfortable"), new("Compact", "Compact")];
+    private static readonly SelectionItem[] _gridLines = [new("Both", "Both"), new("Horizontal", "Rows"), new("Vertical", "Columns"), new("None", "None")];
+    private static readonly SelectionItem[] _gridThemes =
+    [
+        new("scheme", "Follow the colour scheme"), new("Default", "Default"), new("Vb6Windows", "VB6 Windows"),
+        new("ExcelLightBlue", "Light Blue"), new("ExcelLightGreen", "Light Green"), new("ExcelLightOrange", "Light Orange"),
+        new("ExcelMediumBlue", "Medium Blue"), new("ExcelMediumGreen", "Medium Green"), new("ExcelDarkSlate", "Dark Slate"),
+    ];
+
+    private List<TripRequest> _rows = [];
+    private bool _copied;
+
+    protected override void OnInitialized() => _rows = Store.Requests.OrderByDescending(r => r.DateRequested).Take(8).ToList();
+
+    // Applies a change and tells the window and its open page to repaint
+    private void Change(Action apply)
+    {
+        apply();
+        Settings.NotifyChanged();
+    }
+
+    private void PickScheme(string? accent) =>
+        Change(() => Settings.Scheme = GetawaysAppSettings.Schemes.First(s => s.Accent == accent));
+
+    private void PickGridTheme(string? key) =>
+        Change(() => Settings.GridTheme = key is null or "scheme" ? null : Enum.Parse<GridTheme>(key));
+
+    private Task OpenCustomise()
+    {
+        Settings.Customising = true;
+        return OnOpenDashboard.InvokeAsync();
+    }
+
+    private async Task CopyCode()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", Settings.ToRazor());
+            _copied = true;
+            StateHasChanged();
+            await Task.Delay(2000);
+            _copied = false;
+        }
+        catch (JSException)
+        {
+            Notifications.Info("Your browser blocked the clipboard", "Select the code and copy it by hand.");
+        }
+    }
+}

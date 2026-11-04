@@ -6,7 +6,9 @@ namespace FlexCore.Showcase.Data;
 /// </summary>
 public static class TravelData
 {
-    /// <summary>A packaged trip the operator sells: where it goes, how long it is and which city its suppliers are named after.</summary>
+    /// <summary>A packaged trip the operator sells: where it goes, how long it is and which city its suppliers are named after.
+    /// The six here feed the Cards, Scheduler, Layout and text pages; the agency's full list of twelve, one per destination, is
+    /// RazorSharpGetaways.Data.TripPackages in the Quick Start project, which the cost sheet report and the home window use.</summary>
     public record Package(string Name, string Region, string City, int Nights);
 
     public static readonly Package[] Packages =

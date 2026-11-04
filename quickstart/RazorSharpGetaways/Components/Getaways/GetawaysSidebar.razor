@@ -1,0 +1,25 @@
+@* The app's menu: the brand, a vertical TabStripControl with one tab per page, and the versions in the footer. What a click does
+   is the host's: Razor Sharp Getaways navigates to the page's route, the FlexCore site switches the page inside its demo frame. *@
+@namespace RazorSharpGetaways.Components.Getaways
+@using Fx.ControlKit
+
+<aside class="gw-sidebar">
+    <div class="gw-brand">
+        <span class="gw-brand-mark bi bi-airplane-fill"></span>
+        <span class="gw-brand-name">@GetawaysPages.AppName</span>
+    </div>
+    <TabStripControl Items="_items" SelectedIndex="SelectedIndex" SelectedIndexChanged="OnSelect"
+                     Orientation="TabOrientation.Vertical" Theme="TabTheme.Minimal" ShowOrientationMenu="false"
+                     AriaLabel="Pages" CssClass="gw-nav" />
+    <div class="gw-sidebar-foot">@GetawaysPages.AppName v@(GetawaysPages.AppVersion)<br />Built with FlexCore @GetawaysPages.FlexCoreVersion</div>
+</aside>
+
+@code {
+    /// <summary>Index of the open page in <see cref="GetawaysPages.All"/>.</summary>
+    [Parameter] public int SelectedIndex { get; set; }
+
+    /// <summary>Raised with the index of the page the visitor picked.</summary>
+    [Parameter] public EventCallback<int> OnSelect { get; set; }
+
+    private readonly List<TabStripItem> _items = GetawaysPages.All.Select(p => new TabStripItem(p.Nav, p.Icon)).ToList();
+}
