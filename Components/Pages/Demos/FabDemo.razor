@@ -12,17 +12,13 @@
                    SourcePath="FabMenuControl.razor">
     <Overview>
         <p>
-            <code>FabMenuControl</code> renders a 56px round trigger fixed 2rem from the bottom-right of the viewport. Clicking it dims
-            the page behind a backdrop and slides up one labelled round button per <code>FabMenuItem</code>, first item nearest the
-            trigger. That open state is what other libraries call a speed dial. Picking an action closes the menu and runs the item's
-            <code>OnClick</code>. The control imports no script of its own.
+            <code>FabMenuControl</code> is a Blazor floating action button: a round trigger fixed to the corner of the screen that fans out a menu of actions, what other libraries call a speed dial. Each example here is pinned inside its own stage so two can be shown at once.
         </p>
-        <p>On this page each example pins its instance inside a grey stage so two can be shown at once. In an app, leave the position alone.</p>
     </Overview>
 
     <Examples>
         <DemoExample Id="menu" Title="Action menu" RazorCode="@Code.Menu" CSharpCode="@Code.MenuCs" CssCode="@Code.MenuCss">
-            <Description><p>Each item carries a label, an icon and a colour. The plus turns into a close cross while open. The switch on the right sets <code>Disabled</code>.</p></Description>
+            <Description><p>Click the plus to fan out the actions; the switch disables the trigger.</p></Description>
             <Controls>
                 <ToggleButtonControl @bind-Selected="_disabled">Disabled</ToggleButtonControl>
             </Controls>
@@ -36,7 +32,7 @@
         </DemoExample>
 
         <DemoExample Id="custom" Title="Trigger icon and extra content" RazorCode="@Code.Custom" CSharpCode="@Code.CustomCs">
-            <Description><p><code>IconCss</code> replaces the plus. <code>ChildContent</code> renders in the fan after the items, for markup that is not an action.</p></Description>
+            <Description><p><code>IconCss</code> replaces the plus, and <code>ChildContent</code> adds markup to the fan that is not an action.</p></Description>
             <Demo>
                 <div class="fab-stage short">
                     <FabMenuControl IconCss="bi bi-chat-dots" Items="_support" Title="Support">

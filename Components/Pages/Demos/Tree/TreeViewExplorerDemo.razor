@@ -21,17 +21,13 @@
                    SourcePath="TreeViewControl.razor;TreeViewControl.Appearance.cs;TreeViewControl.Operations.cs;TreeViewModels.cs;TreeViewData.cs;wwwroot/browser-capabilities.js">
     <Overview>
         <p>
-            <code>TreeViewControl</code> renders a list of <code>TreeNode</code>s with nested <code>Children</code>. Nodes expand on click,
-            report selection through <code>SelectedNodeChanged</code>, and can carry a <code>Tag</code> for your own data. Two folder icon sets
-            and <code>UseVb6TreeStyle</code>, which draws the dotted connector lines of the Windows common control, cover modern and
-            migrated screens. Checkboxes, multi-select, inline editing, drag and drop, lazy loading and virtualization are parameters
-            on the same control; this page shows the basics.
+            <code>TreeViewControl</code> is a Blazor tree view: nested <code>TreeNode</code>s with folder icons, selection, checkboxes, inline editing, drag and drop, lazy loading and virtualization, plus <code>UseVb6TreeStyle</code> for the dotted connector lines of migrated Windows screens.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="explorer" Title="Programme explorer with a node inspector" RazorCode="@Code.Explorer" CSharpCode="@Code.ExplorerCs">
-            <Description><p>Click a node to select it and read its properties on the right; click a folder to expand it. The switches change the folder icons and the connector lines.</p></Description>
+            <Description><p>Click a node to inspect it on the right; the switches change the folder icons and the connector lines.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_styleItems" @bind-Values="_styleValues" Selection="ChoiceSelectionMode.Single" AriaLabel="Folder style" />
                 <ToggleButtonControl @bind-Selected="_useVb6Style">VB6 lines</ToggleButtonControl>

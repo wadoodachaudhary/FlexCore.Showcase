@@ -15,18 +15,13 @@
                    SourcePath="Diagram/DiagramControl.razor;Diagram/DiagramControl.razor.css;Diagram/DiagramModels.cs">
     <Overview>
         <p>
-            <code>DiagramControl</code> draws a list of <code>Nodes</code> and the <code>Connectors</code> between them as a single
-            <code>&lt;svg&gt;</code>. There is no automatic layout: each node's <code>OffsetX</code> and <code>OffsetY</code> give its centre
-            in pixels. A connector names two node Ids, picks a side of each node unless you set the ports, and draws a straight or right-angled
-            line with an optional arrowhead and label. A click on an enabled node raises <code>NodeClicked</code> and then follows the node's
-            <code>NavigateUrl</code>. The control has no dragging, zooming or editing; to change the diagram, change the node and connector
-            objects and let the page re-render.
+            <code>DiagramControl</code> is a Blazor diagram drawn as one inline SVG: nodes in six shapes placed by hand, straight or right-angled connectors with labels and arrowheads, and a click event. There is no dragging or editing; change the objects and the page re-renders.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="workflow" Title="A booking workflow" RazorCode="@Code.Workflow" CSharpCode="@Code.WorkflowCs" CssCode="@Code.WorkflowCss">
-            <Description><p>Razor Sharp Getaways' trip requests from first contact to travel documents. Every position is set by hand, and with the default <code>Auto</code> ports each connector leaves from the side that faces its target. Click a step, or use Previous step and Next step (they walk the main path, then the declined branch), and the panel shows who handles it and how long it usually takes; the page marks the current step with a <code>CssClass</code> styled through <code>::deep</code>.</p></Description>
+            <Description><p>Click a step, or use Previous and Next, to read who handles it and how long it takes.</p></Description>
             <Demo>
                 <div class="wf-layout">
                     <div class="canvas">
@@ -54,7 +49,7 @@
         </DemoExample>
 
         <DemoExample Id="shapes" Title="Shapes, connectors and links" RazorCode="@Code.Shapes" CSharpCode="@Code.ShapesCs">
-            <Description><p>Each node's second line names its shape. <code>Rectangle</code> and <code>RoundedRectangle</code> both round their corners by <code>CornerRadius</code>, so the Rectangle here sets it to 0. "Visa needed?" forks from its bottom port: "yes" is a default orthogonal connector, "no" a <code>Straight</code> one with both ports set. The other connectors show a closed arrowhead, a dash pattern, a wider coloured line and <code>IsBroken</code>. "Package chosen" has a <code>NavigateUrl</code>; while Follow links is off, the <code>NodeClicked</code> handler sets <code>Handled</code> and the page stays put. The grey node has <code>Enabled</code> false. Hover "Package chosen" or "Departure" for their tooltips.</p></Description>
+            <Description><p>Every shape, connector style and port setting on one canvas; hover a node for its tooltip, and the grey one is disabled.</p></Description>
             <Demo>
                 <div class="controls">
                     <SwitchControl @bind-Checked="_followLinks" Label="Follow links" />

@@ -14,17 +14,13 @@
                    SourcePath="RibbonControl.razor;RibbonTab.razor;RibbonGroup.razor;RibbonButton.razor;RibbonControl.razor.css">
     <Overview>
         <p>
-            <code>RibbonControl</code> lays out <code>RibbonTab</code> children as a strip of tab headers. The open tab shows its
-            <code>RibbonGroup</code>s side by side, each with its title underneath, and every group holds <code>RibbonButton</code>s.
-            A large button stacks its glyph above the label and starts a group; small buttons put the glyph beside the label and wrap
-            into columns. The first tab is open when the ribbon appears, and clicking a header opens another. No JavaScript.
+            <code>RibbonControl</code> is an Office-style command bar for Blazor: <code>RibbonTab</code> headers across the top, titled <code>RibbonGroup</code>s side by side in the open tab, and large or small <code>RibbonButton</code>s inside them. The buttons hold no state; the page decides what each does, when it is disabled and how it looks pressed.
         </p>
-        <p>The buttons hold no state of their own. The page decides what each one does, when it is disabled and how it looks pressed.</p>
     </Overview>
 
     <Examples>
         <DemoExample Id="tabs" Title="Tabs, groups and buttons" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs">
-            <Description><p>A travel agency's front desk. Paste is disabled until Cut or Copy has put a booking on the clipboard. Rest the pointer on Hold to see a <code>Tooltip</code> that differs from the label.</p></Description>
+            <Description><p>Switch tabs, then Cut or Copy a booking to enable Paste, and rest the pointer on Hold for a <code>Tooltip</code> that differs from its label.</p></Description>
             <Demo>
                 <RibbonControl>
                     <RibbonTab Title="Home">
@@ -52,7 +48,7 @@
         </DemoExample>
 
         <DemoExample Id="pressed" Title="Pressed and disabled states" RazorCode="@Code.Pressed" CSharpCode="@Code.PressedCs" CssCode="@Code.PressedCss">
-            <Description><p>The buttons format the note under the ribbon. Bold, Italic and Highlight show as pressed through <code>CssClass</code>; Larger and Smaller are disabled at the ends of the size range.</p></Description>
+            <Description><p>Bold, Italic and Highlight show as pressed through <code>CssClass</code>; Larger and Smaller are disabled at the ends of the size range.</p></Description>
             <Demo>
                 <div class="format-ribbon">
                     <RibbonControl>

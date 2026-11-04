@@ -23,23 +23,13 @@
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridColumn.cs">
     <Overview>
         <p>
-            Nothing special is needed to bind a grid to data that changes: keep the same list, change the rows in place, and call
-            <code>StateHasChanged</code>. The grid renders only the rows in its window, so each pass re-renders those rows and the
-            cells Blazor finds changed. A column's <code>Template</code> is a <code>RenderFragment</code> over the row object, which is
-            how the price, change, trend and profit cells below draw colour, arrows and a small SVG from the row's values; sorting by
-            any column keeps working while rows move.
-        </p>
-        <p>
-            The simulated market below is seeded data, not a live feed: every tick changes three to seven instruments by up to 1.5
-            percent. Two numbers are measured on the server with <code>Stopwatch</code>: how long the tick's render took, from the tick
-            to the component's next <code>OnAfterRender</code>, and the running average over the last twenty ticks. Browser paint is
-            not included.
+            Live data needs nothing special in the Blazor <code>GridControl</code>: change the rows in place and call <code>StateHasChanged</code>; only the rows in view and the cells that changed re-render. A column <code>Template</code> draws colour, arrows and small SVG from the row's values, and sorting keeps working while rows move.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="ticker" Title="A portfolio that moves" RazorCode="@Code.Ticker" CSharpCode="@Code.TickerCs">
-            <Description><p>Start the stream and pick an interval; the status line counts ticks and rows changed and reports the render time per tick. Sort by Change while it runs to watch rows re-order, or click Tick once to step. Reset puts the prices back. The last movement tints the price cell up or down.</p></Description>
+            <Description><p>Start the stream, sort by Change while it runs, or click Tick to step once; the status line reports rows changed and the server render time per tick.</p></Description>
             <Controls>
                 <ButtonControl CssClass="@(_streaming ? "btn-sm btn-danger" : "btn-sm btn-success")" OnClick="ToggleStreaming">@(_streaming ? "Pause" : "Start")</ButtonControl>
                 <ButtonGroupControl Items="_intervalItems" Values="@(new[] { _intervalMs.ToString() })" ValuesChanged="PickInterval" Selection="ChoiceSelectionMode.Single" AriaLabel="Tick interval" />

@@ -19,17 +19,13 @@
                    SourcePath="DropDownListControl.razor;Grid/DropDownGridControl.razor;ListBoxControl.razor">
     <Overview>
         <p>
-            Three ways to choose from a list. <code>DropDownListControl</code> is a one-line box that opens a list of options; with
-            <code>Editable</code> it becomes a text box that also accepts text that is not in the list. <code>DropDownGridControl</code> opens a
-            <code>GridControl</code> with the columns you declare and a search box, and shows one field of the picked row when closed.
-            <code>ListBoxControl</code> shows every option at once as radio buttons or checkboxes, and its value is a <code>List&lt;string&gt;</code>.
-            All three take any item type and read each item's text and value from properties you name.
+            Three ways to choose from a list in Blazor: <code>DropDownListControl</code> is a one-line dropdown, editable if you like; <code>DropDownGridControl</code> opens a searchable grid and shows one field of the picked row; <code>ListBoxControl</code> shows every option as radio buttons or checkboxes. All take any item type.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="dropdown" Title="Pick a destination" RazorCode="@Code.Dropdown" CSharpCode="@Code.DropdownCs">
-            <Description><p>Left: a list-only dropdown over the twelve destinations. <code>ItemTemplate</code> adds the country to each option; the closed box keeps the <code>TextFieldName</code> text. <code>ValueChange</code> hands the page the whole record as <code>ItemData</code> next to the value. With the box focused, a typed letter selects the first city starting with it, and Up and Down step through the cities without opening the list. Right: <code>Editable="true"</code> makes the box a text input; pick a gateway or type a city that is not listed, and Enter or leaving the box commits the text as the value. The switch sets <code>Enabled</code> on both.</p></Description>
+            <Description><p>Pick a destination on the left; on the right the box is editable, so type a city that is not listed and press Enter.</p></Description>
             <Demo>
                 <div class="pair">
                     <div class="field">
@@ -54,7 +50,7 @@
         </DemoExample>
 
         <DemoExample Id="lookup" Title="Pick two airports from a 4,009-row grid" RazorCode="@Code.Lookup" CSharpCode="@Code.LookupCs" CssCode="@Code.LookupCss">
-            <Description><p>Two lookups over the airports from the <a href="demo/grid">Data Grid</a> page (OurAirports, public domain). The search box keeps the rows where any property contains the typed text, ignoring case, so a code (<em>KEF</em>), a city, a country or part of an airport's name all work although only four columns are shown. Click a row, or press Down to open and move and Enter to pick; the closed box then shows the code and city (<code>ClosedTextFieldName</code>) while <code>Value</code> holds the code. The ✕ clears the value. The page works out the great-circle distance between the two picks from their coordinates.</p></Description>
+            <Description><p>Search 4,009 airports by code, city or country, pick two, and the page works out the distance between them.</p></Description>
             <Demo>
                 <div class="pair">
                     <div class="lookup">
@@ -101,7 +97,7 @@
         </DemoExample>
 
         <DemoExample Id="listbox" Title="Choose several destinations" RazorCode="@Code.Listbox" CSharpCode="@Code.ListboxCs" CssCode="@Code.ListboxCss">
-            <Description><p>Left: <code>SelectionMode="Multiple"</code>, one checkbox per destination; every click hands <code>ValueChanged</code> a new <code>List&lt;string&gt;</code> of the ticked values. The control does not promise an order, so the page lists them in list order. <code>CssClass</code> lays the twelve rows out in two columns. Right: the default single mode draws radio buttons and keeps at most one value; switch on <code>ShowCheckbox</code> and the same list draws checkboxes that still allow one choice but can be unticked. Items are read by property name, so the four category strings are wrapped in a one-property record: a blank <code>TextField</code> gives empty labels. The button clears the wish list from the page.</p></Description>
+            <Description><p>Tick several destinations on the left; the right list keeps one choice, with checkboxes when the switch is on.</p></Description>
             <Demo>
                 <div class="pair">
                     <div>

@@ -11,17 +11,13 @@
                    SourcePath="SecurityCodeControl.razor">
     <Overview>
         <p>
-            <code>SecurityCodeControl</code> renders <code>Length</code> single-character inputs and joins them into one string bound through
-            <code>Value</code>. <code>OnComplete</code> fires when every box holds a character. <code>Type="Numeric"</code> rejects anything
-            but digits and uses <code>type="tel"</code>, so phones show the number pad. Each box is an ordinary input: Tab or a click moves
-            between them, a character fills a box and Backspace clears it. The control does not move focus on its own and does not split a
-            pasted code across the boxes.
+            <code>SecurityCodeControl</code> is a Blazor OTP input: one box per character for verification codes and PINs, joined into one bound <code>Value</code>, with <code>OnComplete</code> when the last box is filled.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="verify" Title="Verification code" RazorCode="@Code.Verify" CSharpCode="@Code.VerifyCs">
-            <Description><p>Six digits, checked in <code>OnComplete</code>. Fill the boxes in order with Tab between them; the demo code is <code>492018</code>. Clear resets the bound value, which empties every box.</p></Description>
+            <Description><p>Type the six digits (the demo code is 492018), Tab between boxes; Clear empties them.</p></Description>
             <Demo>
                 <p class="lead">We sent a code to +1 (425) ••• 0142. Enter it to continue.</p>
                 <div class="code-row">

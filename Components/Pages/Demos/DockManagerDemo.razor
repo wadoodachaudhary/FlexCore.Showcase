@@ -21,18 +21,13 @@
                    SourcePath="Docking/DockManagerControl.razor;Docking/DockNodeView.razor;Docking/DockPanelActions.razor;Docking/DockModels.cs">
     <Overview>
         <p>
-            <code>DockManagerControl</code> takes a list of <code>DockPanel</code>s, each a key, a title and a render fragment, and arranges them in
-            a tree of tab groups and two-pane splits. Each pane's Dock… menu moves it into any group as a tab, or beside that
-            group on its left, right, top or bottom. A pane can float as a non-modal window, unpin into a strip along the top
-            that opens as a drawer, or close into a "Closed panes" menu that brings it back. Splits are <code>SplitterControl</code>s and keep their
-            ratio. The arrangement is a <code>DockLayoutState</code>: the control reports it after every change, accepts one as its starting point, and
-            saves or restores it as JSON.
+            <code>DockManagerControl</code> is a Blazor dock manager: tabbed panes the user can split, float, unpin and close, IDE style, with the whole arrangement saved and restored as one JSON document.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="workspace" Title="A four-pane workspace" RazorCode="@Code.Workspace" CSharpCode="@Code.WorkspaceCs">
-            <Description><p>Explorer on the left, Document and Output as tabs in the middle, Properties on the right, from a <code>State</code> built in code. Document cannot be closed and Output cannot float, so those buttons are missing on their action bars. Use Dock… to move a pane to another group or beside it, resize a split, float Properties, unpin Explorer and open it from the strip, close Output and bring it back from Closed panes. Save keeps the current layout as JSON, Restore applies it again, Reset hands the control a fresh starting state. The line below is fed by <code>StateChanged</code>.</p></Description>
+            <Description><p>Use a pane's Dock… menu to move it, float Properties, unpin Explorer, close Output and bring it back; Save and Restore round-trip the layout as JSON.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _json = _dock!.SaveLayout()">Save layout</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _dock!.RestoreLayoutAsync(_json!)" Disabled="@(_json is null)">Restore layout</ButtonControl>
@@ -49,7 +44,7 @@
         </DemoExample>
 
         <DemoExample Id="methods" Title="Driving it from code" RazorCode="@Code.Methods" CSharpCode="@Code.MethodsCs">
-            <Description><p>Three panes that start as one tab group, the default when no <code>State</code> is given. The buttons call the public methods: Float, Unpin, Close and a Dock that puts every pane back into the first group as a tab. Log is not closable, so closing it is ignored and the counts do not move. The group's id for <code>DockAsync</code> is read from the layout the control saves.</p></Description>
+            <Description><p>The buttons call <code>FloatAsync</code>, <code>UnpinAsync</code>, <code>CloseAsync</code> and <code>DockAsync</code> from code.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.FloatAsync("chart")'>Float Chart</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.UnpinAsync("log")'>Unpin Log</ButtonControl>

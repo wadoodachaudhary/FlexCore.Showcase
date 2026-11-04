@@ -30,17 +30,13 @@
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridModels.cs;Grid/GridControlEvents.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
-            <code>GroupColumns</code> opens the grid already grouped; with <code>AllowGrouping</code> the user regroups by dragging a header
-            into the bar above the grid. <code>AggregateRows</code> lists what to compute per group: each <code>AggregateColumn</code> names a
-            field, an <code>AggregateType</code> and a format, and its <code>GroupCaptionTemplate</code> and <code>GroupFooterTemplate</code>
-            decide where the value is printed and how; <code>ShowInFooter</code> prints the same values once more under the whole grid.
-            <code>ShowSearchBar</code> adds a search box to the grid toolbar.
+            Grouping with aggregates in the Blazor <code>GridControl</code>. <code>GroupColumns</code> opens the grid grouped, <code>AllowGrouping</code> lets users regroup by dragging a header into the bar, and <code>AggregateRows</code> computes sums, counts and averages per group, in group footers and in the grid footer.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="rate-card" Title="Rate card grouped by category" RazorCode="@Code.RateCard" CSharpCode="@Code.RateCardCs">
-            <Description><p>The operator's rate card: the services it buys at each destination it sells, from flights and transfers to rooms, tours, insurance and its own booking fees, each with the supplier, the unit the rate is quoted per, the rate and a Bookable flag. It opens grouped by <strong>Category</strong>; drag <strong>Destination</strong> into the bar to regroup. Each caption shows the average rate and the line count; each footer repeats the average. Sort <strong>Rate</strong> descending for the most expensive services, filter <strong>Bookable</strong> for the lines that cannot be sold at present, or type in the search box.</p></Description>
+            <Description><p>Drag Destination into the group bar to regroup a rate card that opens grouped by Category; each caption shows the average rate and line count.</p></Description>
             <Demo>
                 <div class="catalog">
                 <GridControl TValue="RateCardLine"
@@ -73,7 +69,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="package-costs" Title="Package cost lines with sums in the footer, grouped on demand" RazorCode="@Code.PackageCosts" CSharpCode="@Code.PackageCostsCs">
-            <Description><p>Sixty cost lines for the Lisbon Explorer package: the fifteen services the operator pays its suppliers for, costed once per departure season for two travellers and seven nights, not grouped to start with. The grid footer sums <code>Qty</code> and <code>Total</code>; drag <strong>Cost group</strong>, <strong>Supplier</strong> or <strong>Season</strong> into the bar above the grid and every group gets the same sums in its footer, while the grid footer keeps the overall total. <strong>Rate basis</strong> is Contract where the rate comes from the supplier contract and only moves with the season, and Spot where it is bought afresh for each departure. <code>ShowInGroupFooter</code> and <code>ShowInFooter</code> are both on; there is no caption aggregate here.</p></Description>
+            <Description><p>Drag Cost group, Supplier or Season into the bar: every group gets Qty and Total sums in its footer while the grid footer keeps the overall total.</p></Description>
             <Demo>
                 <div class="catalog">
                 <GridControl TValue="PackageCostLine"

@@ -30,18 +30,13 @@
                    SourcePath="Grid/GridColumn.cs;Grid/GridColumnsBase.cs;Grid/GridControl.razor.cs;Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
-            The columns inside <code>GridColumnsBase</code> are ordinary Razor markup, so a <code>@@foreach</code> over a list of column
-            specs defines them. Replace the list and the grid re-reads its columns in place: a different set, order, width or
-            <code>Visible</code> flag, while the component instance, its data and its selection stay. Wrap the swap in
-            <code>SuspendRedraw(fields)</code>: the grid holds its rendering while the list changes, converges added and removed columns in
-            place and applies the order you pass; without it, new fields append after the ones the grid already knows.
-            <code>Visible="false"</code> keeps a column in the set but off the screen.
+            Grid columns are Razor markup, so a <code>&#64;foreach</code> over a list of column specs defines them and replacing the list changes the column set at runtime. Wrap the swap in <code>SuspendRedraw</code> and the Blazor <code>GridControl</code> converges the columns in place, keeping its data and selection.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="sets" Title="Three column sets, one grid" RazorCode="@Code.Sets" CSharpCode="@Code.SetsCs">
-            <Description><p>Select a row, then switch between the Default, Purchasing and Minimal sets: the selection stays while the columns change. Each set is a list of <code>ColumnSpec</code> objects; the Purchasing set also carries a hidden Category column. Qty and Price are editable in Default, Price in Purchasing (<code>EditMode.Batch</code>: double-click a cell).</p></Description>
+            <Description><p>Select a row, then switch between the Default, Purchasing and Minimal sets: the selection survives, the Purchasing set carries a hidden Category column, and Qty and Price stay editable.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_layouts" Values="@(new[] { _activeLayout })"
                                     ValuesChanged="@(v => ApplyLayoutAsync(v.Count > 0 ? v[0] : "Default"))"

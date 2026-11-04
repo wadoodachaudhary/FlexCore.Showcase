@@ -21,23 +21,13 @@
                    SourcePath="Grid/GridControl.razor.cs;Grid/SelectionSettings.cs;Grid/GridControlEvents.cs">
     <Overview>
         <p>
-            <code>GridControl</code> renders only the rows in view plus an overscan band above and below; spacer rows stand in for the
-            rest, and a small scroll-position reader in the grid's script tells the server where the window is. Grouped grids are
-            windowed the same way unless <code>EnableGroupedRowWindowing</code> is turned off. <code>WindowOverscanRows</code> sets the
-            band; by default a cell budget (<code>WindowOverscanCellBudget</code>, 900 cells per side) shrinks it on wide grids, and this
-            page turns that budget off so the number you pick is the number you get.
-        </p>
-        <p>
-            Two timings are taken here, both on the server with <code>Stopwatch</code>: how long it takes to build the list of rows in
-            C#, and how long the first render after a swap takes, from the click to the component's next <code>OnAfterRender</code>.
-            Browser layout and paint are not included, so the wait you see is a little longer than the second number. The selected and
-            edited counts come from the grid's own events.
+            Row windowing in the Blazor <code>GridControl</code>: only the rows in view plus an overscan band are rendered, spacer rows stand in for the rest, and grouped grids are windowed the same way. <code>WindowOverscanRows</code> and <code>WindowOverscanCellBudget</code> size the band. The timings here are server-side <code>Stopwatch</code> figures: building the rows and the first render after a swap.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="rows" Title="Row count, overscan and grouping" RazorCode="@Code.Rows" CSharpCode="@Code.RowsCs">
-            <Description><p>Pick a row count: the page rebuilds the list and remounts the grid, and the line under the grid reports both timings. The overscan switch sets the band of rows rendered beyond the view on each side. Group by Category to see grouped rows windowed too, and turn Window grouped rows off to render every grouped row for comparison. Click rows and edit the Description, Category, Qty, Unit Cost and Active cells: the counts update from <code>SelectionChanged</code> and <code>OnCellSave</code>. With the grid focused, typing jumps to the first row whose active column starts with the typed text.</p></Description>
+            <Description><p>Pick a row count up to 100,000, set the overscan band, group by Category, then select rows and edit cells; the line under the grid reports both timings and the counts from <code>SelectionChanged</code> and <code>OnCellSave</code>.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_rowCountItems" Values="@(new[] { _rowCount.ToString() })" ValuesChanged="PickRowCount" Selection="ChoiceSelectionMode.Single" AriaLabel="Row count" />
                 <ButtonGroupControl Items="_overscanItems" Values="@(new[] { _overscan.ToString() })" ValuesChanged="PickOverscan" Selection="ChoiceSelectionMode.Single" AriaLabel="Overscan rows" />

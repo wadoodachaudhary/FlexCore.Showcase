@@ -29,13 +29,13 @@
                    SourcePath="BadgeControl.razor;BadgeModels.cs;AlertControl.razor;AlertModels.cs;SkeletonControl.razor;SkeletonModels.cs;TimelineControl.razor;TimelineItemControl.razor;TimelineModels.cs;BreadCrumbControl.razor;BreadCrumbItem.cs;FlexControlBase.cs;ProgressBarControl.razor;ChunkProgressBarControl.razor;ContentModels.cs">
     <Overview>
         <p>
-            Seven small controls that have no page of their own yet, grouped by what they do: status and feedback, content, and progress. Each is shown with the parameters it is usually given; the tables under Documentation list every parameter, with what it changes.
+            Seven small Blazor controls on one page: <code>BadgeControl</code>, <code>AlertControl</code>, <code>SkeletonControl</code>, <code>TimelineControl</code>, <code>BreadCrumbControl</code>, <code>ProgressBarControl</code> and <code>ChunkProgressBarControl</code>. The tables under Documentation list every parameter.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="status" Title="Badges, alerts and skeletons" RazorCode="@Code.Status">
-            <Description><p><code>BadgeControl</code> takes a <code>Variant</code>, a <code>Size</code>, or <code>IsDot</code> for a status dot. <code>AlertControl</code> is an inline banner with a <code>Severity</code> and an optional close. <code>SkeletonControl</code> holds the place of loading content.</p></Description>
+            <Description><p>A badge per variant and size, an alert per severity, and a skeleton holding the place of loading content.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <BadgeControl Text="Primary" Variant="BadgeVariant.Primary" />
@@ -63,7 +63,7 @@
         </DemoExample>
 
         <DemoExample Id="content" Title="Timeline and breadcrumb" RazorCode="@Code.Content" CSharpCode="@Code.ContentCs">
-            <Description><p><code>TimelineControl</code> lists <code>TimelineItemControl</code>s, each with a title, a time and a coloured point. <code>BreadCrumbControl</code> takes a list of <code>BreadCrumbItem</code>s; the last one renders without a link.</p></Description>
+            <Description><p>A timeline of items with a time and a coloured point, and a breadcrumb whose last item has no link.</p></Description>
             <Demo>
                 <div class="two">
                     <TimelineControl>
@@ -79,7 +79,7 @@
         </DemoExample>
 
         <DemoExample Id="progress" Title="Progress bars" RazorCode="@Code.Progress" CSharpCode="@Code.ProgressCs" CssCode="@Code.ProgressCss">
-            <Description><p><code>ProgressBarControl</code> takes a percentage (<code>Value</code>, 0 to 100) with a bold <code>Title</code>, a <code>Status</code> after it and a <code>Detail</code> line under the bar. <code>Indeterminate</code> swaps the fill for a sweep while the import connects, <code>IsError</code> with <code>ErrorMessage</code> turns it red, and an <code>OnCancel</code> delegate adds its Cancel button. <code>ChunkProgressBarControl</code> shows the same line count in segments over its <code>Min</code> to <code>Max</code> range, here 0 to 5,000; the small one is vertical, with five segments and <code>ShowValue</code> off. The import is simulated: a timer on the page adds lines every 250 ms.</p></Description>
+            <Description><p>Start the import: a percentage bar with title, status and cancel, and a chunked bar over 0 to 5,000 lines.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <ButtonControl CssClass="btn-primary" OnClick="StartImport" Disabled="Running">Start import</ButtonControl>

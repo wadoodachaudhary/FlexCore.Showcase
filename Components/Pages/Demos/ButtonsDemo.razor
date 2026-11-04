@@ -15,16 +15,13 @@
                    SourcePath="ButtonControl.razor">
     <Overview>
         <p>
-            <code>ButtonControl</code> renders one <code>&lt;button&gt;</code>. Variants are CSS classes, colors come
-            from <code>--fx-btn-*</code> variables, and any attribute it does not recognise is forwarded to the element.
-            Give it <code>DropDownContent</code> and it becomes a popup trigger that closes on click-away without JavaScript.
+            <code>ButtonControl</code> is FlexCore's Blazor button: one native <code>&lt;button&gt;</code> with variant classes, CSS-variable colours and an optional dropdown panel. Unknown attributes pass straight through to the element.
         </p>
-        <p>This site themes its buttons: it sets the <code>--fx-btn-*</code> variables to its pale indigo, gives <code>btn-primary</code> and <code>btn-outline-primary</code> its own indigo, and sets the type and padding in its stylesheet. The examples show that look; the tables list the library's defaults.</p>
     </Overview>
 
     <Examples>
         <DemoExample Id="variants" Title="Variants, icons and sizes" RazorCode="@Code.Variants">
-            <Description><p>The default look comes from the theme variables; add one <code>btn-*</code> class for a semantic color. <code>IconCss</code> renders a leading icon, a trailing icon is ordinary content, and <code>btn-sm</code> / <code>btn-lg</code> change the size. Icon-only buttons need <code>Title</code> and <code>aria-label</code>. <code>RoundedButtonControl</code> is a pill-shaped subclass with four <code>Variant</code> colors. The <code>--fx-btn-*</code> variables in the table below retheme any region that sets them.</p></Description>
+            <Description><p>Try the <code>btn-*</code> colour classes, <code>btn-sm</code>/<code>btn-lg</code>, a leading <code>IconCss</code> icon, and the pill-shaped <code>RoundedButtonControl</code>.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <ButtonControl>Default</ButtonControl>
@@ -53,7 +50,7 @@
         </DemoExample>
 
         <DemoExample Id="dropdown" Title="Dropdown button" RazorCode="@Code.Dropdown" CSharpCode="@Code.DropdownCs">
-            <Description><p>Set <code>DropDownContent</code> and the button toggles a panel beneath itself. A backdrop element closes it on click-away. Call <code>CloseDropDown()</code> after a pick.</p></Description>
+            <Description><p>Click the button: <code>DropDownContent</code> opens beneath it and click-away closes it; no script involved.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <ButtonControl @ref="_export" CssClass="btn-primary" IconCss="bi bi-download" DropDownCssClass="menu">

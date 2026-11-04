@@ -22,16 +22,13 @@
                    SourcePath="Charts/SunburstChartControl.razor;Charts/SunburstChartControl.razor.css;Charts/SunburstModels.cs;Charts/ChartControl.razor">
     <Overview>
         <p>
-            <code>SunburstChartControl</code> draws a <code>SunburstNode</code> tree as concentric rings. Click a ring segment to drill into it,
-            click the centre to zoom back out; a breadcrumb tracks the path and <code>OnNodeClick</code> / <code>OnNodeHover</code> report
-            the node. The dataset is 56,956,080 confirmed COVID-19 cases and 1,397,672 deaths, after
-            <a href="https://towardsdatascience.com/how-i-created-a-sunburst-chart-using-javascript-to-visualize-covid-19-data-4ef27b45af8a/" target="_blank" rel="noopener">an article on Towards Data Science</a>.
+            <code>SunburstChartControl</code> draws a <code>SunburstNode</code> tree as concentric rings in a Blazor page: click a segment to drill in, click the centre to zoom out, and read the node from <code>OnNodeClick</code> and <code>OnNodeHover</code>. The data is 56,956,080 confirmed COVID-19 cases and 1,397,672 deaths across 210 countries, after an article on Towards Data Science.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="covid" Title="Cases and deaths by continent and country" RazorCode="@Code.Covid" CSharpCode="@Code.CovidCs">
-            <Description><p>Switch the metric, filter a continent, search a country, or open the data table underneath. The chart, the stats and the leaderboard share one selection.</p></Description>
+            <Description><p>Switch the metric, filter a continent, search a country or open the data table underneath; the chart, stats and leaderboard share one selection.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_metricItems" Values="@(new[] { _useDeathsAsMetric ? "deaths" : "cases" })"
                                     ValuesChanged="@(v => SwitchMetric(v.Count > 0 && v[0] == "deaths"))"

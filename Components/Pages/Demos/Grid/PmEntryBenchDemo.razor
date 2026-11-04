@@ -27,16 +27,13 @@
                    SourcePath="TextBoxTypingBehavior.cs;Grid/GridControl.razor.cs;Grid/GridTextEditingDiagnosticsSnapshot.cs;TextBoxControl.razor;wwwroot/textbox-control.js">
     <Overview>
         <p>
-            Text cell editors are <code>TextBoxControl</code>s, and <code>TextEditorTypingBehavior</code> picks their transport.
-            <code>ServerBacked</code>, the default, keeps the ordinary Blazor event path: the server sees the text as it is typed.
-            <code>ClientBuffered</code> keeps typing in the browser and sends the completed value when the cell commits, so a slow or
-            busy connection does not get a round trip per character. Both modes write the same value to the row on commit.
+            <code>TextEditorTypingBehavior</code> picks how text cell editors in the Blazor <code>GridControl</code> send keystrokes: <code>ServerBacked</code> uses the ordinary Blazor event path, <code>ClientBuffered</code> keeps typing in the browser and sends the value when the cell commits. Both write the same value on commit.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="transport" Title="Switch the transport, then type" RazorCode="@Code.Transport" CSharpCode="@Code.TransportCs">
-            <Description><p>Pick a transport, double-click an agent's Full Name, Email, Phone or Desk cell, type and press Enter. The line under the grid counts the saves and names the last one. On a local connection the two modes feel the same; the difference is how many messages travel while you type.</p></Description>
+            <Description><p>Pick a transport, double-click a Full Name, Email, Phone or Desk cell, type and press Enter; the difference is how many messages travel while you type.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_transports" Values="@(new[] { _clientBuffered ? "client" : "server" })"
                                     ValuesChanged="@(v => SetTransport(v.Count > 0 && v[0] == "client"))"

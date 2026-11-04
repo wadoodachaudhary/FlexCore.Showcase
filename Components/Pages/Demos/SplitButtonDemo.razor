@@ -11,16 +11,13 @@
                    SourcePath="SplitButtonControl.razor">
     <Overview>
         <p>
-            <code>SplitButtonControl</code> renders two native buttons side by side. The main half fires <code>OnClick</code>;
-            the caret half opens a menu built from <code>Items</code>, followed by any markup in <code>MenuContent</code>.
-            A click-away backdrop closes the menu; the control imports no script of its own. Use it when one action is the default and the others are
-            variants of it. When there is no default action, use <a href="demo/buttons#dropdown">ButtonControl's dropdown mode</a>.
+            <code>SplitButtonControl</code> is a Blazor split button: a main half that fires <code>OnClick</code> and a caret half that opens a menu of <code>Items</code>. Use it when one action is the default and the rest are variants of it.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="basic" Title="Default action with alternatives" RazorCode="@Code.Basic" CSharpCode="@Code.BasicCs">
-            <Description><p><code>Text</code> and <code>IconCss</code> label the main half. A disabled item renders but does not fire. <code>Disabled</code> greys out both halves.</p></Description>
+            <Description><p>Click the left half to export, the caret for the other formats; the greyed item is disabled.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <SplitButtonControl Text="Save" IconCss="bi bi-save" Items="_saveItems"
@@ -32,7 +29,7 @@
         </DemoExample>
 
         <DemoExample Id="menu-content" Title="Custom menu content" RazorCode="@Code.MenuContent" CSharpCode="@Code.MenuContentCs">
-            <Description><p><code>MenuContent</code> renders after the items. Clicks inside it do not close the menu, so it suits options that stay open; click-away closes it.</p></Description>
+            <Description><p><code>MenuContent</code> renders after the items and stays open while you click inside it.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <SplitButtonControl Text="Publish" IconCss="bi bi-cloud-upload" Items="_publishItems"

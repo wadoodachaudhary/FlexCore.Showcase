@@ -20,17 +20,13 @@
                    SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs;Grid/GridSettings.cs">
     <Overview>
         <p>
-            <code>AllowColumnReorder</code> is on by default: every header is draggable, and while a header is being dragged the grid shows a
-            vertical pipe at the position where the column would land. Drop to the left half of a header to land before it, to the right
-            half to land after it. <code>ColumnReorderPipeColor</code> takes any CSS colour for the pipe; the default is a dark grey. After a drop the grid raises
-            <code>OnLayoutChanged</code> with a <code>GridSettings</code> snapshot whose <code>ColumnOrder</code> lists the fields in their new
-            order, which is what a host saves to restore a user's layout later.
+            Column reordering in the Blazor <code>GridControl</code>: <code>AllowColumnReorder</code> is on by default, a pipe marks the drop position while a header is dragged, and <code>OnLayoutChanged</code> delivers a <code>GridSettings</code> snapshot with the new <code>ColumnOrder</code> for the host to save.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="reorder" Title="Move columns by dragging headers" RazorCode="@Code.Reorder" CSharpCode="@Code.ReorderCs">
-            <Description><p>Drag <strong>Priority</strong> in front of <strong>Booking</strong>, or <strong>Agent</strong> to the right of <strong>Cost</strong>. Only the dragged column moves; sorting, filtering and the search box keep working on the new order.</p></Description>
+            <Description><p>Drag Priority in front of Booking, or Agent to the right of Cost; sorting, filtering and search keep working on the new order.</p></Description>
             <Demo>
                 <GridControl TValue="ReorderingRow"
                              DataSource="@_rows"

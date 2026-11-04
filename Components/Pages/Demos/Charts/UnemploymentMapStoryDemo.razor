@@ -17,32 +17,22 @@
                    SourcePath="Maps/MapStoryControl.razor;Maps/ChoroplethLayout.cs;Maps/MapStory.cs">
     <Overview>
         <p>
-            <code>MapStory</code> is a declarative report: levels, region values, a color scale, callouts and the source line.
-            Define it in C# or load the same shape from JSON with <code>MapStory.Load</code>.
-            <code>MapStoryControl</code> draws each level on the existing <code>MapControl</code> choropleth.
-            Click a region to open the next map. Back and the breadcrumb return upward.
-            <code>MapStory.RenderSvg</code> writes the same graphic as static SVG for a report or an export.
-            The story below is unemployment. Continent figures are labour-force-weighted averages of ILO modelled national rates (World Bank, 2025).
-            Europe uses the August 2026 rates from the reference graphic. Provincial maps use Eurostat NUTS-2 for 2024, and the United States uses BLS statewide rates for September 2026.
-            No figure on this page is sample data. A country without a provincial series opens “Regional data not available”.
-            The second example builds a choropleth in code from the airports on the <a href="demo/grid">Data Grid</a> page and, for one country,
-            switches <code>MapControl</code> to its plain map with markers.
+            <code>MapStoryControl</code> draws a drill-down choropleth on the Blazor <code>MapControl</code> from a declarative <code>MapStory</code>: levels, region values, a colour scale, callouts and a source line, defined in C# or loaded from JSON. <code>MapStory.RenderSvg</code> writes the same graphic as static SVG for reports and exports.
+        </p>
+        <p>
+            The story below is unemployment: ILO modelled national rates weighted by labour force (World Bank, 2025), Eurostat NUTS-2 for 2024 and BLS state rates for September 2026. No figure on this page is sample data.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="story" Title="Unemployment, world to province" RazorCode="@Code.Story" CSharpCode="@Code.StoryCs">
-            <Description>
-                <p>Start at the world. Open Europe, then Spain, France, Germany, Italy or Finland. From North America, open the United States. Other countries stop at the national rate.</p>
-            </Description>
+            <Description><p>Start at the world, open Europe and then Spain, France, Germany, Italy or Finland, or open the United States from North America; other countries stop at the national rate.</p></Description>
             <Demo>
                 <MapStoryControl Story="_story" Width="960" Height="640" />
             </Demo>
         </DemoExample>
         <DemoExample Id="airports" Title="Airports per country, then one country's airports" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs" CssCode="@Code.AirportsCss">
-            <Description>
-                <p>The 4,009 airports from the <a href="demo/grid">Data Grid</a> page, counted per country: one airport is the palest blue, the United States' 634 the deepest. The colours step at 1, 3, 10, 30 and 100 airports because half of the countries have four or fewer. Click a country to open it on the plain map with one marker per airport (rose for large, amber for medium, grey for small). In the three countries with more than 200 airports (the United States, China and Canada), markers close together merge into a numbered circle that zooms in when clicked. Clicking a marker lists the airport's runways. Small territories such as French Polynesia have no outline at this scale. Data: <a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports</a>, public domain.</p>
-            </Description>
+            <Description><p>Click a country to open its 4,009-airport share on the plain map with one marker per airport; in the United States, China and Canada nearby markers merge into numbered clusters that zoom on click.</p></Description>
             <Demo>
                 @if (_country is null)
                 {
@@ -80,9 +70,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="svg" Title="The same Europe graphic as static SVG" RazorCode="@Code.Svg" CSharpCode="@Code.SvgCs">
-            <Description>
-                <p><code>RenderSvg</code> does not need a circuit. A report host can place this markup the way it places other SVG.</p>
-            </Description>
+            <Description><p>The Europe level rendered by <code>RenderSvg</code> without a circuit, ready for a report host to place like any other SVG.</p></Description>
             <Demo>
                 <div class="map-story-static">@((MarkupString)_europeSvg)</div>
             </Demo>

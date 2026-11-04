@@ -34,18 +34,13 @@
                    SourcePath="Reports/ReportWriterControl.razor;Reports/CrystalXmlReportLoader.cs;Reports/ReportOptions.cs;Reports/IReportDataExecutor.cs;Reports/IReportSessionContext.cs;Reports/IReportPickListProvider.cs;Reports/IReportExporter.cs;Reports/IReportViewerSettings.cs">
     <Overview>
         <p>
-            <code>ReportWriterControl</code> renders a <code>ReportDefinition</code> as paginated HTML pages with Crystal-style group headers
-            and footers, a clickable group tree and drill-down tabs. The definition is built in code or loaded from a Crystal XML export by
-            <code>CrystalXmlReportLoader</code>, which reads the tables, joins, groups, formulas and field placement. The control has no data
-            access of its own: the host registers <code>IReportDataExecutor</code>, <code>IReportSessionContext</code> and
-            <code>IReportPickListProvider</code> in dependency injection, and optionally an <code>IReportExporter</code>. The toolbar prints,
-            exports, searches the report text and zooms the pages.
+            <code>ReportWriterControl</code> renders a <code>ReportDefinition</code> as paginated HTML pages in a Blazor app, with Crystal-style group headers and footers, a group tree, search, zoom, print and export. <code>CrystalXmlReportLoader</code> builds the definition from a Crystal XML export; data comes from the <code>IReportDataExecutor</code> the host registers.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="report" Title="Package costs by region, package, cost group and supplier" RazorCode="@Code.Report" CSharpCode="@Code.ReportCs">
-            <Description><p>The bundled XML is a tour operator's cost sheet: four group levels (region, package, cost group, supplier), a sum in the package, cost group and supplier footers and a grand total at the end. Pick a package and a departure season and press Run; the report loads on arrival too. This site's data executor ignores the SQL in the definition and synthesises the supplier lines for the chosen package and season, so every choice returns a report. Press <strong>Parameters</strong> in the report's toolbar and the writer opens its own parameter dialog with the packages and seasons the XML lists; it reruns the report with what you pick there (the two pickers above belong to this page and do not follow the dialog). Open the group tree on the left to jump between groups, or search the report text from the toolbar.</p></Description>
+            <Description><p>Pick a package and a season and press Run, open the group tree to jump between the four group levels, or press Parameters in the toolbar for the writer's own dialog.</p></Description>
             <Controls>
                 <DropDownListControl TItem="string" TValue="string" DataSource="@_packages" @bind-Value="_package" AriaLabel="Package" Width="210px" />
                 <DropDownListControl TItem="string" TValue="string" DataSource="@_seasons" @bind-Value="_season" AriaLabel="Season" Width="120px" />

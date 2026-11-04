@@ -31,19 +31,13 @@
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.ColumnFeatures.cs;Grid/GridColumnsBase.cs;Grid/GridColumn.cs;Grid/GridEnums.cs;Grid/GridControl.Filtering.cs;Grid/GridControl.RowEditing.cs;Grid/GridControl.MultiSort.cs">
     <Overview>
         <p>
-            The grid reads a cell through the column's <code>Field</code>. When a row is an <code>IDictionary&lt;string, object&gt;</code>,
-            which is what <code>ExpandoObject</code> is, <code>Field</code> is the key, so ad-hoc query results bind without a model class.
-            On this page the columns come from the data too: a <code>@@foreach</code> over the keys of the first row declares one
-            <code>GridColumn</code> per key, numeric values get <code>ColumnType.Number</code> and a format, and when the key set changes the
-            swap runs inside <code>SuspendRedraw</code> so the grid converges the columns in place. With <code>AutoGenerateColumns</code>
-            the shape comes from the row type instead: <code>Display</code>, <code>DisplayName</code>, <code>DisplayFormat</code>,
-            <code>Editable</code> and <code>Key</code> attributes set the header, band, order, format and whether a cell can be edited.
+            Dynamic columns for the Blazor <code>GridControl</code>. With <code>IDictionary&lt;string, object&gt;</code> rows, such as <code>ExpandoObject</code>, a column's <code>Field</code> is the key, so columns can be declared from the data itself; with <code>AutoGenerateColumns</code> they come from <code>Display</code>, <code>DisplayFormat</code>, <code>Editable</code> and <code>Key</code> attributes on the row type.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="dynamic" Title="Columns read from the first row" RazorCode="@Code.Dynamic" CSharpCode="@Code.DynamicCs">
-            <Description><p>Five keys per row to start. Turn on the lead-time field and every row gains a key, so a sixth column appears; turn it off and the column goes. Change the row count to rebuild the list at a different size. Sorting, the filter icons and the search box work on the dynamic values; the line under the grid lists the columns the grid has right now.</p></Description>
+            <Description><p>Turn the lead-time field on and off to add and remove a column, or change the row count; the columns are read from the keys of the first row and swapped inside <code>SuspendRedraw</code>.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_sizes" Values="@(new[] { _rowCount.ToString() })"
                                     ValuesChanged="@(v => SetRowCountAsync(v.Count > 0 ? int.Parse(v[0]) : 500))"
@@ -77,7 +71,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="annotations" Title="Columns from data annotations" RazorCode="@Code.Annotations" CSharpCode="@Code.AnnotationsCs">
-            <Description><p>No column markup: the grid builds its columns from the attributes on <code>AnnotatedGridItem</code>. <code>Display</code> gives Item #, SKU, Unit price and Extended their headers, order and bands; <code>DisplayName</code> labels the description; <code>DisplayFormat</code> formats the money; <code>Key</code> and <code>Editable(false)</code> keep Item # and Extended read-only; <code>AutoGenerateField = false</code> hides InternalCode.</p></Description>
+            <Description><p>No column markup: headers, order, bands, formats and read-only cells all come from the attributes on <code>AnnotatedGridItem</code>.</p></Description>
             <Demo>
                 <GridControl DataSource="@_annotatedRows"
                              TValue="AnnotatedGridItem"

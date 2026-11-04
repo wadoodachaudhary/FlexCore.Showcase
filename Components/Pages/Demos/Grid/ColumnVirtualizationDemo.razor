@@ -21,17 +21,13 @@
                    SourcePath="Grid/GridControl.ColumnVirtualization.cs;Grid/GridEnums.cs;Grid/GridControl.razor.cs">
     <Overview>
         <p>
-            <code>EnableColumnVirtualization</code> renders only the non-frozen columns that are horizontally in view, plus
-            <code>ColumnVirtualizationOverscan</code> columns on either side; the rest become fixed-width spacers so the scrollbar and the
-            column positions stay right. Frozen columns stay mounted. The grid exposes <code>ColumnVirtualizationStatus</code> (Disabled,
-            Active or Fallback) and, when it has to fall back to a full render, <code>ColumnVirtualizationFallbackReason</code>.
-            <code>WidthMode="GridWidthMode.FitColumns"</code> sizes the grid to the sum of its column widths, up to the space available.
+            <code>EnableColumnVirtualization</code> keeps only the columns in view, plus <code>ColumnVirtualizationOverscan</code> on each side, in the page; the rest become fixed-width spacers so scrolling stays accurate. Frozen columns stay mounted, and <code>ColumnVirtualizationStatus</code> reports whether the Blazor grid is virtualizing or has fallen back.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="wide" Title="Twenty-one columns, three of them pinned" RazorCode="@Code.Wide" CSharpCode="@Code.WideCs">
-            <Description><p>Scroll the grid sideways. ID and Code stay on the left, Status on the right, and the eighteen metric columns move between them. The first paint mounts every column; from the first scroll on, only the metrics in view plus two on each side stay mounted and the rest become spacers. The line under the grid reports the grid's own status.</p></Description>
+            <Description><p>Scroll sideways across eighteen metric columns: ID, Code and Status stay pinned, only the metrics in view stay mounted, and the status line reports the grid's own state.</p></Description>
             <Demo>
                 <div class="wide">
                 <GridControl @ref="_grid"

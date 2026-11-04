@@ -27,16 +27,13 @@
                    SourcePath="Navigation/TabControl.razor; TabStripControl.razor; AccordionControl.razor">
     <Overview>
         <p>
-            <code>TabControl</code> owns its content: each <code>TabItem</code> declares a header and a pane, and <code>SelectedIndex</code> binds
-            two ways. <code>TabStripControl</code> is the header row alone, driven by a list of <code>TabStripItem</code>s with icons, disabled
-            and closable tabs, for cases where the content lives elsewhere, such as open documents or routes. <code>AccordionControl</code> stacks
-            <code>AccordionItemControl</code> headers and expands one at a time, or several with <code>Multiple</code>.
+            Three Blazor controls for one section at a time: <code>TabControl</code> with its own panes, <code>TabStripControl</code>, a bare header row for content that lives elsewhere, and <code>AccordionControl</code>, stacked headers that expand.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs" CssCode="@Code.TabsCss">
-            <Description><p>Panes are declared inline; only the selected one renders, so the Lines table is not in the page until its tab is chosen. The <code>TabItems</code> wrapper is optional. The look is this site's own tab style: the <code>Minimal</code> theme on one <code>Horizontal</code> row, restyled by the <code>site-tabs</code> class in the CSS tab. <code>TabControl</code> has no close button.</p></Description>
+            <Description><p>Switch tabs; only the selected pane renders. This is the site's own tab style, the Minimal theme in one row.</p></Description>
             <Demo>
                 <TabControl @bind-SelectedIndex="_tab" CssClass="site-tabs" Orientation="TabOrientation.Horizontal" Theme="TabTheme.Minimal">
                     <TabItems>
@@ -67,7 +64,7 @@
         </DemoExample>
 
         <DemoExample Id="strip" Title="Document tabs" RazorCode="@Code.Strip" CSharpCode="@Code.StripCs" CssCode="@Code.StripCss">
-            <Description><p>A tab strip laid out as a document workspace: Home is not <code>Closable</code>, so it has no ×; the documents are, and their × raises <code>OnTabClose</code> with the index, after which the page removes the item. The strip renders headers only; the page shows the selected item's <code>Tag</code> underneath. A disabled tab ignores clicks. <code>Theme</code> picks one of five built-in looks (the buttons set it); right-click the strip for the control's own menu, which also changes <code>Orientation</code>: Hybrid Vertical wraps the tabs onto rows, Horizontal keeps one scrolling row, Vertical turns the strip into a rail beside the pane. Both report back through <code>@@bind-Theme</code> and <code>@@bind-Orientation</code>, shown in the line under the strip.</p></Description>
+            <Description><p>Close a document with its ×, pick a theme with the buttons, and right-click the strip to change its orientation.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_themeItems" Values="@(new[] { _theme.ToString() })" ValuesChanged="SetTheme" Selection="ChoiceSelectionMode.Single" AriaLabel="Tab theme" />
             </Controls>
@@ -84,7 +81,7 @@
         </DemoExample>
 
         <DemoExample Id="accordion" Title="Accordion" RazorCode="@Code.Accordion">
-            <Description><p><code>Multiple="true"</code> lets several sections stay open; without it, opening one closes the rest. <code>InitiallyExpanded</code> opens a section on first render and <code>Disabled</code> greys its header.</p></Description>
+            <Description><p>Open several sections; without <code>Multiple</code>, opening one closes the rest.</p></Description>
             <Demo>
                 <div class="acc">
                     <AccordionControl Multiple="true">

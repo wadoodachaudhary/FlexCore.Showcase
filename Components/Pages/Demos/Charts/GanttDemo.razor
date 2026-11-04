@@ -25,22 +25,13 @@
                    SourcePath="Gantt/GanttControl.razor;Gantt/GanttModels.cs">
     <Overview>
         <p>
-            <code>GanttControl</code> is a <code>TreeGridControl</code> whose last column draws each task as a bar on a day-scaled timeline.
-            Tasks are plain <code>GanttTask</code> objects: a title, start and end, a progress percentage, an optional parent (the row nests
-            under it) and a comma-separated list of predecessor ids (drawn as arrows). The toolbar adds, edits and deletes tasks through a
-            dialog, expands or collapses the tree, and switches the timescale. A bar can be dragged to move its task and either end dragged
-            to resize it. Every change is validated and offered to <code>TaskChanging</code> before <code>TasksChanged</code> delivers the
-            new list. The control never edits the objects it was given: it works on clones and hands back clones.
-        </p>
-        <p>
-            The timeline runs from the earliest start to two days after the latest end and is at least 14 days wide. One day is 72, 32, 8
-            or 2 pixels in the Day, Week, Month and Year views; drags snap to whole days and keep each task's time of day.
+            <code>GanttControl</code> is a Blazor <code>TreeGridControl</code> whose last column draws each <code>GanttTask</code> as a bar on a day-scaled timeline, with nesting, predecessor arrows and progress. Tasks are added, edited and deleted through a dialog or by dragging bars; every change is validated, offered to <code>TaskChanging</code> and delivered by <code>TasksChanged</code> as clones, never by editing the objects you passed in.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="schedule" Title="Project schedule" RazorCode="@Code.Schedule" CSharpCode="@Code.ScheduleCs">
-            <Description><p>Nine tasks in two phases with dependencies between them. Add opens the dialog for a new task; select a row and Edit or Delete act on it, as does a double-click on the row. Drag a bar to move its task, drag either end to change its length, or put the focus on an end handle and press the arrow keys. A change that breaks a rule (an end before its start, a task starting before a predecessor finishes, a delete while other tasks still point at the task) is refused with a message under the toolbar. The line under the chart is built from the list <code>TasksChanged</code> delivers. The chart opens in the Month view, 8 px a day, so the whole plan is in sight without scrolling; the timescale dropdown switches to the wider views. <em>Drag bars</em> off removes the end handles and ignores drags (the dialog still edits); <em>Enforce dependencies</em> off lets a task start before its predecessor ends.</p></Description>
+            <Description><p>Drag a bar to move a task or its end to resize it, use Add, Edit and Delete, and switch the timescale; a change that breaks a rule is refused with a message under the toolbar.</p></Description>
             <Controls>
                 <ToggleButtonControl Selected="@_drag" SelectedChanged="v => _drag = v">Drag bars</ToggleButtonControl>
                 <ToggleButtonControl Selected="@_enforce" SelectedChanged="v => _enforce = v">Enforce dependencies</ToggleButtonControl>
@@ -52,7 +43,7 @@
         </DemoExample>
 
         <DemoExample Id="views" Title="Read-only timeline with a task template" RazorCode="@Code.Views" CSharpCode="@Code.ViewsCs">
-            <Description><p>The same plan with <code>AllowEditing</code> off: Add, Edit and Delete are disabled, the dialog and the drag handles are gone, while Expand all, Collapse all and the timescale still work. The Task column uses <code>TaskTemplate</code> to add the progress figure. <code>View</code> is bound both ways: the buttons set it from the page and the toolbar's dropdown reports back through <code>ViewChanged</code>. Month fits the plan in the card; Day and Week are wider than it and scroll, and Year shrinks the bars below their titles.</p></Description>
+            <Description><p>The same plan with <code>AllowEditing</code> off and a <code>TaskTemplate</code> that adds the progress figure; the buttons set <code>View</code> and the toolbar reports back through <code>ViewChanged</code>.</p></Description>
             <Controls>
                 @foreach (var v in Enum.GetValues<GanttView>())
                 {
@@ -70,7 +61,7 @@
         </DemoExample>
 
         <DemoExample Id="veto" Title="Vetoing a change" RazorCode="@Code.Veto" CSharpCode="@Code.VetoCs">
-            <Description><p><code>TaskChanging</code> sees every create, update and delete after the control's own validation has passed, with the action, the proposed task and the stored one. Here finished tasks are locked and nothing can be deleted: drag the Wireframes bar a day to the left, or select Launch and press Delete, and the guard refuses. The control shows no message for a refusal (a refused drag snaps back, a refused delete closes its prompt, a refused edit leaves the dialog open), so the line under the chart reports the decision. A delete of a task that others still depend on, Wireframes for one, never reaches the guard: the control's own rule refuses it first with its message under the toolbar.</p></Description>
+            <Description><p><code>TaskChanging</code> locks finished tasks and refuses every delete: drag Wireframes a day left, or select Launch and press Delete, and the line under the chart reports the refusal.</p></Description>
             <Demo>
                 <GanttControl Tasks="@_guarded" TasksChanged="t => _guarded = t" TaskChanging="Guard" View="GanttView.Month" Height="380px" />
                 <p class="result">@_decision</p>

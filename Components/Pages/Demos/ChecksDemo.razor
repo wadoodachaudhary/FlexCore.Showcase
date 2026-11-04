@@ -13,17 +13,13 @@
                    SourcePath="CheckBoxControl.razor; RadioGroupControl.razor; RadioControl.razor; SwitchControl.razor; RatingControl.razor">
     <Overview>
         <p>
-            <code>CheckBoxControl</code> is a native check box with a classic 13px look and an <code>Indeterminate</code> state for
-            "some of these". <code>RadioGroupControl&lt;TValue&gt;</code> renders one <code>RadioControl</code> per
-            <code>RadioGroupItem</code>, shares a name between them so the arrow keys work, and binds the chosen value.
-            <code>SwitchControl</code> is a check box drawn as a track and thumb. <code>RatingControl</code> is a row of star buttons.
-            All four bind their value two ways; the radio group also reports to an <code>EditContext</code>.
+            The small Blazor inputs every form needs: <code>CheckBoxControl</code> with an indeterminate state, <code>RadioGroupControl</code> for one of several, <code>SwitchControl</code> for on or off, and <code>RatingControl</code> for stars. All bind their value two ways.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="checks" Title="Check boxes with select all" RazorCode="@Code.Checks" CSharpCode="@Code.ChecksCs">
-            <Description><p>The parent box is checked when every child is, and <code>Indeterminate</code> when only some are. Clicking it sets all three. A disabled box keeps its value and is skipped by Tab.</p></Description>
+            <Description><p>Tick the children and watch the parent go indeterminate; tick the parent to set all three.</p></Description>
             <Demo>
                 <div class="stack">
                     <CheckBoxControl Checked="@AllChecked" Indeterminate="@SomeChecked" CheckedChanged="SetAll" Label="Include in quote" />
@@ -39,7 +35,7 @@
         </DemoExample>
 
         <DemoExample Id="radio" Title="Radio group and switches" RazorCode="@Code.Radio" CSharpCode="@Code.RadioCs">
-            <Description><p>One value from a list of <code>RadioGroupItem</code>s, laid out with <code>Vertical</code>; the third item is disabled. Switches are independent on-off settings with a <code>Label</code>. The line below reads the bound values.</p></Description>
+            <Description><p>One value from the radio group, two switches; the line below reads them.</p></Description>
             <Demo>
                 <div class="demo-row top">
                     <div class="stack">
@@ -58,7 +54,7 @@
         </DemoExample>
 
         <DemoExample Id="rating" Title="Rating" RazorCode="@Code.Rating" CSharpCode="@Code.RatingCs">
-            <Description><p>Hover previews a value; a click sets it and counts as one more review, so the read-only rating below moves with the running average. <code>ReadOnly</code> shows a value without letting it change (whole stars, so the average is rounded for the stars and printed exactly beside them); <code>MaxStars</code> sets the count.</p></Description>
+            <Description><p>Click a star; the read-only rating below moves with the running average.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <RatingControl Value="@_stars" ValueChanged="Rate" />

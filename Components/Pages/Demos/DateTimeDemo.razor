@@ -14,18 +14,13 @@
                    SourcePath="DatePickerControl.razor; TimePickerControl.razor; DateRangePickerControl.razor; CalendarControl.razor; TimeSpanPickerControl.razor">
     <Overview>
         <p>
-            <code>DatePickerControl</code> is a text box that parses what you type (sixteen built-in date formats, more with <code>ShowTime</code>) and opens a calendar
-            on the 📅 button, F4 or Enter on an empty field. <code>TimePickerControl</code> is an editable drop-down of times from <code>Min</code>
-            to <code>Max</code> every <code>Step</code>. <code>DateRangePickerControl</code> pairs two date pickers with a range calendar in a popup,
-            and <code>CalendarControl</code> is that calendar on its own, in single, multiple or range mode. <code>TimeSpanPickerControl</code> is a
-            row of number boxes for a duration. All five bind their value two ways and report validation through <code>EditContext</code> when
-            used inside an <code>EditForm</code>.
+            FlexCore's Blazor date and time pickers: <code>DatePickerControl</code> parses what you type or opens a calendar, <code>TimePickerControl</code> lists times in steps, <code>DateRangePickerControl</code> picks a start and end, <code>CalendarControl</code> is the calendar on its own and <code>TimeSpanPickerControl</code> takes a duration. All bind two ways and validate inside an <code>EditForm</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="appointment" Title="Date, time and duration" RazorCode="@Code.Appointment" CSharpCode="@Code.AppointmentCs">
-            <Description><p><code>MinDate</code> greys out the past; <code>ShowCalendarSidebar</code> adds Today, Tomorrow and week shortcuts to the drop-down. The time list runs 8:00 to 18:00 in half hours, and typed times outside it are refused with the control's own message. The duration commits when a box loses focus.</p></Description>
+            <Description><p>Type a date or open the calendar; the time list runs 8:00 to 18:00 in half hours.</p></Description>
             <Demo>
                 <div class="fields">
                     <div class="field"><span class="field-label">Date</span><DatePickerControl @bind-Value="_date" MinDate="DateTime.Today" ShowCalendarSidebar="true" AriaLabel="Appointment date" /></div>
@@ -37,7 +32,7 @@
         </DemoExample>
 
         <DemoExample Id="range" Title="Date range" RazorCode="@Code.Range" CSharpCode="@Code.RangeCs">
-            <Description><p>One <code>CalendarRange</code> binds both pickers and the popup calendar. <code>Min</code> and <code>Max</code> bound the travel window. Put the end before the start and the control reports it; the bound value still updates, so the page can refuse to count nights.</p></Description>
+            <Description><p>Pick a start and an end; one <code>CalendarRange</code> binds both boxes and the popup.</p></Description>
             <Demo>
                 <DateRangePickerControl @bind-Value="_trip" Min="DateTime.Today" Max="DateTime.Today.AddDays(180)" AriaLabel="Trip dates" />
                 <p class="result">@TripDates</p>
@@ -45,7 +40,7 @@
         </DemoExample>
 
         <DemoExample Id="calendar" Title="Calendar, several dates" RazorCode="@Code.Calendar" CSharpCode="@Code.CalendarCs">
-            <Description><p><code>SelectionMode="Multiple"</code> toggles days into <code>Values</code>. <code>DisabledDate</code> greys out weekends, <code>FirstDayOfWeek</code> starts the grid on Monday, and the heading button switches to a year or decade view. Arrow keys move through the days.</p></Description>
+            <Description><p>Click several days; weekends are disabled and the heading switches to year and decade views.</p></Description>
             <Demo>
                 <div class="cal-row">
                     <CalendarControl @bind-Values="_departures" SelectionMode="CalendarSelectionMode.Multiple" Min="DateTime.Today" Max="DateTime.Today.AddDays(90)"

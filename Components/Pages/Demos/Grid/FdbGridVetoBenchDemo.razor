@@ -22,16 +22,13 @@
                    SourcePath="Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/SelectionSettings.cs;Grid/GridControl.razor.cs;Grid/GridControl.KeyboardSelection.cs">
     <Overview>
         <p>
-            <code>RowSelecting</code> fires before the selection moves. Its <code>RowSelectEventArgs</code> carries the target row in
-            <code>Data</code> and a <code>Cancel</code> flag; set it and the move is refused, whether it came from a click or from the
-            keyboard. This page marks a row dirty when a cell value is written (<code>OnCellSave</code>) and refuses every move
-            away from it until Save is pressed; moves within the dirty row are still allowed.
+            <code>RowSelecting</code> fires before the selection moves in the Blazor <code>GridControl</code>; set <code>Cancel</code> on its <code>RowSelectEventArgs</code> and the move is refused, whether it came from a click or the keyboard. This page locks a row from the moment <code>OnCellSave</code> writes a value until Save is pressed.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="lock" Title="Leave a row only after saving it" RazorCode="@Code.Lock" CSharpCode="@Code.LockCs">
-            <Description><p>Double-click a Qty, Price or Notes cell, change it and press Enter. Now click another row, or press the Down arrow: the other row does not become selected and the line under the grid counts the refusal. Press Save and the lock lifts.</p></Description>
+            <Description><p>Edit a Qty, Price or Notes cell, then click another row or press Down: the move is refused and counted until you press Save.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="Save" Disabled="@(!_dirty)">Save</ButtonControl>
             </Controls>

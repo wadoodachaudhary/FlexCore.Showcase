@@ -19,40 +19,13 @@
                    SourcePath="AI/AIPromptControl.razor; AI/AIPromptModels.cs; Editor/LlmResultCard.razor; Layout/AppBarControl.razor; ToolbarControl.razor; ToolbarButtonControl.razor; ToolbarSeparatorControl.razor">
     <Overview>
         <p>
-            <code>AIPromptControl</code> is the screen side of a text-generation feature: a multi-line prompt, suggestion buttons that fill it, a Generate
-            button, one button per <code>AIPromptCommand</code>, and an <code>LlmResultCard</code> that shows the response with a button to use it. The
-            control calls no service. You pass a <code>Generate</code> delegate that receives an <code>AIPromptRequest</code> (the prompt, and the command
-            if one was clicked) with a <code>CancellationToken</code> and returns the response text; the control handles the busy state, cancelling, the
-            error message and a history of responses. Both examples on this page pass a stub that returns canned text.
-        </p>
-        <p>
-            Wiring a real model is the host's job. Inside <code>Generate</code>, send <code>request.Prompt</code> (and
-            <code>request.Command.Instruction</code> when a command button was used) to whatever you call models with, an <code>HttpClient</code>
-            against your own endpoint or a vendor SDK, honour the <code>CancellationToken</code>, and return the text; the control shows it in the
-            result card and keeps the last <code>MaxHistory</code> responses. Nothing on this page calls a model: the stub waits 1.2 seconds and
-            returns canned text.
-        </p>
-        <p>
-            The second example puts it on a desk screen: an <code>AppBarControl</code> for the title row, a <code>ToolbarControl</code> of
-            <code>ToolbarButtonControl</code>s and <code>ToolbarSeparatorControl</code>s for the commands, and the prompt in a side panel.
+            <code>AIPromptControl</code> is the Blazor screen side of a text-generation feature: a prompt box, suggestion buttons, commands, a response card and a history. It calls no service: your <code>Generate</code> delegate receives the prompt and the command and returns the text, so any model or endpoint plugs in. Both examples here use a stub that returns canned text after 1.2 seconds.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="prompt" Title="Prompt, suggestions and commands" RazorCode="@Code.Prompt" CSharpCode="@Code.PromptCs" CssCode="@Code.PromptCss">
-            <Description>
-                <p>
-                    A suggestion only fills the prompt; Generate sends it. Shorten, Expand and Friendlier tone send the same prompt with their
-                    <code>AIPromptCommand</code>, and the card's badge names the command. Use in draft raises <code>Apply</code> with the response on show,
-                    and the page copies its <code>Output</code> into the draft below. From the second response on, a row of history buttons brings back an
-                    earlier one; Dismiss hides the card and keeps the response in the history. The count under the control comes from <code>Generated</code>.
-                </p>
-                <p>
-                    No model is called. <code>Generate</code> is a page method, <code>StubGenerateAsync</code>, that waits 1.2 seconds on the request's token
-                    (so Cancel stops it), picks canned text by a word in the prompt and switches on the command's <code>Key</code>. It ignores
-                    <code>Instruction</code>, which a real provider would add to the prompt. An application connects its own provider through the same delegate.
-                </p>
-            </Description>
+            <Description><p>Click a suggestion, then Generate or one of the commands; Use in draft copies the response below, and the history buttons bring earlier ones back.</p></Description>
             <Demo>
                 <div class="ai">
                     <AIPromptControl @bind-Prompt="_prompt" Suggestions="_suggestions" Commands="_commands" Generate="StubGenerateAsync"
@@ -67,22 +40,7 @@
         </DemoExample>
 
         <DemoExample Id="app-bar" Title="From an app bar and toolbar" RazorCode="@Code.AppBar" CSharpCode="@Code.AppBarCs" CssCode="@Code.AppBarCss">
-            <Description>
-                <p>
-                    <code>AppBarControl</code> lays out its three slots in a header: an icon and the title, a subtitle, and a badge that follows the save state.
-                    Under it, a <code>ToolbarControl</code> holds <code>ToolbarButtonControl</code>s with Bootstrap icon classes in <code>IconCss</code> and
-                    captions in <code>Label</code>, with <code>ToolbarSeparatorControl</code>s between the groups. The buttons only report themselves in the
-                    status line; nothing is exported or printed. Save is <code>Disabled</code> until a new request, an edit to the notes or an added response.
-                </p>
-                <p>
-                    Export has <code>HasDropdown</code>, which draws the arrow and nothing else, so the page opens its own two-item panel under it; a pick,
-                    Export again or any other toolbar button closes it. AI assistant is a toggle through <code>Selected</code> and shows the prompt in a side
-                    panel (hidden, not removed, so its history survives); its Add to notes appends the response to the notes. The Captions checkbox is the
-                    toolbar's own (<code>ShowCaptionsToggle</code>), bound here through <code>ShowCaptions</code> and <code>ShowCaptionsChanged</code>; the
-                    switch above sets <code>Vertical</code> on every button. The library styles <code>Selected</code> only on <code>Large</code> buttons, so
-                    the page adds the pressed tint (CSS tab).
-                </p>
-            </Description>
+            <Description><p>The same prompt in a desk screen: an <code>AppBarControl</code>, a <code>ToolbarControl</code> whose AI assistant button opens the prompt in a side panel.</p></Description>
             <Controls>
                 <SwitchControl @bind-Checked="_vertical" Label="Vertical buttons" />
             </Controls>

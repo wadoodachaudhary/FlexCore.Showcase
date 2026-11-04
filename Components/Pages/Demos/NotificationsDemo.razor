@@ -15,16 +15,13 @@
                    SourcePath="Notifications/NotificationService.cs; NotificationDisplayControl.razor">
     <Overview>
         <p>
-            <code>NotificationService</code> is a scoped, per-circuit service with four methods: <code>Info</code>, <code>Success</code>,
-            <code>Warning</code> and <code>Error</code>. Each takes a message, an optional detail line and a duration in milliseconds;
-            zero keeps the toast until the user closes it. <code>NotificationDisplayControl</code>, rendered once in the layout, shows the
-            queue fixed to the top-right corner, newest first, twenty at most, each sliding in from the right. Neither imports a script of its own.
+            <code>NotificationService</code> shows Blazor toast notifications from anywhere in the app: <code>Info</code>, <code>Success</code>, <code>Warning</code> and <code>Error</code>, stacked top-right by one <code>NotificationDisplayControl</code> in the layout.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="levels" Title="Levels, detail and duration" RazorCode="@Code.Levels" CSharpCode="@Code.LevelsCs">
-            <Description><p>One call per level. The second argument is the smaller detail line. Defaults: info 5 s, success 4 s, warning 8 s, error 10 s. Pass <code>durationMs: 0</code> for a toast that stays.</p></Description>
+            <Description><p>Raise each level; the second argument is the detail line and <code>durationMs: 0</code> keeps a toast until it is closed.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <ButtonControl CssClass="btn-primary" OnClick="@(() => Notifications.Info("File uploaded", "report-q3.xlsx, 2.1 MB"))">Info</ButtonControl>

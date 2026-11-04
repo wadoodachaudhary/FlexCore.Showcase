@@ -29,17 +29,13 @@
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.ExportOptions.cs;Grid/GridControl.ProviderExport.cs;Grid/GridExportModels.cs;Grid/NativePdfDocument.cs;Excel/XlsxWriter.cs;Grid/GridColumn.cs">
     <Overview>
         <p>
-            The grid exports itself: <code>ExportToCsvAsync</code>, <code>ExportToXlsxAsync</code> and the other <code>ExportTo…Async</code>
-            methods take the rows as currently filtered and sorted and the columns as currently visible, build the file on the server with
-            the library's own writers, and hand it to the browser. Where the File System Access API exists a save dialog opens; elsewhere
-            the file downloads. A <code>GridColumn</code> with a <code>Template</code> renders whatever markup you put inside it for each row,
-            with <code>context</code> as the row object; the Status column here renders each line's Bookable flag as a <code>BadgeControl</code>.
+            Export and cell templates for the Blazor <code>GridControl</code>. <code>ExportToCsvAsync</code>, <code>ExportToXlsxAsync</code> and the other <code>ExportTo…Async</code> methods take the rows as filtered and sorted and the columns as visible, build the file on the server and hand it to the browser. A column's <code>Template</code> renders your own markup per row.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="export" Title="Export the rows you see" RazorCode="@Code.Export" CSharpCode="@Code.ExportCs">
-            <Description><p>Two hundred and fifty lines of the operator's rate card: the service, its supplier, category and season, a sample quantity and the net rate, with Bookable or Suspended as a badge. Search, filter or sort first, then export: the file holds exactly the rows and columns on screen, in the same order. When the export is done the grid shows the row count in a status pill.</p></Description>
+            <Description><p>Search, filter or sort, then export: the file holds exactly the rows and columns on screen, and the Status column renders each line's Bookable flag as a <code>BadgeControl</code>.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="ExportCsv">Export CSV</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="ExportExcel">Export Excel (.xlsx)</ButtonControl>

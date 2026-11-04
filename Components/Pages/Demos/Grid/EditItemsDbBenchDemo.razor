@@ -30,16 +30,13 @@
                    SourcePath="Grid/EditSettings.cs;Grid/GridEnums.cs;Grid/GridColumn.cs;Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/GridControl.razor.cs;Grid/GridControl.razor;Grid/GridControl.DeleteConfirmation.cs;Grid/GridControl.RowEditing.cs;Grid/GridControl.Validation.cs">
     <Overview>
         <p>
-            <code>EditSettings</code> turns editing on and picks the mode. In <code>EditMode.Batch</code> a double-click on an editable cell,
-            or Enter on the selected cell, opens an editor in that cell; Tab or Enter commits the value to the bound object and Escape
-            abandons it. There is no row editor and no save button. Columns opt in with <code>AllowEditing</code>. <code>GridControlEvents</code> reports what happens: <code>OnCellEdit</code> before a cell opens (set
-            <code>Cancel</code> to refuse) and <code>OnCellSave</code> when a value is written.
+            Cell editing in the Blazor <code>GridControl</code>: <code>EditSettings</code> with <code>EditMode.Batch</code> opens an editor in the cell on double-click or Enter, commits on Tab or Enter and writes straight to the bound object. Columns opt in with <code>AllowEditing</code>; <code>OnCellEdit</code> can refuse a cell and <code>OnCellSave</code> reports each write.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="edit" Title="Edit rate card cells in place" RazorCode="@Code.Edit" CSharpCode="@Code.EditCs">
-            <Description><p>Five thousand generated rate card lines held in memory; each line is a service from one supplier at one destination, with the net rate the operator pays and the margin it adds. Code, Region and Destination are read-only; double-click any other cell, or select it and press Enter, to edit it. Enter commits and stays on the cell, Tab commits and moves the selection to the next editable cell, Escape abandons the edit. The line under the grid counts saves and names the last one.</p></Description>
+            <Description><p>Double-click any cell except Code, Region or Destination, type, and press Enter to commit or Escape to abandon; the line under the grid counts saves on a 5,000-line rate card.</p></Description>
             <Demo>
                 <GridControl TValue="RateCardItem"
                              DataSource="@_lines"

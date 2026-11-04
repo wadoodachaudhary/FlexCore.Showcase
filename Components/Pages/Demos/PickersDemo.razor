@@ -21,18 +21,13 @@
                    SourcePath="AutoCompleteControl.razor;StepperControl.razor;WizardModels.cs;ColorPaletteControl.razor;ColorPalettes.cs">
     <Overview>
         <p>
-            Three small controls that pick one thing. <code>AutoCompleteControl</code> is an editable dropdown whose popup fills with
-            suggestions while the user types, from a list it filters itself or from a callback you supply; its value is the text, and it tells
-            you separately when that text is one of the suggestions. <code>StepperControl</code> draws the steps of a process as buttons and
-            decides which of them may be entered: in linear mode only earlier steps and the next one, never past an invalid step, never a
-            disabled step. <code>ColorPaletteControl</code> is a grid of swatches with one focusable tile and arrow-key movement.
-            Radio groups are on <a href="demo/checks">Checks &amp; switches</a>, calendars and time pickers on <a href="demo/date-time">Date &amp; time</a>.
+            Three Blazor pickers: <code>AutoCompleteControl</code> suggests while you type, from a list or a callback; <code>StepperControl</code> shows the steps of a process and decides which may be entered; <code>ColorPaletteControl</code> is a grid of swatches with keyboard movement. Radio groups are on <a href="demo/checks">Checks &amp; switches</a>, calendars on <a href="demo/date-time">Date &amp; time</a>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="suggest" Title="Suggestions while typing" RazorCode="@Code.Suggest" CSharpCode="@Code.SuggestCs">
-            <Description><p>Left: the twelve destinations, filtered by the control, case-insensitive, anywhere in the name, after one character and a 250 ms pause; an <code>ItemTemplate</code> adds the country, and <code>ItemSelected</code> reports the destination once the text matches a suggestion. Right: <code>OnRead</code> searches the 4,009 airports from the <a href="demo/grid">Data Grid</a> page through a callback that waits 300 ms like a server would, after two characters and a 400 ms pause, five suggestions at most: an exact code first, then cities and names that start with the text. Try <em>KEF</em>, <em>Lisbon</em> or <em>Portugal</em>. Typing on cancels the previous lookup. In both, the bound value is the text, whether or not it came from the list.</p></Description>
+            <Description><p>Type in either box: the left one filters twelve destinations itself, the right one asks a callback that searches 4,009 airports (try KEF, Lisbon or Portugal).</p></Description>
             <Demo>
                 <div class="pair">
                     <div>
@@ -54,7 +49,7 @@
         </DemoExample>
 
         <DemoExample Id="steps" Title="Steps" RazorCode="@Code.Steps" CSharpCode="@Code.StepsCs">
-            <Description><p>Four steps in the default linear mode: any earlier step can be clicked, the next one too, the ones after it are disabled. Mark the current step invalid and it gains a warning sign while every later step closes, so Next does nothing until the step is valid again; going back is always allowed. The Back and Next buttons call <code>SelectAsync</code> from the page, <code>CanNavigate</code> sees every move before it happens, and the arrow keys walk from step to step.</p></Description>
+            <Description><p>Click Next, go back, and mark the current step invalid to see the later steps close.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _stepper!.SelectAsync(_step - 1)" Disabled="@(_step == 0)">Back</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _stepper!.SelectAsync(_step + 1)" Disabled="@(_step == _steps.Count - 1)">Next</ButtonControl>
@@ -67,7 +62,7 @@
         </DemoExample>
 
         <DemoExample Id="palette" Title="Colour palette" RazorCode="@Code.Palette" CSharpCode="@Code.PaletteCs">
-            <Description><p>Left: the built-in 48-colour palette, eight across. Right: ten colours of your own, five across, larger tiles, and a <code>TileTemplate</code> that prints the hex value instead of the tick. Click a swatch or move with the arrow keys, Home and End; Up and Down jump by a row. The selected swatch keeps an outline whatever the template shows.</p></Description>
+            <Description><p>Click a swatch or move with the arrow keys; the right palette uses its own colours and a <code>TileTemplate</code>.</p></Description>
             <Demo>
                 <div class="pair">
                     <div>

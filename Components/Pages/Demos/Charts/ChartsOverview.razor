@@ -37,20 +37,13 @@
                    SourcePath="Charts/ChartControl.razor;Charts/ChartModels.cs;Charts/ChartEnums.cs;Charts/ChartControl.razor.css;Charts/ChartSvg.cs">
     <Overview>
         <p>
-            <code>ChartControl</code> takes a <code>ChartType</code> and a list of <code>ChartSeries</code> and draws the result as SVG;
-            there is no npm package or third-party script behind it. The gallery groups the types by the question they answer:
-            comparison, trend, part-to-whole, distribution, correlation, multivariate, KPI cards, statistics, heatmap and sparklines.
-            Charts with a page of their own are not repeated here: the drill-down <a href="demo/charts/sunburst">sunburst</a>, the
-            <a href="demo/gantt">Gantt chart</a>, the <a href="demo/gauges">gauges and stock chart</a> and the <a href="demo/charts/map-story">map story</a>;
-            candlestick, OHLC, bullet, range, Sankey and the radial and linear gauge types are on <a href="demo/advanced-charts">Financial &amp; gauges</a>.
-            Every bar, slice, point, cell and flow shows a card on hover with its label, series and value; the second example shows the
-            default card, a <code>TooltipFormat</code> pattern, a <code>TooltipTemplate</code> and the <code>PointHover</code> event.
+            <code>ChartControl</code> is FlexCore's Blazor chart: pass a <code>ChartType</code> and a list of <code>ChartSeries</code> and it draws the result as SVG from C#, with no npm package or third-party script. The gallery groups the 35+ types by the question they answer; every bar, slice, point, cell and flow shows a tooltip card on hover. The sunburst, Gantt, gauges, stock chart and map story have pages of their own.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="gallery" Title="Gallery by purpose" RazorCode="@Code.Gallery" CSharpCode="@Code.GalleryCs">
-            <Description><p>Every chart here is the same control with a different <code>Type</code>. Series data is bound; titles, heights, axes, legends and palettes are parameters.</p></Description>
+            <Description><p>Every chart here is the same control with a different <code>Type</code>; series data is bound and titles, axes, legends and palettes are parameters.</p></Description>
             <Demo>
 <TabControl @bind-SelectedIndex="_tab" CssClass="site-tabs" Orientation="TabOrientation.Horizontal" Theme="TabTheme.Minimal">
     <TabItem HeaderText="Comparison">
@@ -267,7 +260,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="tooltips" Title="Tooltips: default card, format pattern, template" RazorCode="@Code.Tooltips" CSharpCode="@Code.TooltipsCs">
-            <Description><p>Hover any bar, slice or point. The default card shows the label, the series when there are several, and the value; pie, donut, funnel and pyramid add the share of the whole. <code>TooltipFormat</code> rewrites the rows with placeholders, <code>TooltipTemplate</code> replaces the card, and <code>PointHover</code> hands the page the same context; the line under the tiles prints it. The card is Blazor markup positioned at the pointer, one event per shape and none per pixel, and it opens towards the middle of the drawing.</p></Description>
+            <Description><p>Hover any shape for the default card, then compare a <code>TooltipFormat</code> pattern, a <code>TooltipTemplate</code> and the <code>PointHover</code> event, whose context is printed under the tiles.</p></Description>
             <Demo>
 <DashboardLayoutControl Columns="3" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="1">
     <DashboardLayoutPanels>

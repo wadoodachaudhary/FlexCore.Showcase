@@ -23,22 +23,13 @@
                    SourcePath="Grid/PivotControl.razor;Grid/PivotControl.razor.cs;Grid/PivotSortDescriptor.cs;Grid/GridEnums.cs;Grid/GridColumn.cs;Grid/GridControl.razor.cs">
     <Overview>
         <p>
-            <code>PivotControl</code> turns a list of objects into a cross-tab: the values of the <code>RowFields</code> label the rows,
-            the values of the <code>ColumnFields</code> spread across the columns, and each cell aggregates one or more measures with
-            <code>Sum</code>, <code>Average</code>, <code>Count</code>, <code>Min</code> or <code>Max</code>. Two row fields give grouped rows
-            with a subtotal per group; two column fields give a two-row header; more than one measure adds a sub-column per measure. Headers
-            sort either a dimension or the rows by a column's values, and the sort keys can be read and set from the page. With
-            <code>Interactive</code> the control adds the field builder: available fields, four drop zones and a filter bar.
-        </p>
-        <p>
-            <code>GridControl</code> can switch into this control: <code>AllowPivoting</code> enables its embedded pivot view,
-            <code>ShowPivotPanelButton</code> puts the button on the grid's option rail, and the grid's export then takes the pivot's rows and columns.
+            <code>PivotControl</code> is FlexCore's Blazor pivot table: <code>RowFields</code> label the rows, <code>ColumnFields</code> spread across the columns, and each cell aggregates one or more measures with Sum, Average, Count, Min or Max. Two row fields give grouped rows with subtotals; <code>Interactive</code> adds a drag-and-drop field builder. <code>GridControl</code> can open the same view through <code>AllowPivoting</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="builder" Title="Interactive builder" RazorCode="@Code.Builder" CSharpCode="@Code.BuilderCs">
-            <Description><p>The 4,009 airports from the <a href="demo/grid#airports">Data Grid</a> page, as a small record: the builder lists every public property of the row type, so names, codes and coordinates are left out. <code>Airports</code> is 1 on every row, so its sum counts airports. Try Runway class in Columns under Type, or Hemisphere in Filters. Drag a field from the list into Filters, Rows, Columns or Values; drag a chip to another area to move it; the ✕ removes it. Each value chip has an aggregation dropdown and a format box (a .NET numeric format such as N0 or C2; blank prints the plain number). A filter field adds a dropdown above the table that narrows the data before grouping. The arrows on row and column chips sort that dimension; a click on a column header sorts the rows by that column's values, and Shift-click adds a second key. The builder starts from the parameters below and then keeps its own state.</p></Description>
+            <Description><p>Drag fields between Filters, Rows, Columns and Values, set each value chip's aggregation and format, and click headers (Shift-click for a second key) to sort 4,009 airports.</p></Description>
             <Demo>
                 <PivotControl TValue="AirportFacts"
                               DataSource="@_facts"
@@ -53,7 +44,7 @@
         </DemoExample>
 
         <DemoExample Id="grouped" Title="Grouped rows, subtotals and two measures" RazorCode="@Code.Grouped" CSharpCode="@Code.GroupedCs">
-            <Description><p>The same airports as full <code>Airport</code> records; with no builder, the page decides which fields are pivoted. Two row fields: Continent spans its countries and a "<em>continent</em> Total" row closes each group. Two measures: Airports (a <code>Count</code>) and Longest runway (a <code>Max</code>) sit side by side under each airport type and under Total, each with its own format and label. The table opens sorted by the Airports total, largest first, so each continent lists its countries by airport count; rows stay inside their continent when sorted by a value. Click a header to sort by that column (ascending, then descending, then off); Shift-click adds a key. The buttons set <code>SortDescriptors</code> from the page with the generated names of the Total columns, and the line below shows the keys the control reports through <code>SortDescriptorsChanged</code>, whichever side changed them. <em>Grand totals</em> and <em>Subtotals</em> switch the Total column and the continent Total rows off and on.</p></Description>
+            <Description><p>Continent spans its countries with a Total row per group and two measures, Airports and Longest runway, side by side; the buttons set <code>SortDescriptors</code> from the page and toggle grand totals and subtotals.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [MostAirports])">Most airports first</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [LongestRunway])">Longest runway first</ButtonControl>
@@ -77,7 +68,7 @@
         </DemoExample>
 
         <DemoExample Id="formulas" Title="Formula columns in a grid" RazorCode="@Code.Formulas" CSharpCode="@Code.FormulasCs">
-            <Description><p>Not a pivot, but the other way to compute numbers in a table. A column's <code>Formula</code> is evaluated per row: <code>[Field]</code> references and bare property names are replaced by the row's values and the expression runs through .NET's <code>DataTable.Compute</code>, so arithmetic, comparisons, <code>IIF</code> and the other DataColumn expression functions work. With <code>AllowCellFormulas</code>, a text cell that starts with <code>=</code> is evaluated the same way. Here twelve airports, from Amsterdam below sea level to La Paz at 13,355 ft: Elevation (m) is the column formula <code>[ElevationFt] * 0.3048</code>, and Longest runway (km) reads a property that returns <code>=[LongestRunwayFt] * 0.0003048</code>. Values that are not numbers count as 0, and an expression that fails shows as <code>#</code> followed by the expression. The results are display only; the row's data is not changed.</p></Description>
+            <Description><p>A column <code>Formula</code> such as <code>[ElevationFt] * 0.3048</code> is evaluated per row through <code>DataTable.Compute</code>, and with <code>AllowCellFormulas</code> a cell value starting with <code>=</code> is evaluated the same way.</p></Description>
             <Demo>
                 <GridControl TValue="Hub" DataSource="@_hubs"
                              AllowCellFormulas="true"

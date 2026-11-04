@@ -32,32 +32,13 @@
                    SourcePath="Grid/GridItemsProvider.cs;Grid/GridControl.ItemsProvider.cs;Grid/GridControl.ProviderGrouping.cs;Grid/GridControl.ProviderExport.cs">
     <Overview>
         <p>
-            An <code>ItemsProvider</code> replaces <code>DataSource</code> with a delegate the grid calls whenever it needs rows: the first
-            window, a scroll past what is loaded, a new sort or search, an export. Each <code>GridItemsRequest</code> says what is wanted
-            (<code>Purpose</code>), where in the result it starts (<code>StartIndex</code>, <code>Count</code>) and the current
-            <code>Query</code>: sorts, filters, search text, group fields and the aggregates to compute. The provider translates that into its
-            own LINQ or SQL and answers with a <code>GridItemsResult</code> of items and the total count. The grid keeps only a few recent
-            ranges in memory.
-        </p>
-        <p>
-            With <code>EnableProviderGrouping</code> the same delegate also serves the group tree. <code>Groups</code> asks for the top-level
-            groups, <code>GroupChildren</code> for the groups under one of them and <code>GroupItems</code> for the rows under the innermost,
-            each with the parent keys in <code>GroupRequest</code>. Groups start collapsed (<code>ProviderGroupsInitiallyCollapsed</code>), so
-            opening one is what sends its request; <code>ProviderGroupPageSize</code> and <code>ProviderGroupItemPageSize</code> cap each page,
-            and the grid adds a <em>Load more</em> row while the provider reports <code>HasMore</code>. Group counts and aggregates come from
-            the provider too, so captions and footers are right before any row is loaded.
-        </p>
-        <p>
-            <code>ExportProviderQueryAsync</code> exports the whole current query rather than the loaded window: it pages through
-            <code>Export</code> requests of <code>ProviderExportPageSize</code> rows, reports each page through
-            <code>ProviderExportProgressChanged</code>, and <code>CancelProviderExport</code> stops it. Column filters travel in the same request
-            as <code>Query.Filters</code>; this example leaves column filtering off because its provider does not translate them.
+            An <code>ItemsProvider</code> replaces <code>DataSource</code> with a delegate the Blazor <code>GridControl</code> calls for each window, sort, search, group or export; every <code>GridItemsRequest</code> carries the purpose, range and current query, and the provider answers with items and a total. With <code>EnableProviderGrouping</code> the same delegate serves the group tree, counts and aggregates page by page, and <code>ExportProviderQueryAsync</code> exports the whole query with progress and cancel.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="orders" Title="Twelve thousand orders, loaded group by group" RazorCode="@Code.Orders" CSharpCode="@Code.OrdersCs">
-            <Description><p>The orders sit in an in-memory list behind a 90 ms delay (60 ms for export pages) and stand in for a database. Open a region to fetch its categories, open a category to fetch its first 75 rows, and use <em>Load more</em> for the rest; the line under the grid counts the requests and names the last one. Sorting a column or typing in the search box starts a new query. <em>Export all to CSV</em> writes every order that matches the search, 400 at a time, with progress and a Cancel.</p></Description>
+            <Description><p>Open a region, then a category, then Load more: each step sends one request to a provider behind a 90 ms delay, and Export all pages through every matching order with progress and Cancel.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="ExportCsvAsync" Disabled="@(_grid?.IsProviderExporting == true)">Export all to CSV</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="CancelExport" Disabled="@(_grid?.IsProviderExporting != true)">Cancel export</ButtonControl>
@@ -98,7 +79,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="search" Title="A flat list, searched, sorted and paged by the provider" RazorCode="@Code.Search" CSharpCode="@Code.SearchCs">
-            <Description><p>The rate card is an in-memory list of 5,000 lines synthesized for each visitor and stands in for a database: each line is one supplier's service at one destination, with the net rate the operator pays. The provider gets every request the grid makes and returns only the range asked for, with the total. Type in the search box and the next request carries <code>SearchText</code>, which this provider matches against the code, description and supplier; sort a column and it carries <code>Sorts</code>; scroll and the grid asks for the next range. The line under the grid describes the last request. Column filters are off because this provider does not translate them.</p></Description>
+            <Description><p>Type in the search box or sort a column and the next request carries <code>SearchText</code> or <code>Sorts</code>; the line under the grid describes the last request the provider answered.</p></Description>
             <Demo>
                 <GridControl TValue="RateCardItem"
                              ItemsProvider="LoadItemsAsync"

@@ -18,18 +18,13 @@
                    SourcePath="CardControl.razor; CardGroupControl.razor; CarouselControl.razor; CarouselItemControl.razor">
     <Overview>
         <p>
-            <code>CardControl</code> stacks four regions: a header from <code>Title</code> and <code>Subtitle</code> (or your own
-            <code>HeaderContent</code>), an image from <code>ImageUrl</code>, the body from child content, and a right-aligned
-            <code>FooterContent</code> row. <code>Elevation</code> picks one of three shadow depths. <code>CardGroupControl</code> is a
-            grid of 280px-minimum columns that wraps as the page narrows and stretches every card in a row to the same height.
-            <code>CarouselControl</code> shows one <code>CarouselItemControl</code> at a time, with arrow and dot buttons of its own,
-            a two-way <code>ActiveIndex</code> and three public methods for moving from code.
+            <code>CardControl</code> is a Blazor card with header, image, body and footer; <code>CardGroupControl</code> lays several out in a wrapping grid of equal heights; <code>CarouselControl</code> shows one card at a time with arrows and dots.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="card" Title="Card with image, header and footer" RazorCode="@Code.Card" CSharpCode="@Code.CardCs">
-            <Description><p><code>Title</code> and <code>Subtitle</code> fill the header; the image sits between header and body, and <code>ImageAlt</code> falls back to the title. Footer children line up on the right. Pick an elevation to compare the shadows; 0 leaves only the border.</p></Description>
+            <Description><p>Pick an elevation to compare the shadows; 0 leaves only the border.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <span class="field-label">Elevation</span>
@@ -49,7 +44,7 @@
         </DemoExample>
 
         <DemoExample Id="group" Title="Card group" RazorCode="@Code.Group" CSharpCode="@Code.GroupCs">
-            <Description><p>Three cards from a list. <code>HeaderContent</code> replaces the title block, here with an icon. Narrow the window and the grid drops to two columns, then one.</p></Description>
+            <Description><p>Three cards from a list; narrow the window and the grid drops to two columns, then one.</p></Description>
             <Demo>
                 <CardGroupControl>
                     @foreach (var q in _quotes)
@@ -65,7 +60,7 @@
         </DemoExample>
 
         <DemoExample Id="carousel" Title="Carousel of destination cards" RazorCode="@Code.Carousel" CSharpCode="@Code.CarouselCs" CssCode="@Code.CarouselCss">
-            <Description><p>Six packages from the tour catalogue, one card per <code>CarouselItemControl</code>. The arrows and dots are the carousel's own buttons; Previous, Next and First below call its <code>Prev()</code>, <code>Next()</code> and <code>SelectSlide(0)</code>. Every move raises <code>ActiveIndexChanged</code>, which <code>@@bind-ActiveIndex</code> turns into the count. Next and Previous wrap round at the ends. Only the current card is rendered. The switches set <code>ShowNavButtons</code> and <code>ShowIndicators</code>.</p></Description>
+            <Description><p>Use the arrows, the dots or the buttons below, which call <code>Prev()</code>, <code>Next()</code> and <code>SelectSlide(0)</code>.</p></Description>
             <Controls>
                 <SwitchControl @bind-Checked="_showNav" Label="Nav buttons" />
                 <SwitchControl @bind-Checked="_showDots" Label="Indicators" />

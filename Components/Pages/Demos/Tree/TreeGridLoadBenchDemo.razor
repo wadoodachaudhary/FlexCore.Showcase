@@ -40,18 +40,13 @@
                    SourcePath="Grid/TreeGridControl.razor;Grid/TreeGridControl.razor.cs;Grid/TreeGridControl.Checking.cs;Grid/TreeGridControl.Editing.cs;Grid/TreeGridControl.Frozen.cs;Grid/TreeGridControl.Loading.cs;Grid/TreeGridControl.Moving.cs;Grid/TreeGridControl.Query.cs;Grid/TreeGridColumn.cs;Grid/TreeGridMutationModels.cs;Grid/TreeGridQuery.cs;Grid/GridModels.cs;Grid/GridToolbarModels.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
-            <code>TreeGridControl</code> builds the hierarchy from two property names on a flat list: <code>IdMapping</code> names the key and
-            <code>ParentIdMapping</code> the parent key, null or empty for a root. <code>TreatAsParent</code> marks rows as expandable even
-            before their children are in the list, <code>TreeColumnIndex</code> picks the column that carries the indentation and icons, <code>NodeExpandIconStyle</code> is
-            <code>PlusMinus</code> or <code>Triangle</code>, <code>EnableCollapseAll</code> starts with every node collapsed unless an
-            <code>InitialExpansionPredicate</code> says otherwise, and <code>ToggleOnRowClick="false"</code> limits mouse toggling to the icon; the keyboard still toggles. <code>Expanded</code> and <code>Collapsed</code> report the node
-            and its level; <code>ExpandAllAsync</code> and <code>CollapseAllAsync</code> change the state from code without raising those events.
+            <code>TreeGridControl</code> is FlexCore's Blazor tree grid: it builds the hierarchy from a flat list through <code>IdMapping</code> and <code>ParentIdMapping</code>. <code>TreatAsParent</code> and <code>LoadChildren</code> load nodes on demand, <code>InitialExpansionPredicate</code> opens some on arrival, and <code>Expanded</code> and <code>Collapsed</code> report each toggle.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="airports" Title="4,009 airports, loaded as you open them" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs">
-            <Description><p>The airports from the <a href="demo/grid#airports">Data Grid</a> page as continent, country, airport and runway. Only the six continents are in <code>DataSource</code>; <code>TreatAsParent</code> marks the continents, countries and airports with runways as expandable, and <code>LoadChildren</code> returns a row's children the first time it opens, so a visitor who opens Portugal loads Portugal's nineteen airports and nothing else. Europe opens on load through <code>InitialExpansionPredicate</code>. Group rows count their airports and open runways and give the longest; a runway row gives its own length, surface and whether it is lighted. Click a header to sort; each level sorts within its parent. The line under the grid counts the rows loaded so far.</p></Description>
+            <Description><p>Open a continent, a country, then an airport: each level loads its children the first time it opens, and the line under the grid counts the rows loaded so far.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _places?.CollapseAllAsync() ?? Task.CompletedTask)">Collapse all</ButtonControl>
             </Controls>
@@ -82,7 +77,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="org" Title="Org chart: who reports to whom" RazorCode="@Code.Org" CSharpCode="@Code.OrgCs">
-            <Description><p>Razor Sharp Getaways, an imagined tour operator: @_staff.Count(p => !p.Vacant).ToString("N0") people in @_staff.Count.ToString("N0") posts, from the chief executive to seasonal guides in twelve destinations and three contact centres. The staff come from a generator with a fixed seed, so everyone sees the same people, and every name is made up. Search for a name, title, office or division (try <em>Lisbon</em>, <em>Guide</em> or <em>Technology</em>) and press Enter: the matches stay, together with every manager above them, so the tree never loses its root. Vacant posts keep their place and their reports, finance, HR and marketing partners show their second, dotted-line manager under Also reports to, and the Name column stays put while you scroll sideways. The rating is a read-only <code>RatingControl</code> inside a column template.</p></Description>
+            <Description><p>Search for a name, title, office or division (try Lisbon or Guide) and press Enter: the matches stay with every manager above them, vacant posts keep their place, and the Name column stays put while you scroll sideways.</p></Description>
             <Controls>
                 <TextBoxControl Value="@_search" ValueChanged="Search" Placeholder="Name, title, office or division" Width="240px" />
             </Controls>

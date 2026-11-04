@@ -27,19 +27,13 @@
                    SourcePath="Charts/GaugeControl.razor;Charts/GaugeControls.cs;Charts/GaugeVisualControl.razor;Charts/GaugeModels.cs;Charts/StockChartControl.razor;Charts/StockChartRange.cs;Charts/ChartModels.cs">
     <Overview>
         <p>
-            The four gauge controls are one <code>GaugeControl</code> with a different shape each: <code>ArcGaugeControl</code> fills a
-            three-quarter arc, <code>CircularGaugeControl</code> a full ring, <code>RadialGaugeControl</code> adds a needle to the arc, and
-            <code>LinearGaugeControl</code> is a horizontal bar. They take the same parameters: a value between <code>Min</code> and
-            <code>Max</code>, coloured <code>Ranges</code>, extra <code>Pointers</code>, tick count and formats. Each is drawn as inline SVG and
-            exposes itself as a <code>meter</code>. <code>StockChartControl</code> wraps a candlestick, OHLC or high-low chart in a toolbar of
-            date pickers, zoom and pan buttons, with a navigator strip of closing prices and two sliders underneath; the visible range is
-            yours through <code>Start</code>, <code>End</code> and <code>RangeChanged</code>.
+            Four Blazor gauges sharing one parameter set: <code>ArcGaugeControl</code>, <code>CircularGaugeControl</code>, <code>RadialGaugeControl</code> and <code>LinearGaugeControl</code> take a value between <code>Min</code> and <code>Max</code>, coloured <code>Ranges</code>, extra <code>Pointers</code>, ticks and formats, drawn as inline SVG. <code>StockChartControl</code> wraps a candlestick, OHLC or high-low chart in a toolbar of date pickers, zoom and pan, with the visible range exposed through <code>Start</code>, <code>End</code> and <code>RangeChanged</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="gauges" Title="Four gauges, one value" RazorCode="@Code.Gauges" CSharpCode="@Code.GaugesCs">
-            <Description><p>The buttons move one value through all four. The arc has three coloured ranges, so its value arc is drawn thinner over them. The ring uses ten ticks and a <code>ValueTemplate</code> in place of the printed value. The radial gauge carries a second needle, a <code>GaugePointer</code> for the target, in its own colour. The linear gauge combines ranges, a pointer and formats with a percent sign. Hover a range or a pointer for its label.</p></Description>
+            <Description><p>Move one value through all four gauges and hover a range or pointer for its label; the radial gauge carries a second needle for the target.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _value = Math.Max(0, _value - 10)" Disabled="@(_value <= 0)">−10</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _value = Math.Min(100, _value + 10)" Disabled="@(_value >= 100)">+10</ButtonControl>
@@ -60,7 +54,7 @@
         </DemoExample>
 
         <DemoExample Id="stock" Title="Stock chart" RazorCode="@Code.Stock" CSharpCode="@Code.StockCs">
-            <Description><p>Ninety trading days of generated prices; <code>Start</code> opens the chart on the last fourteen. The toolbar's pickers set the start and end and cannot cross each other or leave the data; Zoom in halves the visible span around its centre, Zoom out doubles it, Earlier and Later slide it by half, All shows everything. The chart writes a date under every visible day, so once more than about sixteen are in view the labels run into each other: the page's buttons stay at five and fourteen trading days, and the navigator is off because its 90 px strip draws a 600 by 300 chart at three tenths of its size. The buttons above call <code>SetRangeAsync</code> from the page and switch the chart type; the line below is fed by <code>RangeChanged</code> and counts the trading days in view.</p></Description>
+            <Description><p>Use the pickers, Zoom in, Zoom out, Earlier and Later on ninety days of generated prices, or set the range from the page with <code>SetRangeAsync</code>; the line below counts the trading days in view.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _stock!.SetRangeAsync(_prices[^5].DateValue, null)">Last 5 trading days</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _stock!.SetRangeAsync(_firstShown, null)">Last 14 trading days</ButtonControl>

@@ -18,23 +18,13 @@
                    SourcePath="TextBoxControl.razor; NumericTextBoxControl.razor; TextAreaControl.razor">
     <Overview>
         <p>
-            <code>TextBoxControl</code> is a text box bound to a <code>string</code>, or a <code>&lt;textarea&gt;</code> with
-            <code>Multiline</code>. By default it reports <code>ValueChanged</code> when the field changes (Tab out, click away, Enter);
-            <code>UpdateOnInput</code> reports every keystroke instead. <code>NumericTextBoxControl&lt;TValue&gt;</code> is a number input
-            for <code>int</code>, <code>decimal</code>, <code>double</code> or <code>float</code> that parses the text, clamps it to
-            <code>Min</code> and <code>Max</code> and reports only when the entry is committed with Enter, Tab or a click away.
-            <code>TextAreaControl</code> is the multi-line box with a character limit, spell checking, scroll-bar modes and methods that
-            insert text at the caret and move focus.
-        </p>
-        <p>
-            All three render native elements and bind with <code>@@bind-Value</code>. None draws a label; the fields here sit inside a
-            <code>&lt;label&gt;</code>.
+            FlexCore's Blazor text inputs: <code>TextBoxControl</code> for a line of text (per keystroke with <code>UpdateOnInput</code>, or on change), <code>NumericTextBoxControl</code> for a typed number clamped to a range, and <code>TextAreaControl</code> for notes with a limit, spell checking and caret-level methods. All bind with <code>&#64;bind-Value</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="details" Title="Traveller details" RazorCode="@Code.Details" CSharpCode="@Code.DetailsCs" CssCode="@Code.DetailsCss">
-            <Description><p>Name has <code>UpdateOnInput</code>, so its count goes up with every keystroke; Email keeps the default and reports when the field changes: on Tab, a click away or Enter. Travellers clamps quietly: type 20 and it commits as 12. Budget rejects instead: below $250 a head its <code>ValueChange</code> handler sets <code>Cancel</code>, which leaves your figure in the box, marks it <code>aria-invalid</code> and puts focus back. <code>Format="C2"</code> shows 3200.00 in the box, because the control turns <code>C</code> into <code>F</code> for the number input; the summary adds the dollar sign.</p></Description>
+            <Description><p>Type in each field: Name updates per keystroke, Email on change, Travellers clamps to 12, and Budget refuses anything under $250 a head.</p></Description>
             <Demo>
                 <div class="details">
                     <label class="field">
@@ -68,7 +58,7 @@
         </DemoExample>
 
         <DemoExample Id="notes" Title="Notes with a limit" RazorCode="@Code.Notes" CSharpCode="@Code.NotesCs">
-            <Description><p>A 200-character note bound with <code>UpdateOnInput</code>, so the count follows every keystroke; the browser stops typing at <code>MaxLength</code>. The first button calls <code>InsertTextAsync</code>, which puts the phrase at the caret, or over the selection, although the click moved focus to the button; when the phrase would not fit it returns <code>false</code> and inserts nothing. <code>SpellCheck="true"</code> asks the browser to mark misspellings. The switch turns on the control's own context menu with the <code>Editing</code> items; it replaces the browser's menu, spelling suggestions included.</p></Description>
+            <Description><p>Type up to 200 characters; the button inserts a phrase at the caret, and the switch turns on the control's own context menu.</p></Description>
             <Demo>
                 <div class="notes">
                     <label class="field">

@@ -24,15 +24,13 @@
                    SourcePath="Grid/GridControl.ColumnFeatures.cs;Grid/GridColumn.cs;Grid/GridColumnHeaderBand.cs;Grid/EditSettings.cs">
     <Overview>
         <p>
-            A column with <code>IsFrozen</code> stays in view while the rest scroll sideways; <code>FrozenPosition</code> puts it on the
-            left or the right edge. <code>ColumnHeaderBands</code> draws a second header row that spans named groups of columns, and a
-            column's <code>HeaderBand</code> joins a band by name.
+            Frozen columns and header bands for the Blazor <code>GridControl</code>. <code>IsFrozen</code> with <code>FrozenPosition</code> pins a column to the left or right edge; <code>ColumnHeaderBands</code> adds a header row that spans the columns sharing a <code>HeaderBand</code> name.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="frozen" Title="Header bands and frozen columns" RazorCode="@Code.Frozen" CSharpCode="@Code.FrozenCs">
-            <Description><p>Two hundred rows. ID and Code are frozen on the left, Status and Actions on the right; scroll the grid sideways and they stay put. The bands Identity, Product, Amounts and Workflow span their columns. Qty, Price and Discount accept edits in place (<code>EditMode.Batch</code>). Remove drops the row and the count below updates.</p></Description>
+            <Description><p>Scroll sideways: ID and Code stay on the left, Status and Actions on the right, and the Identity, Product, Amounts and Workflow bands span their columns; Qty, Price and Discount edit in place.</p></Description>
             <Demo>
                 <div class="frozen">
                 <GridControl DataSource="@_rows"

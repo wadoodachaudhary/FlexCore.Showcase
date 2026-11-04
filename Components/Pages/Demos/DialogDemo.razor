@@ -16,20 +16,13 @@
                    SourcePath="DialogControl.razor; Dialogs/MessageBoxControl.razor; Dialogs/IDialogService.cs">
     <Overview>
         <p>
-            <code>DialogControl</code> is a window: a title bar with a close icon, a body, an optional footer. It drags by its title bar,
-            resizes from eight handles, and is modal (page dimmed and blocked) or non-modal (page stays live). Enter can fire a default
-            button, Escape closes, and a right-click on the title bar opens a Win32-style system menu. <code>CssClass="fx-dialog-classic"</code>
-            gives it the classic frame for migrated VB6 forms.
-        </p>
-        <p>
-            <code>MessageBoxControl</code> and <code>InputDialogControl</code> are built on it, and <code>IDialogService</code> wraps both so any
-            component can <code>await</code> a confirm, alert or prompt in place of the browser's own.
+            <code>DialogControl</code> is a Blazor dialog window: movable, resizable, modal or non-modal, with a default button, Escape to close and a Win32-style system menu. <code>MessageBoxControl</code>, <code>InputDialogControl</code> and <code>IDialogService</code> build on it so any component can await a confirm, alert or prompt.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="modal" Title="Modal dialog with a default button" RazorCode="@Code.Modal" CSharpCode="@Code.ModalCs">
-            <Description><p><code>@@bind-Visible</code> opens and closes it. <code>FooterContent</code> holds the buttons. <code>OnEnter</code> makes Archive the default button: Enter anywhere in the dialog fires it. It stays the default over a note, a date and a list in the body: Enter in any of them presses Archive. Escape and the close icon cancel. The switch applies <code>fx-dialog-classic</code>, the Win32 frame for migrated VB6 forms.</p></Description>
+            <Description><p>Open the dialog and press Enter anywhere in it: <code>OnEnter</code> fires the default button. The switch applies the classic Win32 frame.</p></Description>
             <Controls>
                 <ToggleButtonControl @bind-Selected="_classic">Classic look</ToggleButtonControl>
             </Controls>
@@ -60,7 +53,7 @@
         </DemoExample>
 
         <DemoExample Id="window" Title="Non-modal window" RazorCode="@Code.Window" CSharpCode="@Code.WindowCs">
-            <Description><p><code>IsModal="false"</code> leaves the page live. Width, height and position bind two ways, so a drag or resize reports back. <code>ShowWindowIcon</code> adds the icon that opens the system menu.</p></Description>
+            <Description><p>A non-modal window leaves the page live; drag or resize it and the bound size and position report back.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <ButtonControl CssClass="btn-primary" OnClick="@(() => _winOpen = true)">Open window</ButtonControl>
@@ -76,7 +69,7 @@
         </DemoExample>
 
         <DemoExample Id="service" Title="Message box, prompt and the dialog service" RazorCode="@Code.Service" CSharpCode="@Code.ServiceCs">
-            <Description><p><code>IDialogService</code> replaces <code>window.confirm</code>, <code>alert</code> and <code>prompt</code>: inject it anywhere and await the answer. A page can also own a <code>MessageBoxControl</code> and call <code>ShowAsync</code> for an icon, the .NET look, or a confirmation checkbox, or a <code>MultiLineEditControl</code> for a long-text prompt.</p></Description>
+            <Description><p>Each button awaits an answer from <code>IDialogService</code> or a <code>MessageBoxControl</code>; Notes opens a multi-line prompt.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <ButtonControl OnClick="Confirm">Confirm</ButtonControl>

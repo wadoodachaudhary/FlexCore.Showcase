@@ -19,16 +19,13 @@
                    SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs;Grid/GridControl.AdvancedFeatures.cs;Grid/GridControl.PresentationFeatures.cs;Grid/GridControl.ItemsProvider.cs;Grid/GridControl.ColumnVirtualization.cs;Grid/GridControl.ProviderGrouping.cs;Grid/GridControl.ProviderExport.cs;Grid/GridModels.cs">
     <Overview>
         <p>
-            <code>GridControl</code> binds a list through <code>DataSource</code> and <code>TValue</code>, declares its columns in
-            <code>GridColumnsBase</code> and switches behaviours on with <code>Allow*</code> flags. This page shows the core set on real data:
-            4,009 airports from <a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports</a>, which is in the public domain. The pages in the Data Grid menu each take one feature further, from batch editing and frozen columns to
-            on-demand loading, grouping with totals and the tree grid; they are listed under Related.
+            <code>GridControl</code> is FlexCore's Blazor data grid: bind a list with <code>DataSource</code>, declare columns in <code>GridColumnsBase</code>, and switch on sorting, filtering, grouping, search and row windowing with <code>Allow*</code> flags. The other Data Grid pages each take one feature further; they are listed under Related.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="airports" Title="4,009 airports: search, sort, filter and group" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs" CssCode="@Code.AirportsCss">
-            <Description><p>Every airport with an IATA code and scheduled passenger service in the <a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports</a> data (public domain, snapshot of 26 October 2026). The grid opens grouped by continent, and each caption counts the airports and gives their average elevation and longest runway. Type in the search box (try <em>Lisbon</em> or <em>Iceland</em>), click a header to sort (Elevation finds the highest airports), use a header's filter icon, or drag the Continent chip out of the bar above the grid for one flat list. Scroll sideways for runways, city and the Wikipedia article: the Code column stays put. Only the rows in view are rendered. The same airports are counted per country, and placed on a map, on the <a href="demo/charts/map-story#airports">Map story</a> page.</p></Description>
+            <Description><p>Search (try Lisbon), click a header to sort, open a filter icon, or drag the Continent chip out of the group bar; 4,009 airports from OurAirports, grouped by continent with counts and averages in each caption.</p></Description>
             <Demo>
                 <div class="airports">
                     <GridControl TValue="Airport" DataSource="@_airports"

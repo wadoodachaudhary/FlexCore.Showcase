@@ -12,17 +12,13 @@
                    SourcePath="ToggleButtonControl.razor; ButtonGroupControl.razor; SegmentedControl.razor">
     <Overview>
         <p>
-            <code>ToggleButtonControl</code> is a <a href="demo/buttons">ButtonControl</a> with a pressed state: <code>Selected</code> binds
-            two ways and the button reports <code>aria-pressed</code>. <code>ButtonGroupControl</code> lines up several such buttons from a
-            list of <code>SelectionItem</code>s and keeps the selection for you: one value or many, horizontal or vertical, with Arrow,
-            Home and End moving focus between them.
+            <code>ToggleButtonControl</code> is a Blazor button that stays pressed; <code>ButtonGroupControl</code> lines several up and keeps one value or many selected; <code>SegmentedControl</code> is a radio group drawn as one bar.
         </p>
-        <p>This site sets <code>--fx-accent</code> and the <code>--fx-btn-*</code> variables to its own indigo, so the examples show that look; the tables list the library's defaults.</p>
     </Overview>
 
     <Examples>
         <DemoExample Id="toggle" Title="Toggle button" RazorCode="@Code.Toggle" CSharpCode="@Code.ToggleCs">
-            <Description><p><code>@@bind-Selected</code> holds the state. Icon-only toggles need <code>Title</code> and <code>aria-label</code>. <code>Enabled="false"</code> disables; there is no <code>Disabled</code> parameter on this control.</p></Description>
+            <Description><p>Press to toggle; <code>&#64;bind-Selected</code> holds the state.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <ToggleButtonControl @bind-Selected="_bold" IconCss="bi bi-type-bold" Title="Bold" aria-label="Bold" />
@@ -36,7 +32,7 @@
         </DemoExample>
 
         <DemoExample Id="group" Title="Button group" RazorCode="@Code.Group" CSharpCode="@Code.GroupCs">
-            <Description><p><code>Selection="Single"</code> replaces the selection; <code>Multiple</code> toggles each value. <code>Orientation="Vertical"</code> stacks the buttons. <code>AllowEmpty</code> lets the last value go; a disabled item stays in place and is skipped by the arrow keys.</p></Description>
+            <Description><p>Left group picks one value, right group picks several; use the arrow keys to move between buttons.</p></Description>
             <Demo>
                 <div class="demo-row top">
                     <div class="stack">
@@ -52,7 +48,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="segmented" Title="Segmented control" RazorCode="@Code.Segmented" CSharpCode="@Code.SegmentedCs">
-            <Description><p><code>SegmentedControl</code> is a <code>RadioGroupControl</code> drawn as one bar: a list of <code>SelectionItem</code>s, one <code>Value</code> bound two ways, <code>Orientation</code> to stack it. As in any radio group, one segment holds the Tab stop and the arrow keys move the choice.</p></Description>
+            <Description><p>One choice as a bar; arrow keys move it like a radio group.</p></Description>
             <Demo>
                 <div class="stack">
                     <SegmentedControl Items="_viewItems" @bind-Value="_calendarView" AriaLabel="Calendar view" />

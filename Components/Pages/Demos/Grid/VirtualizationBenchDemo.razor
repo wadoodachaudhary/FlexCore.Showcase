@@ -22,22 +22,13 @@
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.PresentationFeatures.cs;Grid/GridControlEvents.cs">
     <Overview>
         <p>
-            Without paging the grid scrolls: it renders the rows in view plus an overscan band and lets spacer rows stand in for the rest,
-            so a thousand rows or fifty thousand cost about the same per frame (the window parameters are on
-            <a href="demo/grid/row-selection-50k">100k rows</a>). With <code>AllowPaging</code> it renders one page of <code>PageSize</code>
-            rows and a pager, placed by <code>PagerPosition</code>, that also offers the <code>PageSizes</code>. Sorting, filtering, grouping,
-            the search box and batch editing work the same way in both.
-        </p>
-        <p>
-            Two timings are taken here, both on the server with <code>Stopwatch</code>: building the thousand rows in C#, and the first render
-            after a switch, from the click to the component's next <code>OnAfterRender</code>. The line under the grid keeps the latest value
-            for each mode so they can be compared. Browser layout and paint are not included, so the wait you see is a little longer.
+            Scrolling or paging in the Blazor <code>GridControl</code>. Without paging the grid windows the rows in view; with <code>AllowPaging</code> it renders one page of <code>PageSize</code> rows and a pager placed by <code>PagerPosition</code> that offers the <code>PageSizes</code>. Sorting, filtering, grouping, search and batch editing work the same way in both.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="modes" Title="One grid, three ways to show a thousand rows" RazorCode="@Code.Modes" CSharpCode="@Code.ModesCs">
-            <Description><p>Switch between scrolling, 25 per page and 100 per page; each switch remounts the grid and records its first render time. Sort, filter, group by Category or type in the search box in any mode. Select several rows with Ctrl or Shift and edit one Quantity: the grid's default <code>MultiRow</code> batch behaviour writes the value to every selected row, and the count of saved cells comes from <code>OnCellSave</code>. In a paged mode the current page comes from <code>PageChanged</code>.</p></Description>
+            <Description><p>Switch between scrolling, 25 per page and 100 per page; each switch records its first render time, and editing one Quantity with several rows selected writes the value to every selected row.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_modeItems" Values="@(new[] { _modeKey })" ValuesChanged="PickMode" Selection="ChoiceSelectionMode.Single" AriaLabel="Scroll or page" />
             </Controls>

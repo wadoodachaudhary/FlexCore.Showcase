@@ -24,14 +24,13 @@
                    SourcePath="Charts/ChartControl.razor;Charts/ChartModels.cs">
     <Overview>
         <p>
-            The same <code>ChartControl</code> as the <a href="demo/charts">gallery</a>, with the types a finance or operations screen
-            needs. Financial series use <code>ChartDataPoint.Financial</code> for open, high, low and close; the others bind ordinary series.
+            The same Blazor <code>ChartControl</code> with the types a finance or operations screen needs: candlestick and OHLC bound through <code>ChartDataPoint.Financial</code>, bullet and range comparisons, a Sankey flow and two gauge types.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="financial" Title="Candlestick and OHLC" RazorCode="@Code.Financial" CSharpCode="@Code.FinancialCs">
-            <Description><p>Both read the same series; <code>Candlestick</code> fills the body, <code>Ohlc</code> draws ticks.</p></Description>
+            <Description><p>Both charts read the same series: Candlestick fills the body, Ohlc draws ticks.</p></Description>
             <Demo>
                 <div class="two">
                     <ChartControl Type="ChartType.Candlestick" UpColor="@ChartPalette.Green" DownColor="@ChartPalette.Rose" Title="BAKE, one week of trading" Series="_candlestickSeries" Height="248px" />
@@ -41,7 +40,7 @@
         </DemoExample>
 
         <DemoExample Id="comparisons" Title="Bullet, range and Sankey" RazorCode="@Code.Comparisons" CSharpCode="@Code.ComparisonsCs">
-            <Description><p><code>Bullet</code> shows actual against target bands, <code>RangeColumn</code> floats a minimum to maximum bar, <code>Sankey</code> draws weighted flows between nodes.</p></Description>
+            <Description><p>Bullet shows actual against target bands, RangeColumn floats a minimum-to-maximum bar, and Sankey draws weighted flows between nodes.</p></Description>
             <Demo>
                 <div class="stack">
                     <ChartControl Type="ChartType.Bullet" ColorPalette="@ChartPalette.Site" Title="Monthly budget, spent against planned" Series="_bulletSeries" Height="240px" />
@@ -54,7 +53,7 @@
         </DemoExample>
 
         <DemoExample Id="gauges" Title="Radial and linear gauges" RazorCode="@Code.Gauges" CSharpCode="@Code.GaugesCs">
-            <Description><p>One series, two gauge types. The standalone <code>ArcGaugeControl</code>, <code>CircularGaugeControl</code>, <code>RadialGaugeControl</code> and <code>LinearGaugeControl</code> have <a href="demo/gauges">a page of their own</a>.</p></Description>
+            <Description><p>One series drawn as two gauge types; the standalone gauge controls have a page of their own.</p></Description>
             <Demo>
                 <div class="gauges">
                     <ChartControl Type="ChartType.RadialGauge" ColorPalette="@ChartPalette.Site" Title="Rain barrel, percent full" Series="_gaugeSeries" Height="300px" />

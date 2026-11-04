@@ -11,16 +11,13 @@
                    SourcePath="SliderControl.razor; RangeSliderControl.razor">
     <Overview>
         <p>
-            <code>SliderControl</code> is a styled native <code>&lt;input type="range"&gt;</code>: <code>Min</code>, <code>Max</code> and
-            <code>Step</code> map straight onto the input, and <code>Value</code> binds two ways. <code>ValueChanged</code> fires while the
-            thumb is dragged and once more on release, so a bound page updates live. <code>RangeSliderControl</code> stacks two sliders for a
-            <code>NumericRange</code> and keeps <code>Start</code> at or below <code>End</code>.
+            <code>SliderControl</code> is a Blazor slider on the native range input, with <code>Min</code>, <code>Max</code>, <code>Step</code> and a two-way <code>Value</code>; <code>RangeSliderControl</code> binds a lower and an upper bound as one <code>NumericRange</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="slider" Title="Slider" RazorCode="@Code.Slider" CSharpCode="@Code.SliderCs">
-            <Description><p><code>Step="0.5"</code> gives half-percent markup. <code>ShowValue="false"</code> hides the built-in readout so the page can format its own; the disabled slider keeps the default readout. Unmatched attributes such as <code>aria-label</code> land on the input.</p></Description>
+            <Description><p>Drag the thumb: <code>ValueChanged</code> fires while dragging, so the price updates live.</p></Description>
             <Demo>
                 <div class="field">
                     <span class="field-label">Markup</span>
@@ -36,7 +33,7 @@
         </DemoExample>
 
         <DemoExample Id="range" Title="Range slider" RazorCode="@Code.Range" CSharpCode="@Code.RangeCs">
-            <Description><p>One <code>NumericRange</code> binds both thumbs. <code>Format</code> shapes the readout; <code>StartLabel</code> and <code>EndLabel</code> name the two inputs. Dragging the start past the end stops at the end, and the other way round. The list below filters as the range moves.</p></Description>
+            <Description><p>Move either thumb; the list filters to the options inside the range.</p></Description>
             <Demo>
                 <div class="range-row">
                     <RangeSliderControl @bind-Value="_budget" Min="0" Max="2000" Step="50" Format="$#,##0"

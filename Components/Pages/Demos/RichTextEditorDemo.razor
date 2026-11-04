@@ -16,37 +16,13 @@
                    SourcePath="Editor/EditorControl.razor.cs; Editor/EditorControl.Commands.cs; Editor/FormatControl.razor; Editor/EditorLiteControl.razor.cs; wwwroot/editor-control.js">
     <Overview>
         <p>
-            Three controls from <code>Fx.ControlKit.Editor</code>. <code>EditorControl</code> takes a list of <code>EditorBlock</code> records
-            (paragraphs, two heading levels, images and page breaks), writes them into one <code>contenteditable</code> element, and from then on
-            the browser owns the text. <code>ReadBlocksAsync</code> and <code>OnBlocksChanged</code> hand it back as blocks, with inline markup cut
-            down to bold, italic, underline, <code>s</code>, line breaks and styled spans. <code>FormatControl</code> is a formatting toolbar with no
-            editor of its own: it raises callbacks, and the page calls the editor. <code>EditorLiteControl</code> is a smaller editor with its own
-            toolbar and lists, bound to an HTML string.
-        </p>
-        <p>
-            Selection, formatting, undo snapshots and search for <code>EditorControl</code>, and paste cleanup and format conversion for
-            <code>EditorLiteControl</code>, run in the library's <code>editor-control.js</code>. Both controls import it as a module on their first
-            render, so the page needs no script tag.
+            <code>EditorControl</code> is a Blazor block editor for letters and long documents: paragraphs, two heading levels, images and page breaks, with undo and search; <code>FormatControl</code> is a formatting toolbar you connect to it; <code>EditorLiteControl</code> is a smaller editor bound to an HTML string, for notes.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="document" Title="A document with its formatting toolbar" RazorCode="@Code.Document" CSharpCode="@Code.DocumentCs" CssCode="@Code.DocumentCss">
-            <Description>
-                <p>
-                    <code>FormatControl</code> only raises callbacks, so each one is connected to an <code>EditorControl</code> method: B, I, U and S
-                    to <code>ExecFormatCommandAsync</code>, Font and Size to <code>ApplyInlineStyleAsync</code>, which acts only on selected text, Line to
-                    <code>ApplyBlockStyleAsync</code>, the alignment buttons to <code>SetBlockAlignmentAsync</code>, and Width to the
-                    <code>PageWidth</code> parameter. H1 and H2 call <code>ApplyHeadingStyleAsync</code>, which gives the selected text a heading's font,
-                    size and weight but leaves the paragraph a paragraph. The letter is one chapter heading, two section headings and paragraphs; there is
-                    no list block, so the day-by-day plan is three paragraphs.
-                </p>
-                <p>
-                    With <code>EnableHistory</code> on, Undo and Redo follow <code>HistoryChanged</code>, and the line under the letter is recounted from
-                    every <code>OnBlocksChanged</code>. Find and replace, or Ctrl+F (⌘F) in the letter, opens the control's search panel; Start over calls
-                    <code>PushAsync</code>, which writes the original blocks back and clears the history.
-                </p>
-            </Description>
+            <Description><p>Select text and use the toolbar; Undo, Redo and Find and replace (Ctrl+F) are the editor's own, and the line below recounts on every change.</p></Description>
             <Demo>
                 <div class="doc">
                     <div class="doc-bar">
@@ -75,13 +51,7 @@
         </DemoExample>
 
         <DemoExample Id="comment" Title="A light editor for short text" RazorCode="@Code.Comment" CSharpCode="@Code.CommentCs" CssCode="@Code.CommentCss">
-            <Description>
-                <p>
-                    A booking note. <code>EditorLiteControl</code> brings its own toolbar (text style, bold, italic, underline, two kinds of list, link,
-                    clear formatting) and binds <code>Value</code> as HTML. Every keystroke and toolbar action raises <code>ValueChanged</code> with the
-                    sanitised HTML, which the box below prints. The placeholder is drawn by CSS while the note is empty and is not part of the value.
-                </p>
-            </Description>
+            <Description><p>Type a note; every keystroke raises <code>ValueChanged</code> with the sanitised HTML shown below.</p></Description>
             <Demo>
                 <EditorLiteControl @bind-Value="_note" MinHeight="120px"
                                    Placeholder="A note for the Lisbon desk: dietary needs, mobility, a birthday to mark…" />

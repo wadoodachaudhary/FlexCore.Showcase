@@ -18,23 +18,13 @@
                    SourcePath="FlexCore.Documents/Pdf/PdfViewerControl.razor;FlexCore.Documents/Pdf/PdfViewerModels.cs;FlexCore.Documents/wwwroot/pdf-viewer.js">
     <Overview>
         <p>
-            <code>PdfViewerControl</code> shows one page at a time on a canvas with a transparent text layer over it, so text can be selected,
-            searched and highlighted. The first toolbar moves between pages, zooms from 25% to 400% in steps of 25%, rotates in quarter
-            turns, downloads, prints and toggles the Details pane; the second searches the document and, when allowed, adds highlights and
-            notes. The Details pane lists the document's bookmarks, the search hits, the form fields as editable controls, and the notes and
-            highlights. Field values, highlights and notes are written into the file on Download, Print and <code>SaveAsync</code>; the
-            document itself stays in the browser until the application asks for those bytes.
-        </p>
-        <p>
-            The control lives in the <code>FlexCore.Documents</code> package, so a project references it alongside FlexCore. Rendering and
-            editing use pdf.js 6.3.289 and pdf-lib 1.17.1, shipped inside that package as static assets; nothing is loaded from a CDN and
-            no PDF content is sent to a remote service.
+            <code>PdfViewerControl</code> opens, searches, annotates and fills PDF files in the browser and hands the edited file back as bytes through <code>SaveAsync</code>. It ships in the FlexCore.Documents package with pdf.js and pdf-lib as static assets; nothing is loaded from a CDN and no PDF content leaves the browser until the application asks for it.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="viewer" Title="Full viewer" RazorCode="@Code.Viewer" CSharpCode="@Code.ViewerCs">
-            <Description><p>A three-page sample loaded by URL. Open the Details pane for its bookmarks and the form on page 2; search for FlexCore to get a hit on every page; select some text and press Highlight selection, or add a note. Open PDF reads a file from your machine. Download and Print carry your edits; Save to host asks the viewer for the same bytes on the server and reports their size.</p></Description>
+            <Description><p>Search for FlexCore, open the Details pane for bookmarks and the form on page 2, highlight a selection or add a note, then Download, Print or Save to host with your edits.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="SaveToHostAsync" Disabled="@(_viewer?.PageCount is not > 0)">Save to host</ButtonControl>
             </Controls>
@@ -45,7 +35,7 @@
         </DemoExample>
 
         <DemoExample Id="reader" Title="Read-only, from bytes, driven from the page" RazorCode="@Code.Reader" CSharpCode="@Code.ReaderCs">
-            <Description><p>The same file supplied as a byte array from the server, with Open, annotations, form filling and bookmarks turned off: what a report preview looks like. The buttons call the viewer's methods, and the line below is fed by <code>Loaded</code>, <code>PageChanged</code> and <code>SearchChanged</code>.</p></Description>
+            <Description><p>The same file from a byte array with Open, annotations, form filling and bookmarks off; the buttons call the viewer's methods and the line below is fed by its events.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _reader!.GoToPageAsync(2)" Disabled="@(_reader?.PageCount is not > 0)">Page 2</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick='() => _reader!.SearchTextAsync("FlexCore")' Disabled="@(_reader?.PageCount is not > 0)">Find FlexCore</ButtonControl>

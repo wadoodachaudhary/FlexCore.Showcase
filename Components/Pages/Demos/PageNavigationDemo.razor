@@ -28,25 +28,13 @@
                    SourcePath="PageControl.razor;PageNavigationMap.cs;Grid/GridControl.razor.cs">
     <Overview>
         <p>
-            <code>PageControl</code> wraps a page or a form and owns its Tab key. A <code>PageNavigationGraph</code> names the focus
-            nodes, each a CSS selector: one focusable control such as a grid, or a region whose controls are visited in DOM order. Tab
-            and Shift+Tab move through the nodes' targets in declared order (or <code>Order</code>), wrapping at the ends when
-            <code>Wrap</code> is on; <code>Next</code> and <code>Previous</code> override the order for a page that is not linear, and
-            <code>Entry</code> says whether a node is entered at its first or last target. A node's <code>Shortcuts</code> jump to it, or
-            activate it, from anywhere in the page; while the user is typing in an editor a shortcut is ignored unless it allows that.
-        </p>
-        <p>
-            A <code>GridControl</code> inside keeps Tab for its own cells by default; set its <code>TabNavigationMode</code> to
-            <code>PageControl</code> and Tab leaves the grid for the next node. <code>FocusFirstNodeOnLoad</code> puts the keyboard on the
-            first target once the page has data, the way a desktop form opens. <code>ScrollMode</code> decides how the region scrolls
-            when its content is larger than its space, and with a <code>ZoomService</code> that the host applies, Ctrl with plus, minus
-            and zero zoom the page's FlexCore text.
+            <code>PageControl</code> gives a Blazor page keyboard navigation like a desktop form: a graph of named focus nodes, Tab order across inputs and grids, wrap-around and Alt-key shortcuts, with the first field focused on load.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="supplier" Title="A supplier record worked from the keyboard" RazorCode="@Code.Supplier" CSharpCode="@Code.SupplierCs">
-            <Description><p>Three regions, three nodes: the supplier's details, its contacts grid and three status switches. Click into the first field and press Tab repeatedly: focus walks the fields, enters the grid, leaves it after its last cell for the switches, and wraps back to the first field. Alt with D, C or O jumps to a region from anywhere on the page. Previous and Next load another supplier into the same regions; the switches are bound to the record, so a change survives moving away and back.</p></Description>
+            <Description><p>Click into the first field and press Tab: focus walks the details, enters the grid, leaves it for the switches and wraps; Alt+D, Alt+C and Alt+O jump to a region.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => Show(_index - 1))" Disabled="@(_index <= 0)">Previous</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => Show(_index + 1))" Disabled="@(_index >= _suppliers.Count - 1)">Next</ButtonControl>

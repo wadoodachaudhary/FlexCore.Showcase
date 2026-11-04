@@ -11,16 +11,13 @@
                    SourcePath="BarcodeControl.razor; QrCodeControl.razor; BarcodeModels.cs">
     <Overview>
         <p>
-            Both controls hand <code>Value</code> to ZXing.Net and render the result as an <code>&lt;svg role="img"&gt;</code>, so there is
-            no image request and the code scales with its box. A value the symbology cannot encode shows the encoder's message in place of the
-            code instead of throwing. <code>BarcodeControl</code> picks the symbology with <code>Type</code>; <code>QrCodeControl</code> takes a
-            <code>Size</code> and an <code>ErrorCorrection</code> level.
+            <code>BarcodeControl</code> and <code>QrCodeControl</code> are Blazor barcode generators: nine linear symbologies and QR codes, encoded on the server with ZXing.Net and drawn as inline SVG, so there is no image request.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="barcode" Title="Barcode" RazorCode="@Code.Barcode" CSharpCode="@Code.BarcodeCs">
-            <Description><p>Pick a symbology and edit the value. Each one has its own rules: EAN-13 wants 12 or 13 digits, UPC-A 11 or 12, ITF an even count, Code 39 upper-case letters and digits. Break a rule and the control's own error replaces the bars.</p></Description>
+            <Description><p>Pick a symbology and edit the value; break its rules (EAN-13 wants 12 or 13 digits) and the encoder's message replaces the bars.</p></Description>
             <Demo>
                 <div class="controls">
                     <ButtonGroupControl Items="_typeItems" Values="@(new[] { _type.ToString() })" ValuesChanged="PickType" AriaLabel="Symbology" />
@@ -32,7 +29,7 @@
         </DemoExample>
 
         <DemoExample Id="qr" Title="QR code" RazorCode="@Code.Qr" CSharpCode="@Code.QrCs">
-            <Description><p>Higher error correction survives more damage to the printed code but needs more modules for the same text. <code>Size</code> is the rendered width and height in pixels; the module grid stays sharp because the SVG uses <code>shape-rendering="crispEdges"</code>.</p></Description>
+            <Description><p>Change the size and error correction; higher correction survives more damage and needs more modules.</p></Description>
             <Demo>
                 <div class="controls">
                     <TextBoxControl @bind-Value="_qrValue" UpdateOnInput="true" Width="280px" Placeholder="Text or URL" />

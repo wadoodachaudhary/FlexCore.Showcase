@@ -37,24 +37,13 @@
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.AdvancedFeatures.cs;Grid/GridControlEvents.cs;Grid/SelectionSettings.cs;Grid/GridModels.cs">
     <Overview>
         <p>
-            A master-detail screen is two ordinary grids and one event. The master grid raises <code>RowSelected</code> (a
-            <code>GridControlEvents</code> callback passed through <code>EventsRef</code>) with the selected row in <code>args.Data</code>;
-            the page filters its detail list by that row's key and binds the result to the second grid's <code>DataSource</code>.
-            <code>SelectionSettings</code> with <code>SelectionType.Single</code> keeps one master row selected, and
-            <code>AutoSelectFirstRow</code> selects the first row as soon as the grid has rows and raises <code>RowSelected</code> for it, so
-            the detail fills on arrival. <code>RowSelecting</code> can refuse a move while the detail has unsaved edits; the
-            <a href="demo/grid/unsaved-row-lock">Unsaved-row lock</a> page shows that.
-        </p>
-        <p>
-            When the detail is short, one grid will do. A <code>DetailTemplate</code> renders under the row that owns it, behind an arrow
-            column the grid adds on the left; the grid keeps track of which rows are open and tells the page through <code>RowExpand</code>
-            and <code>RowCollapse</code>. Anything can go in the template. The second example puts a second <code>GridControl</code> there.
+            Master-detail with the Blazor <code>GridControl</code>: the master grid's <code>RowSelected</code> event filters a second grid, or a <code>DetailTemplate</code> opens any markup, including another grid, under the row that owns it. <code>AutoSelectFirstRow</code> fills the detail on arrival; <code>RowExpand</code> and <code>RowCollapse</code> report open rows.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="countries" Title="Countries and their airports" RazorCode="@Code.Countries" CSharpCode="@Code.CountriesCs">
-            <Description><p>The airports from the <a href="demo/grid#airports">Data Grid</a> page, 233 countries on the left and 4,009 airports on the right. Click a country and the right grid shows its airports: every airport row carries its country's ISO code, and the page keeps the rows whose code matches. The Airports column of the country row, the airport grid's footer and the line under the grids count the same airports. Search the countries (try <em>Portugal</em>) and click the result, or sort either grid on its own.</p></Description>
+            <Description><p>Click a country on the left, or search for one (try Portugal), and the right grid shows its airports; both grids sort on their own.</p></Description>
             <Demo>
                 <div class="pair">
                     <div>
@@ -97,7 +86,7 @@
         </DemoExample>
 
         <DemoExample Id="warehouses" Title="Products and their warehouse stock" RazorCode="@Code.Warehouses" CSharpCode="@Code.WarehousesCs" CssCode="@Code.WarehousesCss">
-            <Description><p>Fifteen products in one grid. The arrow at the left of a row opens a second grid under it with that product's stock per warehouse; <code>ExpandMode.Single</code> keeps one open at a time. Receive the next shipment or reserve stock inside the detail and the product row above recalculates on hand, available and valuation. The category buttons filter the products; when the filter hides the open product the page closes it with <code>CollapseRow</code>.</p></Description>
+            <Description><p>Open the arrow on a product row to see its stock per warehouse, then receive or reserve stock in the detail and watch the product row recalculate.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="CategoryItems" Values="@(new[] { _category })" ValuesChanged="Filter" Selection="ChoiceSelectionMode.Single" AriaLabel="Category" />
             </Controls>

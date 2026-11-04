@@ -21,17 +21,13 @@
                    SourcePath="Layout/PageLayoutControl.razor; SplitterControl.razor; Layout/DashboardLayoutControl.razor; Layout/GridLayoutControl.razor; Layout/GridLayoutItemControl.razor; Layout/StackLayoutControl.razor">
     <Overview>
         <p>
-            Three ways to divide a page. <code>PageLayoutControl</code> is a flex row of <code>LeftPanelControl</code>,
-            <code>CenterPanelControl</code> and <code>RightPanelControl</code>; the side panels collapse to a 20px tab.
-            <code>SplitterControl</code> puts a draggable bar between two panes, in pixels or as a share of the container,
-            with keyboard resizing. <code>DashboardLayoutControl</code> is a CSS grid of panels placed by row, column and span; change those values and the grid re-flows.
-            Inside a panel, <code>GridLayoutControl</code> and <code>StackLayoutControl</code> write a CSS grid or a flex row or column straight from their parameters.
+            Three ways to divide a Blazor page: <code>PageLayoutControl</code> with collapsible side panels, <code>SplitterControl</code> with a draggable bar between two panes, and <code>DashboardLayoutControl</code>, a grid of panels placed by row, column and span. Inside a panel, <code>GridLayoutControl</code> and <code>StackLayoutControl</code> write a CSS grid or a flex row from their parameters.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="shell" Title="Application shell: panels and a splitter" RazorCode="@Code.Shell" CSharpCode="@Code.ShellCs">
-            <Description><p><code>PageLayoutControl</code> rows up a navigation panel, the centre and a properties panel; each side panel collapses from its own tab or from the icon buttons in the centre, because <code>Collapsed</code> binds two ways. The centre holds a <code>SplitterControl</code>: drag the bar, or Tab to it and use the arrow keys, Home and End; double-click restores the first size. Bind <code>PrimarySize</code> two ways and persist from <code>OnResizeCommitted</code>, which fires once per gesture. The navigation, list and properties are wired together, so click around.</p></Description>
+            <Description><p>Collapse a side panel from its tab, drag the splitter or move it with the arrow keys; the panels are wired together, so click around.</p></Description>
             <Demo>
                 <div class="frame">
                     <PageLayoutControl Height="340px">
@@ -97,7 +93,7 @@
         </DemoExample>
 
         <DemoExample Id="dashboard" Title="Dashboard grid" RazorCode="@Code.Dashboard" CSharpCode="@Code.DashboardCs">
-            <Description><p><code>Columns</code> sets the grid; each panel takes <code>Row</code>, <code>Column</code>, <code>SizeX</code> and <code>SizeY</code>, here from page state. Click a KPI card to expand it across the row and back; hover one for its comparison. A panel is exactly its grid box, so spans are chosen to fit the cards. No script.</p></Description>
+            <Description><p>Click a KPI card to expand it across the row; each panel is placed by <code>Row</code>, <code>Column</code>, <code>SizeX</code> and <code>SizeY</code>.</p></Description>
             <Demo>
                 @* .dash is the page-scoped ancestor that ::deep rules below need *@
                 <div class="dash">
@@ -128,7 +124,7 @@
         </DemoExample>
 
         <DemoExample Id="grid" Title="Grid and stack layouts" RazorCode="@Code.GridStack" CSharpCode="@Code.GridStackCs">
-            <Description><p>A package summary for Lisbon Explorer. The fields sit in a <code>GridLayoutControl</code>, whose <code>Columns</code> is a CSS track list written into the style as given: here <code>repeat(n,minmax(0,1fr))</code> from the column buttons. Included is a <code>GridLayoutItemControl</code> with <code>ColumnSpan</code> set to the column count, so it always fills a row. <code>CollapseOnSmallScreen</code> is on by default: in a viewport 600px wide or less the grid drops to one column whatever <code>Columns</code> says. The panel itself is a vertical <code>StackLayoutControl</code> and the header and buttons are horizontal ones; the services are a stack whose <code>Wrap</code> the switch turns off, and they then stay on one line and scroll sideways.</p></Description>
+            <Description><p>Change the column count; at 600 px or narrower the grid drops to one column, and the switch turns wrapping off in the services stack.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_columnItems" Values="@(new[] { _columns.ToString() })" ValuesChanged="PickColumns" AriaLabel="Columns" />
                 <SwitchControl @bind-Checked="_wrapTags" Label="Wrap services" />

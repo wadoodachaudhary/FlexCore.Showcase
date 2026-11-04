@@ -28,24 +28,13 @@
                    SourcePath="Data/DataControl.cs">
     <Overview>
         <p>
-            <code>DataControl</code> is not a visual control. It wraps a <code>DataTable</code> and gives it a small, typed surface: build it
-            with <code>DataFrame</code> from column arrays and optional row labels, with <code>FromRows</code> from any objects, or from a
-            <code>DataTable</code>; <code>ConvertDtypes</code> turns text columns into <code>bool</code>, <code>int</code>, <code>long</code>,
-            <code>decimal</code> or <code>DateTime</code> when every value parses. <code>Filter</code> and <code>Sort</code> are
-            <code>DataView</code> expressions applied to the current view, and <code>Query</code> returns a new frame of the matching rows.
-        </p>
-        <p>
-            The converters read the current view, filtered and sorted: <code>ToGridRows</code> gives <code>ExpandoObject</code> rows a
-            <code>GridControl</code> binds to, <code>ToChartBars</code> and <code>ToChartSeries</code> shape it for <code>ChartControl</code>,
-            <code>ToReportDefinition</code> describes it for <code>ReportWriterControl</code>, and <code>ToCsv</code> / <code>ToJson</code>
-            write it out. <code>At</code> and <code>Iat</code> read and write single cells; <code>IsDirty</code> and
-            <code>GetChanges</code> track edits the way a <code>DataTable</code> does.
+            <code>DataControl</code> is a typed wrapper over a <code>DataTable</code> for Blazor pages: build it with <code>DataFrame</code>, <code>FromRows</code> or a <code>DataTable</code>, convert text columns with <code>ConvertDtypes</code>, apply <code>Filter</code> and <code>Sort</code> expressions, and read the result as grid rows, chart series, a report definition, CSV or JSON. <code>IsDirty</code> and <code>GetChanges</code> track edits.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="frame" Title="Filter and sort once; a grid, a chart and a CSV follow" RazorCode="@Code.Frame" CSharpCode="@Code.FrameCs">
-            <Description><p>Eight orders, entered as text and converted once: <code>Amount</code> became <code>decimal</code>, <code>Open</code> became <code>bool</code> and <code>Ordered</code> became <code>DateTime</code>. Type a <code>DataView</code> filter such as <code>Amount > 1000</code>, <code>Open = true</code> or <code>Customer LIKE 'A%'</code> and apply it; pick a sort. The grid, the chart and the CSV under them are all read from the same frame, so they change together. An expression the view cannot parse is reported and the previous filter stays.</p></Description>
+            <Description><p>Type a <code>DataView</code> filter such as <code>Amount &gt; 1000</code> or <code>Customer LIKE 'A%'</code>, pick a sort, and the grid, chart and CSV below change together; an expression that fails to parse is reported and the previous filter stays.</p></Description>
             <Controls>
                 <TextBoxControl @bind-Value="_filterText" Placeholder="Amount > 1000" Width="220px" />
                 <ButtonControl CssClass="btn-sm btn-primary" OnClick="ApplyFilter">Apply filter</ButtonControl>

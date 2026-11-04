@@ -21,25 +21,13 @@
                    SourcePath="Scheduling/SchedulerControl.razor;Scheduling/SchedulerControl.razor.css;Scheduling/SchedulerModels.cs">
     <Overview>
         <p>
-            <code>SchedulerControl</code> lays out <code>SchedulerEvent</code> appointments in seven views and edits them in a dialog of its
-            own. Its toolbar holds Previous, Today and Next, the dates on screen, a view drop-down and New appointment. Day, Week, WorkWeek
-            and MultiDay draw a time grid with a column per day, or per day and resource when <code>Resources</code> is set; Month draws six
-            weeks of day cells, Timeline a row per resource with a cell per day, and Agenda a table of the 30 days from <code>Date</code>.
-        </p>
-        <p>
-            Clicking an appointment opens the editor (title, start, end, all day, time zone, resource, repeat rule, description);
-            double-clicking an empty slot, or clicking a date in Month or Timeline, opens it for a new one. In the time views the strip at
-            the bottom of an appointment can be dragged onto a later slot, and the appointment then ends where that slot starts. Repeating appointments are iCalendar RRULE
-            strings expanded by Ical.Net; saving or deleting one occurrence excludes its date from the series, and a saved occurrence
-            becomes an entry of its own. Each appointment carries its own <code>TimeZoneId</code> and is converted into the scheduler's.
-            Every change is validated, offered to <code>Changing</code>, which may cancel it, and then delivered through
-            <code>EventsChanged</code> as a new list of copies; the list passed in is never modified.
+            <code>SchedulerControl</code> is a Blazor scheduler: appointments in day, week, work-week, multi-day, month, timeline and agenda views, edited in its own dialog, with resources, iCalendar repeat rules, per-appointment time zones and a <code>Changing</code> event that can veto any change.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="week" Title="A week of guided tours" RazorCode="@Code.Week" CSharpCode="@Code.WeekCs">
-            <Description><p>Razor Sharp Getaways' Lisbon tours in the Week view, the default, with the time zone set to Europe/Lisbon and the grid running to 22:00. Five tours repeat from four weeks back with no end date: the old town walk every day, the others on set weekdays. The Lisbon Explorer group's two transfers and its day at leisure, an all-day entry in Thursday's heading, belong to the current week. On Wednesdays the Sintra trip and the walk overlap and share the column. Use the toolbar to move through the dates and switch views, click a tour to edit it (a repeating one asks whether to change this occurrence or the entire series), or double-click an empty slot to add one. The buttons above set <code>SlotMinutes</code>; Read-only turns off every editing route while navigation keeps working. <code>Date</code>, <code>View</code> and <code>Events</code> are bound both ways, and the line below reads them.</p></Description>
+            <Description><p>Move through the dates, switch views, click a tour to edit it or double-click an empty slot to add one; the buttons set the slot length and Read-only.</p></Description>
             <Demo>
                 <div class="controls">
                     <ButtonGroupControl Items="_slotItems" Values="@(new[] { _slot.ToString() })" ValuesChanged="PickSlot" AriaLabel="Slot length" />
@@ -52,7 +40,7 @@
         </DemoExample>
 
         <DemoExample Id="rules" Title="Changes the page refuses" RazorCode="@Code.Rules" CSharpCode="@Code.RulesCs">
-            <Description><p>Today's tours for two guides, Lavender and Rufus, given as <code>Resources</code> to the Day view: one column each, with the guide's colour on the left edge of the tours. <code>Changing</code> receives every create, update and delete after the control's own validation, with the action and a copy of the tour as it would be saved; setting <code>Cancel</code> keeps the list as it was. This page refuses a tour that starts before 08:00, a tour without a guide or whose times overlap another tour of the same guide, and the delete of a tour with seats sold (the old town walk and Belém by tram). Try it: double-click Rufus's column at 13:30 and save, so the new hour runs into Belém by tram; drag the strip at the bottom of the old town walk down to 13:30, which is accepted, then below the food tour, which is not; open Belém by tram and delete it. The control shows no message for a refusal: a refused save leaves the editor open, a refused drag opens it with the dropped end time, and a refused delete leaves its confirmation open. Cancel, then read the line under the scheduler.</p></Description>
+            <Description><p>Try a tour before 08:00, one overlapping another of the same guide, or deleting Belém by tram: <code>Changing</code> refuses them and the line below says why.</p></Description>
             <Demo>
                 <SchedulerControl @bind-Events="_guided" @bind-Date="_guideDay" @bind-View="_guideView" Resources="_guides" Changing="Guard"
                                   TimeZoneId="Europe/Lisbon" EndHour="20" Height="480px" />
@@ -61,7 +49,7 @@
         </DemoExample>
 
         <DemoExample Id="zones" Title="Two time zones" RazorCode="@Code.Zones" CSharpCode="@Code.ZonesCs">
-            <Description><p>One list of six entries in two schedulers that open in the Agenda view: the guide's set to Europe/Lisbon, the client's to America/Vancouver. Five entries are written in Lisbon time and the video call in Vancouver time; each pane converts every entry from its own <code>TimeZoneId</code>, so the 06:30 airport meet-and-greet falls on the previous evening for the client. Both panes bind the same list, <code>Date</code> and <code>View</code>, so an edit in one shows in the other and the two toolbars move together. The editor fills in its own pane's zone, so an entry saved in the Vancouver pane is stored in Vancouver time, as the list underneath shows. Both run the time grid from 0 to 24, so in the Week view the Lisbon morning tours appear in Vancouver's small hours.</p></Description>
+            <Description><p>The same six entries in Lisbon and Vancouver time; edit in one pane and the other follows.</p></Description>
             <Demo>
                 <div class="pair">
                     <div>
