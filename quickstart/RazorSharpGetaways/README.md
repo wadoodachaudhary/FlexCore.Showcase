@@ -61,4 +61,3 @@ two hosts that draw toasts and dialogs, `NotificationDisplayControl` and `Dialog
 ## Licence
 
 The FlexCore package is released under the MIT licence; see its [LICENSE](https://github.com/wadoodachaudhary/FlexCore/blob/main/LICENSE).
-This sample is yours to copy and change.

@@ -34,7 +34,7 @@ builder.Services.AddScoped<GetawaysAppSettings>();
 builder.Services.AddSingleton(new ReportOptions
 {
     SchemaPrefix = "",                                       // showcase XML doesn't use a schema
-    SessionAutoInjectParameters = { "DivisionID", "UserId" }, // auto-fill from session ctx
+    SessionAutoInjectParameters = { "AgencyId", "UserId" }, // the parameters GetawaysReportSession answers; no report here names them
 });
 builder.Services.AddScoped<CrystalXmlReportLoader>();
 builder.Services.AddScoped<IReportSessionContext, GetawaysReportSession>();
