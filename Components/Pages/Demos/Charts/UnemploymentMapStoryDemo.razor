@@ -3,12 +3,10 @@
 @using Fx.ControlKit.Maps
 @using FlexCore.Showcase.Components.Shared
 @using FlexCore.Showcase.Data
-@* 2026-10-21: page added with the FlexKit 0.1.131 choropleth mirror (Cursor branch, merged by Wadood).
-   2026-10-23 (meeting point 3): code tabs generated from this file (gencode) instead of hand-written constants; the inline style block
-   moved to the page stylesheet; a parameter table for MapStoryControl written from Maps/MapStoryControl.razor.
-   2026-10-26 (Baaria): second example, airports per country (the OurAirports snapshot the Data Grid page uses) as a choropleth built in
-   code with MapStoryComposer; a click opens the country on MapControl's plain map with one marker per airport. MapControl draws markers
-   only without a Choropleth, hence the two views. MapControl parameters written from Maps/MapControl.razor. *@
+@* 2026-10-21: page added with the FlexKit 0.1.131 choropleth mirror.
+   2026-10-23: code tabs generated from this file; inline styles -> page stylesheet; table from Maps/MapStoryControl.razor.
+   2026-10-26: example 2, airports per country via MapStoryComposer; a click opens a plain MapControl, since MapControl draws
+   markers only without a Choropleth. Table from Maps/MapControl.razor. *@
 
 <PageTitle>Blazor Map Chart: Drill-Down Choropleth — FlexCore</PageTitle>
 

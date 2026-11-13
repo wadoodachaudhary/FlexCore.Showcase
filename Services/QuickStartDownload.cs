@@ -1,8 +1,8 @@
 namespace FlexCore.Showcase.Services;
 
 /// <summary>
-/// The Quick Start download (2026-11-04): quickstart/RazorSharpGetaways zipped by FlexCore.Showcase.csproj on every build and
-/// embedded in this assembly, so the file a visitor gets is always the code the home page's app window is running.
+/// Quick Start download (2026-11-04): quickstart/RazorSharpGetaways, zipped and embedded by FlexCore.Showcase.csproj every build,
+/// so it always matches the home page's app window.
 /// </summary>
 public static class QuickStartDownload
 {

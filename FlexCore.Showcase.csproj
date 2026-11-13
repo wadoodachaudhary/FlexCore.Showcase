@@ -14,19 +14,16 @@
     <EmbeddedResource Include="Data\OurAirports\*.tsv" LogicalName="FlexCore.Showcase.Data.OurAirports.%(Filename)%(Extension)" />
   </ItemGroup>
 
-  <!-- The home page's app window is the Quick Start project, Razor Sharp Getaways (2026-11-04, Baaria): its page components, window
-       parts and data classes live in quickstart/RazorSharpGetaways and are compiled into this site from there, so the download and
-       the demo are the same code. Home.razor hosts the parts. Its stylesheet and its report are copied over this site's wwwroot on
-       every build (SyncQuickStartShared below): a linked Content item is served empty by the static web assets pipeline, so the copies
-       in wwwroot are committed and the Quick Start's files are the source. -->
+  <!-- Home page app window = Quick Start project (2026-11-04), compiled in so download and demo are the same code; Home.razor
+       hosts the parts. Stylesheet and report are copied, not linked (SyncQuickStartShared): static web assets serve a linked
+       Content item empty. -->
   <ItemGroup>
     <RazorComponent Include="quickstart\RazorSharpGetaways\Components\Getaways\*.razor" Link="Quickstart\Components\Getaways\%(Filename)%(Extension)" />
     <Compile Include="quickstart\RazorSharpGetaways\Components\Getaways\*.cs" Link="Quickstart\Components\Getaways\%(Filename)%(Extension)" />
     <Compile Include="quickstart\RazorSharpGetaways\Data\*.cs" Link="Quickstart\Data\%(Filename)%(Extension)" />
   </ItemGroup>
 
-  <!-- The home page's app window shows these files' own code in its Razor and C# tabs, and the Tabs & accordion page shows app.css's
-       site-tabs rules in a CSS tab, and the chart pages print ChartPalette.cs in their C# tabs (Components/Shared/AppSource.cs). -->
+  <!-- Printed in code tabs (Components/Shared/AppSource.cs); app.css for its site-tabs rules (Tabs & accordion page). -->
   <ItemGroup>
     <EmbeddedResource Include="quickstart\RazorSharpGetaways\Components\Getaways\Getaways*.razor;quickstart\RazorSharpGetaways\Data\GetawaysAppSettings.cs;Components\Shared\ChartPalette.cs;wwwroot\app.css" LogicalName="FlexCore.Showcase.Source.%(Filename)%(Extension)" />
   </ItemGroup>
@@ -45,15 +42,14 @@
     </ItemGroup>
   </Target>
 
-  <!-- The files both apps serve as their own: the Quick Start's copies are the source, this site's wwwroot copies are refreshed on
-       every build (and committed, so a first build after a clone has them too). -->
+  <!-- Files both apps serve; the Quick Start copies are the source. wwwroot copies are committed so a fresh clone's first build
+       has them. -->
   <Target Name="SyncQuickStartShared" BeforeTargets="BeforeBuild">
     <Copy SourceFiles="quickstart\RazorSharpGetaways\wwwroot\getaways.css;quickstart\RazorSharpGetaways\wwwroot\reports\Package Cost Sheet.xml"
           DestinationFiles="wwwroot\getaways.css;wwwroot\reports\Package Cost Sheet.xml" SkipUnchangedFiles="true" />
   </Target>
 
-  <!-- The Quick Start download: quickstart/RazorSharpGetaways, without build output, zipped and embedded; Services/QuickStartDownload.cs
-       serves it at /downloads/razor-sharp-getaways.zip. -->
+  <!-- Quick Start download, zipped and embedded; Services/QuickStartDownload.cs serves it at /downloads/razor-sharp-getaways.zip. -->
   <ItemGroup>
     <QuickStartFile Include="quickstart\RazorSharpGetaways\**" Exclude="quickstart\**\bin\**;quickstart\**\obj\**;quickstart\**\.DS_Store;quickstart\**\*.user" />
   </ItemGroup>

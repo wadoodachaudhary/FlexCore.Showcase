@@ -2,8 +2,8 @@
 .note { font-size: 13.5px; color: #475569; margin: -8px 0 14px; }
 .note code { font-size: 12.5px; background: #f1f5f9; padding: 1px 4px; border-radius: 4px; color: #334155; }
 
-/* Stage: pins the fixed-position control inside the card. The host goes static so the backdrop's
-   containing block is the stage; isolation keeps the control's z-indexes under the site nav. */
+/* Stage: pins the fixed-position control in the card. A static host keeps the backdrop in the stage;
+   isolation keeps the control under the site nav. */
 .fab-stage { position: relative; isolation: isolate; height: 320px; border-radius: 8px; background: #f1f5f9; overflow: hidden;
              display: flex; justify-content: flex-end; align-items: flex-end; padding: 1rem; box-sizing: border-box; }
 .fab-stage.short { height: 240px; }

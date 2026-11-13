@@ -3,16 +3,9 @@
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (row 3 of the Data Grid list). Same 1,000 rows and 21 columns. Changes, closing SC-132 to
-   SC-134: a line under the grid reads the grid's own ColumnVirtualizationStatus so a viewer can see that windowing is on; the
-   developer-syntax card header went; Height="100%" became the 520px the old card gave the grid. AllowMultiColumnSorting="true" was
-   removed because no such parameter exists in FlexCore (it fell through as an unmatched attribute); ShowMultiColumnSortingIndex went
-   with it as off-topic here. The .wide wrapper exists for the page CSS: frozen body cells use background-color:inherit and the
-   library gives rows none, so scrolled columns show through the pinned ones; the page gives rows a white background until the
-   library fix (SC-292).
-   2026-10-18: vocabulary written from GridControl.ColumnVirtualization.cs (parameters, status properties, every fallback reason in
-   TryCreateColumnVirtualizationLayout and TryResolveColumnVirtualizationWidth), GridEnums.cs (GridWidthMode) and the markup/CSS hooks in
-   GridControl.razor and GridControl.razor.css; rows checked against the source with scratchpad/vocabcheck.py. *@
+@* 2026-10-17: on FeatureDemoLayout; closes SC-132 to SC-134. Height 520px, the old card's. AllowMultiColumnSorting removed (not a
+   FlexCore parameter), ShowMultiColumnSortingIndex with it. .wide is for the page CSS: white rows until the library fix (SC-292).
+   2026-10-18: vocabulary from GridControl.ColumnVirtualization.cs, GridEnums.cs, GridControl.razor(.css). *@
 
 <PageTitle>Column Virtualization in a Blazor Grid — FlexCore</PageTitle>
 
@@ -157,7 +150,7 @@
         public string Status { get; set; } = "";
     }
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    // Code tabs: generated verbatim copies of the Demo block and members above.
     private static class Code
     {
         public const string Wide = @"<div class=""wide"">

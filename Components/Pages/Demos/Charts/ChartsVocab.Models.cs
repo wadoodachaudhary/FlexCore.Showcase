@@ -1,8 +1,7 @@
-// 2026-10-24: chart model rows for the Charts page Documentation (meeting point 5). Every description was checked against
-// the read sites in Charts/ChartControl.razor, so a property no renderer reads says so. ChartBar is the nested class
-// ChartControl.ChartBar (Charts/ChartControl.razor, legacy Bars list), not a ChartModels.cs type. The read-only aliases on
-// ChartDataPoint (Open/High/Low/Close, Actual/Target, Source/Destination) are documented inline on the fields and factories
-// they forward to rather than as rows of their own. GaugeRange and GaugePointer are on the Gauges page.
+// 2026-10-24: chart model rows for the Charts page Documentation, from the read sites in Charts/ChartControl.razor (a property
+// no renderer reads says so). ChartBar is the nested ChartControl.ChartBar (Charts/ChartControl.razor, legacy Bars list), not a
+// ChartModels.cs type. ChartDataPoint's read-only aliases (Open/High/Low/Close, Actual/Target, Source/Destination) are documented
+// on the fields and factories they forward to, not as rows. GaugeRange and GaugePointer are on the Gauges page.
 using FlexCore.Showcase.Components.Shared;
 
 namespace FlexCore.Showcase.Components.Pages.Demos.Charts;

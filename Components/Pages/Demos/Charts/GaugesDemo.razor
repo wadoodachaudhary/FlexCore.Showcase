@@ -4,20 +4,13 @@
 @using Fx.ControlKit.Charts
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-19: new page (Baaria approved the Control tour split; fourth page; replaces the SC-033 idea of folding these into
-   Financial & gauges, which already has three examples). The tour's Charts tab moved here and was removed there. Documentation
-   written from Charts/GaugeControl.razor, GaugeControls.cs, GaugeVisualControl.razor, GaugeModels.cs, StockChartControl.razor,
-   StockChartRange.cs and ChartModels.cs; rows checked with scratchpad/vocabcheck.py; the drawing and toolbar sentences read
-   from GaugeVisualControl's markup and StockChartControl's SetRangeAsync/ZoomAsync/PanAsync/OnParametersSet. *@
-@* 2026-10-23 (developer meeting point 5, chart label clutter). Gauges: two to a row at Height 300px, so the 300-unit view box
-   renders at scale 1 and its 11-unit tick labels at 11 px (four 225 px tiles at 200px gave scale 0.667, 7.3 px); the linear gauge
-   gets 150px, where its 320 by 105 view box fills a 465 px tile. Stock chart: ChartControl's financial renderer writes a label
-   under every visible point (no thinning), and about sixteen "MMM d" labels are all that fit its 530-unit plot, so Start opens
-   the chart on the last fourteen trading days and the page's buttons offer five and fourteen; the old Last 30 days (22 points)
-   and Everything (90 points) buttons overlapped. Height 400px renders the 600 by 320 view box at scale 1.25 (12.5 px axis text)
-   instead of 1.0625. ShowNavigator is off: the navigator draws a 600 by 300 line chart 90 px high, scale 0.3, text at 3 px; it
-   returns when the library can draw its labels at a readable size. The range line counts the trading days in view so the
-   buttons, the chart and the text agree. *@
+@* 2026-10-19: Control tour's Charts tab -> own page, not Financial & gauges as SC-033 proposed (it has three examples).
+   Documentation from Charts/Gauge*, StockChart*, ChartModels.cs; drawing and toolbar sentences from GaugeVisualControl and
+   StockChartControl code. *@
+@* 2026-10-23 (label clutter): gauges two to a row at 300px draw the 300-unit view box at scale 1 (11 px ticks); the linear gauge's
+   320 by 105 view box fills a 465 px tile at 150px. Stock chart (400px, scale 1.25): the renderer labels every visible point and
+   about sixteen fit, so Start opens on the last fourteen trading days, buttons offer five and fourteen (longer ranges overlapped).
+   ShowNavigator off while its labels render at 3 px. Range line counts visible trading days, matching buttons and chart. *@
 
 <PageTitle>Blazor Gauges and Stock Chart — FlexCore</PageTitle>
 
@@ -166,7 +159,7 @@
     private string Describe(DateTime start, DateTime end) =>
         $"{start:MMM d} to {end:MMM d}, {_prices.Count(p => p.DateValue >= start && p.DateValue <= end)} trading days.";
 
-    // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
+    // Code tabs: verbatim copies of each Demo block and the members behind it.
     private static class Code
     {
         // The palette the gauges use, printed from Components/Shared/ChartPalette.cs

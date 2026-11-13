@@ -1,9 +1,8 @@
 @page "/demo/fab"
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-12: new page on FeatureDemoLayout. Facts checked against FabMenuControl.razor, FabMenuItem.cs,
-   FabMenuControl.razor.css and BadgeModels.cs (FlexCore 0.2.48). The control is position:fixed; each card
-   pins its instance inside a stage with two scoped overrides (CSS tab of the first example) so two can show. *@
+@* 2026-10-12: new page; facts from FabMenu*, BadgeModels.cs (FlexCore 0.2.48). The control is position:fixed, so each card pins
+   it in a stage (first example's CSS tab). *@
 
 <PageTitle>Blazor Floating Action Button (FAB) — FlexCore</PageTitle>
 
@@ -168,8 +167,8 @@ protected override void OnInitialized()
 // FabMenuItem(title, iconCss, color); OnClick is a settable EventCallback.
 private FabMenuItem Action(string title, string icon, BadgeVariant color, Action<string> pick) =>
     new(title, icon, color) { OnClick = EventCallback.Factory.Create(this, () => pick(title)) };";
-        public const string MenuCss = @"/* Stage: pins the fixed-position control inside the card. The host goes static so the backdrop's
-   containing block is the stage; isolation keeps the control's z-indexes under the site nav. */
+        public const string MenuCss = @"/* Stage: pins the fixed-position control in the card. A static host keeps the backdrop in the stage;
+   isolation keeps the control under the site nav. */
 .fab-stage { position: relative; isolation: isolate; height: 320px; border-radius: 8px; background: #f1f5f9; overflow: hidden;
              display: flex; justify-content: flex-end; align-items: flex-end; padding: 1rem; box-sizing: border-box; }
 .fab-stage.short { height: 240px; }

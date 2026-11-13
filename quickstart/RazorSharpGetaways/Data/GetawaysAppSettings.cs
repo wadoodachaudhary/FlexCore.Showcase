@@ -5,10 +5,9 @@ using Fx.ControlKit.Scheduling;
 
 namespace RazorSharpGetaways.Data;
 
-// The choices behind the Settings page. Registered as a scoped service in Program.cs, so one instance serves the whole visit; a
-// reload starts again from the defaults, which are the app as designed. The Settings page's C# tab on the FlexCore site prints the
-// lines between the markers. The chart colours of each scheme were picked with a colour-blindness check on the order they stack in;
-// Razor Sharp keeps the logo's own colours.
+// Settings page state. Scoped service (Program.cs): one instance per visit; a reload restores the defaults. The FlexCore site's
+// Settings C# tab prints the lines between the markers. Each scheme's chart colours were picked with a colour-blindness check in
+// stack order; Razor Sharp keeps the logo's colours.
 // code-tab:settings
 /// <summary>One colour scheme: getaways.css holds its colours under the class scheme-{Key}.</summary>
 public sealed record GetawaysScheme(string Key, string Name, string Accent, string Blurb, string[] ChartColors);
@@ -38,7 +37,7 @@ public sealed class GetawaysAppSettings
     public SchedulerView ItineraryView { get; set; } = SchedulerView.MultiDay;
     public ChartType DashboardChart { get; set; } = ChartType.StackedBar;
 
-    // Grids. A null theme follows the scheme through the gw-grid-theme class; any other is the grid's own built-in theme.
+    // Grids: a null theme follows the scheme via the gw-grid-theme class; any other is a built-in grid theme
     public GridTheme? GridTheme { get; set; }
     public GridDensity GridDensity { get; set; } = GridDensity.Default;
     public GridLines GridLines { get; set; } = GridLines.Both;
@@ -50,14 +49,14 @@ public sealed class GetawaysAppSettings
     public HashSet<string> HiddenCards { get; } = [];
     public bool Customising { get; set; }
 
-    /// <summary>Raised after a change on the Settings page, so the app window and its open page repaint.</summary>
+    /// <summary>Raised after a Settings change; the app window and its open page repaint.</summary>
     public event Action? Changed;
     public void NotifyChanged() => Changed?.Invoke();
 
-    /// <summary>Class on the app window; the scheme's colours hang on it.</summary>
+    /// <summary>App window class that carries the scheme's colours.</summary>
     public string SchemeClass => $"scheme-{Scheme.Key}";
 
-    /// <summary>Inline style on the app window: the zoom every FlexCore control reads, and a base size for text that only inherits.</summary>
+    /// <summary>App window inline style: --fx-zoom for FlexCore controls, plus a base font size for inherited text.</summary>
     public string WindowStyle => TextSize == 100
         ? ""
         : FormattableString.Invariant($"--fx-zoom: {TextSize / 100.0:0.##}; font-size: calc(1em * var(--fx-zoom, 1))");
@@ -65,7 +64,7 @@ public sealed class GetawaysAppSettings
     public string GridCss => GridTheme is null ? "gw-grid-theme gw-grid" : "gw-grid";
     public GridTheme GridThemeValue => GridTheme ?? Fx.ControlKit.Grid.GridTheme.Default;
 
-    /// <summary>The layout preset the current arrangement matches, or "" once the cards have been moved by hand.</summary>
+    /// <summary>The layout preset the arrangement matches, or "" once cards are moved by hand.</summary>
     public string Preset => (SideBySide, CardOrder[0], CardOrder[1]) switch
     {
         (true, Figures, Chart) => "side",
@@ -144,7 +143,7 @@ public sealed class GetawaysAppSettings
         return at >= 0 && at < VisibleCards.Count;
     }
 
-    /// <summary>Swaps a card with its visible neighbour; the Move up and Move down buttons.</summary>
+    /// <summary>Swaps a card with its visible neighbour (Move up / Move down).</summary>
     public void MoveCard(string key, int step)
     {
         if (!CanMove(key, step)) return;
@@ -205,7 +204,7 @@ public sealed class GetawaysAppSettings
 
     private static bool SameMonth(DateTime a, DateTime b) => a.Year == b.Year && a.Month == b.Month;
 
-    /// <summary>The Settings page's live panel: the parameters the app's controls receive for the current choices.</summary>
+    /// <summary>Settings page live panel: the control parameters for the current choices.</summary>
     public string ToRazor()
     {
         var code = new StringBuilder();

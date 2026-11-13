@@ -4,15 +4,10 @@
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
-@* Retitled 2026-10-06 to match the site nav.
-   2026-10-20: rebuilt on FeatureDemoLayout (developer meeting, point 2). The old copy claimed 50 columns, 2.5 million cells, a
-   dropdown editor, a hand-incremented render counter and unmeasured "silky-smooth" scrolling; the grid has 12 columns and the only
-   timing was list generation. Now: one example, the real column count, two timings the page takes itself (build, and the server's
-   first render after the swap) and counters fed by the grid's own events. The cell budget is switched off so the overscan choice
-   applies as written (with the default 900-cell budget and 12 columns, 260 would be capped at 75 rows). Facts checked against
-   2026-10-23: 100,000 joined the row-count switch and the page became "100k rows", absorbing the Four scenarios performance tab.
-   GridControl.razor.cs (windowing comments around WindowOverscanRows), SelectionSettings.cs and GridControlEvents.cs. Edits are counted
-   with OnCellSave: GridControlEvents also declares CellSaved, but nothing in the library raises it. *@
+@* 2026-10-06: retitled to match the site nav.
+   2026-10-20: rebuilt on FeatureDemoLayout; real column count, measured timings. Cell budget 0: the default 900-cell budget at
+   12 columns caps the 260-row overscan at 75 rows. Edits via OnCellSave: CellSaved is declared but never raised.
+   2026-10-23: 100,000 added to the row-count switch; page became "100k rows", absorbing the Four scenarios performance tab. *@
 
 <PageTitle>Blazor Grid with 100,000 Rows — FlexCore</PageTitle>
 

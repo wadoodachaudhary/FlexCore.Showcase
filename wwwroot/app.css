@@ -1,5 +1,4 @@
-/* 2026-10-28 (Baaria): one site font. Inter comes from Google Fonts (App.razor); the system stack is the fallback.
-   The four brand colours are the four tiles of the FlexCore logo (MainLayout.razor); --brand-stripe lays them side by side. */
+/* 2026-10-28: Inter site font (Google Fonts, App.razor), system fallback; brand colours = the logo's tiles (MainLayout.razor). */
 :root {
     --site-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
     --brand-blue: #0284c7;
@@ -8,18 +7,15 @@
     --brand-green: #10b981;
     --brand-stripe: linear-gradient(90deg, var(--brand-blue) 0 25%, var(--brand-sky) 25% 50%, var(--brand-indigo) 50% 75%, var(--brand-green) 75% 100%);
     --brand-stripe-down: linear-gradient(180deg, var(--brand-blue) 0 25%, var(--brand-sky) 25% 50%, var(--brand-indigo) 50% 75%, var(--brand-green) 75% 100%);
-    /* Buttons (2026-10-29, Baaria: the blue "screams basic business blue"): a deeper shade of the logo's indigo tile for filled
-       buttons, its palest tint for soft ones. Text-only hovers keep the menu blue (see the 2026-10-25 note near the end). */
+    /* Buttons (2026-10-29): logo indigo. Text-only hovers keep the menu blue (2026-10-25 note below). */
     --brand-button: #4f46e5;
     --brand-button-hover: #4338ca;
     --brand-button-soft: #eef2ff;
     --brand-button-soft-hover: #e0e7ff;
     --brand-button-soft-text: #4338ca;
 
-    /* The library's ButtonControl themed through its own variables (2026-10-29, Baaria: every button on the site like the home
-       page's, the demos' included): pale indigo at rest, darker on hover, no border, rounder corners. ToggleButtonControl,
-       ButtonGroupControl, SegmentedControl, PopupControl and DataFilterControl take their pressed or picked colour from --fx-accent.
-       What no variable covers is set in the "Buttons" block below. */
+    /* ButtonControl themed site-wide (demos included) through its own variables (2026-10-29); several controls take their
+       pressed/picked colour from --fx-accent. The rest: "Buttons" block below. */
     --fx-btn-bg: var(--brand-button-soft);
     --fx-btn-color: var(--brand-button-soft-text);
     --fx-btn-border: 1px solid transparent;
@@ -32,10 +28,8 @@
     --fx-accent: var(--brand-button);
 }
 
-/* Buttons: what the --fx-btn-* variables do not reach. The type and weight of the home page's buttons, and the indigo for the
-   variants whose colours the library fixes (btn-primary, btn-outline-primary). Each selector is one step stronger than the
-   library's scoped rule it replaces; the classic VB6 button (fx-button-classic) keeps its own look. Padding is left to the
-   library: its controls tighten it inside themselves (scheduler entries, pagers), and a site-wide padding would undo that. */
+/* Buttons beyond the --fx-btn-* variables: type and weight, indigo for library-fixed variants; doubled classes beat the library's
+   scoped rules. Padding stays with the library: its controls tighten it internally (scheduler entries, pagers). */
 :root .fx-button.fx-button:not(.fx-button-classic) {
     font-family: inherit;
     font-weight: 600;
@@ -49,9 +43,8 @@
 :root .fx-button.btn-outline-primary.btn-outline-primary { background: transparent; border-color: var(--brand-button); color: var(--brand-button-soft-text); }
 :root .fx-button.btn-outline-primary.btn-outline-primary:hover:not(:disabled) { background: var(--brand-button); color: #ffffff; }
 
-/* Brand marks across the site (2026-10-28, Baaria: "apply the colour scheme throughout the site, including the demo pages"): a page
-   title gets a short four-colour bar under it and a section heading a logo tile in front of it, the tiles taking the logo's colours
-   in turn. The rules sit with each page type: .docs-page below, FeatureDemoLayout.razor.css, DemoExample.razor.css, SignUp.razor.css. */
+/* Brand marks (2026-10-28; title bar, heading tiles) live with each page type: .docs-page below, FeatureDemoLayout.razor.css,
+   DemoExample.razor.css, SignUp.razor.css. */
 
 html, body {
     font-family: var(--site-font);
@@ -155,11 +148,8 @@ h1:focus {
 .footer-section { max-width: 1100px; margin: 32px auto; padding: 32px;
     border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
 
-/* Doodle headings (2026-10-28, Baaria): a small hand-drawn picture on the left of a section heading with the text beside it, the
-   pair centred on the page since 2026-10-29; on phones the picture sits above the heading. Each picture's lines go through the fx-hand wobble filter (DoodleFilters.razor), and
-   while its heading plays (fxToggleClassWhenVisible in App.razor adds is-playing) the filter flicks between three seeds so the
-   ink "boils" like hand-drawn animation. The movements themselves live with each picture's page (Home.razor.css,
-   ComponentCatalogDirectory.razor.css). */
+/* Doodle headings (2026-10-28; centred 2026-10-29): fx-hand wobble filter from DoodleFilters.razor; is-playing (App.razor's
+   fxToggleClassWhenVisible) cycles its three seeds. Movements live in Home.razor.css, ComponentCatalogDirectory.razor.css. */
 .doodle-head { display: flex; align-items: center; justify-content: center; gap: 20px; text-align: center; }
 .doodle { flex: none; width: 112px; height: auto; overflow: visible; filter: url(#fx-hand); }
 .doodle-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
@@ -340,9 +330,8 @@ h1:focus {
     font-size: 20px; cursor: pointer; line-height: 1;
 }
 
-/* ── Home hero grid (2026-11-04): the app window's own rules (grid theme, cells, editor, pickers) moved with the window into the
-   Quick Start project, quickstart/RazorSharpGetaways/wwwroot/getaways.css, which this site links. Only what other pages share stays
-   below: the feature strip above the hero grid, the DropDownGridControl popup placement and look, and the calendar popover theme. ── */
+/* ── Home hero grid (2026-11-04): app window rules moved to quickstart/RazorSharpGetaways/wwwroot/getaways.css (linked by this
+   site); shared rules below. ── */
 
 /* ── Performance & Feature Highlight Bar ── */
 .grid-perf-highlights {
@@ -389,19 +378,15 @@ h1:focus {
     line-height: 1.2;
 }
 
-/* DropDownGridControl keeps its popup hidden at top/left -9999px until two JS round trips (loading its module, then measuring) and
-   a server render place it: 0.6 to 0.85 s on the live site from Pakistan, against about 0.23 s for the popup's markup to arrive.
-   Its placement is also a fixed screen position taken once, so when the popup grid reveals its current row and the hero grid
-   scrolls under it (seen 2026-10-26), the popup is left a row away from its box. CSS anchor positioning ties the open popup to
-   its box instead, from the first render (the library's inline top/left are overridden), and flips it when it would leave the
-   window. Browsers without anchor positioning (position-area) keep the library's placement. */
+/* DropDownGridControl places its popup once, at a fixed screen position, after two JS round trips; when the popup grid reveals
+   its current row and the hero grid scrolls under it (2026-10-26), it ends a row off its box. Anchor positioning ties it to its
+   box from the first render; browsers without position-area keep the library's placement. */
 @supports (position-area: bottom) {
     .fx-dropdown-grid.fx-open > .fx-dropdown-grid-input-wrap {
         anchor-name: --fx-dropdown-grid-open;
     }
-    /* position-area, not top/left: the try fallbacks can only flip declarations that are not !important, so the library's inline
-       top/left are cleared with !important and the area itself stays overridable (checked 2026-10-26: at the window's bottom
-       edge the popup now opens upward). */
+    /* position-area, not top/left: try fallbacks flip only non-!important declarations, so the library's inline top/left are
+       cleared with !important and the area stays overridable (2026-10-26: opens upward at the bottom edge). */
     .fx-dropdown-grid.fx-open > .fx-dropdown-grid-popup {
         position: fixed !important;
         position-anchor: --fx-dropdown-grid-open;
@@ -1071,35 +1056,28 @@ td:has(.fx-dropdown-grid.fx-open),
     box-shadow: 0 2px 6px rgba(79, 70, 229, 0.4) !important;
 }
 
-/* 2026-10-25 (Baaria): the library's tab strips (Example | Razor | C# on every example, the home hero's Example | Razor) follow the
-   same hover and active blue, through the control's own CSS variables. */
+/* 2026-10-25: library tab strips take the same hover and active blue via the control's CSS variables. */
 .fx-tabstrip { --fx-tab-active-color: #0284c7; --fx-tab-active-border-color: #0284c7; }
 .fx-tabstrip-tab:hover:not(.fx-tabstrip-tab-disabled) { --fx-text-color: #0284c7; }
-/* 2026-10-25 (Baaria): one hover design site-wide: text turns #0284c7 (the top menu's blue), neutral backgrounds tint #f1f5f9;
-   filled buttons are indigo (--brand-button, since 2026-10-29) and darken on hover; the 2px bar is reserved for the active or open item. */
-/* ── 2026-10-18, Baaria's review ─────────────────────────────────────────────
-   Frozen header cells: GridControl.razor writes style="…position:sticky;left:…; position:relative;" on every header cell, so the
-   later position:relative wins and a frozen column's header scrolls away while its body cells stay pinned (SC-292). Until the
-   library fix, force sticky on header cells whose inline style asked for it. */
+/* 2026-10-25: site-wide hover: text #0284c7 (top menu blue), neutral backgrounds #f1f5f9, filled buttons darker indigo
+   (2026-10-29); the 2px bar marks only the active or open item. */
+/* ── 2026-10-18 ──────────────────────────────────────────────────────────────
+   Frozen header cells: GridControl.razor writes position:sticky then position:relative inline on header cells, so
+   frozen headers scroll away. Force sticky until the library fix. */
 .fx-grid th.fx-header-cell[style*="position:sticky"] { position: sticky !important; }
 
-/* Grid scrollbars: macOS overlay scrollbars hide the horizontal bar until a sideways gesture, so a wide grid looked unscrollable.
-   Styling the WebKit scrollbar makes it a classic, always-visible bar in Chrome, Edge and Safari. */
+/* Grid scrollbars: macOS overlay scrollbars hide a wide grid's horizontal bar; a styled WebKit scrollbar stays visible. */
 .fx-grid-content::-webkit-scrollbar { width: 12px; height: 12px; }
 .fx-grid-content::-webkit-scrollbar-track { background: #f3f3f3; }
 .fx-grid-content::-webkit-scrollbar-thumb { background: #b9b9b9; border-radius: 6px; border: 2px solid #f3f3f3; }
 .fx-grid-content::-webkit-scrollbar-thumb:hover { background: #8a8a8a; }
 .fx-grid-content::-webkit-scrollbar-corner { background: #f3f3f3; }
 
-/* Site tabs (2026-10-29, Baaria): the top menu's look for every tab row on the site: the code tabs (Example | Razor | C# | CSS)
-   on each example and over the home page's app window, the chart gallery and the Tabs & accordion page's tab control. Grey text;
-   a grey tint and blue text on hover; a pale blue tint with blue semibold text when open; an open code tab carries an X that goes
-   back to Example. TabStripControl writes its theme's colours inline, so these rules replace the properties themselves, one step
-   stronger than the library's scoped rules. The Tabs & accordion page's CSS tab prints the rules between the markers verbatim
-   (FlexCore.Showcase.csproj embeds this file for AppSource.Region). */
+/* Site tabs (2026-10-29): the top menu's look for every tab row. The Tabs & accordion page's CSS tab prints the rules between
+   the markers verbatim (AppSource.Region). */
 /* code-tab:site-tabs */
-/* class="site-tabs" on a TabStripControl, or on a TabControl for its header row. :root and :is() lift the rules above the
-   strip's own styles and the colours its Theme writes inline. */
+/* class="site-tabs" on a TabStripControl, or on a TabControl for its header row. :root and :is() outrank the strip's own
+   styles and the colours its Theme writes inline. */
 :root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) { padding: 6px 8px; gap: 4px; background: none; border: 0; border-bottom: 1px solid #f1f5f9; }
 :root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-viewport { gap: 4px; }
 :root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab {

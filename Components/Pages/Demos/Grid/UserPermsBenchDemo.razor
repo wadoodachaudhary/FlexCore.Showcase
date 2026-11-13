@@ -6,29 +6,15 @@
 @using FlexCore.Showcase.Services
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-25 (Baaria, SC-344): the master-detail example runs on sales desks and agents (Data/BenchModels.cs SalesDesk, AgentListItem;
-   BenchDataStore.SalesDesks, Agents) instead of the earlier security groups and users.
-   2026-10-26: the first example became countries and their airports (Data/AirportData.cs, the OurAirports data the Data Grid page
-   opens on); the desks, the agents and their generator in BenchDataStore are gone. The relation is Airport.CountryCode. *@
+@* 2026-10-25 (SC-344): master-detail example on sales desks and agents (Data/BenchModels.cs, BenchDataStore).
+   2026-10-26: example 1 on countries and their airports (Data/AirportData.cs, Airport.CountryCode); desks, agents removed. *@
 
-@* 2026-10-18: moved onto FeatureDemoLayout (Saturday plan) and given a real relation: each detail row carries its master's key and
-   BenchDataStore generates one detail row per master count (today AgentListItem.DeskID and SalesDesk.AgentCount), so the detail
-   grid filters on a.DeskID == desk.DeskID and the master's Agents column equals the detail's row count (SC-189, SC-193). Gone: the
-   Take((GroupID % 4) + 3) subset, the "Create Group & Rename" button that never opened an editor (SC-190), the manual dirty checkbox
-   (SC-191; the real veto is on Unsaved-row lock), the benchmark wording (SC-192) and the legacy form's jargon in the copy (SC-188;
-   the old route stays as an alias).
-   2026-10-18: vocabulary written from GridControl.razor.cs (selection parameters, the private SelectRow/ToggleRowSelection paths that
-   raise RowSelecting/RowSelected, SelectFirstVisibleRowAsync, the public Select*/Clear* methods and NotifySelectionChangedAsync),
-   GridControl.KeyboardSelection.cs, GridControlEvents.cs, SelectionSettings.cs and GridModels.cs; rows checked with
-   scratchpad/vocabcheck.py. Members the grid declares but never raises or reads (RowDeselecting, RowDeselected, EnableToggle,
-   PersistSelection) are listed as such; the library note is in SC-253.
-   2026-10-23 (developer meeting, point 2; SC-338, SC-115): the inventory scenario from Four scenarios is the second example, rebuilt on
-   the grid's own detail rows: DetailTemplate with a second GridControl inside, ExpandMode.Single, RowExpand/RowCollapse, and
-   CollapseRow when a filter hides the open product. The old page drew the detail as an HTML table. Model types renamed from
-   AgInventoryProductRow/AgWarehouseStockDetail to InventoryProduct/WarehouseStock (the Ag prefix was the competitor's name, SC-048);
-   the categories on the buttons come from the data (the old page offered Networking, Displays and Peripherals, which no product has).
-   Detail-row vocabulary from GridControl.AdvancedFeatures.cs and the expand column / detail row markup in GridControl.razor and
-   GridControl.razor.cs; checked with scratchpad/vocabcheck.py. *@
+@* 2026-10-18: on FeatureDemoLayout; detail rows carry their master's key (SC-189, SC-193). Bench leftovers removed (SC-190,
+   SC-191, SC-192); legacy jargon removed (SC-188; old route an alias until 2026-10-25).
+   2026-10-18: vocabulary from GridControl.razor.cs, GridControl.KeyboardSelection.cs, GridControlEvents.cs, SelectionSettings.cs,
+   GridModels.cs; declared-but-unused members marked (SC-253).
+   2026-10-23 (SC-338, SC-115): Four scenarios' inventory is example 2, on the grid's detail rows. Ag prefix dropped from the model
+   types (a competitor's name, SC-048). Detail-row vocabulary from GridControl.AdvancedFeatures.cs, GridControl.razor(.cs). *@
 
 <PageTitle>Blazor Master-Detail Grid — FlexCore</PageTitle>
 
@@ -259,7 +245,7 @@
         product.TotalReserved += 10;
     }
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    // Code tabs: generated verbatim copies of the Demo block and members above.
     private static class Code
     {
         public const string Countries = @"<div class=""pair"">
@@ -325,8 +311,7 @@ private void Show(CountryRow? country)
 
 private sealed record CountryRow(string Code, string Name, int Airports);";
         public const string WarehousesCss = @".detail { display: grid; gap: 6px; padding: 2px 4px 4px; }
-/* A GridControl with no Height sizes its scroll area with flex-basis 0, which inside a table cell collapses to the
-   scrollbar; this lets the nested grid grow to its rows instead. */
+/* With no Height, a GridControl's scroll area (flex-basis 0) shrinks to its scrollbar in a table cell; this lets it grow to its rows. */
 .detail ::deep .fx-grid-content { flex: 0 0 auto; }
 .detail-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: #334155; }
 .detail-bar span { margin-right: auto; }

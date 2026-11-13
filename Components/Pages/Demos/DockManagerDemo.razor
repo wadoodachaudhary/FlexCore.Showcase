@@ -4,15 +4,10 @@
 @using Fx.ControlKit.Docking
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-19: new page (Baaria approved the Control tour split; fifth page; the SC-032 idea of folding the dock manager into
-   Page layouts was dropped for a page of its own, the frame controls AppBar/Toolbar/GridLayout still go to Page layouts). The
-   tour's Docking tab moved here and was removed there. Documentation written from Docking/DockManagerControl.razor,
-   DockNodeView.razor, DockPanelActions.razor and DockModels.cs; rows checked with scratchpad/vocabcheck.py; behaviour sentences
-   read from OnParametersSet, PublishAsync, DockAsync, FloatAsync, UnpinAsync, CloseAsync, DockLayoutState.Validate and the two
-   child views. *@
+@* 2026-10-19: Control tour's Docking tab -> own page, not Page layouts (SC-032 moves only AppBar, Toolbar, GridLayout there). *@
 
-@* 2026-10-25 (SC-253 item 27): tab dragging does not start in the browser (DockNodeView.razor:15 renders draggable=""); the copy no longer
-   tells readers to drag and says so in the behaviour list. *@
+@* 2026-10-25 (SC-253 item 27): tab drag never starts (DockNodeView.razor:15 renders draggable=""); the copy notes this instead
+   of saying to drag. *@
 
 <PageTitle>Blazor Dock Manager — FlexCore</PageTitle>
 
@@ -184,7 +179,7 @@
         }
     }
 
-    // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
+    // Code tabs are verbatim copies of each Demo block and of the members behind it.
     private static class Code
     {
         public const string Workspace = @"<DockManagerControl @ref=""_dock"" Panels=""@_panels"" State=""@_state"" StateChanged=""s => _summary = Summarize(s)"" Height=""460px"" />

@@ -2,13 +2,10 @@
 @inject IJSRuntime JS
 @inject NavigationManager Nav
 
-@* One example (2026-10-12): title with anchor, one-line description, then Example | Razor | C# | CSS
-   tabs on TabStripControl inside a CardControl. The live markup stays mounted while a code tab is
-   shown, so demo state and @ref captures survive switching. Registers with FeatureDemoLayout.
-   2026-10-20: a catalog link such as demo/checks#radio lands on this page from another page, and Blazor does not
-   scroll to the fragment on that navigation. The section is focusable (tabindex -1) and focuses itself on its first
-   interactive render when the fragment names it; the browser scrolls it into view (scroll-margin-top clears the
-   sticky header). Blazor's FocusAsync, no custom script. *@
+@* One example (2026-10-12), registered with FeatureDemoLayout. Live markup stays mounted under the code tabs: demo state and @ref
+   captures survive.
+   2026-10-20: Blazor skips cross-page fragment scrolling (demo/checks#radio), so the section the fragment names focuses itself on
+   first interactive render (FocusAsync, no script); scroll-margin-top clears the sticky header. *@
 <section class="ex" id="@Id" tabindex="-1" @ref="_section">
     <CardControl Elevation="0" CssClass="ex-card">
         <HeaderContent>
@@ -87,7 +84,7 @@
         }
     }
 
-    // The open code tab carries an X that goes back to Example (2026-10-29, Baaria)
+    // The open code tab carries an X that goes back to Example (2026-10-29)
     private void Select(int index)
     {
         _tab = index;

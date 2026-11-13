@@ -1,6 +1,5 @@
 /* 2026-10-19: Gauges & stock chart page. No Bootstrap names in here. */
-/* 2026-10-23 (developer meeting point 5): the four gauges sit two to a row. A 465 px tile at Height 300px renders the 300-unit
-   view box at scale 1, so the 11-unit tick labels are 11 px; four 225 px tiles at 200px drew them at 7.3 px. */
+/* 2026-10-23: two gauges to a row so Height 300px draws the 300-unit view box at scale 1 (11 px ticks; four to a row: 7 px). */
 .four { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
 .pane-title { font-size: 13px; font-weight: 600; color: #334155; margin: 0 0 6px; text-align: center; }
 .ring-value { font-size: 15px; color: #0f766e; }

@@ -1,5 +1,5 @@
-/* FAQ page (2026-10-29): the shared .docs-page styles size h1 and h2; the questions are h3 and need their own size so they read as
-   questions under a group heading rather than as a second set of headlines. */
+/* FAQ page (2026-10-29): .docs-page sizes h1 and h2; questions are h3, sized to read as questions under a group heading, not
+   headlines. */
 .docs-page h3 {
     font-size: 18px;
     font-weight: 600;

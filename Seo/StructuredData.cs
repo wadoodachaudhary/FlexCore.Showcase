@@ -1,10 +1,9 @@
 namespace FlexCore.Showcase.Seo;
 
 /// <summary>
-/// The JSON-LD each page carries (2026-10-29). Home describes the library once (SoftwareSourceCode) and the site (WebSite);
-/// every other registered page carries its breadcrumb trail and a TechArticle whose facts are the page's own title, description
-/// and last change date. Dictionaries, because the keys start with "@". System.Text.Json's default encoder escapes "&lt;" so the
-/// output is safe inside a script element.
+/// Per-page JSON-LD (2026-10-29). Home: the library (SoftwareSourceCode) and the site (WebSite). Other registered pages: breadcrumb
+/// trail and a TechArticle from the page's title, description and last change date. Dictionaries because keys start with "@".
+/// System.Text.Json's default encoder escapes "&lt;", so the output is safe inside a script element.
 /// </summary>
 public static class StructuredData
 {
@@ -50,7 +49,7 @@ public static class StructuredData
         ["version"] = SiteMeta.LibraryVersion,
         ["keywords"] = SiteMeta.Keywords,
     };
-    // No offers or ratings: Google's software rich result needs a price and a rating, and neither can be stated honestly here.
+    // No offers or ratings: Google's software rich result needs a price and a rating; neither can be stated honestly.
 
     private static Dictionary<string, object?> Breadcrumbs(PageMeta page, string url)
     {

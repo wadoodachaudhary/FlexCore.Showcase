@@ -1,11 +1,9 @@
 namespace FlexCore.Showcase.Seo;
 
-// The page registry (2026-10-29). One entry per routed page: canonical path, the visible heading, the document title, one
-// sentence for search results and link previews, the section, alias routes, the controls shown and the words people search
-// under. Every claim here is checkable on the page it describes; numbers come from the page's own data. Titles follow the
-// form the other Blazor vendors rank with, "Blazor <control> — FlexCore", and stay under 60 characters; descriptions are one
-// sentence of 70–160 characters that names the control, the framework and what the page shows. scripts/check-seo.py checks
-// the routes, lengths and that each page's <PageTitle> equals its Title here (scripts/apply-titles.py writes them).
+// Page registry (2026-10-29): one PageMeta per routed page. Every claim must be checkable on its page; numbers come from the
+// page's own data. Titles: "Blazor <control> — FlexCore" (the form other Blazor vendors rank with), under 60 characters.
+// Descriptions: one sentence, 70–160 characters, naming the control, the framework and what the page shows. scripts/check-seo.py
+// checks routes, lengths and that each <PageTitle> equals its Title (scripts/apply-titles.py writes them).
 public static partial class SiteMeta
 {
     public const string Summary = "FlexCore is a Blazor UI component library for .NET 10: a virtualized data grid, tree grid, pivot table, charts, scheduler, Gantt, diagram and a report writer among 130+ controls, written in C# and rendered as HTML and SVG, with no npm packages.";

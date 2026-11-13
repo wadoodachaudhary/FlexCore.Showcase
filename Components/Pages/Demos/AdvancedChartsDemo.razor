@@ -4,18 +4,13 @@
 @using FlexCore.Showcase.Components.Pages.Demos.Charts
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-12: moved onto FeatureDemoLayout; six Bootstrap cards became three examples with the same charts.
-   Parameter table pending (SC-264). C# tabs added 2026-10-17: the series fields, verbatim (SC-277).
-   2026-10-23 (developer meeting, point 5: chart labels too small): every SVG chart type draws on a fixed viewBox (600x320 Candlestick
-   and OHLC, 600x300 RangeColumn, 650x340 Sankey, 600 x rows*60 Bullet, 300x300 radial gauge, 320x105 linear gauge) and scales to
-   min(tile width / viewBox width, Height / viewBox height), so label size follows tile width and a Height above the width-bound value
-   only adds a blank band. Comparisons re-laid out: Bullet alone at its 600x240 design size, RangeColumn and Sankey two-up; every
-   Height set to the width-bound value for a 465 px tile; RangeColumn labels kept to 8 characters because the renderer cuts longer
-   ones; the Sankey data given one flow per node because the renderer draws a node and label per flow (a shared source prints once per
-   link); the radial gauge tile widened to its 300 px design size and the linear gauge raised to its 105 px. 
-   2026-10-24: Documentation: the page's seven ChartType rows and the ChartDataPoint table from ChartsVocab (shared with the Charts page).
-   2026-10-24: the datasets became small stories: a trading week of BAKE (a fictional bakery chain), a household budget against
-   plan, a week of garden temperatures, recycling by bin, a rain barrel's level. The 2026-10-23 geometry is unchanged. *@
+@* 2026-10-12 (SC-264): on FeatureDemoLayout; six cards -> three examples.
+   C# tabs (2026-10-17): the series fields, verbatim (SC-277).
+   2026-10-23: charts draw on a fixed viewBox (Candlestick/OHLC 600x320, RangeColumn 600x300, Sankey 650x340, Bullet 600 x rows*60,
+   radial gauge 300x300, linear 320x105) scaled to fit tile width and Height: labels follow tile width, extra Height is blank. Heights
+   width-bound for a 465 px tile. RangeColumn labels max 8 characters (renderer cuts).
+   2026-10-24: Documentation: ChartType rows and ChartDataPoint table from ChartsVocab (shared with the Charts page).
+   2026-10-24: datasets are small stories. *@
 
 <PageTitle>Blazor Candlestick, OHLC and Sankey Charts — FlexCore</PageTitle>
 
@@ -84,7 +79,7 @@
 
     private List<ChartSeries> _candlestickSeries = new()
     {
-        // BAKE is a fictional bakery chain; one trading week of open, high, low, close (the axis runs from the lowest low to the highest high)
+        // BAKE, a fictional bakery chain: one week of open, high, low, close; the axis spans lowest low to highest high
         new ChartSeries("BAKE", ChartType.Candlestick, new[]
         {
             ChartDataPoint.Financial("Mon", 120, 135, 115, 130),
@@ -97,7 +92,7 @@
 
     private List<ChartSeries> _bulletSeries = new()
     {
-        // one month in dollars: the bar is what was spent, the line across it what was planned
+        // one month in dollars: bar = spent, line across it = planned
         new ChartSeries("Household budget", ChartType.Bullet, new[]
         {
             ChartDataPoint.Bullet("Groceries", 420, 400),
@@ -109,7 +104,7 @@
 
     private List<ChartSeries> _rangeSeries = new()
     {
-        // overnight low to afternoon high in °C; the axis runs from the lowest low (4) to the highest high (20) in four steps
+        // overnight low to afternoon high, °C; the axis spans lowest low (4) to highest high (20) in four steps
         new ChartSeries("Garden thermometer", ChartType.RangeColumn, new[]
         {
             ChartDataPoint.Range("Mon", 6, 14),
@@ -122,7 +117,7 @@
 
     private List<ChartSeries> _sankeySeries = new()
     {
-        // kg collected from each bin in a month and what it is made into; one flow per node, because the renderer draws a node and label per flow
+        // kg per bin in a month and what it becomes; one flow per node (the renderer draws a node and label per flow)
         new ChartSeries("Recycling", ChartType.Sankey, new[]
         {
             ChartDataPoint.Sankey("Paper", "Cardboard", 120),
@@ -153,7 +148,7 @@
 </div>";
         public static string FinancialCs => @"private List<ChartSeries> _candlestickSeries = new()
 {
-    // BAKE is a fictional bakery chain; one trading week of open, high, low, close (the axis runs from the lowest low to the highest high)
+    // BAKE, a fictional bakery chain: one week of open, high, low, close; the axis spans lowest low to highest high
     new ChartSeries(""BAKE"", ChartType.Candlestick, new[]
     {
         ChartDataPoint.Financial(""Mon"", 120, 135, 115, 130),
@@ -172,7 +167,7 @@
 </div>";
         public static string ComparisonsCs => @"private List<ChartSeries> _bulletSeries = new()
 {
-    // one month in dollars: the bar is what was spent, the line across it what was planned
+    // one month in dollars: bar = spent, line across it = planned
     new ChartSeries(""Household budget"", ChartType.Bullet, new[]
     {
         ChartDataPoint.Bullet(""Groceries"", 420, 400),
@@ -184,7 +179,7 @@
 
 private List<ChartSeries> _rangeSeries = new()
 {
-    // overnight low to afternoon high in °C; the axis runs from the lowest low (4) to the highest high (20) in four steps
+    // overnight low to afternoon high, °C; the axis spans lowest low (4) to highest high (20) in four steps
     new ChartSeries(""Garden thermometer"", ChartType.RangeColumn, new[]
     {
         ChartDataPoint.Range(""Mon"", 6, 14),
@@ -197,7 +192,7 @@ private List<ChartSeries> _rangeSeries = new()
 
 private List<ChartSeries> _sankeySeries = new()
 {
-    // kg collected from each bin in a month and what it is made into; one flow per node, because the renderer draws a node and label per flow
+    // kg per bin in a month and what it becomes; one flow per node (the renderer draws a node and label per flow)
     new ChartSeries(""Recycling"", ChartType.Sankey, new[]
     {
         ChartDataPoint.Sankey(""Paper"", ""Cardboard"", 120),

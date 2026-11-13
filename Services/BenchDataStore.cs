@@ -4,10 +4,9 @@ using FlexCore.Showcase.Data;
 namespace FlexCore.Showcase.Services;
 
 /// <summary>
-/// In-memory data for the grid pages, synthesized per circuit (scoped in Program.cs, built in the constructor) so one visitor's
-/// edits never reach another's: the tour operator's
-/// rate card (5,000 lines over <see cref="TravelData.Destinations"/>), the supplier list with its contacts (Page navigation) and
-/// the sales desks with their agents (Master-detail). Deterministic, so screenshots and timings repeat.
+/// In-memory grid page data, built per circuit (scoped in Program.cs) so one visitor's edits never reach another's: the rate card
+/// (5,000 lines over <see cref="TravelData.Destinations"/>), suppliers and contacts (Page navigation). Deterministic, so
+/// screenshots and timings repeat.
 /// </summary>
 public sealed class BenchDataStore
 {
@@ -41,9 +40,9 @@ public sealed class BenchDataStore
     }
 
     /// <summary>
-    /// The rate card: for every destination, every supplier's services in every season. Supplier names are built from the
-    /// destination's city (Hotel Lisbon Central, Kyoto Walks); the rates move with the region and the season; the margin
-    /// depends on the category. Every seventeenth line is not bookable.
+    /// Rate card: lines cycle through destinations and categories; supplier, service and season drawn at random (seeded).
+    /// Supplier names from the city (Hotel Lisbon Central, Kyoto Walks) plus a few operator-wide names; rates move with region
+    /// and season; margin by category. Every 17th line is not bookable.
     /// </summary>
     private static List<RateCardItem> SynthesizeRateCard(int count)
     {
@@ -115,8 +114,8 @@ public sealed class BenchDataStore
     }
 
     /// <summary>
-    /// The supplier list: every destination's hotels, transfer companies, tour operators and services, named from the city
-    /// (Hotel Lisbon Central, Kyoto Walks) with a few operator-wide names. Deterministic; about a third have no contract yet.
+    /// Suppliers per destination (hotels, transfer companies, tour operators, services), named from the city (Hotel Lisbon
+    /// Central, Kyoto Walks). Deterministic; about a third have no contract.
     /// </summary>
     private static List<SupplierRecord> SynthesizeSuppliers(int count)
     {

@@ -3,10 +3,8 @@
 @inject NotificationService Notifications
 @implements IDisposable
 
-@* 2026-10-12: rebuilt on FeatureDemoLayout (was four buttons and two static snippets). One example, per
-   the one-good-example rule. Facts checked against Notifications/NotificationService.cs and
-   NotificationDisplayControl.razor(.css) in FlexCore 0.2.48. NotificationDisplayControl is rendered once
-   by MainLayout; a copy here showed every toast twice (removed 2026-10-06). *@
+@* 2026-10-12: on FeatureDemoLayout; facts from NotificationService.cs, NotificationDisplayControl.razor(.css), FlexCore 0.2.48.
+   No NotificationDisplayControl here: MainLayout has one; a second doubled every toast (removed 2026-10-06). *@
 
 <PageTitle>Blazor Toast Notifications — FlexCore</PageTitle>
 

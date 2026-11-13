@@ -3,14 +3,13 @@ using System.Reflection;
 namespace FlexCore.Showcase.Seo;
 
 /// <summary>
-/// One page as search engines, link previews and AI assistants see it (2026-10-29). <see cref="Path"/> is the canonical
-/// base-relative path ("" for home). <see cref="Heading"/> is the page's visible h1 and breadcrumb text; <see cref="Title"/> is the
-/// document title (the &lt;PageTitle&gt;, the search result and the link preview), which names the framework and the control the
-/// way people search for them. <see cref="Aliases"/> are the other @page routes that render the same page, whose canonical link
-/// points here; <see cref="Section"/> groups the page in the sitemap and in llms.txt; <see cref="Controls"/> names the library
-/// types the page demonstrates and <see cref="Keywords"/> the words people search for the subject under (the other vendors'
-/// spellings: "datagrid", "data table"), both for the Markdown twin and llms.txt. <see cref="Index"/> false keeps the page out
-/// of the sitemap and adds a noindex tag.
+/// One page as search engines, link previews and AI assistants see it (2026-10-29). <see cref="Path"/>: canonical base-relative
+/// path ("" for home). <see cref="Heading"/>: visible h1 and breadcrumb text. <see cref="Title"/>: the &lt;PageTitle&gt;, search
+/// result and link preview; names framework and control as people search them. <see cref="Aliases"/>: other @page routes of the
+/// page; their canonical link points here. <see cref="Section"/>: sitemap and llms.txt group. <see cref="Controls"/>: library
+/// types shown, for the Markdown twin and llms.txt. <see cref="Keywords"/>: search terms, incl. other vendors' spellings
+/// ("datagrid", "data table"), for the Markdown twin and the JSON-LD article. <see cref="Index"/> false: out of the sitemap,
+/// noindex tag.
 /// </summary>
 public sealed record PageMeta(
     string Path,
@@ -31,9 +30,8 @@ public sealed record PageMeta(
 }
 
 /// <summary>
-/// The words and addresses the site publishes about itself: canonical origin and host rules, and the page registry in
-/// SiteMeta.Pages.cs. SiteHead reads it for the head tags, SeoEndpoints for robots.txt, sitemap.xml and llms.txt. A page's
-/// &lt;PageTitle&gt; is kept equal to its <see cref="PageMeta.Title"/> here; scripts/check-seo.py checks that.
+/// Site metadata: canonical origin, host rules, page registry (SiteMeta.Pages.cs). Read by SiteHead (head tags) and SeoEndpoints
+/// (robots.txt, sitemap.xml, llms.txt). Each &lt;PageTitle&gt; equals its <see cref="PageMeta.Title"/> (scripts/check-seo.py).
 /// </summary>
 public static partial class SiteMeta
 {
@@ -44,10 +42,10 @@ public static partial class SiteMeta
     /// <summary>Hosts that 301 to <see cref="Origin"/>: the www name and production's App Service default name.</summary>
     public static readonly string[] RedirectHosts = { "www.flexcoreui.com", "flexcore.azurewebsites.net" };
 
-    /// <summary>The QA copy of the site: never redirected, served with noindex and a robots.txt that disallows everything.</summary>
+    /// <summary>The QA copy of the site: never redirected, noindex (header and meta tag); robots.txt has no sitemap.</summary>
     public const string StagingHost = "flexcore-showcase.azurewebsites.net";
 
-    /// <summary>1200 x 630 link-preview image (wwwroot/og-image.png). Absolute, because preview fetchers do not resolve relative URLs.</summary>
+    /// <summary>1200 x 630 link-preview image (wwwroot/og-image.png); absolute, as preview fetchers do not resolve relative URLs.</summary>
     public static string OgImage => Origin + "/og-image.png";
 
     public static bool IsStaging(string host) => host.Equals(StagingHost, StringComparison.OrdinalIgnoreCase);

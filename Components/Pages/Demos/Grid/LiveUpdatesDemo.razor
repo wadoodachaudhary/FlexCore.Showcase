@@ -9,12 +9,8 @@
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Services
 @using FlexCore.Showcase.Components.Shared
-@* 2026-10-23 (developer meeting, point 2): the finance ticker scenario from Four scenarios, on its own page. Four scenarios was retired
-   the same day (SC-338) and both of its addresses stay as aliases here. The grid is bound to one
-   list that a timer changes in place; the page calls StateHasChanged after each tick and the grid re-renders its window. What is
-   measured: ticks applied, rows changed per tick, and the server's render time per tick (Stopwatch from the tick to the component's
-   next OnAfterRender), kept as a running average. Facts checked against GridColumn.cs (Template is RenderFragment<object>) and
-   GridControl.razor.cs. Data: BenchDataStore.GetFinanceTickers (seeded, not live market data; the page says so). *@
+@* 2026-10-23: finance ticker from Four scenarios, now retired (SC-338; its routes alias here). Render time per tick = tick ->
+   next OnAfterRender, averaged. Facts from GridColumn.cs, GridControl.razor.cs. Data: BenchDataStore.GetFinanceTickers (seeded). *@
 
 <PageTitle>Real-Time Blazor Grid with Live Updates — FlexCore</PageTitle>
 

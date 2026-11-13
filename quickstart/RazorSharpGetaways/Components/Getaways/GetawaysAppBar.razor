@@ -1,6 +1,4 @@
-@* The top bar: the menu button and the page title on the left; on the right the bell with the newest requests, Help and the
-   signed-in agent's profile menu. The bell's entries hand a request to the host to open; Help and the profile items answer with
-   a toast, as this app has no pages for them. *@
+@* Top bar. The host opens a request picked from the bell (newest requests); Help and the profile items only show a toast. *@
 @namespace RazorSharpGetaways.Components.Getaways
 @using Fx.ControlKit
 @using Fx.ControlKit.Layout
@@ -53,7 +51,7 @@
     /// <summary>The open page's title.</summary>
     [Parameter] public string Title { get; set; } = "";
 
-    /// <summary>The menu button: the host shrinks the menu to icons, or opens it over the page on a phone.</summary>
+    /// <summary>Menu button: the host shrinks the menu to icons, or opens it over the page on phones.</summary>
     [Parameter] public EventCallback OnMenuClick { get; set; }
 
     /// <summary>A request picked from the bell; the host opens it in the Trip Requests editor.</summary>
@@ -77,7 +75,7 @@
         return OnShowNewRequests.InvokeAsync();
     }
 
-    // The parts of the app this demo leaves out answer with a toast
+    // Parts the demo leaves out show a toast
     private void NotInDemo(string what) =>
         Notifications.Info($"{what} is not part of this demo", "The menu's pages, the grid, the chart and the + button all work.");
 }

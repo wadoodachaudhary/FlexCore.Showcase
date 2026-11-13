@@ -4,12 +4,10 @@
 @inject NavigationManager Nav
 @implements IDisposable
 
-@* Head tags for the current page (2026-10-29): canonical URL, description, Open Graph and Twitter card, JSON-LD, and noindex on
-   the staging host and on pages that should stay out of search. Mounted once from Routes.razor, so it is interactive and follows
-   in-app navigation like <PageTitle> does; the words come from Seo/SiteMeta.Pages.cs, so no page needs editing to be covered.
-   A page that is not registered, or is registered as not indexed, gets only the noindex tag. The title stays each page's own <PageTitle>.
-   Blazor keeps only the last <HeadContent> rendered, so no page may add one of its own (scripts/check-seo.py checks); add to this
-   component or to the registry instead. *@
+@* Head tags for the current page (2026-10-29), text from Seo/SiteMeta.Pages.cs; noindex on the staging host; unregistered or
+   not-indexed pages get only noindex. Mounted once from Routes.razor to follow in-app navigation; titles stay in each <PageTitle>.
+   Blazor keeps only the last <HeadContent>, so pages must not add their own (scripts/check-seo.py checks): extend this or the
+   registry. *@
 <HeadContent>
     @if (_page is { Index: true })
     {

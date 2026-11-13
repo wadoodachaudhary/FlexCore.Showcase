@@ -20,9 +20,8 @@
 /* honeypot: off-screen, not display:none, so a naive bot still fills it */
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
 
-/* Mailbox doodle over the form (2026-10-29). The ink and its boil come from .doodle / .doodle-head in app.css. Coming into view
-   (is-playing, added by fxToggleClassWhenVisible): the box hops, the door drops open and stays open, the flag waves. After a send
-   (is-sent): the letter flies in through the open door, the door shuts and the flag goes up and stays up. */
+/* Mailbox doodle (2026-10-29); ink and boil from .doodle / .doodle-head (app.css). is-playing (fxToggleClassWhenVisible): box
+   hops, door opens and stays open, flag waves. is-sent: letter flies in, door shuts, flag stays up. */
 .mailbox-head { margin: -6px 0 10px; }
 .mailbox-head .doodle { width: 150px; }
 .mb-door { transform-origin: 48px 96px; }

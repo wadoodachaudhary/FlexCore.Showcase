@@ -1,10 +1,8 @@
 @page "/demo/checks"
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-13: new page on FeatureDemoLayout; three examples (check boxes, radio group and switch, rating). Facts checked against
-   CheckBoxControl.razor(.css), RadioGroupControl.razor, RadioControl.razor(.css), RadioGroupItem.cs, SwitchControl.razor(.css),
-   RatingControl.razor(.css) and FlexControlBase.cs (FlexCore 0.2.48). Switch and rating moved here from UI elements; the check box
-   and radio group had no page. The Razor tabs are generated verbatim from the Demo blocks by script. *@
+@* 2026-10-13: new page on FeatureDemoLayout; switch and rating moved from UI elements; Razor tabs generated from the Demo blocks.
+   Facts from CheckBox*, Radio*, Switch*, Rating*, FlexControlBase.cs (FlexCore 0.2.48). *@
 
 <PageTitle>Blazor Checkbox, Radio Group, Switch and Rating — FlexCore</PageTitle>
 
@@ -140,7 +138,7 @@
     private bool _signature = true, _insure;
     private string Delivery => $"{_deliveryItems.First(i => i.Value == _delivery).Text}; signature {(_signature ? "required" : "not required")}; {(_insure ? "insured" : "not insured")}; tracked.";
 
-    // Rating: each click is one more review (Baaria, 2026-10-20)
+    // Rating: each click adds one review
     private int _stars = 3;
     private int _reviews = 38, _sum = 152;                 // 38 reviews averaging 4.0 to start
     private double Average => (double)_sum / _reviews;
@@ -296,7 +294,7 @@ private string Delivery => $""{_deliveryItems.First(i => i.Value == _delivery).T
     <RatingControl Value=""@((int)Math.Round(Average))"" ReadOnly=""true"" />
     <span class=""field-label"">Average @Average.ToString(""0.0"") of @_reviews reviews</span>
 </div>";
-        public const string RatingCs = @"// Rating: each click is one more review (Baaria, 2026-10-20)
+        public const string RatingCs = @"// Rating: each click adds one review
 private int _stars = 3;
 
 private int _reviews = 38, _sum = 152;                 // 38 reviews averaging 4.0 to start

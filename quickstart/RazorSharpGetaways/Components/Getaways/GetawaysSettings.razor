@@ -1,6 +1,5 @@
-@* The Settings page. Every control changes the shared GetawaysAppSettings, which raises Changed so the whole window answers at
-   once, and the preview shows the grids and the chart while their own pages are closed. GridControl reads Theme only when it is
-   created, so the preview grid carries a @key that names the theme. *@
+@* Settings: controls update the shared GetawaysAppSettings, whose Changed event repaints the window. GridControl reads Theme
+   only on creation, so the preview grid's @key names the theme. *@
 @namespace RazorSharpGetaways.Components.Getaways
 @using Microsoft.JSInterop
 @using Fx.ControlKit
@@ -188,7 +187,7 @@
 
     protected override void OnInitialized() => _rows = Store.Requests.OrderByDescending(r => r.DateRequested).Take(8).ToList();
 
-    // Applies a change and tells the window and its open page to repaint
+    // Applies a change; the window and its open page repaint
     private void Change(Action apply)
     {
         apply();

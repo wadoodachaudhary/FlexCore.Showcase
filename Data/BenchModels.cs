@@ -1,8 +1,8 @@
 namespace FlexCore.Showcase.Data;
 
 /// <summary>
-/// One line of the tour operator's rate card: a bookable service from one supplier at one destination, with the
-/// net rate the operator pays and the margin it adds. Shared by Batch editing, Export &amp; templates and On-demand loading.
+/// Rate card line: one supplier's bookable service at one destination, with net rate and margin. Used by Batch editing,
+/// Export &amp; templates and On-demand loading.
 /// </summary>
 public sealed class RateCardItem
 {
@@ -20,9 +20,7 @@ public sealed class RateCardItem
     public string Notes { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// A supplier on the operator's books: a hotel, transfer company, tour operator or service at one destination. Page navigation.
-/// </summary>
+/// <summary>Supplier at one destination: hotel, transfer company, tour operator or service. Page navigation.</summary>
 public sealed class SupplierRecord
 {
     public string Code { get; set; } = string.Empty;

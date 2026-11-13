@@ -3,13 +3,9 @@
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Services
 
-@* 2026-10-25: new page on FeatureDemoLayout; three examples, one per control (dropdown, lookup, listbox). Facts checked against
-   DropDownListControl.razor, DropDownListControl.razor.cs, DropDownListControl.razor.css, wwwroot/dropdown-list-control.js,
-   Grid/DropDownGridControl.razor, Grid/DropDownGridControl.razor.cs, Grid/DropDownGridControl.razor.css, ListBoxControl.razor,
-   ListBoxControl.razor.css and ListBoxSelectionMode.cs in FlexCore 0.2.49. DropDownListControl declares AllowFiltering and ChildContent
-   but never reads them; the tables say so. None of the three controls captures unmatched attributes.
-   2026-10-26 (Baaria): the lookup example picks two of the 4,009 airports the Data Grid page shows (OurAirports, Data/AirportData.cs)
-   and gives the great-circle distance between them, instead of one of 200 invented suppliers. *@
+@* 2026-10-25: new page; facts from DropDownListControl*, dropdown-list-control.js, Grid/DropDownGridControl*, ListBox*
+   (FlexCore 0.2.49). DropDownListControl never reads AllowFiltering or ChildContent; none of the three captures unmatched attributes.
+   2026-10-26: lookup example on OurAirports (Data/AirportData.cs): two airports and their great-circle distance. *@
 
 <PageTitle>Blazor DropDownList, DropDownGrid and ListBox — FlexCore</PageTitle>
 

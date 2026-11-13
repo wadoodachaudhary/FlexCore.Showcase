@@ -3,16 +3,10 @@
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-25: new page (SC-347 wave 1). Three examples: a week of repeating tours (views, navigation, editor, SlotMinutes,
-   ReadOnly, two-way Date/View/Events), a Changing guard on a Day view with two guides as Resources, and one list shown in two
-   TimeZoneIds. Facts checked against Scheduling/SchedulerControl.razor, SchedulerControl.razor.css and SchedulerModels.cs
-   (FlexCore main 58a62e0), plus ToolbarControl, DialogControl, Forms/FormControl and Forms/FormItemControl for the editor.
-   The demo data was expanded with SchedulerEngine.Expand in a scratch console against the built FlexCore.dll (Lisbon and
-   Vancouver ranges) before it went on the page.
-   Left out on purpose: moving an appointment by dragging it. SchedulerControl.razor:13, 15 and 20 render draggable="@CanEdit",
-   which Blazor writes as an empty draggable attribute, and browsers treat that as not draggable (checked on the live
-   Dock manager page, whose DockNodeView.razor:15 has the same pattern: getAttribute "" and .draggable false). Only the resize
-   strip (draggable="true", line 20) can be dragged, so the page offers that and nothing else. *@
+@* 2026-10-25: new page (SC-347). Facts from Scheduling/SchedulerControl.razor(.css), SchedulerModels.cs (main 58a62e0), and for
+   the editor ToolbarControl, DialogControl, Forms/FormControl, Forms/FormItemControl.
+   No drag-to-move: SchedulerControl renders draggable="@CanEdit", which Blazor writes as an empty attribute that browsers treat
+   as not draggable (same in DockNodeView.razor). Only the resize strip (draggable="true") drags. *@
 
 <PageTitle>Blazor Scheduler (Event Calendar) — FlexCore</PageTitle>
 

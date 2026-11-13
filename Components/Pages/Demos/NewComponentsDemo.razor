@@ -4,23 +4,14 @@
 @using Fx.ControlKit
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-12: moved onto FeatureDemoLayout. The four Bootstrap cards became three examples; the existing
-   demos were kept, a breadcrumb was added (the catalog listed one here), the split button moved to its own
-   page, and copy that made library claims was replaced with neutral sample text. Vocabulary pending (SC-264). Code tabs added 2026-10-13.
-   2026-10-24: Documentation written from BadgeControl.razor, BadgeModels.cs, AlertControl.razor, AlertModels.cs, SkeletonControl.razor,
-   SkeletonModels.cs, TimelineControl.razor, TimelineItemControl.razor, TimelineModels.cs, BreadCrumbControl.razor, BreadCrumbItem.cs and
-   FlexControlBase.cs, with the five .razor.css files for what each class does; rows checked with scratchpad/vocabcheck.py (enum members and
-   the OnClose payload by grep). Two example facts are stated in the tables: the dot badge's Title is never read, and the Home crumb's empty
-   Href renders as text (SC-264). 
-   2026-10-24 (later): the dot badge lost a Title attribute the control never reads (no tooltip rendered), and the Home crumb got a real
-   href (an empty one renders as text, not a link); the Overview no longer says the tables follow later. Tabs regenerated.
-   2026-10-25 (SC-347): third example, "progress": a ProgressBarControl and two ChunkProgressBarControls showing a supplier-rate import
-   that the page simulates with a PeriodicTimer (disposed with the page, hence @implements IDisposable). Its documentation and the new
-   Accessibility section are written from ProgressBarControl.razor/.css, ChunkProgressBarControl.razor/.css, ContentModels.cs
-   (FlexOrientation), FlexControlBase.cs and ButtonControl.razor. FlexCore's compiled scoped CSS bundle shows the .fx-progress-cancel
-   margin rule carrying ProgressBarControl's scope, so it misses the button ButtonControl renders; the page CSS pushes the button right.
-   Overview, tagline, source list and the Documentation intro now include the two progress controls; the first two examples are unchanged.
-   2026-10-26 (Baaria): sample content moved to the travel theme. *@
+@* 2026-10-12 (SC-264): on FeatureDemoLayout; breadcrumb added, split button moved out, neutral sample text.
+   2026-10-13: code tabs.
+   2026-10-24: Documentation from Badge*, Alert*, Skeleton*, Timeline*, BreadCrumb* sources, FlexControlBase.cs and .razor.css.
+   Tables note: the dot badge's Title is never read; the Home crumb's empty Href renders as text (SC-264).
+   2026-10-24 (later): dot badge's Title removed, Home crumb given a real href; Overview and tabs updated.
+   2026-10-25 (SC-347): "progress" example on a PeriodicTimer-simulated import; docs from ProgressBarControl*,
+   ChunkProgressBarControl*, ContentModels.cs, ButtonControl.razor. Cancel placement: see .razor.css.
+   2026-10-26: sample content on the travel theme. *@
 
 <PageTitle>Blazor Badge, Alert, Timeline and Progress Bar — FlexCore</PageTitle>
 
@@ -420,15 +411,14 @@ private void StopTimer() { _timer?.Dispose(); _timer = null; }
 
 // The page declares @implements IDisposable, so the timer stops when the page goes away.
 public void Dispose() => StopTimer();";
-        public const string ProgressCss = @"/* 2026-10-25: progress example. ProgressBarControl's margin-left rule for its Cancel button is scoped to ProgressBarControl
-   and does not reach the button that ButtonControl renders, so the page pushes the button to the right. */
+        public const string ProgressCss = @"/* 2026-10-25: ProgressBarControl's scoped Cancel-button margin misses ButtonControl's button, so the page pushes it right. */
 .progress-demo { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
 .progress-demo ::deep .fx-progress { flex: 1 1 320px; margin: 0; }
 .progress-demo ::deep .fx-progress-cancel { margin-left: auto; }
 .chunk-col { flex: 0 1 240px; }";
     }
 
-    // Documentation rows (2026-10-24), written from the FlexCore sources named in the header comment.
+    // Documentation rows (2026-10-24), from the FlexCore sources in the header comment.
     private static class Vocab
     {
         public static readonly ApiRow[] Badge =

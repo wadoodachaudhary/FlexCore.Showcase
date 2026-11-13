@@ -2,13 +2,11 @@
 @using FlexCore.Showcase.Components.Shared
 @using FlexCore.Showcase.Data
 
-@* 2026-10-25: new page on FeatureDemoLayout; two examples (traveller details, notes with a limit). Facts checked against
-   TextBoxControl.razor(.css), TextBoxTypingBehavior.cs, TextContextMenuModels.cs, NumericTextBoxControl.razor(.css),
-   TextAreaControl.razor(.css), TextAreaScrollBars.cs, Editor/TextAreaControl.razor, PasswordControl.razor,
-   Forms/FormItemControl.razor and wwwroot/textbox-control.js in FlexCore 0.2.49, plus Blazor's blazor.web.js 10.0.2 for how
-   the value property is written. Both namespaces Fx.ControlKit and Fx.ControlKit.Editor are imported site-wide and each has a
-   TextAreaControl, so this page writes Fx.ControlKit.TextAreaControl in full. Neither NumericTextBoxControl nor TextAreaControl
-   captures unmatched attributes, so every field is labelled by a wrapping <label>. *@
+@* 2026-10-25: new page on FeatureDemoLayout. Facts from TextBox*, NumericTextBoxControl.razor(.css), TextArea*,
+   TextContextMenuModels.cs, Editor/TextAreaControl.razor, PasswordControl.razor, Forms/FormItemControl.razor,
+   wwwroot/textbox-control.js (FlexCore 0.2.49); blazor.web.js 10.0.2 for how value is written. Fx.ControlKit.TextAreaControl
+   in full: Fx.ControlKit.Editor (also imported) has one too. NumericTextBoxControl and TextAreaControl capture no unmatched
+   attributes, hence the wrapping <label>s. *@
 
 <PageTitle>Blazor TextBox, Numeric TextBox and TextArea — FlexCore</PageTitle>
 

@@ -1,7 +1,6 @@
-@* The Invoices page: the Package Cost Sheet, a Crystal Reports XML export (wwwroot/reports), run by ReportWriterControl for one
-   booked trip. The trip's destination picks the package and its departure the season; its nights, party size, quote and request key
-   go along as extra seeds, which Data/PackageCostSheet.cs reads to cost the sheet for that booking. The writer's toolbar prints and
-   exports the sheet, and its Parameters button reruns it for any package and season. *@
+@* Invoices: ReportWriterControl runs the Package Cost Sheet (Crystal Reports XML export, wwwroot/reports) for a booked trip.
+   Its destination and departure pick the package and season; its other details go as extra seeds, which Data/PackageCostSheet.cs
+   reads to cost the sheet. *@
 @namespace RazorSharpGetaways.Components.Getaways
 @using System.Globalization
 @using Fx.ControlKit

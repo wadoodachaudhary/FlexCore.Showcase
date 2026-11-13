@@ -7,23 +7,14 @@
 @using FlexCore.Showcase.Data
 @inject FlexCore.Showcase.Services.BenchDataStore BenchData
 
-@* 2026-10-18: moved onto FeatureDemoLayout (Saturday plan). Same provider and the same 12,000 rows. Changes, closing SC-021 and
-   SC-170 to SC-173: the copy states the setup (in-memory list, simulated delay) and says in plain words that groups and rows load
-   when they are opened before it names the request purposes; one title everywhere; the "bench" wording went (nothing is timed).
-   AllowFiltering="true" was removed because the provider never read request.Query.Filters, so a column filter changed nothing
-   (a provider-backed checklist would also need EnableProviderFilterValueRequests). ExportAllProviderItems went because the page
-   calls ExportProviderQueryAsync, which does not need it. The readout under the grid now counts the requests and names the group
-   each one was for. Fixed on the way: the provider answered GroupChildren and GroupItems requests with the aggregates of the whole
-   query, and the grid stores a child page's aggregates on the parent group (GridControl.ProviderGrouping.cs ~512), so an opened
-   region's footer showed the grand total; child pages now carry the parent group's totals. The .orders wrapper exists for the page
-   CSS: the caption count and sum pills are built in C# and never get the scoped library styling (SC-253), so the page spaces them.
-   Parameter tables are a later pass (SC-278). *@
+@* 2026-10-18: on FeatureDemoLayout; closes SC-021, SC-170 to SC-173 (setup stated, one title, no "bench" wording). Tables
+   followed (SC-278). AllowFiltering removed: the provider never read request.Query.Filters (a provider checklist also needs
+   EnableProviderFilterValueRequests). ExportAllProviderItems removed: ExportProviderQueryAsync does not need it.
+   Fix: GroupChildren and GroupItems pages return the parent group's totals (opened footers showed the grand total).
+   .orders wrapper: the page CSS spaces the caption pills (SC-253). *@
 
-@* 2026-10-25 (Baaria, SC-344): the search example runs on the operator's rate card (Data/BenchModels.cs RateCardItem,
-   BenchDataStore.RateCard) instead of the earlier estimating items. Same provider shape as before: the search
-   matches the code, description and supplier; SortItems still sorts by property name; paging and the readout are unchanged.
-   Supplier is a new column and the others were narrowed so the eight fit the main column. Code.Search and Code.SearchCs were
-   regenerated verbatim; the orders example was not touched. *@
+@* 2026-10-25 (SC-344): search example on the rate card (Data/BenchModels.cs RateCardItem); Supplier column added, the rest
+   narrowed to fit the main column. *@
 
 <PageTitle>On-Demand Data Loading in a Blazor Grid — FlexCore</PageTitle>
 

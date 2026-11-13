@@ -1,5 +1,4 @@
-/* Razor Sharp Getaways: page basics. The app's own look is in getaways.css; this file only lays the ground a CSS reset would, as
-   the app loads no CSS framework, plus the Blazor error bar. */
+/* Razor Sharp Getaways: minimal reset (no CSS framework) and the Blazor error bar. The app's look is in getaways.css. */
 *, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; }

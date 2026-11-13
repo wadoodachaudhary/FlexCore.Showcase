@@ -1,10 +1,9 @@
 namespace FlexCore.Showcase.Components.Shared;
 
-// Chart colours (2026-10-31, Baaria): every chart on the site passes these as ColorPalette instead of ChartControl's built-in eight,
-// so the charts wear the site's colours. The chart pages' C# tabs print the lines between the markers (FlexCore.Showcase.csproj
-// embeds this file for AppSource.Region). The order was picked with a colour-blindness check: under protanopia and deuteranopia
-// each colour stays clearly apart from the next (OKLab distance 16 or more), and all eight hold 3:1 against the white card.
-// The logo's sky (#38bdf8) is left out because it falls to 2.1:1 on white.
+// Chart colours (2026-10-31): every site chart passes these as ColorPalette instead of ChartControl's built-in eight. Chart pages'
+// C# tabs print the lines between the markers (FlexCore.Showcase.csproj embeds this file for AppSource.Region). Order keeps
+// neighbours apart under protanopia and deuteranopia (OKLab distance >= 16); all eight hold 3:1 on white. The logo's sky
+// (#38bdf8) is out: 2.1:1 on white.
 // code-tab:chart-palette
 /// <summary>Chart colours: the FlexCore logo's blue, green and indigo first, then five that go with them.</summary>
 public static class ChartPalette

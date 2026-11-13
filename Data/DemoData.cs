@@ -1,17 +1,16 @@
 namespace FlexCore.Showcase.Data;
 
 /// <summary>
-/// In-memory data for the Grouping &amp; totals grid page: the tour operator's rate card and the cost lines of one of its
-/// packages, both built on <see cref="TravelData"/>. Supplier and service names are invented; no real company is named.
-/// Both generators are seeded, so screenshots repeat. The home page, the Report writer page and the larger grid pages take
-/// their travel data from their own services.
+/// Data for the Grouping &amp; totals grid page: the rate card and one package's cost lines, built on <see cref="TravelData"/>.
+/// Supplier and service names are invented. Seeded, so screenshots repeat. The home page, Report writer and larger grid pages
+/// use their own services.
 /// </summary>
 public static class DemoData
 {
     /// <summary>Two travellers on every package costing.</summary>
     private const int Pax = 2;
 
-    /// <summary>How far a destination is from home moves its rates; the same factors as the bench store's rate card.</summary>
+    /// <summary>Rate factor by region; same factors as the bench store's rate card.</summary>
     private static decimal RegionFactor(string region) => region switch
     {
         "East Asia" => 1.15m, "Southern Africa" => 1.1m, "North Africa" => 0.85m, "Northern Europe" => 1.4m,
@@ -21,8 +20,8 @@ public static class DemoData
     /// <summary>Departure season price factor.</summary>
     private static decimal SeasonFactor(string season) => season switch { "Summer" => 1.25m, "Autumn" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
 
-    /// <summary>The services on the rate card: category, supplier (a {0} placeholder takes the city), description, the unit the
-    /// rate is quoted per, and the rate range in whole currency units before the region factor.</summary>
+    /// <summary>Rate card services: category, supplier ({0} takes the city), description, rate unit, and rate range in whole
+    /// currency units before the region factor.</summary>
     private static readonly (string Category, string Supplier, string Description, string Unit, int Low, int High)[] RateCardServices =
     {
         ("Transport",     "Meridian Airways",             "Return flights, economy",         "pax",     380, 620),
@@ -39,8 +38,8 @@ public static class DemoData
         ("Services",      "Razor Sharp Getaways, head office", "Documents and delivery",          "booking",  12,  25),
     };
 
-    /// <summary>Generates the rate card: for every destination the operator sells, four to seven of the services above in turn,
-    /// each with a rate drawn from its range and scaled by the region. Roughly one line in ten is not bookable.</summary>
+    /// <summary>Rate card: per destination, four to seven of the services above in turn, each rate drawn from its range and
+    /// scaled by region. About one line in ten is not bookable.</summary>
     public static List<RateCardLine> GenerateRateCard()
     {
         var rnd = new Random(13);
@@ -69,9 +68,8 @@ public static class DemoData
         return lines;
     }
 
-    /// <summary>The services costed for a package: cost group (lettered the way the Report writer's cost sheet letters them),
-    /// supplier (a {0} placeholder takes the package's city), description, unit, the rate range before the season factor, the
-    /// rate basis (Contract or Spot) and whether the line is priced per person or per booking.</summary>
+    /// <summary>Package services: cost group (lettered as on the Report writer's cost sheet), supplier ({0} takes the package's
+    /// city), description, unit, rate range before the season factor, Contract or Spot rate, per person or per booking.</summary>
     private static readonly (string CostGroup, string Supplier, string Description, string Unit, int Low, int High, string RateBasis, string Pricing)[] PackageServices =
     {
         ("A Transport",     "Meridian Airways",             "Return flights, economy",         "pax",     380, 620, "Contract", "Per person"),
@@ -91,10 +89,9 @@ public static class DemoData
         ("D Services",      "Razor Sharp Getaways, head office", "Documents and delivery",          "booking",  12,  25, "Contract", "Per booking"),
     };
 
-    /// <summary>Generates the cost lines of the first package in <see cref="TravelData.Packages"/> (Lisbon Explorer): the services
-    /// above, costed once per departure season in turn, for <see cref="Pax"/> travellers and the package's nights, so the default
-    /// sixty lines are the fifteen services in each of the four seasons. A contract rate is drawn once per service and only moves
-    /// with the season; a spot rate is drawn afresh for every line.</summary>
+    /// <summary>Cost lines of the first package in <see cref="TravelData.Packages"/> (Lisbon Explorer): the services above per
+    /// season in turn, for <see cref="Pax"/> travellers and the package's nights; default 60 = 15 services x 4 seasons. Contract
+    /// rates are drawn once per service and move only with the season; spot rates are drawn per line.</summary>
     public static List<PackageCostLine> GeneratePackageCostLines(int count = 60)
     {
         var rnd = new Random(42);

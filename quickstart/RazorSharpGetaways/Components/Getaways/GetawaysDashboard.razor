@@ -1,6 +1,5 @@
-@* The Dashboard: four figures, the month-by-month chart and the upcoming departures, each a card placed by GridLayoutControl from
-   the Settings page's layout, with a rearrange mode that drags cards by their bar. It reads the same trip requests as the Trip
-   Requests page, so an edit or a new request there shows up here. *@
+@* Dashboard: cards GridLayoutControl places from the Settings layout. Shares the Trip Requests data, so edits and new
+   requests show here. *@
 @namespace RazorSharpGetaways.Components.Getaways
 @using Fx.ControlKit
 @using Fx.ControlKit.Charts
@@ -150,7 +149,7 @@
 
     private IReadOnlyList<TripRequest> Requests => Store.Requests;
 
-    // The requests are generated over the 300 days up to today (TripRequestStore)
+    // Requests span the 300 days up to today (TripRequestStore)
     private static DateTime Today => DateTime.Today;
 
     private bool _withDeclined;

@@ -1,11 +1,11 @@
 namespace RazorSharpGetaways.Data;
 
-/// <summary>A packaged trip the agency sells: where it goes, the city its suppliers are named after and how long it is.</summary>
+/// <summary>A packaged trip: destination, the city its suppliers are named after, and length.</summary>
 public sealed record TripPackage(string Name, string Region, string Destination, string City, int Nights);
 
 /// <summary>
-/// The agency's packages, one for each destination its trip requests name, and the departure seasons its cost sheets price them
-/// by. The Invoices page picks a booked trip's package by its destination and its season by its departure date.
+/// The agency's packages (one per destination in its trip requests) and the seasons cost sheets price them by. The Invoices page
+/// picks a booked trip's package by destination and season by departure date.
 /// </summary>
 public static class TripPackages
 {
@@ -28,7 +28,7 @@ public static class TripPackages
     /// <summary>Departure seasons; a cost sheet prices a package per season.</summary>
     public static readonly string[] Seasons = ["Spring", "Summer", "Autumn", "Winter"];
 
-    /// <summary>The package sold for a destination; the first package when the destination is not on the list.</summary>
+    /// <summary>The package for a destination, or the first package if it is not listed.</summary>
     public static TripPackage ForDestination(string destination) =>
         All.FirstOrDefault(p => p.Destination.Equals(destination, StringComparison.OrdinalIgnoreCase)) ?? All[0];
 

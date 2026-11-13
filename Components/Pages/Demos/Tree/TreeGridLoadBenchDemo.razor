@@ -7,31 +7,16 @@
 @using FlexCore.Showcase.Services
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (row 9 of the Data Grid list) and turned from a "first-load bench" into the plain tree
-   grid page the tracker asked for (SC-231). Gone, closing SC-226 to SC-230: the Benchmark button and the timing (the Stopwatch
-   only wrapped list construction), the "40 / 180 / 480 nodes" labels (the grid loads 50 / 210 / 540 rows, groups included; the
-   readout now counts them), the no-op Expanded handler (Expanded and Collapsed now feed the readout), an internal form name,
-   "Windows/VB6 folder styles" and the three competing titles. fx-treegrid-dotted-lines stays: it is a Showcase style (wwwroot/app.css:1639),
-   not a library one.
-   Added: Expand all / Collapse all ButtonControls on the grid's ExpandAllAsync / CollapseAllAsync. Height="100%" became the 440px
-   the wrapper gave it. Parameter tables are a later pass (SC-278).
-   2026-10-23: second example, the org chart from Four scenarios (department filter keeps the manager chain; RatingControl in a
-   column template).
-   2026-10-24: Documentation tables (SC-278) written from Grid/TreeGridControl.razor, Grid/TreeGridControl.razor.cs and its Checking,
-   Editing, Frozen, Loading, Moving and Query partials, Grid/TreeGridColumn.cs, Grid/TreeGridMutationModels.cs, Grid/TreeGridQuery.cs,
-   Grid/GridModels.cs, Grid/GridToolbarModels.cs and Grid/GridEnums.cs; every row run through vocabcheck.py against those files, with
-   event payloads, read-only properties and async returns checked by grep. The control has 97 [Parameter] declarations (74 plain, 23
-   EventCallbacks), not the 92 the placeholder counted. 
-   2026-10-24 (later): three Overview sentences corrected from the source read (EnableCollapseAll vs InitialExpansionPredicate, keyboard
-   toggling, ExpandAllAsync/CollapseAllAsync raise no events).
-   2026-10-25 (Baaria, SC-344): the load bench runs on suppliers and their services (Data/BenchModels.cs, the node class) instead of
-   the earlier node shape and cost divisions.
-   2026-10-26: the first example became the OurAirports data (Data/AirportData.cs): six continents in the list, and countries,
-   airports and runways from LoadChildren as rows open, which the page had not shown before. The suppliers, the size buttons and
-   Expand all went with it (ExpandAllAsync opens only rows whose children are loaded, so it would load one level per click).
-   2026-10-26 (Baaria): the org chart runs on Razor Sharp Getaways' generated staff (Data/TravelOrg.cs, all names made up)
-   instead of the 21-person HR list; a search box over name, title, office, division and department replaces the department
-   buttons, and the Name column is frozen. *@
+@* 2026-10-17: first-load bench -> plain tree grid page on FeatureDemoLayout (SC-231); bench UI and wrong labels removed (SC-226 to
+   SC-230). fx-treegrid-dotted-lines: a TreeGridControl class. Height 440px, the wrapper's. Tables added 2026-10-24 (SC-278).
+   2026-10-23: example 2, org chart from Four scenarios (department filter keeps the manager chain; RatingControl column template).
+   2026-10-24 (SC-278): tables from Grid/TreeGrid*.cs, TreeGridControl.razor, GridModels.cs, GridToolbarModels.cs, GridEnums.cs.
+   2026-10-24 (later): Overview fixed (EnableCollapseAll vs InitialExpansionPredicate, keyboard toggling, Expand/CollapseAllAsync
+   raise no events).
+   2026-10-25 (SC-344): load bench on suppliers and their services (Data/BenchModels.cs).
+   2026-10-26: example 1 on OurAirports (Data/AirportData.cs): continents in the list, the rest from LoadChildren. No Expand all:
+   ExpandAllAsync opens only loaded rows, one level per click.
+   2026-10-26: org chart on generated staff (Data/TravelOrg.cs, names made up); a search box replaces the department buttons. *@
 
 <PageTitle>Blazor Tree Grid (TreeList) — FlexCore</PageTitle>
 
@@ -301,7 +286,7 @@
         _orgGeneration++;
     }
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    // Code tabs: generated verbatim copies of the Demo block and members above.
     private static class Code
     {
         public const string Org = @"<TextBoxControl Value=""@_search"" ValueChanged=""Search"" Placeholder=""Name, title, office or division"" Width=""240px"" />

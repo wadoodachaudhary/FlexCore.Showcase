@@ -1,5 +1,5 @@
-// 2026-10-24: ChartType rows for the Charts page Documentation (meeting point 5). Each row was checked against the renderer
-// branch in Charts/ChartControl.razor; a type that has no branch of its own says which branch draws it.
+// 2026-10-24: ChartType rows for the Charts page Documentation, from the renderer branches in Charts/ChartControl.razor; a type
+// with no branch of its own names the branch that draws it.
 using FlexCore.Showcase.Components.Shared;
 
 namespace FlexCore.Showcase.Components.Pages.Demos.Charts;

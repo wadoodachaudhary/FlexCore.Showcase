@@ -2,8 +2,7 @@
 .fd-header { margin-bottom: 20px; }
 .fd-title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
 .fd-title { margin: 0; font-size: clamp(32px, 3.6vw, 44px); font-weight: 700; line-height: 1.1; letter-spacing: -0.035em; color: #0f172a; }
-/* 2026-10-28: the logo's colours on every demo page: a four-colour bar under the header, a logo tile in front of each section
-   heading (Overview blue, Examples indigo, Documentation green, Keyboard sky, Related blue) and the stripe down the rail. */
+/* 2026-10-28: logo colours: four-colour bar under the header, logo tile before each section heading, stripe down the rail. */
 .fd-header::after { content: ""; display: block; width: 64px; height: 4px; border-radius: 2px; background: var(--brand-stripe); margin-top: 16px; }
 .fd-control { font-size: 13px; background: #eef2ff; color: #3730a3; padding: 3px 8px; border-radius: 6px; }
 .fd-tagline { margin: 8px 0 0; font-size: 16px; color: #475569; max-width: 75ch; }

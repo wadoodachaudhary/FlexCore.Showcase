@@ -5,18 +5,17 @@ using System.Text.RegularExpressions;
 namespace RazorSharpGetaways.Data;
 
 /// <summary>
-/// The rows behind the Package Cost Sheet report (wwwroot/reports/Package Cost Sheet.xml): the service lines the agency pays its
-/// suppliers for one package in one departure season, grouped by cost group and supplier, built in memory from
-/// <see cref="TripPackages"/> and the same for the same choices every time. The report's own parameters are Package and Season.
-/// When the Invoices page runs the sheet for a booked trip it also passes Pax, Nights, Quote and Request: the lines are then costed
-/// for that party and scaled so the sheet comes to <see cref="CostShareOfQuote"/> of the price quoted to the client.
+/// Rows for the Package Cost Sheet report (wwwroot/reports/Package Cost Sheet.xml): what the agency pays suppliers for one package
+/// in one season, by cost group and supplier, built in memory from <see cref="TripPackages"/> (same choices, same rows). Report
+/// parameters: Package, Season. For a booked trip the Invoices page also passes Pax, Nights, Quote and Request; the lines are then
+/// costed for that party and scaled to <see cref="CostShareOfQuote"/> of the client's quote.
 /// </summary>
 public static class PackageCostSheet
 {
-    /// <summary>What the suppliers' costs come to as a share of the price quoted to the client.</summary>
+    /// <summary>Supplier costs as a share of the client's quote.</summary>
     public const decimal CostShareOfQuote = 0.82m;
 
-    /// <summary>Answers the report's SQL: a table with the columns the SELECT list asks for and one row per service line.</summary>
+    /// <summary>Answers the report's SQL: the SELECT list's columns, one row per service line.</summary>
     public static DataTable Build(string sql, IDictionary<string, object>? parameters)
     {
         var table = EmptyTable(SelectAliases(sql));
@@ -32,7 +31,7 @@ public static class PackageCostSheet
         var city = package.City;
         int rooms = (pax + 1) / 2;   // two to a room
 
-        // Prices move with the season and with how far the package is from home
+        // Prices vary with season and distance from home
         decimal seasonFactor = season switch { "Summer" => 1.25m, "Autumn" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
         decimal flightFactor = package.Region switch
         {
@@ -40,7 +39,7 @@ public static class PackageCostSheet
             "North America" => 1.4m, "Oceania" => 1.9m, "South America" => 1.5m, _ => 1.0m
         };
 
-        // Cost groups, each with its suppliers; each supplier with its services: code letter, description, quantity, unit, rate range, note
+        // Cost groups -> suppliers -> services (code letter, description, quantity, unit, rate range, note)
         var costGroups = new (string Code, string Desc, (string Supplier, (string Code, string Desc, int Qty, string Unit, int Low, int High, string Note)[] Services)[] Suppliers)[]
         {
             ("A", "Transport", new[]
@@ -118,7 +117,7 @@ public static class PackageCostSheet
                 foreach (var svc in services)
                 {
                     var factor = svc.Code == "F" ? flightFactor * seasonFactor : seasonFactor;
-                    // Rates in cents times the factors, rounded back to two places, so every rate prints with two decimals
+                    // Rate in cents times the factors, rounded to two places so every rate prints two decimals
                     var rate = Math.Round(rnd.Next(svc.Low * 100, svc.High * 100 + 1) / 100m * factor, 2);
                     lines.Add((group.Code, group.Desc, supplier, $"{svc.Code}{lineNo:D3}", svc.Desc, svc.Qty, svc.Unit, rate, svc.Note));
                     lineNo++;
@@ -150,8 +149,8 @@ public static class PackageCostSheet
             SetIfPresent(row, "PackageCostLines_Unit",          l.Unit);
             SetIfPresent(row, "PackageCostLines_Rate",          l.Rate);
             SetIfPresent(row, "PackageCostLines_Notes",         l.Note);
-            // Formula columns: what the Crystal formulas would give, so the groups and sums agree with the design, except PackageDesc,
-            // which adds the request key when the sheet is run for a booking
+            // Formula columns: the Crystal formulas' values, so groups and sums match the design; PackageDesc also adds the
+            // request key for a booking
             SetIfPresent(row, "Formula_Amount",      l.Qty * l.Rate);
             SetIfPresent(row, "Formula_PackageDesc", packageDesc);
             SetIfPresent(row, "Formula_GroupDesc",   $"{l.Group} {l.GroupDesc}");

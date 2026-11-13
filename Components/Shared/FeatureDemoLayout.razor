@@ -1,13 +1,11 @@
 @namespace FlexCore.Showcase.Components.Shared
 @inject NavigationManager Nav
 
-@* Page frame for one feature (2026-10-12): header → Overview → Examples → Documentation →
-   Keyboard and accessibility → Related, plus an "On this page" list filled by the DemoExamples.
-   Breadcrumb is BreadCrumbControl; the two-column frame has no FlexCore equivalent.
-   2026-10-18 (Baaria's review): "Vocabulary" became "Documentation"; the source files moved from the header to the rail under
-   "On this page" and are listed without links, because whether the full source stays public is still an open decision.
-   2026-10-20 (developer meeting): the rail shows an Examples entry with the example titles nested under it.
-   2026-10-25: Documentation can hold DocSections (accordion); their titles nest under Documentation in the rail. *@
+@* Page frame for one feature (2026-10-12), with an "On this page" rail filled by the DemoExamples; the two-column frame has no
+   FlexCore equivalent.
+   2026-10-18: "Vocabulary" → "Documentation"; source files in the rail, unlinked until it is decided whether source stays public.
+   2026-10-20: rail Examples entry with the example titles nested under it.
+   2026-10-25: DocSections titles nest under Documentation in the rail. *@
 <CascadingValue Value="this" IsFixed="true">
 <div class="fd-shell">
     <header class="fd-header">

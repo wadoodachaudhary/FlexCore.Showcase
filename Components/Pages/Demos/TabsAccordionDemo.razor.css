@@ -13,8 +13,8 @@
 .strip-actions .result { margin: 0; }
 .acc { max-width: 480px; }
 
-/* 2026-10-28: the tab looks come from TabTheme (FolderTabs on this page); the page only joins the pane to the strip and lays out
-   the Vertical rail, which the strip draws 220 px wide with height: 100%. */
+/* 2026-10-28: tab looks come from TabTheme (FolderTabs); the page only joins the pane to the strip and lays out the Vertical
+   rail (the strip draws it 220 px wide, height: 100%). */
 .docs { display: flex; flex-direction: column; }
 .docs .strip-pane { border: 1px solid #cbd5e1; border-top: 0; border-radius: 0 0 8px 8px; background: #fff; padding: 14px 16px; }
 .docs-vertical { flex-direction: row; align-items: stretch; min-height: 240px; }

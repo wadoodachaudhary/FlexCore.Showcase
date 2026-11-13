@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Package Cost Sheet: Razor Sharp Getaways' cost breakdown for one package in one departure season. Four group levels (region,
-  package, cost group, supplier), a sum in every group footer and a grand total in the report footer. Written in the Crystal XML
-  export shape that CrystalXmlReportLoader reads, with a single table and a handful of fields.
-
-  The rows come from RazorSharpGetaways.Data.PackageCostSheet through the app's IReportDataExecutor (Data/GetawaysReportServices.cs);
-  no database is involved. The Package parameter's pick list is the agency's package list (Data/TripPackages.cs).
+  Package Cost Sheet: costs for one package in one departure season, in the Crystal XML export shape CrystalXmlReportLoader reads.
+  Rows come from Data/PackageCostSheet.cs via the app's IReportDataExecutor (Data/GetawaysReportServices.cs), not a database;
+  the Package pick list from Data/TripPackages.cs.
 -->
 <Report Name="" FileName="Package Cost Sheet.rpt" HasSavedData="False">
   <Summaryinfo KeywordsinReport="" ReportAuthor="Razor Sharp Getaways" ReportComments="Cost sheet of one package in one season" ReportSubject="" ReportTitle="Package Cost Sheet" />

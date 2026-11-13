@@ -4,8 +4,8 @@ namespace RazorSharpGetaways.Components.Getaways;
 public sealed record GetawaysPage(string Key, string Nav, string Icon, string Title, string Route);
 
 /// <summary>
-/// What both hosts of the app window share: its name, its pages and the profile menu. Razor Sharp Getaways routes each page;
-/// the FlexCore site's home page switches between them inside its demo frame.
+/// Shared by both hosts: app name, pages, profile menu. Razor Sharp Getaways routes each page; the FlexCore site's home page
+/// switches between them inside its demo frame.
 /// </summary>
 public static class GetawaysPages
 {
@@ -25,14 +25,14 @@ public static class GetawaysPages
 
     public static int IndexOf(string key) => Math.Max(0, Array.FindIndex(All, p => p.Key == key));
 
-    /// <summary>The profile menu's entries; each answers with a toast in this app.</summary>
+    /// <summary>Profile menu entries; each shows a toast.</summary>
     public static readonly (string Text, string Icon)[] ProfileMenu =
     [
         ("My profile", "bi bi-person-circle"), ("Account settings", "bi bi-person-gear"),
         ("Notifications", "bi bi-bell"), ("Sign out", "bi bi-box-arrow-right"),
     ];
 
-    /// <summary>The FlexCore version the app runs on, read from the assembly for the menu's footer.</summary>
+    /// <summary>FlexCore assembly version, for the menu footer.</summary>
     public static string FlexCoreVersion { get; } =
         typeof(Fx.ControlKit.ButtonControl).Assembly.GetName().Version is { } v ? $"{v.Major}.{v.Minor}.{v.Build}" : "";
 }

@@ -4,17 +4,16 @@ using System.Text;
 namespace FlexCore.Showcase.Seo;
 
 /// <summary>
-/// The crawler-facing plumbing (2026-10-29): one host for the site, and robots.txt, sitemap.xml and llms.txt generated from
-/// <see cref="SiteMeta"/> so they cannot drift from the pages. Wired in Program.cs.
+/// Crawler plumbing (2026-10-29): one host; robots.txt, sitemap.xml and llms.txt generated from <see cref="SiteMeta"/> so they
+/// match the pages. Wired in Program.cs.
 /// </summary>
 public static class SeoEndpoints
 {
     /// <summary>
-    /// 301s GET/HEAD requests on the www name and production's azurewebsites name to https://flexcoreui.com, so search engines
-    /// see one copy of each page. Runs before HTTPS redirection so http://www... is one hop. Leaves the SignalR endpoint and App
-    /// Service's own probes alone: the platform pings the default host name, does not follow redirects, and must get a 200.
-    /// The staging host is never redirected; every response from it carries X-Robots-Tag: noindex instead (a robots.txt block
-    /// would hide the noindex, and a blocked URL can still be listed by address).
+    /// 301s GET/HEAD on the www and production azurewebsites names to https://flexcoreui.com: one copy of each page for search
+    /// engines. Before HTTPS redirection so http://www... is one hop. Skips SignalR and App Service probes: the platform pings the
+    /// default host name, does not follow redirects, needs a 200. Staging is never redirected; it sends X-Robots-Tag: noindex
+    /// instead (a robots.txt block would hide the noindex, and a blocked URL can still be listed by address).
     /// </summary>
     public static IApplicationBuilder UseCanonicalHost(this IApplicationBuilder app) => app.Use(async (context, next) =>
     {
@@ -44,7 +43,7 @@ public static class SeoEndpoints
         endpoints.MapGet("/sitemap.xml", (HttpContext http) => Text(http, Sitemap(), "application/xml"));
         endpoints.MapGet("/llms.txt", (HttpContext http) => Text(http, LlmsTxt(), "text/plain"));
         endpoints.MapGet("/llms-full.txt", (HttpContext http) => Text(http, PageDocs.LlmsFull, "text/plain"));
-        // One Markdown twin per page (/demo/grid.md), the form llms.txt links to; explicit routes, so nothing else is caught.
+        // One Markdown twin per page (/demo/grid.md), linked from llms.txt; explicit routes so nothing else is caught.
         foreach (var page in PageDocs.WithTwin)
             endpoints.MapGet("/" + page.MarkdownPath, (HttpContext http) => Text(http, PageDocs.Twin(page.Path)!, "text/markdown"));
     }
@@ -56,9 +55,8 @@ public static class SeoEndpoints
     }
 
     /// <summary>
-    /// Everything may be crawled except the SignalR endpoint and the error pages; search engines and AI assistants are welcome,
-    /// so there are no per-bot groups (a named group would replace the * rules for that bot, not add to them). Staging gets the
-    /// same rules without the sitemap; its noindex header does the rest.
+    /// All crawlable except SignalR and the error pages. No per-bot groups: a named group replaces the * rules for that bot
+    /// instead of adding to them. Staging: same rules, no sitemap; its noindex header does the rest.
     /// </summary>
     private static string Robots(string host) =>
         "# Search engines and AI assistants are welcome to crawl and cite this site.\nUser-agent: *\nContent-Signal: search=yes, ai-input=yes, ai-train=yes\nDisallow: /_blazor\nDisallow: /Error\nDisallow: /not-found\n"
@@ -78,9 +76,8 @@ public static class SeoEndpoints
     }
 
     /// <summary>
-    /// llms.txt per llmstxt.org: an H1, a one-paragraph blockquote, plain paragraphs of facts, then H2 sections of
-    /// "- [title](url): description" lines, one section per registry section. Links go to the Markdown twins when a page has
-    /// one, as the spec asks, and to the page itself otherwise.
+    /// llms.txt per llmstxt.org: H1, one-paragraph blockquote, fact paragraphs, then one H2 per registry section of
+    /// "- [title](url): description" lines. Links go to the page's Markdown twin (as the spec asks), else to the page.
     /// </summary>
     private static string LlmsTxt()
     {

@@ -2,16 +2,9 @@
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (row 5 of the Data Grid list). Same twelve rows and nine columns. Changes, closing SC-181
-   and SC-182: the QA-checklist copy ("validate first-drop reorder", "reload the page and repeat") became a description of what the
-   user does; the reorder-pipe colour picker went (a test knob; the parameter is named in the overview instead); the "Other Grid
-   Demos" list went (the menu and Related cover it). OnLayoutChanged (GridSettings snapshot, fired from the header drop handler,
-   GridControl.razor.cs ~12931) feeds a line under the grid with the new column order, so a drop has a visible result and the hook
-   for saving user layouts is on show.
-   2026-10-18: vocabulary written from GridControl.razor.cs (AllowColumnReorder ~675, ColumnReorderPipeColor ~713,
-   OnLayoutChanged ~781, PersistenceKey ~794) and GridSettings.cs; rows checked against the source with scratchpad/vocabcheck.py.
-   Library doc gaps found on the way are in SC-253 (owner-gated).
-   2026-10-26 (Baaria): sample data moved to the travel theme *@
+@* 2026-10-17: on FeatureDemoLayout; closes SC-181, SC-182. Colour picker removed; OnLayoutChanged (header drop) feeds the order line.
+   2026-10-18: vocabulary from GridControl.razor.cs and GridSettings.cs; library doc gaps in SC-253 (owner-gated).
+   2026-10-26: sample data on the travel theme *@
 
 <PageTitle>Column Reorder by Drag and Drop in a Blazor Grid — FlexCore</PageTitle>
 
@@ -123,7 +116,7 @@
         new("BK-1610", "Marrakech",  "Customer care", "Post-trip feedback call",    "Agatha Lamplighter","Medium", 2.8m,  360.00m, new(2026, 1, 19)),
     };
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    // Code tabs: generated verbatim copies of the Demo block and members above.
     private static class Code
     {
         public const string Reorder = @"<GridControl TValue=""ReorderingRow""

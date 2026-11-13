@@ -2,17 +2,11 @@
 @using FlexCore.Showcase.Components.Shared
 @using FlexCore.Showcase.Data
 
-@* 2026-10-12: rebuilt on FeatureDemoLayout (was two framed demos and a static snippet). Two examples: an
-   application shell (page layout + splitter, collapse buttons inside the demo) and the dashboard grid. Splitter added: the catalog already pointed here and no page rendered it. Facts checked
-   against Layout/PageLayoutControl, Left/Center/RightPanelControl, DashboardLayoutControl, DashboardLayoutPanel
-   and SplitterControl.razor in FlexCore 0.2.48. *@
-@* 2026-10-25 (SC-347): third example "grid", Grid and stack layouts: a Lisbon Explorer package summary (TravelData) on
-   GridLayoutControl with a GridLayoutItemControl span, inside StackLayoutControl rows; a column-count button group and a
-   Wrap switch in the Controls slot. New doc sections for GridLayoutControl, GridLayoutItemControl, StackLayoutControl and
-   FlexAlignment/FlexOrientation, three CSS class rows, one accessibility point; the Related line now points at the example.
-   Facts checked against Layout/GridLayoutControl.razor and .razor.css, Layout/GridLayoutItemControl.razor,
-   Layout/StackLayoutControl.razor, ContentModels.cs, FlexControlBase.cs and BadgeControl.razor in FlexCore 0.2.49.
-   2026-10-26 (Baaria): sample content moved to the travel theme. *@
+@* 2026-10-12: rebuilt on FeatureDemoLayout; SplitterControl added (the catalog pointed here; no page rendered it). Checked against
+   Layout/PageLayoutControl, *PanelControl, DashboardLayout*, SplitterControl.razor (FlexCore 0.2.48). *@
+@* 2026-10-25 (SC-347): example 3 "grid" (Grid and stack layouts) with doc sections; checked against Layout/GridLayout*.razor(.css),
+   Layout/StackLayoutControl.razor, ContentModels.cs, FlexControlBase.cs, BadgeControl.razor (FlexCore 0.2.49).
+   2026-10-26: sample content on the travel theme. *@
 
 <PageTitle>Blazor Splitter, Panels and Dashboard Layout — FlexCore</PageTitle>
 

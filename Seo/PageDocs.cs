@@ -8,11 +8,10 @@ using Microsoft.AspNetCore.Components;
 namespace FlexCore.Showcase.Seo;
 
 /// <summary>
-/// The site's documentation as Markdown (2026-10-29): one twin per page at /&lt;path&gt;.md and all of them in /llms-full.txt, for
-/// AI assistants and developers who want the text without the app. Per registered page: its description and keywords, the
-/// documentation tables (the pages' ApiRow arrays, read by reflection so they are the same rows the Documentation sections
-/// show) and the code examples (the pages' Code constants, the same text as the Razor, C# and CSS tabs, with the @using lines
-/// CodeUsings adds there). Built once per process; the content only changes with a deployment.
+/// Site docs as Markdown (2026-10-29): one twin per page at /&lt;path&gt;.md, all of them in /llms-full.txt. Per registered page:
+/// description, keywords, documentation tables (its ApiRow arrays by reflection, the same rows its Documentation section shows)
+/// and code examples (its Code constants, as in the code tabs, with the CodeUsings @using lines).
+/// Built once per process: content changes only with a deployment.
 /// </summary>
 public static partial class PageDocs
 {
@@ -87,7 +86,7 @@ public static partial class PageDocs
         ["demo/charts"] = typeof(Components.Pages.Demos.Charts.ChartsVocab),
     };
 
-    /// <summary>The page's ApiRow arrays: in a nested static class named Vocab, on the page type itself, or in its shared class; declaration order.</summary>
+    /// <summary>The page's ApiRow arrays from its nested Vocab class, its own type or its shared class, in declaration order.</summary>
     private static IEnumerable<(string Name, ApiRow[] Rows)> Tables(PageMeta page, Type type)
     {
         const BindingFlags Any = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;

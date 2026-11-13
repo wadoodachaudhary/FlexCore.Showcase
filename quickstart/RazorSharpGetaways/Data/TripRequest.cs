@@ -1,8 +1,8 @@
 namespace RazorSharpGetaways.Data;
 
 /// <summary>
-/// One trip request at the agency's quote desk: who asked, where to, what was quoted and where it stands. The Trip Requests
-/// grid edits these in place, the Dashboard counts them, and the Itinerary and Invoices pages open one of them.
+/// A trip request at the quote desk: who asked, where to, the quote and its status. The Trip Requests grid edits these in place,
+/// the Dashboard counts them, the Itinerary and Invoices pages open one.
 /// </summary>
 public sealed class TripRequest
 {
@@ -13,7 +13,7 @@ public sealed class TripRequest
 
     public string Agent { get; set; } = "";
 
-    /// <summary>Colour behind the agent's initials; every agent has their own.</summary>
+    /// <summary>Colour behind the agent's initials; one per agent.</summary>
     public string AvatarBg { get; set; } = "#0284c7";
 
     public DateTime DateRequested { get; set; }
@@ -22,7 +22,7 @@ public sealed class TripRequest
     public int Travellers { get; set; } = 2;
     public DateTime Departure { get; set; }
 
-    /// <summary>Nights away: the package's length for the destination, unless the booking says otherwise (LIS-0586 is five).</summary>
+    /// <summary>Nights away: the destination package's length unless the booking overrides it (LIS-0586 is five).</summary>
     public int Nights { get; set; } = 7;
 
     public string TripType { get; set; } = "";
@@ -38,7 +38,7 @@ public sealed class TripRequest
     /// <summary>Change from the first fare sample to the last, in whole per cent.</summary>
     public int FareDeltaPercent { get; set; }
 
-    /// <summary>A copy for the editor, so Cancel leaves the row as it was.</summary>
+    /// <summary>Editor copy, so Cancel leaves the row unchanged.</summary>
     public TripRequest Clone()
     {
         var copy = (TripRequest)MemberwiseClone();
@@ -46,7 +46,7 @@ public sealed class TripRequest
         return copy;
     }
 
-    /// <summary>Takes the fields the editor can change from an edited copy.</summary>
+    /// <summary>Copies the editor-changeable fields from an edited copy.</summary>
     public void CopyEditsFrom(TripRequest edited)
     {
         Agent = edited.Agent;
@@ -64,7 +64,7 @@ public sealed class TripRequest
     }
 }
 
-/// <summary>A row of the trip-type lookup that the grid's in-cell drop-down grid shows.</summary>
+/// <summary>Trip-type lookup row for the grid's in-cell drop-down grid.</summary>
 public sealed class TripTypeLookup
 {
     public string Code { get; set; } = "";

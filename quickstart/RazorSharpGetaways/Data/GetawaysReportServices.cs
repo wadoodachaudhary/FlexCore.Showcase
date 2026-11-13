@@ -4,9 +4,9 @@ using Fx.ControlKit.Reports;
 namespace RazorSharpGetaways.Data;
 
 /// <summary>
-/// The report writer's data source. It receives the SQL the Crystal XML loader built and the parameter values, and here answers
-/// from memory through <see cref="PackageCostSheet"/>. A real application runs the SQL against its database in this one method,
-/// with Dapper, EF Core or a plain command, and returns the rows as a DataTable.
+/// Report writer data source: gets the SQL the Crystal XML loader built plus the parameter values; here it answers from memory via
+/// <see cref="PackageCostSheet"/>. A real app runs the SQL against its database here (Dapper, EF Core or a plain command) and
+/// returns the rows as a DataTable.
 /// </summary>
 public sealed class GetawaysReportData : IReportDataExecutor
 {
@@ -17,8 +17,8 @@ public sealed class GetawaysReportData : IReportDataExecutor
 }
 
 /// <summary>
-/// Values for parameters a report's SQL names but the caller did not pass (ReportOptions.SessionAutoInjectParameters lists them).
-/// The cost sheet names none, so this is the worked example; a real application reads them from the signed-in user.
+/// Values for parameters a report's SQL names but the caller omits (listed in ReportOptions.SessionAutoInjectParameters). The cost
+/// sheet uses none, so this is an example; a real app reads them from the signed-in user.
 /// </summary>
 public sealed class GetawaysReportSession : IReportSessionContext
 {
@@ -31,8 +31,8 @@ public sealed class GetawaysReportSession : IReportSessionContext
 }
 
 /// <summary>
-/// The XML report pipeline needs no Crystal runtime; this stub stands in for <see cref="IReportExporter"/>, which the writer only
-/// calls for native .rpt files, because the control resolves the service whether or not it is used.
+/// Stub <see cref="IReportExporter"/>: XML reports need no Crystal runtime and the writer calls it only for native .rpt files,
+/// but the control resolves the service anyway.
 /// </summary>
 public sealed class NoReportExporter : IReportExporter
 {

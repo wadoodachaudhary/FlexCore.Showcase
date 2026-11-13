@@ -5,23 +5,13 @@
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (one-example-plus-code push, tracker section 6). Same grid, data and aggregates, with
-   three corrections: ShowGroupCount dropped because the Count aggregate's caption template already prints "(n items)", so every
-   caption showed the count twice; the internal catalog name left the intro; "default sorts" left the intro because the page sets
-   none. Two library behaviours shape the copy (logged in SC-253): a group footer prints only the first aggregate defined for a
-   column, so the Count footer template never shows; and the caption aggregates' pill styling is scoped CSS that never matches the
-   spans built in GridControl.razor.cs, so they run together, which the page CSS works around through the .catalog wrapper.
-   2026-10-18: vocabulary written from GridControl.razor.cs (grouping parameters, AddGroup/RemoveGroup/ClearAllGroupsAsync, the public
-   group methods, ComputeAggregates, FormatAggregateValue, the caption and footer renderers), GridControl.AdvancedFeatures.cs,
-   GridColumn.cs, GridModels.cs (AggregateRow, AggregateColumn, GroupEventArgs), GridControlEvents.cs and GridEnums.cs; rows checked with
-   scratchpad/vocabcheck.py. Declared-but-unused members are named as such; library notes in SC-253.
-   2026-10-20 (meeting point 2): the unlisted Assembly and Vendor prices pages fold in here. Vendor prices repeated this page's
-   configuration (grouped by one column, average and count in captions and footers) on other data, so it is gone; Assembly becomes
-   the second example, because it shows the one thing the catalog does not: sums in the grid footer with no initial grouping. Both
-   old routes now open this page. *@
-@* 2026-10-25 (Baaria, SC-344): both examples run on the tour operator's data in Data/DemoData.cs (rate card lines, package cost
-   lines) instead of the earlier assembly and item catalog. The example anchors are now rate-card and package-costs;
-   nothing linked to the old ones. The .catalog wrapper class stays because the page CSS keys on it. *@
+@* 2026-10-17: on FeatureDemoLayout; no ShowGroupCount (the Count caption prints "(n items)"). SC-253: a group footer shows only
+   a column's first aggregate (the Count footer never shows); caption pill CSS misses GridControl's spans (.catalog works around it).
+   2026-10-18: vocabulary from GridControl.razor.cs, .AdvancedFeatures.cs, GridColumn.cs, GridModels.cs, GridControlEvents.cs,
+   GridEnums.cs; unused members marked (SC-253).
+   2026-10-20: Assembly and Vendor prices pages merged in (routes alias here); Vendor prices dropped (same setup), Assembly is
+   example 2 (footer sums). *@
+@* 2026-10-25 (SC-344): examples on Data/DemoData.cs; anchors rate-card, package-costs. .catalog stays: the page CSS keys on it. *@
 
 <PageTitle>Grouping and Aggregates in a Blazor Grid — FlexCore</PageTitle>
 
@@ -180,8 +170,7 @@
         }
     };
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed); each C# tab also carries its
-    // record from Data/DemoData.cs.
+    // Code tabs: generated verbatim copies of the Demo block and members above; each C# tab adds its record from Data/DemoData.cs.
     private static class Code
     {
         public const string PackageCosts = @"<div class=""catalog"">

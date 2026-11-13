@@ -12,7 +12,8 @@ dotnet run
 ```
 
 The first run restores the FlexCore package from NuGet and prints the address, `https://localhost:7150`. If the browser warns about
-the certificate, trust the development certificate once with `dotnet dev-certs https --trust`, or open `http://localhost:5150`.
+the certificate, trust the development certificate once with `dotnet dev-certs https --trust`, or start the app with
+`dotnet run --launch-profile http` and open `http://localhost:5150`.
 
 ## The pages
 

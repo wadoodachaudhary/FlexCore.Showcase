@@ -6,15 +6,11 @@
 @using FlexCore.Showcase.Components.Shared
 @using FlexCore.Showcase.Data
 
-@* 2026-10-19: moved onto FeatureDemoLayout (SC-275). The four pivots and the hand-typed snippets became three examples with
-   generated code tabs (SC-217: the old section 5 copy said Count of Quantity while the live pivot summed it). Route /demo/pivot
-   added and the old route kept as an alias (SC-216). The formula grid stays as the third example until it has a page of its own
-   (SC-218): it is the only place on the site that shows GridColumn.Formula and AllowCellFormulas. Documentation (SC-219) written
-   from Grid/PivotControl.razor(.cs), PivotSortDescriptor.cs, GridEnums.cs, GridColumn.cs and the formula path in
-   GridControl.razor.cs (ResolveCellValue, EvaluateFormula, FormulaValueLiteral); rows checked with scratchpad/vocabcheck.py.
-   2026-10-26: all three examples use the OurAirports data (Data/AirportData.cs) instead of the invented sales and deals.
-   The builder pivots a small projection: it offers every public property of the row type, and names or codes in Rows and
-   Columns at once would build millions of cells. *@
+@* 2026-10-19: on FeatureDemoLayout (SC-275), generated code tabs (SC-217), route /demo/pivot; old route an alias (SC-216).
+   Formula grid is example 3 until its own page (SC-218): the site's only GridColumn.Formula / AllowCellFormulas demo.
+   Docs (SC-219) from Grid/Pivot*, GridEnums.cs, GridColumn.cs and the formula path in GridControl.razor.cs.
+   2026-10-26: examples on OurAirports (Data/AirportData.cs). The builder gets a projection: it offers every public property, and
+   names or codes in Rows and Columns together would build millions of cells. *@
 
 <PageTitle>Blazor Pivot Table (PivotGrid) — FlexCore</PageTitle>
 
@@ -191,7 +187,7 @@
         public string RunwayKmFormula => "=[LongestRunwayFt] * 0.0003048";
     }
 
-    // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
+    // Code tabs are verbatim copies of each Demo block and of the members behind it.
     private static class Code
     {
         public const string Builder = @"<PivotControl TValue=""AirportFacts""

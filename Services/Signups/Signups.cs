@@ -1,7 +1,7 @@
-// 2026-10-13: sign-up / question form backing store. Submissions are appended as JSON lines to a file:
-//   - on Azure App Service (WEBSITE_SITE_NAME set): $HOME/data/flexcore-signups.jsonl, which survives deploys and restarts
+// 2026-10-13: sign-up / question form store; one JSON line per submission, appended to:
+//   - Azure App Service (WEBSITE_SITE_NAME set): $HOME/data/flexcore-signups.jsonl (survives deploys and restarts)
 //   - elsewhere: App_Data/signups.jsonl under the content root (git-ignored)
-// Override with "Signups:Path" in configuration. Email delivery of the Community edition link is not wired yet; see tracker SC-274.
+// "Signups:Path" overrides. Community edition link email not wired yet (SC-274).
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Microsoft.Extensions.Options;

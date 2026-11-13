@@ -1,6 +1,5 @@
-@* The app window: the menu (GetawaysSidebar), the top bar (GetawaysAppBar), the routed page and the + button (GetawaysFab). The
-   FlexCore site's home page renders these same parts inside its demo frame. The Settings page's choices reach the window as a
-   class (the colour scheme) and a style (the text size) on its root. *@
+@* App window; the FlexCore site's home page renders the same parts in its demo frame. Settings arrive as a root class (colour
+   scheme) and style (text size). *@
 @inherits LayoutComponentBase
 @implements IDisposable
 @using Fx.ControlKit.Dialogs
@@ -28,7 +27,7 @@
     </div>
 </div>
 
-@* Toasts and service dialogs render through these two hosts; without them NotificationService and IDialogService show nothing *@
+@* Hosts for toasts and service dialogs; without them NotificationService and IDialogService show nothing *@
 <NotificationDisplayControl />
 <DialogHostControl />
 
@@ -39,7 +38,7 @@
 </div>
 
 @code {
-    // The menu button shrinks the menu to icons on wide screens and opens it over the page on phones; CSS shows the one that applies
+    // Menu button: icons-only menu on wide screens, menu over the page on phones; CSS applies the right one
     private bool _navOpen;
 
     private string WindowClass =>

@@ -6,13 +6,13 @@
 <GetawaysRequests OpenRequestId="Open" StartNew="New" />
 
 @code {
-    /// <summary>?open=586 opens that request in the editor; the Dashboard, the bell and the Itinerary link here with it.</summary>
+    /// <summary>?open=586 opens that request in the editor; used by the Dashboard, the bell and the Itinerary.</summary>
     [SupplyParameterFromQuery(Name = "open")] public int? Open { get; set; }
 
-    /// <summary>?new=true opens the editor on a blank request; the + button links here with it.</summary>
+    /// <summary>?new=true opens the editor on a blank request; used by the + button.</summary>
     [SupplyParameterFromQuery(Name = "new")] public bool New { get; set; }
 
-    // Once the page has acted on the address, it goes back to /requests, so a reload or a second press of the + button starts clean
+    // After acting on the query, go back to /requests so a reload or a second + press starts clean
     protected override void OnAfterRender(bool firstRender)
     {
         if (Open is not null || New) Nav.NavigateTo("requests", replace: true);

@@ -2,14 +2,11 @@
 @using FlexCore.Showcase.Components.Shared
 @using FlexCore.Showcase.Data
 
-@* 2026-10-13: new page on FeatureDemoLayout; two examples (card, card group). Facts checked against CardControl.razor(.css),
-   CardGroupControl.razor and FlexControlBase.cs (FlexCore 0.2.48). Cards moved here from UI elements. The Razor tabs are
-   generated verbatim from the Demo blocks by script. *@
-@* 2026-10-25 (SC-347): third example, "carousel": CarouselControl with six CarouselItemControls, each a CardControl for a
-   TravelData package. Facts checked against CarouselControl.razor(.css) and CarouselItemControl.razor (FlexCore 0.2.49): the
-   methods are Next, Prev and SelectSlide; there is no key handling and no ARIA beyond the buttons' labels, so the example adds
-   role, aria-roledescription and aria-label on the root and an aria-live count. The two card examples are unchanged.
-   2026-10-26 (Baaria): sample content moved to the travel theme. *@
+@* 2026-10-13: new page on FeatureDemoLayout; checked against Card*Control.razor*, FlexControlBase.cs (FlexCore 0.2.48). Razor
+   tabs generated verbatim from the Demo blocks. *@
+@* 2026-10-25 (SC-347): carousel example, checked against Carousel*Control.razor* (FlexCore 0.2.49). No key handling or ARIA beyond
+   button labels, so the example adds role, aria-roledescription, aria-label on the root and an aria-live count.
+   2026-10-26: travel-theme sample content. *@
 
 <PageTitle>Blazor Card, Card Group and Carousel — FlexCore</PageTitle>
 
@@ -345,7 +342,7 @@ private static readonly Dictionary<string, string> Blurbs = new()
 private readonly Trip[] _trips = TravelData.Packages
     .Select(p => new Trip(p.City, TravelData.Destinations.First(d => d.City == p.City).Country, p.Name, p.Nights, Blurbs[p.City]))
     .ToArray();";
-        public const string CarouselCss = @"/* 2026-10-25: carousel example. The arrows sit 12px in from each side and the dots 12px above the bottom, over the item, so the slide pads round them. */
+        public const string CarouselCss = @"/* 2026-10-25: the carousel's arrows (12px in from each side) and dots (12px above the bottom) overlay the item, so the slide pads round them. */
 .trip-slide { padding: 24px 64px 44px; }
 .trip-slide ::deep .fx-card { max-width: 420px; min-height: 190px; margin: 0 auto; }
 .trip-slide ::deep .fx-card-header { background-color: #eff6ff; }

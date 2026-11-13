@@ -4,14 +4,9 @@
 @using FlexCore.Showcase.Components.Shared
 @using FlexCore.Showcase.Data
 
-@* 2026-10-19: new page (Baaria approved the Control tour split; third page). The tour's Selection tab moved here and was removed
-   there. Of that tab, RadioGroupControl already lives on Checks & switches and CalendarControl and TimePickerControl on Date & time,
-   so this page carries AutoCompleteControl, StepperControl and ColorPaletteControl; DropDownListControl (29 parameters) is proposed
-   as a page of its own (SC-279). Documentation written from AutoCompleteControl.razor, StepperControl.razor, WizardModels.cs,
-   ColorPaletteControl.razor and ColorPalettes.cs; rows checked with scratchpad/vocabcheck.py; behaviour sentences read from
-   SearchAsync/CommitAsync, CanSelect/SelectAsync/KeyAsync and SelectAsync/KeyAsync/OnParametersSet.
-   2026-10-26 (Baaria): the suggestions example now lists the operator's twelve destinations and looks up the 4,009 airports of the
-   Data Grid page (OurAirports, Data/AirportData.cs) through the callback, instead of mostly US cities and a hardware list. *@
+@* 2026-10-19: new page from the Control tour's Selection tab; DropDownListControl is on Lists & dropdowns (SC-279). Docs from
+   AutoCompleteControl.razor, StepperControl.razor, WizardModels.cs, ColorPaletteControl.razor, ColorPalettes.cs.
+   2026-10-26: suggestions example searches the airports (Data/AirportData.cs) through the callback. *@
 
 <PageTitle>Blazor AutoComplete, Stepper and Color Palette — FlexCore</PageTitle>
 
@@ -211,7 +206,7 @@
     private string? _accent = "#0284c7";
     private readonly string[] _brand = ["#0f172a", "#1d4ed8", "#0284c7", "#0f766e", "#b45309", "#be123c", "#7c3aed", "#475569", "#e2e8f0", "#ffffff"];
 
-    // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
+    // Code tabs are verbatim copies of each Demo block and of the members behind it.
     private static class Code
     {
         public const string Suggest = @"<div class=""pair"">

@@ -4,9 +4,8 @@
 @implements IDisposable
 
 <div class="showcase-shell-layout">
-    @* Preview banner (owner decision 2026-10-13: keep the site open, point NuGet visitors at the sign-up form; wording "Community edition" per owner 2026-10-13). AlertControl is the library's own banner.
-       2026-10-29 (Baaria): reworded to "Sign up for first access"; the NuGet, MIT and Community edition sentence is out while licensing
-       and availability are decided internally. *@
+    @* Preview banner (2026-10-13, owner decision): site stays open, NuGet visitors go to the sign-up form.
+       2026-10-29: no NuGet/MIT/Community edition sentence while licensing and availability are decided internally. *@
     @if (_showBanner)
     {
         <div class="preview-banner">
@@ -31,14 +30,10 @@
             </a>
         </div>
 
-        @* Desktop nav is FlexCore's own MenuBarControl + MenuDropDownControl (dogfooding rule, 2026-10-06).
-           Items are plain <a role="menuitem"> so they stay real links (new tab, crawlers); the library's
-           keyboard script already treats any role="menuitem" as a menu item. Groups live in @code so the
-           phone drawer below renders the same list. *@
-        @* @key on the current URL (2026-10-17, Baaria's report): the panel items are plain links, and MenuDropDownControl only closes
-           itself for MenuActionControl clicks, Escape, the backdrop or the trigger, so after a link navigation the layout (which
-           survives navigations) kept the panel open over the new page. Remounting the menubar on each URL change resets it.
-           Library-side fix proposed in SC-253. *@
+        @* Desktop nav (2026-10-06): items are <a role="menuitem">, real links (new tab, crawlers) the library keyboard script
+           still handles. Groups in @code, shared with the phone drawer. *@
+        @* @key on the URL (2026-10-17): MenuDropDownControl stays open after link navigation in the persistent layout; remounting
+           per URL closes it. Library fix proposed in SC-253. *@
         <div class="top-nav-menu">
             <MenuBarControl @key="Nav.Uri" CssClass="site-menubar">
                 @foreach (var g in _groups)
@@ -85,8 +80,7 @@
             <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" class="btn-nav-icon" title="View Source on GitHub">
                 <span class="bi bi-github"></span>
             </a>
-            @* Phone: no FlexCore off-canvas control exists yet, so this is a checkbox-toggled drawer. The whole app is interactive
-               (App.razor), so the layout survives navigation and the box stayed ticked; it is bound so LocationChanged can clear it. *@
+            @* Phone: checkbox drawer (no FlexCore off-canvas control yet); bound so LocationChanged unticks it on navigation. *@
             <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Open menu" @bind="_navOpen" />
             <label for="nav-toggle" class="btn-nav-icon nav-burger" title="Menu"><span class="bi bi-list"></span></label>
         </div>
@@ -170,8 +164,8 @@
     // Nav data lives in Components/Shared/SiteNav.cs (shared with the footer, drawer and overview pages).
     private static NavGroup[] _groups => SiteNav.Groups;
 
-    /// <summary>One group is active at a time: the first in menu order whose links include the page. 100k rows is linked from
-    /// Data Grid and from Performance, and both used to be underlined (Baaria, 2026-10-20, then about Four scenarios).</summary>
+    /// <summary>One active group: the first in menu order whose links include the page. 100k rows (under Data Grid and
+    /// Performance) used to underline both (2026-10-20).</summary>
     private bool IsActive(NavGroup g) => ReferenceEquals(g, ActiveGroup);
     private NavGroup? ActiveGroup
     {

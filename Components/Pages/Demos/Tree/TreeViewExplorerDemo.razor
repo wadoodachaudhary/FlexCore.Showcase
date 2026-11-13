@@ -4,15 +4,11 @@
 @using Fx.ControlKit.Navigation
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-12: moved onto FeatureDemoLayout. One example (the explorer with its inspector); folder style and
-   VB6 lines are switches in the card header on FlexCore controls instead of Bootstrap buttons. Parameter
-   table written from TreeViewControl.Appearance.cs and TreeViewControl.Operations.cs (0.2.48).
-   2026-10-20: code tabs generated from this file (gencode), replacing hand-written constants that had drifted from the markup.
-   2026-10-24: Keyboard and ARIA tables written from TreeViewControl.razor (markup), HandleKeyDown in TreeViewControl.Operations.cs and
-   treeKeyboard in wwwroot/browser-capabilities.js; Parameters and TreeNode rows re-read against TreeViewControl.Appearance.cs,
-   TreeViewControl.Operations.cs, TreeViewModels.cs and TreeViewData.cs (FolderStyle and Children defaults, TreeIndentPixels and ShowIcons
-   descriptions corrected; search, display-mode, focus and Outline node members added; mixed-type grouped rows split). 
-   2026-10-26 (Baaria): the sample tree is a tour operator's summer programme instead of a construction project. *@
+@* 2026-10-12: on FeatureDemoLayout; parameter table from TreeViewControl.Appearance.cs, .Operations.cs (FlexCore 0.2.48).
+   2026-10-20: code tabs generated from this file; hand-written copies had drifted.
+   2026-10-24: Keyboard and ARIA tables from TreeViewControl.razor, .Operations.cs, wwwroot/browser-capabilities.js; Parameters and
+   TreeNode rows re-checked against TreeViewControl.*.cs, TreeViewModels.cs, TreeViewData.cs and corrected.
+   2026-10-26: sample tree is a tour operator's summer programme. *@
 
 <PageTitle>Blazor TreeView — FlexCore</PageTitle>
 
@@ -182,8 +178,8 @@
         ];
     }
 
-    // Vocabulary rows from the partial classes and models. 2026-10-24: every row re-read against the source; grouped rows keep one
-    // declared type each so Type and Default are exact; Keys and Aria come from HandleKeyDown and the markup.
+    // Vocabulary rows from the partial classes and models. 2026-10-24: each grouped row keeps one declared type so Type and
+    // Default are exact; Keys and Aria from HandleKeyDown and the markup.
     private static class Vocab
     {
         public static readonly ApiRow[] Parameters =

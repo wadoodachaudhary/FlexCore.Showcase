@@ -5,15 +5,10 @@
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
-@* Retitled 2026-10-06 to match the site nav. The second route is the retired optimizer page's address.
-   2026-10-20: rebuilt on FeatureDemoLayout (developer meeting, point 2; the old file is docs/retired-pages/VirtualizationBenchDemo.razor.txt).
-   Gone: a constant "1.2 ms", a render counter incremented by hand, "60 FPS", "near-zero memory", "zero external JavaScript",
-   a dropdown editor that did not exist, a Pivot mode (Pivot tables has its own page) and a documentation table with the wrong
-   defaults. Now: one example with a three-way switch (scroll, 25 per page, 100 per page), the same two timings as 50k rows,
-   the edit count from OnCellSave and the page from PageChanged. Facts checked against GridControl.razor.cs (PageSize, PageSizes,
-   AllowPaging, BatchEditBehavior, GoToPageAsync), GridControl.PresentationFeatures.cs (PagerPosition), GridControlEvents.cs and
-   GridModels.cs (PageChangeEventArgs).
-   2026-10-26 (Baaria): sample data moved to the travel theme *@
+@* 2026-10-06: retitled to match the site nav; the second route is the retired optimizer page's address.
+   2026-10-20: rebuilt on FeatureDemoLayout (old file: docs/retired-pages/VirtualizationBenchDemo.razor.txt); fake figures and
+   features removed.
+   2026-10-26: sample data on the travel theme *@
 
 <PageTitle>Blazor Grid Virtualization vs Paging — FlexCore</PageTitle>
 

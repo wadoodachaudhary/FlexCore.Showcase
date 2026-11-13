@@ -8,24 +8,14 @@
 @using RazorSharpGetaways.Data
 @inject IWebHostEnvironment Env
 
-@* 2026-10-18: moved onto FeatureDemoLayout (Saturday list). Same report, same auto-run on first paint. Changes, closing SC-220 to
-   SC-223 and SC-225: the copy says four group levels (the XML defines Community, Model, Group and Phase; the old intro said four
-   and the bullet list said three); the "real production report" claim, "@DivisionID" and the stub class names left the copy, which
-   now says what the control does before how this page wires it; the logger and its typo went; title, h1 and menu label all read
-   "Report writer". The model and community pickers are DropDownListControls and Run is a ButtonControl; the inline <style> block
-   became a scoped stylesheet.
-   2026-10-18: vocabulary written from ReportWriterControl.razor (the six parameters, public state, the public methods and their doc
-   comments, the @inject list, the toolbar export items), ReportNativeExport.cs, ReportOptions.cs and the five host interfaces; rows
-   checked with scratchpad/vocabcheck.py. ShowReportAsync seeds a literal "DivisionID" from the session context (lines ~1317 and ~1549),
-   a host name inside the library; noted in SC-253.
-   2026-10-25 (Baaria, SC-344): the report is a tour operator's Package Cost Sheet (wwwroot/reports/Package Cost Sheet.xml, data from
-   Data/TravelData.cs through a data executor; since 2026-11-04 the Quick Start project's, quickstart/RazorSharpGetaways/Data). It
-   replaced an earlier cut-down cost report. Same
-   shape: four group levels with a sum in every footer; new: a grand total in the report footer (the loader's GrandTotals). The page
-   file moved from ModelCostsDemo to PackageCostsDemo and the old address is kept as an alias.
-   2026-10-25 (catalog audit SC-345): the page loads through ShowReportAsync with Package and Season as seeds instead of ShowXmlReport.
-   ShowXmlReport never sets ReportFilePath, so the toolbar's Parameters button (ChromeOnEditParameters) returned early and the
-   catalog's Report Parameter Dialog row led to a page where the dialog could not open; noted for the owner in SC-253. *@
+@* 2026-10-18: on FeatureDemoLayout, titled "Report writer"; closes SC-220 to SC-223 and SC-225 (no production-report claim, host
+   or stub names in the copy; logger removed).
+   2026-10-18: vocabulary from ReportWriterControl.razor, ReportNativeExport.cs, ReportOptions.cs and the host interfaces.
+   ShowReportAsync seeds a literal "DivisionID" from the session context, a host name inside the library (SC-253).
+   2026-10-25 (SC-344): Package Cost Sheet (wwwroot/reports/Package Cost Sheet.xml) on Data/TravelData.cs via a data executor
+   (since 2026-11-04 from quickstart/RazorSharpGetaways/Data). ModelCostsDemo -> PackageCostsDemo; the old address is an alias.
+   2026-10-25 (SC-345): loads through ShowReportAsync, not ShowXmlReport: ShowXmlReport never sets ReportFilePath, so the
+   Parameters button (ChromeOnEditParameters) returned early and the Report Parameter Dialog could not open (SC-253). *@
 
 <PageTitle>Blazor Report Writer for Crystal Reports XML — FlexCore</PageTitle>
 
@@ -124,9 +114,9 @@
         }
     }
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed). The data executor this site
-    // registers is the Quick Start project's, quickstart/RazorSharpGetaways/Data/GetawaysReportServices.cs (2026-11-04); Program.cs
-    // shows the registrations. The packages come from the same project's TripPackages, the agency's full list of twelve.
+    // Code tabs: generated verbatim copies of the Demo block and the members above. The data executor is the Quick Start project's
+    // quickstart/RazorSharpGetaways/Data/GetawaysReportServices.cs (2026-11-04; registered in Program.cs); packages are that
+    // project's TripPackages (all twelve).
     private static class Code
     {
         public const string Report = @"<div class=""report-frame"">

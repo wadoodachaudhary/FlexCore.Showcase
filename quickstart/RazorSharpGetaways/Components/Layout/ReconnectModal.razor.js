@@ -24,14 +24,11 @@ async function retry() {
     document.removeEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
 
     try {
-        // Reconnect will asynchronously return:
-        // - true to mean success
-        // - false to mean we reached the server, but it rejected the connection (e.g., unknown circuit ID)
-        // - exception to mean we didn't reach the server (this can be sync or async)
+        // Blazor.reconnect(): true on success; false if the server rejected the connection (e.g. unknown circuit ID);
+        // throws (sync or async) if the server was unreachable
         const successful = await Blazor.reconnect();
         if (!successful) {
-            // We have been able to reach the server, but the circuit is no longer available.
-            // We'll reload the page so the user can continue using the app as quickly as possible.
+            // Server reached but the circuit is gone: try to resume it; reload the page if that fails
             const resumeSuccessful = await Blazor.resumeCircuit();
             if (!resumeSuccessful) {
                 location.reload();
@@ -40,7 +37,7 @@ async function retry() {
             }
         }
     } catch (err) {
-        // We got an exception, server is currently unavailable
+        // Server unavailable
         document.addEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
     }
 }

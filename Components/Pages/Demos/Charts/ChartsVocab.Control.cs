@@ -1,5 +1,5 @@
-// 2026-10-24: ChartControl parameter rows for the Charts page Documentation (meeting point 5). Every description was checked
-// against the read sites in Charts/ChartControl.razor, not just the declaration; "never read" rows say so.
+// 2026-10-24: ChartControl parameter rows for the Charts page Documentation, from the read sites in Charts/ChartControl.razor,
+// not just the declarations; "never read" rows say so.
 using FlexCore.Showcase.Components.Shared;
 
 namespace FlexCore.Showcase.Components.Pages.Demos.Charts;
@@ -45,14 +45,14 @@ public static partial class ChartsVocab
         new("TooltipFormatter", "Code-side text for the card's rows, lines separated by <code>\n</code>; return null to fall back to <code>TooltipFormat</code> or the default rows.", "Func&lt;ChartTooltipContext, string?&gt;?", "null"),
         new("TooltipTemplate", "Replaces the whole card content; the context is the hovered shape.", "RenderFragment&lt;ChartTooltipContext&gt;?", "null"),
         new("PointHover", "Raised with the context when the pointer enters a shape and with null when it leaves the shape or the chart.", "EventCallback&lt;ChartTooltipContext?&gt;"),
-        // Printed and report charts (0.2.50, 2026-11-03): these branches render a bitmap <img> from a ReportVectorImage instead of SVG.
+        // Printed and report charts (0.2.50, 2026-11-03): render a ReportVectorImage bitmap <img> instead of SVG.
         new("ReportPlot", "A report's chart definition. When <code>PrintedSummaryPlot</code> supports it (one measure, no series field, a print axis, or summaries as categories) the control draws that plot as a bitmap instead of SVG; otherwise it only lends its <code>RightCategoryLegend</code> to the category-legend scene.", "ReportAnalysisDefinition?", "null"),
         new("CategoryLegend", "Draws <code>Bar</code>, <code>GroupedBar</code>, <code>StackedBar</code> and <code>StackedBar100</code> as the classic printed bar scene with a category-key legend, as a bitmap.", "bool", "false"),
         new("ThreeDimensional", "Draws <code>Bar</code>, <code>GroupedBar</code>, <code>StackedBar</code> and <code>StackedBar100</code> with perspective faces, as a bitmap.", "bool", "false"),
         new("ColorBarsByCategory", "Single-series <code>Bar</code> only: each bar takes its point's colour (<code>GetPointColor</code>) instead of the series colour.", "bool", "false"),
         new("PrintWidthPoints / PrintHeightPoints", "Print size in points. Both set, a <code>Bar</code> draws its SVG at that size instead of 600x300, and <code>Line</code>, <code>Surface</code>, <code>Ohlc</code>, <code>HorizontalBar</code>, <code>Area</code>, <code>Pie</code>, <code>Donut</code>, <code>Radar</code>, <code>Funnel</code>, <code>Gauge</code>, <code>Scatter</code> and <code>Bubble</code> render as the printed stage chart bitmap. The category-legend and 3-D scenes use them when set and 600x300 otherwise.", "double", "0"),
         new("PrintReportGroupChart", "Printed stage chart, <code>Line</code> and <code>Area</code> only: the report group chart's layout (tighter margins, larger value labels, black heading).", "bool", "false"),
-        // 37 rows
+        // 38 rows
     };
 
     /// <summary>ChartTooltipContext (Charts/ChartModels.cs), what TooltipFormatter, TooltipTemplate and PointHover receive.</summary>

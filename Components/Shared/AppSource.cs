@@ -4,10 +4,10 @@ using System.Text.RegularExpressions;
 namespace FlexCore.Showcase.Components.Shared;
 
 /// <summary>
-/// Source for the home page's app window's Razor and C# tabs (2026-10-29), for the Tabs &amp; accordion page's CSS tab (app.css's
-/// site-tabs rules) and for the chart pages' C# tabs (ChartPalette.cs). FlexCore.Showcase.csproj embeds the files: since 2026-11-04 the
-/// window's pages are the Quick Start project's, quickstart/RazorSharpGetaways/Components/Getaways/Getaways*.razor and
-/// Data/GetawaysAppSettings.cs, so every tab shows the code exactly as it is built here and shipped in the download.
+/// Embedded source (FlexCore.Showcase.csproj) for the home page app window's Razor and C# tabs (2026-10-29), the Tabs &amp;
+/// accordion page's CSS tab (app.css site-tabs rules) and the chart pages' C# tabs (ChartPalette.cs). Since 2026-11-04 the window
+/// is the Quick Start project (quickstart/RazorSharpGetaways/Components/Getaways/Getaways*.razor, Data/GetawaysAppSettings.cs),
+/// so tabs show the code as built and shipped.
 /// <see cref="Markup"/> and <see cref="Code"/> split a page into its markup (after its opening maintainer comment) and the body of
 /// its @code block; <see cref="Region"/> collects the parts of a file between "code-tab:name" and "/code-tab" marker lines.
 /// </summary>

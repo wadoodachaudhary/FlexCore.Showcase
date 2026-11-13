@@ -17,20 +17,18 @@ builder.Services.AddScoped<Fx.ControlKit.ZoomService>();
 // Dialog service (confirm / alert / prompt); its host is <DialogHostControl /> in MainLayout. Added 2026-10-12 for /demo/dialog.
 builder.Services.AddScoped<Fx.ControlKit.Dialogs.DialogService>();
 builder.Services.AddScoped<Fx.ControlKit.Dialogs.IDialogService>(sp => sp.GetRequiredService<Fx.ControlKit.Dialogs.DialogService>());
-// Scoped, one store per circuit (2026-10-26): the grid and form pages edit these rows in place, so a shared singleton let one
-// visitor's edits show up for every other visitor until the app restarted.
+// Scoped per circuit (2026-10-26): pages edit these rows in place; a singleton leaked one visitor's edits to all others.
 builder.Services.AddScoped<BenchDataStore>();
-// Sign-up / question form (2026-10-13): JSON-lines file store; "Signups:Path" overrides the location. Email delivery not wired yet (SC-274).
+// Sign-up / question form (2026-10-13): JSON-lines file store; "Signups:Path" overrides its path. No email delivery yet (SC-274).
 builder.Services.Configure<FlexCore.Showcase.Services.Signups.SignupOptions>(builder.Configuration.GetSection("Signups"));
 builder.Services.AddSingleton<FlexCore.Showcase.Services.Signups.ISignupStore, FlexCore.Showcase.Services.Signups.FileSignupStore>();
 
-// The home page's app window is the Quick Start project (quickstart/RazorSharpGetaways, 2026-11-04): its trip requests and its
-// Settings page's choices, one instance per circuit, as in the download.
+// Home window = Quick Start project (2026-11-04): trip requests and Settings choices, one per circuit, as in the download.
 builder.Services.AddScoped<TripRequestStore>();
 builder.Services.AddScoped<GetawaysAppSettings>();
 
-// Report pipeline: the Quick Start project's in-memory data executor, session context and no-op exporter stand in for a database
-// (quickstart/RazorSharpGetaways/Data/GetawaysReportServices.cs); the Report writer page and the window's Invoices page share them.
+// Report pipeline without a database: the Quick Start's in-memory executor, session context and no-op exporter
+// (quickstart/RazorSharpGetaways/Data/GetawaysReportServices.cs), shared by Report writer and the window's Invoices page.
 builder.Services.AddSingleton(new ReportOptions
 {
     SchemaPrefix = "",                                       // showcase XML doesn't use a schema
@@ -39,8 +37,7 @@ builder.Services.AddSingleton(new ReportOptions
 builder.Services.AddScoped<CrystalXmlReportLoader>();
 builder.Services.AddScoped<IReportSessionContext, GetawaysReportSession>();
 builder.Services.AddScoped<IReportDataExecutor, GetawaysReportData>();
-// IReportExporter is logically optional (only needed for .rpt binaries) but
-// Blazor's @inject can't see C# nullability — register a no-op stub.
+// IReportExporter is optional (.rpt binaries only), but @inject can't see C# nullability: register a no-op stub.
 builder.Services.AddScoped<IReportExporter, NoReportExporter>();
 builder.Services.AddScoped<IReportViewerSettings, InMemoryReportViewerSettings>();
 builder.Services.AddScoped<IReportPickListProvider, EmptyReportPickListProvider>();

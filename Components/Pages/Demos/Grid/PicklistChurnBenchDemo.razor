@@ -7,22 +7,11 @@
 @using System.ComponentModel.DataAnnotations
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (row 8 of the Data Grid list) and made to match its menu label. The old page bound
-   ExpandoObject rows to five fixed columns and dressed that as a "modal opening benchmark" with typed-in numbers (SC-022, SC-159,
-   SC-160, SC-162); all of that went, with the old internal names (SC-161) and the unused @ref (SC-163). Now
-   the columns are read from the keys of the first row, a switch adds a field to every row so a column appears, and the row count
-   is a ButtonGroupControl. Column-set changes go through the grid's SuspendRedraw scope with the columns keyed by field (see
-   SC-298 for why). Parameter tables are a later pass (SC-278).
-   2026-10-24 (SC-278): Documentation tables written from Grid/GridColumn.cs (Field, HeaderText, Type, Format, DisplayFormatter,
-   DisplayField, Formula, IsPrimaryKey, AllowEditing), Grid/GridEnums.cs (ColumnType), Grid/GridControl.razor.cs (GetPropertyValue
-   and TryGetDictionaryValue for the row shapes, GetCellDisplayValue, GetSortKeyValue and GridSortKeyComparer, BeginUpdate /
-   EndUpdateAsync / SuspendRedraw / ColumnUpdateScope, SyncPendingColumnStructure, PruneColumnStatesToCurrentFields and the
-   OnAfterRenderAsync completion), Grid/GridColumnsBase.cs (AddColumn dedup, RemoveColumn, ReorderColumns),
-   Grid/GridControl.ColumnFeatures.cs (AutoGenerateColumns, AvailableColumns fallback, ColumnHeaderBands) and the ColumnType read
-   sites in Grid/GridControl.Filtering.cs, Grid/GridControl.RowEditing.cs and Grid/GridControl.MultiSort.cs. Column, Grid and
-   Methods rows checked with scratchpad/vocabcheck.py; the ColumnType members and the row-shape rows by grep, which the script
-   cannot parse. The Vocab class moved below the Code class to match the other pages. 
-   2026-10-26 (Baaria): sample groups moved to the travel theme (Flights, Hotels, Tours, Transfers, Insurance); the annotated rows are travel packages. *@
+@* 2026-10-17: on FeatureDemoLayout, titled as in the menu; fixed-column "benchmark" removed (SC-022, SC-159, SC-160, SC-161,
+   SC-162, SC-163). Column-set changes run in SuspendRedraw with columns keyed by field (SC-298). Tables added 2026-10-24 (SC-278).
+   2026-10-24 (SC-278): tables from Grid/GridColumn.cs, GridEnums.cs, GridColumnsBase.cs, GridControl.razor.cs, .ColumnFeatures.cs;
+   ColumnType reads in GridControl.Filtering.cs, .RowEditing.cs, .MultiSort.cs.
+   2026-10-26: sample data on the travel theme. *@
 
 <PageTitle>Dynamic Columns in a Blazor Grid — FlexCore</PageTitle>
 
@@ -253,7 +242,7 @@
             };
         }).ToList();
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    // Code tabs: generated verbatim copies of the Demo block and members above.
     private static class Code
     {
         public const string Dynamic = @"<GridControl @ref=""_grid""

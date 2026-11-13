@@ -5,23 +5,12 @@
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (row 4 of the Data Grid list). Same six rows and three column sets. Changes, closing
-   SC-023 and SC-128 to SC-131: the layout buttons are a ButtonGroupControl; EditSettings (Batch) added so the ColumnSpec.Editable
-   flag the page already carried does something (SC-129); a readout names the selected row through RowSelected/RowDeselected so the
-   one claim the page keeps (selection survives a swap) can be seen; the scroll-offset claim went (six rows never scroll, SC-130);
-   the swap now goes through the grid's own SuspendRedraw(fields) scope (GridControl.razor.cs:88-135): without it a reused
-   GridColumn instance with a new Field kept the old column on screen (GridColumn registers once, GridColumn.cs:311) and, once
-   keyed, new fields appended after the fields the grid already knew instead of taking the declared order; the columns are keyed by
-   field so added and removed columns converge in place;
-   the two unused @refs went (SC-131); "legacy applications", "DOM thrashing" and "seamless" left the copy. Parameter tables are a
-   later pass (SC-278).
-   2026-10-24 (SC-278 closed): Documentation tables written from Grid/GridColumn.cs, Grid/GridColumnsBase.cs, Grid/GridControl.razor.cs
-   (BeginUpdate/EndUpdateAsync/SuspendRedraw 88-147, SyncPendingColumnStructure 157-200), Grid/GridControlEvents.cs, Grid/GridModels.cs
-   and Grid/GridEnums.cs; every row checked at its read or raise site and with vocabcheck, whose only flags are its own artifacts (it
-   compares an event payload to the EventCallback declaration and reads async Task as the return type). Found while checking: the
-   RowDeselected handler wired at line 120 never runs, GridControl does not raise it (TreeGridControl does); left as is, the code tabs
-   are verbatim.
-   2026-10-26 (Baaria): sample data moved to the travel theme *@
+@* 2026-10-17: on FeatureDemoLayout; closes SC-023, SC-128 to SC-131. EditSettings (Batch) makes ColumnSpec.Editable work (SC-129);
+   no scroll-offset claim, six rows never scroll (SC-130); unused @refs removed (SC-131); tables added 2026-10-24 (SC-278).
+   SuspendRedraw(fields) needed: else a reused GridColumn keeps its old Field (registers once); keyed new fields append out of order.
+   2026-10-24 (SC-278 closed): tables from the SourcePath files. GridControl never raises RowDeselected, so the
+   _events.RowDeselected handler in OnInitialized never runs; kept, the code tabs are verbatim.
+   2026-10-26: sample data on the travel theme *@
 
 <PageTitle>Dynamic Column Sets in a Blazor Grid — FlexCore</PageTitle>
 
@@ -199,8 +188,7 @@
             ]
         };
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed); the C# tab also carries
-    // ColumnSpec from Data/BenchModels.cs.
+    // Code tabs: generated verbatim copies of the Demo block and members above; the C# tab adds ColumnSpec from Data/BenchModels.cs.
     private static class Code
     {
         public const string Sets = @"<GridControl @ref=""_grid""

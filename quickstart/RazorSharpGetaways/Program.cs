@@ -9,17 +9,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// FlexCore services: toasts, confirm/alert/prompt dialogs and the shared text zoom. MainLayout.razor mounts the two hosts
-// (NotificationDisplayControl, DialogHostControl) that draw them.
+// FlexCore services: toasts, confirm/alert/prompt dialogs, shared text zoom. Their hosts (NotificationDisplayControl,
+// DialogHostControl) are in MainLayout.razor.
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<DialogService>();
 builder.Services.AddScoped<IDialogService>(sp => sp.GetRequiredService<DialogService>());
 builder.Services.AddScoped<Fx.ControlKit.ZoomService>();
 
-// The report writer (Invoices page): its options, the Crystal XML loader and the five host services it resolves. The data
-// executor and the session context are this app's (Data/GetawaysReportServices.cs); the other three are the library's stand-ins.
-// SessionAutoInjectParameters names the parameters a report may take from the session instead of a prompt; the cost sheet has
-// none, so these two are the worked example for a report of your own.
+// Report writer (Invoices page): options, Crystal XML loader and the five host services it resolves. Data executor, session
+// context and exporter are this app's (Data/GetawaysReportServices.cs); viewer settings and pick list are library stand-ins.
+// SessionAutoInjectParameters: parameters a report takes from the session instead of a prompt; the cost sheet uses none, so these
+// two are an example.
 builder.Services.AddSingleton(new ReportOptions
 {
     SchemaPrefix = "",
@@ -32,7 +32,7 @@ builder.Services.AddScoped<IReportExporter, NoReportExporter>();
 builder.Services.AddScoped<IReportViewerSettings, InMemoryReportViewerSettings>();
 builder.Services.AddScoped<IReportPickListProvider, EmptyReportPickListProvider>();
 
-// The app's own state, one instance per visitor: the trip requests and the Settings page's choices
+// App state, one instance per visitor: trip requests and Settings choices
 builder.Services.AddScoped<TripRequestStore>();
 builder.Services.AddScoped<GetawaysAppSettings>();
 

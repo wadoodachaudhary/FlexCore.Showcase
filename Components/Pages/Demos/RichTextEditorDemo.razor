@@ -2,12 +2,10 @@
 @using System.Net
 @using System.Text.RegularExpressions
 
-@* 2026-10-25: new page on FeatureDemoLayout (SC-347); two examples (document, comment). Facts checked against EditorControl.razor,
-   EditorControl.razor.cs, EditorControl.Commands.cs, EditorCommandModels.cs, EditorModels.cs, FormatControl.razor and its stylesheet,
-   EditorDropDownControl.razor, EditorButtonControl.razor, EditorLiteControl.razor, EditorLiteControl.razor.cs, EditorLiteModels.cs and
-   wwwroot/editor-control.js in FlexCore 0.2.49 (main 58a62e0). Nothing in the library calls FormatControl; the wiring below follows the
-   control's titles ("applies to the current selection", "applies to the whole document") and EditorControl's public methods.
-   The letter uses one-word font names: the browser writes a multi-word family with double quotes, which the read-back drops. *@
+@* 2026-10-25: new page on FeatureDemoLayout (SC-347). Facts from Editor*.razor/.cs, FormatControl.razor and its stylesheet,
+   wwwroot/editor-control.js (FlexCore 0.2.49, main 58a62e0). Nothing in the library calls FormatControl; the wiring follows its
+   titles and EditorControl's public methods. The letter uses one-word font names: the browser writes multi-word families in
+   double quotes, and the read-back (editor-control.js safeStyleValue) drops a style value containing one: the font is lost. *@
 
 <PageTitle>Blazor Rich Text Editor — FlexCore</PageTitle>
 

@@ -1,6 +1,4 @@
-@* The Trip Requests page, the agency's quote desk: 1,000 requests in a windowed GridControl with a frozen key column, an in-cell
-   DropDownGridControl lookup, a Quote cell that takes typing straight away, a Sparkline chart and badges in every row, filter chips,
-   a search box, a status bar and a DialogControl editor. It reads the shared TripRequestStore and the Settings page's grid choices. *@
+@* Trip Requests (quote desk) in a windowed GridControl. Reads the shared TripRequestStore and the Settings page's grid choices. *@
 @namespace RazorSharpGetaways.Components.Getaways
 @using Fx.ControlKit
 @using Fx.ControlKit.Charts
@@ -78,7 +76,7 @@
 
             <GridColumn Field="@nameof(TripRequest.Destination)" HeaderText="Destination" Width="130px" AllowEditing="false" />
 
-            @* In-cell DropDownGridControl: a four-column lookup with search; the header sorts by the code *@
+            @* In-cell DropDownGridControl: four-column lookup with search; the header sorts by code *@
             <GridColumn Field="@nameof(TripRequest.TripType)" HeaderText="Trip type" Width="170px" AllowEditing="false">
                 <Template Context="row">
                     @{ var r = (TripRequest)row; }
@@ -108,12 +106,12 @@
                 </Template>
             </GridColumn>
 
-            @* Fast typing: click the cell and type, the value commits on Enter or blur *@
+            @* Fast typing: click the cell and type; Enter or blur commits *@
             <GridColumn Field="@nameof(TripRequest.Quote)" HeaderText="Quote" Width="130px"
                         Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right"
                         AllowEditing="true" SelectAllOnEdit="true" />
 
-            @* Sparkline: five weekly fare samples for the route, the last one is the quote; the header sorts by the change *@
+            @* Sparkline: five weekly fare samples, the last is the quote; the header sorts by the change *@
             <GridColumn Field="@nameof(TripRequest.FareDeltaPercent)" HeaderText="Fare trend" Width="135px" AllowFiltering="false" AllowEditing="false">
                 <Template Context="row">
                     @{
@@ -134,7 +132,7 @@
                 </Template>
             </GridColumn>
 
-            @* The Edit button opens the editor; a double-click on the row does the same *@
+            @* Edit button or row double-click opens the editor *@
             <GridColumn Field="@nameof(TripRequest.Itinerary)" HeaderText="Itinerary" Width="300px" AllowEditing="false">
                 <Template Context="row">
                     @{ var r = (TripRequest)row; }
@@ -159,7 +157,7 @@
         <div class="fx-statusbar-panel gw-status-total">Total quoted: <strong>@FilteredRequests.Sum(r => r.Quote).ToString("C2")</strong></div>
     </StatusBarControl>
 
-    @* The quote editor: a modal DialogControl over a copy of the request; Save writes the copy back, Add puts a new request first *@
+    @* Quote editor: modal DialogControl over a copy of the request; Save writes it back, Add puts a new request first *@
     <DialogControl Visible="_editorOpen" VisibleChanged="@(v => { if (!v) CloseEditor(); })"
                    IsModal="true" CloseOnOverlayClick="true" CloseOnEscape="true" ShowCloseIcon="true"
                    Width="600px" CssClass="gw-editor" AriaLabel="@(_isNew ? "New trip request" : "Edit trip request")">
@@ -239,10 +237,10 @@
 </div>
 
 @code {
-    /// <summary>Opens the editor on this request when the value changes; the Dashboard, the bell and the Itinerary arrive with it.</summary>
+    /// <summary>Opens the editor on this request when it changes; the Dashboard, the bell and the Itinerary pass it.</summary>
     [Parameter] public int? OpenRequestId { get; set; }
 
-    /// <summary>Opens the editor on a blank request when it turns true; the + button arrives with it.</summary>
+    /// <summary>Opens the editor on a blank request when it turns true; the + button passes it.</summary>
     [Parameter] public bool StartNew { get; set; }
 
     /// <summary>Content between the filters and the grid; the FlexCore site puts its feature strip here.</summary>
@@ -314,7 +312,7 @@
     {
         Settings.Changed += StateHasChanged;
 
-        // Selecting a row fills the status bar, a typed quote moves the fare trend, and a double-click opens the editor
+        // Row select fills the status bar, a typed quote moves the fare trend, double-click opens the editor
         _gridEvents.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<TripRequest>>(this, e => _selected = e.Data);
         _gridEvents.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<TripRequest>>(this, e =>
         {
@@ -328,7 +326,7 @@
         });
     }
 
-    // The host hands over a request to open, or asks for a new one, through the parameters; each is acted on once per change
+    // The host passes a request to open, or asks for a new one, via parameters; each is handled once per change
     protected override void OnParametersSet()
     {
         if (OpenRequestId != _lastOpenId)
@@ -371,7 +369,7 @@
         Notifications.Success($"Updated {r.Request} trip type to {newType}");
     }
 
-    // The grid writes the workbook itself and the browser downloads it
+    // The grid writes the workbook; the browser downloads it
     private Task ExportToExcel() => _grid?.ExportToXlsxAsync("trip-requests.xlsx") ?? Task.CompletedTask;
 
     private void OpenEditor(TripRequest request)

@@ -6,9 +6,8 @@
 @inject ILogger<SignUp> Log
 @inject IJSRuntime JS
 
-@* 2026-10-13: sign-up and question form (owner decision: site stays open, the Community edition ships by email). Built on the library's
-   FormControl / FormItemControl so the form is itself a FlexCore example. Submissions go to ISignupStore (a JSON-lines file
-   for now); email delivery is not wired yet, see tracker SC-274. Anti-spam: a honeypot field and three submissions per circuit. *@
+@* 2026-10-13: sign-up and question form on FormControl (owner decision: site stays open, Community edition ships by email).
+   Submissions -> ISignupStore (JSON-lines file); email not wired (SC-274). Anti-spam: honeypot, three submissions per circuit. *@
 
 <PageTitle>FlexCore Community Edition: Sign up or Ask a Question</PageTitle>
 
@@ -31,8 +30,8 @@
         </section>
 
         <section class="signup-form" aria-live="polite">
-            @* Hand-drawn mailbox (2026-10-29, Baaria), the same ink as the home page doodles. When the form comes into view the box
-               hops and its door drops open; after a send the letter flies in, the door shuts and the flag goes up. *@
+            @* Hand-drawn mailbox (2026-10-29): hops and opens when scrolled into view; after a send the letter flies in, the
+               door shuts, the flag goes up. *@
             <div class="@($"doodle-head mailbox-head {(_saved is null ? "" : "is-sent")}")" @ref="_mailbox">
                 <svg class="doodle mailbox-doodle" viewBox="0 0 170 150" aria-hidden="true">
                     <path d="M22 140 q20 -4 40 0 t40 0 t40 0 t20 0" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" />

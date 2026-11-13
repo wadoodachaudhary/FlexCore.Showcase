@@ -3,9 +3,8 @@ using System.Globalization;
 namespace FlexCore.Showcase.Seo;
 
 /// <summary>
-/// Last commit date of each routed page's .razor file, read from the git log the build embeds (the PageDates target in the
-/// csproj). It gives the sitemap an honest lastmod: the day the page itself last changed. A build without git embeds nothing
-/// and the sitemap carries no dates, which search engines treat as "unknown" rather than as wrong.
+/// Last commit date of each routed page's .razor file, from the git log the build embeds (PageDates target in the csproj): the
+/// sitemap's lastmod. A build without git embeds nothing, so no dates, which search engines read as unknown rather than wrong.
 /// </summary>
 public static class PageDates
 {

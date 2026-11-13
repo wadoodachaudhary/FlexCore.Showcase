@@ -1,13 +1,13 @@
 namespace RazorSharpGetaways.Data;
 
 /// <summary>
-/// The agency's trip requests for one visit: 1,000 generated on first use and kept in memory, so an edit on the Trip Requests
-/// page shows on the Dashboard at once. Registered as a scoped service in Program.cs, one per visitor. To run the app on your own
-/// data, replace the generator here; the pages read only this class.
+/// The agency's trip requests for one visit: 1,000 generated on first use and kept in memory, so Trip Requests edits show on the
+/// Dashboard at once. Scoped service (Program.cs), one per visitor. For your own data, replace the generator; the pages read only
+/// this class.
 /// </summary>
 public sealed class TripRequestStore
 {
-    /// <summary>The agent signed in to the app, who takes the new requests.</summary>
+    /// <summary>The signed-in agent; takes new requests.</summary>
     public const string SignedInAgent = "Pippa Larkspur";
 
     public static readonly TravelAgent[] Agents =
@@ -22,7 +22,7 @@ public sealed class TripRequestStore
         new("Ambrose Hobnob", "#059669"),
     ];
 
-    /// <summary>The trip types the agency sells; the grid's drop-down grid lists these four columns.</summary>
+    /// <summary>Trip types the agency sells; the grid's drop-down grid lists these four columns.</summary>
     public static readonly IReadOnlyList<TripTypeLookup> TripTypes =
     [
         new() { Code = "BEACH", Name = "Beach & island resorts", Desk = "Leisure", LeadTime = "6-8 wks" },
@@ -40,18 +40,18 @@ public sealed class TripRequestStore
     /// <summary>All requests, newest additions first.</summary>
     public List<TripRequest> Requests { get; } = GenerateRequests(1000);
 
-    /// <summary>The newest requests still waiting for a quote; the bell in the top bar shows four.</summary>
+    /// <summary>Newest requests awaiting a quote; the top bar's bell shows four.</summary>
     public IEnumerable<TripRequest> Newest(int count) =>
         Requests.Where(r => r.Status == "New").OrderByDescending(r => r.DateRequested).Take(count);
 
-    /// <summary>Booked trips that have not left yet, soonest first: the Dashboard's departures and the Invoices page's list.</summary>
+    /// <summary>Booked trips not yet departed, soonest first: Dashboard departures and the Invoices list.</summary>
     public IEnumerable<TripRequest> BookedDepartures =>
         Requests.Where(r => r.Status == "Booked" && r.Departure >= DateTime.Today).OrderBy(r => r.Departure);
 
-    /// <summary>The trip the Itinerary page lays out: LIS-0586, a Lisbon honeymoon booked by the signed-in agent and leaving tomorrow.</summary>
+    /// <summary>The Itinerary page's trip: LIS-0586, a Lisbon honeymoon booked by the signed-in agent, leaving tomorrow.</summary>
     public TripRequest? ItineraryTrip => Requests.FirstOrDefault(r => r.Request == "LIS-0586") ?? Requests.FirstOrDefault();
 
-    /// <summary>A blank request for the editor, taken by the signed-in agent.</summary>
+    /// <summary>Blank request for the editor, assigned to the signed-in agent.</summary>
     public TripRequest NewRequest() => new()
     {
         Agent = SignedInAgent, AvatarBg = AgentColor(SignedInAgent),
@@ -61,7 +61,7 @@ public sealed class TripRequestStore
         Travellers = 2, Status = "New"
     };
 
-    /// <summary>Adds a request filled in by the editor at the top of the list and returns it.</summary>
+    /// <summary>Adds an editor-filled request at the top of the list; returns it.</summary>
     public TripRequest Add(TripRequest request)
     {
         Complete(request);
@@ -81,18 +81,18 @@ public sealed class TripRequestStore
         ApplyQuoteToFares(stored);
     }
 
-    // The trip type's name and the agent's colour follow what was typed in the editor
+    // Trip type name and agent colour follow the editor's input
     private static void Complete(TripRequest request)
     {
         request.TripTypeName = TripTypes.FirstOrDefault(t => t.Code.Equals(request.TripType, StringComparison.OrdinalIgnoreCase))?.Name ?? request.TripType;
         request.AvatarBg = AgentColor(request.Agent);
     }
 
-    /// <summary>The colour of an agent's avatar; grey for a name that is not on the team.</summary>
+    /// <summary>Agent avatar colour; grey for names not on the team.</summary>
     public static string AgentColor(string name) =>
         Agents.FirstOrDefault(a => a.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Color ?? "#64748b";
 
-    /// <summary>The last of the five weekly fare samples is the quote, so a new quote moves the sparkline's end and its percentage.</summary>
+    /// <summary>The last of five weekly fare samples is the quote; a new quote moves the sparkline's end and percentage.</summary>
     public static void ApplyQuoteToFares(TripRequest r)
     {
         if (r.FareHistory.Count == 0) return;
@@ -100,7 +100,7 @@ public sealed class TripRequestStore
         r.FareDeltaPercent = (int)Math.Round((r.FareHistory[^1] - r.FareHistory[0]) / (decimal)Math.Max(1, r.FareHistory[0]) * 100);
     }
 
-    /// <summary>Request keys are the first three letters of the destination plus a running number, e.g. LIS-0001.</summary>
+    /// <summary>Request key: first three letters of the destination plus a running number, e.g. LIS-0001.</summary>
     public static string RequestKey(string destination, int id)
     {
         var word = destination.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
@@ -110,7 +110,7 @@ public sealed class TripRequestStore
 
     private static List<TripRequest> GenerateRequests(int count)
     {
-        // Each trip type goes only to places that offer it, and both itineraries of a type read true for every one of its places.
+        // Each trip type goes only to places that offer it; both itineraries of a type fit every one of its places
         var tripTypes = new (string Code, string Name, int Low, int High, string ItineraryA, string ItineraryB, string[] Places)[]
         {
             ("BEACH", "Beach & island resorts", 1800, 5200,
@@ -147,7 +147,7 @@ public sealed class TripRequestStore
                 ["Santorini", "Amalfi Coast", "Lisbon", "Hoi An", "Kyoto", "Marrakech"])
         };
 
-        // 200 first names from many places; a first name may repeat, a surname may not
+        // 200 first names from many places; first names may repeat, surnames may not
         var firstNames = new[]
         {
             "Clementine", "Barnaby", "Juniper", "Mortimer", "Petunia", "Thaddeus", "Winifred", "Archibald", "Lavender", "Ebenezer",
@@ -181,8 +181,8 @@ public sealed class TripRequestStore
         var rnd = new Random(42);
         var list = new List<TripRequest>(count);
 
-        // Every lead traveller has a surname no one else has: two requests under one surname would read as one family booking
-        // twice. 40 starts by 25 endings make 1,000 made-up surnames, dealt out in a shuffled order; none is an agent's surname.
+        // Unique surname per lead traveller (a shared one would read as a family booking twice): 40 starts x 25 endings = 1,000
+        // made-up surnames, shuffled; none is an agent's.
         var starts = new[]
         {
             "Thistle", "Goose", "Bumble", "Apple", "Feather", "Higgle", "Parsnip", "Wobble", "Pepper", "Puddle",
@@ -239,8 +239,8 @@ public sealed class TripRequestStore
             });
         }
 
-        // LIS-0586 is the trip the Itinerary page lays out: a Lisbon honeymoon for two, booked by the signed-in agent and leaving
-        // tomorrow, so it heads the Dashboard's departures and the Invoices page opens on it.
+        // LIS-0586, the Itinerary trip: Lisbon honeymoon for two, signed-in agent, leaves tomorrow, so it heads the Dashboard's
+        // departures and the Invoices page opens on it
         if (list.Count >= 586)
         {
             var trip = list[585];

@@ -1,6 +1,5 @@
-@* 2026-10-25 (Baaria): a long Documentation section folds into the library's AccordionControl, one DocSection per topic, so a reader
-   opens the part they need; FeatureDemoLayout lists the sections under Documentation in the rail. Expand all and Collapse all
-   re-create the items with the wanted initial state, because AccordionItemControl has no public expand method (library item). *@
+@* 2026-10-25: long Documentation as an AccordionControl, one DocSection per topic. Expand/Collapse all re-create the items with
+   the wanted initial state: AccordionItemControl has no public expand method (library item). *@
 <div class="doc-sections">
     <div class="doc-sections-bar">
         <ButtonControl CssClass="btn-sm" OnClick="() => SetAll(true)">Expand all</ButtonControl>

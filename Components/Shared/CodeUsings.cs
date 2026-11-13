@@ -3,10 +3,10 @@ using System.Text.RegularExpressions;
 namespace FlexCore.Showcase.Components.Shared;
 
 /// <summary>
-/// The @using lines a code tab needs in a new Blazor project (2026-10-27): every Fx.ControlKit namespace whose public types the
-/// Razor or C# tab names, read from the FlexCore and FlexCore.Documents assemblies, plus the few System namespaces the examples
-/// use beyond a new project's implicit usings and the template's _Imports.razor. Names are taken from tags, generic arguments,
-/// @-expressions, Type.Member values and C# code; plain text and plain attribute values are skipped so prose does not count.
+/// @using lines a code tab needs in a new Blazor project (2026-10-27): each Fx.ControlKit namespace whose public types the
+/// Razor or C# tab names (from the FlexCore and FlexCore.Documents assemblies), plus System namespaces beyond the implicit
+/// usings and the template's _Imports.razor. Names come from tags, generic arguments, @-expressions, Type.Member values and
+/// C# code; plain text and plain attribute values are skipped.
 /// </summary>
 internal static partial class CodeUsings
 {
@@ -18,7 +18,7 @@ internal static partial class CodeUsings
             .GroupBy(t => t.Name.Split('`')[0])
             .ToDictionary(g => g.Key, g => g.Select(t => t.Namespace!).Distinct().ToArray()));
 
-    // System namespaces the examples use that a new project does not import already.
+    // System namespaces the examples use beyond a new project's imports.
     private static readonly (Regex Pattern, string Namespace)[] Framework =
     [
         (new(@"\[(Required|Range|MinLength|MaxLength|StringLength|Display|EmailAddress|Phone|RegularExpression|Compare|Url)\b"), "System.ComponentModel.DataAnnotations"),

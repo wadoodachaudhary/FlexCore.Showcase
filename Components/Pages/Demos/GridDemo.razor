@@ -3,14 +3,10 @@
 @using FlexCore.Showcase.Components.Shared
 @using FlexCore.Showcase.Data
 
-@* 2026-10-17: moved onto FeatureDemoLayout (one-example-plus-code push, tracker section 6). The grid and its data are unchanged;
-   the hand-typed markup block became Razor and C# tabs copied from the live example. "Right-click for menu" left the copy:
-   GridControl only raises OnContextMenu when the host handles it, and this page does not. Parameter tables are a later pass (SC-278). 
-   2026-10-24: Documentation written: all 224 GridControl parameters in 27 purpose groups plus AggregateRow and AggregateColumn, rows in
-   GridVocab.A.cs and GridVocab.B.cs (two agents, read sites checked with scratchpad/vocabcheck.py).
-   2026-10-26 (Baaria: a better grid example, on open data used by several pages): the ten-employee list became the 4,009 airports
-   with an IATA code and scheduled service in the OurAirports dump (public domain; Data/OurAirports, Data/AirportData.cs), grouped by
-   continent with count, average elevation and longest runway in the captions; search, sort, filter, group, frozen code column. *@
+@* 2026-10-17: on FeatureDemoLayout, code tabs from the live example. No "Right-click for menu": OnContextMenu fires only when the
+   host handles it; this page does not.
+   2026-10-24 (SC-278): tables for all GridControl parameters, AggregateRow, AggregateColumn (GridVocab.A.cs, .B.cs).
+   2026-10-26: example on OurAirports (public domain; Data/OurAirports, AirportData.cs): IATA airports with scheduled service. *@
 
 <PageTitle>Blazor Data Grid (DataGrid, Table) — FlexCore</PageTitle>
 

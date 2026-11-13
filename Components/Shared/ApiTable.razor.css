@@ -6,8 +6,7 @@
 .api-table td { padding: 8px 12px; vertical-align: top; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
 .api-table tr:last-child td { border-bottom: 0; }
 .api-name { white-space: nowrap; }
-/* 2026-10-28: long generic types (Func<SchedulerRange,CancellationToken,Task<…>>) break after "<" and "," (ApiTable.razor inserts
-   <wbr> there) instead of pushing the description off the card; the floor keeps short types such as DateTime on one line. */
+/* 2026-10-28: long generic types wrap after "<" and "," (<wbr> from ApiTable.razor); min-width keeps short types on one line. */
 .api-type { min-width: 170px; max-width: 320px; }
 .api-default { min-width: 120px; max-width: 240px; }
 .api-type code, .api-default code { white-space: normal; }

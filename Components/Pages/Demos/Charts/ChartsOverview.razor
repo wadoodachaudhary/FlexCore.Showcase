@@ -1,34 +1,19 @@
 @page "/demo/charts"
 @using Fx.ControlKit.Charts
 @using FlexCore.Showcase.Components.Shared
-@* 2026-10-12: wrapped in FeatureDemoLayout as one example (the tabbed gallery, unchanged). "No JavaScript
-   dependencies" reworded per the claims rule. ChartControl parameter table pending (SC-264).
+@* 2026-10-12 (SC-264): on FeatureDemoLayout; "No JavaScript dependencies" reworded (claims rule).
    2026-10-20: ?tab=<slug> opens the gallery on that tab (catalog row Sparkline Charts); slugs in TabSlugs.
-   2026-10-29: nine more tiles (ComboBarLine, RangeBar, StepLine, MultiLine, RangeArea, HighLow, Pyramid, DotPlot, ArcGauge), so every
-   ChartType with a renderer is drawn on this page or on Financial & gauges.
-   2026-10-31: second example for the hover tooltips the library gained the same day (ShowTooltips, TooltipFormat, TooltipTemplate,
-   PointHover; ChartTooltipContext table under Documentation).
-   2026-10-23 (developer meeting point 5, label clutter): every SVG chart draws on a fixed viewBox (600x300; 300x300 for
-   Pie, Donut, Radar, Gauge; 400x300 for Funnel) with xMidYMid meet, so rendered text = tile scale, and a tile taller
-   than its width-bound height is blank. Each layout now sets CellAspectRatio so a tile is title + chart (+ legend)
-   tall, and every Height is the width-bound value (226px in a 453px two-column tile, 400px full width). Dense charts
-   (Histogram, Box Plot, Waterfall, Pareto, Funnel) have full-width tiles; Part-to-Whole went from 3 to 2 columns with
-   the Sunburst on a SizeY=2 row that holds its 680px drawing. Scatter and Bubble put numeric x values in Label (the
-   renderer parses Label as x and draws no x tick labels). Radar "JavaScript" -> "JS" (labels cut at 8). Waterfall is
-   deltas only: the renderer adds every point to the running total, so "Gross Profit"/"Net Income" subtotal bars were
-   drawn as further increases. Funnel values and stage names chosen so each label fits its segment. Heatmap legend
-   hidden (it repeated the row labels). Gantt has 8 tasks so the rows fill the plot (rowH is capped at 30 units).
-   YAxis Max/TickCount set where the default 1.1 x max gave ragged tick values. HorizontalBar has no renderer (draws
-   as Bar) and is not used. The Stacked Area title and the Sunburst itself are untouched. 
-   2026-10-24: Documentation written as eleven tables from Charts/ChartControl.razor, ChartModels.cs, ChartEnums.cs, ChartControl.razor.css and
-   ChartSvg.cs (rows in ChartsVocab.*.cs, checked with scratchpad/vocabcheck.py; read sites, not just declarations).
-   2026-10-24: the datasets became small stories (ice cream flavours, a bakery's week, two seedlings growing, a favourite-colour
-   survey, a library front desk, an office coffee machine); every title names its subject, series and categories are real words,
-   and the 2026-10-23 geometry (label cuts, tile sizes, every YAxis Max) is unchanged. The data is made up.
-   2026-10-25 (Baaria): charts that have a page of their own left the gallery: the Sunburst panel (Part-to-Whole), the three
-   ChartType.Gauge tiles (KPI & Gauge, now "KPI cards") and the Project tab (ChartType.Gantt). The Overview and Related list point at
-   those pages. ChartType.Gauge and ChartType.Gantt are now drawn on no page (the gauge and Gantt pages use the dedicated controls);
-   their ChartType rows say so. TabSlugs follow the tabs: kpi-gauge became kpi, project went. *@
+   2026-10-29: nine more tiles; every ChartType with a renderer is drawn here or on Financial & gauges.
+   2026-10-31: hover tooltips example and ChartTooltipContext table.
+   2026-10-23 (label clutter): fixed viewBox (600x300; 300x300 Pie, Donut, Radar, Gauge; 400x300 Funnel), xMidYMid meet: text
+   scales with the tile, extra height is blank. Heights width-bound (226px in a 453px two-column tile, 400px full width);
+   CellAspectRatio fits title + chart (+ legend). Renderer quirks: Scatter/Bubble parse x from Label, draw no x tick labels; labels
+   cut at 8 (Radar "JS"); Waterfall adds every point to the running total (deltas only); HorizontalBar draws as Bar (not used).
+   Funnel data chosen so labels fit; Heatmap legend hidden (repeated row labels); YAxis Max/TickCount where 1.1 x max was ragged.
+   2026-10-24: Documentation tables from Charts/Chart*.cs, ChartControl.razor(.css) (rows in ChartsVocab.*.cs, from read sites).
+   2026-10-24: datasets are small made-up stories; titles name their subject.
+   2026-10-25: Sunburst, Gauge and Gantt tiles left for their own pages; ChartType.Gauge/Gantt are drawn on no page (those pages
+   use dedicated controls), their ChartType rows say so. TabSlugs: kpi-gauge -> kpi, project removed. *@
 
 <PageTitle>Blazor Charts (Line, Bar, Pie, Area, Scatter) — FlexCore</PageTitle>
 
@@ -338,7 +323,7 @@
             <DocSection Id="doc-css-variables" Title="CSS variables" Count='@DocSection.Label(ChartsVocab.CssVars.Length, "variables")'>
                 <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="ChartsVocab.CssVars" />
                 <p>
-                <code>ChartControl</code> raises no events and has no public methods. <code>GaugeRange</code> and <code>GaugePointer</code>,
+                <code>ChartControl</code> raises one event, <code>PointHover</code>, listed with its parameters, and has no public methods. <code>GaugeRange</code> and <code>GaugePointer</code>,
                 used by <code>GaugeRanges</code> and <code>GaugePointers</code>, are documented on the <a href="demo/gauges">Gauges &amp; stock chart</a>
                 page; <code>SunburstChartControl</code>, which the <code>Sunburst</code> type delegates to, on the <a href="demo/charts/sunburst">Sunburst</a> page.
                 </p>
@@ -398,11 +383,11 @@
         ChartDataPoint.Financial("Thu", 20, 25, 17, 21), ChartDataPoint.Financial("Fri", 18, 23, 15, 19), ChartDataPoint.Financial("Sat", 17, 22, 14, 18),
         ChartDataPoint.Financial("Sun", 18, 24, 15, 20) } };
     ChartSeries _roomPyramid = new() { Name = "Stays", DataPoints = new() { new("Standard", 520), new("Superior", 280), new("Deluxe", 140), new("Suite", 60) } };
-    // DotPlot scales its axis from the data and labels the ticks as whole numbers, so integer data reads best
+    // DotPlot scales its axis to the data and labels ticks as whole numbers: integer data reads best
     ChartSeries _complaints = new() { Name = "Complaints", DataPoints = new() {
         new("Harbour", 2), new("Hilltop", 5), new("Old Town", 7), new("Beach", 1), new("Airport", 9) } };
 
-    // Tooltips example: the last context PointHover delivered, and the favourite-colour survey as a named series, each slice in the colour it names
+    // Tooltips example: the last PointHover context, and the colour survey as a named series, each slice in its own colour
     private ChartTooltipContext? _hovered;
     ChartSeries _colourSeries = new() { Name = "People", DataPoints = new() {
         new("Blue", 42) { Color = ChartPalette.Blue }, new("Green", 30) { Color = ChartPalette.Green }, new("Red", 24) { Color = ChartPalette.Rose },
@@ -425,7 +410,7 @@
     ChartSeries _pieSeries = new()
     {
         Name = "People",
-        // each slice wears the colour it names; Yellow takes the palette amber, which holds 3:1 on white where a true yellow does not
+        // each slice in the colour it names; Yellow is the palette amber, which holds 3:1 on white (a true yellow does not)
         DataPoints = new() {
             new("Blue", 42) { Color = ChartPalette.Blue }, new("Green", 30) { Color = ChartPalette.Green }, new("Red", 24) { Color = ChartPalette.Rose },
             new("Purple", 15) { Color = ChartPalette.Violet }, new("Yellow", 9) { Color = ChartPalette.Amber } }
@@ -434,7 +419,7 @@
     ChartSeries _funnelSeries = new()
     {
         Name = "Conversion",
-        // segment width is 320 units x value / max and a label is about 6.6 units per character, so each stage name fits its own segment
+        // segment width = 320 units x value / max, about 6.6 units per label character: each stage name fits its segment
         DataPoints = new() { new("Visits", 1000), new("Leads", 720), new("Trials", 480), new("Quotes", 300), new("Won", 180) }
     };
 
@@ -494,7 +479,7 @@
 
     List<ChartSeries> _waterfallSeries = new()
     {
-        // every point is a step from the running total (there are no subtotal bars), so the last step lands on net income: 120
+        // every point is a step from the running total (no subtotal bars); the last step lands on net income: 120
         new() { Name = "P&L", DataPoints = new() {
             new("Revenue", 500), new("COGS", -200), new("OpEx", -120), new("Interest", -20), new("Tax", -40) } }
     };
@@ -759,7 +744,7 @@
     </DashboardLayoutPanels>
 </DashboardLayoutControl>
 <p class=""result"">@(_hovered is null ? ""PointHover: nothing under the pointer."" : $""PointHover: {_hovered.Title}, {_hovered.SeriesName ?? ""one series""}, {_hovered.Value}{(_hovered.Percentage is { } s ? $"", {s:0.#}% of the whole"" : """")}"")</p>";
-        public static string TooltipsCs => @"// Tooltips example: the last context PointHover delivered, and the favourite-colour survey as a named series, each slice in the colour it names
+        public static string TooltipsCs => @"// Tooltips example: the last PointHover context, and the colour survey as a named series, each slice in its own colour
 private ChartTooltipContext? _hovered;
 ChartSeries _colourSeries = new() { Name = ""People"", DataPoints = new() {
     new(""Blue"", 42) { Color = ChartPalette.Blue }, new(""Green"", 30) { Color = ChartPalette.Green }, new(""Red"", 24) { Color = ChartPalette.Rose },
@@ -805,7 +790,7 @@ ChartSeries _kyotoWeek = new() { Name = ""°C"", DataPoints = new() {
     ChartDataPoint.Financial(""Thu"", 20, 25, 17, 21), ChartDataPoint.Financial(""Fri"", 18, 23, 15, 19), ChartDataPoint.Financial(""Sat"", 17, 22, 14, 18),
     ChartDataPoint.Financial(""Sun"", 18, 24, 15, 20) } };
 ChartSeries _roomPyramid = new() { Name = ""Stays"", DataPoints = new() { new(""Standard"", 520), new(""Superior"", 280), new(""Deluxe"", 140), new(""Suite"", 60) } };
-// DotPlot scales its axis from the data and labels the ticks as whole numbers, so integer data reads best
+// DotPlot scales its axis to the data and labels ticks as whole numbers: integer data reads best
 ChartSeries _complaints = new() { Name = ""Complaints"", DataPoints = new() {
     new(""Harbour"", 2), new(""Hilltop"", 5), new(""Old Town"", 7), new(""Beach"", 1), new(""Airport"", 9) } };
 
@@ -826,7 +811,7 @@ List<ChartSeries> _lineSeries = new()
 ChartSeries _pieSeries = new()
 {
     Name = ""People"",
-    // each slice wears the colour it names; Yellow takes the palette amber, which holds 3:1 on white where a true yellow does not
+    // each slice in the colour it names; Yellow is the palette amber, which holds 3:1 on white (a true yellow does not)
     DataPoints = new() {
         new(""Blue"", 42) { Color = ChartPalette.Blue }, new(""Green"", 30) { Color = ChartPalette.Green }, new(""Red"", 24) { Color = ChartPalette.Rose },
         new(""Purple"", 15) { Color = ChartPalette.Violet }, new(""Yellow"", 9) { Color = ChartPalette.Amber } }
@@ -835,7 +820,7 @@ ChartSeries _pieSeries = new()
 ChartSeries _funnelSeries = new()
 {
     Name = ""Conversion"",
-    // segment width is 320 units x value / max and a label is about 6.6 units per character, so each stage name fits its own segment
+    // segment width = 320 units x value / max, about 6.6 units per label character: each stage name fits its segment
     DataPoints = new() { new(""Visits"", 1000), new(""Leads"", 720), new(""Trials"", 480), new(""Quotes"", 300), new(""Won"", 180) }
 };
 
@@ -895,7 +880,7 @@ List<ChartSeries> _radarSeries = new()
 
 List<ChartSeries> _waterfallSeries = new()
 {
-    // every point is a step from the running total (there are no subtotal bars), so the last step lands on net income: 120
+    // every point is a step from the running total (no subtotal bars); the last step lands on net income: 120
     new() { Name = ""P&L"", DataPoints = new() {
         new(""Revenue"", 500), new(""COGS"", -200), new(""OpEx"", -120), new(""Interest"", -20), new(""Tax"", -40) } }
 };

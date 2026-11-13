@@ -1,12 +1,10 @@
 @page "/demo/diagram"
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-25: new page on FeatureDemoLayout; two examples (booking workflow with NodeClicked, shapes/connectors/links). Facts checked
-   against Diagram/DiagramControl.razor, DiagramControl.razor.css and DiagramModels.cs in FlexCore 0.2.49. The control has no layout
-   engine (OffsetX/OffsetY are hand-set centres), no drag, zoom or editing, and no keyboard or ARIA support on nodes; the workflow's
-   Previous/Next buttons are the page's keyboard route. Connector Ids are page-unique (wf-*, sh-*) because the arrowhead marker ids
-   are document-wide. 
-   2026-10-26: Previous/Next stop at the ends instead of wrapping (Next from Documents sent went to Declined, Previous from the first step too). *@
+@* 2026-10-25: new page, checked against Diagram/* (FlexCore 0.2.49). No layout engine (OffsetX/OffsetY are hand-set centres);
+   no drag, zoom, editing, node keyboard or ARIA: Previous/Next are the keyboard route. Connector Ids page-unique (wf-*, sh-*):
+   arrowhead marker ids are document-wide.
+   2026-10-26: Previous/Next stop at the ends instead of wrapping. *@
 
 <PageTitle>Blazor Diagram Component — FlexCore</PageTitle>
 
