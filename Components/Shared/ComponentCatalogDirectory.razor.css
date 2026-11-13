@@ -14,62 +14,81 @@
     letter-spacing: -0.035em;
 }
 
-.popular-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 16px;
+/* Two racehorses neck and neck left of the title (2026-11-13), drawn like the other doodles; .doodle-head and .doodle in app.css lay
+   them out with the title and give the hand-drawn wobble. workhorses.svg is a sprite of 15 columns (the frames of one gallop stride)
+   by 2 rows (the white horse with the logo cloth, the ink horse). Frame k of 15 shows at a background position of k / 14, and one
+   stride steps through all 15; both horses keep the same stride time, three frames apart, and rest on a frame with hooves on the
+   ground (--k). A frame is 288 x 192 units: --fw and --fh size it in whole pixels, so the steps never land between pixels, and --u
+   places everything else in the same units. Wind marks blow past and the ground streams back while they run; still for visitors
+   who turn motion off. */
+.popular-head { margin-bottom: 28px; }
+.popular-head .popular-title { margin: 0; }
+.horse-race {
+    --fw: 132px;
+    --fh: 88px;
+    --u: calc(var(--fw) / 288);
+    position: relative;
+    width: calc(var(--u) * 412);
+    height: calc(var(--u) * 210);
+}
+.race-marks {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+.racer {
+    position: absolute;
+    left: calc(var(--u) * var(--x));
+    top: calc(var(--u) * var(--y));
+    width: var(--fw);
+    height: var(--fh);
+    background: url("images/workhorses.svg") repeat-x;
+    background-size: 1500% 200%;
+    background-position: calc(var(--k) * 100% / 14) var(--row);
+}
+/* --x and --y are in the marks' units, less the 40 left of zero */
+.racer-ink   { --x: 124; --y: 0;  --k: 8; --row: 100%; --surge: 3px; }
+.racer-paper { --x: 40;  --y: 14; --k: 5; --row: 0%;   --surge: -3px; }
+
+.race-wind { opacity: 0; }
+
+.popular-head.is-playing .racer { animation: race-stride 0.5s steps(15) 6, race-surge 3s ease-in-out; }
+.popular-head.is-playing .race-wind { animation: race-wind 0.75s ease-out 4; }
+.popular-head.is-playing .race-ground { animation: race-ground 0.2s linear 15; }
+
+@keyframes race-stride {
+    from { background-position: calc(var(--k) * 100% / 14) var(--row); }
+    to { background-position: calc((var(--k) + 15) * 100% / 14) var(--row); }
 }
 
-.popular-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 22px 14px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+@keyframes race-surge {
+    35% { transform: translateX(var(--surge)); }
+    70% { transform: translateX(calc(var(--surge) * -0.6)); }
 }
 
-.popular-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.09);
-    border-color: #cbd5e1;
+@keyframes race-wind {
+    0% { opacity: 0; transform: translateX(12px); }
+    25%, 60% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-10px); }
 }
 
-.popular-icon-box {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    margin-bottom: 12px;
-    transition: transform 0.2s ease;
+@keyframes race-ground {
+    to { transform: translateX(-96px); }
 }
 
-.popular-card:hover .popular-icon-box {
-    transform: scale(1.1);
+@media (max-width: 768px) {
+    .horse-race { --fw: 96px; --fh: 64px; }
 }
 
-.popular-icon-box.pink   { background: #ffe4e6; color: #e11d48; }
-.popular-icon-box.purple { background: #f3e8ff; color: #9333ea; }
-.popular-icon-box.teal   { background: #ccfbf1; color: #0d9488; }
-.popular-icon-box.indigo { background: #e0e7ff; color: #4f46e5; }
-.popular-icon-box.coral  { background: #ffedd5; color: #ea580c; }
-.popular-icon-box.green  { background: #dcfce7; color: #16a34a; }
-
-.popular-name {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: #1e293b;
+@media (prefers-reduced-motion: reduce) {
+    .popular-head.is-playing .racer,
+    .popular-head.is-playing .race-wind,
+    .popular-head.is-playing .race-ground { animation: none; }
 }
 
 /* ── Complete component directory, multi-column ── */
-/* One white box holds the heading, the doodle, the filter and the list (2026-10-29, Baaria: the folder tab of the morning "looks
+/* One white box holds the heading, the doodle, the filter and the list (2026-10-29: the folder tab of the morning "looks
    weird, maybe just make it one big rectangle"). */
 .catalog-directory-section {
     margin: 36px 0 64px;
@@ -232,7 +251,7 @@
     text-transform: uppercase;
     margin: 0 0 10px 0;
     padding-bottom: 6px;
-    border-bottom: 3px solid var(--brand-blue);   /* the logo's dark blue (2026-10-29, Baaria) */
+    border-bottom: 3px solid var(--brand-blue);   /* the logo's dark blue (2026-10-29) */
 }
 
 
@@ -295,18 +314,12 @@
 
 /* ── Responsive Rules ── */
 @media (max-width: 1200px) {
-    .popular-cards-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
     .directory-columns-container {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 768px) {
-    .popular-cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
     .directory-columns-container {
         grid-template-columns: 1fr;
     }

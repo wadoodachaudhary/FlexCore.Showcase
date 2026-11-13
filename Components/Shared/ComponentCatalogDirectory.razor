@@ -3,50 +3,33 @@
 @if (ShowWorkhorses)
 {
 <section class="popular-components-section">
-    <h2 class="popular-title">Start with the <span class="text-nowrap">workhorses <span aria-hidden="true">🐎</span></span></h2>
-    <div class="popular-cards-grid">
-        <a href="demo/grid" class="popular-card">
-            <div class="popular-icon-box pink">
-                <span class="bi bi-table"></span>
-            </div>
-            <span class="popular-name">Data Grid</span>
-        </a>
-
-        <a href="demo/charts" class="popular-card">
-            <div class="popular-icon-box purple">
-                <span class="bi bi-pie-chart-fill"></span>
-            </div>
-            <span class="popular-name">Charts</span>
-        </a>
-
-        <a href="demo/scheduler" class="popular-card">
-            <div class="popular-icon-box teal">
-                <span class="bi bi-calendar-week"></span>
-            </div>
-            <span class="popular-name">Scheduler</span>
-        </a>
-
-        <a href="demo/dialog" class="popular-card">
-            <div class="popular-icon-box indigo">
-                <span class="bi bi-window"></span>
-            </div>
-            <span class="popular-name">Dialogs</span>
-        </a>
-
-        <a href="demo/reports/package-costs" class="popular-card">
-            <div class="popular-icon-box coral">
-                <span class="bi bi-file-earmark-richtext"></span>
-            </div>
-            <span class="popular-name">Report Writer</span>
-        </a>
-
-        <a href="demo/forms" class="popular-card">
-            <div class="popular-icon-box green">
-                <span class="bi bi-ui-checks-grid"></span>
-            </div>
-            <span class="popular-name">Forms</span>
-        </a>
+    <div class="doodle-head popular-head" @ref="_workhorsesHead">
+        @* Two racehorses neck and neck in place of the 🐎 emoji (2026-11-13, the "ink and paper" pair), drawn like
+           the site's other doodles: one solid ink, one white with an ink line, and the front one wears a saddle cloth with the FlexCore
+           logo, the only colour. Each is one gallop stride from Eadweard Muybridge's photographs The Horse in Motion (1878), traced to a
+           smooth outline with the jockey taken off; wwwroot/images/workhorses.svg holds the 15 frames of both horses and the CSS steps
+           through them. Each time the heading scrolls into view they run, with wind marks behind and the ground streaming back:
+           fxToggleClassWhenVisible (App.razor) adds is-playing. The marks are drawn in the sprite's frame units, the racers placed over them. *@
+        <div class="doodle horse-race" aria-hidden="true">
+            <svg class="race-marks" viewBox="-40 0 412 210">
+                <g class="race-wind" fill="none" stroke="#0f172a" stroke-width="4" stroke-linecap="round">
+                    <path d="M-22 62 q9 -4 18 0" /><path d="M-30 84 q11 -4 22 0" /><path d="M-20 106 q8 -3 16 0" />
+                </g>
+                @* the last squiggle waits past the right edge, so the ground can slide one step (96) and look the same *@
+                <g class="race-ground" fill="none" stroke="#0f172a" stroke-width="4" stroke-linecap="round">
+                    <path d="M20 205 q14 -5 28 0 t28 0" /><path d="M116 205 q14 -5 28 0 t28 0" /><path d="M212 205 q14 -5 28 0 t28 0" />
+                    <path d="M308 205 q14 -5 28 0 t28 0" /><path d="M404 205 q14 -5 28 0 t28 0" />
+                </g>
+            </svg>
+            @* back to front, so the white horse covers the ink one *@
+            <span class="racer racer-ink"></span>
+            <span class="racer racer-paper"></span>
+        </div>
+        <h2 class="popular-title">Start with the workhorses</h2>
     </div>
+    @* The same four cards as the home page (2026-11-13, Baaria); they replaced six small tiles (Data Grid, Charts, Scheduler, Dialogs,
+       Report Writer, Forms). *@
+    <WorkhorseCards />
 </section>
 }
 
@@ -288,18 +271,20 @@
 </section>
 
 @code {
-    /// <summary>Shows the six workhorse cards above the directory. The home page turns them off: it has its own four large
-    /// feature cards under the finish-line ribbon (2026-10-28).</summary>
+    /// <summary>Shows the workhorses heading and the four shared WorkhorseCards above the directory. The home page turns it off:
+    /// it shows the same cards under its own finish-line heading.</summary>
     [Parameter] public bool ShowWorkhorses { get; set; } = true;
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
+    private ElementReference _workhorsesHead;
     private ElementReference _toolboxHead;
     private string _searchTerm = "";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-            await JS.InvokeVoidAsync("fxToggleClassWhenVisible", _toolboxHead, "is-playing");
+        if (!firstRender) return;
+        if (ShowWorkhorses) await JS.InvokeVoidAsync("fxToggleClassWhenVisible", _workhorsesHead, "is-playing");
+        await JS.InvokeVoidAsync("fxToggleClassWhenVisible", _toolboxHead, "is-playing");
     }
 
     // Tier orders a category (Baaria, 2026-10-26): 1 is the category's lead control (Data Grid always first), 2 the core controls,
