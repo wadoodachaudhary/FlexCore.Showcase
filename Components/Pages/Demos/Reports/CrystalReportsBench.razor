@@ -1,0 +1,120 @@
+@page "/demo/reports/crystal-bench"
+@page "/demo/reports/ai-atlas"
+@using FlexCore.Showcase.Services
+@implements IAsyncDisposable
+@inject IWebHostEnvironment Env
+@inject AtlasDatabase Database
+@inject AtlasRunContext RunContext
+@inject IJSRuntime JS
+@inject ILogger<CrystalReportsBench> Logger
+
+<PageTitle>AI Atlas | FlexCore Report Studio</PageTitle>
+<div class="atlas" data-interactive="@_interactive.ToString().ToLowerInvariant()">
+    <header class="atlas-heading">
+        <div class="atlas-identity"><span class="atlas-mark"><i class="bi bi-intersect" aria-hidden="true"></i></span><div><div class="atlas-eyebrow">FLEXCORE / REPORT STUDIO</div><h1>AI Atlas</h1></div></div>
+        <div class="atlas-heading-actions">
+            <FilePickerControl UseFileBrowser="true" RootPath="@SampleDefinitions" InitialPath="@SampleDefinitions" SearchPattern="*.xml" DialogHeader="Browse sample reports" FilePicked="BrowsePickedAsync" Enabled="@(!_busy)" Label="Browse files" CssClass="atlas-picker" />
+            <fieldset disabled="@_busy" class="atlas-upload-fieldset"><FilePickerControl Accept=".rpt,.xml" Multiple="true" OnChange="UploadAsync" Label="Upload report" CssClass="atlas-picker atlas-upload" /></fieldset>
+            <ButtonControl CssClass="atlas-button" IconCss="bi bi-plus-lg" aria-label="New report" OnClick="NewAsync" Disabled="@_busy">New report</ButtonControl>
+        </div>
+    </header>
+    <div class="atlas-navigation">
+        <TabStripControl Items="@_tabs" SelectedIndex="@_tab" SelectedIndexChanged="ChangeTabAsync" CssClass="atlas-tabs" />
+        <span class="atlas-connection"><span></span> AI Atlas SQLite <small>read only</small></span>
+    </div>
+    @if (_selected is not null)
+    {
+        <div class="atlas-context">
+            <span class="atlas-context-title">@_selected.Title</span>
+            <div class="atlas-context-actions">
+                @if (_selected.Id == "adoption")
+                {
+                    <label class="atlas-parameter">Year<DropDownListControl TValue="int" TItem="YearChoice" DataSource="@_years" Value="@_year" ValueChanged="YearChanged" TextFieldName="Label" ValueFieldName="Value" Width="100px" AriaLabel="Scenario year" Enabled="@(!_busy)" /></label>
+                }
+                @if (_selected.Id == "economics")
+                {
+                    <label class="atlas-parameter">Scenario<DropDownListControl TValue="string" TItem="Choice" DataSource="@_scenarios" Value="@_scenario" ValueChanged="ScenarioChanged" TextFieldName="Label" ValueFieldName="Value" Width="150px" AriaLabel="Economic scenario" Enabled="@(!_busy)" /></label>
+                }
+                @if (!_selected.IsSample)
+                {
+                    <DropDownListControl TValue="string" TItem="Choice" DataSource="@_dataModes" Value="@_dataMode" ValueChanged="DataModeChanged" TextFieldName="Label" ValueFieldName="Value" Width="180px" AriaLabel="Report data source" Enabled="@(!_busy)" />
+                }
+                <ButtonControl CssClass="atlas-icon" IconCss="bi bi-arrow-repeat" Title="Convert RPT to XML" aria-label="Convert RPT to XML" Disabled="@(_busy || !_selected.IsRpt)" OnClick="ConvertAsync" />
+                <ButtonControl CssClass="atlas-icon" IconCss="bi bi-download" Title="Download report XML" aria-label="Download report XML" Disabled="@_busy" OnClick="DownloadAsync" />
+                <ButtonControl CssClass="atlas-button" IconCss="bi bi-pencil-square" aria-label="Edit" Disabled="@_busy" OnClick="EditAsync">Edit</ButtonControl>
+                <ButtonControl CssClass="atlas-button atlas-primary" IconCss="bi bi-play-fill" aria-label="Run report" Disabled="@_busy" OnClick="RunAsync">Run report</ButtonControl>
+            </div>
+        </div>
+    }
+    <div class="atlas-status @(_failed ? "is-error" : "")" role="status" aria-live="polite">
+        <i class="bi @(_failed ? "bi-exclamation-circle" : _busy ? "bi-hourglass-split" : "bi-check2-circle")" aria-hidden="true"></i><span>@_status</span>
+        @if (_busy) { <ButtonControl CssClass="atlas-icon" IconCss="bi bi-x-lg" Title="Cancel after current step" aria-label="Cancel operation" OnClick="Cancel" /> }
+    </div>
+    @if (_tab == 0)
+    {
+        <div class="atlas-library">
+            <aside class="atlas-catalog">
+                <div class="atlas-catalog-heading"><h2>Report library</h2><span>@_reports.Count</span></div>
+                <TextBoxControl Value="@_search" ValueChanged="SearchChanged" UpdateOnInput="true" Placeholder="Search reports" AriaLabel="Search reports" CssClass="atlas-search" />
+                <div class="atlas-report-list">
+                    @foreach (var report in FilteredReports)
+                    {
+                        <ButtonControl @key="report.Id" CssClass="@("atlas-report-row " + (_selected?.Id == report.Id ? "is-selected" : ""))" OnClick="@(() => SelectAsync(report))" Disabled="@_busy" aria-pressed="@(_selected?.Id == report.Id)">
+                            <span class="atlas-report-thumb" style="@("--report-accent:"+report.Accent)">
+                                @if (report.IsSample) { <img src="@PreviewUrl(report)" alt="" loading="lazy" /> }
+                                else { <i class="bi bi-file-earmark-richtext" aria-hidden="true"></i> }
+                            </span>
+                            <span class="atlas-report-label"><small>@report.Category.ToUpperInvariant()</small><strong>@report.Title</strong><span>@(report.IsRpt ? "RPT" : "XML") / @(report.IsSample ? "AI Atlas" : "Uploaded")</span></span><i class="bi bi-chevron-right" aria-hidden="true"></i>
+                        </ButtonControl>
+                    }
+                    @if (!FilteredReports.Any()) { <p class="atlas-empty">No matching reports.</p> }
+                </div>
+                <div class="atlas-library-footer"><i class="bi bi-database" aria-hidden="true"></i><span>12 tables / 6 report stories</span></div>
+            </aside>
+            @if (_selected is not null)
+            {
+                <section class="atlas-story" style="@("--report-accent:"+_selected.Accent)">
+                    <div class="atlas-story-copy">
+                        <div class="atlas-eyebrow">@_selected.Category.ToUpperInvariant() / @(_selected.IsSample ? "CURATED REPORT" : "PRIVATE IMPORT")</div>
+                        <h2>@_selected.Title</h2><p>@_selected.Description</p>
+                        <div class="atlas-facts"><strong>@_selected.Metric</strong><span>@_selected.SecondaryMetric</span></div>
+                        <div class="atlas-disclosure"><i class="bi bi-info-circle" aria-hidden="true"></i><span>@_selected.Disclosure</span></div>
+                        @if (_selected.IsRpt) { <ButtonControl CssClass="atlas-button atlas-primary" IconCss="bi bi-arrow-repeat" aria-label="Convert to XML" OnClick="ConvertAsync" Disabled="@_busy">Convert to Open XML</ButtonControl> }
+                        @if (_selected.Log.Count > 0)
+                        {
+                            <details class="atlas-conversion" open><summary>Conversion activity</summary><ol>@foreach (var item in _selected.Log.TakeLast(12)) { <li>@item</li> }</ol></details>
+                        }
+                        @if (_selected.IsSample) { <a class="atlas-source-link" href="reports/ai-atlas/README.md" target="_blank">Sources &amp; methodology <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a> }
+                    </div>
+                    <div class="atlas-preview-stage">
+                        @if (_selected.IsSample)
+                        {
+                            <img class="atlas-paper-preview" src="@PreviewUrl(_selected)" alt="@(_selected.Title + ", first page preview")" /><span class="atlas-preview-caption">FIRST PAGE / BASELINE PARAMETERS</span>
+                        }
+                        else
+                        {
+                            <div class="atlas-import-preview"><i class="bi bi-file-earmark-richtext" aria-hidden="true"></i><strong>@Path.GetFileName(_selected.SourcePath)</strong><span>@(_selected.XmlPath is null ? "Awaiting conversion" : "XML ready")</span></div>
+                        }
+                    </div>
+                </section>
+            }
+        </div>
+    }
+    <section class="atlas-viewer" hidden="@(_tab != 1)">
+        @if (_selected is not null) { <div class="atlas-data-note">@(_dataMode == "layout" ? "LAYOUT ONLY / No detail data. External database schemas are not connected." : _selected.Disclosure)</div> }
+        <ReportWriterControl @ref="_writer" UsePositionedLayout="true" />
+    </section>
+    <section class="atlas-designer" hidden="@(_tab != 2)">
+        @if (_designerPath is not null) { <ReportDesignerControl @key="_designerKey" @ref="_designer" XmlPath="@_designerPath" AvailableDataSources="@_schema" AllowFileOpen="false" DocumentChanged="DocumentChanged" SaveRequested="SaveAsync" PreviewRequested="PreviewAsync" /> }
+    </section>
+    @if (_tab == 3)
+    {
+        <section class="atlas-data">
+            <header><div><div class="atlas-eyebrow">DATA EXPLORER</div><h2>Behind the stories</h2><p>12 related tables. Historical sources and clearly marked scenario assumptions.</p></div><a class="atlas-source-link" href="reports/ai-atlas/data/atlas.db" download>Download SQLite <i class="bi bi-download" aria-hidden="true"></i></a></header>
+            <div class="atlas-data-toolbar"><DropDownListControl TValue="string" TItem="Choice" DataSource="@_tables" Value="@_table" ValueChanged="TableChanged" TextFieldName="Label" ValueFieldName="Value" Width="260px" AriaLabel="Data table" /><span>@_data.Count rows / @_columns.Count columns</span></div>
+            <GridControl @key="_table" TValue="Dictionary<string, object>" DataSource="@_data" Height="480px" AllowSorting="true" AllowResizing="true" AllowSelection="true" ShowRowCountInFooter="true">
+                <GridColumnsBase>@foreach (var column in _columns) { <GridColumn Field="@column" HeaderText="@column" Width="@(column is "Narrative" or "Url" or "Assumption" or "Description" ? "380px" : "180px")" /> }</GridColumnsBase>
+            </GridControl>
+        </section>
+    }
+</div>

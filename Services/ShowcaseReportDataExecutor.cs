@@ -17,18 +17,41 @@ namespace FlexCore.Showcase.Services;
 /// <para>Adding more reports: dispatch on a fingerprint of the SQL (a table
 /// name, a unique formula alias, etc.) inside <see cref="Execute"/> and emit a
 /// builder per fingerprint.</para>
+/// <para>The AI Atlas studio is routed to its bounded, read-only SQLite database.</para>
 /// </summary>
-public class ShowcaseReportDataExecutor : IReportDataExecutor
+public class ShowcaseReportDataExecutor : IReportDefinitionDataExecutor
 {
     private readonly ILogger<ShowcaseReportDataExecutor> _logger;
+    private readonly AtlasDatabase _atlas;
+    private readonly AtlasRunContext _context;
 
-    public ShowcaseReportDataExecutor(ILogger<ShowcaseReportDataExecutor> logger)
+    public ShowcaseReportDataExecutor(ILogger<ShowcaseReportDataExecutor> logger, AtlasDatabase atlas, AtlasRunContext context)
     {
         _logger = logger;
+        _atlas = atlas;
+        _context = context;
+    }
+
+    public DataTable Execute(ReportDefinition definition, IDictionary<string, object>? parameters)
+    {
+        if (_context.Enabled && _context.LayoutOnly)
+        {
+            var table = new DataTable();
+            foreach (var name in (definition.PositionedLayout?.Bindings.Values ?? definition.Columns.Select(c => c.Field))
+                .Where(c => !string.IsNullOrWhiteSpace(c)).Distinct(StringComparer.OrdinalIgnoreCase))
+                table.Columns.Add(name, typeof(object));
+            return table;
+        }
+        return Execute(definition.Sql, parameters);
     }
 
     public DataTable Execute(string sql, IDictionary<string, object>? parameters)
     {
+        if (_context.Enabled)
+        {
+            if (_context.LayoutOnly) throw new InvalidOperationException("Switch to AI Atlas SQLite to execute a data query.");
+            return _atlas.Execute(sql, parameters);
+        }
         _logger.LogInformation("Showcase report SQL:\n{Sql}\nParams: {Params}",
             sql, parameters == null ? "(none)" : string.Join(", ", parameters.Select(p => $"@{p.Key}={p.Value}")));
 

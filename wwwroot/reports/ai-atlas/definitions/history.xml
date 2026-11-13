@@ -1,0 +1,407 @@
+<Report Name="A brief history of intelligence" HasSavedData="False">
+  <Summaryinfo ReportTitle="A brief history of intelligence" />
+  <PrintOptions PageContentHeight="14400" PageContentWidth="9900" PaperOrientation="Portrait" PaperSize="PaperLetter">
+    <PageMargins bottomMargin="720" leftMargin="720" rightMargin="720" topMargin="720" />
+  </PrintOptions>
+  <Database>
+    <TableLinks />
+    <Tables>
+      <Table Name="AtlasHistory" Alias="AtlasHistory" QualifiedName="AtlasHistory">
+        <Fields>
+          <Field Name="Year" ShortName="Year" LongName="AtlasHistory.Year" FormulaForm="{AtlasHistory.Year}" Type="NumberField" />
+          <Field Name="Title" ShortName="Title" LongName="AtlasHistory.Title" FormulaForm="{AtlasHistory.Title}" Type="StringField" />
+          <Field Name="Narrative" ShortName="Narrative" LongName="AtlasHistory.Narrative" FormulaForm="{AtlasHistory.Narrative}" Type="StringField" />
+          <Field Name="Organization" ShortName="Organization" LongName="AtlasHistory.Organization" FormulaForm="{AtlasHistory.Organization}" Type="StringField" />
+          <Field Name="Source" ShortName="Source" LongName="AtlasHistory.Source" FormulaForm="{AtlasHistory.Source}" Type="StringField" />
+        </Fields>
+      </Table>
+    </Tables>
+  </Database>
+  <DataDefinition>
+    <Groups />
+    <RecordSelectionFormula></RecordSelectionFormula>
+    <SortFields>
+      <SortField Field="{AtlasHistory.Year}" SortDirection="AscendingOrder" SortType="RecordSortField" />
+    </SortFields>
+    <SummaryFields />
+    <RunningTotalFieldDefinitions />
+    <FormulaFieldDefinitions />
+    <ParameterFieldDefinitions />
+  </DataDefinition>
+  <ReportDefinition>
+    <Areas>
+      <Area Kind="ReportHeader" Name="ReportHeaderArea1">
+        <AreaFormat EnableKeepTogether="false" EnableNewPageAfter="false" EnableNewPageBefore="false" EnablePrintAtBottomOfPage="false" EnableResetPageNumberAfter="false" EnableSuppress="false" EnableHideForDrillDown="false" />
+        <Sections>
+          <Section Height="4500" Kind="ReportHeader" Name="ReportHeaderSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="true" EnableHideForDrillDown="false" EnableNewPageAfter="false" EnableNewPageBefore="false" EnablePrintAtBottomOfPage="false" EnableResetPageNumberAfter="false" EnableSuppress="false" EnableSuppressIfBlank="false" EnableUnderlaySection="false" ReadOnly="false" RelativePositions="false">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="ffffffff" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <TextObject Name="Series" Kind="Text" Top="0" Left="0" Width="9700" Height="350">
+                <Text>AI ATLAS  /  RESEARCH NOTES  /  HISTORY</Text>
+                <Color Name="ff087f73" A="255" R="8" G="127" B="115" />
+                <Font Bold="true" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Style="Bold" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+              <TextObject Name="Title" Kind="Text" Top="400" Left="0" Width="9700" Height="900">
+                <Text>A brief history of intelligence</Text>
+                <Color Name="ff18201e" A="255" R="24" G="32" B="30" />
+                <Font Bold="true" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="32" SizeinPoints="32" Style="Bold" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+              <TextObject Name="Deck" Kind="Text" Top="1400" Left="0" Width="9700" Height="500">
+                <Text>Seven moments that moved AI from a research question to an everyday interface.</Text>
+                <Color Name="ff525e59" A="255" R="82" G="94" B="89" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="12" SizeinPoints="12" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+              <BoxObject Name="AccentRule" Kind="Box" Top="2040" Left="0" Width="9700" Height="40" DataSource="">
+                <Color Name="ff000000" A="255" R="0" G="0" B="0" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ff087f73" A="255" R="8" G="127" B="115" />
+                </Border>
+              </BoxObject>
+              <TextObject Name="Insight" Kind="Text" Top="2300" Left="0" Width="4000" Height="950">
+                <Text>Learning, scale and interfaces</Text>
+                <Color Name="ff18201e" A="255" R="24" G="32" B="30" />
+                <Font Bold="true" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="18" SizeinPoints="18" Style="Bold" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+              <TextObject Name="Analysis" Kind="Text" Top="3370" Left="0" Width="4000" Height="1000">
+                <Text>Progress did not follow a straight line. New methods, compute and accessible interfaces opened different kinds of possibility.</Text>
+                <Color Name="ff525e59" A="255" R="82" G="94" B="89" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+              <PictureObject Name="OverviewChart" Kind="Picture" Top="2200" Left="4700" Width="5000" Height="2000" DataSource="">
+                <Color Name="ff000000" A="255" R="0" G="0" B="0" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <FlexKitVisual ImageFit="contain">
+                  <Vector Left="0" Top="0" Width="490" Height="232">
+                    <Shape Kind="Text" Points="0 25" Fill="#525e59" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="start" Baseline="alphabetic" Value="1956" />
+                    </Shape>
+                    <Shape Kind="Rectangle" Points="150 14 22.916666666666664 13" Fill="#087f73" Stroke="none" StrokeWidth="0" Winding="false" />
+                    <Shape Kind="Text" Points="485 25" Fill="#18201e" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="end" Baseline="alphabetic" Value="6" />
+                    </Shape>
+                    <Shape Kind="Text" Points="0 57" Fill="#525e59" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="start" Baseline="alphabetic" Value="1997" />
+                    </Shape>
+                    <Shape Kind="Rectangle" Points="150 46 179.51388888888889 13" Fill="#087f73" Stroke="none" StrokeWidth="0" Winding="false" />
+                    <Shape Kind="Text" Points="485 57" Fill="#18201e" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="end" Baseline="alphabetic" Value="47" />
+                    </Shape>
+                    <Shape Kind="Text" Points="0 89" Fill="#525e59" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="start" Baseline="alphabetic" Value="2012" />
+                    </Shape>
+                    <Shape Kind="Rectangle" Points="150 78 236.80555555555557 13" Fill="#087f73" Stroke="none" StrokeWidth="0" Winding="false" />
+                    <Shape Kind="Text" Points="485 89" Fill="#18201e" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="end" Baseline="alphabetic" Value="62" />
+                    </Shape>
+                    <Shape Kind="Text" Points="0 121" Fill="#525e59" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="start" Baseline="alphabetic" Value="2016" />
+                    </Shape>
+                    <Shape Kind="Rectangle" Points="150 110 252.08333333333331 13" Fill="#087f73" Stroke="none" StrokeWidth="0" Winding="false" />
+                    <Shape Kind="Text" Points="485 121" Fill="#18201e" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="end" Baseline="alphabetic" Value="66" />
+                    </Shape>
+                    <Shape Kind="Text" Points="0 153" Fill="#525e59" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="start" Baseline="alphabetic" Value="2017" />
+                    </Shape>
+                    <Shape Kind="Rectangle" Points="150 142 255.90277777777777 13" Fill="#087f73" Stroke="none" StrokeWidth="0" Winding="false" />
+                    <Shape Kind="Text" Points="485 153" Fill="#18201e" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="end" Baseline="alphabetic" Value="67" />
+                    </Shape>
+                    <Shape Kind="Text" Points="0 185" Fill="#525e59" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="start" Baseline="alphabetic" Value="2020" />
+                    </Shape>
+                    <Shape Kind="Rectangle" Points="150 174 267.3611111111111 13" Fill="#087f73" Stroke="none" StrokeWidth="0" Winding="false" />
+                    <Shape Kind="Text" Points="485 185" Fill="#18201e" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="end" Baseline="alphabetic" Value="70" />
+                    </Shape>
+                    <Shape Kind="Text" Points="0 217" Fill="#525e59" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="start" Baseline="alphabetic" Value="2022" />
+                    </Shape>
+                    <Shape Kind="Rectangle" Points="150 206 275 13" Fill="#087f73" Stroke="none" StrokeWidth="0" Winding="false" />
+                    <Shape Kind="Text" Points="485 217" Fill="#18201e" Stroke="none" StrokeWidth="0" Winding="false">
+                      <Text Font="Arial" Size="15" Weight="400" Italic="false" Underline="false" StrikeOut="false" Anchor="end" Baseline="alphabetic" Value="72" />
+                    </Shape>
+                  </Vector>
+                </FlexKitVisual>
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </PictureObject>
+              <TextObject Name="ChartCaption" Kind="Text" Top="4220" Left="4700" Width="5000" Height="270">
+                <Text>Years since 1950; selected milestones</Text>
+                <Color Name="ff65736c" A="255" R="101" G="115" B="108" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="8" SizeinPoints="8" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="PageHeader" Name="PageHeaderArea1">
+        <AreaFormat EnableKeepTogether="false" EnableNewPageAfter="false" EnableNewPageBefore="false" EnablePrintAtBottomOfPage="false" EnableResetPageNumberAfter="false" EnableSuppress="false" EnableHideForDrillDown="false" />
+        <Sections>
+          <Section Height="700" Kind="PageHeader" Name="PageHeaderSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="true" EnableHideForDrillDown="false" EnableNewPageAfter="false" EnableNewPageBefore="false" EnablePrintAtBottomOfPage="false" EnableResetPageNumberAfter="false" EnableSuppress="false" EnableSuppressIfBlank="false" EnableUnderlaySection="false" ReadOnly="false" RelativePositions="false">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="ffffffff" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <TextObject Name="RunningTitle" Kind="Text" Top="40" Left="0" Width="9700" Height="250">
+                <Text>AI ATLAS   /   HISTORY</Text>
+                <Color Name="ff087f73" A="255" R="8" G="127" B="115" />
+                <Font Bold="true" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="8" SizeinPoints="8" Style="Bold" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+              <TextObject Name="YearLabel" Kind="Text" Top="370" Left="0" Width="1080" Height="260">
+                <Text>YEAR</Text>
+                <Color Name="ff525e59" A="255" R="82" G="94" B="89" />
+                <Font Bold="true" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="8" SizeinPoints="8" Style="Bold" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+              <TextObject Name="TitleLabel" Kind="Text" Top="370" Left="1200" Width="3480" Height="260">
+                <Text>TURNING POINT</Text>
+                <Color Name="ff525e59" A="255" R="82" G="94" B="89" />
+                <Font Bold="true" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="8" SizeinPoints="8" Style="Bold" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+              <TextObject Name="OrganizationLabel" Kind="Text" Top="370" Left="4800" Width="2480" Height="260">
+                <Text>ORIGIN</Text>
+                <Color Name="ff525e59" A="255" R="82" G="94" B="89" />
+                <Font Bold="true" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="8" SizeinPoints="8" Style="Bold" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+              <TextObject Name="SourceLabel" Kind="Text" Top="370" Left="7400" Width="2180" Height="260">
+                <Text>SOURCE</Text>
+                <Color Name="ff525e59" A="255" R="82" G="94" B="89" />
+                <Font Bold="true" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="8" SizeinPoints="8" Style="Bold" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="Detail" Name="DetailArea1">
+        <AreaFormat EnableKeepTogether="false" EnableNewPageAfter="false" EnableNewPageBefore="false" EnablePrintAtBottomOfPage="false" EnableResetPageNumberAfter="false" EnableSuppress="false" EnableHideForDrillDown="false" />
+        <Sections>
+          <Section Height="1140" Kind="Detail" Name="DetailSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="true" EnableHideForDrillDown="false" EnableNewPageAfter="false" EnableNewPageBefore="false" EnablePrintAtBottomOfPage="false" EnableResetPageNumberAfter="false" EnableSuppress="false" EnableSuppressIfBlank="false" EnableUnderlaySection="false" ReadOnly="false" RelativePositions="false">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="ffffffff" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <FieldObject Name="YearValue" Kind="Field" Top="80" Left="0" Width="1040" Height="520" DataSource="{AtlasHistory.Year}">
+                <Color Name="ff087f73" A="255" R="8" G="127" B="115" />
+                <Font Bold="true" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="20" SizeinPoints="20" Style="Bold" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </FieldObject>
+              <FieldObject Name="TitleValue" Kind="Field" Top="80" Left="1200" Width="3440" Height="520" DataSource="{AtlasHistory.Title}">
+                <Color Name="ff18201e" A="255" R="24" G="32" B="30" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </FieldObject>
+              <FieldObject Name="OrganizationValue" Kind="Field" Top="80" Left="4800" Width="2440" Height="520" DataSource="{AtlasHistory.Organization}">
+                <Color Name="ff18201e" A="255" R="24" G="32" B="30" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </FieldObject>
+              <FieldObject Name="SourceValue" Kind="Field" Top="80" Left="7400" Width="2140" Height="520" DataSource="{AtlasHistory.Source}">
+                <Color Name="ff18201e" A="255" R="24" G="32" B="30" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </FieldObject>
+              <FieldObject Name="Narrative" Kind="Field" Top="600" Left="1200" Width="8400" Height="500" DataSource="{AtlasHistory.Narrative}">
+                <Color Name="ff65736c" A="255" R="101" G="115" B="108" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </FieldObject>
+              <BoxObject Name="RowRule" Kind="Box" Top="1120" Left="0" Width="9700" Height="8" DataSource="">
+                <Color Name="ff000000" A="255" R="0" G="0" B="0" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffdce4df" A="255" R="220" G="228" B="223" />
+                </Border>
+              </BoxObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="ReportFooter" Name="ReportFooterArea1">
+        <AreaFormat EnableKeepTogether="false" EnableNewPageAfter="false" EnableNewPageBefore="false" EnablePrintAtBottomOfPage="false" EnableResetPageNumberAfter="false" EnableSuppress="false" EnableHideForDrillDown="false" />
+        <Sections>
+          <Section Height="650" Kind="ReportFooter" Name="ReportFooterSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="true" EnableHideForDrillDown="false" EnableNewPageAfter="false" EnableNewPageBefore="false" EnablePrintAtBottomOfPage="false" EnableResetPageNumberAfter="false" EnableSuppress="false" EnableSuppressIfBlank="false" EnableUnderlaySection="false" ReadOnly="false" RelativePositions="false">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="ffffffff" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <TextObject Name="EndNote" Kind="Text" Top="100" Left="0" Width="9700" Height="220">
+                <Text>READING THE REPORT</Text>
+                <Color Name="ff087f73" A="255" R="8" G="127" B="115" />
+                <Font Bold="true" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="8" SizeinPoints="8" Style="Bold" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+              <TextObject Name="Method" Kind="Text" Top="330" Left="0" Width="9700" Height="320">
+                <Text>Historical dates; editorial narrative. Sources and assumptions are included in the AI Atlas data pack.</Text>
+                <Color Name="ff525e59" A="255" R="82" G="94" B="89" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+      <Area Kind="PageFooter" Name="PageFooterArea1">
+        <AreaFormat EnableKeepTogether="false" EnableNewPageAfter="false" EnableNewPageBefore="false" EnablePrintAtBottomOfPage="false" EnableResetPageNumberAfter="false" EnableSuppress="false" EnableHideForDrillDown="false" />
+        <Sections>
+          <Section Height="520" Kind="PageFooter" Name="PageFooterSection1">
+            <SectionFormat CssClass="" EnableKeepTogether="true" EnableHideForDrillDown="false" EnableNewPageAfter="false" EnableNewPageBefore="false" EnablePrintAtBottomOfPage="false" EnableResetPageNumberAfter="false" EnableSuppress="false" EnableSuppressIfBlank="false" EnableUnderlaySection="false" ReadOnly="false" RelativePositions="false">
+              <SectionAreaConditionFormulas />
+              <BackgroundColor Name="ffffffff" A="255" R="255" G="255" B="255" />
+            </SectionFormat>
+            <ReportObjects>
+              <BoxObject Name="FooterRule" Kind="Box" Top="0" Left="0" Width="9700" Height="12" DataSource="">
+                <Color Name="ff000000" A="255" R="0" G="0" B="0" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="10" SizeinPoints="10" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffdce4df" A="255" R="220" G="228" B="223" />
+                </Border>
+              </BoxObject>
+              <TextObject Name="Provenance" Kind="Text" Top="130" Left="0" Width="6500" Height="240">
+                <Text>AI ATLAS  /  HISTORICAL SOURCES</Text>
+                <Color Name="ff65736c" A="255" R="101" G="115" B="108" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="8" SizeinPoints="8" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Default" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </TextObject>
+              <FieldObject Name="Page" Kind="Field" Top="130" Left="9000" Width="700" Height="240" DataSource="PageNumber">
+                <Color Name="ff65736c" A="255" R="101" G="115" B="108" />
+                <Font Bold="false" FontFamily="Arial" Italic="false" Name="Arial" OriginalFontName="Arial" Size="8" SizeinPoints="8" Style="Regular" Underline="false" Unit="Point" />
+                <ObjectFormat EnableCanGrow="false" EnableCloseAtPageBreak="true" EnableKeepTogether="true" EnableSuppress="false" HorizontalAlignment="Right" FlexKitFormatString="" FlexKitLockFormat="false" FlexKitLockSizePosition="false" FlexKitIndentTwips="0" />
+                <ObjectFormatConditionFormulas />
+                <Border TopLineStyle="NoLine" BottomLineStyle="NoLine" LeftLineStyle="NoLine" RightLineStyle="NoLine">
+                  <BorderColor A="255" R="0" G="0" B="0" />
+                  <BackgroundColor Name="ffffffff" A="0" R="255" G="255" B="255" />
+                </Border>
+              </FieldObject>
+            </ReportObjects>
+          </Section>
+        </Sections>
+      </Area>
+    </Areas>
+  </ReportDefinition>
+</Report>

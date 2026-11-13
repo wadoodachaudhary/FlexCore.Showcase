@@ -1,0 +1,113 @@
+@page "/demo/tree/treeview-outline"
+@rendermode InteractiveServer
+@using Fx.ControlKit
+@using Fx.ControlKit.Navigation
+
+<PageTitle>TreeView Outline &amp; Checklist — FlexCore Controls</PageTitle>
+
+<SyncfusionDemoLayout Title="TreeView Outline &amp; Checklist Mode"
+                      Category="Tree"
+                      BadgeText="Navigation"
+                      RazorCode="@_razorSourceCode"
+                      CSharpCode="@_csharpSourceCode"
+                      CSharpTabName="OutlineModel.cs">
+    <Summary>
+        <p>
+            <strong>DisplayMode="TreeViewDisplayMode.Outline"</strong> turns the TreeViewControl into a course-outline or checklist:
+            status circles on groups, a connector line with status dots on items, a secondary type line, a count badge,
+            collapsible groups with a right-hand chevron, a built-in search box and a selected-row highlight.
+        </p>
+        <p>The standard tree API is unchanged: selection, expansion, keyboard navigation, filtering and templates work in both modes.</p>
+    </Summary>
+
+    <DemoControls>
+        <div style="display:flex;gap:12px;align-items:center;font-size:13px;flex-wrap:wrap;">
+            <ButtonControl OnClick="MarkSelectedComplete" Disabled="@(_selected is not { HasChildren: false })">Mark selected complete</ButtonControl>
+            <ButtonControl OnClick="Reset">Reset progress</ButtonControl>
+            <span>Selected: <b>@(_selected?.Text ?? "None")</b></span>
+        </div>
+    </DemoControls>
+
+    <DemoContent>
+        <div style="width:380px;background:#f2f2f4;padding:12px 0;border:1px solid #e2e8f0;border-radius:8px;max-height:560px;overflow:auto;">
+            <TreeViewControl Nodes="@_nodes"
+                             DisplayMode="TreeViewDisplayMode.Outline"
+                             ShowSearchBox="true"
+                             SearchPlaceholder="Search by item title"
+                             SelectedNode="@_selected"
+                             SelectedNodeChanged="n => _selected = n"
+                             AriaLabel="Onboarding checklist" />
+        </div>
+    </DemoContent>
+
+    <DocumentationContent>
+        <h3>Outline mode API</h3>
+        <ul>
+            <li><code>TreeViewControl.DisplayMode</code>: <code>Standard</code> (default) or <code>Outline</code>.</li>
+            <li><code>ShowSearchBox</code>, <code>SearchPlaceholder</code>, <code>SearchText</code> / <code>SearchTextChanged</code>, <code>EmptyFilterText</code>: built-in text filter (works in both modes; <code>FilterText</code> still wins when set).</li>
+            <li><code>TreeNode.Status</code> (<code>None</code>, <code>NotStarted</code>, <code>InProgress</code>, <code>Complete</code>), <code>Caption</code>, <code>SecondaryText</code>, <code>SecondaryIcon</code> (FlexIcons name or SVG path), <code>BadgeText</code>.</li>
+            <li><code>TreeViewData.RollUpStatus(roots, setBadges)</code>: parent status from children plus optional "done/total" badges.</li>
+            <li>Colors come from CSS variables such as <code>--fx-tree-outline-accent</code>, <code>--fx-tree-outline-selected-bg</code>, <code>--fx-tree-outline-line</code> and <code>--fx-tree-outline-inset</code>.</li>
+        </ul>
+    </DocumentationContent>
+</SyncfusionDemoLayout>
+
+@code {
+    private List<TreeNode> _nodes = Build();
+    private TreeNode? _selected;
+
+    private static List<TreeNode> Build()
+    {
+        TreeNode Item(string id, string text, string kind, string icon, int minutes, TreeNodeStatus status) =>
+            new() { Id = id, Text = text, SecondaryText = $"{kind} · {minutes} MIN", SecondaryIcon = icon, Status = status };
+        var nodes = new List<TreeNode>
+        {
+            new() { Id = "g1", Text = "Getting started", IsExpanded = true, Children =
+            [
+                Item("g1a", "Welcome and overview", "Text", "document", 3, TreeNodeStatus.Complete),
+                Item("g1b", "Meet the team", "Video", "video", 5, TreeNodeStatus.Complete),
+                Item("g1c", "Handbook and forms", "Downloads", "download", 2, TreeNodeStatus.NotStarted),
+            ]},
+            new() { Id = "g2", Caption = "Week 1", Text = "Tools and accounts", Children =
+            [
+                Item("g2a", "Set up your workstation", "Text", "document", 10, TreeNodeStatus.NotStarted),
+                Item("g2b", "Systems tour", "Slides", "presentation", 12, TreeNodeStatus.NotStarted),
+                Item("g2c", "Week 1 check", "Quiz", "question", 6, TreeNodeStatus.NotStarted),
+            ]},
+            new() { Id = "g3", Caption = "Week 2", Text = "Working safely", Children =
+            [
+                Item("g3a", "Security basics", "Video", "video", 8, TreeNodeStatus.NotStarted),
+                Item("g3b", "Final check", "Quiz", "question", 10, TreeNodeStatus.NotStarted),
+            ]},
+        };
+        TreeViewData.RollUpStatus(nodes, setBadges: true);
+        return nodes;
+    }
+
+    private void MarkSelectedComplete()
+    {
+        if (_selected is null || _selected.HasChildren) return;
+        _selected.Status = TreeNodeStatus.Complete;
+        TreeViewData.RollUpStatus(_nodes, setBadges: true);
+    }
+
+    private void Reset() { _nodes = Build(); _selected = null; }
+
+    private const string _razorSourceCode = @"<TreeViewControl Nodes=""@_nodes""
+                 DisplayMode=""TreeViewDisplayMode.Outline""
+                 ShowSearchBox=""true""
+                 SearchPlaceholder=""Search by item title""
+                 @bind-SelectedNode=""_selected"" />";
+
+    private const string _csharpSourceCode = @"var nodes = new List<TreeNode>
+{
+    new() { Id = ""g1"", Caption = ""Week 1"", Text = ""Tools and accounts"", IsExpanded = true, Children =
+    [
+        new() { Id = ""a"", Text = ""Set up your workstation"", SecondaryText = ""TEXT · 10 MIN"",
+                SecondaryIcon = ""document"", Status = TreeNodeStatus.Complete },
+        new() { Id = ""b"", Text = ""Week 1 check"", SecondaryText = ""QUIZ · 6 MIN"",
+                SecondaryIcon = ""question"", Status = TreeNodeStatus.NotStarted },
+    ]},
+};
+TreeViewData.RollUpStatus(nodes, setBadges: true); // group status + ""1/2"" badge";
+}

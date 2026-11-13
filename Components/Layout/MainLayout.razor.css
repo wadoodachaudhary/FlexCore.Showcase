@@ -70,7 +70,7 @@
     overflow: visible; /* was overflow-x:auto; that clipped MenuDropDownControl's absolute panel into a horizontal scroll strip */
 }
 
-.nav-menu-item {
+.top-nav-menu ::deep .nav-menu-item {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -84,18 +84,18 @@
     transition: all 0.15s ease;
 }
 
-.nav-menu-item:hover {
+.top-nav-menu ::deep .nav-menu-item:hover {
     color: #0284c7;
     background: #f1f5f9;
 }
 
-.nav-menu-item.active {
+.top-nav-menu ::deep .nav-menu-item.active {
     color: #0284c7;
     background: #e0f2fe;
     font-weight: 600;
 }
 
-.nav-menu-item .bi {
+.top-nav-menu ::deep .nav-menu-item .bi {
     font-size: 14px;
 }
 

@@ -84,6 +84,8 @@ public static class SiteNav
         })),
         new("Reports", "bi-file-earmark-spreadsheet", "demo/reports/package-costs", "Report writer", AtoZ(new NavItem[]
         {
+            new("Report writer (Model Costs)", "demo/reports/model-costs"),
+            new("Crystal Reports bench", "demo/reports/crystal-bench"),
             new("PDF viewer", "demo/pdf-viewer"),                  // own page since 2026-10-19; was a Control tour tab
         })),
         // Only pages that measure something and say how. Tree grid load joins when it times the real load.

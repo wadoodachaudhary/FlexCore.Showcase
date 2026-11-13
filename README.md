@@ -8,6 +8,35 @@ GitHub Repository: **[https://github.com/wadoodachaudhary/FlexCore.Showcase](htt
 
 ---
 
+## AI Atlas Report Studio
+
+Open `/demo/reports/ai-atlas` (also available at `/demo/reports/crystal-bench`).
+The studio includes a searchable report library, file browser, RPT/XML upload,
+native C# RPT conversion, positioned viewer, visual designer and data explorer.
+It requires no Java, IKVM or SAP Crystal runtime.
+
+The bundled [AI Atlas pack](wwwroot/reports/ai-atlas/README.md) contains six
+editable report stories and a read-only SQLite database with 12 related tables.
+Historical sources are linked; model, adoption, infrastructure and economic
+metrics are explicitly illustrative. No proprietary RPT samples are published.
+The app does not create or migrate its database at startup.
+
+Uploaded business reports start in **Layout only** mode until their fields are
+mapped to the sample database. Conversion does not consult validation XML.
+Edits and uploads live in a private temporary workspace; download report XML to
+retain an edited definition. Original bundled reports are never overwritten.
+
+Regression tools in the sibling `JavaToCSharp` workspace:
+
+```sh
+dotnet run --project tools/ReportAtlas.Tests
+node tools/ReportAtlas.Tests/browser.cjs
+```
+
+The browser check targets a locally running Showcase on port 5088. The seed
+tool and sample-pack README document how to rebuild the public database and
+report definitions offline.
+
 ## Quick Start for Developers
 
 For complete instructions on cloning, developing locally, running regression tests, connecting to Azure, and deploying updates to [https://flexcoreui.com](https://flexcoreui.com), read the complete guide:

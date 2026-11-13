@@ -21,8 +21,10 @@ builder.Services.AddScoped<BenchDataStore>();
 // Sign-up / question form (2026-10-13): JSON-lines file store; "Signups:Path" overrides the location. Email delivery not wired yet (SC-274).
 builder.Services.Configure<FlexCore.Showcase.Services.Signups.SignupOptions>(builder.Configuration.GetSection("Signups"));
 builder.Services.AddSingleton<FlexCore.Showcase.Services.Signups.ISignupStore, FlexCore.Showcase.Services.Signups.FileSignupStore>();
+builder.Services.AddSingleton<AtlasDatabase>();
+builder.Services.AddScoped<AtlasRunContext>();
 
-// Report pipeline — stub services that synthesize demo data instead of hitting a DB.
+// AI Atlas uses read-only SQLite; the legacy Model Costs demo retains its fixture.
 builder.Services.AddSingleton(new ReportOptions
 {
     SchemaPrefix = "",                                       // showcase XML doesn't use a schema
