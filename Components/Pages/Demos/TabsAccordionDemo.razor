@@ -5,7 +5,7 @@
    Navigation/TabItem.razor, TabStripControl.razor, TabStripModels.cs, AccordionControl.razor, AccordionItemControl.razor and their stylesheets
    (FlexCore 0.2.48). The accordion moved here from UI elements. *@
 
-@* 2026-10-26 (Baaria, review comment: "more like tabs, with an outline and an x to close, in FlexCore style"): both tab examples sit
+@* 2026-10-26 (review comment: "more like tabs, with an outline and an x to close, in FlexCore style"): both tab examples sit
    in a .folder-tabs wrapper whose page CSS draws outlined folder tabs (grey resting tabs, a white active tab joined to its pane by a
    blue top edge); the CSS tab shows it. TabControl has no close button, so the closable tabs are the tab strip's, now laid out like
    a document workspace: a pinned Home tab and closable documents. Sample data moved from a kitchen estimate to the site's travel
@@ -16,7 +16,7 @@
    document tabs example switches theme with a button group and orientation with the strip's own menu, and the doc tables carry
    the new members (checked against TabStripControl.razor, TabStripModels.cs, TabStripControl.razor.css, Navigation/TabControl.razor). *@
 
-@* 2026-10-29 (Baaria): the tab control example takes the site's tab style (the top menu's look, as on every code tab and the chart
+@* 2026-10-29: the tab control example takes the site's tab style (the top menu's look, as on every code tab and the chart
    gallery): Minimal theme, one Horizontal row and the site-tabs class from app.css, whose rules the CSS tab prints through
    AppSource.Region. The document tabs keep the library themes, since their buttons switch them and site-tabs would override all five. *@
 

@@ -5,17 +5,17 @@
 @inject TripRequestStore Store
 @inject GetawaysAppSettings Settings
 
-@* 2026-10-28 (Baaria): the agency's pages are named in its own voice (Razor Sharp Trip Requests) and the window title is the
-   agency's name. 2026-10-29 (Baaria): the Sales (charts) and Front Desk (ribbon) pages were removed; the Dashboard carries a chart. *@
+@* 2026-10-28: the agency's pages are named in its own voice (Razor Sharp Trip Requests) and the window title is the
+   agency's name. 2026-10-29: the Sales (charts) and Front Desk (ribbon) pages were removed; the Dashboard carries a chart. *@
 
-@* 2026-10-25 (Baaria, SC-344): the hero grid is a travel agency's quote desk, Inbox — Trip Requests. It replaced an example whose
+@* 2026-10-25 (SC-344): the hero grid is a travel agency's quote desk, Inbox — Trip Requests. It replaced an example whose
    banner text, columns and names came from an earlier custom-quote inbox. Same grid features as before (1,000 windowed rows, frozen
    key column, in-cell DropDownGridControl lookup, fast-typing money cell, SVG sparkline, badges, popup editor); two buttons that only
    raised a notification now do their job: Export to Excel calls the grid's ExportToXlsxAsync, New Request opens the editor on a blank
    request and adds it on Save. The "grid" string in the code tab is the GridControl block below, copied verbatim (scratchpad
    home_inbox.py regenerates it). *@
 
-@* 2026-10-25 (Baaria: "not very interactive"): the dropdown, Edit button and header sort all worked, but on the live site each
+@* 2026-10-25 ("not very interactive"): the dropdown, Edit button and header sort all worked, but on the live site each
    answered in 0.4 to 1.6 s with no sign of life, and a second click undid the first (closed the list, flipped the sort). The grid
    rendered about 144 rows (8 columns, so the default 60-row overscan per side), each with its own DropDownGridControl; WindowOverscanRows
    is now 15, about 42 rows. Trip type, Fare trend and Itinerary had no Field, so their headers could not sort; they now sort by
@@ -28,10 +28,10 @@
 <div class="landing-container">
     @* 1. Hero *@
     <div class="top-hero-compact">
-        @* 2026-10-28 (Baaria): hero rewritten. Each claim is checked: 100,000 rows on /demo/grid/row-selection-50k, Crystal import
+        @* 2026-10-28: hero rewritten. Each claim is checked: 100,000 rows on /demo/grid/row-selection-50k, Crystal import
            via CrystalXmlReportLoader (XML exports), 137 standalone controls counted in the launch audit, both packages MIT.
            The pill cycles grids, charts, reports in CSS (Home.razor.css, "word pill"); screen readers get the plain sentence.
-           Headline chosen by Baaria 2026-10-28 from the toolbox ideas. *@
+           Headline chosen 2026-10-28 from the toolbox ideas. *@
         <h1 class="hero-oneliner">
             <span class="visually-hidden">The Blazor toolbox that does grids, charts and reports right.</span>
             <span aria-hidden="true">The Blazor toolbox <br class="hero-br-lg" />that does <br class="hero-br-sm" /><span class="text-nowrap"><span class="word-pill"><span class="word-pill-mark"></span><span class="word-pill-words"><span>grids</span><span>charts</span><span>reports</span></span></span> right.</span></span>
@@ -50,8 +50,8 @@
     </div>
 
 
-    @* 2. The app window (2026-10-29, Baaria, after the app demo on blazor.radzen.com): Razor Sharp Getaways as a working app. Since
-       2026-11-04 (Baaria) the window is also the Quick Start project, quickstart/RazorSharpGetaways: its pages, window parts, data
+    @* 2. The app window (2026-10-29, after the app demo on blazor.radzen.com): Razor Sharp Getaways as a working app. Since
+       2026-11-04 the window is also the Quick Start project, quickstart/RazorSharpGetaways: its pages, window parts, data
        and stylesheet are that project's files, compiled into this site from there (FlexCore.Showcase.csproj), so the download and the
        demo cannot drift. This file keeps only what is the site's: the frame, the Example | Razor | C# tabs over the window, and the
        feature strip above the grid. Pages are switched here, not routed; ?tab= names one (the old keys grid, bookings and reports
@@ -86,7 +86,7 @@
                     <GetawaysAppBar Title="@CurrentPage.Title" OnMenuClick="ToggleMenu" OnOpenRequest="OpenRequest" OnShowNewRequests="@(() => ShowRequests("New requests"))" />
 
                     <div class="gw-page">
-                        @* 2026-10-24 (Baaria): the Razor code is a tab over the example, not a drawer under it. The live page stays
+                        @* 2026-10-24: the Razor code is a tab over the example, not a drawer under it. The live page stays
                            mounted while hidden, so the grid keeps its state when the reader switches back. *@
                         @if (_codeTab > 0)
                         {
@@ -162,10 +162,10 @@
     </section>
 
 
-    @* Four-colour divider between home sections (2026-10-29, Baaria), the bar that sits under each page title *@
+    @* Four-colour divider between home sections (2026-10-29), the bar that sits under each page title *@
     <div class="section-divider" aria-hidden="true"></div>
 
-    @* ── 3. The four big workhorses (2026-10-28, Baaria). They replace the six small workhorse cards on this page, and since
+    @* ── 3. The four big workhorses (2026-10-28). They replace the six small workhorse cards on this page, and since
        2026-11-13 the components page shows them too: the cards are WorkhorseCards.razor, shared by both. Every line is checked: 100,000 rows (/demo/grid/row-selection-50k); 43 values in ChartType;
        CrystalXmlReportLoader, DrillDownFilter and ReportDesignerCanvasControl in FlexCore/Reports; SchedulerView has Day, Week, Month,
        Timeline and Agenda, and Gantt is its own control. The pictures are plain SVG, decoration only, in the logo's four colours.
@@ -203,15 +203,15 @@
     </section>
 
     @* ── 4. The component directory ── *@
-    @* Four-colour divider between home sections (2026-10-29, Baaria), the bar that sits under each page title *@
+    @* Four-colour divider between home sections (2026-10-29), the bar that sits under each page title *@
     <div class="section-divider" aria-hidden="true"></div>
     <ComponentCatalogDirectory ShowWorkhorses="false" />
 
 
-    @* 5. Pillars, on the page's one coloured band (2026-10-28, Baaria, after the stats bar and blue band on telerik.com): a green
+    @* 5. Pillars, on the page's one coloured band (2026-10-28, after the stats bar and blue band on telerik.com): a green
        strip of numbers straddles the top of a full-width indigo band, both colours from the logo. The numbers are checked: 137
        standalone controls (launch audit), 42 ChartType values and 100,000 rows on /demo/grid/row-selection-50k. Three since
-       2026-10-29: Baaria dropped the fourth (first "0 npm packages", then "MIT licensed on NuGet"). *@
+       2026-10-29: the fourth was dropped (first "0 npm packages", then "MIT licensed on NuGet"). *@
     <div class="stats-strip">
         <div class="stat"><span class="stat-num">130+</span><span class="stat-label">Blazor controls</span></div>
         <div class="stat"><span class="stat-num">35+</span><span class="stat-label">chart types</span></div>
@@ -253,7 +253,7 @@
             </p>
         </div>
 
-        @* 2026-11-04 (Baaria): card text rewritten to say what each one saves a team. Each line checks out: 100,000 rows on
+        @* 2026-11-04: card text rewritten to say what each one saves a team. Each line checks out: 100,000 rows on
            /demo/grid/row-selection-50k; MdiHost, GridTheme.Vb6Windows, TreeViewControl.UseVb6TreeStyle and CrystalXmlReportLoader, with no
            Crystal package in FlexCore.csproj; AggregateRows and ExportToXlsxAsync; IReportDataExecutor, IReportSessionContext, IGridSettingsStore. *@
         <div class="pillars-grid">
@@ -399,7 +399,7 @@
         </div>
     </section>
 
-    @* Four-colour divider between home sections (2026-10-29, Baaria), the bar that sits under each page title *@
+    @* Four-colour divider between home sections (2026-10-29), the bar that sits under each page title *@
     <div class="section-divider" aria-hidden="true"></div>
 
     @* 7. Call to action *@
@@ -525,7 +525,7 @@
         Notifications.Info("New itinerary entry", "Double-click an empty slot on the itinerary to add an entry.");
     }
 
-    // Example | Razor | C# over the app window (2026-10-29, Baaria): the open code tab carries an X that goes back to Example
+    // Example | Razor | C# over the app window (2026-10-29): the open code tab carries an X that goes back to Example
     private int _codeTab;
     private readonly List<TabStripItem> _viewTabs = [new("Example", "bi bi-window"), new("Razor", "bi bi-code-slash"), new("C#", "bi bi-filetype-cs")];
     private void SetCodeTab(int index)

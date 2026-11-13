@@ -27,7 +27,7 @@
         </div>
         <h2 class="popular-title">Start with the workhorses</h2>
     </div>
-    @* The same four cards as the home page (2026-11-13, Baaria); they replaced six small tiles (Data Grid, Charts, Scheduler, Dialogs,
+    @* The same four cards as the home page (2026-11-13); they replaced six small tiles (Data Grid, Charts, Scheduler, Dialogs,
        Report Writer, Forms). *@
     <WorkhorseCards />
 </section>
@@ -37,7 +37,7 @@
 <section class="catalog-directory-section" id="components">
     <div class="directory-header">
         <div class="doodle-head directory-head-row" @ref="_toolboxHead">
-            @* Hand-drawn toolbox in place of the 🛠️ emoji (2026-10-28, Baaria), drawn like the finish flag on the home page and placed left of the heading. Each
+            @* Hand-drawn toolbox in place of the 🛠️ emoji (2026-10-28), drawn like the finish flag on the home page and placed left of the heading. Each
                time the heading scrolls into view the lid flips open, a wrench, a screwdriver and a hammer pop out and wiggle, and
                everything packs away again: fxToggleClassWhenVisible (App.razor) adds is-playing and the CSS does the rest. The tools
                are drawn first so the box and lid cover them at rest. *@
@@ -287,22 +287,22 @@
         await JS.InvokeVoidAsync("fxToggleClassWhenVisible", _toolboxHead, "is-playing");
     }
 
-    // Tier orders a category (Baaria, 2026-10-26): 1 is the category's lead control (Data Grid always first), 2 the core controls,
+    // Tier orders a category (2026-10-26): 1 is the category's lead control (Data Grid always first), 2 the core controls,
     // 3 the specialist ones; within a tier, A to Z. FilterItems applies it, so the arrays may be written in any order.
     record DirectoryItem(string Icon, string Name, string Href, int Tier = 2);
 
     // Href rule (developer meeting, 2026-10-19): a control with its own page links to the page; a control that is one
     // example on a shared page links to that example's anchor (the DemoExample Id). Rows whose control has no demo
-    // yet keep their old target (Baaria, 2026-10-20).
+    // yet keep their old target (2026-10-20).
 
     private readonly DirectoryItem[] _dataManagement =
     [
-        // 2026-10-25 (Baaria, catalog audit SC-345): Picklist Dropdown (no such control) and Speed Dial (a second FAB row) removed; icons
+        // 2026-10-25 (catalog audit SC-345): Picklist Dropdown (no such control) and Speed Dial (a second FAB row) removed; icons
         // now fit their rows; Report Parameter Dialog lands on the report, whose toolbar Parameters button opens the dialog.
         // SC-347: TextBox, Numeric TextBox and TextArea point at Text inputs; DropDownList, DropDownGrid and ListBox at Lists & dropdowns;
         // Rich Text Editor and Format at the editor page; Diagram, Scheduler and Property Grid (Forms) at their new examples; Grid Layout,
         // Progress Bar and Carousel at the third examples on Page layouts, UI elements and Cards.
-        // 2026-10-26 (Baaria, SC-350): one row per component, named the way Syncfusion, Telerik, MudBlazor and Radzen name theirs. Grid
+        // 2026-10-26 (SC-350): one row per component, named the way Syncfusion, Telerik, MudBlazor and Radzen name theirs. Grid
         // features (live updates, batch editing, frozen columns, virtualization, master-detail, reordering…), sub-parts (report parameter
         // dialog, format control, card group, form item and group, LLM result card) and variants (pill buttons, the Financial & gauges
         // page) left the directory; none of the four lists those as components, and every one of those pages stays in the top menu. The
