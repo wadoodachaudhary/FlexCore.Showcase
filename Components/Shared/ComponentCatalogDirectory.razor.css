@@ -3,6 +3,10 @@
     margin: 56px 0 56px;
 }
 
+/* the divider between the workhorses and the full list, the same bar as the home page's (Home.razor.css .section-divider) */
+.section-divider { width: 128px; height: 8px; margin: 0 auto; border-radius: 4px; background: var(--brand-stripe); }
+.section-divider + .catalog-directory-section { margin-top: 56px; }
+
 /* 2026-10-28: same heading scale as the home page sections (Home.razor.css .section-title), centred like them since 2026-10-29. */
 .popular-title {
     text-align: center;

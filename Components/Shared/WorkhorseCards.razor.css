@@ -113,22 +113,27 @@
     .workhorse-art { height: 140px; }
 }
 
-/* Compact: the components page shows the four cards smaller and in one row; two by two on tablets, one column on phones */
+/* Compact: the components page shows the four cards smaller and in one row (two by two on tablets and phones). Each card
+   is mostly its drawing, with a slim white strip under it holding the icon, the name and one short line; the whole card is the link. */
 .workhorse-grid.compact { grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .compact .workhorse-card { border-radius: 12px; }
-.compact .workhorse-art { height: 92px; padding: 10px; }
-.compact .workhorse-body { gap: 8px; padding: 14px 16px 16px; }
-.compact .workhorse-name { gap: 8px; font-size: 17px; }
-.compact .workhorse-tile { width: 30px; height: 30px; border-radius: 8px; font-size: 15px; }
-.compact .workhorse-desc { font-size: 13.5px; line-height: 1.45; }
-.compact .workhorse-chips { gap: 4px; }
-.compact .workhorse-chips li { font-size: 11px; padding: 3px 8px; }
-.compact .workhorse-link { font-size: 13.5px; }
+.compact .workhorse-art { height: 150px; padding: 14px; }
+.compact .workhorse-body { flex: none; padding: 10px 14px; border-top: 1px solid #e2e8f0; }
+.compact .workhorse-name { justify-content: center; gap: 10px; font-size: 15.5px; }
+.compact .workhorse-body { gap: 4px; }
+.workhorse-line { margin: 0; font-size: 12.5px; line-height: 1.4; color: #64748b; text-align: center; text-wrap: balance; }
+.workhorse-line .nb { white-space: nowrap; }   /* keep "in-cell" and "drill-down" whole when the line wraps on phones */
+.compact .workhorse-tile { width: 28px; height: 28px; border-radius: 8px; font-size: 14px; }
 
 @media (max-width: 1100px) {
     .workhorse-grid.compact { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 560px) {
-    .workhorse-grid.compact { grid-template-columns: 1fr; }
+    .workhorse-grid.compact { gap: 10px; }
+    .compact .workhorse-art { height: 96px; padding: 10px; }
+    .compact .workhorse-body { padding: 8px 10px; }
+    .compact .workhorse-name { gap: 8px; font-size: 14px; }
+    .compact .workhorse-tile { width: 24px; height: 24px; font-size: 12px; }
+    .workhorse-line { font-size: 11.5px; }
 }

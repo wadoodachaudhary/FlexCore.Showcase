@@ -22,11 +22,18 @@
         </div>
         <div class="workhorse-body">
             <h3 class="workhorse-name"><span class="workhorse-tile blue"><span class="bi bi-table"></span></span> Data Grid</h3>
-            <p class="workhorse-desc">Scroll 100,000 rows, type straight into cells, then export the lot to Excel.</p>
-            <ul class="workhorse-chips">
-                <li>Virtual scrolling</li><li>Frozen columns</li><li>Tree grid</li><li>Excel export</li>
-            </ul>
-            <span class="workhorse-link">Explore the grid &rarr;</span>
+            @if (Compact)
+            {
+                <p class="workhorse-line">100,000 rows, <span class="nb">in-cell</span> editing, Excel export</p>
+            }
+            else
+            {
+                <p class="workhorse-desc">Scroll 100,000 rows, type straight into cells, then export the lot to Excel.</p>
+                <ul class="workhorse-chips">
+                    <li>Virtual scrolling</li><li>Frozen columns</li><li>Tree grid</li><li>Excel export</li>
+                </ul>
+                <span class="workhorse-link">Explore the grid &rarr;</span>
+            }
         </div>
     </a>
 
@@ -44,11 +51,18 @@
         </div>
         <div class="workhorse-body">
             <h3 class="workhorse-name"><span class="workhorse-tile indigo"><span class="bi bi-pie-chart-fill"></span></span> Charts</h3>
-            <p class="workhorse-desc">35+ chart types drawn in SVG from C#, from sparklines and gauges to Sankey diagrams.</p>
-            <ul class="workhorse-chips">
-                <li>Bar &amp; line</li><li>Pie &amp; donut</li><li>Gauges</li><li>Financial</li>
-            </ul>
-            <span class="workhorse-link">Explore the charts &rarr;</span>
+            @if (Compact)
+            {
+                <p class="workhorse-line">35+ chart types, drawn in SVG from C#</p>
+            }
+            else
+            {
+                <p class="workhorse-desc">35+ chart types drawn in SVG from C#, from sparklines and gauges to Sankey diagrams.</p>
+                <ul class="workhorse-chips">
+                    <li>Bar &amp; line</li><li>Pie &amp; donut</li><li>Gauges</li><li>Financial</li>
+                </ul>
+                <span class="workhorse-link">Explore the charts &rarr;</span>
+            }
         </div>
     </a>
 
@@ -68,11 +82,18 @@
         </div>
         <div class="workhorse-body">
             <h3 class="workhorse-name"><span class="workhorse-tile green"><span class="bi bi-file-earmark-richtext"></span></span> Reports</h3>
-            <p class="workhorse-desc">Bring your Crystal Reports across and run them in the browser, with parameters and drill-down.</p>
-            <ul class="workhorse-chips">
-                <li>Crystal import</li><li>Parameters</li><li>Drill-down</li><li>Report designer</li>
-            </ul>
-            <span class="workhorse-link">Explore the reports &rarr;</span>
+            @if (Compact)
+            {
+                <p class="workhorse-line">Parameters, <span class="nb">drill-down</span> and a report designer</p>
+            }
+            else
+            {
+                <p class="workhorse-desc">Bring your Crystal Reports across and run them in the browser, with parameters and drill-down.</p>
+                <ul class="workhorse-chips">
+                    <li>Crystal import</li><li>Parameters</li><li>Drill-down</li><li>Report designer</li>
+                </ul>
+                <span class="workhorse-link">Explore the reports &rarr;</span>
+            }
         </div>
     </a>
 
@@ -93,16 +114,24 @@
         </div>
         <div class="workhorse-body">
             <h3 class="workhorse-name"><span class="workhorse-tile sky"><span class="bi bi-calendar-week"></span></span> Scheduler</h3>
-            <p class="workhorse-desc">Day, week, month, timeline and agenda views, plus a Gantt chart for the long jobs.</p>
-            <ul class="workhorse-chips">
-                <li>Day &amp; week</li><li>Month</li><li>Timeline</li><li>Gantt</li>
-            </ul>
-            <span class="workhorse-link">Explore the scheduler &rarr;</span>
+            @if (Compact)
+            {
+                <p class="workhorse-line">Day, week, month, timeline and agenda views</p>
+            }
+            else
+            {
+                <p class="workhorse-desc">Day, week, month, timeline and agenda views, plus a Gantt chart for the long jobs.</p>
+                <ul class="workhorse-chips">
+                    <li>Day &amp; week</li><li>Month</li><li>Timeline</li><li>Gantt</li>
+                </ul>
+                <span class="workhorse-link">Explore the scheduler &rarr;</span>
+            }
         </div>
     </a>
 </div>
 
 @code {
-    /// <summary>Four smaller cards in one row (the components page) instead of the big two-by-two (the home page).</summary>
+    /// <summary>Four smaller cards in one row (the components page) instead of the big two-by-two (the home page): mostly the drawing,
+    /// with a slim white strip under it holding the icon, the name and one short line; no description, tags or "Explore" link.</summary>
     [Parameter] public bool Compact { get; set; }
 }
