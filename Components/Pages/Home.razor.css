@@ -33,7 +33,7 @@
     margin: 20px auto 0;
 }
 
-/* Hero calls to action: solid brand blue (the top bar's Quick Start colour) and a light tint, like notion.com's pair. */
+/* Hero calls to action: solid brand blue (the top bar's Quick Start color) and a light tint, like notion.com's pair. */
 .hero-actions {
     display: flex;
     justify-content: center;
@@ -62,7 +62,7 @@
 .hero-btn-secondary:hover { background: var(--brand-button-soft-hover); }
 
 /* Word pill (2026-10-28, after notion.com): "The Blazor toolbox that does [grids] right." The three words share one grid cell and
-   take turns, 3 s each; the pill and its square take the logo's colours (grids blue, charts indigo, reports green)
+   take turns, 3 s each; the pill and its square take the logo's colors (grids blue, charts indigo, reports green)
    and its width follows the word, so the widths below are the words' widths in Inter 700 at -0.045em. */
 .word-pill {
     display: inline-flex;
@@ -466,9 +466,9 @@
 }
 
 /* ── 3. The four big workhorses (2026-10-28) ──
-   A normal section heading with a hand-drawn chequered flag on the right (Notion-style ink doodle, inline SVG in Home.razor), then
+   A normal section heading with a hand-drawn checkered flag on the right (Notion-style ink doodle, inline SVG in Home.razor), then
    a 2 x 2 grid of cards (one column on phones), each a link with an SVG picture on a tinted panel above its text. The four tints
-   are the logo's four colours. */
+   are the logo's four colors. */
 .workhorses-section {
     margin: 64px 0 72px;
 }
@@ -569,7 +569,7 @@
     margin-bottom: 64px;
 }
 
-/* The page's one coloured band (2026-10-28, after telerik.com): full width indigo from the logo, drawn with the box-shadow trick
+/* The page's one colored band (2026-10-28, after telerik.com): full width indigo from the logo, drawn with the box-shadow trick
    (the shadow fills the viewport sideways, clip-path trims it to the band's height), so nothing overflows the page. The green strip
    of numbers sits just before it in the markup and pulls its lower half down over the band's top edge. */
 .brand-band {
@@ -620,7 +620,7 @@
     font-weight: 600;
 }
 
-/* 2026-10-28: section heads are large, without the small uppercase label above them (after notion.com); centred since 2026-10-29.
+/* 2026-10-28: section heads are large, without the small uppercase label above them (after notion.com); centered since 2026-10-29.
    The same scale is used by .popular-title, .directory-title and the call to action. */
 .section-header {
     text-align: center;
@@ -746,7 +746,7 @@
 }
 
 /* ── 7. Bottom Call To Action Banner ── */
-/* Divider between home sections (2026-10-29): the four logo colours as a short bar, like the one under each page title. The
+/* Divider between home sections (2026-10-29): the four logo colors as a short bar, like the one under each page title. The
    sections around it give the space; the toolbox and the call to action get a matching top margin. */
 .section-divider { width: 128px; height: 8px; margin: 0 auto; border-radius: 4px; background: var(--brand-stripe); }
 .landing-container ::deep .catalog-directory-section { margin-top: 72px; }
@@ -771,7 +771,7 @@
     color: #ffffff;
 }
 
-/* The banner is centred, so its rocket and heading are centred as a pair (stacked and centred on phones). */
+/* The banner is centered, so its rocket and heading are centered as a pair (stacked and centered on phones). */
 .cta-banner .doodle-head { justify-content: center; align-items: center; margin-bottom: 14px; }
 
 /* Rocket: rumble with the flame flaring, lift off with speed lines and smoke, hover, settle back. The flame scales from the nozzle. */

@@ -15,7 +15,7 @@ namespace FlexCore.Showcase.Seo;
 /// </summary>
 public static partial class PageDocs
 {
-    // Declared first: static initialisers run in order, and Twins reads it.
+    // Declared first: static initializers run in order, and Twins reads it.
     /// <summary>Routed page types by base-relative path, including alias routes.</summary>
     public static IReadOnlyDictionary<string, Type> PageTypes { get; } = typeof(PageDocs).Assembly.GetTypes()
         .SelectMany(t => t.GetCustomAttributes<RouteAttribute>().Select(r => (Path: SiteMeta.Normalize(r.Template), Type: t)))

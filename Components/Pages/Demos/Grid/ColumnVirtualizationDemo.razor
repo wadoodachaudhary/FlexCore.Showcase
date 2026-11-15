@@ -10,11 +10,11 @@
 <PageTitle>Column Virtualization in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Wide grids" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Twenty-one columns and a thousand rows: pinned edges, and only the columns in view kept in the page."
+                   Tagline="Give users wide tables to scroll through while only the columns in view are rendered."
                    SourcePath="Grid/GridControl.ColumnVirtualization.cs;Grid/GridEnums.cs;Grid/GridControl.razor.cs">
     <Overview>
         <p>
-            <code>EnableColumnVirtualization</code> keeps only the columns in view, plus <code>ColumnVirtualizationOverscan</code> on each side, in the page; the rest become fixed-width spacers so scrolling stays accurate. Frozen columns stay mounted, and <code>ColumnVirtualizationStatus</code> reports whether the Blazor grid is virtualizing or has fallen back.
+            Column virtualization lets a Blazor <code>GridControl</code> show a table far wider than the screen, such as monthly figures, rendering only the columns in view. Turn on <code>EnableColumnVirtualization</code> and the off-screen columns become fixed-width spacers, so column positions and the scroll bar stay right while frozen columns stay mounted. <code>ColumnVirtualizationStatus</code> tells you when a layout makes the grid fall back to rendering every column.
         </p>
     </Overview>
 
@@ -269,7 +269,7 @@ public sealed class WideGridRow
             new("data-fx-column-virtualization", "On the grid's root element: <code>disabled</code>, <code>active</code> or <code>fallback</code>."),
             new("data-fx-column-virtualization-fallback", "On the root element: the fallback reason, empty otherwise."),
             new("fx-column-window-spacer-col / fx-column-window-spacer", "The <code>&lt;col&gt;</code> and the header, filter, body and aggregate cells that stand in for the omitted columns' width."),
-            new("fx-grid-column-virtualization-fallback", "The fallback note: one grey 9px line with <code>role=\"status\"</code> and the reason in its tooltip."),
+            new("fx-grid-column-virtualization-fallback", "The fallback note: one gray 9px line with <code>role=\"status\"</code> and the reason in its tooltip."),
         };
     }
 }

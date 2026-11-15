@@ -12,11 +12,11 @@
 <PageTitle>Unsaved-Row Lock in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Unsaved-row lock" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Veto the move to another row while the current one has unsaved changes."
+                   Tagline="Stop users leaving a row with unsaved changes until they save it."
                    SourcePath="Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/SelectionSettings.cs;Grid/GridControl.razor.cs;Grid/GridControl.KeyboardSelection.cs">
     <Overview>
         <p>
-            <code>RowSelecting</code> fires before the selection moves in the Blazor <code>GridControl</code>; set <code>Cancel</code> on its <code>RowSelectEventArgs</code> and the move is refused, whether it came from a click or the keyboard. This page locks a row from the moment <code>OnCellSave</code> writes a value until Save is pressed.
+            <code>RowSelecting</code> lets a Blazor <code>GridControl</code> refuse to move the selection, so users cannot leave a row they have edited but not saved. Use it on order or booking screens where each row is saved on its own: set <code>Cancel</code> on the event's <code>RowSelectEventArgs</code> and a click or arrow key that would move away is refused. This page marks a row as changed when <code>OnCellSave</code> writes a value and unlocks it on Save.
         </p>
     </Overview>
 
@@ -137,7 +137,7 @@
             new BookingLine { Code = "30", Description = "Sintra day tour, small group", Qty = 2, Price = 89.00m, Notes = "Vegetarian lunch for one" },
             new BookingLine { Code = "40", Description = "Fado dinner show", Qty = 2, Price = 75.00m, Notes = "Table near the stage" },
             new BookingLine { Code = "50", Description = "Lisbon to Porto train, first class", Qty = 2, Price = 48.50m, Notes = "Window seats requested" },
-            new BookingLine { Code = "60", Description = "Travel insurance, per traveller", Qty = 2, Price = 39.00m, Notes = "Policy sent with the itinerary" }
+            new BookingLine { Code = "60", Description = "Travel insurance, per traveler", Qty = 2, Price = 39.00m, Notes = "Policy sent with the itinerary" }
         ];
 
         _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<BookingLine>>(this, args =>
@@ -232,7 +232,7 @@ protected override void OnInitialized()
         new BookingLine { Code = ""30"", Description = ""Sintra day tour, small group"", Qty = 2, Price = 89.00m, Notes = ""Vegetarian lunch for one"" },
         new BookingLine { Code = ""40"", Description = ""Fado dinner show"", Qty = 2, Price = 75.00m, Notes = ""Table near the stage"" },
         new BookingLine { Code = ""50"", Description = ""Lisbon to Porto train, first class"", Qty = 2, Price = 48.50m, Notes = ""Window seats requested"" },
-        new BookingLine { Code = ""60"", Description = ""Travel insurance, per traveller"", Qty = 2, Price = 39.00m, Notes = ""Policy sent with the itinerary"" }
+        new BookingLine { Code = ""60"", Description = ""Travel insurance, per traveler"", Qty = 2, Price = 39.00m, Notes = ""Policy sent with the itinerary"" }
     ];
 
     _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<BookingLine>>(this, args =>
@@ -301,7 +301,7 @@ private void Save()
         public static readonly ApiRow[] Methods =
         {
             new("EndEditAsync()", "Commits the open batch editor through the same path as Enter, raising <code>OnCellSave</code>; a pending type-ahead is committed and an open row editor saved the same way. Returns without saving when the value fails validation.", "Task"),
-            new("BeginEditCellAsync(TValue row, string field)", "Pages to the row, selects the cell (through <code>RowSelecting</code> and <code>RowSelected</code>) and opens its batch editor as a click would, after <code>OnCellEdit</code>. Does nothing when that is cancelled, the column is not editable or edit mode is not <code>Batch</code>; a checkbox cell is selected but not toggled.", "Task"),
+            new("BeginEditCellAsync(TValue row, string field)", "Pages to the row, selects the cell (through <code>RowSelecting</code> and <code>RowSelected</code>) and opens its batch editor as a click would, after <code>OnCellEdit</code>. Does nothing when that is canceled, the column is not editable or edit mode is not <code>Batch</code>; a checkbox cell is selected but not toggled.", "Task"),
         };
     }
 }

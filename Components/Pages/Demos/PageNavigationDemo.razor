@@ -16,11 +16,11 @@
 <PageTitle>Keyboard Navigation for Blazor Forms: PageControl — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Page navigation" Category="Components" CategoryHref="components" ControlName="PageControl"
-                   Tagline="A page region the keyboard can work through: named focus nodes, Tab order across controls and grids, and shortcuts."
+                   Tagline="Let users work through a form from the keyboard, as in a desktop app."
                    SourcePath="PageControl.razor;PageNavigationMap.cs;Grid/GridControl.razor.cs">
     <Overview>
         <p>
-            <code>PageControl</code> gives a Blazor page keyboard navigation like a desktop form: a graph of named focus nodes, Tab order across inputs and grids, wrap-around and Alt-key shortcuts, with the first field focused on load.
+            <code>PageControl</code> gives a Blazor page desktop-style keyboard navigation: Tab follows the order you define across inputs and grids, and Alt-key shortcuts jump between regions. Use it on data-entry screens such as a supplier record, so users keep their hands on the keyboard; the order is a graph of named focus nodes that can wrap at the ends, and <code>FocusFirstNodeOnLoad</code> puts the cursor in the first field when the page opens.
         </p>
     </Overview>
 

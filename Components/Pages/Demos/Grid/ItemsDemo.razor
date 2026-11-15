@@ -16,11 +16,11 @@
 <PageTitle>Grouping and Aggregates in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Grouping &amp; totals" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Group rows by a column, with averages, counts and sums in the group captions, group footers and the grid footer, on a tour operator's rate card and the cost lines of one of its packages."
+                   Tagline="Group rows by any column and show sums, counts and averages per group."
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridModels.cs;Grid/GridControlEvents.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
-            Grouping with aggregates in the Blazor <code>GridControl</code>. <code>GroupColumns</code> opens the grid grouped, <code>AllowGrouping</code> lets users regroup by dragging a header into the bar, and <code>AggregateRows</code> computes sums, counts and averages per group, in group footers and in the grid footer.
+            Grouping lets users of a Blazor <code>GridControl</code> split a long list into groups by any column, with sums, counts and averages per group. Use it on rate cards, cost lines or orders where the question is how much per supplier or per season; users regroup by dragging a column header into the group bar. Turn on <code>AllowGrouping</code>, set <code>GroupColumns</code> to open the grid grouped, and list caption, group-footer and grid-footer totals in <code>AggregateRows</code>.
         </p>
     </Overview>
 
@@ -287,7 +287,7 @@ public record RateCardLine(string Code, string Description, string Supplier, str
             new("GroupExpandIconStyle", "<code>PlusMinus</code> boxes or <code>Triangle</code> chevrons on the caption rows. The expand-icon template and glyph parameters override the preset.", "GroupExpandIconStyle", "GroupExpandIconStyle.PlusMinus"),
             new("GroupHeaderTextSelector", "Replaces the caption text. Receives the field, the key as text and the group's rows; the key itself, and so collapse state, is unchanged.", "Func&lt;string, string, IReadOnlyList&lt;TValue&gt;, string&gt;?", "null"),
             new("AggregateRows", "What to compute and where to print it; the two tables below.", "List&lt;AggregateRow&gt;?", "null"),
-            new("GroupedColumnColor / GroupItemTextColor / GroupTotalTextColor", "Optional CSS colours for the grouped values in caption rows and chips, the caption text, and the aggregate values. Empty inherits.", "string", "\"\""),
+            new("GroupedColumnColor / GroupItemTextColor / GroupTotalTextColor", "Optional CSS colors for the grouped values in caption rows and chips, the caption text, and the aggregate values. Empty inherits.", "string", "\"\""),
             new("ShowRowCountInFooter", "Prints the row count of the complete filtered result in the footer, not of the rendered window or page.", "bool", "false"),
             new("EnableGroupedRowWindowing", "Windows the rows of a grouped grid the way a flat grid is windowed. Off renders every row.", "bool", "true"),
             new("GroupFooterTemplate", "Declared, but <code>GridControl</code> never reads it.", "RenderFragment&lt;object&gt;?", "null"),
@@ -323,7 +323,7 @@ public record RateCardLine(string Code, string Description, string Supplier, str
         };
         public static readonly ApiRow[] Methods =
         {
-            new("GroupByColumnAsync(string field)", "Adds a group, with the events and the column's <code>AllowGrouping</code> honoured.", "Task"),
+            new("GroupByColumnAsync(string field)", "Adds a group, with the events and the column's <code>AllowGrouping</code> honored.", "Task"),
             new("UngroupColumnAsync(string field)", "Removes a group, with the events.", "Task"),
             new("ClearGroupingAsync()", "Removes every group without raising the events.", "Task"),
             new("ExpandAllGroupAsync()", "Expands every group and re-renders.", "Task"),

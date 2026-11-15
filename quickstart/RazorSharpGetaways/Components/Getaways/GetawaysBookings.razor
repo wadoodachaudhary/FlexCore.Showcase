@@ -1,5 +1,5 @@
-@* Itinerary of one booked trip. SchedulerControl takes colour only from Resources, which add a column per day, so each title
-   starts with a kind emoji and getaways.css colours the blocks by it. *@
+@* Itinerary of one booked trip. SchedulerControl takes color only from Resources, which add a column per day, so each title
+   starts with a kind emoji and getaways.css colors the blocks by it. *@
 @namespace RazorSharpGetaways.Components.Getaways
 @using Fx.ControlKit.Scheduling
 @using RazorSharpGetaways.Data
@@ -10,7 +10,7 @@
     <div class="gw-trip-head">
         <div>
             <h3 class="gw-trip-title">@_trip.Request · @_trip.Destination honeymoon</h3>
-            <p class="gw-trip-sub">@_trip.Traveller, @_trip.Travellers travelling · @_trip.Departure.ToString("ddd d MMM") to @_trip.Departure.AddDays(_trip.Nights).ToString("ddd d MMM") · Agent: @_trip.Agent</p>
+            <p class="gw-trip-sub">@_trip.Traveler, @_trip.Travelers traveling · @_trip.Departure.ToString("ddd d MMM") to @_trip.Departure.AddDays(_trip.Nights).ToString("ddd d MMM") · Agent: @_trip.Agent</p>
         </div>
         <ul class="gw-legend" aria-label="Kinds of entry">
             <li class="k-flight">✈️ Flight</li>

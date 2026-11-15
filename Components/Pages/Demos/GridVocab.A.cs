@@ -45,7 +45,7 @@ public static partial class GridVocab
         new("RowSelectorHandleShape", "Look of the handle: <code>HalfButton</code>, <code>Button</code>, <code>CheckBox</code> or <code>Flat</code>. It sets the handle's size, border, radius and background, and <code>Flat</code> adds <code>fx-row-selector-cell-flat</code> to the cell.", "GridRowSelectorHandleShape", "GridRowSelectorHandleShape.HalfButton"),
         new("RowSelectorHandleWidth", "Width of the handle column in px, clamped to 12-40.", "int", "18"),
         new("RowSelectorHandlePredicate", "Per-row gate for the selector handle; null shows it on every row, and a predicate that throws hides it.", "Func&lt;TValue, bool&gt;?", "null"),
-        new("RowSelectorHandleEmphasisPredicate", "Marks rows whose selector handle draws emphasised; null emphasises none.", "Func&lt;TValue, bool&gt;?", "null"),
+        new("RowSelectorHandleEmphasisPredicate", "Marks rows whose selector handle draws emphasized; null emphasizes none.", "Func&lt;TValue, bool&gt;?", "null"),
         new("MinRowHeight", "Floor in px for every resolved row height: <code>RowHeight</code>, <code>RowHeightSelector</code> results and user resizes.", "double", "16"),
         new("RowHeightSelector", "Per-row height in px, called with the item and its resolved row index; null or a non-positive result falls back to <code>RowHeight</code>. Incompatible with <code>ItemsProvider</code>.", "Func&lt;TValue, int, double?&gt;?", "null"),
         new("RowCssClassSelector", "Extra CSS class for a data row, called with the item and row index.", "Func&lt;TValue, int, string?&gt;?", "null"),
@@ -78,7 +78,7 @@ public static partial class GridVocab
     public static readonly ApiRow[] A_Filtering =
     {
         new("AllowFiltering", "Master switch for the header filter icon, the filter-bar inputs, the header menu's filter items and the expression-filter button; the column's own <code>AllowFiltering</code> must also be true.", "bool", "false"),
-        new("EnableAdvancedFilterPopup", "Adds a second condition (Condition 1, AND/OR, Condition 2) to the column filter popup, honoured by local and provider filtering.", "bool", "false"),
+        new("EnableAdvancedFilterPopup", "Adds a second condition (Condition 1, AND/OR, Condition 2) to the column filter popup, honored by local and provider filtering.", "bool", "false"),
         new("EnableBlankRowFilter", "Adds (Blanks) and (Non-Blanks) quick filters to the column filter popup.", "bool", "false"),
         new("ClearFiltersOnDataSourceChange", "Clears all transient filter state when a different <code>DataSource</code> instance arrives, so one context's filter cannot hide another context's rows.", "bool", "true"),
         new("ShowHeaderFilterIcon", "Shows the clickable filter icon in each filterable header; turn it off when the grid already renders filter-bar inputs.", "bool", "true"),

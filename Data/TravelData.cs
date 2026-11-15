@@ -22,7 +22,7 @@ public static class TravelData
     };
 
     /// <summary>Departure seasons.</summary>
-    public static readonly string[] Seasons = { "Spring", "Summer", "Autumn", "Winter" };
+    public static readonly string[] Seasons = { "Spring", "Summer", "Fall", "Winter" };
 
     /// <summary>Every destination, with region and country; the rate card and supplier list cover all of them.</summary>
     public static readonly (string City, string Region, string Country)[] Destinations =

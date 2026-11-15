@@ -47,13 +47,13 @@ public sealed class BenchDataStore
     private static List<RateCardItem> SynthesizeRateCard(int count)
     {
         // category → suppliers (a {0} placeholder takes the city) → services (description, unit, low rate, high rate)
-        var catalogue = new (string Category, int Margin, (string Supplier, (string Desc, string Unit, int Low, int High)[] Services)[] Suppliers)[]
+        var catalog = new (string Category, int Margin, (string Supplier, (string Desc, string Unit, int Low, int High)[] Services)[] Suppliers)[]
         {
             ("Transport", 10, new[]
             {
                 ("Meridian Airways", new[] { ("Return flights, economy", "pax", 380, 620), ("Return flights, premium economy", "pax", 900, 1500), ("Checked baggage, 23 kg", "pax", 40, 60) }),
                 ("{0} Airport Transfers", new[] { ("Airport to hotel, private car", "trip", 45, 90), ("Hotel to airport, private car", "trip", 45, 90), ("Shared shuttle", "pax", 18, 30) }),
-                ("{0} Rail & Coach", new[] { ("Day-trip coach with driver", "day", 120, 260), ("Regional rail pass, 3 days", "pax", 90, 180), ("Car hire, compact", "day", 35, 70) }),
+                ("{0} Rail & Bus", new[] { ("Day-trip bus with driver", "day", 120, 260), ("Regional rail pass, 3 days", "pax", 90, 180), ("Car rental, compact", "day", 35, 70) }),
             }),
             ("Accommodation", 15, new[]
             {
@@ -66,7 +66,7 @@ public sealed class BenchDataStore
                 ("{0} Walks", new[] { ("Old town walking tour", "pax", 25, 45), ("Evening food tour", "pax", 65, 110) }),
                 ("{0} Day Tours", new[] { ("Full-day excursion with lunch", "pax", 80, 160), ("Entrance tickets", "pax", 18, 40), ("Sunset boat trip", "pax", 45, 95) }),
                 ("Taste of {0}", new[] { ("Cooking class with market visit", "pax", 70, 120), ("Wine tasting with transfer", "pax", 60, 120) }),
-                ("{0} Adventures", new[] { ("Guided hike, half day", "pax", 40, 80), ("Kayak hire with guide", "pax", 55, 95) }),
+                ("{0} Adventures", new[] { ("Guided hike, half day", "pax", 40, 80), ("Kayak rental with guide", "pax", 55, 95) }),
             }),
             ("Services", 12, new[]
             {
@@ -82,7 +82,7 @@ public sealed class BenchDataStore
         for (var i = 1; i <= count; i++)
         {
             var (city, region, _) = TravelData.Destinations[i % TravelData.Destinations.Length];
-            var cat = catalogue[(i / TravelData.Destinations.Length) % catalogue.Length];
+            var cat = catalog[(i / TravelData.Destinations.Length) % catalog.Length];
             var sup = cat.Suppliers[random.Next(cat.Suppliers.Length)];
             var svc = sup.Services[random.Next(sup.Services.Length)];
             var season = TravelData.Seasons[random.Next(TravelData.Seasons.Length)];
@@ -91,7 +91,7 @@ public sealed class BenchDataStore
                 "East Asia" => 1.15m, "Southern Africa" => 1.1m, "North Africa" => 0.85m, "Northern Europe" => 1.4m,
                 "North America" => 1.3m, "Oceania" => 1.35m, "South America" => 1.05m, _ => 1.0m
             };
-            var seasonFactor = season switch { "Summer" => 1.25m, "Autumn" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
+            var seasonFactor = season switch { "Summer" => 1.25m, "Fall" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
             var rate = Math.Round(random.Next(svc.Low * 100, svc.High * 100 + 1) / 100m * regionFactor * seasonFactor, 2);
 
             list.Add(new RateCardItem
@@ -122,7 +122,7 @@ public sealed class BenchDataStore
         var patterns = new (string Name, string Category)[]
         {
             ("Hotel {0} Central", "Accommodation"), ("{0} Boutique Stays", "Accommodation"), ("{0} Apartments", "Accommodation"), ("{0} Villas", "Accommodation"),
-            ("{0} Airport Transfers", "Transport"), ("{0} Rail & Coach", "Transport"), ("{0} Car Hire", "Transport"),
+            ("{0} Airport Transfers", "Transport"), ("{0} Rail & Bus", "Transport"), ("{0} Car Rental", "Transport"),
             ("{0} Walks", "Experiences"), ("{0} Day Tours", "Experiences"), ("Taste of {0}", "Experiences"), ("{0} Adventures", "Experiences"),
             ("{0} Harbour Cruises", "Experiences"), ("{0} Bike Tours", "Experiences"), ("{0} Cooking School", "Experiences"),
             ("{0} Guide Co-op", "Services"), ("{0} Concierge", "Services"), ("{0} Spa Retreat", "Services"),

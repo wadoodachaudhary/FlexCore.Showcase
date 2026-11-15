@@ -7,7 +7,7 @@ namespace FlexCore.Showcase.Data;
 /// </summary>
 public static class DemoData
 {
-    /// <summary>Two travellers on every package costing.</summary>
+    /// <summary>Two travelers on every package costing.</summary>
     private const int Pax = 2;
 
     /// <summary>Rate factor by region; same factors as the bench store's rate card.</summary>
@@ -18,7 +18,7 @@ public static class DemoData
     };
 
     /// <summary>Departure season price factor.</summary>
-    private static decimal SeasonFactor(string season) => season switch { "Summer" => 1.25m, "Autumn" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
+    private static decimal SeasonFactor(string season) => season switch { "Summer" => 1.25m, "Fall" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
 
     /// <summary>Rate card services: category, supplier ({0} takes the city), description, rate unit, and rate range in whole
     /// currency units before the region factor.</summary>
@@ -26,7 +26,7 @@ public static class DemoData
     {
         ("Transport",     "Meridian Airways",             "Return flights, economy",         "pax",     380, 620),
         ("Transport",     "{0} Airport Transfers",        "Airport to hotel, private car",   "trip",     45,  90),
-        ("Transport",     "{0} Rail & Coach",             "Day-trip coach with driver",      "day",     120, 260),
+        ("Transport",     "{0} Rail & Bus",             "Day-trip bus with driver",      "day",     120, 260),
         ("Accommodation", "Hotel {0} Central",            "Double room with breakfast",      "night",   110, 260),
         ("Accommodation", "Hotel {0} Central",            "Twin room, room only",            "night",    90, 220),
         ("Accommodation", "Hotel {0} Central",            "Suite with breakfast",            "night",   240, 480),
@@ -76,7 +76,7 @@ public static class DemoData
         ("A Transport",     "Meridian Airways",             "Checked baggage, 23 kg",          "pax",      40,  60, "Contract", "Per person"),
         ("A Transport",     "{0} Airport Transfers",        "Airport to hotel, private car",   "trip",     45,  90, "Spot",     "Per booking"),
         ("A Transport",     "{0} Airport Transfers",        "Hotel to airport, private car",   "trip",     45,  90, "Spot",     "Per booking"),
-        ("A Transport",     "{0} Rail & Coach",             "Day-trip coach with driver",      "day",     120, 260, "Spot",     "Per booking"),
+        ("A Transport",     "{0} Rail & Bus",             "Day-trip bus with driver",      "day",     120, 260, "Spot",     "Per booking"),
         ("B Accommodation", "Hotel {0} Central",            "Double room with breakfast",      "night",   110, 260, "Contract", "Per booking"),
         ("B Accommodation", "Hotel {0} Central",            "Late checkout on departure day",  "stay",     30,  60, "Spot",     "Per booking"),
         ("C Experiences",   "{0} Walks",                    "Old town walking tour",           "pax",      25,  45, "Contract", "Per person"),
@@ -90,7 +90,7 @@ public static class DemoData
     };
 
     /// <summary>Cost lines of the first package in <see cref="TravelData.Packages"/> (Lisbon Explorer): the services above per
-    /// season in turn, for <see cref="Pax"/> travellers and the package's nights; default 60 = 15 services x 4 seasons. Contract
+    /// season in turn, for <see cref="Pax"/> travelers and the package's nights; default 60 = 15 services x 4 seasons. Contract
     /// rates are drawn once per service and move only with the season; spot rates are drawn per line.</summary>
     public static List<PackageCostLine> GeneratePackageCostLines(int count = 60)
     {

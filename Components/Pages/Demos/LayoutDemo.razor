@@ -11,11 +11,11 @@
 <PageTitle>Blazor Splitter, Panels and Dashboard Layout — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Page layouts" Category="Components" ControlName="PageLayoutControl · SplitterControl · DashboardLayoutControl · GridLayoutControl · StackLayoutControl"
-                   Tagline="An application shell with collapsible side panels and a splitter, a dashboard grid, and grid and stack layouts for the content of a panel."
+                   Tagline="Lay out an app shell with collapsible panels, a splitter and a dashboard of tiles."
                    SourcePath="Layout/PageLayoutControl.razor; SplitterControl.razor; Layout/DashboardLayoutControl.razor; Layout/GridLayoutControl.razor; Layout/GridLayoutItemControl.razor; Layout/StackLayoutControl.razor">
     <Overview>
         <p>
-            Three ways to divide a Blazor page: <code>PageLayoutControl</code> with collapsible side panels, <code>SplitterControl</code> with a draggable bar between two panes, and <code>DashboardLayoutControl</code>, a grid of panels placed by row, column and span. Inside a panel, <code>GridLayoutControl</code> and <code>StackLayoutControl</code> write a CSS grid or a flex row from their parameters.
+            Blazor layout controls divide a page: <code>PageLayoutControl</code> adds collapsible side panels, <code>SplitterControl</code> a draggable bar between two panes, and <code>DashboardLayoutControl</code> a grid of tiles. Use them for an app shell with navigation and detail panes, or a dashboard of KPI cards; inside a panel, <code>GridLayoutControl</code> and <code>StackLayoutControl</code> write a CSS grid or a flex row from their parameters.
         </p>
     </Overview>
 
@@ -220,9 +220,9 @@
     {
         ["Requests"] = new[]
         {
-            new Item("LIS-0001 Marmalade", "3 lines · Quoted · $1,720", new[] { ("Traveller", "Clementine Marmalade"), ("Status", "Quoted"), ("Lines", "3"), ("Total", "$1,720") }),
-            new Item("KYO-0001 Thistlewood", "6 lines · Draft · $4,860 · last saved today 09:12", new[] { ("Traveller", "Juniper Thistlewood"), ("Status", "Draft"), ("Lines", "6"), ("Total", "$4,860") }),
-            new Item("AMF-0002 Puddleby", "9 lines · Booked · $6,240", new[] { ("Traveller", "Barnaby Puddleby"), ("Status", "Booked"), ("Lines", "9"), ("Total", "$6,240") }),
+            new Item("LIS-0001 Marmalade", "3 lines · Quoted · $1,720", new[] { ("Traveler", "Clementine Marmalade"), ("Status", "Quoted"), ("Lines", "3"), ("Total", "$1,720") }),
+            new Item("KYO-0001 Thistlewood", "6 lines · Draft · $4,860 · last saved today 09:12", new[] { ("Traveler", "Juniper Thistlewood"), ("Status", "Draft"), ("Lines", "6"), ("Total", "$4,860") }),
+            new Item("AMF-0002 Puddleby", "9 lines · Booked · $6,240", new[] { ("Traveler", "Barnaby Puddleby"), ("Status", "Booked"), ("Lines", "9"), ("Total", "$6,240") }),
         },
         ["Suppliers"] = new[]
         {
@@ -334,7 +334,7 @@
         };
         public static readonly ApiRow[] Css =
         {
-            new("fx-page-layout · fx-left-panel · fx-center-panel · fx-right-panel", "Flex row and its panels. Side panels: grey, bordered, scroll their own content; <code>.fx-panel-collapsed</code> at zero width."),
+            new("fx-page-layout · fx-left-panel · fx-center-panel · fx-right-panel", "Flex row and its panels. Side panels: gray, bordered, scroll their own content; <code>.fx-panel-collapsed</code> at zero width."),
             new("fx-panel-toggle · -left · -right", "The 20×40px collapse tab, hung outside the panel edge."),
             new("fx-splitter · -vertical · -horizontal · -disabled", "Container and orientation."),
             new("fx-splitter-pane · -primary · -secondary · fx-splitter-bar · fx-splitter-grip", "Panes, the bar and its grip."),
@@ -475,9 +475,9 @@ private readonly Dictionary<string, Item[]> _data = new()
 {
     [""Requests""] = new[]
     {
-        new Item(""LIS-0001 Marmalade"", ""3 lines · Quoted · $1,720"", new[] { (""Traveller"", ""Clementine Marmalade""), (""Status"", ""Quoted""), (""Lines"", ""3""), (""Total"", ""$1,720"") }),
-        new Item(""KYO-0001 Thistlewood"", ""6 lines · Draft · $4,860 · last saved today 09:12"", new[] { (""Traveller"", ""Juniper Thistlewood""), (""Status"", ""Draft""), (""Lines"", ""6""), (""Total"", ""$4,860"") }),
-        new Item(""AMF-0002 Puddleby"", ""9 lines · Booked · $6,240"", new[] { (""Traveller"", ""Barnaby Puddleby""), (""Status"", ""Booked""), (""Lines"", ""9""), (""Total"", ""$6,240"") }),
+        new Item(""LIS-0001 Marmalade"", ""3 lines · Quoted · $1,720"", new[] { (""Traveler"", ""Clementine Marmalade""), (""Status"", ""Quoted""), (""Lines"", ""3""), (""Total"", ""$1,720"") }),
+        new Item(""KYO-0001 Thistlewood"", ""6 lines · Draft · $4,860 · last saved today 09:12"", new[] { (""Traveler"", ""Juniper Thistlewood""), (""Status"", ""Draft""), (""Lines"", ""6""), (""Total"", ""$4,860"") }),
+        new Item(""AMF-0002 Puddleby"", ""9 lines · Booked · $6,240"", new[] { (""Traveler"", ""Barnaby Puddleby""), (""Status"", ""Booked""), (""Lines"", ""9""), (""Total"", ""$6,240"") }),
     },
     [""Suppliers""] = new[]
     {

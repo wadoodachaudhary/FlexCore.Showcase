@@ -34,7 +34,7 @@ public sealed record StaffMember
 
 /// <summary>
 /// Staff of Razor Sharp Getaways for the people demos: Boston head office, a ground team per <see cref="TravelData"/> destination,
-/// contact centres in Lisbon, Manila and Boston, central functions. Fixed seed: every visitor and build sees the same people.
+/// contact centers in Lisbon, Manila and Boston, central functions. Fixed seed: every visitor and build sees the same people.
 /// Names are made up: executives fixed, everyone else drawn from the two lists below.
 /// </summary>
 public static class TravelOrg
@@ -136,11 +136,11 @@ public static class TravelOrg
         var care = b.Add(coo, "Director of Customer Care", 7, "Customer care", "Customer care leadership", Lisbon);
         var quality = b.Add(care, "Quality and Training Manager", 5, "Customer care", "Quality and training", Lisbon);
         b.Many(3, quality, "Quality Analyst", 3, "Customer care", "Quality and training", Lisbon);
-        b.Many(3, quality, "Contact Centre Trainer", 3, "Customer care", "Quality and training", Lisbon);
+        b.Many(3, quality, "Contact Center Trainer", 3, "Customer care", "Quality and training", Lisbon);
         foreach (var (site, teams) in new[] { (Lisbon, 6), (Manila, 9), (Boston, 3) })
         {
-            var dept = $"Contact centre {site.City}";
-            var siteManager = b.Add(care, "Contact Centre Manager", 6, "Customer care", dept, site);
+            var dept = $"Contact center {site.City}";
+            var siteManager = b.Add(care, "Contact Center Manager", 6, "Customer care", dept, site);
             for (var t = 0; t < teams; t++)
             {
                 var leader = b.Add(siteManager, "Team Leader", 4, "Customer care", dept, site);

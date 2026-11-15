@@ -13,11 +13,11 @@
 <PageTitle>Blazor Grid Virtualization vs Paging — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Scroll vs paging" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="The same thousand rows scrolled through a row window or paged: what each costs on the server, measured here."
+                   Tagline="Let users scroll or page through long lists, with the server cost of each measured."
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.PresentationFeatures.cs;Grid/GridControlEvents.cs">
     <Overview>
         <p>
-            Scrolling or paging in the Blazor <code>GridControl</code>. Without paging the grid windows the rows in view; with <code>AllowPaging</code> it renders one page of <code>PageSize</code> rows and a pager placed by <code>PagerPosition</code> that offers the <code>PageSizes</code>. Sorting, filtering, grouping, search and batch editing work the same way in both.
+            The Blazor <code>GridControl</code> lets users scroll a long list or page through it, with sorting, filtering, grouping, search and editing working the same in both. Without paging the grid renders only the rows in view and a band around them; set <code>AllowPaging</code> and it renders one page of <code>PageSize</code> rows, with <code>PagerPosition</code> and <code>PageSizes</code> shaping the pager. This page records the first render of each mode on the server, so you can compare them.
         </p>
     </Overview>
 

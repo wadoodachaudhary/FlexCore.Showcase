@@ -20,11 +20,11 @@
 <PageTitle>Blazor Report Writer for Crystal Reports XML — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Report writer" Category="Reports" CategoryHref="demo/reports/package-costs" ControlName="ReportWriterControl"
-                   Tagline="Paginated, grouped reports from a Crystal-style XML definition, with a group tree, search, print and export."
+                   Tagline="Run reports exported from Crystal Reports as paginated, grouped pages in Blazor."
                    SourcePath="Reports/ReportWriterControl.razor;Reports/CrystalXmlReportLoader.cs;Reports/ReportOptions.cs;Reports/IReportDataExecutor.cs;Reports/IReportSessionContext.cs;Reports/IReportPickListProvider.cs;Reports/IReportExporter.cs;Reports/IReportViewerSettings.cs">
     <Overview>
         <p>
-            <code>ReportWriterControl</code> renders a <code>ReportDefinition</code> as paginated HTML pages in a Blazor app, with Crystal-style group headers and footers, a group tree, search, zoom, print and export. <code>CrystalXmlReportLoader</code> builds the definition from a Crystal XML export; data comes from the <code>IReportDataExecutor</code> the host registers.
+            <code>ReportWriterControl</code> is a Blazor report writer that runs a report definition and shows paginated pages with group headers, footers and a group tree. Use it to move Crystal Reports to the web: <code>CrystalXmlReportLoader</code> reads a Crystal XML export, your <code>IReportDataExecutor</code> supplies the rows, and no Crystal engine is needed to run the report or export it to HTML, CSV or Excel. Users search, zoom and print from the toolbar.
         </p>
     </Overview>
 
@@ -169,7 +169,7 @@ private async Task RunReport()
             new("PdfViewerComponentType", "The PDF viewer component used for .rpt output, for trimmed hosts that bring the Documents package.", "Type?", "null"),
             new("PromptOptionalParameters", "Includes optional parameters in the parameter dialog.", "bool", "false"),
             new("TabsOrientation", "Layout of the report tabs (the main report and its drill-downs, shown once there are two): <code>Vertical</code>, a rail; <code>HybridVertical</code>, wrapped rows; <code>Horizontal</code>, one scrolling row. A right-click on the strip opens the viewer's own orientation and theme menu; the choice goes to <code>IReportViewerSettings</code> and is read back when the viewer first loads.", "TabOrientation", "TabOrientation.Vertical"),
-            new("TabsTheme", "Colours of that strip: <code>WindowsClassic</code>, <code>FolderTabs</code>, <code>ColorfulCards</code>, <code>Minimal</code> or <code>Dark</code>; saved and restored the same way.", "TabTheme", "TabTheme.WindowsClassic"),
+            new("TabsTheme", "Colors of that strip: <code>WindowsClassic</code>, <code>FolderTabs</code>, <code>ColorfulCards</code>, <code>Minimal</code> or <code>Dark</code>; saved and restored the same way.", "TabTheme", "TabTheme.WindowsClassic"),
             new("OnClose", "The toolbar's Close button. Unset with <code>ShowChrome</code> on, the button is still there and does nothing.", "EventCallback"),
             new("OnPageTitleChanged", "Raised by <code>ShowReportAsync</code> with the report's file name without extension, for a host's title bar.", "EventCallback&lt;string&gt;"),
         };

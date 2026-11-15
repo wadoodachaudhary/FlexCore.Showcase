@@ -16,11 +16,11 @@
 
 <FeatureDemoLayout Title="Gauges &amp; stock chart" Category="Charts" CategoryHref="demo/charts"
                    ControlName="ArcGaugeControl · CircularGaugeControl · RadialGaugeControl · LinearGaugeControl · StockChartControl"
-                   Tagline="Four gauges that share one set of parameters, and a candlestick chart with a date toolbar."
+                   Tagline="Read a value against its target at a glance, and browse prices by date."
                    SourcePath="Charts/GaugeControl.razor;Charts/GaugeControls.cs;Charts/GaugeVisualControl.razor;Charts/GaugeModels.cs;Charts/StockChartControl.razor;Charts/StockChartRange.cs;Charts/ChartModels.cs">
     <Overview>
         <p>
-            Four Blazor gauges sharing one parameter set: <code>ArcGaugeControl</code>, <code>CircularGaugeControl</code>, <code>RadialGaugeControl</code> and <code>LinearGaugeControl</code> take a value between <code>Min</code> and <code>Max</code>, coloured <code>Ranges</code>, extra <code>Pointers</code>, ticks and formats, drawn as inline SVG. <code>StockChartControl</code> wraps a candlestick, OHLC or high-low chart in a toolbar of date pickers, zoom and pan, with the visible range exposed through <code>Start</code>, <code>End</code> and <code>RangeChanged</code>.
+            Four Blazor gauges show a single value against its limits at a glance: <code>ArcGaugeControl</code>, <code>CircularGaugeControl</code>, <code>RadialGaugeControl</code> and <code>LinearGaugeControl</code>, which share one set of parameters. Use them for utilization, progress or throughput on a dashboard: colored <code>Ranges</code> mark the zones and extra <code>Pointers</code> show a target beside the reading. <code>StockChartControl</code> adds date pickers, zoom and pan to a candlestick, OHLC or high-low chart.
         </p>
     </Overview>
 
@@ -33,7 +33,7 @@
             </Controls>
             <Demo>
                 <div class="four">
-                    <div><p class="pane-title">Arc</p><ArcGaugeControl Value="@_value" Ranges="@_ranges" Color="@ChartPalette.Blue" AriaLabel="Utilisation" Height="300px" /></div>
+                    <div><p class="pane-title">Arc</p><ArcGaugeControl Value="@_value" Ranges="@_ranges" Color="@ChartPalette.Blue" AriaLabel="Utilization" Height="300px" /></div>
                     <div>
                         <p class="pane-title">Circular</p>
                         <CircularGaugeControl Value="@_value" TickCount="10" Color="@ChartPalette.Green" AriaLabel="Progress" Height="300px">
@@ -76,7 +76,7 @@
                 <li>The arc, radial and circular gauges use a 300 by 300 view box. The track and the ranges are 16 px arcs; the value arc is 16 px on its own and 7 px over ranges. The arc and radial gauges sweep 270 degrees from the lower left; the circular gauge sweeps the full 360.</li>
                 <li>The radial gauge draws a needle for the value; every gauge draws a needle, or a vertical mark on the linear gauge, for each pointer. Ranges and pointers carry a <code>title</code> with their label, so hovering shows it.</li>
                 <li><code>TickCount</code> intervals give <code>TickCount + 1</code> labels formatted with <code>LabelFormat</code>; the circular gauge drops the last one, which would overlap the first.</li>
-                <li>The value is printed in the middle with <code>ValueFormat</code> unless a <code>ValueTemplate</code> is set, in which case the template is centred over the drawing.</li>
+                <li>The value is printed in the middle with <code>ValueFormat</code> unless a <code>ValueTemplate</code> is set, in which case the template is centered over the drawing.</li>
                 <li>For drawing and for <code>aria-valuenow</code> the value is clamped into <code>Min</code> to <code>Max</code>; a range or pointer outside that span is clamped the same way.</li>
                 <li>The gauge throws when a value is not finite, when <code>Max</code> is not above <code>Min</code>, when <code>TickCount</code> is outside 1 to 100, or when a range ends before it starts.</li>
                 </ul>
@@ -108,7 +108,7 @@
         <p>
             Each gauge is a <code>meter</code> named by <code>AriaLabel</code> with <code>aria-valuenow</code>, <code>aria-valuemin</code> and
             <code>aria-valuemax</code>; its SVG is hidden from assistive technology so the figures are not read twice. The stock chart's
-            pickers are labelled "Stock chart start date" and "Stock chart end date", the navigator sliders "Navigator start" and
+            pickers are labeled "Stock chart start date" and "Stock chart end date", the navigator sliders "Navigator start" and
             "Navigator end" (the navigator is off in the example above), and the empty state is a status message.
         </p>
     </Accessibility>
@@ -169,7 +169,7 @@
 <ButtonControl CssClass=""btn-sm"" OnClick=""() => _value = Math.Min(100, _value + 10)"" Disabled=""@(_value >= 100)"">+10</ButtonControl>
 
 <div class=""four"">
-    <div><p class=""pane-title"">Arc</p><ArcGaugeControl Value=""@_value"" Ranges=""@_ranges"" Color=""@ChartPalette.Blue"" AriaLabel=""Utilisation"" Height=""300px"" /></div>
+    <div><p class=""pane-title"">Arc</p><ArcGaugeControl Value=""@_value"" Ranges=""@_ranges"" Color=""@ChartPalette.Blue"" AriaLabel=""Utilization"" Height=""300px"" /></div>
     <div>
         <p class=""pane-title"">Circular</p>
         <CircularGaugeControl Value=""@_value"" TickCount=""10"" Color=""@ChartPalette.Green"" AriaLabel=""Progress"" Height=""300px"">
@@ -235,15 +235,15 @@ private string Describe(DateTime start, DateTime end) =>
             new("Value", "The reading. Drawn and announced clamped into <code>Min</code> to <code>Max</code>.", "double", "0"),
             new("Min", "Start of the scale.", "double", "0"),
             new("Max", "End of the scale; must be above <code>Min</code>.", "double", "100"),
-            new("Ranges", "Coloured bands along the scale, each with a label for its tooltip.", "IReadOnlyList&lt;GaugeRange&gt;", "Array.Empty&lt;GaugeRange&gt;()"),
-            new("Pointers", "Extra markers: needles on the round gauges, vertical marks on the linear one, each with a colour and a label.", "IReadOnlyList&lt;GaugePointer&gt;", "Array.Empty&lt;GaugePointer&gt;()"),
-            new("Color", "Colour of the value arc or bar and of the radial gauge's needle.", "string", "\"#2563eb\""),
+            new("Ranges", "Colored bands along the scale, each with a label for its tooltip.", "IReadOnlyList&lt;GaugeRange&gt;", "Array.Empty&lt;GaugeRange&gt;()"),
+            new("Pointers", "Extra markers: needles on the round gauges, vertical marks on the linear one, each with a color and a label.", "IReadOnlyList&lt;GaugePointer&gt;", "Array.Empty&lt;GaugePointer&gt;()"),
+            new("Color", "Color of the value arc or bar and of the radial gauge's needle.", "string", "\"#2563eb\""),
             new("TickCount", "Number of intervals on the scale, 1 to 100; one label per interval boundary.", "int", "5"),
             new("LabelFormat", "Numeric format of the tick labels.", "string", "\"0\""),
             new("ValueFormat", "Numeric format of the printed value.", "string", "\"0.##\""),
             new("Height", "Height of the drawing; the width follows the container.", "string", "\"260px\""),
             new("AriaLabel", "Accessible name of the meter.", "string", "\"Gauge\""),
-            new("ValueTemplate", "Replaces the printed value with your own content, centred over the gauge; receives value, min and max.", "RenderFragment&lt;GaugeValueContext&gt;?", "null"),
+            new("ValueTemplate", "Replaces the printed value with your own content, centered over the gauge; receives value, min and max.", "RenderFragment&lt;GaugeValueContext&gt;?", "null"),
         };
         public static readonly ApiRow[] Stock =
         {
@@ -265,12 +265,12 @@ private string Describe(DateTime start, DateTime end) =>
         public static readonly ApiRow[] StockMethods =
         {
             new("SetRangeAsync(DateTime? start, DateTime? end)", "Sets the visible range from code; null falls back to the first or last point, dates outside the data are clamped, and start after end throws. Raises <code>RangeChanged</code>.", "Task"),
-            new("ZoomAsync(double factor)", "Multiplies the visible span by the factor around its centre, never below one day; the toolbar uses 0.5 and 2.", "Task"),
+            new("ZoomAsync(double factor)", "Multiplies the visible span by the factor around its center, never below one day; the toolbar uses 0.5 and 2.", "Task"),
             new("PanAsync(int direction)", "Slides the range by half its span, earlier for a negative direction and later for a positive one, clamped to the data.", "Task"),
         };
         public static readonly ApiRow[] Css =
         {
-            new("fx-gauge", "A gauge's root element; <code>fx-gauge-value-template</code> is the centred template."),
+            new("fx-gauge", "A gauge's root element; <code>fx-gauge-value-template</code> is the centered template."),
             new("fx-stock-chart", "The stock chart's root; <code>fx-stock-navigator</code> is the strip with the sliders."),
         };
     }

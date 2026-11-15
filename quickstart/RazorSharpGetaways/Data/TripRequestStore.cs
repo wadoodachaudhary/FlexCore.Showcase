@@ -31,7 +31,7 @@ public sealed class TripRequestStore
         new() { Code = "SAFARI", Name = "Safari & wildlife", Desk = "Adventure", LeadTime = "12-16 wks" },
         new() { Code = "CRUISE", Name = "Ocean & river cruises", Desk = "Cruise", LeadTime = "10-14 wks" },
         new() { Code = "RAIL", Name = "Scenic rail journeys", Desk = "Touring", LeadTime = "4-6 wks" },
-        new() { Code = "FAMILY", Name = "Family holidays", Desk = "Leisure", LeadTime = "6-8 wks" },
+        new() { Code = "FAMILY", Name = "Family vacations", Desk = "Leisure", LeadTime = "6-8 wks" },
         new() { Code = "HONEYMOON", Name = "Honeymoons & celebrations", Desk = "Luxury", LeadTime = "8-10 wks" },
     ];
 
@@ -58,7 +58,7 @@ public sealed class TripRequestStore
         DateRequested = DateTime.Today, Departure = DateTime.Today.AddDays(90),
         Destination = "Lisbon", Nights = TripPackages.ForDestination("Lisbon").Nights,
         TripType = "CITY", TripTypeName = "City breaks & culture",
-        Travellers = 2, Status = "New"
+        Travelers = 2, Status = "New"
     };
 
     /// <summary>Adds an editor-filled request at the top of the list; returns it.</summary>
@@ -81,14 +81,14 @@ public sealed class TripRequestStore
         ApplyQuoteToFares(stored);
     }
 
-    // Trip type name and agent colour follow the editor's input
+    // Trip type name and agent color follow the editor's input
     private static void Complete(TripRequest request)
     {
         request.TripTypeName = TripTypes.FirstOrDefault(t => t.Code.Equals(request.TripType, StringComparison.OrdinalIgnoreCase))?.Name ?? request.TripType;
         request.AvatarBg = AgentColor(request.Agent);
     }
 
-    /// <summary>Agent avatar colour; grey for names not on the team.</summary>
+    /// <summary>Agent avatar color; gray for names not on the team.</summary>
     public static string AgentColor(string name) =>
         Agents.FirstOrDefault(a => a.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Color ?? "#64748b";
 
@@ -137,7 +137,7 @@ public sealed class TripRequestStore
                 "First-class rail pass with two overnight sleeper legs",
                 "Scenic railway loop with three nights in small towns",
                 ["Kyoto", "Banff", "Vancouver", "Hoi An"]),
-            ("FAMILY", "Family holidays", 2400, 7600,
+            ("FAMILY", "Family vacations", 2400, 7600,
                 "Half-term week with a kids' club and a family suite",
                 "Theme park passes for four with a connecting-rooms hotel",
                 ["Lisbon", "Vancouver", "Queenstown", "Cape Town", "Kyoto"]),
@@ -175,13 +175,13 @@ public sealed class TripRequestStore
         var notes = new[]
         {
             "Flexible on dates by a few days", "Prefers a morning departure", "Repeat client, knows the agent",
-            "Asked for a travel insurance quote", "Needs an accessible room", "Travelling with an infant"
+            "Asked for a travel insurance quote", "Needs an accessible room", "Traveling with an infant"
         };
 
         var rnd = new Random(42);
         var list = new List<TripRequest>(count);
 
-        // Unique surname per lead traveller (a shared one would read as a family booking twice): 40 starts x 25 endings = 1,000
+        // Unique surname per lead traveler (a shared one would read as a family booking twice): 40 starts x 25 endings = 1,000
         // made-up surnames, shuffled; none is an agent's.
         var starts = new[]
         {
@@ -206,7 +206,7 @@ public sealed class TripRequestStore
             var destination = type.Places[rnd.Next(type.Places.Length)];
             var quote = rnd.Next(type.Low / 10, type.High / 10) * 10m;
             var requested = startDate.AddMinutes(rnd.Next(0, 300 * 24 * 60));
-            var travellers = type.Code switch { "FAMILY" => rnd.Next(3, 7), "HONEYMOON" => 2, _ => rnd.Next(1, 5) };
+            var travelers = type.Code switch { "FAMILY" => rnd.Next(3, 7), "HONEYMOON" => 2, _ => rnd.Next(1, 5) };
 
             // five weekly fare samples for the route; the last one is the quote
             var first = (int)(quote * (100 + rnd.Next(-12, 13)) / 100);
@@ -224,8 +224,8 @@ public sealed class TripRequestStore
                 AvatarBg = agent.Color,
                 DateRequested = requested,
                 Destination = destination,
-                Traveller = $"{firstNames[rnd.Next(firstNames.Length)]} {surnames[(i - 1) % surnames.Length]}",
-                Travellers = travellers,
+                Traveler = $"{firstNames[rnd.Next(firstNames.Length)]} {surnames[(i - 1) % surnames.Length]}",
+                Travelers = travelers,
                 Departure = requested.Date.AddDays(rnd.Next(30, 200)),
                 Nights = TripPackages.ForDestination(destination).Nights,
                 TripType = type.Code,
@@ -246,8 +246,8 @@ public sealed class TripRequestStore
             var trip = list[585];
             trip.Request = "LIS-0586";
             trip.Destination = "Lisbon";
-            trip.Traveller = $"Wei {surnames[585]}";
-            trip.Travellers = 2;
+            trip.Traveler = $"Wei {surnames[585]}";
+            trip.Travelers = 2;
             trip.Agent = SignedInAgent;
             trip.AvatarBg = AgentColor(SignedInAgent);
             trip.TripType = "HONEYMOON";

@@ -15,17 +15,17 @@
 <PageTitle>Blazor DataTable Wrapper: DataControl — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Data control" Category="Data Grid" CategoryHref="demo/grid" ControlName="DataControl"
-                   Tagline="One in-memory table behind a grid, a chart and a CSV: filter and sort it once and every view follows."
+                   Tagline="Filter and sort one table, then read it as grid rows, chart series or CSV."
                    SourcePath="Data/DataControl.cs">
     <Overview>
         <p>
-            <code>DataControl</code> is a typed wrapper over a <code>DataTable</code> for Blazor pages: build it with <code>DataFrame</code>, <code>FromRows</code> or a <code>DataTable</code>, convert text columns with <code>ConvertDtypes</code>, apply <code>Filter</code> and <code>Sort</code> expressions, and read the result as grid rows, chart series, a report definition, CSV or JSON. <code>IsDirty</code> and <code>GetChanges</code> track edits.
+            <code>DataControl</code> wraps a <code>DataTable</code> for Blazor apps: filter and sort the rows once, then read them as grid rows, chart series, CSV or JSON. Use it when one data set, such as a list of orders, feeds several views, and when you need to know what users changed: <code>IsDirty</code> and <code>GetChanges</code> track edits. If you know pandas or the PowerBuilder DataWindow, the API will feel familiar: <code>DataFrame</code>, <code>ConvertDtypes</code> and a 1-based <code>GetItem</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="frame" Title="Filter and sort once; a grid, a chart and a CSV follow" RazorCode="@Code.Frame" CSharpCode="@Code.FrameCs">
-            <Description><p>Type a <code>DataView</code> filter such as <code>Amount &gt; 1000</code> or <code>Customer LIKE 'A%'</code>, pick a sort, and the grid, chart and CSV below change together; an expression that fails to parse is reported and the previous filter stays.</p></Description>
+            <Description><p>Type a <code>DataView</code> filter like <code>Amount &gt; 1000</code> or <code>Customer LIKE 'A%'</code> and pick a sort; grid, chart and CSV change together, and a bad expression is reported, keeping the old filter.</p></Description>
             <Controls>
                 <TextBoxControl @bind-Value="_filterText" Placeholder="Amount > 1000" Width="220px" />
                 <ButtonControl CssClass="btn-sm btn-primary" OnClick="ApplyFilter">Apply filter</ButtonControl>
@@ -176,7 +176,7 @@
             new("GroupBy(groupColumn, valueColumn, aggregate)", "One result per distinct group value over the current view: the aggregate of valueColumn and the row count.", "IReadOnlyList&lt;DataControlAggregateResult&gt;"),
             new("Find(expression, startRow, endRow)", "1-based number of the first row in the range matching the expression; 0 when none.", "int"),
             new("ToGridRows()", "Current view as ExpandoObject rows, one key per column.", "IEnumerable&lt;ExpandoObject&gt;"),
-            new("ToChartBars(labelColumn, valueColumn, colorColumn)", "One bar per row of the current view; the optional colour column names each bar's colour.", "List&lt;ChartControl.ChartBar&gt;"),
+            new("ToChartBars(labelColumn, valueColumn, colorColumn)", "One bar per row of the current view; the optional color column names each bar's color.", "List&lt;ChartControl.ChartBar&gt;"),
             new("ToChartSeries(labelColumn, valueColumns)", "One series per value column, with a point per row of the current view.", "List&lt;ChartSeries&gt;"),
             new("ToReportDefinition(title)", "A report definition whose columns mirror the table: header from the column caption, numeric columns right-aligned.", "ReportDefinition"),
             new("ToCsv() / ToJson(options) / SaveAs(format)", "The current view as text; SaveAs picks Csv or Json.", "string"),

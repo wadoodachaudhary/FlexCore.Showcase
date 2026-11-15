@@ -7,23 +7,23 @@
 <PageTitle>Blazor Checkbox, Radio Group, Switch and Rating — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Checks & switches" Category="Components" ControlName="CheckBoxControl · RadioGroupControl · SwitchControl · RatingControl"
-                   Tagline="Yes or no, one of several, on or off, and how many stars: the small inputs every form needs."
+                   Tagline="Let users check items, switch options on, pick one of several or give a star rating."
                    SourcePath="CheckBoxControl.razor; RadioGroupControl.razor; RadioControl.razor; SwitchControl.razor; RatingControl.razor">
     <Overview>
         <p>
-            The small Blazor inputs every form needs: <code>CheckBoxControl</code> with an indeterminate state, <code>RadioGroupControl</code> for one of several, <code>SwitchControl</code> for on or off, and <code>RatingControl</code> for stars. All bind their value two ways.
+            The small Blazor inputs that most forms need: <code>CheckBoxControl</code>, <code>SwitchControl</code>, <code>RadioGroupControl</code> for one choice out of a few, and <code>RatingControl</code> for stars. Use checkboxes for a list users check off, where a select-all box can show that only some are checked, and a switch for a single option users turn on or off, such as Signature required. All four bind their value two ways.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="checks" Title="Check boxes with select all" RazorCode="@Code.Checks" CSharpCode="@Code.ChecksCs">
-            <Description><p>Tick the children and watch the parent go indeterminate; tick the parent to set all three.</p></Description>
+            <Description><p>Check the children and watch the parent go indeterminate; check the parent to set all three.</p></Description>
             <Demo>
                 <div class="stack">
                     <CheckBoxControl Checked="@AllChecked" Indeterminate="@SomeChecked" CheckedChanged="SetAll" Label="Include in quote" />
                     <div class="stack indent">
                         <CheckBoxControl @bind-Checked="_tax" Label="Sales tax" />
-                        <CheckBoxControl @bind-Checked="_labour" Label="Labour" />
+                        <CheckBoxControl @bind-Checked="_labor" Label="Labor" />
                         <CheckBoxControl @bind-Checked="_permits" Label="Permits" />
                         <CheckBoxControl Checked="true" Disabled="true" Label="Materials (always included)" />
                     </div>
@@ -33,7 +33,7 @@
         </DemoExample>
 
         <DemoExample Id="radio" Title="Radio group and switches" RazorCode="@Code.Radio" CSharpCode="@Code.RadioCs">
-            <Description><p>One value from the radio group, two switches; the line below reads them.</p></Description>
+            <Description><p>Pick a delivery method, then switch Signature required or Insure the shipment on and off; the line below reads your choices.</p></Description>
             <Demo>
                 <div class="demo-row top">
                     <div class="stack">
@@ -113,17 +113,17 @@
 
 @code {
     // Check boxes
-    private bool _tax = true, _labour = true, _permits;
-    private bool AllChecked => _tax && _labour && _permits;
-    private bool SomeChecked => !AllChecked && (_tax || _labour || _permits);
-    private void SetAll(bool value) => _tax = _labour = _permits = value;
+    private bool _tax = true, _labor = true, _permits;
+    private bool AllChecked => _tax && _labor && _permits;
+    private bool SomeChecked => !AllChecked && (_tax || _labor || _permits);
+    private void SetAll(bool value) => _tax = _labor = _permits = value;
     private string Included
     {
         get
         {
             var parts = new List<string> { "materials" };
             if (_tax) parts.Add("sales tax");
-            if (_labour) parts.Add("labour");
+            if (_labor) parts.Add("labor");
             if (_permits) parts.Add("permits");
             return "Quote includes " + string.Join(", ", parts) + ".";
         }
@@ -218,7 +218,7 @@
             new("fx-checkbox · .fx-checkbox-indeterminate · .fx-checkbox-theme-blue · fx-checkbox-label", "Label host; the classic 13px square box, the dash state, the native blue variant, and the text."),
             new("fx-radio-group · fx-radio · fx-radio-label", "Flex group; each radio label with a native 16px button; focus draws a dotted outline on the text."),
             new("fx-switch-host · .fx-switch-disabled · fx-switch-input · fx-switch-track · fx-switch-thumb · fx-switch-label", "Label host, hidden input, 38×22px track (blue when checked), 18px thumb that slides 16px, and the text."),
-            new("fx-rating · .fx-rating-readonly · .fx-rating-disabled · fx-rating-item · .fx-rating-filled / .fx-rating-empty", "Row of 20px star buttons; filled stars are amber, empty ones grey; hover scales a star by 15%."),
+            new("fx-rating · .fx-rating-readonly · .fx-rating-disabled · fx-rating-item · .fx-rating-filled / .fx-rating-empty", "Row of 20px star buttons; filled stars are amber, empty ones gray; hover scales a star by 15%."),
         };
         public static readonly ApiRow[] Keys =
         {
@@ -236,20 +236,20 @@
     <CheckBoxControl Checked=""@AllChecked"" Indeterminate=""@SomeChecked"" CheckedChanged=""SetAll"" Label=""Include in quote"" />
     <div class=""stack indent"">
         <CheckBoxControl @bind-Checked=""_tax"" Label=""Sales tax"" />
-        <CheckBoxControl @bind-Checked=""_labour"" Label=""Labour"" />
+        <CheckBoxControl @bind-Checked=""_labor"" Label=""Labor"" />
         <CheckBoxControl @bind-Checked=""_permits"" Label=""Permits"" />
         <CheckBoxControl Checked=""true"" Disabled=""true"" Label=""Materials (always included)"" />
     </div>
 </div>
 <p class=""result"">@Included</p>";
         public const string ChecksCs = @"// Check boxes
-private bool _tax = true, _labour = true, _permits;
+private bool _tax = true, _labor = true, _permits;
 
-private bool AllChecked => _tax && _labour && _permits;
+private bool AllChecked => _tax && _labor && _permits;
 
-private bool SomeChecked => !AllChecked && (_tax || _labour || _permits);
+private bool SomeChecked => !AllChecked && (_tax || _labor || _permits);
 
-private void SetAll(bool value) => _tax = _labour = _permits = value;
+private void SetAll(bool value) => _tax = _labor = _permits = value;
 
 private string Included
 {
@@ -257,7 +257,7 @@ private string Included
     {
         var parts = new List<string> { ""materials"" };
         if (_tax) parts.Add(""sales tax"");
-        if (_labour) parts.Add(""labour"");
+        if (_labor) parts.Add(""labor"");
         if (_permits) parts.Add(""permits"");
         return ""Quote includes "" + string.Join("", "", parts) + ""."";
     }

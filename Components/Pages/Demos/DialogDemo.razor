@@ -9,11 +9,11 @@
 <PageTitle>Blazor Dialog, Window and Message Box — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Dialogs" Category="Components" ControlName="DialogControl"
-                   Tagline="A movable, resizable window with a default button, plus message boxes and prompts you can await."
+                   Tagline="Ask users to confirm, enter a value or edit a record in a movable, resizable window."
                    SourcePath="DialogControl.razor; Dialogs/MessageBoxControl.razor; Dialogs/IDialogService.cs">
     <Overview>
         <p>
-            <code>DialogControl</code> is a Blazor dialog window: movable, resizable, modal or non-modal, with a default button, Escape to close and a Win32-style system menu. <code>MessageBoxControl</code>, <code>InputDialogControl</code> and <code>IDialogService</code> build on it so any component can await a confirm, alert or prompt.
+            <code>DialogControl</code> is a Blazor dialog window, modal or non-modal, that users can move and resize, with a default button for Enter and Escape to close. Use modal for a decision the page must wait for, such as deleting an order, and non-modal for a tool window users keep open while they work. For a quick confirm, alert or prompt, any component can await one call on <code>IDialogService</code>, such as <code>ConfirmAsync</code>.
         </p>
     </Overview>
 
@@ -28,7 +28,7 @@
                     <ButtonControl CssClass="btn-primary" OnClick="@(() => _archiveOpen = true)">Open dialog</ButtonControl>
                     <span class="result">@_archiveResult</span>
                 </div>
-                @* Classic: the frame class, the window icon, classic buttons; .dlg-host lets page CSS grey the footer. *@
+                @* Classic: the frame class, the window icon, classic buttons; .dlg-host lets page CSS gray the footer. *@
                 <div class="dlg-host">
                     <DialogControl @bind-Visible="_archiveOpen" Header="Archive project" Width="440px" OnEnter="Archive"
                                    CssClass="@(_classic ? "fx-dialog-classic" : null)" ShowWindowIcon="@_classic">
@@ -55,7 +55,7 @@
                 <div class="demo-row">
                     <ButtonControl CssClass="btn-primary" OnClick="@(() => _winOpen = true)">Open window</ButtonControl>
                     <ButtonControl OnClick="@(() => _pageClicks++)">Page click (@_pageClicks)</ButtonControl>
-                    <span class="result">@_winWidth × @_winHeight, @(_winPos is null ? "centred" : $"moved {_winPos.X:0}, {_winPos.Y:0}")</span>
+                    <span class="result">@_winWidth × @_winHeight, @(_winPos is null ? "centered" : $"moved {_winPos.X:0}, {_winPos.Y:0}")</span>
                 </div>
                 <DialogControl @bind-Visible="_winOpen" Header="Inspector" IsModal="false" ShowWindowIcon="true"
                                @bind-Width="_winWidth" @bind-Height="_winHeight" @bind-Position="_winPos"
@@ -99,7 +99,7 @@
             </DocSection>
             <DocSection Id="doc-methods" Title="Methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
                 <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
-                <p class="note">Enums: <code>MessageBoxButtons</code> Ok, OkCancel, YesNo, YesNoCancel · <code>MessageBoxResult</code> Ok, Cancel, Yes, No · <code>MessageBoxLook</code> VB6, DotNet · <code>DialogPosition(X, Y)</code> is the offset from centre in CSS pixels.</p>
+                <p class="note">Enums: <code>MessageBoxButtons</code> Ok, OkCancel, YesNo, YesNoCancel · <code>MessageBoxResult</code> Ok, Cancel, Yes, No · <code>MessageBoxLook</code> VB6, DotNet · <code>DialogPosition(X, Y)</code> is the offset from center in CSS pixels.</p>
             </DocSection>
             <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
                 <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
@@ -112,7 +112,7 @@
 
     <Accessibility>
         <ul>
-            <li>The dialog has <code>role="dialog"</code>, <code>aria-modal</code> when modal, and is labelled by <code>Header</code> or <code>AriaLabel</code>; <code>AriaDescribedBy</code> points at a description.</li>
+            <li>The dialog has <code>role="dialog"</code>, <code>aria-modal</code> when modal, and is labeled by <code>Header</code> or <code>AriaLabel</code>; <code>AriaDescribedBy</code> points at a description.</li>
             <li><code>AutoFocus</code> moves focus to the first focusable control on open; focus returns to the opener on close.</li>
             <li>Escape closes, or runs <code>OnEscape</code> when set. Alt+F4 closes. Ctrl+Enter closes when <code>CloseOnCtrlEnter</code> is on. Enter fires <code>OnEnter</code> unless the focused control keeps the key.</li>
             <li>The system menu (right-click on the title bar, or the window icon) offers Move and Close; Restore, Size, Minimize and Maximize are listed but disabled.</li>
@@ -164,14 +164,14 @@
     private async Task Prompt()
     {
         var name = await Dialogs.PromptAsync("Project name:", "New project", "Untitled");
-        _answer = name is null ? "Cancelled" : $"Named \"{name}\"";
+        _answer = name is null ? "Canceled" : $"Named \"{name}\"";
     }
     private Task Alert() => Dialogs.AlertAsync("Export finished. 240 rows written.", "Export");
     private async Task Notes()
     {
         var text = await _editor!.ShowAsync(_notes, "Booking notes", 500, "Internal notes for the booking; 500 characters at most.");
         if (text is not null) _notes = text;
-        _answer = text is null ? "Cancelled" : $"Notes: {text.Length} characters";
+        _answer = text is null ? "Canceled" : $"Notes: {text.Length} characters";
     }
     private async Task AskDotNet() =>
         _answer = (await _box!.ShowAsync("Save changes to Report.docx?", "Editor", MessageBoxButtons.YesNoCancel, "question", MessageBoxLook.DotNet)).ToString();
@@ -188,7 +188,7 @@
             new("ChildContent", "Body.", "RenderFragment?"),
             new("FooterContent", "Footer, right-aligned flex row. Rendered only when set.", "RenderFragment?", "null"),
             new("Width / Height", "CSS sizes. Two-way: a resize reports the new values through <code>WidthChanged</code> / <code>HeightChanged</code>.", "string?", "null"),
-            new("Position", "Offset from centre after a drag. Two-way with <code>@bind-Position</code>.", "DialogPosition?", "null"),
+            new("Position", "Offset from center after a drag. Two-way with <code>@bind-Position</code>.", "DialogPosition?", "null"),
             new("IsModal", "true dims and blocks the page; false leaves it live.", "bool", "true"),
             new("ShowCloseIcon", "The ✕ in the title bar.", "bool", "true"),
             new("CloseOnEscape", "Escape requests close.", "bool", "true"),
@@ -212,7 +212,7 @@
             new("ConfirmAsync(message, title)", "Yes / No box; true for Yes.", "Task&lt;bool&gt;"),
             new("ConfirmCancelAsync(message, title)", "Yes / No / Cancel box.", "Task&lt;MessageBoxResult&gt;"),
             new("AlertAsync(message, title)", "OK box.", "Task"),
-            new("PromptAsync(message, title, defaultValue)", "Single-line input; null when cancelled.", "Task&lt;string?&gt;"),
+            new("PromptAsync(message, title, defaultValue)", "Single-line input; null when canceled.", "Task&lt;string?&gt;"),
             new("(setup)", "Register <code>DialogService</code> and <code>IDialogService</code> as scoped; render one <code>DialogHostControl</code> in the layout. Without a host the calls return false, Cancel or null.", ""),
         };
         public static readonly ApiRow[] MessageBox =
@@ -222,7 +222,7 @@
             new("Buttons", "Which buttons to show.", "MessageBoxButtons", "Ok"),
             new("IconCss", "Keyword <code>warning</code>, <code>info</code>, <code>error</code>, <code>question</code> or <code>none</code>; any other value is used as a CSS class. The VB6 look shows the question icon by default on boxes with more than OK.", "string?", "null"),
             new("Look", "<code>VB6</code> classic frame or <code>DotNet</code>.", "MessageBoxLook", "VB6"),
-            new("RequiredConfirmationText", "Adds a checkbox with this label; the primary button stays disabled until it is ticked.", "string?", "null"),
+            new("RequiredConfirmationText", "Adds a checkbox with this label; the primary button stays disabled until it is checked.", "string?", "null"),
             new("Draggable", "Title bar drags the box.", "bool", "true"),
             new("CloseOnOverlayClick", "Backdrop click closes.", "bool", "false"),
             new("OnResult", "Fires with the chosen button.", "EventCallback&lt;MessageBoxResult&gt;"),
@@ -240,15 +240,15 @@
         public static readonly ApiRow[] Methods =
         {
             new("MessageBoxControl.ShowAsync(message, title, buttons, icon, look, requiredConfirmationText)", "Shows the box and completes with the chosen button. All but message optional; <code>icon</code> takes the same keywords as <code>IconCss</code>.", "Task&lt;MessageBoxResult&gt;"),
-            new("InputDialogControl.ShowAsync(prompt, title, defaultValue)", "Shows the prompt; null when cancelled.", "Task&lt;string?&gt;"),
-            new("MultiLineEditControl.ShowAsync(initial, title, maxLength, prompt)", "Multi-line text prompt; null when cancelled.", "Task&lt;string?&gt;"),
+            new("InputDialogControl.ShowAsync(prompt, title, defaultValue)", "Shows the prompt; null when canceled.", "Task&lt;string?&gt;"),
+            new("MultiLineEditControl.ShowAsync(initial, title, maxLength, prompt)", "Multi-line text prompt; null when canceled.", "Task&lt;string?&gt;"),
             new("DefaultButtonScope.ConsumeEnter()", "Cascaded by a dialog with <code>OnEnter</code>. A control calls it to keep one Enter for itself.", "void"),
             new("DefaultButtonScope.Defer(task)", "The default button waits for this task before deciding.", "void"),
         };
         public static readonly ApiRow[] Css =
         {
-            new("fx-dialog-overlay · .fx-dialog-overlay-nonmodal", "Fixed full-screen layer, 35% black and centred; non-modal makes it transparent and lets clicks through."),
-            new("fx-dialog · .fx-dialog-classic", "The window: white, rounded, shadow, 320px minimum, 90vw / 90vh maximum. Classic: grey, square 28px title bar, MS Sans Serif."),
+            new("fx-dialog-overlay · .fx-dialog-overlay-nonmodal", "Fixed full-screen layer, 35% black and centered; non-modal makes it transparent and lets clicks through."),
+            new("fx-dialog · .fx-dialog-classic", "The window: white, rounded, shadow, 320px minimum, 90vw / 90vh maximum. Classic: gray, square 28px title bar, MS Sans Serif."),
             new("fx-dialog-header · fx-dialog-title · fx-dialog-close · fx-dialog-window-icon", "Title bar parts. The ✕ turns red on hover."),
             new("fx-dialog-body · fx-dialog-footer", "Body with 16px padding; footer with a top border, right-aligned."),
             new("fx-dialog-btn", "Footer button styling that any button can take."),
@@ -278,7 +278,7 @@
     <ButtonControl CssClass=""btn-primary"" OnClick=""@(() => _archiveOpen = true)"">Open dialog</ButtonControl>
     <span class=""result"">@_archiveResult</span>
 </div>
-@* Classic: the frame class, the window icon, classic buttons; .dlg-host lets page CSS grey the footer. *@
+@* Classic: the frame class, the window icon, classic buttons; .dlg-host lets page CSS gray the footer. *@
 <div class=""dlg-host"">
     <DialogControl @bind-Visible=""_archiveOpen"" Header=""Archive project"" Width=""440px"" OnEnter=""Archive""
                    CssClass=""@(_classic ? ""fx-dialog-classic"" : null)"" ShowWindowIcon=""@_classic"">
@@ -317,7 +317,7 @@ private void Archive()
         public const string Window = @"<div class=""demo-row"">
     <ButtonControl CssClass=""btn-primary"" OnClick=""@(() => _winOpen = true)"">Open window</ButtonControl>
     <ButtonControl OnClick=""@(() => _pageClicks++)"">Page click (@_pageClicks)</ButtonControl>
-    <span class=""result"">@_winWidth × @_winHeight, @(_winPos is null ? ""centred"" : $""moved {_winPos.X:0}, {_winPos.Y:0}"")</span>
+    <span class=""result"">@_winWidth × @_winHeight, @(_winPos is null ? ""centered"" : $""moved {_winPos.X:0}, {_winPos.Y:0}"")</span>
 </div>
 <DialogControl @bind-Visible=""_winOpen"" Header=""Inspector"" IsModal=""false"" ShowWindowIcon=""true""
                @bind-Width=""_winWidth"" @bind-Height=""_winHeight"" @bind-Position=""_winPos""
@@ -359,7 +359,7 @@ private async Task Confirm() => _answer = await Dialogs.ConfirmAsync(""Delete 3 
 private async Task Prompt()
 {
     var name = await Dialogs.PromptAsync(""Project name:"", ""New project"", ""Untitled"");
-    _answer = name is null ? ""Cancelled"" : $""Named \""{name}\"""";
+    _answer = name is null ? ""Canceled"" : $""Named \""{name}\"""";
 }
 
 private Task Alert() => Dialogs.AlertAsync(""Export finished. 240 rows written."", ""Export"");
@@ -368,7 +368,7 @@ private async Task Notes()
 {
     var text = await _editor!.ShowAsync(_notes, ""Booking notes"", 500, ""Internal notes for the booking; 500 characters at most."");
     if (text is not null) _notes = text;
-    _answer = text is null ? ""Cancelled"" : $""Notes: {text.Length} characters"";
+    _answer = text is null ? ""Canceled"" : $""Notes: {text.Length} characters"";
 }
 
 private async Task AskDotNet() =>

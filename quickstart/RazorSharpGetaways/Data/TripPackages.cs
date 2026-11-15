@@ -26,7 +26,7 @@ public static class TripPackages
     ];
 
     /// <summary>Departure seasons; a cost sheet prices a package per season.</summary>
-    public static readonly string[] Seasons = ["Spring", "Summer", "Autumn", "Winter"];
+    public static readonly string[] Seasons = ["Spring", "Summer", "Fall", "Winter"];
 
     /// <summary>The package for a destination, or the first package if it is not listed.</summary>
     public static TripPackage ForDestination(string destination) =>
@@ -40,7 +40,7 @@ public static class TripPackages
     {
         3 or 4 or 5 => "Spring",
         6 or 7 or 8 => "Summer",
-        9 or 10 or 11 => "Autumn",
+        9 or 10 or 11 => "Fall",
         _ => "Winter"
     };
 }

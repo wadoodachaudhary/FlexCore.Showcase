@@ -24,7 +24,7 @@
                 {
                     <ButtonControl BareStyle="true" CssClass="gw-menu-item gw-menu-request" OnClick="@(() => Open(r))">
                         <AvatarControl Text="@r.Agent" AlternativeText="@r.Agent" Size="24px" CssClass="gw-agent-avatar" Style="@($"background:{r.AvatarBg}")" />
-                        <span class="gw-menu-request-text"><strong>@r.Destination</strong> for @r.Traveller<small>@r.Request · @r.TripTypeName</small></span>
+                        <span class="gw-menu-request-text"><strong>@r.Destination</strong> for @r.Traveler<small>@r.Request · @r.TripTypeName</small></span>
                     </ButtonControl>
                 }
                 <ButtonControl BareStyle="true" CssClass="gw-menu-item gw-menu-all" OnClick="ShowAllNew">Show all new requests</ButtonControl>

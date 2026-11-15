@@ -13,11 +13,11 @@
 <PageTitle>Cell Editor Typing Modes in a Blazor Server Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Typing modes" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Decide whether each keystroke in a cell editor goes to the server or stays in the browser until commit."
+                   Tagline="Send every keystroke to the server, or keep typing in the browser until commit."
                    SourcePath="TextBoxTypingBehavior.cs;Grid/GridControl.razor.cs;Grid/GridTextEditingDiagnosticsSnapshot.cs;TextBoxControl.razor;wwwroot/textbox-control.js">
     <Overview>
         <p>
-            <code>TextEditorTypingBehavior</code> picks how text cell editors in the Blazor <code>GridControl</code> send keystrokes: <code>ServerBacked</code> uses the ordinary Blazor event path, <code>ClientBuffered</code> keeps typing in the browser and sends the value when the cell commits. Both write the same value on commit.
+            Typing modes decide how text editors in a Blazor <code>GridControl</code> send what users type: every keystroke to the server, or once when the cell commits. Use <code>ClientBuffered</code> for heavy data entry or a distant server: keystrokes stay in the browser and the value is sent once, on commit. <code>ServerBacked</code>, the default, is the ordinary Blazor path with a round trip per key; both write the same value.
         </p>
     </Overview>
 

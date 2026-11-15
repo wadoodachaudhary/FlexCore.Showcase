@@ -32,7 +32,7 @@ public static class PackageCostSheet
         int rooms = (pax + 1) / 2;   // two to a room
 
         // Prices vary with season and distance from home
-        decimal seasonFactor = season switch { "Summer" => 1.25m, "Autumn" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
+        decimal seasonFactor = season switch { "Summer" => 1.25m, "Fall" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
         decimal flightFactor = package.Region switch
         {
             "East Asia" => 1.6m, "Southern Africa" => 1.8m, "North Africa" => 0.9m, "Northern Europe" => 1.1m,
@@ -55,9 +55,9 @@ public static class PackageCostSheet
                     ("T", "Airport to hotel, private car",      1, "trip",   45,  90, ""),
                     ("T", "Hotel to airport, private car",      1, "trip",   45,  90, ""),
                 }),
-                ($"{city} Rail & Coach", new[]
+                ($"{city} Rail & Bus", new[]
                 {
-                    ("T", "Day-trip coach with driver",         1, "day",   120, 260, "Net rate"),
+                    ("T", "Day-trip bus with driver",         1, "day",   120, 260, "Net rate"),
                     ("T", "Regional rail pass, 3 days",       pax, "pax",    90, 180, ""),
                 }),
             }),

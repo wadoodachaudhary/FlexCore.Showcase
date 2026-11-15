@@ -16,17 +16,17 @@
 <PageTitle>Blazor Badge, Alert, Timeline and Progress Bar — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="UI elements" Category="Components"
-                   Tagline="The small parts: badges, alerts, skeletons, timeline, breadcrumb and progress bars."
+                   Tagline="Show status, progress and where users are with badges, alerts, timelines and bars."
                    SourcePath="BadgeControl.razor;BadgeModels.cs;AlertControl.razor;AlertModels.cs;SkeletonControl.razor;SkeletonModels.cs;TimelineControl.razor;TimelineItemControl.razor;TimelineModels.cs;BreadCrumbControl.razor;BreadCrumbItem.cs;FlexControlBase.cs;ProgressBarControl.razor;ChunkProgressBarControl.razor;ContentModels.cs">
     <Overview>
         <p>
-            Seven small Blazor controls on one page: <code>BadgeControl</code>, <code>AlertControl</code>, <code>SkeletonControl</code>, <code>TimelineControl</code>, <code>BreadCrumbControl</code>, <code>ProgressBarControl</code> and <code>ChunkProgressBarControl</code>. The tables under Documentation list every parameter.
+            Seven small Blazor controls, from <code>BadgeControl</code> to <code>ProgressBarControl</code>, that tell users what is happening and where they are. Use <code>BadgeControl</code> for counts and status, <code>AlertControl</code> for a message that stays on the page, <code>SkeletonControl</code> while content loads, <code>TimelineControl</code> for a history, <code>BreadCrumbControl</code> for the path to the current page, and <code>ProgressBarControl</code> or <code>ChunkProgressBarControl</code> for a long import.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="status" Title="Badges, alerts and skeletons" RazorCode="@Code.Status">
-            <Description><p>A badge per variant and size, an alert per severity, and a skeleton holding the place of loading content.</p></Description>
+            <Description><p>Compare a badge in every variant and size, an alert for each severity, and a skeleton holding the place of content still loading.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <BadgeControl Text="Primary" Variant="BadgeVariant.Primary" />
@@ -54,12 +54,12 @@
         </DemoExample>
 
         <DemoExample Id="content" Title="Timeline and breadcrumb" RazorCode="@Code.Content" CSharpCode="@Code.ContentCs">
-            <Description><p>A timeline of items with a time and a coloured point, and a breadcrumb whose last item has no link.</p></Description>
+            <Description><p>Read a timeline whose items each carry a time and a colored point, and a breadcrumb whose last item, the current page, is not a link.</p></Description>
             <Demo>
                 <div class="two">
                     <TimelineControl>
                         <TimelineItemControl Title="Deposit received" Time="09:00" PointColor="BadgeVariant.Success">Booking LIS-0001 confirmed.</TimelineItemControl>
-                        <TimelineItemControl Title="Tickets issued" Time="13:30" PointColor="BadgeVariant.Primary">Return flights for two travellers.</TimelineItemControl>
+                        <TimelineItemControl Title="Tickets issued" Time="13:30" PointColor="BadgeVariant.Primary">Return flights for two travelers.</TimelineItemControl>
                         <TimelineItemControl Title="Hotel to confirm" Time="16:45" PointColor="BadgeVariant.Warning">Late arrival noted with the old-town hotel.</TimelineItemControl>
                     </TimelineControl>
                 </div>
@@ -79,7 +79,7 @@
                 <div class="progress-demo mt">
                     <ProgressBarControl Value="Percent" Title="Importing supplier rates" Status="@ImportStatus" Detail="@ImportDetail"
                                         Indeterminate="Connecting" IsError="@(_phase == ImportPhase.Failed)" ErrorMessage="@_error"
-                                        OnCancel="CancelCallback" CancelText="Stop import" CancelDisabled="_cancelling" />
+                                        OnCancel="CancelCallback" CancelText="Stop import" CancelDisabled="_canceling" />
                     <div class="chunk-col">
                         <ChunkProgressBarControl Value="_linesDone" Max="TotalLines" ChunkCount="10" Indeterminate="Connecting"
                                                  AriaLabel="Supplier rate lines imported" />
@@ -204,12 +204,12 @@
     private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", "/"), new("Requests", "demo/layout"), new("LIS-0001 Marmalade") };
 
     // Progress (2026-10-25): the import is simulated; a PeriodicTimer on this page advances it and the controls only display it.
-    private enum ImportPhase { Idle, Connecting, Importing, Cancelled, Failed, Done }
+    private enum ImportPhase { Idle, Connecting, Importing, Canceled, Failed, Done }
     private static readonly (string City, int Lines)[] RateFiles = { ("Lisbon", 2000), ("Kyoto", 1800), ("Cape Town", 1200) };
     private static readonly int TotalLines = RateFiles.Sum(f => f.Lines);
     private ImportPhase _phase;
     private int _linesDone, _connectTicks;
-    private bool _cancelling;
+    private bool _canceling;
     private string? _error;
     private PeriodicTimer? _timer;
 
@@ -232,7 +232,7 @@
     {
         ImportPhase.Idle => "not started",
         ImportPhase.Connecting => "connecting",
-        ImportPhase.Cancelled => $"stopped at {_linesDone:N0} lines",
+        ImportPhase.Canceled => $"stopped at {_linesDone:N0} lines",
         ImportPhase.Done => $"{TotalLines:N0} lines read",
         _ => FileStatus(),
     };
@@ -242,7 +242,7 @@
     private void StartImport()
     {
         StopTimer();
-        (_phase, _linesDone, _connectTicks, _cancelling, _error) = (ImportPhase.Connecting, 0, 0, false, null);
+        (_phase, _linesDone, _connectTicks, _canceling, _error) = (ImportPhase.Connecting, 0, 0, false, null);
         _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250));
         _ = RunImportAsync(_timer);
     }
@@ -257,7 +257,7 @@
     private void Tick()
     {
         if (!Running) return;
-        if (_cancelling) { _phase = ImportPhase.Cancelled; StopTimer(); }
+        if (_canceling) { _phase = ImportPhase.Canceled; StopTimer(); }
         else if (Connecting) { if (++_connectTicks == 6) _phase = ImportPhase.Importing; }
         else
         {
@@ -267,7 +267,7 @@
     }
 
     // Bound to CancelDisabled: the button reads "cancelling…" until the next tick stops the loop.
-    private void CancelImport() => _cancelling = true;
+    private void CancelImport() => _canceling = true;
 
     private void FailImport()
     {
@@ -310,7 +310,7 @@
         public const string Content = @"<div class=""two"">
     <TimelineControl>
         <TimelineItemControl Title=""Deposit received"" Time=""09:00"" PointColor=""BadgeVariant.Success"">Booking LIS-0001 confirmed.</TimelineItemControl>
-        <TimelineItemControl Title=""Tickets issued"" Time=""13:30"" PointColor=""BadgeVariant.Primary"">Return flights for two travellers.</TimelineItemControl>
+        <TimelineItemControl Title=""Tickets issued"" Time=""13:30"" PointColor=""BadgeVariant.Primary"">Return flights for two travelers.</TimelineItemControl>
         <TimelineItemControl Title=""Hotel to confirm"" Time=""16:45"" PointColor=""BadgeVariant.Warning"">Late arrival noted with the old-town hotel.</TimelineItemControl>
     </TimelineControl>
 </div>
@@ -325,7 +325,7 @@
 <div class=""progress-demo mt"">
     <ProgressBarControl Value=""Percent"" Title=""Importing supplier rates"" Status=""@ImportStatus"" Detail=""@ImportDetail""
                         Indeterminate=""Connecting"" IsError=""@(_phase == ImportPhase.Failed)"" ErrorMessage=""@_error""
-                        OnCancel=""CancelCallback"" CancelText=""Stop import"" CancelDisabled=""_cancelling"" />
+                        OnCancel=""CancelCallback"" CancelText=""Stop import"" CancelDisabled=""_canceling"" />
     <div class=""chunk-col"">
         <ChunkProgressBarControl Value=""_linesDone"" Max=""TotalLines"" ChunkCount=""10"" Indeterminate=""Connecting""
                                  AriaLabel=""Supplier rate lines imported"" />
@@ -334,12 +334,12 @@
                              Orientation=""FlexOrientation.Vertical"" Style=""height: 120px"" AriaLabel=""Supplier rate lines imported, vertical"" />
 </div>";
         public const string ProgressCs = @"// Progress (2026-10-25): the import is simulated; a PeriodicTimer on this page advances it and the controls only display it.
-private enum ImportPhase { Idle, Connecting, Importing, Cancelled, Failed, Done }
+private enum ImportPhase { Idle, Connecting, Importing, Canceled, Failed, Done }
 private static readonly (string City, int Lines)[] RateFiles = { (""Lisbon"", 2000), (""Kyoto"", 1800), (""Cape Town"", 1200) };
 private static readonly int TotalLines = RateFiles.Sum(f => f.Lines);
 private ImportPhase _phase;
 private int _linesDone, _connectTicks;
-private bool _cancelling;
+private bool _canceling;
 private string? _error;
 private PeriodicTimer? _timer;
 
@@ -362,7 +362,7 @@ private string ImportStatus => _phase switch
 {
     ImportPhase.Idle => ""not started"",
     ImportPhase.Connecting => ""connecting"",
-    ImportPhase.Cancelled => $""stopped at {_linesDone:N0} lines"",
+    ImportPhase.Canceled => $""stopped at {_linesDone:N0} lines"",
     ImportPhase.Done => $""{TotalLines:N0} lines read"",
     _ => FileStatus(),
 };
@@ -372,7 +372,7 @@ private string ImportDetail => $""file {CurrentFile().Index + 1} of {RateFiles.L
 private void StartImport()
 {
     StopTimer();
-    (_phase, _linesDone, _connectTicks, _cancelling, _error) = (ImportPhase.Connecting, 0, 0, false, null);
+    (_phase, _linesDone, _connectTicks, _canceling, _error) = (ImportPhase.Connecting, 0, 0, false, null);
     _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250));
     _ = RunImportAsync(_timer);
 }
@@ -387,7 +387,7 @@ private async Task RunImportAsync(PeriodicTimer timer)
 private void Tick()
 {
     if (!Running) return;
-    if (_cancelling) { _phase = ImportPhase.Cancelled; StopTimer(); }
+    if (_canceling) { _phase = ImportPhase.Canceled; StopTimer(); }
     else if (Connecting) { if (++_connectTicks == 6) _phase = ImportPhase.Importing; }
     else
     {
@@ -397,7 +397,7 @@ private void Tick()
 }
 
 // Bound to CancelDisabled: the button reads ""cancelling…"" until the next tick stops the loop.
-private void CancelImport() => _cancelling = true;
+private void CancelImport() => _canceling = true;
 
 private void FailImport()
 {
@@ -425,7 +425,7 @@ public void Dispose() => StopTimer();";
         {
             new("Text", "Content of the span when not empty; <code>ChildContent</code> is then ignored.", "string?", "null"),
             new("ChildContent", "Rendered only when <code>Text</code> is null or empty.", "RenderFragment?", "null"),
-            new("Variant", "Picks the colour class, <code>fx-badge-primary</code> to <code>fx-badge-dark</code>; see the values below. An unknown value falls back to <code>fx-badge-primary</code>.", "BadgeVariant", "BadgeVariant.Primary"),
+            new("Variant", "Picks the color class, <code>fx-badge-primary</code> to <code>fx-badge-dark</code>; see the values below. An unknown value falls back to <code>fx-badge-primary</code>.", "BadgeVariant", "BadgeVariant.Primary"),
             new("Size", "Picks <code>fx-badge-sm</code>, <code>fx-badge-md</code> or <code>fx-badge-lg</code>: font size and padding.", "BadgeSize", "BadgeSize.Medium"),
             new("IsPill", "Adds <code>fx-badge-pill</code>: fully rounded ends and wider side padding. False keeps the 4px corners of <code>fx-badge</code>.", "bool", "true"),
             new("IsDot", "Adds <code>fx-badge-dot</code>: an 8px circle with no padding. <code>Text</code> and <code>ChildContent</code> are still rendered inside it, so give a dot neither.", "bool", "false"),
@@ -434,12 +434,12 @@ public void Dispose() => StopTimer();";
         public static readonly ApiRow[] BadgeVariants =
         {
             new("Primary", "Blue, white text (<code>fx-badge-primary</code>); the default."),
-            new("Secondary", "Slate grey, white text."),
+            new("Secondary", "Slate gray, white text."),
             new("Success", "Green, white text."),
             new("Danger", "Red, white text."),
             new("Warning", "Amber, white text."),
             new("Info", "Sky blue, white text."),
-            new("Light", "Light grey, dark text, 1px border."),
+            new("Light", "Light gray, dark text, 1px border."),
             new("Dark", "Dark slate, white text."),
         };
         public static readonly ApiRow[] BadgeSizes =
@@ -453,7 +453,7 @@ public void Dispose() => StopTimer();";
             new("Title", "Inherited from <code>FlexControlBase</code>; rendered as an <code>h6.fx-alert-title</code> when not empty.", "string?", "null"),
             new("Text", "Rendered in <code>div.fx-alert-text</code> under the title when not empty.", "string?", "null"),
             new("ChildContent", "Rendered after <code>Title</code> and <code>Text</code> inside the content column; all three can be present.", "RenderFragment?", "null"),
-            new("Severity", "Picks the colour class (<code>fx-alert-info</code>, <code>-success</code>, <code>-warning</code>, <code>-error</code>) and which of the four inline SVG icons is drawn.", "AlertSeverity", "AlertSeverity.Info"),
+            new("Severity", "Picks the color class (<code>fx-alert-info</code>, <code>-success</code>, <code>-warning</code>, <code>-error</code>) and which of the four inline SVG icons is drawn.", "AlertSeverity", "AlertSeverity.Info"),
             new("ShowIcon", "Renders the <code>fx-alert-icon</code> column with the severity's icon.", "bool", "true"),
             new("AllowClose", "Renders the close button (<code>fx-alert-close</code>, <code>aria-label</code> Close). Clicking it sets a private flag that removes the whole alert from the render tree, then raises <code>OnClose</code>. No parameter shows it again; a new component instance does.", "bool", "false"),
         };
@@ -507,9 +507,9 @@ public void Dispose() => StopTimer();";
         public static readonly ApiRow[] TimelineItem =
         {
             new("Title", "<code>div.fx-timeline-title</code> (bold) under the time, when not empty.", "string?", "null"),
-            new("Time", "<code>div.fx-timeline-time</code>, the small grey line at the top of the item, when not empty. Plain text; nothing parses or formats it.", "string?", "null"),
+            new("Time", "<code>div.fx-timeline-time</code>, the small gray line at the top of the item, when not empty. Plain text; nothing parses or formats it.", "string?", "null"),
             new("IconCss", "Classes of a <code>span</code> rendered inside the 14px point when <code>PointContent</code> is null and this is not empty.", "string?", "null"),
-            new("PointColor", "Adds <code>fx-timeline-item-point-</code> plus the lower-cased value to the item. The stylesheet colours the point for <code>Success</code>, <code>Danger</code>, <code>Warning</code>, <code>Info</code>, <code>Secondary</code> and <code>Dark</code>; <code>Primary</code> and <code>Light</code> have no rule and keep the point's default blue.", "BadgeVariant", "BadgeVariant.Primary"),
+            new("PointColor", "Adds <code>fx-timeline-item-point-</code> plus the lower-cased value to the item. The stylesheet colors the point for <code>Success</code>, <code>Danger</code>, <code>Warning</code>, <code>Info</code>, <code>Secondary</code> and <code>Dark</code>; <code>Primary</code> and <code>Light</code> have no rule and keep the point's default blue.", "BadgeVariant", "BadgeVariant.Primary"),
             new("PointContent", "Replaces the point's content; wins over <code>IconCss</code>.", "RenderFragment?", "null"),
             new("ChildContent", "Body text in <code>div.fx-timeline-body</code> under the title; the div is rendered even when empty.", "RenderFragment?", "null"),
         };
@@ -523,7 +523,7 @@ public void Dispose() => StopTimer();";
             new("Text", "The crumb's visible text, inside the link or the span.", "string", "\"\""),
             new("Href", "Link target. Null or empty renders the crumb as text; the last crumb is text whatever its <code>Href</code>.", "string?", "null"),
             new("IconCss", "Classes of a <code>span.fx-breadcrumb-icon</code> placed before the text, in both the link and the text form.", "string?", "null"),
-            new("Disabled", "Adds the class <code>disabled</code> to the item (grey, <code>pointer-events: none</code>) and renders it as text even when it has an <code>Href</code>.", "bool", "false"),
+            new("Disabled", "Adds the class <code>disabled</code> to the item (gray, <code>pointer-events: none</code>) and renders it as text even when it has an <code>Href</code>.", "bool", "false"),
         };
         public static readonly ApiRow[] FlexBase =
         {
@@ -541,7 +541,7 @@ public void Dispose() => StopTimer();";
         {
             new("Value", "Percent complete, 0 to 100, not a fraction: 0.5 is half a percent. Clamped to that range for the fill width, which eases over 0.25 s when it changes, and for the percentage in the detail line, shown with at most one decimal (<code>0.#</code>). Ignored while <code>Indeterminate</code> is true.", "double", "0"),
             new("Title", "Bold lead-in at the start of the header, when not blank. A non-null <code>Title</code>, even an empty one, also puts a middle dot before <code>Status</code>.", "string?", "null"),
-            new("Status", "Grey text after the title (<code>span.fx-progress-status</code>), when not blank.", "string?", "null"),
+            new("Status", "Gray text after the title (<code>span.fx-progress-status</code>), when not blank.", "string?", "null"),
             new("Detail", "Text of the monospace line under the bar (<code>p.fx-progress-detail</code>), after the percentage and a middle dot when the percentage is shown.", "string?", "null"),
             new("Indeterminate", "Adds <code>fx-progress-indeterminate</code> to the fill: a block 30% wide sweeps left to right every 1.4 s in place of the fill width, and the percentage is not shown.", "bool", "false"),
             new("IsError", "Adds <code>fx-progress-error</code> to the root: pink background, red border and a solid red fill, and an indeterminate sweep stops. It shows no text by itself; pair it with <code>ErrorMessage</code>.", "bool", "false"),

@@ -7,11 +7,11 @@
 <PageTitle>Blazor OTP Input (Security Code) — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Security code" Category="Components" ControlName="SecurityCodeControl"
-                   Tagline="One box per character for verification codes and PINs, with a callback when the last box is filled."
+                   Tagline="Collect verification codes and PINs one character per box."
                    SourcePath="SecurityCodeControl.razor">
     <Overview>
         <p>
-            <code>SecurityCodeControl</code> is a Blazor OTP input: one box per character for verification codes and PINs, joined into one bound <code>Value</code>, with <code>OnComplete</code> when the last box is filled.
+            <code>SecurityCodeControl</code> is a Blazor one-time-code input: one box per character for verification codes and PINs, joined into one bound <code>Value</code>. Use it for two-step sign-in or confirming an email address; <code>OnComplete</code> fires when the last box is filled, so you can check the code without a Submit button. <code>Length</code> sets the number of boxes, and <code>Type</code> allows digits only or letters too.
         </p>
     </Overview>
 
@@ -92,7 +92,7 @@
             new("Length", "Number of boxes.", "int", "6"),
             new("Type", "<code>Numeric</code> accepts digits only and renders <code>type=\"tel\"</code>; <code>AlphaNumeric</code> accepts any character.", "SecurityCodeControl.SecurityCodeType", "Numeric"),
             new("OnComplete", "Fires with the full code once every box is filled, after <code>ValueChanged</code>.", "EventCallback&lt;string&gt;"),
-            new("Disabled", "Disables every box and greys the host. The base <code>Enabled</code> is not read by this control.", "bool", "false"),
+            new("Disabled", "Disables every box and grays the host. The base <code>Enabled</code> is not read by this control.", "bool", "false"),
             new("CssClass / Style (base)", "On the host element. The base <code>Visible</code> is not applied.", "string?", "null"),
             new("(unmatched attributes)", "Forwarded to the host <code>&lt;div&gt;</code>, not to the boxes.", "Dictionary&lt;string,object&gt;"),
         };
@@ -103,7 +103,7 @@
         };
         public static readonly ApiRow[] Css =
         {
-            new("fx-security-code-host · .disabled", "Inline flex row, 0.5rem gap; <code>disabled</code> greys the boxes and sets <code>cursor: not-allowed</code>."),
+            new("fx-security-code-host · .disabled", "Inline flex row, 0.5rem gap; <code>disabled</code> grays the boxes and sets <code>cursor: not-allowed</code>."),
             new("fx-security-code-cell", "Each box: 42×48px, bold 1.25rem text, 2px border; focus turns the border blue with a 3px ring."),
         };
         public static readonly ApiRow[] Keys =

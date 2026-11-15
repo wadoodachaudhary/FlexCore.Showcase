@@ -8,21 +8,21 @@
    2026-10-20: code tabs generated from this file; hand-written copies had drifted.
    2026-10-24: Keyboard and ARIA tables from TreeViewControl.razor, .Operations.cs, wwwroot/browser-capabilities.js; Parameters and
    TreeNode rows re-checked against TreeViewControl.*.cs, TreeViewModels.cs, TreeViewData.cs and corrected.
-   2026-10-26: sample tree is a tour operator's summer programme. *@
+   2026-10-26: sample tree is a tour operator's summer program. *@
 
 <PageTitle>Blazor TreeView — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Tree view" Category="Components" ControlName="TreeViewControl"
-                   Tagline="A hierarchical tree with folder icons, checkboxes, editing, drag and drop, and a classic VB6 look."
+                   Tagline="Show folders, categories or a program as a tree users expand, check and rearrange."
                    SourcePath="TreeViewControl.razor;TreeViewControl.Appearance.cs;TreeViewControl.Operations.cs;TreeViewModels.cs;TreeViewData.cs;wwwroot/browser-capabilities.js">
     <Overview>
         <p>
-            <code>TreeViewControl</code> is a Blazor tree view: nested <code>TreeNode</code>s with folder icons, selection, checkboxes, inline editing, drag and drop, lazy loading and virtualization, plus <code>UseVb6TreeStyle</code> for the dotted connector lines of migrated Windows screens.
+            <code>TreeViewControl</code> is a Blazor tree view that shows nested items, such as folders or a tour program, which users expand, select, check, rename and drag. Use it, rather than a <a href="demo/grid/tree-grid">tree grid</a>, when each node is a name, not a row of columns; <code>LoadChildren</code> fetches a branch when it opens, and <code>EnableVirtualization</code> renders only the nodes in view. <code>UseVb6TreeStyle</code> draws the dotted lines of the classic Windows tree control.
         </p>
     </Overview>
 
     <Examples>
-        <DemoExample Id="explorer" Title="Programme explorer with a node inspector" RazorCode="@Code.Explorer" CSharpCode="@Code.ExplorerCs">
+        <DemoExample Id="explorer" Title="Program explorer with a node inspector" RazorCode="@Code.Explorer" CSharpCode="@Code.ExplorerCs">
             <Description><p>Click a node to inspect it on the right; the switches change the folder icons and the connector lines.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_styleItems" @bind-Values="_styleValues" Selection="ChoiceSelectionMode.Single" AriaLabel="Folder style" />
@@ -105,7 +105,7 @@
     private bool _useVb6Style = true;
 
     // Folder style switch: a ButtonGroupControl bound to the enum's name.
-    private readonly SelectionItem[] _styleItems = { new("Yellow", "Yellow folders"), new("Grey", "Grey folders"), new("None", "No icons") };
+    private readonly SelectionItem[] _styleItems = { new("Yellow", "Yellow folders"), new("Grey", "Gray folders"), new("None", "No icons") };
     private IReadOnlyList<string> _styleValues = new[] { "Yellow" };
     private TreeFolderStyle FolderStyle => Enum.Parse<TreeFolderStyle>(_styleValues[0]);
 
@@ -124,9 +124,9 @@
             new TreeNode
             {
                 Id = "root-1",
-                Text = "Summer 2026 Programme",
+                Text = "Summer 2026 Program",
                 IsExpanded = true,
-                Tag = "Programme root",
+                Tag = "Program root",
                 Children =
                 [
                     new TreeNode
@@ -149,7 +149,7 @@
                         Children =
                         [
                             new TreeNode { Id = "kyoto", Text = "Kyoto Culture Tour", Tag = "42 of 50 seats sold" },
-                            new TreeNode { Id = "hoi-an", Text = "Hoi An Food Trail", Tag = "28 travellers booked" },
+                            new TreeNode { Id = "hoi-an", Text = "Hoi An Food Trail", Tag = "28 travelers booked" },
                             new TreeNode { Id = "cape-town", Text = "Cape Town & Winelands", Tag = "18 departures confirmed" }
                         ]
                     },
@@ -258,12 +258,12 @@
             new("aria-checked", "Only with <code>ShowCheckboxes</code>: mixed, true or false on the row. The checkbox input inside repeats it and has <code>tabindex</code> -1."),
             new("aria-disabled", "true or false on every row, from <code>IsDisabled</code>."),
             new("aria-busy", "true on a row while <code>LoadChildren</code> runs for it, with a <code>role status</code> span reading Loading… in the row; omitted otherwise."),
-            new("role button", "The expander arrow of a parent in Standard mode and the chevron in Outline mode, labelled Expand or Collapse plus the node text. Neither is focusable; they are mouse targets. A leaf's arrow is <code>aria-hidden</code>."),
+            new("role button", "The expander arrow of a parent in Standard mode and the chevron in Outline mode, labeled Expand or Collapse plus the node text. Neither is focusable; they are mouse targets. A leaf's arrow is <code>aria-hidden</code>."),
             new("aria-hidden", "Node icons, status circles and dots, the rail and leaf arrows."),
             new("role search", "The wrapper of the built-in search box; the input is <code>type=search</code> with <code>aria-label</code> from <code>SearchPlaceholder</code>."),
             new("role status", "The <code>EmptyFilterText</code> message when the search box filter matches nothing, and the Loading… span of a lazy row."),
             new("role alert", "The <code>AlertControl</code> that shows an <code>Error</code> message under the tree."),
-            new("Rename box", "The inline editor's input is labelled Rename node; Save and Cancel are buttons."),
+            new("Rename box", "The inline editor's input is labeled Rename node; Save and Cancel are buttons."),
             new("Not emitted", "No <code>role group</code> around children and no <code>aria-owns</code>; the hierarchy is in the level, posinset and setsize attributes only. No <code>aria-describedby</code> or <code>aria-current</code>."),
         };
     }
@@ -311,7 +311,7 @@ private TreeNode? _selectedNode;
 private bool _useVb6Style = true;
 
 // Folder style switch: a ButtonGroupControl bound to the enum's name.
-private readonly SelectionItem[] _styleItems = { new(""Yellow"", ""Yellow folders""), new(""Grey"", ""Grey folders""), new(""None"", ""No icons"") };
+private readonly SelectionItem[] _styleItems = { new(""Yellow"", ""Yellow folders""), new(""Grey"", ""Gray folders""), new(""None"", ""No icons"") };
 
 private IReadOnlyList<string> _styleValues = new[] { ""Yellow"" };
 
@@ -332,9 +332,9 @@ private static List<TreeNode> BuildSampleTree()
         new TreeNode
         {
             Id = ""root-1"",
-            Text = ""Summer 2026 Programme"",
+            Text = ""Summer 2026 Program"",
             IsExpanded = true,
-            Tag = ""Programme root"",
+            Tag = ""Program root"",
             Children =
             [
                 new TreeNode
@@ -357,7 +357,7 @@ private static List<TreeNode> BuildSampleTree()
                     Children =
                     [
                         new TreeNode { Id = ""kyoto"", Text = ""Kyoto Culture Tour"", Tag = ""42 of 50 seats sold"" },
-                        new TreeNode { Id = ""hoi-an"", Text = ""Hoi An Food Trail"", Tag = ""28 travellers booked"" },
+                        new TreeNode { Id = ""hoi-an"", Text = ""Hoi An Food Trail"", Tag = ""28 travelers booked"" },
                         new TreeNode { Id = ""cape-town"", Text = ""Cape Town & Winelands"", Tag = ""18 departures confirmed"" }
                     ]
                 },

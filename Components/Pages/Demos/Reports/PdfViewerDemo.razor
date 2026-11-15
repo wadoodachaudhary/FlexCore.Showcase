@@ -12,11 +12,11 @@
 <PageTitle>Blazor PDF Viewer — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="PDF viewer" Category="Reports" CategoryHref="demo/reports/package-costs" ControlName="PdfViewerControl"
-                   Tagline="Open, read, search, annotate and fill PDF files in the browser, and get the edited file back as bytes."
+                   Tagline="Let users read, search, annotate and fill PDFs without leaving your app."
                    SourcePath="FlexCore.Documents/Pdf/PdfViewerControl.razor;FlexCore.Documents/Pdf/PdfViewerModels.cs;FlexCore.Documents/wwwroot/pdf-viewer.js">
     <Overview>
         <p>
-            <code>PdfViewerControl</code> opens, searches, annotates and fills PDF files in the browser and hands the edited file back as bytes through <code>SaveAsync</code>. It ships in the FlexCore.Documents package with pdf.js and pdf-lib as static assets; nothing is loaded from a CDN and no PDF content leaves the browser until the application asks for it.
+            <code>PdfViewerControl</code> is a Blazor PDF viewer that lets users read, search, annotate and fill in PDF files in the browser. Use it for contracts, forms and statements: <code>SaveAsync</code> hands the edited file back to your code as bytes, and no PDF content leaves the browser until your application asks for it. It ships in the FlexCore.Documents package with pdf.js and pdf-lib as static assets, so nothing loads from a CDN.
         </p>
     </Overview>
 
@@ -33,7 +33,7 @@
         </DemoExample>
 
         <DemoExample Id="reader" Title="Read-only, from bytes, driven from the page" RazorCode="@Code.Reader" CSharpCode="@Code.ReaderCs">
-            <Description><p>The same file from a byte array with Open, annotations, form filling and bookmarks off; the buttons call the viewer's methods and the line below is fed by its events.</p></Description>
+            <Description><p>Load the same file from bytes, read-only, with Open, annotations, form filling and bookmarks turned off; the buttons call the viewer's methods and its events feed the line below.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _reader!.GoToPageAsync(2)" Disabled="@(_reader?.PageCount is not > 0)">Page 2</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick='() => _reader!.SearchTextAsync("FlexCore")' Disabled="@(_reader?.PageCount is not > 0)">Find FlexCore</ButtonControl>
@@ -103,10 +103,10 @@
 
     <Accessibility>
         <p>
-            The page buttons are labelled "Previous page" and "Next page", the search box "Search document", and the canvas
+            The page buttons are labeled "Previous page" and "Next page", the search box "Search document", and the canvas
             "PDF page <em>n</em>"; the page viewport is a focusable region. Busy text and the match count use <code>role="status"</code>
             and errors <code>role="alert"</code>. Bookmarks, search hits and notes in the Details pane are buttons, and the current hit
-            carries <code>aria-current</code>. Form fields in the pane are ordinary labelled controls.
+            carries <code>aria-current</code>. Form fields in the pane are ordinary labeled controls.
         </p>
     </Accessibility>
 

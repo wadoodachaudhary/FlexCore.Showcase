@@ -15,11 +15,11 @@
 <PageTitle>Real-Time Blazor Grid with Live Updates — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Live updates" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="A grid whose rows change several times a second: templated cells, sorting while it moves, and the cost of each tick measured."
+                   Tagline="Show live prices in a grid that users can still sort while rows change."
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridColumn.cs">
     <Overview>
         <p>
-            Live data needs nothing special in the Blazor <code>GridControl</code>: change the rows in place and call <code>StateHasChanged</code>; only the rows in view and the cells that changed re-render. A column <code>Template</code> draws colour, arrows and small SVG from the row's values, and sorting keeps working while rows move.
+            The Blazor <code>GridControl</code> shows live data, such as prices changing several times a second, and users can sort it while the rows move. Use it for tickers, dashboards and order queues: change the bound rows in place and call <code>StateHasChanged</code>, and only the rows in view and the cells that changed re-render. A column <code>Template</code> draws color, arrows and SVG sparklines from each row's values.
         </p>
     </Overview>
 
@@ -75,7 +75,7 @@
                         </GridColumn>
                         <GridColumn Field="@nameof(TickerRow.Quantity)" HeaderText="Holdings" Width="85px" Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" />
                         <GridColumn Field="@nameof(TickerRow.TotalValue)" HeaderText="Market value" Width="120px" Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(TickerRow.UnrealizedPL)" HeaderText="Unrealised P&amp;L" Width="125px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                        <GridColumn Field="@nameof(TickerRow.UnrealizedPL)" HeaderText="Unrealized P&amp;L" Width="125px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
                             <Template>
                                 @{ var row = (TickerRow)context; }
                                 <span class="@(row.UnrealizedPL >= 0 ? "gain" : "loss")">@(row.UnrealizedPL > 0 ? "+" : "")@row.UnrealizedPL.ToString("C2")</span>
@@ -228,7 +228,7 @@
         {
             new("Field", "Property the column reads, and sorts by.", "string"),
             new("HeaderText", "Header caption.", "string?"),
-            new("Template", "Markup for the cell, given the row object as context; used here for the price tint, the change arrows, the trend line and the profit colour.", "RenderFragment&lt;object&gt;?"),
+            new("Template", "Markup for the cell, given the row object as context; used here for the price tint, the change arrows, the trend line and the profit color.", "RenderFragment&lt;object&gt;?"),
             new("Type", "Text, Number, Date or Boolean: decides editor, alignment default and sorting.", "ColumnType"),
             new("Format", "Format string for the cell text when there is no template.", "string?"),
             new("TextAlign", "Left, Right or Center; the type's default when null.", "TextAlign?", "null"),
@@ -287,7 +287,7 @@
         </GridColumn>
         <GridColumn Field=""@nameof(TickerRow.Quantity)"" HeaderText=""Holdings"" Width=""85px"" Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" />
         <GridColumn Field=""@nameof(TickerRow.TotalValue)"" HeaderText=""Market value"" Width=""120px"" Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(TickerRow.UnrealizedPL)"" HeaderText=""Unrealised P&amp;L"" Width=""125px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
+        <GridColumn Field=""@nameof(TickerRow.UnrealizedPL)"" HeaderText=""Unrealized P&amp;L"" Width=""125px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
             <Template>
                 @{ var row = (TickerRow)context; }
                 <span class=""@(row.UnrealizedPL >= 0 ? ""gain"" : ""loss"")"">@(row.UnrealizedPL > 0 ? ""+"" : """")@row.UnrealizedPL.ToString(""C2"")</span>

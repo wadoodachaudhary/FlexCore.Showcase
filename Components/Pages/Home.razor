@@ -162,14 +162,14 @@
     </section>
 
 
-    @* Four-colour divider between home sections (2026-10-29), the bar that sits under each page title *@
+    @* Four-color divider between home sections (2026-10-29), the bar that sits under each page title *@
     <div class="section-divider" aria-hidden="true"></div>
 
     @* ── 3. The four big workhorses (2026-10-28). They replace the six small workhorse cards on this page, and since
        2026-11-13 the components page shows them too: the cards are WorkhorseCards.razor, shared by both. Every line is checked: 100,000 rows (/demo/grid/row-selection-50k); 43 values in ChartType;
        CrystalXmlReportLoader, DrillDownFilter and ReportDesignerCanvasControl in FlexCore/Reports; SchedulerView has Day, Week, Month,
-       Timeline and Agenda, and Gantt is its own control. The pictures are plain SVG, decoration only, in the logo's four colours.
-       The heading is a plain section heading with a hand-drawn chequered flag beside it (it replaced a dark finish-line ribbon that
+       Timeline and Agenda, and Gantt is its own control. The pictures are plain SVG, decoration only, in the logo's four colors.
+       The heading is a plain section heading with a hand-drawn checkered flag beside it (it replaced a dark finish-line ribbon that
        read as cartoonish); the flag waves each time the heading scrolls into view: fxToggleClassWhenVisible (App.razor) adds
        is-playing and Home.razor.css does the rest. The picture sits left of the heading text, like the crane and the scale below. *@
     <section class="workhorses-section">
@@ -203,13 +203,13 @@
     </section>
 
     @* ── 4. The component directory ── *@
-    @* Four-colour divider between home sections (2026-10-29), the bar that sits under each page title *@
+    @* Four-color divider between home sections (2026-10-29), the bar that sits under each page title *@
     <div class="section-divider" aria-hidden="true"></div>
     <ComponentCatalogDirectory ShowWorkhorses="false" />
 
 
-    @* 5. Pillars, on the page's one coloured band (2026-10-28, after the stats bar and blue band on telerik.com): a green
-       strip of numbers straddles the top of a full-width indigo band, both colours from the logo. The numbers are checked: 137
+    @* 5. Pillars, on the page's one colored band (2026-10-28, after the stats bar and blue band on telerik.com): a green
+       strip of numbers straddles the top of a full-width indigo band, both colors from the logo. The numbers are checked: 137
        standalone controls (launch audit), 42 ChartType values and 100,000 rows on /demo/grid/row-selection-50k. Three since
        2026-10-29: the fourth was dropped (first "0 npm packages", then "MIT licensed on NuGet"). *@
     <div class="stats-strip">
@@ -246,28 +246,28 @@
                         </g>
                     </g>
                 </svg>
-                <h2 class="section-title">Engineered for Enterprise Growth</h2>
+                <h2 class="section-title">Built for line-of-business apps</h2>
             </div>
             <p class="section-desc">
-                The desktop-app power business users expect, rebuilt for the browser in Blazor.
+                The screens business users rely on, from big grids to printed reports, rebuilt for the browser in C#.
             </p>
         </div>
 
-        @* 2026-11-04: card text rewritten to say what each one saves a team. Each line checks out: 100,000 rows on
+        @* 2026-11-04: card text says what each one saves a team; 2026-11-14: titles name the benefit, same facts. Each line checks out: 100,000 rows on
            /demo/grid/row-selection-50k; MdiHost, GridTheme.Vb6Windows, TreeViewControl.UseVb6TreeStyle and CrystalXmlReportLoader, with no
            Crystal package in FlexCore.csproj; AggregateRows and ExportToXlsxAsync; IReportDataExecutor, IReportSessionContext, IGridSettingsStore. *@
         <div class="pillars-grid">
             <div class="pillar-card">
                 <div class="pillar-icon blue">⚡</div>
-                <h3 class="pillar-title">Ultra-Fast Virtualization</h3>
+                <h3 class="pillar-title">Big data, small page</h3>
                 <p class="pillar-desc">
-                    Big datasets stop being a performance project. Scroll 100,000 rows while the grid renders only a small window of them.
+                    Scroll 100,000 rows while the grid renders only a small window around the rows on screen, so large datasets stop being a performance project.
                 </p>
             </div>
 
             <div class="pillar-card">
                 <div class="pillar-icon purple">🛡️</div>
-                <h3 class="pillar-title">No npm, No Bundler</h3>
+                <h3 class="pillar-title">No npm, no bundler</h3>
                 <p class="pillar-desc">
                     No node_modules to audit and no JavaScript build to maintain. Add the package and your team stays in C#.
                 </p>
@@ -275,33 +275,33 @@
 
             <div class="pillar-card">
                 <div class="pillar-icon green">🏢</div>
-                <h3 class="pillar-title">Legacy VB / WinForms Migration</h3>
+                <h3 class="pillar-title">Desktop apps, moved to the web</h3>
                 <p class="pillar-desc">
-                    Move to the web and keep the screens users already know: MDI windows, VB6-style grids and trees, and Crystal Reports XML exports with no Crystal runtime.
+                    Keep the screens users already know: MDI windows, VB6-style grids and trees, and Crystal Reports run from their XML export, with no Crystal runtime.
                 </p>
             </div>
 
             <div class="pillar-card">
                 <div class="pillar-icon amber">📊</div>
-                <h3 class="pillar-title">Excel-Grade Grid Power</h3>
+                <h3 class="pillar-title">Spreadsheet-style grids, built in</h3>
                 <p class="pillar-desc">
-                    The spreadsheet features users demand, already built: frozen columns, tree grids, totals, in-cell editing, and Excel export.
+                    Frozen columns, tree grids, totals, in-cell editing and Excel export: the grid features users ask for, ready to switch on.
                 </p>
             </div>
 
             <div class="pillar-card">
                 <div class="pillar-icon rose">🎨</div>
-                <h3 class="pillar-title">Adaptive Layout &amp; MDI</h3>
+                <h3 class="pillar-title">App shells, ready to use</h3>
                 <p class="pillar-desc">
-                    Stop hand-building app shells. Collapsible panels, splitters, tab strips, and multi-document windows are ready to drop in.
+                    Stop hand-building layouts: collapsible panels, splitters, tab strips and multi-document windows drop straight in.
                 </p>
             </div>
 
             <div class="pillar-card">
                 <div class="pillar-icon cyan">🔌</div>
-                <h3 class="pillar-title">Pluggable &amp; Host-Agnostic</h3>
+                <h3 class="pillar-title">Fits your stack</h3>
                 <p class="pillar-desc">
-                    Keep your stack. Report data, session context, and saved grid settings plug in through C# interfaces, so EF Core, Dapper, or raw SQL all fit.
+                    Report data, session context and saved grid settings plug in through C# interfaces, so EF Core, Dapper or raw SQL all work.
                 </p>
             </div>
         </div>
@@ -337,7 +337,7 @@
                 <h2 class="section-title">How FlexCore Compares</h2>
             </div>
             <p class="section-desc">
-                See why engineering teams choose FlexCore over bloated JS wrappers and rigid enterprise licensing.
+                What comes in the box, compared with Blazor wrappers around JavaScript suites and with basic Blazor libraries.
             </p>
         </div>
 
@@ -347,7 +347,7 @@
                     <tr>
                         <th>Feature / Capability</th>
                         <th class="col-flexcore">FlexCore UI</th>
-                        <th>Heavy JS Wrapper Suites</th>
+                        <th>JavaScript Wrapper Suites</th>
                         <th>Basic Blazor Libraries</th>
                     </tr>
                 </thead>
@@ -360,33 +360,33 @@
                     </tr>
                     <tr>
                         <td><strong>Virtualized Grid Performance</strong></td>
-                        <td class="col-flexcore"><span class="check-yes">✓ 100K+ Rows Smooth</span></td>
-                        <td>Heavy DOM / JS Memory</td>
-                        <td><span class="check-no">✗ Slow / Lags</span></td>
+                        <td class="col-flexcore"><span class="check-yes">✓ 100,000 rows, rendered a window at a time</span></td>
+                        <td>Depends on the wrapped JavaScript grid</td>
+                        <td>Varies by library</td>
                     </tr>
                     <tr>
-                        <td><strong>JavaScript Interop Overhead</strong></td>
-                        <td class="col-flexcore"><span class="check-yes">✓ Zero (Pure Blazor)</span></td>
-                        <td>Heavy JSON serialization</td>
-                        <td>Low</td>
+                        <td><strong>JavaScript to maintain</strong></td>
+                        <td class="col-flexcore"><span class="check-yes">✓ None: no npm or bundler; FlexCore loads its own scripts</span></td>
+                        <td>A JavaScript library under the Blazor API</td>
+                        <td>Little or none</td>
                     </tr>
                     <tr>
                         <td><strong>Crystal &amp; Legacy Report Engine</strong></td>
-                        <td class="col-flexcore"><span class="check-yes">✓ Native Built-in</span></td>
-                        <td><span class="check-no">✗ Not Available</span></td>
-                        <td><span class="check-no">✗ Not Available</span></td>
+                        <td class="col-flexcore"><span class="check-yes">✓ Runs Crystal Reports XML exports, no Crystal runtime</span></td>
+                        <td><span class="check-no">✗ Not included</span></td>
+                        <td><span class="check-no">✗ Not included</span></td>
                     </tr>
                     <tr>
-                        <td><strong>Office Ribbon &amp; IDE Layouts</strong></td>
-                        <td class="col-flexcore"><span class="check-yes">✓ Included</span></td>
-                        <td>Requires Expensive Addon</td>
-                        <td><span class="check-no">✗ Not Available</span></td>
+                        <td><strong>Office-Style Ribbon &amp; IDE Layouts</strong></td>
+                        <td class="col-flexcore"><span class="check-yes">✓ Ribbon and dock manager included</span></td>
+                        <td>Varies by suite</td>
+                        <td><span class="check-no">✗ Not included</span></td>
                     </tr>
                     <tr>
                         <td><strong>Built-in Excel Export</strong></td>
-                        <td class="col-flexcore"><span class="check-yes">✓ Included</span></td>
-                        <td>Client-side CSV only</td>
-                        <td><span class="check-no">✗ None</span></td>
+                        <td class="col-flexcore"><span class="check-yes">✓ .xlsx workbooks written in C#, no extra library</span></td>
+                        <td>Varies by suite</td>
+                        <td><span class="check-no">✗ Not included</span></td>
                     </tr>
                     <tr>
                         <td><strong>Licensing &amp; Per-Seat Fees</strong></td>
@@ -399,7 +399,7 @@
         </div>
     </section>
 
-    @* Four-colour divider between home sections (2026-10-29), the bar that sits under each page title *@
+    @* Four-color divider between home sections (2026-10-29), the bar that sits under each page title *@
     <div class="section-divider" aria-hidden="true"></div>
 
     @* 7. Call to action *@
@@ -432,10 +432,10 @@
                     <path d="M46 84 v18" /><path d="M124 84 v18" /><path d="M56 106 v12" /><path d="M114 106 v12" />
                 </g>
             </svg>
-            <h2>Ready to Build Lightning-Fast Blazor Apps?</h2>
+            <h2>Ready to build your next Blazor app?</h2>
         </div>
         <p>
-            Start developing in minutes. Add the FlexCore NuGet package to your project and experience the power of pure Blazor desktop-grade UI controls.
+            Add the NuGet package, register the dialog and toast services, and put your first grid on a page; Get Started walks you through it.
         </p>
 
         <div class="install-box" style="margin-bottom: 24px; background: rgba(0,0,0,0.4);">
@@ -536,7 +536,7 @@
     private bool _copiedInstall = false;
     private bool _copiedCode = false;
 
-    // Finish flag left of "Everything you need to cross the finish line": 5 columns of 4 chequered cells whose corners are nudged by
+    // Finish flag left of "Everything you need to cross the finish line": 5 columns of 4 checkered cells whose corners are nudged by
     // -1, 0 or +1 px so the drawing looks hand-made. Whole numbers only, so the points never depend on the server's culture.
     private const int FlagColumns = 5;
     private static readonly (int Col, string Points, bool Dark)[] _flagCells = BuildFlagCells();

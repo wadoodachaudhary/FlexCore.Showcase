@@ -12,17 +12,17 @@
 <PageTitle>Blazor Grid with 100,000 Rows — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="100k rows" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Twelve columns and up to a hundred thousand generated rows: what the row window costs, measured on this page."
+                   Tagline="Scroll, select and edit up to 100,000 rows, with the server cost measured here."
                    SourcePath="Grid/GridControl.razor.cs;Grid/SelectionSettings.cs;Grid/GridControlEvents.cs">
     <Overview>
         <p>
-            Row windowing in the Blazor <code>GridControl</code>: only the rows in view plus an overscan band are rendered, spacer rows stand in for the rest, and grouped grids are windowed the same way. <code>WindowOverscanRows</code> and <code>WindowOverscanCellBudget</code> size the band. The timings here are server-side <code>Stopwatch</code> figures: building the rows and the first render after a swap.
+            Row windowing lets users work through a Blazor <code>GridControl</code> of 100,000 rows while only the rows in view, plus an overscan band, are rendered. Use it for long lists such as a full price list or a booking history, flat or grouped; <code>WindowOverscanRows</code> and <code>WindowOverscanCellBudget</code> size the band. The timings shown are server-side <code>Stopwatch</code> figures for building the rows and for the first render after a swap.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="rows" Title="Row count, overscan and grouping" RazorCode="@Code.Rows" CSharpCode="@Code.RowsCs">
-            <Description><p>Pick a row count up to 100,000, set the overscan band, group by Category, then select rows and edit cells; the line under the grid reports both timings and the counts from <code>SelectionChanged</code> and <code>OnCellSave</code>.</p></Description>
+            <Description><p>Pick up to 100,000 rows, set the overscan band and group by Category, then select and edit; the line under the grid reports both timings and the selection and save counts.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_rowCountItems" Values="@(new[] { _rowCount.ToString() })" ValuesChanged="PickRowCount" Selection="ChoiceSelectionMode.Single" AriaLabel="Row count" />
                 <ButtonGroupControl Items="_overscanItems" Values="@(new[] { _overscan.ToString() })" ValuesChanged="PickOverscan" Selection="ChoiceSelectionMode.Single" AriaLabel="Overscan rows" />
@@ -157,8 +157,8 @@
     private void Rebuild()
     {
         var sw = Stopwatch.StartNew();
-        var categories = new[] { "Flights", "Hotels", "Transfers", "Excursions", "Cruises", "Rail", "Insurance", "Car hire" };
-        var seasons = new[] { "Summer", "Autumn", "Winter", "Spring" };
+        var categories = new[] { "Flights", "Hotels", "Transfers", "Excursions", "Cruises", "Rail", "Insurance", "Car rental" };
+        var seasons = new[] { "Summer", "Fall", "Winter", "Spring" };
         var currencies = new[] { "EUR", "USD", "GBP" };
         var boards = new[] { "Room only", "Bed and breakfast", "Half board", "All inclusive" };
         var desks = new[] { "Boston", "Lisbon", "Kyoto", "Cape Town", "Manila" };
@@ -350,8 +350,8 @@ protected override void OnAfterRender(bool firstRender)
 private void Rebuild()
 {
     var sw = Stopwatch.StartNew();
-    var categories = new[] { ""Flights"", ""Hotels"", ""Transfers"", ""Excursions"", ""Cruises"", ""Rail"", ""Insurance"", ""Car hire"" };
-    var seasons = new[] { ""Summer"", ""Autumn"", ""Winter"", ""Spring"" };
+    var categories = new[] { ""Flights"", ""Hotels"", ""Transfers"", ""Excursions"", ""Cruises"", ""Rail"", ""Insurance"", ""Car rental"" };
+    var seasons = new[] { ""Summer"", ""Fall"", ""Winter"", ""Spring"" };
     var currencies = new[] { ""EUR"", ""USD"", ""GBP"" };
     var boards = new[] { ""Room only"", ""Bed and breakfast"", ""Half board"", ""All inclusive"" };
     var desks = new[] { ""Boston"", ""Lisbon"", ""Kyoto"", ""Cape Town"", ""Manila"" };

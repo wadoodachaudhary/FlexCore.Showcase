@@ -11,11 +11,11 @@
 <PageTitle>Blazor Card, Card Group and Carousel — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Cards" Category="Components" ControlName="CardControl · CardGroupControl · CarouselControl"
-                   Tagline="A bordered container with an optional header, image, body and footer, a grid that lays several of them out, and a carousel that shows one at a time."
+                   Tagline="Show products, places or people as cards, in a grid or a carousel."
                    SourcePath="CardControl.razor; CardGroupControl.razor; CarouselControl.razor; CarouselItemControl.razor">
     <Overview>
         <p>
-            <code>CardControl</code> is a Blazor card with header, image, body and footer; <code>CardGroupControl</code> lays several out in a wrapping grid of equal heights; <code>CarouselControl</code> shows one card at a time with arrows and dots.
+            <code>CardControl</code> is a Blazor card: a bordered box with an optional header, image, body and footer for one item. Use cards for items users browse and compare: <code>CardGroupControl</code> lays several out in a wrapping grid of equal heights, and <code>CarouselControl</code> shows one at a time with in a carousel, allowing you to flip through the cards one at a time.
         </p>
     </Overview>
 
@@ -100,7 +100,7 @@
             </DocSection>
             <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
                 <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-                <p>Colours, padding and the three shadows are fixed in the stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
+                <p>Colors, padding and the three shadows are fixed in the stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
             </DocSection>
             <DocSection Id="doc-carouselcontrol-parameters" Title="CarouselControl parameters" Count='@DocSection.Label(Vocab.Carousel.Length, "parameters")'>
                 <ApiTable Kind="ApiKind.Parameters" Title="CarouselControl parameters" Rows="Vocab.Carousel" />
@@ -131,7 +131,7 @@
             <li>Nothing in a card is focusable except what you put in it. The footer is a flex row, so buttons there keep their natural Tab order.</li>
             <li><code>CardGroupControl</code> is a CSS grid; it adds no list semantics.</li>
             <li><code>CarouselControl</code> renders a plain <code>&lt;div&gt;</code> with no role, no <code>aria-roledescription</code> and no label. The carousel example passes <code>role="region"</code>, <code>aria-roledescription="carousel"</code> and <code>aria-label</code> as attributes, which the control forwards to that div.</li>
-            <li>The arrows are buttons labelled "Previous" and "Next"; each dot is a button labelled "Slide 1", "Slide 2" and so on. The current dot is marked only by its <code>active</code> class (solid and wider), with no <code>aria-current</code> or pressed state. The dots are 10px circles, a small target.</li>
+            <li>The arrows are buttons labeled "Previous" and "Next"; each dot is a button labeled "Slide 1", "Slide 2" and so on. The current dot is marked only by its <code>active</code> class (solid and wider), with no <code>aria-current</code> or pressed state. The dots are 10px circles, a small target.</li>
             <li>The carousel has no key handling; arrow keys do nothing. Its arrows and dots are native buttons, reached with Tab and pressed with Enter or Space.</li>
             <li>Only the current item is in the page, so the other cards cannot be reached by Tab or by a screen reader until they are shown. The control does not announce a change of slide; the example's count line is <code>aria-live="polite"</code>, so screen readers announce the new position.</li>
         </ul>
@@ -208,10 +208,10 @@
         public static readonly ApiRow[] Css =
         {
             new("fx-card · fx-card-elevation-1 / -2 / -3", "White rounded box with a hairline border, <code>overflow: hidden</code>; the elevation classes add the shadows."),
-            new("fx-card-header · fx-card-title · fx-card-subtitle", "Header block with a bottom hairline; bold 1rem title, 0.8rem grey subtitle."),
+            new("fx-card-header · fx-card-title · fx-card-subtitle", "Header block with a bottom hairline; bold 1rem title, 0.8rem gray subtitle."),
             new("fx-card-image", "Full-width image block; the image is <code>display: block</code>."),
             new("fx-card-body", "Padded body that grows to fill the card."),
-            new("fx-card-footer", "Light grey footer, flex row aligned to the end."),
+            new("fx-card-footer", "Light gray footer, flex row aligned to the end."),
             new("fx-card-group", "Grid, <code>repeat(auto-fit, minmax(280px, 1fr))</code>, 1rem gap."),
         };
         // Carousel rows (0.2.49)
@@ -248,8 +248,8 @@
             new("fx-carousel", "Root: full width, <code>overflow: hidden</code>, 8px radius, dark slate background <code>#1e293b</code>."),
             new("fx-carousel-inner", "Holds the items; at least 200px tall."),
             new("fx-carousel-item · active", "The current item's wrapper; it fades in from 40% opacity over 0.3s."),
-            new("fx-carousel-btn · fx-carousel-prev / -next", "36px round arrow buttons, translucent black, centred vertically 12px in from the left and right edges."),
-            new("fx-carousel-indicators", "Row of dots centred 12px above the bottom edge."),
+            new("fx-carousel-btn · fx-carousel-prev / -next", "36px round arrow buttons, translucent black, centered vertically 12px in from the left and right edges."),
+            new("fx-carousel-indicators", "Row of dots centered 12px above the bottom edge."),
             new("fx-carousel-indicator · active", "10px dot with a white ring; the current one is solid white and 22px wide."),
         };
     }

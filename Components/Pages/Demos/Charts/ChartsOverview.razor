@@ -18,17 +18,17 @@
 <PageTitle>Blazor Charts (Line, Bar, Pie, Area, Scatter) — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Charts" Category="Charts" CategoryHref="demo/charts" ControlName="ChartControl"
-                   Tagline="One control, 35+ chart types, drawn in SVG from C#."
+                   Tagline="Show trends, shares, rankings and flows with 35+ chart types drawn as SVG from C#."
                    SourcePath="Charts/ChartControl.razor;Charts/ChartModels.cs;Charts/ChartEnums.cs;Charts/ChartControl.razor.css;Charts/ChartSvg.cs">
     <Overview>
         <p>
-            <code>ChartControl</code> is FlexCore's Blazor chart: pass a <code>ChartType</code> and a list of <code>ChartSeries</code> and it draws the result as SVG from C#, with no npm package or third-party script. The gallery groups the 35+ types by the question they answer; every bar, slice, point, cell and flow shows a tooltip card on hover. The sunburst, Gantt, gauges, stock chart and map story have pages of their own.
+            <code>ChartControl</code> is a Blazor chart that turns your series into any of 35+ chart types, from bars and lines to heatmaps and funnels. Use it for dashboards and reports: change one <code>Type</code> to show the same data another way, and every bar, slice and point shows a tooltip card on hover. Rendering is SVG built in C#, with no npm package or third-party JavaScript.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="gallery" Title="Gallery by purpose" RazorCode="@Code.Gallery" CSharpCode="@Code.GalleryCs">
-            <Description><p>Every chart here is the same control with a different <code>Type</code>; series data is bound and titles, axes, legends and palettes are parameters.</p></Description>
+            <Description><p>Browse the tabs by question, from comparison and trend to distribution and KPI cards; every tile is the same control with a different <code>Type</code>.</p></Description>
             <Demo>
 <TabControl @bind-SelectedIndex="_tab" CssClass="site-tabs" Orientation="TabOrientation.Horizontal" Theme="TabTheme.Minimal">
     <TabItem HeaderText="Comparison">
@@ -36,7 +36,7 @@
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.67">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Bar" ColorPalette="@ChartPalette.Site" Title="Ice cream scoops sold in July, by flavour" Height="226px"
+                    <ChartControl Type="ChartType.Bar" ColorPalette="@ChartPalette.Site" Title="Ice cream scoops sold in July, by flavor" Height="226px"
                                   YAxis="@(new ChartAxis { Max = 400 })"
                                   Series="@(new List<ChartSeries> { new() { Name = "Scoops", DataPoints = new() {
                                       new("Vanilla", 310), new("Chocolate", 280), new("Strawberry", 190),
@@ -113,11 +113,11 @@
         <DashboardLayoutControl Columns="2" CellSpacing="@(new double[] { 16, 16 })" CellAspectRatio="0.86">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row="0" Column="0" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Pie" Title="Favourite colour, 120 people asked" Height="300px"
+                    <ChartControl Type="ChartType.Pie" Title="Favorite color, 120 people asked" Height="300px"
                                   Series="@(new List<ChartSeries> { _pieSeries })" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
-                    <ChartControl Type="ChartType.Donut" Title="Favourite colour, as a donut" Height="300px"
+                    <ChartControl Type="ChartType.Donut" Title="Favorite color, as a donut" Height="300px"
                                   InnerRadius="0.55"
                                   Series="@(new List<ChartSeries> { _pieSeries })" />
                 </DashboardLayoutPanel>
@@ -228,7 +228,7 @@
     <TabItem HeaderText="Sparkline">
         <h2>Inline Sparklines</h2>
         <div class="demo-frame">
-            <p>Kilometres run each day: <ChartControl Type="ChartType.Sparkline" ColorPalette="@ChartPalette.Site" Width="120px" Height="24px"
+            <p>Kilometers run each day: <ChartControl Type="ChartType.Sparkline" ColorPalette="@ChartPalette.Site" Width="120px" Height="24px"
                           Series="@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("", 6), new("", 9), new("", 7), new("", 11), new("", 8), new("", 12), new("", 10) } } })" /></p>
             <p>Pages read each day: <ChartControl Type="ChartType.Sparkline" Width="120px" Height="24px"
@@ -256,7 +256,7 @@
         <DashboardLayoutPanel Row="0" Column="1" SizeX="1" SizeY="1">
             <ChartControl Type="ChartType.Donut" Title="TooltipFormat" Height="226px"
                           TooltipFormat="{label}: {value:N0} people&#10;{percent} of 120 asked"
-                          Series="@(new List<ChartSeries> { _colourSeries })" PointHover="h => _hovered = h" />
+                          Series="@(new List<ChartSeries> { _colorSeries })" PointHover="h => _hovered = h" />
         </DashboardLayoutPanel>
         <DashboardLayoutPanel Row="0" Column="2" SizeX="1" SizeY="1">
             <ChartControl Type="ChartType.Line" ColorPalette="@ChartPalette.Site" Title="TooltipTemplate" Height="226px" Series="@_lineSeries" PointHover="h => _hovered = h">
@@ -387,9 +387,9 @@
     ChartSeries _complaints = new() { Name = "Complaints", DataPoints = new() {
         new("Harbour", 2), new("Hilltop", 5), new("Old Town", 7), new("Beach", 1), new("Airport", 9) } };
 
-    // Tooltips example: the last PointHover context, and the colour survey as a named series, each slice in its own colour
+    // Tooltips example: the last PointHover context, and the color survey as a named series, each slice in its own color
     private ChartTooltipContext? _hovered;
-    ChartSeries _colourSeries = new() { Name = "People", DataPoints = new() {
+    ChartSeries _colorSeries = new() { Name = "People", DataPoints = new() {
         new("Blue", 42) { Color = ChartPalette.Blue }, new("Green", 30) { Color = ChartPalette.Green }, new("Red", 24) { Color = ChartPalette.Rose },
         new("Purple", 15) { Color = ChartPalette.Violet }, new("Yellow", 9) { Color = ChartPalette.Amber } } };
 
@@ -410,7 +410,7 @@
     ChartSeries _pieSeries = new()
     {
         Name = "People",
-        // each slice in the colour it names; Yellow is the palette amber, which holds 3:1 on white (a true yellow does not)
+        // each slice in the color it names; Yellow is the palette amber, which holds 3:1 on white (a true yellow does not)
         DataPoints = new() {
             new("Blue", 42) { Color = ChartPalette.Blue }, new("Green", 30) { Color = ChartPalette.Green }, new("Red", 24) { Color = ChartPalette.Rose },
             new("Purple", 15) { Color = ChartPalette.Violet }, new("Yellow", 9) { Color = ChartPalette.Amber } }
@@ -512,7 +512,7 @@
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.67"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Bar"" ColorPalette=""@ChartPalette.Site"" Title=""Ice cream scoops sold in July, by flavour"" Height=""226px""
+                    <ChartControl Type=""ChartType.Bar"" ColorPalette=""@ChartPalette.Site"" Title=""Ice cream scoops sold in July, by flavor"" Height=""226px""
                                   YAxis=""@(new ChartAxis { Max = 400 })""
                                   Series=""@(new List<ChartSeries> { new() { Name = ""Scoops"", DataPoints = new() {
                                       new(""Vanilla"", 310), new(""Chocolate"", 280), new(""Strawberry"", 190),
@@ -589,11 +589,11 @@
         <DashboardLayoutControl Columns=""2"" CellSpacing=""@(new double[] { 16, 16 })"" CellAspectRatio=""0.86"">
             <DashboardLayoutPanels>
                 <DashboardLayoutPanel Row=""0"" Column=""0"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Pie"" Title=""Favourite colour, 120 people asked"" Height=""300px""
+                    <ChartControl Type=""ChartType.Pie"" Title=""Favorite color, 120 people asked"" Height=""300px""
                                   Series=""@(new List<ChartSeries> { _pieSeries })"" />
                 </DashboardLayoutPanel>
                 <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""1"">
-                    <ChartControl Type=""ChartType.Donut"" Title=""Favourite colour, as a donut"" Height=""300px""
+                    <ChartControl Type=""ChartType.Donut"" Title=""Favorite color, as a donut"" Height=""300px""
                                   InnerRadius=""0.55""
                                   Series=""@(new List<ChartSeries> { _pieSeries })"" />
                 </DashboardLayoutPanel>
@@ -704,7 +704,7 @@
     <TabItem HeaderText=""Sparkline"">
         <h2>Inline Sparklines</h2>
         <div class=""demo-frame"">
-            <p>Kilometres run each day: <ChartControl Type=""ChartType.Sparkline"" ColorPalette=""@ChartPalette.Site"" Width=""120px"" Height=""24px""
+            <p>Kilometers run each day: <ChartControl Type=""ChartType.Sparkline"" ColorPalette=""@ChartPalette.Site"" Width=""120px"" Height=""24px""
                           Series=""@(new List<ChartSeries> { new() { DataPoints = new() {
                               new("""", 6), new("""", 9), new("""", 7), new("""", 11), new("""", 8), new("""", 12), new("""", 10) } } })"" /></p>
             <p>Pages read each day: <ChartControl Type=""ChartType.Sparkline"" Width=""120px"" Height=""24px""
@@ -727,7 +727,7 @@
         <DashboardLayoutPanel Row=""0"" Column=""1"" SizeX=""1"" SizeY=""1"">
             <ChartControl Type=""ChartType.Donut"" Title=""TooltipFormat"" Height=""226px""
                           TooltipFormat=""{label}: {value:N0} people&#10;{percent} of 120 asked""
-                          Series=""@(new List<ChartSeries> { _colourSeries })"" PointHover=""h => _hovered = h"" />
+                          Series=""@(new List<ChartSeries> { _colorSeries })"" PointHover=""h => _hovered = h"" />
         </DashboardLayoutPanel>
         <DashboardLayoutPanel Row=""0"" Column=""2"" SizeX=""1"" SizeY=""1"">
             <ChartControl Type=""ChartType.Line"" ColorPalette=""@ChartPalette.Site"" Title=""TooltipTemplate"" Height=""226px"" Series=""@_lineSeries"" PointHover=""h => _hovered = h"">
@@ -744,9 +744,9 @@
     </DashboardLayoutPanels>
 </DashboardLayoutControl>
 <p class=""result"">@(_hovered is null ? ""PointHover: nothing under the pointer."" : $""PointHover: {_hovered.Title}, {_hovered.SeriesName ?? ""one series""}, {_hovered.Value}{(_hovered.Percentage is { } s ? $"", {s:0.#}% of the whole"" : """")}"")</p>";
-        public static string TooltipsCs => @"// Tooltips example: the last PointHover context, and the colour survey as a named series, each slice in its own colour
+        public static string TooltipsCs => @"// Tooltips example: the last PointHover context, and the color survey as a named series, each slice in its own color
 private ChartTooltipContext? _hovered;
-ChartSeries _colourSeries = new() { Name = ""People"", DataPoints = new() {
+ChartSeries _colorSeries = new() { Name = ""People"", DataPoints = new() {
     new(""Blue"", 42) { Color = ChartPalette.Blue }, new(""Green"", 30) { Color = ChartPalette.Green }, new(""Red"", 24) { Color = ChartPalette.Rose },
     new(""Purple"", 15) { Color = ChartPalette.Violet }, new(""Yellow"", 9) { Color = ChartPalette.Amber } } };
 // _groupedBarSeries and _lineSeries are the gallery's (see the Gallery C# tab)." + PaletteCs;
@@ -811,7 +811,7 @@ List<ChartSeries> _lineSeries = new()
 ChartSeries _pieSeries = new()
 {
     Name = ""People"",
-    // each slice in the colour it names; Yellow is the palette amber, which holds 3:1 on white (a true yellow does not)
+    // each slice in the color it names; Yellow is the palette amber, which holds 3:1 on white (a true yellow does not)
     DataPoints = new() {
         new(""Blue"", 42) { Color = ChartPalette.Blue }, new(""Green"", 30) { Color = ChartPalette.Green }, new(""Red"", 24) { Color = ChartPalette.Rose },
         new(""Purple"", 15) { Color = ChartPalette.Violet }, new(""Yellow"", 9) { Color = ChartPalette.Amber } }

@@ -15,11 +15,11 @@
 <PageTitle>Dynamic Column Sets in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Column sets" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Swap the whole column set at runtime from a list of specs, without remounting the grid."
+                   Tagline="Give one grid a different column set per task, switched at runtime."
                    SourcePath="Grid/GridColumn.cs;Grid/GridColumnsBase.cs;Grid/GridControl.razor.cs;Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
-            Grid columns are Razor markup, so a <code>&#64;foreach</code> over a list of column specs defines them and replacing the list changes the column set at runtime. Wrap the swap in <code>SuspendRedraw</code> and the Blazor <code>GridControl</code> converges the columns in place, keeping its data and selection.
+            Column sets let one Blazor <code>GridControl</code> show different columns for different jobs, swapped at runtime from a list of column specs kept in C#. Use them when a purchasing view and a short summary share the same booking lines: wrap the swap in <code>SuspendRedraw</code> and the grid changes its columns in place, keeping its data and the selected row. Each column is a <code>GridColumn</code> inside an <code>&#64;foreach</code>, keyed by its field.
         </p>
     </Overview>
 
@@ -136,10 +136,10 @@
         [
             new CRow { Code = "HT-110", Description = "Hotel, double room per night", Category = "Hotels", Supplier = "Casa Lumiar Riverside", BookingRef = "BK-2041", Qty = 14, Price = 145.00m },
             new CRow { Code = "FL-210", Description = "Return flight, economy", Category = "Flights", Supplier = "Tejo Skyline Charters", BookingRef = "BK-2042", Qty = 24, Price = 189.00m },
-            new CRow { Code = "TF-310", Description = "Airport transfer, coach", Category = "Transfers", Supplier = "Alfama Coach Lines", BookingRef = "BK-2043", Qty = 2, Price = 320.00m },
+            new CRow { Code = "TF-310", Description = "Airport transfer, shuttle bus", Category = "Transfers", Supplier = "Alfama Coach Lines", BookingRef = "BK-2043", Qty = 2, Price = 320.00m },
             new CRow { Code = "TR-410", Description = "Sintra palaces day tour", Category = "Tours", Supplier = "Quinta Azul Day Tours", BookingRef = "BK-2044", Qty = 24, Price = 68.50m },
             new CRow { Code = "IN-510", Description = "Group travel insurance", Category = "Insurance", Supplier = "Harbourline Travel Cover", BookingRef = "BK-2045", Qty = 24, Price = 34.50m },
-            new CRow { Code = "RL-610", Description = "Rail pass, Lisbon to Porto", Category = "Rail", Supplier = "Ribeira Rail Holidays", BookingRef = "BK-2046", Qty = 24, Price = 42.00m }
+            new CRow { Code = "RL-610", Description = "Rail pass, Lisbon to Porto", Category = "Rail", Supplier = "Ribeira Rail Tours", BookingRef = "BK-2046", Qty = 24, Price = 42.00m }
         ];
 
         _events.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<CRow>>(this, args => _selected = args.Data?.Code);
@@ -248,10 +248,10 @@ protected override void OnInitialized()
     [
         new CRow { Code = ""HT-110"", Description = ""Hotel, double room per night"", Category = ""Hotels"", Supplier = ""Casa Lumiar Riverside"", BookingRef = ""BK-2041"", Qty = 14, Price = 145.00m },
         new CRow { Code = ""FL-210"", Description = ""Return flight, economy"", Category = ""Flights"", Supplier = ""Tejo Skyline Charters"", BookingRef = ""BK-2042"", Qty = 24, Price = 189.00m },
-        new CRow { Code = ""TF-310"", Description = ""Airport transfer, coach"", Category = ""Transfers"", Supplier = ""Alfama Coach Lines"", BookingRef = ""BK-2043"", Qty = 2, Price = 320.00m },
+        new CRow { Code = ""TF-310"", Description = ""Airport transfer, shuttle bus"", Category = ""Transfers"", Supplier = ""Alfama Coach Lines"", BookingRef = ""BK-2043"", Qty = 2, Price = 320.00m },
         new CRow { Code = ""TR-410"", Description = ""Sintra palaces day tour"", Category = ""Tours"", Supplier = ""Quinta Azul Day Tours"", BookingRef = ""BK-2044"", Qty = 24, Price = 68.50m },
         new CRow { Code = ""IN-510"", Description = ""Group travel insurance"", Category = ""Insurance"", Supplier = ""Harbourline Travel Cover"", BookingRef = ""BK-2045"", Qty = 24, Price = 34.50m },
-        new CRow { Code = ""RL-610"", Description = ""Rail pass, Lisbon to Porto"", Category = ""Rail"", Supplier = ""Ribeira Rail Holidays"", BookingRef = ""BK-2046"", Qty = 24, Price = 42.00m }
+        new CRow { Code = ""RL-610"", Description = ""Rail pass, Lisbon to Porto"", Category = ""Rail"", Supplier = ""Ribeira Rail Tours"", BookingRef = ""BK-2046"", Qty = 24, Price = 42.00m }
     ];
 
     _events.RowSelected = EventCallback.Factory.Create<RowSelectEventArgs<CRow>>(this, args => _selected = args.Data?.Code);
@@ -321,7 +321,7 @@ public sealed class ColumnSpec
             new("MinWidth", "Emitted as <code>min-width</code> on the data cells, not the header; the floor of the width the grid computes for frozen offsets and column virtualization, and handed to best fit as a bound. A non-pixel value stops column virtualization from resolving the column.", "string?", "null"),
             new("MaxWidth", "The <code>max-width</code> counterpart of <code>MinWidth</code>; when both are set the floor is applied last, as in CSS.", "string?", "null"),
             new("Type", "<code>Text</code>, <code>Password</code>, <code>Number</code>, <code>Date</code>, <code>Boolean</code> or <code>CheckBox</code>. Picks the filter operators, the editor (check box, date editor, number input), the default alignment and the plain ungrouped display of a <code>Number</code> column without <code>Format</code>.", "ColumnType", "ColumnType.Text"),
-            new("TextAlign", "Cell alignment. Null resolves by <code>Type</code>: <code>CheckBox</code> centres, <code>Date</code> right-aligns, everything else left-aligns. On a <code>CheckBox</code> column only <code>Right</code> overrides; <code>Left</code> still centres.", "TextAlign?", "null"),
+            new("TextAlign", "Cell alignment. Null resolves by <code>Type</code>: <code>CheckBox</code> centers, <code>Date</code> right-aligns, everything else left-aligns. On a <code>CheckBox</code> column only <code>Right</code> overrides; <code>Left</code> still centers.", "TextAlign?", "null"),
             new("HeaderTextAlign", "Caption alignment in the header cell, independent of the cells. The default is <code>TextAlign.Left</code>, written with the <code>Grid.</code> qualifier in the source because the parameter above hides the enum.", "TextAlign", "Grid.TextAlign.Left"),
             new("Format", ".NET format string applied to an <code>IFormattable</code> value with the current culture, after <code>DisplayFormatter</code> and mapped edit options have had their turn; also used by aggregates and the Excel export. Blank on a <code>Number</code> column means plain ungrouped text.", "string?", "null"),
             new("Visible", "False keeps the column registered, with its sort, filter and column state, but out of the rendered set, keyboard navigation, edit targets and auto-width. A Choose Columns or Hide choice by the user overrides it per field until <code>ClearColumnOverrides()</code>.", "bool", "true"),

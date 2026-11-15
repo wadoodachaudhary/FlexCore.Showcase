@@ -9,11 +9,11 @@
 
 <FeatureDemoLayout Title="Date & time" Category="Components"
                    ControlName="DatePickerControl · TimePickerControl · DateRangePickerControl · CalendarControl · TimeSpanPickerControl"
-                   Tagline="Type it or pick it: dates with a calendar drop-down, times from a stepped list, ranges, multi-day selections and durations."
+                   Tagline="Let users type or pick a date, a time, a range or a duration."
                    SourcePath="DatePickerControl.razor; TimePickerControl.razor; DateRangePickerControl.razor; CalendarControl.razor; TimeSpanPickerControl.razor">
     <Overview>
         <p>
-            FlexCore's Blazor date and time pickers: <code>DatePickerControl</code> parses what you type or opens a calendar, <code>TimePickerControl</code> lists times in steps, <code>DateRangePickerControl</code> picks a start and end, <code>CalendarControl</code> is the calendar on its own and <code>TimeSpanPickerControl</code> takes a duration. All bind two ways and validate inside an <code>EditForm</code>.
+            <code>DatePickerControl</code> is a Blazor date picker: users type a date in any of sixteen formats or pick it from a calendar. Its siblings cover the rest of a booking: <code>TimePickerControl</code> lists times in steps, <code>DateRangePickerControl</code> takes a start and an end, <code>CalendarControl</code> can disable days such as weekends, and <code>TimeSpanPickerControl</code> takes a duration. All five bind two ways; the time and range pickers also report bad entries to a surrounding <code>EditForm</code>.
         </p>
     </Overview>
 
@@ -150,7 +150,7 @@
             new("AutoFocus", "Focuses the input once after first render.", "bool", "false"),
             new("AriaLabel", "Accessible name of the input.", "string?", "null"),
             new("ValidationChanged", "Fires with the parse message, or null when the text is valid again.", "EventCallback&lt;string?&gt;"),
-            new("Enabled / Visible / Id / CssClass / Style (base)", "All honoured on the host.", "", null),
+            new("Enabled / Visible / Id / CssClass / Style (base)", "All honored on the host.", "", null),
             new("Grid-cell hosting", "<code>OpenOnRender</code>, <code>InitialText</code>, <code>Uncontrolled</code>, <code>InputValueChanged</code>, <code>ElementReferenceCaptured</code>, <code>OnKeyDown</code>, <code>CalendarButtonKeyDown</code> serve the grid's cell editor; see the source comments before using them in a form.", "", null),
         };
         public static readonly ApiRow[] TimePicker =
@@ -166,7 +166,7 @@
             new("AriaLabel", "Accessible name of the input.", "string?", "null"),
             new("ValidationChanged", "Fires with the error text, or null once valid.", "EventCallback&lt;string?&gt;"),
             new("OnKeyDown", "Raw key events from the input.", "EventCallback&lt;KeyboardEventArgs&gt;"),
-            new("Enabled / Visible (base)", "Honoured.", "bool", "true"),
+            new("Enabled / Visible (base)", "Honored.", "bool", "true"),
         };
         public static readonly ApiRow[] RangePicker =
         {
@@ -192,7 +192,7 @@
             new("View / ViewChanged", "<code>Month</code>, <code>Year</code> (pick a month) or <code>Decade</code> (pick a year). The heading button cycles them.", "CalendarView", "Month"),
             new("ShowTodayButton", "Renders a Today button under the grid.", "bool", "true"),
             new("DayTemplate", "Custom day cell; receives <code>CalendarCellContext</code>.", "RenderFragment&lt;CalendarCellContext&gt;?", "null"),
-            new("Enabled / Visible / Id (base)", "Honoured.", "", null),
+            new("Enabled / Visible / Id (base)", "Honored.", "", null),
         };
         public static readonly ApiRow[] Duration =
         {
@@ -216,7 +216,7 @@
             new("DateRangePickerControl.SetValueAsync(range)", "Validates order, bounds and disabled days, publishes the error and raises <code>ValueChanged</code>.", "Task"),
             new("DateRangePickerControl.Error", "Current message, or null.", "string?"),
             new("CalendarControl.NavigateAsync(direction)", "Moves one period back (−1) or forward (+1) in the current view.", "Task"),
-            new("CalendarControl.SelectAsync(date)", "Same as clicking the day: honours the selection mode and disabled days.", "Task"),
+            new("CalendarControl.SelectAsync(date)", "Same as clicking the day: honors the selection mode and disabled days.", "Task"),
         };
         public static readonly ApiRow[] Css =
         {
@@ -226,7 +226,7 @@
             new("fx-timepicker · fx-timepicker-error", "Host around the drop-down list and the error line."),
             new("fx-date-range · fx-range-error", "Flex row of the two pickers, the Choose range button and the error."),
             new("fx-calendar · -header · -cells · -row · -cell", "Standalone calendar; cells take <code>selected</code>, <code>today</code> and <code>outside</code>."),
-            new("fx-timespan-picker · -segment · -input · -unit", "Bordered row of number boxes with unit letters; <code>disabled</code> greys it."),
+            new("fx-timespan-picker · -segment · -input · -unit", "Bordered row of number boxes with unit letters; <code>disabled</code> grays it."),
         };
         public static readonly ApiRow[] Vars =
         {
@@ -248,7 +248,7 @@
         {
             new("Arrow keys", "Move the focused day; disabled days are skipped and the month follows."),
             new("Page Up / Page Down", "Same day in the previous or next month; with Shift, year."),
-            new("Home / End", "First or last day of the week, honouring <code>FirstDayOfWeek</code>."),
+            new("Home / End", "First or last day of the week, honoring <code>FirstDayOfWeek</code>."),
             new("Enter / Space", "Select the focused day (a native button)."),
         };
     }

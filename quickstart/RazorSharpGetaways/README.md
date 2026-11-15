@@ -23,7 +23,7 @@ the certificate, trust the development certificate once with `dotnet dev-certs h
 | Trip Requests | 1,000 requests, typed quotes, an in-cell lookup, filter chips, search, a quote editor | GridControl, DropDownGridControl, ChipListControl, SearchBoxControl, ToolbarControl, StatusBarControl, DialogControl, DatePickerControl, NumericTextBoxControl |
 | Itinerary | One booked trip, flight out to flight home | SchedulerControl |
 | Invoices | The package cost sheet of a booked trip, a Crystal Reports XML export | ReportWriterControl |
-| Settings | Colour scheme, text size, grid look, dashboard layout, with a live preview | ColorPaletteControl, SliderControl, SwitchControl, SegmentedControl, DropDownListControl |
+| Settings | Color scheme, text size, grid look, dashboard layout, with a live preview | ColorPaletteControl, SliderControl, SwitchControl, SegmentedControl, DropDownListControl |
 
 The window itself is a vertical TabStripControl for the menu, an AppBarControl with ButtonControl menus and an AvatarControl, and a
 FabMenuControl for the + button. Toasts come from NotificationService.
@@ -40,7 +40,7 @@ FabMenuControl for the + button. Toasts come from NotificationService.
 | `Data/TripPackages.cs`, `Data/PackageCostSheet.cs` | The packages the agency sells and the rows behind the cost sheet report |
 | `Data/GetawaysReportServices.cs` | The report writer's data source and session context |
 | `wwwroot/reports/Package Cost Sheet.xml` | The report, in the Crystal XML export shape |
-| `wwwroot/getaways.css` | The look: colours, the four schemes, the grid theme, the editor |
+| `wwwroot/getaways.css` | The look: colors, the four schemes, the grid theme, the editor |
 | `Program.cs` | The FlexCore service registrations |
 
 ## How FlexCore is wired in
@@ -53,12 +53,12 @@ two hosts that draw toasts and dialogs, `NotificationDisplayControl` and `Dialog
 ## Changing things
 
 - Your own data: replace the generator in `Data/TripRequestStore.cs`; the pages read only that class.
-- Another look: the colours and sizes are in `wwwroot/getaways.css`, under `.gw-app` and the `scheme-*` classes.
+- Another look: the colors and sizes are in `wwwroot/getaways.css`, under `.gw-app` and the `scheme-*` classes.
 - Another page: add a `Components/Pages/Something.razor` with an `@page` directive, and a `GetawaysPage` entry in
   `Components/Getaways/GetawaysPages.cs` so it appears in the menu.
 - Your own report: drop a Crystal XML export into `wwwroot/reports`, answer its SQL in `Data/GetawaysReportServices.cs`, and call
   `ShowReportAsync` as `Components/Getaways/GetawaysInvoices.razor` does.
 
-## Licence
+## License
 
-The FlexCore package is released under the MIT licence; see its [LICENSE](https://github.com/wadoodachaudhary/FlexCore/blob/main/LICENSE).
+The FlexCore package is released under the MIT license; see its [LICENSE](https://github.com/wadoodachaudhary/FlexCore/blob/main/LICENSE).

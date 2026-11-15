@@ -1,7 +1,7 @@
 @page "/demo/diagram"
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-25: new page, checked against Diagram/* (FlexCore 0.2.49). No layout engine (OffsetX/OffsetY are hand-set centres);
+@* 2026-10-25: new page, checked against Diagram/* (FlexCore 0.2.49). No layout engine (OffsetX/OffsetY are hand-set centers);
    no drag, zoom, editing, node keyboard or ARIA: Previous/Next are the keyboard route. Connector Ids page-unique (wf-*, sh-*):
    arrowhead marker ids are document-wide.
    2026-10-26: Previous/Next stop at the ends instead of wrapping. *@
@@ -9,11 +9,11 @@
 <PageTitle>Blazor Diagram Component — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Diagram" Category="Components" ControlName="DiagramControl"
-                   Tagline="Boxes and arrows placed by hand and drawn as one inline SVG: six node shapes, labelled connectors and a click event."
+                   Tagline="Draw a workflow or process as boxes and labeled arrows in one inline SVG."
                    SourcePath="Diagram/DiagramControl.razor;Diagram/DiagramControl.razor.css;Diagram/DiagramModels.cs">
     <Overview>
         <p>
-            <code>DiagramControl</code> is a Blazor diagram drawn as one inline SVG: nodes in six shapes placed by hand, straight or right-angled connectors with labels and arrowheads, and a click event. There is no dragging or editing; change the objects and the page re-renders.
+            <code>DiagramControl</code> is a Blazor diagram that draws boxes and arrows, such as a booking workflow, as one inline SVG from nodes and connectors you place. Use it to explain a process or show where a request stands; it offers six node shapes, straight or right-angled connectors with labels and arrowheads, and a click event for details. Users cannot drag or edit it; change the objects in C# and the diagram redraws.
         </p>
     </Overview>
 
@@ -47,7 +47,7 @@
         </DemoExample>
 
         <DemoExample Id="shapes" Title="Shapes, connectors and links" RazorCode="@Code.Shapes" CSharpCode="@Code.ShapesCs">
-            <Description><p>Every shape, connector style and port setting on one canvas; hover a node for its tooltip, and the grey one is disabled.</p></Description>
+            <Description><p>See every shape, connector style and port setting on one canvas; hover a node for its tooltip, and note that the gray one is disabled.</p></Description>
             <Demo>
                 <div class="controls">
                     <SwitchControl @bind-Checked="_followLinks" Label="Follow links" />
@@ -95,7 +95,7 @@
             </DocSection>
             <DocSection Id="doc-css-variables" Title="CSS variables" Count='@DocSection.Label(Vocab.Vars.Length, "variables")'>
                 <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
-                <p>Fill, outline and text colours come from the node and connector properties, not from CSS variables.</p>
+                <p>Fill, outline and text colors come from the node and connector properties, not from CSS variables.</p>
             </DocSection>
         </DocSections>
     </Vocabulary>
@@ -107,7 +107,7 @@
             <li>Labels, sublabels, icons and connector labels are SVG <code>&lt;text&gt;</code>, real text rather than pictures of text.</li>
             <li><code>Tooltip</code> becomes an SVG <code>&lt;title&gt;</code>, the node's first child; browsers show it on hover. A disabled node has <code>pointer-events: none</code>, so its tooltip never appears.</li>
             <li>A disabled node is marked only visually, by 45% opacity and a close icon <code>&lt;image&gt;</code> that has no text alternative.</li>
-            <li>Contrast is up to the page. White text on the default <code>#4A90D9</code> fill is about 3.3:1, under the WCAG AA 4.5:1 for text this size; the fills on this page reach at least 5:1 against their text colour. Sublabels are drawn at 85% opacity, which brings the white ones here down to about 4.2:1 on blue and 4.4:1 on teal.</li>
+            <li>Contrast is up to the page. White text on the default <code>#4A90D9</code> fill is about 3.3:1, under the WCAG AA 4.5:1 for text this size; the fills on this page reach at least 5:1 against their text color. Sublabels are drawn at 85% opacity, which brings the white ones here down to about 4.2:1 on blue and 4.4:1 on teal.</li>
         </ul>
     </Accessibility>
 
@@ -236,15 +236,15 @@
         public static readonly ApiRow[] Node =
         {
             new("Id", "The name connectors use in <code>SourceId</code> and <code>TargetId</code>, matched case-insensitively. A node with a <code>BackgroundImage</code> also uses it for the clip path id <code>clip-<em>Id</em></code>, so keep it unique across diagrams on the same page.", "string", "\"\""),
-            new("OffsetX / OffsetY", "Centre of the node, in pixels from the top-left of the drawing area. Nothing is placed automatically.", "double", "0"),
+            new("OffsetX / OffsetY", "Center of the node, in pixels from the top-left of the drawing area. Nothing is placed automatically.", "double", "0"),
             new("Width", "Width of the shape in pixels.", "double", "140"),
             new("Height", "Height of the shape in pixels.", "double", "50"),
-            new("Label", "Main text, centred, 13 px semibold in <code>TextColor</code>. <code>\\n</code> starts a new line 15 px lower; the first line keeps the single-line position, so a multi-line label sits low. Text is not wrapped or clipped to the shape.", "string", "\"\""),
+            new("Label", "Main text, centered, 13 px semibold in <code>TextColor</code>. <code>\\n</code> starts a new line 15 px lower; the first line keeps the single-line position, so a multi-line label sits low. Text is not wrapped or clipped to the shape.", "string", "\"\""),
             new("SubLabel", "Second line at 11 px, 16 px under the label, or 15 px under the last line of a multi-line label. The label moves up 6 px to make room.", "string?", "null"),
             new("Shape", "Outline; see <code>DiagramControlShape</code>.", "DiagramControlShape", "DiagramControlShape.Rectangle"),
-            new("FillColor", "Shape fill; any SVG colour.", "string", "\"#4A90D9\""),
-            new("StrokeColor", "Outline colour.", "string", "\"#2C5F8A\""),
-            new("TextColor", "Colour of the label, sublabel and icon.", "string", "\"#FFFFFF\""),
+            new("FillColor", "Shape fill; any SVG color.", "string", "\"#4A90D9\""),
+            new("StrokeColor", "Outline color.", "string", "\"#2C5F8A\""),
+            new("TextColor", "Color of the label, sublabel and icon.", "string", "\"#FFFFFF\""),
             new("StrokeWidth", "Outline width in pixels.", "double", "2"),
             new("CornerRadius", "Corner radius of <code>Rectangle</code> and <code>RoundedRectangle</code> alike; set 0 for square corners. Other shapes ignore it.", "double", "6"),
             new("NavigateUrl", "Followed with <code>NavigationManager.NavigateTo</code> when the node is clicked, after <code>NodeClicked</code> unless that set <code>Handled</code>. A relative URL resolves against the base href. It makes the node clickable even without <code>NodeClicked</code>.", "string?", "null"),
@@ -259,18 +259,18 @@
         };
         public static readonly ApiRow[] Connector =
         {
-            new("Id", "Names the arrowhead marker <code>arrow-<em>Id</em></code>. Marker ids are shared by the whole page, so give every connector a distinct Id, across diagrams too; connectors with the same Id all use the first such marker, colour included.", "string", "\"\""),
+            new("Id", "Names the arrowhead marker <code>arrow-<em>Id</em></code>. Marker ids are shared by the whole page, so give every connector a distinct Id, across diagrams too; connectors with the same Id all use the first such marker, color included.", "string", "\"\""),
             new("SourceId / TargetId", "Ids of the nodes at the start and at the arrow end.", "string", "\"\""),
             new("Type", "Right-angle path or straight line; see <code>ConnectorType</code>.", "ConnectorType", "ConnectorType.Orthogonal"),
-            new("StrokeColor", "Line and arrowhead colour.", "string", "\"#555555\""),
+            new("StrokeColor", "Line and arrowhead color.", "string", "\"#555555\""),
             new("StrokeWidth", "Line width in pixels; the arrowhead scales with it.", "double", "2"),
             new("Label", "Text on a white box at 90% opacity, at the midpoint of a straight line or of the middle segment of an orthogonal one (at the bend of a one-bend path). The box is sized at 7 px per character.", "string?", "null"),
-            new("LabelColor", "Label text colour.", "string", "\"#333333\""),
+            new("LabelColor", "Label text color.", "string", "\"#333333\""),
             new("ShowArrow", "Draws the arrowhead at the target end; the line is pulled back 6 px toward the source to make room for it.", "bool", "true"),
             new("DashArray", "SVG <code>stroke-dasharray</code>, such as \"6,4\"; null draws a solid line.", "string?", "null"),
-            new("SourcePort / TargetPort", "Side of each node the line leaves or arrives at. <code>Auto</code> picks top or bottom when the two centres are further apart vertically than horizontally, otherwise left or right.", "DiagramPort", "DiagramPort.Auto"),
+            new("SourcePort / TargetPort", "Side of each node the line leaves or arrives at. <code>Auto</code> picks top or bottom when the two centers are further apart vertically than horizontally, otherwise left or right.", "DiagramPort", "DiagramPort.Auto"),
             new("ArrowStyle", "Open chevron or closed triangle; see <code>ArrowStyle</code>.", "ArrowStyle", "ArrowStyle.Open"),
-            new("IsBroken", "Draws the connector and its arrowhead grey (#a0a0a0), 1.5 px wide and dashed 3,3, overriding <code>StrokeColor</code>, <code>StrokeWidth</code> and <code>DashArray</code>.", "bool", "false"),
+            new("IsBroken", "Draws the connector and its arrowhead gray (#a0a0a0), 1.5 px wide and dashed 3,3, overriding <code>StrokeColor</code>, <code>StrokeWidth</code> and <code>DashArray</code>.", "bool", "false"),
         };
         public static readonly ApiRow[] ClickArgs =
         {
@@ -306,7 +306,7 @@
         };
         public static readonly ApiRow[] Fits =
         {
-            new("Contain", "Scaled to fit inside the padded box and centred (<code>xMidYMid meet</code>)."),
+            new("Contain", "Scaled to fit inside the padded box and centered (<code>xMidYMid meet</code>)."),
             new("Cover", "Scaled to cover the whole node and cropped to its shape (<code>xMidYMid slice</code>); padding is ignored."),
             new("Icon", "Described in the source as natural size, but drawn exactly like Contain: the same padded box and <code>meet</code>."),
         };

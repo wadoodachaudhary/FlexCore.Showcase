@@ -7,11 +7,11 @@
 <PageTitle>Blazor Slider and Range Slider — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Sliders" Category="Components" ControlName="SliderControl · RangeSliderControl"
-                   Tagline="Pick one number, or a lower and upper bound, by dragging or with the arrow keys."
+                   Tagline="Let users pick a number or a range by dragging or with the arrow keys."
                    SourcePath="SliderControl.razor; RangeSliderControl.razor">
     <Overview>
         <p>
-            <code>SliderControl</code> is a Blazor slider on the native range input, with <code>Min</code>, <code>Max</code>, <code>Step</code> and a two-way <code>Value</code>; <code>RangeSliderControl</code> binds a lower and an upper bound as one <code>NumericRange</code>.
+            <code>SliderControl</code> is a Blazor slider that lets users pick a number between a minimum and a maximum by dragging a thumb. Use it for prices, distances or quantities where the range matters more than the exact figure; <code>RangeSliderControl</code> picks a lower and an upper bound, such as a budget band, as one <code>NumericRange</code>. Both are built on the native range input, so the arrow keys work as the browser intends.
         </p>
     </Overview>
 
@@ -68,7 +68,7 @@
             </DocSection>
             <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
                 <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-                <p>Neither stylesheet reads a <code>--fx-*</code> variable: the track is <code>#e2e8f0</code> and the thumb <code>#2563eb</code>. Recolour with <code>CssClass</code> and a scoped <code>::deep</code> rule on <code>.fx-slider-range</code>.</p>
+                <p>Neither stylesheet reads a <code>--fx-*</code> variable: the track is <code>#e2e8f0</code> and the thumb <code>#2563eb</code>. Recolor with <code>CssClass</code> and a scoped <code>::deep</code> rule on <code>.fx-slider-range</code>.</p>
             </DocSection>
         </DocSections>
     </Vocabulary>
@@ -152,7 +152,7 @@
             new("fx-slider-host · .fx-slider-disabled", "Inline flex row, full width, 120px minimum; <code>disabled</code> adds opacity 0.5 and <code>pointer-events: none</code>."),
             new("fx-slider-range", "The input: 6px track, 18px round thumb that scales on hover."),
             new("fx-slider-value", "The readout: bold, right-aligned, 32px minimum width."),
-            new("fx-range-slider", "Grid of two labelled rows (95px label column) and the <code>&lt;output&gt;</code> readout; 220px minimum width."),
+            new("fx-range-slider", "Grid of two labeled rows (95px label column) and the <code>&lt;output&gt;</code> readout; 220px minimum width."),
         };
         public static readonly ApiRow[] Keys =
         {

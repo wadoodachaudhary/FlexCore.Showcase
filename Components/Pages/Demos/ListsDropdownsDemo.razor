@@ -11,11 +11,11 @@
 
 <FeatureDemoLayout Title="Lists &amp; dropdowns" Category="Components" CategoryHref="components"
                    ControlName="DropDownListControl · DropDownGridControl · ListBoxControl"
-                   Tagline="A one-line dropdown, a multi-column lookup with search, and a list of radio buttons or checkboxes."
+                   Tagline="Let users pick from a list: a dropdown, a searchable lookup grid or checkboxes."
                    SourcePath="DropDownListControl.razor;Grid/DropDownGridControl.razor;ListBoxControl.razor">
     <Overview>
         <p>
-            Three ways to choose from a list in Blazor: <code>DropDownListControl</code> is a one-line dropdown, editable if you like; <code>DropDownGridControl</code> opens a searchable grid and shows one field of the picked row; <code>ListBoxControl</code> shows every option as radio buttons or checkboxes. All take any item type.
+            <code>DropDownListControl</code> is a Blazor dropdown that lets users pick one item from a list, or type an unlisted value when it is editable. Use <code>DropDownGridControl</code> instead when the list is long or needs columns, such as 4,009 airports searched by code or city, and <code>ListBoxControl</code> when every option should stay visible as radio buttons or checkboxes. All three take any item type.
         </p>
     </Overview>
 
@@ -83,7 +83,7 @@
                 @if (Find(_fromCode) is { } from && Find(_toCode) is { } to)
                 {
                     <p class="result"><strong>@from.Code → @to.Code</strong>: @from.Name, @from.Country to @to.Name, @to.Country.
-                        Great-circle distance <strong>@Kilometres(from, to).ToString("N0") km</strong> (@((Kilometres(from, to) / 1.609344).ToString("N0")) miles).</p>
+                        Great-circle distance <strong>@Kilometers(from, to).ToString("N0") km</strong> (@((Kilometers(from, to) / 1.609344).ToString("N0")) miles).</p>
                 }
                 else
                 {
@@ -93,7 +93,7 @@
         </DemoExample>
 
         <DemoExample Id="listbox" Title="Choose several destinations" RazorCode="@Code.Listbox" CSharpCode="@Code.ListboxCs" CssCode="@Code.ListboxCss">
-            <Description><p>Tick several destinations on the left; the right list keeps one choice, with checkboxes when the switch is on.</p></Description>
+            <Description><p>Check several destinations on the left; the right list keeps one choice, with checkboxes when the switch is on.</p></Description>
             <Demo>
                 <div class="pair">
                     <div>
@@ -166,7 +166,7 @@
             </DocSection>
             <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
                 <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-                <p>The only variable the three stylesheets read is <code>--fx-zoom</code>, which scales the dropdown fonts. Colours are fixed in CSS; the popup sets <code>--fx-grid-font-size</code> and <code>--fx-grid-line-color</code> on its own grid.</p>
+                <p>The only variable the three stylesheets read is <code>--fx-zoom</code>, which scales the dropdown fonts. Colors are fixed in CSS; the popup sets <code>--fx-grid-font-size</code> and <code>--fx-grid-line-color</code> on its own grid.</p>
             </DocSection>
         </DocSections>
     </Vocabulary>
@@ -221,7 +221,7 @@
     private static Airport? Find(string? code) => code is not null && _airportsByCode.TryGetValue(code, out var airport) ? airport : null;
 
     // Great-circle distance on a sphere of radius 6,371 km (the haversine formula)
-    private static double Kilometres(Airport a, Airport b)
+    private static double Kilometers(Airport a, Airport b)
     {
         static double Radians(double degrees) => degrees * Math.PI / 180;
         var dLat = Radians(b.Latitude - a.Latitude);
@@ -238,7 +238,7 @@
             new("DataSource", "The items. Enumerated again on each render for the options, the closed text and the automatic width. Null shows \"No values\" in the open list.", "IEnumerable&lt;TItem&gt;?", "null"),
             new("TextFieldName / ValueFieldName", "Names of the item properties that give each option its text and its value, read by reflection. Blank uses the item itself (a string) or its <code>ToString()</code>.", "string", "\"\""),
             new("Value", "The current value. A value that matches no option shows as its own text; null or an empty string counts as no value.", "TValue?", "null"),
-            new("Placeholder", "Grey text in the closed button, or the input's placeholder, while there is no value. Also counts toward the automatic width.", "string?", "null"),
+            new("Placeholder", "Gray text in the closed button, or the input's placeholder, while there is no value. Also counts toward the automatic width.", "string?", "null"),
             new("AriaLabel", "<code>aria-label</code> of the button or the editable input.", "string?", "null"),
             new("Width", "CSS width of the host. Unset: sized to the longest option text or the placeholder, 8 to 28 characters plus room for the arrow, never wider than the window less 24px.", "string?", "null"),
             new("PanelMaxHeight", "Tallest open list in pixels before it scrolls. The visible space around the box can make it shorter.", "int", "180"),
@@ -292,8 +292,8 @@
             new("ShowSearch", "A search box above the grid. It keeps the rows where the text of any public property contains the typed text, ignoring case, including properties with no column. Cleared when the popup closes.", "bool", "true"),
             new("SearchPlaceholder", "Placeholder of the search box; unset shows \"Search...\".", "string?", "null"),
             new("AllowClear", "A ✕ button in the box while there is a value. It sets <code>Value</code> to <code>default</code> and raises <code>ValueChanged</code> and <code>OnSelectedItemChanged</code> with default values. Hidden when <code>Disabled</code> or <code>ReadOnly</code>.", "bool", "true"),
-            new("Disabled", "Disables and greys the box; the popup does not open.", "bool", "false"),
-            new("ReadOnly", "The popup does not open and the clear button is hidden, but the box is not greyed.", "bool", "false"),
+            new("Disabled", "Disables and grays the box; the popup does not open.", "bool", "false"),
+            new("ReadOnly", "The popup does not open and the clear button is hidden, but the box is not grayed.", "bool", "false"),
             new("Width", "CSS width of the control.", "string?", "\"100%\""),
             new("PopupWidth", "CSS width of the popup. Placement reads it as a number of pixels to keep the popup inside the window.", "string?", "\"450px\""),
             new("PopupHeight", "Height of the grid area under the search box.", "string?", "\"240px\""),
@@ -317,25 +317,25 @@
             new("TextField / ValueField", "Names of the item properties that give each row its label and its value, read by reflection. Blank gives an empty string, so plain strings need wrapping in a record.", "string", "\"\""),
             new("Value", "The selected values, compared ignoring case. Read again on every parameter update, so a new list from the page replaces the selection.", "List&lt;string&gt;?", "null"),
             new("SelectionMode", "Single keeps at most one value; Multiple keeps any number.", "ListBoxSelectionMode", "ListBoxSelectionMode.Single"),
-            new("ShowCheckbox", "Single mode only: checkboxes instead of radio buttons, so the one choice can be unticked. Multiple mode always draws checkboxes.", "bool", "false"),
+            new("ShowCheckbox", "Single mode only: checkboxes instead of radio buttons, so the one choice can be unchecked. Multiple mode always draws checkboxes.", "bool", "false"),
             new("CssClass", "Added to the <code>fx-listbox</code> element.", "string?", "null"),
         };
         public static readonly ApiRow[] ListEvents =
         {
-            new("ValueChanged", "When a checkbox is ticked or unticked, or a radio button chosen: a new list of the selected values, in no guaranteed order. In single mode it holds at most one value.", "List&lt;string&gt;"),
+            new("ValueChanged", "When a checkbox is checked or unchecked, or a radio button chosen: a new list of the selected values, in no guaranteed order. In single mode it holds at most one value.", "List&lt;string&gt;"),
         };
         public static readonly ApiRow[] Modes =
         {
-            new("Single", "At most one value: radio buttons sharing one group name per list, or, with <code>ShowCheckbox</code>, checkboxes where ticking one unticks the other."),
+            new("Single", "At most one value: radio buttons sharing one group name per list, or, with <code>ShowCheckbox</code>, checkboxes where checking one unchecks the other."),
             new("Multiple", "Any number of values; each row is a checkbox."),
         };
         public static readonly ApiRow[] Css =
         {
             new("fx-dropdown-host", "The dropdown's outer element: inline-block, at least 80px wide, Tahoma at 10px times <code>--fx-zoom</code>. <code>fx-dropdown-open-up</code> is added while the list opens upward."),
-            new("fx-dropdown · fx-dropdown-editable · disabled", "The closed button, or the editable input's wrapper: 20px high with a 1px blue-grey border and a dotted focus outline; grey when disabled."),
-            new("fx-dropdown-text · fx-dropdown-placeholder · fx-dropdown-input · fx-dropdown-arrow", "The button's text and its grey placeholder state, the editable text input, and the 18px arrow lane."),
+            new("fx-dropdown · fx-dropdown-editable · disabled", "The closed button, or the editable input's wrapper: 20px high with a 1px blue-gray border and a dotted focus outline; gray when disabled."),
+            new("fx-dropdown-text · fx-dropdown-placeholder · fx-dropdown-input · fx-dropdown-arrow", "The button's text and its gray placeholder state, the editable text input, and the 18px arrow lane."),
             new("fx-dropdown-panel · fx-dropdown-panel-fit", "The open list, positioned under the box, 180px at most by default; the fit variant takes its widest option's width."),
-            new("fx-dropdown-option · highlighted · selected", "An option button. <code>highlighted</code> (white on blue) follows the mouse and the keys; <code>selected</code> marks the current value and adds no colour."),
+            new("fx-dropdown-option · highlighted · selected", "An option button. <code>highlighted</code> (white on blue) follows the mouse and the keys; <code>selected</code> marks the current value and adds no color."),
             new("fx-dropdown-empty", "\"No values\" in the open list when <code>DataSource</code> is null."),
             new("fx-dropdown-backdrop", "A transparent full-window button behind the open list; a click on it closes the list."),
             new("fx-dropdown-legacy-blue", "Pass it as <code>CssClass</code> for a white-on-blue button and list."),
@@ -433,7 +433,7 @@ private static readonly Destination[] _destinations =
 @if (Find(_fromCode) is { } from && Find(_toCode) is { } to)
 {
     <p class=""result""><strong>@from.Code → @to.Code</strong>: @from.Name, @from.Country to @to.Name, @to.Country.
-        Great-circle distance <strong>@Kilometres(from, to).ToString(""N0"") km</strong> (@((Kilometres(from, to) / 1.609344).ToString(""N0"")) miles).</p>
+        Great-circle distance <strong>@Kilometers(from, to).ToString(""N0"") km</strong> (@((Kilometers(from, to) / 1.609344).ToString(""N0"")) miles).</p>
 }
 else
 {
@@ -451,7 +451,7 @@ private static readonly Dictionary<string, Airport> _airportsByCode = AirportDat
 private static Airport? Find(string? code) => code is not null && _airportsByCode.TryGetValue(code, out var airport) ? airport : null;
 
 // Great-circle distance on a sphere of radius 6,371 km (the haversine formula)
-private static double Kilometres(Airport a, Airport b)
+private static double Kilometers(Airport a, Airport b)
 {
     static double Radians(double degrees) => degrees * Math.PI / 180;
     var dLat = Radians(b.Latitude - a.Latitude);

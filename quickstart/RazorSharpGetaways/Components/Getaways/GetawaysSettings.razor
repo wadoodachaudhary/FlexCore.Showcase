@@ -29,8 +29,8 @@
                     <HeaderContent><h4 class="gw-set-card-title">Look</h4></HeaderContent>
                     <ChildContent>
                         <div class="gw-set-row">
-                            <div class="gw-set-label">Colour scheme</div>
-                            <ColorPaletteControl CssClass="gw-schemes" Colors="@_accents" Columns="4" TileSize="44px" Value="@Settings.Scheme.Accent" ValueChanged="PickScheme" AriaLabel="Colour scheme" />
+                            <div class="gw-set-label">Color scheme</div>
+                            <ColorPaletteControl CssClass="gw-schemes" Colors="@_accents" Columns="4" TileSize="44px" Value="@Settings.Scheme.Accent" ValueChanged="PickScheme" AriaLabel="Color scheme" />
                             <p class="gw-set-note"><strong>@Settings.Scheme.Name.</strong> @Settings.Scheme.Blurb</p>
                         </div>
                         <div class="gw-set-row">
@@ -92,7 +92,7 @@
                                 }
                             </div>
                         </div>
-                        <ButtonControl IconCss="bi bi-arrows-move" OnClick="OpenCustomise">Rearrange on the dashboard</ButtonControl>
+                        <ButtonControl IconCss="bi bi-arrows-move" OnClick="OpenCustomize">Rearrange on the dashboard</ButtonControl>
                     </ChildContent>
                 </CardControl>
 
@@ -114,7 +114,7 @@
                             <SegmentedControl CssClass="gw-seg" Items="_gridLines" AriaLabel="Grid lines" Value="@Settings.GridLines.ToString()"
                                               ValueChanged="@(v => Change(() => Settings.GridLines = Enum.Parse<GridLines>(v)))" />
                         </div>
-                        <SwitchControl Label="Alternate row colours" Checked="@Settings.AlternateRows" CheckedChanged="@(v => Change(() => Settings.AlternateRows = v))" />
+                        <SwitchControl Label="Alternate row colors" Checked="@Settings.AlternateRows" CheckedChanged="@(v => Change(() => Settings.AlternateRows = v))" />
                     </ChildContent>
                 </CardControl>
             </div>
@@ -177,7 +177,7 @@
     private static readonly SelectionItem[] _gridLines = [new("Both", "Both"), new("Horizontal", "Rows"), new("Vertical", "Columns"), new("None", "None")];
     private static readonly SelectionItem[] _gridThemes =
     [
-        new("scheme", "Follow the colour scheme"), new("Default", "Default"), new("Vb6Windows", "VB6 Windows"),
+        new("scheme", "Follow the color scheme"), new("Default", "Default"), new("Vb6Windows", "VB6 Windows"),
         new("ExcelLightBlue", "Light Blue"), new("ExcelLightGreen", "Light Green"), new("ExcelLightOrange", "Light Orange"),
         new("ExcelMediumBlue", "Medium Blue"), new("ExcelMediumGreen", "Medium Green"), new("ExcelDarkSlate", "Dark Slate"),
     ];
@@ -200,9 +200,9 @@
     private void PickGridTheme(string? key) =>
         Change(() => Settings.GridTheme = key is null or "scheme" ? null : Enum.Parse<GridTheme>(key));
 
-    private Task OpenCustomise()
+    private Task OpenCustomize()
     {
-        Settings.Customising = true;
+        Settings.Customizing = true;
         return OnOpenDashboard.InvokeAsync();
     }
 

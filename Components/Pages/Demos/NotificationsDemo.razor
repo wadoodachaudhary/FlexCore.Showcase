@@ -9,11 +9,11 @@
 <PageTitle>Blazor Toast Notifications — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Toasts" Category="Components" ControlName="NotificationService · NotificationDisplayControl"
-                   Tagline="Call the service from anywhere; toasts stack in the top-right corner and dismiss themselves."
+                   Tagline="Tell users an action worked or failed with toasts that close themselves."
                    SourcePath="Notifications/NotificationService.cs; NotificationDisplayControl.razor">
     <Overview>
         <p>
-            <code>NotificationService</code> shows Blazor toast notifications from anywhere in the app: <code>Info</code>, <code>Success</code>, <code>Warning</code> and <code>Error</code>, stacked top-right by one <code>NotificationDisplayControl</code> in the layout.
+            <code>NotificationService</code> shows Blazor toast notifications: short info, success, warning and error messages that stack in the top-right corner and close themselves. Use them to confirm a save or report a failed export without interrupting work; call the service from any component, and one <code>NotificationDisplayControl</code> in the layout shows them all. An error stays ten seconds and a success four, and <code>durationMs: 0</code> keeps a toast until it is closed.
         </p>
     </Overview>
 

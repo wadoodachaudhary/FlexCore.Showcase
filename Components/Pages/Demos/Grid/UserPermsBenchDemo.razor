@@ -19,11 +19,11 @@
 <PageTitle>Blazor Master-Detail Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Master-detail" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Pick a row and see what belongs to it: in a second grid, or in a detail row that opens under it."
+                   Tagline="Pick a row and see what belongs to it, beside it or right under it."
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.AdvancedFeatures.cs;Grid/GridControlEvents.cs;Grid/SelectionSettings.cs;Grid/GridModels.cs">
     <Overview>
         <p>
-            Master-detail with the Blazor <code>GridControl</code>: the master grid's <code>RowSelected</code> event filters a second grid, or a <code>DetailTemplate</code> opens any markup, including another grid, under the row that owns it. <code>AutoSelectFirstRow</code> fills the detail on arrival; <code>RowExpand</code> and <code>RowCollapse</code> report open rows.
+            Master-detail views let users pick a row in a Blazor <code>GridControl</code> and see what belongs to it, such as a country's airports. Use them for orders and their lines or customers and their contacts: filter a second grid from <code>RowSelected</code>, or open a <code>DetailTemplate</code> under the row with any markup, another grid included. <code>AutoSelectFirstRow</code> fills the detail as soon as the page opens.
         </p>
     </Overview>
 

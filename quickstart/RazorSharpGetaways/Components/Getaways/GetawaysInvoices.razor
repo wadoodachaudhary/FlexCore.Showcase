@@ -20,7 +20,7 @@
                 }
                 else
                 {
-                    <text>@_trip.Request · @_package.Name, @_trip.Nights nights, @_season departure · @_trip.Traveller, @_trip.Travellers travelling · quoted @_trip.Quote.ToString("C0")</text>
+                    <text>@_trip.Request · @_package.Name, @_trip.Nights nights, @_season departure · @_trip.Traveler, @_trip.Travelers traveling · quoted @_trip.Quote.ToString("C0")</text>
                 }
             </p>
         </div>
@@ -46,7 +46,7 @@
     protected override void OnInitialized()
     {
         var booked = Store.BookedDepartures.ToList();
-        _trips = booked.Select(r => new SelectionItem(r.Request, $"{r.Request} · {r.Destination} · {r.Traveller}")).ToList();
+        _trips = booked.Select(r => new SelectionItem(r.Request, $"{r.Request} · {r.Destination} · {r.Traveler}")).ToList();
         Select(booked.FirstOrDefault(r => r.Request == "LIS-0586") ?? booked.FirstOrDefault());
     }
 
@@ -79,7 +79,7 @@
         {
             ["Package"] = _package.Name,
             ["Season"] = _season,
-            ["Pax"] = _trip.Travellers.ToString(CultureInfo.InvariantCulture),
+            ["Pax"] = _trip.Travelers.ToString(CultureInfo.InvariantCulture),
             ["Nights"] = _trip.Nights.ToString(CultureInfo.InvariantCulture),
             ["Quote"] = _trip.Quote.ToString(CultureInfo.InvariantCulture),
             ["Request"] = _trip.Request,

@@ -15,11 +15,11 @@
 <PageTitle>Blazor Pivot Table (PivotGrid) — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Pivot tables" Category="Data Grid" CategoryHref="demo/grid" ControlName="PivotControl"
-                   Tagline="Cross-tabs with grouped headers, subtotals, several measures, sorting and a drag-and-drop field builder."
+                   Tagline="Summarize rows into a cross-tab that users rearrange by dragging fields."
                    SourcePath="Grid/PivotControl.razor;Grid/PivotControl.razor.cs;Grid/PivotSortDescriptor.cs;Grid/GridEnums.cs;Grid/GridColumn.cs;Grid/GridControl.razor.cs">
     <Overview>
         <p>
-            <code>PivotControl</code> is FlexCore's Blazor pivot table: <code>RowFields</code> label the rows, <code>ColumnFields</code> spread across the columns, and each cell aggregates one or more measures with Sum, Average, Count, Min or Max. Two row fields give grouped rows with subtotals; <code>Interactive</code> adds a drag-and-drop field builder. <code>GridControl</code> can open the same view through <code>AllowPivoting</code>.
+            <code>PivotControl</code> is a Blazor pivot table that summarizes rows into a cross-tab, with a sum, average, count, minimum or maximum in each cell. Use it for questions such as how many airports each continent has, by type; with <code>Interactive</code> on, users drag fields between Filters, Rows, Columns and Values, as in an Excel PivotTable. Two row fields add subtotals, and <code>GridControl</code> opens the same view through <code>AllowPivoting</code>.
         </p>
     </Overview>
 
@@ -40,7 +40,7 @@
         </DemoExample>
 
         <DemoExample Id="grouped" Title="Grouped rows, subtotals and two measures" RazorCode="@Code.Grouped" CSharpCode="@Code.GroupedCs">
-            <Description><p>Continent spans its countries with a Total row per group and two measures, Airports and Longest runway, side by side; the buttons set <code>SortDescriptors</code> from the page and toggle grand totals and subtotals.</p></Description>
+            <Description><p>Sort by airport count or longest runway with the buttons, which set <code>SortDescriptors</code>, and switch totals on and off; each continent closes with its own Total row.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [MostAirports])">Most airports first</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [LongestRunway])">Longest runway first</ButtonControl>
@@ -64,7 +64,7 @@
         </DemoExample>
 
         <DemoExample Id="formulas" Title="Formula columns in a grid" RazorCode="@Code.Formulas" CSharpCode="@Code.FormulasCs">
-            <Description><p>A column <code>Formula</code> such as <code>[ElevationFt] * 0.3048</code> is evaluated per row through <code>DataTable.Compute</code>, and with <code>AllowCellFormulas</code> a cell value starting with <code>=</code> is evaluated the same way.</p></Description>
+            <Description><p>Elevation (m) is a column <code>Formula</code>, <code>[ElevationFt] * 0.3048</code>, worked out per row; Longest runway (km) holds cell values that start with <code>=</code>, evaluated because <code>AllowCellFormulas</code> is on.</p></Description>
             <Demo>
                 <GridControl TValue="Hub" DataSource="@_hubs"
                              AllowCellFormulas="true"

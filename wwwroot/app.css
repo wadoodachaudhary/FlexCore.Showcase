@@ -1,4 +1,4 @@
-/* 2026-10-28: Inter site font (Google Fonts, App.razor), system fallback; brand colours = the logo's tiles (MainLayout.razor). */
+/* 2026-10-28: Inter site font (Google Fonts, App.razor), system fallback; brand colors = the logo's tiles (MainLayout.razor). */
 :root {
     --site-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
     --brand-blue: #0284c7;
@@ -15,7 +15,7 @@
     --brand-button-soft-text: #4338ca;
 
     /* ButtonControl themed site-wide (demos included) through its own variables (2026-10-29); several controls take their
-       pressed/picked colour from --fx-accent. The rest: "Buttons" block below. */
+       pressed/picked color from --fx-accent. The rest: "Buttons" block below. */
     --fx-btn-bg: var(--brand-button-soft);
     --fx-btn-color: var(--brand-button-soft-text);
     --fx-btn-border: 1px solid transparent;
@@ -148,7 +148,7 @@ h1:focus {
 .footer-section { max-width: 1100px; margin: 32px auto; padding: 32px;
     border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
 
-/* Doodle headings (2026-10-28; centred 2026-10-29): fx-hand wobble filter from DoodleFilters.razor; is-playing (App.razor's
+/* Doodle headings (2026-10-28; centered 2026-10-29): fx-hand wobble filter from DoodleFilters.razor; is-playing (App.razor's
    fxToggleClassWhenVisible) cycles its three seeds. Movements live in Home.razor.css, ComponentCatalogDirectory.razor.css. */
 .doodle-head { display: flex; align-items: center; justify-content: center; gap: 20px; text-align: center; }
 .doodle { flex: none; width: 112px; height: auto; overflow: visible; filter: url(#fx-hand); }
@@ -1077,7 +1077,7 @@ td:has(.fx-dropdown-grid.fx-open),
    the markers verbatim (AppSource.Region). */
 /* code-tab:site-tabs */
 /* class="site-tabs" on a TabStripControl, or on a TabControl for its header row. :root and :is() outrank the strip's own
-   styles and the colours its Theme writes inline. */
+   styles and the colors its Theme writes inline. */
 :root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) { padding: 6px 8px; gap: 4px; background: none; border: 0; border-bottom: 1px solid #f1f5f9; }
 :root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-viewport { gap: 4px; }
 :root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab {

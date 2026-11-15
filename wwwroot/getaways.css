@@ -1,7 +1,7 @@
 /* Razor Sharp Getaways: the app window's look, also linked by the FlexCore site's home demo frame. Rules are scoped under .gw-app
    and style library controls through fx- classes and --fx-* variables; a repeated class beats a library scoped selector. */
 
-/* ── 1. The window: type, colours and the four schemes ── */
+/* ── 1. The window: type, colors and the four schemes ── */
 .gw-app {
     --site-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
 
@@ -145,7 +145,7 @@
 }
 .gw-app.gw-nav-collapsed { grid-template-columns: 68px minmax(0, 1fr); }
 
-/* FlexCore buttons: the app's type and weight, and the scheme colour for library-fixed variants (btn-primary). */
+/* FlexCore buttons: the app's type and weight, and the scheme color for library-fixed variants (btn-primary). */
 .gw-app .fx-button.fx-button:not(.fx-button-classic) {
     font-family: inherit;
     font-weight: 600;
@@ -557,7 +557,7 @@
 .gw-app .gw-types .fx-chip:hover { color: var(--gw-link); }
 .gw-app .gw-types .fx-chip.selected { background: var(--brand-button); border-color: var(--brand-button); color: #ffffff; font-weight: 600; }
 
-/* Grid in the window's colours. Cell and row rules skip the DropDownGridControl popup grid nested in the cells; header rules
+/* Grid in the window's colors. Cell and row rules skip the DropDownGridControl popup grid nested in the cells; header rules
    reach it on purpose (it sorts too). */
 .gw-app .fx-grid.gw-grid-theme {
     --fx-grid-font-family: var(--site-font) !important;
@@ -695,7 +695,7 @@
 .gw-app .fx-badge.gw-badge-gray.gw-badge-gray { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 .gw-app .gw-desc { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; }
 .gw-app .gw-desc-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(12.5px * var(--fx-zoom, 1)); color: #334155; }
-/* Template-coloured text follows the grid on the built-in Dark Slate theme */
+/* Template-colored text follows the grid on the built-in Dark Slate theme */
 .gw-app .fx-grid-dark .gw-agent-name,
 .gw-app .fx-grid-dark .gw-desc-text { color: inherit; }
 .gw-app .gw-cell-edit {
@@ -1192,7 +1192,7 @@
 .gw-app .gw-slot-beside .fx-chart svg text { font-size: calc(14px * var(--fx-zoom, 1)); }
 
 /* Rearranging: the bar is the drag handle, so header dragging in the card's grid still works */
-.gw-app .gw-customise-bar {
+.gw-app .gw-customize-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1206,8 +1206,8 @@
     font-size: calc(13.5px * var(--fx-zoom, 1));
     font-weight: 500;
 }
-.gw-app .gw-customise-tools { display: flex; flex-wrap: wrap; gap: 6px; }
-.gw-app .gw-slot.is-customising { border-radius: 12px; outline: 1px dashed var(--gw-soft-border); outline-offset: 3px; }
+.gw-app .gw-customize-tools { display: flex; flex-wrap: wrap; gap: 6px; }
+.gw-app .gw-slot.is-customizing { border-radius: 12px; outline: 1px dashed var(--gw-soft-border); outline-offset: 3px; }
 .gw-app .gw-slot.is-drop-target { outline: 2px solid var(--brand-button); background: var(--brand-button-soft); }
 .gw-app .gw-slot-bar {
     display: flex;
@@ -1263,12 +1263,12 @@
     .gw-app .gw-kpi-btn { padding: 12px 14px; }
 }
 
-/* ── 6. Itinerary: SchedulerControl in the app's colours ── */
+/* ── 6. Itinerary: SchedulerControl in the app's colors ── */
 .gw-app .gw-trip-head { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px 20px; margin-bottom: 14px; }
 .gw-app .gw-trip-title { margin: 0; font-size: calc(20px * var(--fx-zoom, 1)); font-weight: 700; letter-spacing: -0.02em; color: #0f172a; }
 .gw-app .gw-trip-sub { margin: 4px 0 0; font-size: calc(13.5px * var(--fx-zoom, 1)); color: #64748b; }
 
-/* Kinds of entry: the legend and the blocks share the colours */
+/* Kinds of entry: the legend and the blocks share the colors */
 .gw-app .gw-legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .gw-app .gw-legend li { padding: 3px 10px; border: 1px solid; border-left-width: 4px; border-radius: 999px; font-size: calc(12.5px * var(--fx-zoom, 1)); font-weight: 600; color: #334155; }
 .gw-app .gw-legend .k-flight { background: #eef2ff; border-color: #6366f1; }
@@ -1284,7 +1284,7 @@
 .gw-app .gw-itinerary .fx-time-column { border-right-color: #eef2f7; }
 .gw-app .gw-itinerary .fx-time-slot { border-bottom-color: #f1f5f9; }
 
-/* Timed entries take their title emoji's colour; the library writes the left border colour inline, hence !important. */
+/* Timed entries take their title emoji's color; the library writes the left border color inline, hence !important. */
 .gw-app .gw-itinerary .fx-timed-event { border-radius: 8px; border-width: 1px 1px 1px 4px; }
 .gw-app .gw-itinerary .fx-timed-event .fx-button { padding: 3px 6px; border: 0; background: transparent; font-weight: 600; color: #1e293b; }
 .gw-app .gw-itinerary .fx-timed-event:has(.fx-button[title*="✈"]) { background: #eef2ff; border-color: #c7d2fe; border-left-color: #6366f1 !important; }

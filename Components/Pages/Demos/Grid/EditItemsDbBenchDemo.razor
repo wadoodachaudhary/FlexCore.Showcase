@@ -15,11 +15,11 @@
 <PageTitle>Batch Editing in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Batch editing" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Double-click a cell, type, press Enter: cell-by-cell editing on a 5,000-line rate card, written straight to the bound objects."
+                   Tagline="Let users edit a grid cell by cell, spreadsheet style, straight into your objects."
                    SourcePath="Grid/EditSettings.cs;Grid/GridEnums.cs;Grid/GridColumn.cs;Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/GridControl.razor.cs;Grid/GridControl.razor;Grid/GridControl.DeleteConfirmation.cs;Grid/GridControl.RowEditing.cs;Grid/GridControl.Validation.cs">
     <Overview>
         <p>
-            Cell editing in the Blazor <code>GridControl</code>: <code>EditSettings</code> with <code>EditMode.Batch</code> opens an editor in the cell on double-click or Enter, commits on Tab or Enter and writes straight to the bound object. Columns opt in with <code>AllowEditing</code>; <code>OnCellEdit</code> can refuse a cell and <code>OnCellSave</code> reports each write.
+            Batch editing turns a Blazor <code>GridControl</code> into a spreadsheet-style editor: users double-click a cell or press Enter, type, and commit with Enter or Tab. Use it for rate cards and price lists that are corrected line by line; each commit writes straight to the bound object and raises <code>OnCellSave</code>. Turn it on with <code>EditSettings</code> in <code>EditMode.Batch</code>, keep a column read-only with <code>AllowEditing="false"</code>, and refuse a cell in <code>OnCellEdit</code>.
         </p>
     </Overview>
 
@@ -220,7 +220,7 @@ public sealed class RateCardItem
         {
             new("EditSettingsRef", "The settings object below. Null leaves every cell read-only: each way into an editor first checks <code>AllowEditing</code> on it.", "EditSettings?", "null"),
             new("EventsRef", "The object that holds the callbacks below; the grid has no separate parameters for the edit events.", "GridControlEvents&lt;TValue&gt;?", "null"),
-            new("BatchEditBehavior", "Picks one of the two batch behaviours in the table below.", "GridBatchEditBehavior", "GridBatchEditBehavior.MultiRow"),
+            new("BatchEditBehavior", "Picks one of the two batch behaviors in the table below.", "GridBatchEditBehavior", "GridBatchEditBehavior.MultiRow"),
             new("EditOnSingleClick", "A plain click on an editable batch cell opens its editor at once, instead of only selecting the cell.", "bool", "false"),
             new("CellEditablePredicate", "Per-row veto, called with the row and the field before a cell opens and again for each row a multi-row commit fans out to. A false answer leaves that cell read-only without raising <code>OnCellEdit</code>.", "Func&lt;TValue, string, bool&gt;?", "null"),
             new("NewItemFactory", "Builds the row for <code>AppendRow</code>, <code>InsertRow</code> and the Inline or Dialog add editor. Without it the grid calls <code>Activator.CreateInstance&lt;TValue&gt;()</code>.", "Func&lt;TValue&gt;?", "null"),

@@ -1,11 +1,11 @@
 namespace FlexCore.Showcase.Components.Shared;
 
-// Chart colours (2026-10-31): every site chart passes these as ColorPalette instead of ChartControl's built-in eight. Chart pages'
+// Chart colors (2026-10-31): every site chart passes these as ColorPalette instead of ChartControl's built-in eight. Chart pages'
 // C# tabs print the lines between the markers (FlexCore.Showcase.csproj embeds this file for AppSource.Region). Order keeps
-// neighbours apart under protanopia and deuteranopia (OKLab distance >= 16); all eight hold 3:1 on white. The logo's sky
+// neighbors apart under protanopia and deuteranopia (OKLab distance >= 16); all eight hold 3:1 on white. The logo's sky
 // (#38bdf8) is out: 2.1:1 on white.
 // code-tab:chart-palette
-/// <summary>Chart colours: the FlexCore logo's blue, green and indigo first, then five that go with them.</summary>
+/// <summary>Chart colors: the FlexCore logo's blue, green and indigo first, then five that go with them.</summary>
 public static class ChartPalette
 {
     public const string Blue = "#0284c7";
@@ -17,7 +17,7 @@ public static class ChartPalette
     public const string Violet = "#7c3aed";
     public const string Teal = "#0d9488";
 
-    /// <summary>For ColorPalette: series, slices and stages take the colours in this order.</summary>
+    /// <summary>For ColorPalette: series, slices and stages take the colors in this order.</summary>
     public static readonly string[] Site = [Blue, Green, Indigo, Amber, Fuchsia, Rose, Violet, Teal];
 
     /// <summary>For amounts on a map: one hue, light to dark, through the logo's sky and blue; each step a visible lightness apart.</summary>

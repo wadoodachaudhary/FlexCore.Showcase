@@ -166,7 +166,7 @@
                 <BadgeControl Text="@(_isNew ? "New" : _editing?.Request ?? "")" CssClass="gw-editor-badge" />
                 <span class="gw-editor-titles">
                     <span class="gw-editor-title">@(_isNew ? "New Trip Request" : "Edit Trip Request")</span>
-                    <span class="gw-editor-sub">@(_isNew ? "Fill in the request, then Add" : $"{_editing?.Traveller} • {_editing?.Destination}")</span>
+                    <span class="gw-editor-sub">@(_isNew ? "Fill in the request, then Add" : $"{_editing?.Traveler} • {_editing?.Destination}")</span>
                 </span>
             </span>
         </HeaderContent>
@@ -186,12 +186,12 @@
                     </div>
                     <div class="gw-form-2">
                         <div class="gw-field">
-                            <label>Lead traveller</label>
-                            <TextBoxControl CssClass="gw-input" Value="@_editing.Traveller" ValueChanged="@(v => _editing.Traveller = v ?? "")" />
+                            <label>Lead traveler</label>
+                            <TextBoxControl CssClass="gw-input" Value="@_editing.Traveler" ValueChanged="@(v => _editing.Traveler = v ?? "")" />
                         </div>
                         <div class="gw-field">
-                            <label>Travellers</label>
-                            <NumericTextBoxControl TValue="int" Min="1" Max="12" Width="100%" CssClass="gw-input" Value="@_editing.Travellers" ValueChanged="@(v => _editing.Travellers = v)" />
+                            <label>Travelers</label>
+                            <NumericTextBoxControl TValue="int" Min="1" Max="12" Width="100%" CssClass="gw-input" Value="@_editing.Travelers" ValueChanged="@(v => _editing.Travelers = v)" />
                         </div>
                     </div>
                     <div class="gw-form-2">
@@ -299,7 +299,7 @@
                 list = list.Where(r =>
                     r.Request.Contains(term, StringComparison.OrdinalIgnoreCase) ||
                     r.Agent.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                    r.Traveller.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    r.Traveler.Contains(term, StringComparison.OrdinalIgnoreCase) ||
                     r.Destination.Contains(term, StringComparison.OrdinalIgnoreCase) ||
                     r.Itinerary.Contains(term, StringComparison.OrdinalIgnoreCase) ||
                     r.TripType.Contains(term, StringComparison.OrdinalIgnoreCase));

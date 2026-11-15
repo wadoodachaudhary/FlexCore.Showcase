@@ -15,17 +15,17 @@
 <PageTitle>Blazor Candlestick, OHLC and Sankey Charts — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Financial &amp; gauges" Category="Charts" CategoryHref="demo/charts" ControlName="ChartControl"
-                   Tagline="Candlestick and OHLC, bullet and range comparisons, a Sankey flow, and two gauges."
+                   Tagline="Show prices, budgets against plan, flows and gauges on finance and operations screens."
                    SourcePath="Charts/ChartControl.razor;Charts/ChartModels.cs">
     <Overview>
         <p>
-            The same Blazor <code>ChartControl</code> with the types a finance or operations screen needs: candlestick and OHLC bound through <code>ChartDataPoint.Financial</code>, bullet and range comparisons, a Sankey flow and two gauge types.
+            The Blazor <code>ChartControl</code> draws the charts finance and operations screens need: candlestick and OHLC prices, bullet charts against target, floating ranges, Sankey flows and gauges. Use them for a trading view, a budget review or a material flow; prices bind through <code>ChartDataPoint.Financial</code>, and rising and falling days take the <code>UpColor</code> and <code>DownColor</code> you set.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="financial" Title="Candlestick and OHLC" RazorCode="@Code.Financial" CSharpCode="@Code.FinancialCs">
-            <Description><p>Both charts read the same series: Candlestick fills the body, Ohlc draws ticks.</p></Description>
+            <Description><p>Compare one week of BAKE prices drawn twice from the same series: candlesticks fill the open-to-close body, OHLC marks open and close with ticks.</p></Description>
             <Demo>
                 <div class="two">
                     <ChartControl Type="ChartType.Candlestick" UpColor="@ChartPalette.Green" DownColor="@ChartPalette.Rose" Title="BAKE, one week of trading" Series="_candlestickSeries" Height="248px" />
@@ -35,7 +35,7 @@
         </DemoExample>
 
         <DemoExample Id="comparisons" Title="Bullet, range and Sankey" RazorCode="@Code.Comparisons" CSharpCode="@Code.ComparisonsCs">
-            <Description><p>Bullet shows actual against target bands, RangeColumn floats a minimum-to-maximum bar, and Sankey draws weighted flows between nodes.</p></Description>
+            <Description><p>Read a monthly budget against plan as bullets, a week's low-to-high temperatures as floating bars, and recycling flows as a Sankey whose bands widen with weight.</p></Description>
             <Demo>
                 <div class="stack">
                     <ChartControl Type="ChartType.Bullet" ColorPalette="@ChartPalette.Site" Title="Monthly budget, spent against planned" Series="_bulletSeries" Height="240px" />
@@ -48,7 +48,7 @@
         </DemoExample>
 
         <DemoExample Id="gauges" Title="Radial and linear gauges" RazorCode="@Code.Gauges" CSharpCode="@Code.GaugesCs">
-            <Description><p>One series drawn as two gauge types; the standalone gauge controls have a page of their own.</p></Description>
+            <Description><p>Show one rain-barrel reading as a radial and a linear gauge from the same series; the standalone gauge controls have <a href="demo/gauges">their own page</a>.</p></Description>
             <Demo>
                 <div class="gauges">
                     <ChartControl Type="ChartType.RadialGauge" ColorPalette="@ChartPalette.Site" Title="Rain barrel, percent full" Series="_gaugeSeries" Height="300px" />

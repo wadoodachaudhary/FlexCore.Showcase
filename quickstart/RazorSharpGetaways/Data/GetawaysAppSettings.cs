@@ -6,10 +6,10 @@ using Fx.ControlKit.Scheduling;
 namespace RazorSharpGetaways.Data;
 
 // Settings page state. Scoped service (Program.cs): one instance per visit; a reload restores the defaults. The FlexCore site's
-// Settings C# tab prints the lines between the markers. Each scheme's chart colours were picked with a colour-blindness check in
-// stack order; Razor Sharp keeps the logo's colours.
+// Settings C# tab prints the lines between the markers. Each scheme's chart colors were picked with a color-blindness check in
+// stack order; Razor Sharp keeps the logo's colors.
 // code-tab:settings
-/// <summary>One colour scheme: getaways.css holds its colours under the class scheme-{Key}.</summary>
+/// <summary>One color scheme: getaways.css holds its colors under the class scheme-{Key}.</summary>
 public sealed record GetawaysScheme(string Key, string Name, string Accent, string Blurb, string[] ChartColors);
 
 /// <summary>Where a dashboard card sits. Beside is true for the figures and the chart when they share a row.</summary>
@@ -47,13 +47,13 @@ public sealed class GetawaysAppSettings
     public bool SideBySide { get; set; } = true;
     public List<string> CardOrder { get; private set; } = [Figures, Chart, Departures];
     public HashSet<string> HiddenCards { get; } = [];
-    public bool Customising { get; set; }
+    public bool Customizing { get; set; }
 
     /// <summary>Raised after a Settings change; the app window and its open page repaint.</summary>
     public event Action? Changed;
     public void NotifyChanged() => Changed?.Invoke();
 
-    /// <summary>App window class that carries the scheme's colours.</summary>
+    /// <summary>App window class that carries the scheme's colors.</summary>
     public string SchemeClass => $"scheme-{Scheme.Key}";
 
     /// <summary>App window inline style: --fx-zoom for FlexCore controls, plus a base font size for inherited text.</summary>
@@ -143,7 +143,7 @@ public sealed class GetawaysAppSettings
         return at >= 0 && at < VisibleCards.Count;
     }
 
-    /// <summary>Swaps a card with its visible neighbour (Move up / Move down).</summary>
+    /// <summary>Swaps a card with its visible neighbor (Move up / Move down).</summary>
     public void MoveCard(string key, int step)
     {
         if (!CanMove(key, step)) return;
@@ -185,11 +185,11 @@ public sealed class GetawaysAppSettings
         GridDensity = GridDensity.Default;
         GridLines = GridLines.Both;
         AlternateRows = true;
-        Customising = false;
+        Customizing = false;
         ResetLayout();
     }
 
-    /// <summary>One series per status for each month with requests, in the scheme's chart colours.</summary>
+    /// <summary>One series per status for each month with requests, in the scheme's chart colors.</summary>
     public List<ChartSeries> MonthlySeries(IEnumerable<TripRequest> requests, int months, bool withDeclined)
     {
         var all = requests.ToList();
@@ -222,7 +222,7 @@ public sealed class GetawaysAppSettings
             code.AppendLine($"    <GridLayoutItemControl Row=\"{slot.Row}\" Column=\"{slot.Column}\"{span}>{slot.Title}</GridLayoutItemControl>");
         }
         code.AppendLine("</GridLayoutControl>");
-        code.AppendLine($"<ChartControl Type=\"ChartType.{DashboardChart}\" Series=\"@series\" … />   @* series colours: {string.Join(", ", Scheme.ChartColors)} *@");
+        code.AppendLine($"<ChartControl Type=\"ChartType.{DashboardChart}\" Series=\"@series\" … />   @* series colors: {string.Join(", ", Scheme.ChartColors)} *@");
         code.AppendLine();
         code.AppendLine("@* Itinerary *@");
         code.AppendLine($"<SchedulerControl View=\"SchedulerView.{ItineraryView}\" … />");

@@ -19,11 +19,11 @@
 <PageTitle>On-Demand Data Loading in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="On-demand loading" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Rows, groups, totals and exports fetched from a provider as they are needed, never all at once."
+                   Tagline="Fetch rows, groups and totals as users need them, never the whole table at once."
                    SourcePath="Grid/GridItemsProvider.cs;Grid/GridControl.ItemsProvider.cs;Grid/GridControl.ProviderGrouping.cs;Grid/GridControl.ProviderExport.cs">
     <Overview>
         <p>
-            An <code>ItemsProvider</code> replaces <code>DataSource</code> with a delegate the Blazor <code>GridControl</code> calls for each window, sort, search, group or export; every <code>GridItemsRequest</code> carries the purpose, range and current query, and the provider answers with items and a total. With <code>EnableProviderGrouping</code> the same delegate serves the group tree, counts and aggregates page by page, and <code>ExportProviderQueryAsync</code> exports the whole query with progress and cancel.
+            On-demand loading lets a Blazor <code>GridControl</code> show an order history too large to load at once, fetching only what users scroll to or open. Set an <code>ItemsProvider</code> instead of <code>DataSource</code>: the grid calls it for each scroll window, sort, search or export with a <code>GridItemsRequest</code>, and you answer from your database or API with the items and a total. <code>EnableProviderGrouping</code> pages the group tree the same way.
         </p>
     </Overview>
 
@@ -173,7 +173,7 @@
 
     private string ExportText => _exportProgress is not { } p ? "" :
         $"· Export: {p.ExportedRows:N0}" + (p.TotalRows is { } total ? $" of {total:N0}" : "")
-        + (p.IsCanceled ? " (cancelled)" : p.IsCompleted ? " (complete)" : "");
+        + (p.IsCanceled ? " (canceled)" : p.IsCompleted ? " (complete)" : "");
 
     private async ValueTask<GridItemsResult<ProviderOrder>> LoadOrdersAsync(GridItemsRequest request)
     {
@@ -415,7 +415,7 @@
             new("IncludeTotalCount", "True when the grid needs an authoritative total for this query generation, so a provider can skip a repeated count.", "bool"),
             new("Query", "The current sorts, filters, search text and grouping; the next table.", "GridQueryDescriptor"),
             new("ContextKey", "Opaque host value for the surrounding dataset, passed through uninterpreted.", "object?"),
-            new("CancellationToken", "Cancelled when a newer range or query supersedes the request.", "CancellationToken"),
+            new("CancellationToken", "Canceled when a newer range or query supersedes the request.", "CancellationToken"),
             new("Purpose", "Why the range is requested: Rows, Groups, GroupChildren, GroupItems, Export or FilterValues.", "GridItemsRequestPurpose", "Rows"),
             new("GroupRequest", "Parent group for lazy grouping requests; null for row windows, root groups and exports.", "GridProviderGroupRequest?", "null"),
             new("FilterField", "Field whose distinct values are requested for a FilterValues request; null otherwise.", "string?", "null"),
@@ -632,7 +632,7 @@ private readonly List<AggregateRow> _aggregates =
 
 private string ExportText => _exportProgress is not { } p ? """" :
     $""· Export: {p.ExportedRows:N0}"" + (p.TotalRows is { } total ? $"" of {total:N0}"" : """")
-    + (p.IsCanceled ? "" (cancelled)"" : p.IsCompleted ? "" (complete)"" : """");
+    + (p.IsCanceled ? "" (canceled)"" : p.IsCompleted ? "" (complete)"" : """");
 
 private async ValueTask<GridItemsResult<ProviderOrder>> LoadOrdersAsync(GridItemsRequest request)
 {

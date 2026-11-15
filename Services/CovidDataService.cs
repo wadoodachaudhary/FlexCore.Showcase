@@ -22,8 +22,8 @@ public static class CovidDataService
 
     public static SunburstNode GetCovidSunburstTree(bool useDeathsAsMetric = false)
     {
-        // Continent colours (2026-10-31): the site's chart palette (Components/Shared/ChartPalette.cs) in ring order, so neighbouring
-        // continents stay apart under colour blindness; World is the logo's sky.
+        // Continent colors (2026-10-31): the site's chart palette (Components/Shared/ChartPalette.cs) in ring order, so neighboring
+        // continents stay apart under color blindness; World is the logo's sky.
         var root = new SunburstNode("World", useDeathsAsMetric ? WorldTotalDeaths : WorldTotalCases, useDeathsAsMetric ? WorldTotalCases : WorldTotalDeaths, "#38bdf8");
 
         var asia = new SunburstNode("Asia", useDeathsAsMetric ? 280486.0 : 15940732.0, useDeathsAsMetric ? 15940732.0 : 280486.0, "#0284c7");

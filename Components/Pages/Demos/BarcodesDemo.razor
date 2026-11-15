@@ -7,11 +7,11 @@
 <PageTitle>Blazor Barcode and QR Code Generator — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Barcodes & QR" Category="Components" ControlName="BarcodeControl · QrCodeControl"
-                   Tagline="Nine linear symbologies and QR codes, encoded on the server and drawn as inline SVG."
+                   Tagline="Turn a value into a barcode or a QR code, drawn as inline SVG."
                    SourcePath="BarcodeControl.razor; QrCodeControl.razor; BarcodeModels.cs">
     <Overview>
         <p>
-            <code>BarcodeControl</code> and <code>QrCodeControl</code> are Blazor barcode generators: nine linear symbologies and QR codes, encoded on the server with ZXing.Net and drawn as inline SVG, so there is no image request.
+            <code>BarcodeControl</code> and <code>QrCodeControl</code> are Blazor barcode generators that draw a value as a QR code or one of nine linear barcodes, such as EAN-13. Use them for product labels, tickets, shipping slips or a link to share: the code is encoded in C# with ZXing.Net and drawn as inline SVG, so there is no image file to serve. A value the type cannot encode shows the encoder's message instead of bars.
         </p>
     </Overview>
 
@@ -65,7 +65,7 @@
             </DocSection>
             <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
                 <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
-                <p>Neither stylesheet reads a <code>--fx-*</code> variable. Colours of the code itself come from <code>ForegroundColor</code> and <code>BackgroundColor</code>; the frame is fixed in CSS.</p>
+                <p>Neither stylesheet reads a <code>--fx-*</code> variable. Colors of the code itself come from <code>ForegroundColor</code> and <code>BackgroundColor</code>; the frame is fixed in CSS.</p>
             </DocSection>
         </DocSections>
     </Vocabulary>
@@ -133,7 +133,7 @@
             new("Value", "Text to encode. Empty renders nothing.", "string", "\"FLEX-12345\""),
             new("Type", "Symbology; see the table below.", "BarcodeType", "Code128"),
             new("ShowText", "Draws the value under the bars.", "bool", "true"),
-            new("ForegroundColor / BackgroundColor", "Bar and text colour; background rectangle. Any CSS colour.", "string", "#000000 / #ffffff"),
+            new("ForegroundColor / BackgroundColor", "Bar and text color; background rectangle. Any CSS color.", "string", "#000000 / #ffffff"),
             new("BarHeight", "Bar height in SVG units (pixels at default size); at least 1.", "int", "50"),
             new("Width / Height", "CSS size of the SVG. Unset means the natural size: one unit per module plus 20 units of quiet zone in total, and the bar height plus 27 (text) or 10.", "string?", "null"),
             new("AriaLabel", "Overrides the default \"<em>Type</em> barcode: <em>value</em>\".", "string?", "null"),
@@ -154,7 +154,7 @@
         {
             new("Value", "Text to encode, UTF-8. Empty renders nothing.", "string", "\"FlexCore\""),
             new("Size", "Rendered width and height in pixels; the module count comes from the text length and level.", "int", "150"),
-            new("ForegroundColor / BackgroundColor", "Module and background colour.", "string", "#000000 / #ffffff"),
+            new("ForegroundColor / BackgroundColor", "Module and background color.", "string", "#000000 / #ffffff"),
             new("ErrorCorrection", "Redundancy level; see below.", "QrErrorCorrectionLevel", "Medium"),
             new("AriaLabel", "Overrides the default \"QR code: <em>value</em>\".", "string?", "null"),
             new("CssClass / Style (base)", "On the <code>fx-qrcode</code> frame.", "string?", "null"),

@@ -11,17 +11,17 @@
 <PageTitle>Blazor Data Grid (DataGrid, Table) — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Data Grid" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Search, sort, filter and group 4,009 real airports. Every other grid page takes one feature further."
+                   Tagline="Turn any list into a table users can search, sort, filter and group."
                    SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs;Grid/GridControl.AdvancedFeatures.cs;Grid/GridControl.PresentationFeatures.cs;Grid/GridControl.ItemsProvider.cs;Grid/GridControl.ColumnVirtualization.cs;Grid/GridControl.ProviderGrouping.cs;Grid/GridControl.ProviderExport.cs;Grid/GridModels.cs">
     <Overview>
         <p>
-            <code>GridControl</code> is FlexCore's Blazor data grid: bind a list with <code>DataSource</code>, declare columns in <code>GridColumnsBase</code>, and switch on sorting, filtering, grouping, search and row windowing with <code>Allow*</code> flags. The other Data Grid pages each take one feature further; they are listed under Related.
+            <code>GridControl</code> is a Blazor data grid that lets users search, sort, filter and group tabular data and edit it in place. Use it for any list someone has to work through, from a page of orders to <a href="demo/grid/row-selection-50k">100,000 rows</a>: give it a height and only the rows in view, plus a small band around them, are rendered. Bind a list to <code>DataSource</code>, declare columns, and switch features on with parameters such as <code>AllowSorting</code>, <code>AllowGrouping</code> and <code>ShowSearchBar</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="airports" Title="4,009 airports: search, sort, filter and group" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs" CssCode="@Code.AirportsCss">
-            <Description><p>Search (try Lisbon), click a header to sort, open a filter icon, or drag the Continent chip out of the group bar; 4,009 airports from OurAirports, grouped by continent with counts and averages in each caption.</p></Description>
+            <Description><p>Search 4,009 airports from OurAirports (try Lisbon), sort by a header, open a filter icon, or drag the Continent chip off the group bar; group captions carry counts and averages.</p></Description>
             <Demo>
                 <div class="airports">
                     <GridControl TValue="Airport" DataSource="@_airports"

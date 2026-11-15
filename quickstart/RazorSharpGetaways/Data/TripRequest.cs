@@ -13,13 +13,13 @@ public sealed class TripRequest
 
     public string Agent { get; set; } = "";
 
-    /// <summary>Colour behind the agent's initials; one per agent.</summary>
+    /// <summary>Color behind the agent's initials; one per agent.</summary>
     public string AvatarBg { get; set; } = "#0284c7";
 
     public DateTime DateRequested { get; set; }
     public string Destination { get; set; } = "";
-    public string Traveller { get; set; } = "";
-    public int Travellers { get; set; } = 2;
+    public string Traveler { get; set; } = "";
+    public int Travelers { get; set; } = 2;
     public DateTime Departure { get; set; }
 
     /// <summary>Nights away: the destination package's length unless the booking overrides it (LIS-0586 is five).</summary>
@@ -52,8 +52,8 @@ public sealed class TripRequest
         Agent = edited.Agent;
         AvatarBg = edited.AvatarBg;
         Destination = edited.Destination;
-        Traveller = edited.Traveller;
-        Travellers = edited.Travellers;
+        Traveler = edited.Traveler;
+        Travelers = edited.Travelers;
         TripType = edited.TripType;
         TripTypeName = edited.TripTypeName;
         Quote = edited.Quote;
@@ -74,5 +74,5 @@ public sealed class TripTypeLookup
     public string Display => $"{Code} - {Name}";
 }
 
-/// <summary>An agent at the desk and the colour of their avatar.</summary>
+/// <summary>An agent at the desk and the color of their avatar.</summary>
 public sealed record TravelAgent(string Name, string Color);

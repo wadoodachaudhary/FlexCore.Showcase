@@ -12,11 +12,11 @@
 <PageTitle>Blazor Dock Manager — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Dock manager" Category="Components" CategoryHref="components" ControlName="DockManagerControl"
-                   Tagline="Tabbed panes the user can split, float, unpin and close, with the whole arrangement saved as one JSON document."
+                   Tagline="Let users split, float, unpin and close panes, and save the layout as JSON."
                    SourcePath="Docking/DockManagerControl.razor;Docking/DockNodeView.razor;Docking/DockPanelActions.razor;Docking/DockModels.cs">
     <Overview>
         <p>
-            <code>DockManagerControl</code> is a Blazor dock manager: tabbed panes the user can split, float, unpin and close, IDE style, with the whole arrangement saved and restored as one JSON document.
+            <code>DockManagerControl</code> is a Blazor dock manager: tabbed panes users can split, float, unpin and close, as in a desktop IDE. Use it for workspaces with several tools open at once, such as explorer, properties and output panes; the whole arrangement saves and restores as one JSON document you can store per user. Methods such as <code>FloatAsync</code> and <code>DockAsync</code> move panes from code.
         </p>
     </Overview>
 
@@ -39,7 +39,7 @@
         </DemoExample>
 
         <DemoExample Id="methods" Title="Driving it from code" RazorCode="@Code.Methods" CSharpCode="@Code.MethodsCs">
-            <Description><p>The buttons call <code>FloatAsync</code>, <code>UnpinAsync</code>, <code>CloseAsync</code> and <code>DockAsync</code> from code.</p></Description>
+            <Description><p>Use the buttons to float, unpin, close and re-dock panes from code with <code>FloatAsync</code>, <code>UnpinAsync</code>, <code>CloseAsync</code> and <code>DockAsync</code>.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.FloatAsync("chart")'>Float Chart</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.UnpinAsync("log")'>Unpin Log</ButtonControl>
@@ -109,7 +109,7 @@
     <Accessibility>
         <p>
             Each group is a <code>tablist</code> of <code>tab</code> buttons with <code>aria-selected</code>, and its content a <code>tabpanel</code>
-            named after the pane. The unpinned strip is labelled "Unpinned panes", the drawer is a <code>section</code> labelled with the pane's title,
+            named after the pane. The unpinned strip is labeled "Unpinned panes", the drawer is a <code>section</code> labeled with the pane's title,
             and floating panes are dialogs with the title as their header. The Dock… menu's buttons reach every position from the keyboard.
         </p>
     </Accessibility>
@@ -285,7 +285,7 @@ private static string Summarize(DockLayoutState s) =>
         public static readonly ApiRow[] StateMethods =
         {
             new("Clone()", "A deep copy, made through JSON.", "DockLayoutState"),
-            new("ToJson()", "Serialises the layout.", "string"),
+            new("ToJson()", "Serializes the layout.", "string"),
             new("FromJson(string json)", "Static; parses a layout and throws for null.", "DockLayoutState"),
             new("Nodes()", "Every node of the tree, root first.", "IEnumerable&lt;DockNode&gt;"),
             new("Validate(IEnumerable&lt;string&gt; keys)", "Throws unless the layout places exactly these keys once each and the tree is well formed; see the rules below.", "void"),

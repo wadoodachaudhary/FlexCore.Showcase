@@ -12,21 +12,21 @@
 
 <FeatureDemoLayout Title="Text inputs" Category="Components" CategoryHref="components"
                    ControlName="TextBoxControl · NumericTextBoxControl · TextAreaControl"
-                   Tagline="Single-line text, typed numbers and multi-line notes, each bound two ways to a string or a number."
+                   Tagline="Collect names, numbers and notes, bound two ways to your model."
                    SourcePath="TextBoxControl.razor; NumericTextBoxControl.razor; TextAreaControl.razor">
     <Overview>
         <p>
-            FlexCore's Blazor text inputs: <code>TextBoxControl</code> for a line of text (per keystroke with <code>UpdateOnInput</code>, or on change), <code>NumericTextBoxControl</code> for a typed number clamped to a range, and <code>TextAreaControl</code> for notes with a limit, spell checking and caret-level methods. All bind with <code>&#64;bind-Value</code>.
+            <code>TextBoxControl</code> is a Blazor text box for a line of text, updated on every keystroke with <code>UpdateOnInput</code> or once users leave the field. Use <code>NumericTextBoxControl</code> for counts and amounts that must stay in range, such as travelers or a budget, and <code>TextAreaControl</code> for notes with a character limit and spell checking. All three bind with <code>&#64;bind-Value</code>.
         </p>
     </Overview>
 
     <Examples>
-        <DemoExample Id="details" Title="Traveller details" RazorCode="@Code.Details" CSharpCode="@Code.DetailsCs" CssCode="@Code.DetailsCss">
-            <Description><p>Type in each field: Name updates per keystroke, Email on change, Travellers clamps to 12, and Budget refuses anything under $250 a head.</p></Description>
+        <DemoExample Id="details" Title="Traveler details" RazorCode="@Code.Details" CSharpCode="@Code.DetailsCs" CssCode="@Code.DetailsCss">
+            <Description><p>Type in each field: Name updates per keystroke, Email on change, Travelers clamps to 12, and Budget refuses anything under $250 a head.</p></Description>
             <Demo>
                 <div class="details">
                     <label class="field">
-                        <span class="field-label">Lead traveller</span>
+                        <span class="field-label">Lead traveler</span>
                         <TextBoxControl @bind-Value="_name" @bind-Value:after="CountName" UpdateOnInput="true"
                                         Placeholder="Full name as on the passport" MaxLength="40" CssClass="text-field" />
                     </label>
@@ -36,8 +36,8 @@
                                         Placeholder="name@example.com" MaxLength="80" CssClass="text-field" />
                     </label>
                     <label class="field">
-                        <span class="field-label">Travellers (1 to 12)</span>
-                        <NumericTextBoxControl TValue="int" @bind-Value="_travellers" Min="1" Max="12" Width="90px" />
+                        <span class="field-label">Travelers (1 to 12)</span>
+                        <NumericTextBoxControl TValue="int" @bind-Value="_travelers" Min="1" Max="12" Width="90px" />
                     </label>
                     <label class="field">
                         <span class="field-label">Budget in dollars, steps of 50</span>
@@ -46,9 +46,9 @@
                     </label>
                 </div>
                 <p class="summary">
-                    <strong>@Trip.Name</strong>, @Trip.Nights nights: @(string.IsNullOrWhiteSpace(_name) ? "no lead traveller yet" : _name),
-                    @(string.IsNullOrWhiteSpace(_email) ? "no email yet" : _email), @_travellers travellers,
-                    budget @_budget.ToString("$#,##0") (@((_budget / _travellers).ToString("$#,##0")) a head)
+                    <strong>@Trip.Name</strong>, @Trip.Nights nights: @(string.IsNullOrWhiteSpace(_name) ? "no lead traveler yet" : _name),
+                    @(string.IsNullOrWhiteSpace(_email) ? "no email yet" : _email), @_travelers travelers,
+                    budget @_budget.ToString("$#,##0") (@((_budget / _travelers).ToString("$#,##0")) a head)
                 </p>
                 <p class="counts">ValueChanged so far: name @_nameUpdates, email @_emailUpdates</p>
                 <p class="warn" role="status">@_budgetNote</p>
@@ -132,7 +132,7 @@
         <ul>
             <li>All three render a native <code>&lt;input&gt;</code> or <code>&lt;textarea&gt;</code>, so the browser's own caret keys, selection and screen-reader announcements apply.</li>
             <li>None renders a label. <code>TextBoxControl</code> passes unmatched attributes such as <code>id</code>, <code>aria-label</code> or <code>aria-describedby</code> to its input. <code>NumericTextBoxControl</code> and <code>TextAreaControl</code> accept no unmatched attributes, and an <code>aria-label</code> on them fails when the page renders, so wrap them in a <code>&lt;label&gt;</code> as this page does.</li>
-            <li><code>NumericTextBoxControl</code> sets <code>inputmode</code> to <code>numeric</code> or <code>decimal</code> for on-screen keyboards, and <code>aria-invalid="true"</code> while a <code>ValueChange</code> handler has cancelled the entry. Its spin buttons are hidden by its stylesheet.</li>
+            <li><code>NumericTextBoxControl</code> sets <code>inputmode</code> to <code>numeric</code> or <code>decimal</code> for on-screen keyboards, and <code>aria-invalid="true"</code> while a <code>ValueChange</code> handler has canceled the entry. Its spin buttons are hidden by its stylesheet.</li>
             <li><code>MaxLength</code> is enforced by the browser without a message. Show a count or a note, as the notes example does with a <code>role="status"</code> line.</li>
             <li>The password eye button has <code>aria-label</code> "Show password" or "Hide password" and <code>aria-pressed</code>; it is kept out of the Tab order (<code>tabindex="-1"</code>) so a form tabs as it would with a plain password box.</li>
             <li>The classic context menu opens on the browser's <code>contextmenu</code> event and is a list of plain buttons placed after the box, without menu roles. Escape does not close it; a click anywhere does.</li>
@@ -150,13 +150,13 @@
 </FeatureDemoLayout>
 
 @code {
-    // Traveller details
+    // Traveler details
     private static readonly TravelData.Package Trip = TravelData.Packages[2];
 
     private string? _name = "Ana Moreira";
     private string? _email;
     private int _nameUpdates, _emailUpdates;
-    private int _travellers = 2;
+    private int _travelers = 2;
     private decimal _budget = 3200m;
     private string? _budgetNote;
 
@@ -165,11 +165,11 @@
 
     private void CheckBudget(NumericTextBoxControl<decimal>.NumericChangeEventArgs<decimal> e)
     {
-        var floor = 250m * _travellers;
+        var floor = 250m * _travelers;
         if (e.Value < floor)
         {
             e.Cancel = true;
-            _budgetNote = $"Budget not accepted: at least {floor:$#,##0} for {_travellers} travellers. The box keeps your figure until you change it.";
+            _budgetNote = $"Budget not accepted: at least {floor:$#,##0} for {_travelers} travelers. The box keeps your figure until you change it.";
             return;
         }
         _budget = e.Value;
@@ -256,7 +256,7 @@
             new("Placeholder", "Hint shown while the box is empty.", "string?", "null"),
             new("Width", "CSS width written as an inline style.", "string?", "null"),
             new("CssClass", "Added after <code>fx-numeric</code>.", "string?", "null"),
-            new("Enabled", "False renders <code>disabled</code> (greyed by the stylesheet).", "bool", "true"),
+            new("Enabled", "False renders <code>disabled</code> (grayed by the stylesheet).", "bool", "true"),
             new("Min / Max", "Bounds. A committed value outside them is replaced by the bound. Also written as the input's <code>min</code> and <code>max</code>.", "decimal?", "null"),
             new("Step", "The input's <code>step</code>, which the browser uses for ArrowUp and ArrowDown. The default 1 writes <code>step=\"any\"</code>; any other value is written as given and makes <code>inputmode</code> <code>decimal</code>.", "decimal", "1"),
             new("MaxLength", "Writes <code>maxlength</code> and switches the input to <code>type=\"text\"</code>, because number inputs ignore <code>maxlength</code>.", "int?", "null"),
@@ -279,7 +279,7 @@
             new("ValueExpression", "Accepted so <code>@bind-Value</code> compiles; otherwise unused, so there is no <code>EditForm</code> field tracking.", "Expression&lt;Func&lt;string?&gt;&gt;?", "null"),
             new("Placeholder", "Hint shown while the box is empty.", "string?", "null"),
             new("CssClass", "Added to the textarea; with the classic scroll bar it goes on the host <code>&lt;div&gt;</code> instead.", "string?", "null"),
-            new("Enabled", "False renders <code>disabled</code>: grey background, no resizing. There is no <code>ReadOnly</code> parameter.", "bool", "true"),
+            new("Enabled", "False renders <code>disabled</code>: gray background, no resizing. There is no <code>ReadOnly</code> parameter.", "bool", "true"),
             new("MaxLength", "Writes <code>maxlength</code>. <code>InsertTextAsync</code> refuses text that would pass it, and a client-buffered commit is cut to it.", "int?", "null"),
             new("Rows", "Visible lines; 4 when null.", "int?", "null"),
             new("SpellCheck", "Writes <code>spellcheck=\"true\"</code> or <code>\"false\"</code>; null leaves the browser's default.", "bool?", "null"),
@@ -343,7 +343,7 @@
     {
         public const string Details = @"<div class=""details"">
     <label class=""field"">
-        <span class=""field-label"">Lead traveller</span>
+        <span class=""field-label"">Lead traveler</span>
         <TextBoxControl @bind-Value=""_name"" @bind-Value:after=""CountName"" UpdateOnInput=""true""
                         Placeholder=""Full name as on the passport"" MaxLength=""40"" CssClass=""text-field"" />
     </label>
@@ -353,8 +353,8 @@
                         Placeholder=""name@example.com"" MaxLength=""80"" CssClass=""text-field"" />
     </label>
     <label class=""field"">
-        <span class=""field-label"">Travellers (1 to 12)</span>
-        <NumericTextBoxControl TValue=""int"" @bind-Value=""_travellers"" Min=""1"" Max=""12"" Width=""90px"" />
+        <span class=""field-label"">Travelers (1 to 12)</span>
+        <NumericTextBoxControl TValue=""int"" @bind-Value=""_travelers"" Min=""1"" Max=""12"" Width=""90px"" />
     </label>
     <label class=""field"">
         <span class=""field-label"">Budget in dollars, steps of 50</span>
@@ -363,20 +363,20 @@
     </label>
 </div>
 <p class=""summary"">
-    <strong>@Trip.Name</strong>, @Trip.Nights nights: @(string.IsNullOrWhiteSpace(_name) ? ""no lead traveller yet"" : _name),
-    @(string.IsNullOrWhiteSpace(_email) ? ""no email yet"" : _email), @_travellers travellers,
-    budget @_budget.ToString(""$#,##0"") (@((_budget / _travellers).ToString(""$#,##0"")) a head)
+    <strong>@Trip.Name</strong>, @Trip.Nights nights: @(string.IsNullOrWhiteSpace(_name) ? ""no lead traveler yet"" : _name),
+    @(string.IsNullOrWhiteSpace(_email) ? ""no email yet"" : _email), @_travelers travelers,
+    budget @_budget.ToString(""$#,##0"") (@((_budget / _travelers).ToString(""$#,##0"")) a head)
 </p>
 <p class=""counts"">ValueChanged so far: name @_nameUpdates, email @_emailUpdates</p>
 <p class=""warn"" role=""status"">@_budgetNote</p>";
 
-        public const string DetailsCs = @"// Traveller details
+        public const string DetailsCs = @"// Traveler details
 private static readonly TravelData.Package Trip = TravelData.Packages[2];
 
 private string? _name = ""Ana Moreira"";
 private string? _email;
 private int _nameUpdates, _emailUpdates;
-private int _travellers = 2;
+private int _travelers = 2;
 private decimal _budget = 3200m;
 private string? _budgetNote;
 
@@ -385,11 +385,11 @@ private void CountEmail() => _emailUpdates++;
 
 private void CheckBudget(NumericTextBoxControl<decimal>.NumericChangeEventArgs<decimal> e)
 {
-    var floor = 250m * _travellers;
+    var floor = 250m * _travelers;
     if (e.Value < floor)
     {
         e.Cancel = true;
-        _budgetNote = $""Budget not accepted: at least {floor:$#,##0} for {_travellers} travellers. The box keeps your figure until you change it."";
+        _budgetNote = $""Budget not accepted: at least {floor:$#,##0} for {_travelers} travelers. The box keeps your figure until you change it."";
         return;
     }
     _budget = e.Value;

@@ -21,11 +21,11 @@
 <PageTitle>Blazor Tree Grid (TreeList) — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Tree grid" Category="Data Grid" CategoryHref="demo/grid" ControlName="TreeGridControl"
-                   Tagline="A flat list with Id and ParentId columns, shown as a collapsible hierarchy."
+                   Tagline="Show an org chart or any parent-child list as a table users can expand."
                    SourcePath="Grid/TreeGridControl.razor;Grid/TreeGridControl.razor.cs;Grid/TreeGridControl.Checking.cs;Grid/TreeGridControl.Editing.cs;Grid/TreeGridControl.Frozen.cs;Grid/TreeGridControl.Loading.cs;Grid/TreeGridControl.Moving.cs;Grid/TreeGridControl.Query.cs;Grid/TreeGridColumn.cs;Grid/TreeGridMutationModels.cs;Grid/TreeGridQuery.cs;Grid/GridModels.cs;Grid/GridToolbarModels.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
-            <code>TreeGridControl</code> is FlexCore's Blazor tree grid: it builds the hierarchy from a flat list through <code>IdMapping</code> and <code>ParentIdMapping</code>. <code>TreatAsParent</code> and <code>LoadChildren</code> load nodes on demand, <code>InitialExpansionPredicate</code> opens some on arrival, and <code>Expanded</code> and <code>Collapsed</code> report each toggle.
+            <code>TreeGridControl</code> is a Blazor tree grid: a table whose rows nest under parents, built from a flat list with an Id and a ParentId column. Use it, rather than a tree view, when each node carries columns, as in an org chart; <code>TreatAsParent</code> and <code>LoadChildren</code> fetch a branch only when users open it. Map the hierarchy with <code>IdMapping</code> and <code>ParentIdMapping</code>.
         </p>
     </Overview>
 
@@ -62,7 +62,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="org" Title="Org chart: who reports to whom" RazorCode="@Code.Org" CSharpCode="@Code.OrgCs">
-            <Description><p>Search for a name, title, office or division (try Lisbon or Guide) and press Enter: the matches stay with every manager above them, vacant posts keep their place, and the Name column stays put while you scroll sideways.</p></Description>
+            <Description><p>Search a name, title, office or division (try Lisbon or Guide) and press Enter: matches keep every manager above them, vacant posts stay, and the Name column is pinned.</p></Description>
             <Controls>
                 <TextBoxControl Value="@_search" ValueChanged="Search" Placeholder="Name, title, office or division" Width="240px" />
             </Controls>
@@ -471,7 +471,7 @@ private sealed record Place(string Id, string? ParentId, string Name, string Det
             new("IdMapping", "Name of the public property that holds each row's key, read by reflection. Empty builds no rows; a name that is not a property throws.", "string", "\"\""),
             new("ParentIdMapping", "Name of the property that holds the parent's key. Null, or a key no row has, makes the row a root.", "string", "\"\""),
             new("TreatAsParent", "Marks a row expandable although no child is in the list, until a <code>LoadChildren</code> call for it has completed. Without <code>LoadChildren</code> such a row only gains the icon and the <code>Expanded</code> / <code>Collapsed</code> events; the first example passes it for rows that already have children.", "Func&lt;TValue, bool&gt;?", "null"),
-            new("LoadChildren", "Lazy loading: called the first time a <code>TreatAsParent</code> row opens, with the row and a token cancelled on dispose, and must return that row's direct children (parent key equal to its key, else <code>ArgumentException</code>). The children join the tree and stay until a new <code>DataSource</code> instance arrives; a failure raises <code>LoadFailed</code>.", "Func&lt;TValue, CancellationToken, Task&lt;IReadOnlyList&lt;TValue&gt;&gt;&gt;?", "null"),
+            new("LoadChildren", "Lazy loading: called the first time a <code>TreatAsParent</code> row opens, with the row and a token canceled on dispose, and must return that row's direct children (parent key equal to its key, else <code>ArgumentException</code>). The children join the tree and stay until a new <code>DataSource</code> instance arrives; a failure raises <code>LoadFailed</code>.", "Func&lt;TValue, CancellationToken, Task&lt;IReadOnlyList&lt;TValue&gt;&gt;&gt;?", "null"),
             new("TreeColumnIndex", "Index, in the declared column list, of the column that carries the indent, the expand icon and the folder icon. A hidden column there falls back to the same index among the visible columns.", "int", "0"),
         };
         public static readonly ApiRow[] Expansion =
@@ -619,7 +619,7 @@ private sealed record Place(string Id, string? ParentId, string Name, string Det
             new("EditStarting", "Before a row enters editing or a new row is added: <code>Original</code> (null for a new row), the <code>Draft</code> and its <code>EditContext</code>; <code>Cancel</code> refuses.", "TreeGridEditEventArgs&lt;TValue&gt;"),
             new("DataChanging", "Before a save or a move replaces the records, with the list of Add / Update / Delete / Move changes. <code>Cancel</code>, or an <code>Error</code> text, aborts and shows the error.", "TreeGridDataChangeEventArgs&lt;TValue&gt;"),
             new("DataChanged", "After the records are replaced, with the same args.", "TreeGridDataChangeEventArgs&lt;TValue&gt;"),
-            new("DataSourceChanged", "The new full record list after a commit, for <code>@bind-DataSource</code>; a list handed back this way is recognised as the control's own publication and does not reset its editing state.", "IEnumerable&lt;TValue&gt;"),
+            new("DataSourceChanged", "The new full record list after a commit, for <code>@bind-DataSource</code>; a list handed back this way is recognized as the control's own publication and does not reset its editing state.", "IEnumerable&lt;TValue&gt;"),
             new("RowMoving", "Before a move is committed (drag, Indent / Outdent, the Move row dialog, <code>MoveRowAsync</code>), after <code>CanDrop</code>; <code>Cancel</code> or <code>Error</code> aborts.", "TreeGridRowMoveEventArgs&lt;TValue&gt;"),
             new("RowMoved", "After the move, with the moved record and its target.", "TreeGridRowMoveEventArgs&lt;TValue&gt;"),
             new("SortChanged", "After <code>SetSortsAsync</code>, which header clicks, the sort dialog and Clear sorting go through; the full ordered list.", "IReadOnlyList&lt;GridSortDescriptor&gt;"),
@@ -715,7 +715,7 @@ private sealed record Place(string Id, string? ParentId, string Name, string Det
         };
         public static readonly ApiRow[] QueryMethods =
         {
-            new("AddColumn(TreeGridColumn column) / RemoveColumn(TreeGridColumn column)", "Column registration; <code>TreeGridColumn</code> calls them itself when it initialises and disposes.", "void"),
+            new("AddColumn(TreeGridColumn column) / RemoveColumn(TreeGridColumn column)", "Column registration; <code>TreeGridColumn</code> calls them itself when it initializes and disposes.", "void"),
             new("FreezeColumnAsync(string field, FrozenColumnPosition? position)", "Freezes a column left or right, or unfreezes it with null; throws for an unknown field.", "Task"),
             new("AutoFitColumnsAsync()", "Best-fits every visible column to its content.", "Task"),
             new("AutoFitColumnAsync(string field)", "Best-fits one column, by field or by header for a field-less column.", "Task"),

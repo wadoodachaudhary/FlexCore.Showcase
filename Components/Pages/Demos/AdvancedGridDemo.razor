@@ -13,11 +13,11 @@
 <PageTitle>Frozen Columns and Header Bands in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Frozen columns" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Columns pinned to either edge, and header bands over column groups."
+                   Tagline="Keep key columns in view while users scroll sideways, and label column groups."
                    SourcePath="Grid/GridControl.ColumnFeatures.cs;Grid/GridColumn.cs;Grid/GridColumnHeaderBand.cs;Grid/EditSettings.cs">
     <Overview>
         <p>
-            Frozen columns and header bands for the Blazor <code>GridControl</code>. <code>IsFrozen</code> with <code>FrozenPosition</code> pins a column to the left or right edge; <code>ColumnHeaderBands</code> adds a header row that spans the columns sharing a <code>HeaderBand</code> name.
+            Frozen columns keep IDs and status in view while users scroll a wide Blazor <code>GridControl</code> sideways, and header bands label each group of columns. Use them on booking or price lists with more columns than the screen holds, so the columns that identify a row never scroll away. Set <code>IsFrozen</code> and <code>FrozenPosition</code> to pin a column left or right, and give related columns the same <code>HeaderBand</code> name, or list them in <code>ColumnHeaderBands</code>.
         </p>
     </Overview>
 

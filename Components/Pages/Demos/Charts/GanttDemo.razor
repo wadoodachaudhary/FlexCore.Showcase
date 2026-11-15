@@ -5,7 +5,7 @@
 @using FlexCore.Showcase.Components.Shared
 
 @* 2026-10-19: new page (SC-030), the Control tour's Gantt slice (SC-087 partly); code tabs generated. Documentation from
-   Gantt/GanttControl.razor and Gantt/GanttModels.cs; behaviour sentences follow the code paths. *@
+   Gantt/GanttControl.razor and Gantt/GanttModels.cs; behavior sentences follow the code paths. *@
 @* 2026-10-23 (label clutter): Month view, 8 px a day: the 56-day timeline (earliest start to latest end + 2 days) is 448 px; with
    the grid's 460 px of fixed columns it fits the 943 px scroller. Bar labels (11 px, 8 px padding) are clipped by the bar, so each
    task is long enough for its title. One Plan() for all three examples; Day and Week scroll (the Views example says so). *@
@@ -13,17 +13,17 @@
 <PageTitle>Blazor Gantt Chart — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Gantt chart" Category="Charts" CategoryHref="demo/charts" ControlName="GanttControl"
-                   Tagline="A task list with a timeline: hierarchy, dependencies, progress, and editing by dialog or by dragging the bars."
+                   Tagline="Plan a project as a task list with a timeline users edit by dragging bars."
                    SourcePath="Gantt/GanttControl.razor;Gantt/GanttModels.cs">
     <Overview>
         <p>
-            <code>GanttControl</code> is a Blazor <code>TreeGridControl</code> whose last column draws each <code>GanttTask</code> as a bar on a day-scaled timeline, with nesting, predecessor arrows and progress. Tasks are added, edited and deleted through a dialog or by dragging bars; every change is validated, offered to <code>TaskChanging</code> and delivered by <code>TasksChanged</code> as clones, never by editing the objects you passed in.
+            <code>GanttControl</code> is a Blazor Gantt chart: a task list beside a timeline, with nested tasks, predecessor arrows and progress on each bar. Use it for project plans: users drag bars to move or resize tasks, a task cannot start before its predecessor ends, and <code>TaskChanging</code> lets your code refuse a change. Changes arrive through <code>TasksChanged</code> as copies, so the objects you passed in are never edited.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="schedule" Title="Project schedule" RazorCode="@Code.Schedule" CSharpCode="@Code.ScheduleCs">
-            <Description><p>Drag a bar to move a task or its end to resize it, use Add, Edit and Delete, and switch the timescale; a change that breaks a rule is refused with a message under the toolbar.</p></Description>
+            <Description><p>Drag a bar to move a task, or its end to resize it; use Add, Edit and Delete and switch the timescale; rule-breaking changes are refused with a message.</p></Description>
             <Controls>
                 <ToggleButtonControl Selected="@_drag" SelectedChanged="v => _drag = v">Drag bars</ToggleButtonControl>
                 <ToggleButtonControl Selected="@_enforce" SelectedChanged="v => _enforce = v">Enforce dependencies</ToggleButtonControl>
@@ -35,7 +35,7 @@
         </DemoExample>
 
         <DemoExample Id="views" Title="Read-only timeline with a task template" RazorCode="@Code.Views" CSharpCode="@Code.ViewsCs">
-            <Description><p>The same plan with <code>AllowEditing</code> off and a <code>TaskTemplate</code> that adds the progress figure; the buttons set <code>View</code> and the toolbar reports back through <code>ViewChanged</code>.</p></Description>
+            <Description><p>Switch the timescale between Day, Week, Month and Year on a read-only plan whose <code>TaskTemplate</code> adds each task's progress; the Gantt's own toolbar reports changes through <code>ViewChanged</code>.</p></Description>
             <Controls>
                 @foreach (var v in Enum.GetValues<GanttView>())
                 {
@@ -112,9 +112,9 @@
 
     <Accessibility>
         <p>
-            Each bar is a button labelled "Edit <em>title</em>" and each end handle "Resize start of <em>title</em>" or "Resize end of
+            Each bar is a button labeled "Edit <em>title</em>" and each end handle "Resize start of <em>title</em>" or "Resize end of
             <em>title</em>", so they are reachable with Tab. The validation message has <code>role="alert"</code>. The timescale dropdown
-            is labelled "Gantt timescale". The dependency arrows are SVG hidden from assistive technology; the relation itself is in the
+            is labeled "Gantt timescale". The dependency arrows are SVG hidden from assistive technology; the relation itself is in the
             task's Predecessor tasks field in the editor.
         </p>
     </Accessibility>
@@ -271,7 +271,7 @@ private static GanttTask[] Plan() =>
         {
             new("EditAsync(string id)", "Opens the edit dialog for that task. Does nothing while editing is off or another change is in flight.", "Task"),
             new("CreateAsync()", "Opens the Add task dialog with a one-day draft that starts on the timeline's first day.", "Task"),
-            new("ChangeAsync(GanttTask task, GanttChangeAction action)", "Applies a change from code through the same path as the dialog and the drags: validation, <code>TaskChanging</code>, then <code>TasksChanged</code>. False when editing is off, the change is invalid (<code>ErrorMessage</code> is set) or <code>TaskChanging</code> cancelled it. A create needs an unused id; an update or delete needs an existing one.", "Task&lt;bool&gt;"),
+            new("ChangeAsync(GanttTask task, GanttChangeAction action)", "Applies a change from code through the same path as the dialog and the drags: validation, <code>TaskChanging</code>, then <code>TasksChanged</code>. False when editing is off, the change is invalid (<code>ErrorMessage</code> is set) or <code>TaskChanging</code> canceled it. A create needs an unused id; an update or delete needs an existing one.", "Task&lt;bool&gt;"),
         };
         public static readonly ApiRow[] State =
         {
@@ -307,7 +307,7 @@ private static GanttTask[] Plan() =>
             new("fx-gantt-error", "The validation message under the toolbar."),
             new("fx-gantt-axis", "The timeline header with its tick labels."),
             new("fx-gantt-timeline", "The timeline cell; its background grid is one day wide."),
-            new("fx-gantt-task", "A bar; its left, width and background colour are inline."),
+            new("fx-gantt-task", "A bar; its left, width and background color are inline."),
             new("fx-gantt-move", "The button that fills the bar and starts a move."),
             new("fx-gantt-progress", "The filled part of the bar; its width is the progress percentage."),
             new("fx-gantt-bar-label", "The title inside the bar."),

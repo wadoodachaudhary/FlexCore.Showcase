@@ -16,11 +16,11 @@
 <PageTitle>Dynamic Columns in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Dynamic columns" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Columns read from the rows' keys, or generated from the row type's attributes: a grid whose shape follows the data."
+                   Tagline="Let the data decide the columns: read them from the rows or from attributes."
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.ColumnFeatures.cs;Grid/GridColumnsBase.cs;Grid/GridColumn.cs;Grid/GridEnums.cs;Grid/GridControl.Filtering.cs;Grid/GridControl.RowEditing.cs;Grid/GridControl.MultiSort.cs">
     <Overview>
         <p>
-            Dynamic columns for the Blazor <code>GridControl</code>. With <code>IDictionary&lt;string, object&gt;</code> rows, such as <code>ExpandoObject</code>, a column's <code>Field</code> is the key, so columns can be declared from the data itself; with <code>AutoGenerateColumns</code> they come from <code>Display</code>, <code>DisplayFormat</code>, <code>Editable</code> and <code>Key</code> attributes on the row type.
+            Dynamic columns let a Blazor <code>GridControl</code> take its columns from the data instead of from markup you write by hand. Use dictionary rows such as <code>ExpandoObject</code> for imports or query results whose fields vary, since each key can become a column; or set <code>AutoGenerateColumns</code> and let data-annotation attributes on the row type supply headers, order, bands, formats and read-only cells.
         </p>
     </Overview>
 
@@ -60,7 +60,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="annotations" Title="Columns from data annotations" RazorCode="@Code.Annotations" CSharpCode="@Code.AnnotationsCs">
-            <Description><p>No column markup: headers, order, bands, formats and read-only cells all come from the attributes on <code>AnnotatedGridItem</code>.</p></Description>
+            <Description><p>Compare the grid with its code: there is no column markup, because headers, order, bands, formats and read-only cells come from attributes on <code>AnnotatedGridItem</code>.</p></Description>
             <Demo>
                 <GridControl DataSource="@_annotatedRows"
                              TValue="AnnotatedGridItem"
@@ -99,13 +99,13 @@
                 <li><strong>Header:</strong> <code>Display.Name</code>, else <code>[DisplayName]</code>, else the property name. <code>Display.GroupName</code> becomes the column's <code>HeaderBand</code>.</li>
                 <li><strong>Format:</strong> <code>DisplayFormat.DataFormatString</code> with the <code>{0:…}</code> wrapper removed, so <code>{0:C2}</code> becomes <code>C2</code>.</li>
                 <li><strong>Read-only:</strong> <code>[Key]</code> (which also sets <code>IsPrimaryKey</code>), <code>[Editable(false)]</code>, <code>[ReadOnly(true)]</code>, or no public setter.</li>
-                <li><strong>Type:</strong> <code>Nullable&lt;T&gt;</code> is unwrapped first. <code>[DataType(DataType.Password)]</code> gives Password; a DataType of Date, DateTime or Time gives Date; <code>bool</code> gives CheckBox; <code>DateTime</code>, <code>DateTimeOffset</code> and <code>DateOnly</code> give Date; the numeric types give Number; everything else is Text. Numbers and dates align right, check boxes centre, headers included.</li>
+                <li><strong>Type:</strong> <code>Nullable&lt;T&gt;</code> is unwrapped first. <code>[DataType(DataType.Password)]</code> gives Password; a DataType of Date, DateTime or Time gives Date; <code>bool</code> gives CheckBox; <code>DateTime</code>, <code>DateTimeOffset</code> and <code>DateOnly</code> give Date; the numeric types give Number; everything else is Text. Numbers and dates align right, check boxes center, headers included.</li>
                 </ul>
             </DocSection>
             <DocSection Id="doc-run-time-column-methods" Title="Run-time column methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
                 <ApiTable Kind="ApiKind.Methods" Title="Run-time column methods" Rows="Vocab.Methods" />
                 <p>
-                Inside the window a <code>GridColumn</code> that initialises registers with the container and one that disposes unregisters, but the
+                Inside the window a <code>GridColumn</code> that initializes registers with the container and one that disposes unregisters, but the
                 grid's column-driven render is held. The flush render runs <code>SyncPendingColumnStructure</code> at the top of the pass: when every
                 field in the final order is registered it reorders the container, and whenever a column was added or removed it clears the
                 selected cells, the active cell and any batch edit (selected rows stay), drops the sort and filter state and the sort priority of
@@ -414,7 +414,7 @@ private static string Humanize(string key)
             new("Number", "Without <code>Format</code> the cell shows the plain invariant digits with no grouping. The filter row offers <code>Equals</code>, <code>DoesNotEqual</code>, the four comparisons, <code>IsEmpty</code> and <code>IsNotEmpty</code> and compares as <code>decimal</code>; the editor uses <code>inputmode=decimal</code> and a native number input only with <code>ShowNumericSpinner</code>; best fit measures the column as numeric. The default alignment is still Left."),
             new("Date", "Right-aligned by default. The row editor is a <code>DatePickerControl</code> with <code>Format</code> or <code>MM/dd/yyyy</code>, the batch editor an input of type <code>date</code>; the filter row offers the <code>Number</code> operator set and compares as dates; the sort dialog offers Oldest to Newest."),
             new("Boolean", "Edited with a <code>CheckBoxControl</code> in the row editor and without an in-cell text editor in batch mode; the filter row offers <code>Equals</code>, <code>DoesNotEqual</code>, <code>IsEmpty</code> and <code>IsNotEmpty</code> and compares as <code>bool</code>. The display cell has no special case, so it shows True or False as text, left-aligned."),
-            new("CheckBox", "Renders a check box in the cell, and a click on an editable cell toggles the value in place. Centred by default; only an explicit <code>TextAlign.Right</code> overrides that. Exports write 1 or 0. Filters and editors behave as <code>Boolean</code>. A <code>CheckBox</code> column with an empty <code>Field</code> is the selection check-box column."),
+            new("CheckBox", "Renders a check box in the cell, and a click on an editable cell toggles the value in place. Centered by default; only an explicit <code>TextAlign.Right</code> overrides that. Exports write 1 or 0. Filters and editors behave as <code>Boolean</code>. A <code>CheckBox</code> column with an empty <code>Field</code> is the selection check-box column."),
         };
         public static readonly ApiRow[] RowShapes =
         {

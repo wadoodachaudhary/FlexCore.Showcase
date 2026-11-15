@@ -18,22 +18,22 @@
             <p class="gw-greeting-sub">Here's the agency at a glance for @Today.ToString("dddd, MMMM d").</p>
         </div>
         <div class="gw-dash-tools">
-            <ButtonControl BareStyle="true" CssClass="gw-round-btn" IconCss="bi bi-arrows-move" Title="Rearrange the cards" aria-pressed="@(Settings.Customising ? "true" : "false")" OnClick="@(() => Settings.Customising = !Settings.Customising)" />
+            <ButtonControl BareStyle="true" CssClass="gw-round-btn" IconCss="bi bi-arrows-move" Title="Rearrange the cards" aria-pressed="@(Settings.Customizing ? "true" : "false")" OnClick="@(() => Settings.Customizing = !Settings.Customizing)" />
             <ButtonControl BareStyle="true" CssClass="gw-round-btn" IconCss="bi bi-arrow-clockwise" Title="Refresh" OnClick="Refresh" />
         </div>
     </div>
 
-    @if (Settings.Customising)
+    @if (Settings.Customizing)
     {
-        <div class="gw-customise-bar">
-            <span class="gw-customise-text"><span class="bi bi-arrows-move"></span> Drag a card by its bar, or use its arrows.</span>
-            <div class="gw-customise-tools">
+        <div class="gw-customize-bar">
+            <span class="gw-customize-text"><span class="bi bi-arrows-move"></span> Drag a card by its bar, or use its arrows.</span>
+            <div class="gw-customize-tools">
                 @foreach (var key in Settings.HiddenCards.ToList())
                 {
                     <ButtonControl CssClass="btn-sm" IconCss="bi bi-eye" OnClick="@(() => Settings.SetCardShown(key, true))">Show @GetawaysAppSettings.CardTitle(key)</ButtonControl>
                 }
                 <ButtonControl CssClass="btn-sm" OnClick="Settings.ResetLayout">Reset layout</ButtonControl>
-                <ButtonControl CssClass="btn-sm btn-primary" OnClick="@(() => Settings.Customising = false)">Done</ButtonControl>
+                <ButtonControl CssClass="btn-sm btn-primary" OnClick="@(() => Settings.Customizing = false)">Done</ButtonControl>
             </div>
         </div>
     }
@@ -43,9 +43,9 @@
         @foreach (var slot in Settings.Slots)
         {
             <GridLayoutItemControl @key="slot.Key" Row="slot.Row" Column="slot.Column" ColumnSpan="slot.Span">
-                <div class="@SlotClass(slot)" @ondragover:preventDefault="Settings.Customising"
+                <div class="@SlotClass(slot)" @ondragover:preventDefault="Settings.Customizing"
                      @ondragenter="@(() => { if (_dragging is not null) _dragOver = slot.Key; })" @ondrop="@(() => Drop(slot.Key))">
-                    @if (Settings.Customising)
+                    @if (Settings.Customizing)
                     {
                         <div class="gw-slot-bar" draggable="true" @ondragstart="@(() => _dragging = slot.Key)" @ondragend="EndDrag">
                             <span class="gw-slot-grip bi bi-grip-vertical"></span>
@@ -118,7 +118,7 @@
                                                     <BadgeControl Text="@(((TripRequest)row).Request)" CssClass="gw-code" />
                                                 </Template>
                                             </GridColumn>
-                                            <GridColumn Field="@nameof(TripRequest.Traveller)" HeaderText="Lead traveller" Width="180px" />
+                                            <GridColumn Field="@nameof(TripRequest.Traveler)" HeaderText="Lead traveler" Width="180px" />
                                             <GridColumn Field="@nameof(TripRequest.Destination)" HeaderText="Destination" Width="125px" />
                                             <GridColumn Field="@nameof(TripRequest.TripTypeName)" HeaderText="Trip" Width="190px" />
                                             <GridColumn Field="@nameof(TripRequest.Agent)" HeaderText="Agent" Width="150px" />
@@ -161,7 +161,7 @@
     private string? _dragOver;
 
     private string SlotClass(GetawaysCardSlot slot) =>
-        $"gw-slot {(slot.Beside ? "gw-slot-beside" : "")} {(Settings.Customising ? "is-customising" : "")} {(_dragOver == slot.Key && _dragging != slot.Key ? "is-drop-target" : "")}";
+        $"gw-slot {(slot.Beside ? "gw-slot-beside" : "")} {(Settings.Customizing ? "is-customizing" : "")} {(_dragOver == slot.Key && _dragging != slot.Key ? "is-drop-target" : "")}";
 
     private void Drop(string target)
     {
