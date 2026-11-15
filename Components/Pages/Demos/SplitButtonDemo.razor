@@ -1,23 +1,22 @@
 @page "/demo/split-button"
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-12: new page on FeatureDemoLayout; "Item values" example dropped, SplitButtonItem.Value stays in its table. Facts from
-   SplitButtonControl.razor(.css), SplitButtonItem.cs (FlexCore 0.2.48). *@
+
 
 <PageTitle>Blazor Split Button — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Split button" Category="Components" ControlName="SplitButtonControl"
-                   Tagline="A default action, with its alternatives behind the caret."
+                   Tagline="One click for the usual action, the caret for its alternatives."
                    SourcePath="SplitButtonControl.razor">
     <Overview>
         <p>
-            <code>SplitButtonControl</code> is a Blazor split button: a main half that fires <code>OnClick</code> and a caret half that opens a menu of <code>Items</code>. Use it when one action is the default and the rest are variants of it.
+            <code>SplitButtonControl</code> is a Blazor split button: one click on the main half runs the usual action, and the caret opens a menu of alternatives. Use it when one action is the default and the rest are variants, such as Save with Save as and Save a copy: one button replaces several in a crowded toolbar. The main half raises <code>OnClick</code>, each menu item <code>OnItemClick</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="basic" Title="Default action with alternatives" RazorCode="@Code.Basic" CSharpCode="@Code.BasicCs">
-            <Description><p>Click the left half to export, the caret for the other formats; the greyed item is disabled.</p></Description>
+            <Description><p>Click the left half to save, the caret for the other ways to save; the grayed menu entry is disabled. The second button is <code>Disabled</code> as a whole.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <SplitButtonControl Text="Save" IconCss="bi bi-save" Items="_saveItems"
@@ -29,7 +28,7 @@
         </DemoExample>
 
         <DemoExample Id="menu-content" Title="Custom menu content" RazorCode="@Code.MenuContent" CSharpCode="@Code.MenuContentCs">
-            <Description><p><code>MenuContent</code> renders after the items and stays open while you click inside it.</p></Description>
+            <Description><p>Check Notify subscribers or Pin to top inside the menu before publishing; <code>MenuContent</code> renders after the items and stays open while you click in it.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <SplitButtonControl Text="Publish" IconCss="bi bi-cloud-upload" Items="_publishItems"
@@ -45,6 +44,18 @@
                 </div>
             </Demo>
         </DemoExample>
+
+        <DemoExample Id="child-content" Title="Custom main half" RazorCode="@Code.ChildContent" CSharpCode="@Code.ChildContentCs">
+            <Description><p>Leave <code>Text</code> unset and put your own markup in the main half; set <code>Title</code> so both halves still have a name.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <SplitButtonControl Title="Send" Items="_sendItems" OnClick="@(() => _sent = "Sent to all 3")" OnItemClick="@(i => _sent = i.Text)">
+                        <span class="bi bi-send"></span> Send <span class="count">3</span>
+                    </SplitButtonControl>
+                    @if (_sent is not null) { <span class="result">@_sent</span> }
+                </div>
+            </Demo>
+        </DemoExample>
     </Examples>
 
     <Vocabulary>
@@ -54,10 +65,12 @@
             </DocSection>
             <DocSection Id="doc-splitbuttonitem" Title="SplitButtonItem" Count='@DocSection.Label(Vocab.Item.Length, "properties")'>
                 <ApiTable Kind="ApiKind.Properties" Title="SplitButtonItem" Rows="Vocab.Item" />
-                <p class="note">Colors are fixed in the control's stylesheet; it reads no <code>--fx-*</code> variables. Restyle by overriding these classes.</p>
             </DocSection>
             <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
                 <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+            <DocSection Id="doc-css-variables" Title="CSS variables" Count='@DocSection.Label(Vocab.Vars.Length, "variables")'>
+                <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
             </DocSection>
         </DocSections>
     </Vocabulary>
@@ -65,7 +78,7 @@
     <Accessibility>
         <ul>
             <li>Both halves are native <code>&lt;button&gt;</code>s: Tab reaches each, Space and Enter activate.</li>
-            <li>The caret half sets <code>aria-haspopup</code> and <code>aria-expanded</code>.</li>
+            <li>The caret half sets <code>aria-haspopup="true"</code>, and <code>aria-expanded</code> reads <code>"true"</code> while the menu is open and <code>"false"</code> when closed.</li>
             <li>Menu entries are native buttons: Tab moves through them, Enter or Space picks. There is no arrow-key or Escape handling; a pick or click-away closes the menu.</li>
             <li><code>Disabled</code> sets the native <code>disabled</code> attribute on both halves and ignores pointer events on the host.</li>
         </ul>
@@ -73,8 +86,8 @@
 
     <Related>
         <ul>
-            <li>One button with a menu and no default action: <a href="demo/buttons#dropdown">ButtonControl dropdown mode</a>.</li>
-            <li><code>ToolbarButtonControl</code> with <code>HasDropdown</code>, which draws the arrow and leaves the menu to the page: <a href="demo/ai-prompt#app-bar">AI prompt</a>.</li>
+            <li>One button with a menu: <a href="demo/buttons#dropdown">ButtonControl dropdown mode</a>.</li>
+            <li><code>ToolbarButtonControl</code> with <code>HasDropdown</code>, which draws the arrow and leaves the menu to the page: <a href="demo/toolbar#app-bar">Toolbar</a>.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
@@ -96,12 +109,16 @@
     private string? _published;
     private void Publish(string how) => _published = $"Publish {how} (notify {(_notify ? "on" : "off")}, pin {(_pin ? "on" : "off")})";
 
-    // Vocabulary rows, one per public member (0.2.48).
+    // Child content
+    private readonly List<SplitButtonItem> _sendItems = new() { new("Send to me only", "bi bi-person"), new("Send later…", "bi bi-clock") };
+    private string? _sent;
+
+    // Vocabulary rows, one per public member (0.2.50).
     private static class Vocab
     {
         public static readonly ApiRow[] Parameters =
         {
-            new("Text", "Label of the main half. Wins over <code>ChildContent</code> when set.", "string?", "null"),
+            new("Text", "Label of the main half. Wins over <code>ChildContent</code> when set. Also stands in for <code>Title</code> when that is not set.", "string?", "null"),
             new("IconCss", "Leading icon on the main half.", "string?", "null"),
             new("ChildContent", "Main-half markup, used when <code>Text</code> is not set.", "RenderFragment?"),
             new("Items", "Menu entries, in order.", "IList&lt;SplitButtonItem&gt;?", "null"),
@@ -109,6 +126,10 @@
             new("Disabled", "Disables both halves; the host fades and ignores pointer events.", "bool", "false"),
             new("OnClick", "Main half clicked. No arguments.", "EventCallback"),
             new("OnItemClick", "Menu entry picked. The menu closes first.", "EventCallback&lt;SplitButtonItem&gt;"),
+            new("Title (base)", "Tooltip and accessible name of the main half; the caret gets the same text plus \" options\". Falls back to <code>Text</code>; with neither, the caret is named \"More options\".", "string?", "null"),
+            new("Enabled (base)", "Not read. Use <code>Disabled</code>; <code>Enabled=\"false\"</code> leaves both halves active.", "bool", "true"),
+            new("Visible (base)", "Not read. <code>Visible=\"false\"</code> does not hide the control.", "bool", "true"),
+            new("Id (base)", "Never rendered. An <code>id</code> attribute binds to this parameter, so it does not reach the host either.", "string?", "null"),
             new("CssClass / Style", "Appended to, and inline style on, the host element.", "string?", "null"),
             new("(unmatched attributes)", "Forwarded to the host <code>&lt;div&gt;</code>, not to the buttons.", "Dictionary&lt;string,object&gt;"),
         };
@@ -117,7 +138,7 @@
             new("Text", "Entry label.", "string", "\"\""),
             new("IconCss", "Leading icon.", "string?", "null"),
             new("Value", "Any payload; read it in <code>OnItemClick</code> instead of matching on <code>Text</code>.", "object?", "null"),
-            new("Disabled", "Rendered greyed; clicks ignored.", "bool", "false"),
+            new("Disabled", "Rendered grayed; clicks ignored.", "bool", "false"),
             new("ctor", "<code>new(text, iconCss, value, disabled)</code>, all but text optional.", "", null),
         };
         public static readonly ApiRow[] Css =
@@ -127,6 +148,16 @@
             new("fx-split-button-dropdown", "The menu: white panel under the control, right-aligned, 150px minimum."),
             new("fx-split-button-item", "One entry; <code>.disabled</code> halves its opacity."),
             new("fx-split-button-backdrop", "Full-screen transparent layer that closes the menu on click."),
+        };
+        public static readonly ApiRow[] Vars =
+        {
+            new("--fx-split-btn-bg / --fx-split-btn-color", "Fill and text of both halves.", "#2563eb / #ffffff"),
+            new("--fx-split-btn-border-color", "Border of both halves.", "#1d4ed8"),
+            new("--fx-split-btn-hover-bg", "Fill of the half under the pointer.", "#1d4ed8"),
+            new("--fx-split-btn-divider-color", "Line between the two halves.", "rgba(255, 255, 255, 0.25)"),
+            new("--fx-split-btn-radius", "Outer corners of the control and corners of the menu.", "6px"),
+            new("--fx-split-btn-menu-bg / --fx-split-btn-menu-border-color", "Menu panel fill and border.", "#ffffff / #e2e8f0"),
+            new("--fx-split-btn-menu-color / --fx-split-btn-menu-hover-bg", "Menu entry text, and its fill under the pointer.", "#1e293b / #f1f5f9"),
         };
     }
 
@@ -162,6 +193,17 @@ private string? _saved;";
     </SplitButtonControl>
     @if (_published is not null) { <span class=""result"">@_published</span> }
 </div>";
+        public const string ChildContent = @"<div class=""demo-row"">
+    <SplitButtonControl Title=""Send"" Items=""_sendItems"" OnClick=""@(() => _sent = ""Sent to all 3"")"" OnItemClick=""@(i => _sent = i.Text)"">
+        <span class=""bi bi-send""></span> Send <span class=""count"">3</span>
+    </SplitButtonControl>
+    @if (_sent is not null) { <span class=""result"">@_sent</span> }
+</div>";
+        public const string ChildContentCs = @"// Child content
+private readonly List<SplitButtonItem> _sendItems = new() { new(""Send to me only"", ""bi bi-person""), new(""Send later…"", ""bi bi-clock"") };
+
+private string? _sent;";
+
         public const string MenuContentCs = @"// Menu content
 private readonly List<SplitButtonItem> _publishItems = new() { new(""Schedule…"", ""bi bi-calendar-event"") };
 

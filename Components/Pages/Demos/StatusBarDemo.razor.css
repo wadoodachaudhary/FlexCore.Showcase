@@ -1,0 +1,11 @@
+.demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }   /* not .row: Bootstrap owns that name */
+
+/* a small window so the bar sits at the foot of something */
+.sb-frame { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #fff; max-width: 560px; }
+.sb-body { padding: 18px 16px; min-height: 64px; font-size: 14px; color: #334155; }
+.sb-list { display: flex; flex-direction: column; gap: 8px; }
+
+/* panels written as ChildContent are this page's markup, so this page styles them */
+.sb-panel { display: flex; align-items: center; gap: 4px; padding: 0 8px; height: 100%; white-space: nowrap; border-right: 1px solid #e5e7eb; }
+.sb-panel:last-child { border-right: none; }
+.sb-spring { flex: 1; min-width: 0; }

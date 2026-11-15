@@ -31,10 +31,9 @@
 
         @* Desktop nav (2026-10-06): items are <a role="menuitem">, real links (new tab, crawlers) the library keyboard script
            still handles. Groups in @code, shared with the phone drawer. *@
-        @* @key on the URL (2026-10-17): MenuDropDownControl stays open after link navigation in the persistent layout; remounting
-           per URL closes it. Library fix proposed in SC-253. *@
+        @* 2026-11-14: the bar is no longer remounted per URL. MenuDropDownControl now closes itself when the address changes. *@
         <div class="top-nav-menu">
-            <MenuBarControl @key="Nav.Uri" CssClass="site-menubar">
+            <MenuBarControl CssClass="site-menubar">
                 @foreach (var g in _groups)
                 {
                     @if (g.Items.Length == 0)
@@ -79,7 +78,7 @@
             <a href="https://github.com/wadoodachaudhary/FlexCore" target="_blank" class="btn-nav-icon" title="View Source on GitHub">
                 <span class="bi bi-github"></span>
             </a>
-            @* Phone: checkbox drawer (no FlexCore off-canvas control yet); bound so LocationChanged unticks it on navigation. *@
+            @* Phone: checkbox drawer (no FlexCore off-canvas control yet); bound so LocationChanged unchecks it on navigation. *@
             <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Open menu" @bind="_navOpen" />
             <label for="nav-toggle" class="btn-nav-icon nav-burger" title="Menu"><span class="bi bi-list"></span></label>
         </div>

@@ -23,6 +23,7 @@ public static class SiteNav
             new("Split button", "demo/split-button"),
             new("Toggle buttons", "demo/toggle-buttons"),
             new("Floating action button", "demo/fab"),
+            new("Chips", "demo/chips"),                        // 2026-11-14: ChipListControl and ChipControl
             new("Dialogs", "demo/dialog"),
             new("Toasts", "demo/notifications"),
             new("Sliders", "demo/sliders"),
@@ -40,6 +41,9 @@ public static class SiteNav
             new("Page navigation", "demo/page-navigation"),               // PageControl: keyboard navigation graph (2026-10-20)
             new("Dock manager", "demo/dock-manager"),           // own page since 2026-10-19; was the tour's Docking tab
             new("Tabs & accordion", "demo/tabs-accordion"),
+            new("Menu bar", "demo/menu-bar"),                   // 2026-11-14: MenuBarControl family
+            new("Status bar", "demo/status-bar"),               // 2026-11-14: StatusBarControl
+            new("Toolbar", "demo/toolbar"),                     // 2026-11-14: ToolbarControl family and AppBarControl
             new("Ribbon", "demo/ribbon"),                       // own page since 2026-10-29; was the home window's Front Desk tab
             new("Tree view", "demo/tree/treeview-explorer"),
             new("Display", null),

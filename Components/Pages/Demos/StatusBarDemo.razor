@@ -1,0 +1,228 @@
+@page "/demo/status-bar"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-11-14: new page for StatusBarControl. Facts from StatusBarControl.razor(.css) and StatusBarModels.cs (FlexCore 0.2.50). *@
+
+<PageTitle>Blazor Status Bar — FlexCore</PageTitle>
+
+<FeatureDemoLayout Title="Status bar" Category="Components" ControlName="StatusBarControl"
+                   Tagline="Keep users informed at the foot of a window: connection, save state, counts and totals."
+                   SourcePath="StatusBarControl.razor; StatusBarModels.cs">
+    <Overview>
+        <p>
+            <code>StatusBarControl</code> is a Blazor status bar: a row of panels along the foot of a window that tells users where things stand. Use it on editors and data-entry screens for the connection, whether the work is saved, and how many rows are selected, in one 28px row along the bottom. Fill it from a <code>Panels</code> list of icon-and-text panels, or write your own markup as <code>ChildContent</code> for live counts and totals.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="panels" Title="Panels from a list" RazorCode="@Code.Panels" CSharpCode="@Code.PanelsCs" CssCode="@Code.Css">
+            <Description><p>Press Save and Go offline: change a panel's <code>Text</code> or <code>IconCss</code> and the bar follows; the <code>Spring</code> panel fills the spare width, and the fixed-width ones show a <code>Tooltip</code> on hover.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <ButtonControl CssClass="btn-primary btn-sm" IconCss="bi bi-save" OnClick="Save">Save</ButtonControl>
+                    <ButtonControl CssClass="btn-sm" OnClick="GoOffline">@(_online ? "Go offline" : "Go online")</ButtonControl>
+                </div>
+                <div class="sb-frame">
+                    <div class="sb-body">Booking LIS-0001 Marmalade</div>
+                    <StatusBarControl Panels="_panels" />
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="content" Title="Live counts and totals" RazorCode="@Code.Content" CSharpCode="@Code.ContentCs" CssCode="@Code.Css">
+            <Description><p>Check trips to see the selection count and the quoted total update as you go, written as your own panels in <code>ChildContent</code>.</p></Description>
+            <Demo>
+                <div class="sb-frame">
+                    <div class="sb-body sb-list">
+                        @foreach (var trip in _trips)
+                        {
+                            <CheckBoxControl @bind-Checked="trip.Picked" Label="@($"{trip.Name}, {trip.Quote:C0}")" />
+                        }
+                    </div>
+                    <StatusBarControl>
+                        <div class="sb-panel sb-spring">
+                            <span><strong>@Picked.Count()</strong> of <strong>@_trips.Count</strong> trips selected</span>
+                        </div>
+                        <div class="sb-panel">Total quoted: <strong>@Picked.Sum(t => t.Quote).ToString("C0")</strong></div>
+                    </StatusBarControl>
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <DocSections>
+            <DocSection Id="doc-parameters" Title="Parameters" Count='@DocSection.Label(Vocab.Parameters.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
+            </DocSection>
+            <DocSection Id="doc-statusbarpanel" Title="StatusBarPanel" Count='@DocSection.Label(Vocab.Panel.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="StatusBarPanel" Rows="Vocab.Panel" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>The bar and its panels are plain <code>&lt;div&gt;</code>s: they take no focus and have no role.</li>
+            <li>It is not a live region, so a change of text is not announced to a screen reader.</li>
+            <li>A panel's <code>Tooltip</code> is a native <code>title</code>, shown on hover only.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>The bars at the top of a window: <code>AppBarControl</code> and <code>ToolbarControl</code> on <a href="demo/toolbar">Toolbar</a>.</li>
+            <li>A whole window laid out with panels and a splitter: <a href="demo/layout#shell">Page layouts</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Panels
+    private bool _online = true;
+
+    private int _saves;
+
+    private readonly List<StatusBarPanel> _panels = new()
+    {
+        new("Online", "bi bi-wifi", width: "92px") { Tooltip = "Connection to the booking system" },
+        new("No changes saved yet", spring: true),
+        new("2 travelers", "bi bi-people"),
+        new("EUR", width: "48px") { Tooltip = "Quote currency" },
+    };
+
+    private void Save() => _panels[1].Text = $"Saved {++_saves} time{(_saves == 1 ? "" : "s")}";
+
+    private void GoOffline()
+    {
+        _online = !_online;
+        _panels[0].Text = _online ? "Online" : "Offline";
+        _panels[0].IconCss = _online ? "bi bi-wifi" : "bi bi-wifi-off";
+    }
+
+    // Live content
+    private sealed class Trip
+    {
+        public string Name { get; init; } = "";
+        public decimal Quote { get; init; }
+        public bool Picked { get; set; }
+    }
+
+    private readonly List<Trip> _trips = new()
+    {
+        new() { Name = "Lisbon city break", Quote = 1240, Picked = true },
+        new() { Name = "Zanzibar beach week", Quote = 3980 },
+        new() { Name = "Serengeti safari", Quote = 6150, Picked = true },
+        new() { Name = "Fjord cruise", Quote = 2890 },
+    };
+
+    private IEnumerable<Trip> Picked => _trips.Where(t => t.Picked);
+
+    // Vocabulary rows, one per public member (0.2.50). The control does not inherit FlexControlBase.
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Parameters =
+        {
+            new("Panels", "Panels drawn in order, each an icon and a line of text.", "List&lt;StatusBarPanel&gt;?", "null"),
+            new("ChildContent", "Your own markup, placed after the panels. It takes this page's styles, not the control's.", "RenderFragment?", "null"),
+            new("CssClass", "Appended after <code>fx-statusbar</code>. The control has no <code>Style</code> and accepts no other attributes.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Panel =
+        {
+            new("Text", "The panel's text. Cut with an ellipsis when a <code>Width</code> or <code>Spring</code> panel is too narrow; other panels keep their full width and are clipped at the bar's edge.", "string?", "null"),
+            new("IconCss", "Leading icon.", "string?", "null"),
+            new("Tooltip", "Native <code>title</code> of the panel. Not a constructor argument; set it in an initializer.", "string?", "null"),
+            new("Width", "Fixed CSS width, for example <code>92px</code>. Ignored when <code>Spring</code> is true.", "string?", "null"),
+            new("Spring", "The panel takes all the spare width.", "bool", "false"),
+            new("ctor", "<code>new(text, iconCss, width, spring)</code>, all but text optional.", "", null),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-statusbar", "The bar: a 28px flex row with a gray fill and a top border."),
+            new("fx-statusbar-panel", "One panel: padded, with a right border except on the last."),
+            new("fx-statusbar-spring", "Added to a <code>Spring</code> panel; it grows to fill the row."),
+            new("fx-statusbar-icon · fx-statusbar-text", "The icon and the text inside a panel."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Panels = @"<div class=""demo-row"">
+    <ButtonControl CssClass=""btn-primary btn-sm"" IconCss=""bi bi-save"" OnClick=""Save"">Save</ButtonControl>
+    <ButtonControl CssClass=""btn-sm"" OnClick=""GoOffline"">@(_online ? ""Go offline"" : ""Go online"")</ButtonControl>
+</div>
+<div class=""sb-frame"">
+    <div class=""sb-body"">Booking LIS-0001 Marmalade</div>
+    <StatusBarControl Panels=""_panels"" />
+</div>";
+        public const string PanelsCs = @"// Panels
+private bool _online = true;
+
+private int _saves;
+
+private readonly List<StatusBarPanel> _panels = new()
+{
+    new(""Online"", ""bi bi-wifi"", width: ""92px"") { Tooltip = ""Connection to the booking system"" },
+    new(""No changes saved yet"", spring: true),
+    new(""2 travelers"", ""bi bi-people""),
+    new(""EUR"", width: ""48px"") { Tooltip = ""Quote currency"" },
+};
+
+private void Save() => _panels[1].Text = $""Saved {++_saves} time{(_saves == 1 ? """" : ""s"")}"";
+
+private void GoOffline()
+{
+    _online = !_online;
+    _panels[0].Text = _online ? ""Online"" : ""Offline"";
+    _panels[0].IconCss = _online ? ""bi bi-wifi"" : ""bi bi-wifi-off"";
+}";
+
+        public const string Content = @"<div class=""sb-frame"">
+    <div class=""sb-body sb-list"">
+        @foreach (var trip in _trips)
+        {
+            <CheckBoxControl @bind-Checked=""trip.Picked"" Label=""@($""{trip.Name}, {trip.Quote:C0}"")"" />
+        }
+    </div>
+    <StatusBarControl>
+        <div class=""sb-panel sb-spring"">
+            <span><strong>@Picked.Count()</strong> of <strong>@_trips.Count</strong> trips selected</span>
+        </div>
+        <div class=""sb-panel"">Total quoted: <strong>@Picked.Sum(t => t.Quote).ToString(""C0"")</strong></div>
+    </StatusBarControl>
+</div>";
+        public const string ContentCs = @"// Live content
+private sealed class Trip
+{
+    public string Name { get; init; } = """";
+    public decimal Quote { get; init; }
+    public bool Picked { get; set; }
+}
+
+private readonly List<Trip> _trips = new()
+{
+    new() { Name = ""Lisbon city break"", Quote = 1240, Picked = true },
+    new() { Name = ""Zanzibar beach week"", Quote = 3980 },
+    new() { Name = ""Serengeti safari"", Quote = 6150, Picked = true },
+    new() { Name = ""Fjord cruise"", Quote = 2890 },
+};
+
+private IEnumerable<Trip> Picked => _trips.Where(t => t.Picked);";
+
+        public const string Css = @".demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }   /* not .row: Bootstrap owns that name */
+
+/* a small window so the bar sits at the foot of something */
+.sb-frame { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #fff; max-width: 560px; }
+.sb-body { padding: 18px 16px; min-height: 64px; font-size: 14px; color: #334155; }
+.sb-list { display: flex; flex-direction: column; gap: 8px; }
+
+/* panels written as ChildContent are this page's markup, so this page styles them */
+.sb-panel { display: flex; align-items: center; gap: 4px; padding: 0 8px; height: 100%; white-space: nowrap; border-right: 1px solid #e5e7eb; }
+.sb-panel:last-child { border-right: none; }
+.sb-spring { flex: 1; min-width: 0; }";
+    }
+}

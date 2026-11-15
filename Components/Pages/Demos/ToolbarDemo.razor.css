@@ -1,0 +1,22 @@
+/* Toolbar page: font icons sized for the 18px icon box, the pressed look, the tiles and the quote desk frame. */
+
+/* Commands */
+.tb ::deep .fx-toolbar-btn-icon, .qd ::deep .fx-toolbar-btn-icon { font-size: 16px; line-height: 18px; text-align: center; }
+.tb ::deep .fx-toolbar-btn--selected, .tb ::deep .fx-toolbar-btn--selected:hover:not(:disabled), .tb ::deep .fx-toolbar-btn--selected:focus-visible:not(:disabled) { background: #dbeafe; border-color: #93c5fd; }
+.tb-status { margin: 4px 0 0; font-size: 13px; color: #475569; }
+
+/* Tiles */
+.tools ::deep .fx-toolbar { border: 1px solid #cbd5e1; border-radius: 8px; flex-wrap: wrap; }
+.tools ::deep .fx-toolbar-btn-icon.bi { font-size: 46px; line-height: 56px; text-align: center; }
+
+/* App bar */
+.qd { height: 300px; overflow: auto; padding: 0 12px 12px; border: 1px solid #cbd5e1; border-radius: 8px; }
+.qd ::deep .fx-app-bar { margin: 0 -12px; background: #eff6ff; border-bottom: 1px solid #bfdbfe; }
+.qd ::deep .fx-toolbar { margin-top: 8px; }
+.qd ::deep .fx-app-bar-toolbar { min-height: 0; margin: 0; background: transparent; border: 0; }
+.qd-sub { font-size: 13px; color: #475569; }
+.qd-export { position: relative; display: inline-flex; }
+.qd-backdrop { position: fixed; inset: 0; z-index: 4; }
+.qd-menu { position: absolute; top: 100%; left: 0; z-index: 5; display: flex; flex-direction: column; min-width: 160px; padding: 4px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12); }
+.qd-menu ::deep .qd-menu-item { text-align: left; background: transparent; border-color: transparent; }
+.qd-label { margin: 12px 0 4px; font-size: 12px; font-weight: 600; color: #475569; }

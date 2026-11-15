@@ -2,11 +2,14 @@
 
 @if (ShowWorkhorses)
 {
+@* Laid out like the home page's pillars (2026-11-14): the heading sits in a green strip that straddles the top edge of an indigo
+   band, and the cards sit on the band. *@
 <section class="popular-components-section">
+    <div class="workhorses-strip">
     <div class="doodle-head popular-head" @ref="_workhorsesHead">
         @* Two racehorses neck and neck in place of the 🐎 emoji (2026-11-13, the "ink and paper" pair), drawn like
            the site's other doodles: one solid ink, one white with an ink line, and the front one wears a saddle cloth with the FlexCore
-           logo, the only colour. Each is one gallop stride from Eadweard Muybridge's photographs The Horse in Motion (1878), traced to a
+           logo, the only color. Each is one gallop stride from Eadweard Muybridge's photographs The Horse in Motion (1878), traced to a
            smooth outline with the jockey taken off; wwwroot/images/workhorses.svg holds the 15 frames of both horses and the CSS steps
            through them. Each time the heading scrolls into view they run, with wind marks behind and the ground streaming back:
            fxToggleClassWhenVisible (App.razor) adds is-playing. The marks are drawn in the sprite's frame units, the racers placed over them. *@
@@ -27,13 +30,16 @@
         </div>
         <h2 class="popular-title">Start with the workhorses</h2>
     </div>
+    </div>
+    <div class="brand-band">
+    @* Tagline under the green strip (2026-11-14), in the voice of the Telerik, Syncfusion and Radzen landing pages. "High-performance"
+       rests on GridControl's virtual scrolling of 100,000 rows (/demo/grid/row-selection-50k). *@
+    <p class="workhorses-tagline">The high-performance core of a business app: grids, charts, reports and scheduling that keep pace as your company grows.</p>
     @* The same four cards as the home page (2026-11-13); they replaced six small tiles (Data Grid, Charts, Scheduler, Dialogs,
        Report Writer, Forms). Compact: smaller and in one row here (2026-11-13). *@
     <WorkhorseCards Compact="true" />
+    </div>
 </section>
-@* The home page's four-colour divider between the workhorses and the full list (2026-11-13). The home page passes ShowWorkhorses
-   false and draws its own, so this one shows on the components page only. *@
-<div class="section-divider" aria-hidden="true"></div>
 }
 
 @* Complete component directory, multi-column. *@
@@ -357,6 +363,7 @@
     private readonly DirectoryItem[] _buttonsActions =
     [
         new("button", "Button", "demo/buttons", Tier: 1),
+        new("chip", "Chip List", "demo/chips"),
         new("fab", "Floating Action Button", "demo/fab#menu"),
         new("split-button", "Split Button", "demo/split-button"),
         new("toggle-button", "Toggle Button", "demo/toggle-buttons")
@@ -405,10 +412,12 @@
     [
         new("tab", "Tabs", "demo/tabs-accordion#tabs", Tier: 1),
         new("accordion", "Accordion", "demo/tabs-accordion#accordion"),
-        new("appbar", "AppBar", "demo/ai-prompt#app-bar"),
+        new("appbar", "AppBar", "demo/toolbar#app-bar"),
         new("breadcrumb", "Breadcrumb", "demo/new-components#content"),
+        new("menubar", "Menu Bar", "demo/menu-bar"),
         new("ribbon", "Ribbon", "demo/ribbon#tabs"),          // own page since 2026-10-29 (was the home window's Front Desk tab)
-        new("toolbar", "Toolbar", "demo/ai-prompt#app-bar"),
+        new("statusbar", "Status Bar", "demo/status-bar"),
+        new("toolbar", "Toolbar", "demo/toolbar"),             // own page since 2026-11-14 (was the AI prompt page's second example)
         new("carousel", "Carousel", "demo/cards#carousel", Tier: 3),
         new("stepper", "Stepper", "demo/pickers#steps", Tier: 3)
     ];

@@ -3,10 +3,10 @@
 
 @* 2026-10-12: new page on FeatureDemoLayout; three examples (tab control, tab strip, accordion). Facts checked against Navigation/TabControl.razor,
    Navigation/TabItem.razor, TabStripControl.razor, TabStripModels.cs, AccordionControl.razor, AccordionItemControl.razor and their stylesheets
-   (FlexCore 0.2.48). The accordion moved here from UI elements. *@
+   (FlexCore 0.2.50). The accordion moved here from UI elements. *@
 
 @* 2026-10-26 (review comment: "more like tabs, with an outline and an x to close, in FlexCore style"): both tab examples sit
-   in a .folder-tabs wrapper whose page CSS draws outlined folder tabs (grey resting tabs, a white active tab joined to its pane by a
+   in a .folder-tabs wrapper whose page CSS draws outlined folder tabs (gray resting tabs, a white active tab joined to its pane by a
    blue top edge); the CSS tab shows it. TabControl has no close button, so the closable tabs are the tab strip's, now laid out like
    a document workspace: a pinned Home tab and closable documents. Sample data moved from a kitchen estimate to the site's travel
    theme. *@
@@ -20,46 +20,58 @@
    gallery): Minimal theme, one Horizontal row and the site-tabs class from app.css, whose rules the CSS tab prints through
    AppSource.Region. The document tabs keep the library themes, since their buttons switch them and site-tabs would override all five. *@
 
+@* 2026-11-14: the tab control example shows the library's own themes and layouts again (buttons bound with @bind-Theme and
+   @bind-Orientation, one tab through Content) and no longer takes the site-tabs class, which hid all five themes. Its CSS tab
+   prints the page's own rules. The accessibility notes and the CSS classes row are corrected against TabStripControl.razor. *@
+
 <PageTitle>Blazor Tabs, TabStrip and Accordion — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Tabs & accordion" Category="Components" ControlName="TabControl · TabStripControl · AccordionControl"
-                   Tagline="Three ways to show one section at a time: tabs with their own panes, a bare tab strip you wire up yourself, and stacked headers that expand."
+                   Tagline="Show one section at a time with tabs, document tabs or an accordion."
                    SourcePath="Navigation/TabControl.razor; TabStripControl.razor; AccordionControl.razor">
     <Overview>
         <p>
-            Three Blazor controls for one section at a time: <code>TabControl</code> with its own panes, <code>TabStripControl</code>, a bare header row for content that lives elsewhere, and <code>AccordionControl</code>, stacked headers that expand.
+            <code>TabControl</code> is a Blazor tab control: users switch between sections of a page, and only the selected pane renders. Use <code>TabStripControl</code> for document tabs users close, with the content kept elsewhere, and <code>AccordionControl</code> for stacked sections that expand in place, as on a narrow settings page. Both tab controls come in five themes and let users change orientation from a right-click menu.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs" CssCode="@Code.TabsCss">
-            <Description><p>Switch tabs; only the selected pane renders. </p></Description>
+            <Description><p>Switch between the Summary, Lines and Notes of a trip quote; only the selected pane renders. Pick a theme and a layout with the buttons, or right-click the tabs: every tab control carries that menu, and <code>&#64;bind-Theme</code> and <code>&#64;bind-Orientation</code> follow it.</p></Description>
+            <Controls>
+                <ButtonGroupControl Items="_themeItems" Values="@(new[] { _tabTheme.ToString() })" ValuesChanged="SetTabTheme" Selection="ChoiceSelectionMode.Single" AriaLabel="Tab theme" />
+                <ButtonGroupControl Items="_layoutItems" Values="@(new[] { _tabLayout.ToString() })" ValuesChanged="SetTabLayout" Selection="ChoiceSelectionMode.Single" AriaLabel="Tab layout" />
+            </Controls>
             <Demo>
-                <TabControl @bind-SelectedIndex="_tab" CssClass="site-tabs" Orientation="TabOrientation.Horizontal" Theme="TabTheme.Minimal">
-                    <TabItems>
-                        <TabItem HeaderText="Summary">
-                            <dl class="summary">
-                                <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
-                                <dt>Status</dt><dd>Quoted, 3 lines</dd>
-                                <dt>Total</dt><dd>$1,720</dd>
-                            </dl>
-                        </TabItem>
-                        <TabItem HeaderText="Lines">
-                            <table class="lines">
-                                <thead><tr><th>Item</th><th>Qty</th><th class="num">Amount</th></tr></thead>
-                                <tbody>
-                                    <tr><td>Return flights</td><td>2 seats</td><td class="num">$420</td></tr>
-                                    <tr><td>Old-town hotel</td><td>4 nights</td><td class="num">$1,120</td></tr>
-                                    <tr><td>Guided food tour</td><td>2 people</td><td class="num">$180</td></tr>
-                                </tbody>
-                            </table>
-                        </TabItem>
-                        <TabItem HeaderText="Notes">
-                            <p class="m0">Quote valid 14 days. The travellers prefer a morning flight; the hotel holds the rooms until Friday.</p>
-                        </TabItem>
-                    </TabItems>
-                </TabControl>
-                <p class="result">Tab @(_tab + 1) of 3 selected</p>
+                <div class="quote-tabs">
+                    <TabControl @bind-SelectedIndex="_tab" @bind-Theme="_tabTheme" @bind-Orientation="_tabLayout">
+                        <TabItems>
+                            <TabItem HeaderText="Summary">
+                                <dl class="summary">
+                                    <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
+                                    <dt>Status</dt><dd>Quoted, 3 lines</dd>
+                                    <dt>Total</dt><dd>$1,720</dd>
+                                </dl>
+                            </TabItem>
+                            <TabItem HeaderText="Lines">
+                                <table class="lines">
+                                    <thead><tr><th>Item</th><th>Qty</th><th class="num">Amount</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Return flights</td><td>2 seats</td><td class="num">$420</td></tr>
+                                        <tr><td>Old-town hotel</td><td>4 nights</td><td class="num">$1,120</td></tr>
+                                        <tr><td>Guided food tour</td><td>2 people</td><td class="num">$180</td></tr>
+                                    </tbody>
+                                </table>
+                            </TabItem>
+                            <TabItem HeaderText="Notes">
+                                <Content>
+                                    <p class="m0">Quote valid 14 days. The travelers prefer a morning flight; the hotel holds the rooms until Friday.</p>
+                                </Content>
+                            </TabItem>
+                        </TabItems>
+                    </TabControl>
+                </div>
+                <p class="result">Tab @(_tab + 1) of 3 selected · @_tabTheme, @_tabLayout</p>
             </Demo>
         </DemoExample>
 
@@ -85,7 +97,7 @@
             <Demo>
                 <div class="acc">
                     <AccordionControl Multiple="true">
-                        <AccordionItemControl Title="Traveller" IconCss="bi bi-person" InitiallyExpanded="true">Clementine Marmalade, two adults, repeat client.</AccordionItemControl>
+                        <AccordionItemControl Title="Traveler" IconCss="bi bi-person" InitiallyExpanded="true">Clementine Marmalade, two adults, repeat client.</AccordionItemControl>
                         <AccordionItemControl Title="Flights" IconCss="bi bi-airplane">Return to Lisbon, morning departure, one checked bag each.</AccordionItemControl>
                         <AccordionItemControl Title="Notes" IconCss="bi bi-sticky">Quote valid 14 days.</AccordionItemControl>
                         <AccordionItemControl Title="Attachments (none)" IconCss="bi bi-paperclip" Disabled="true">—</AccordionItemControl>
@@ -126,8 +138,9 @@
 
     <Accessibility>
         <ul>
-            <li><code>TabControl</code> headers are native buttons: Tab moves between them and Enter or Space selects. There are no <code>tablist</code>, <code>tab</code> or <code>tabpanel</code> roles and no arrow-key handling.</li>
-            <li><code>TabStripControl</code> tabs are <code>&lt;div&gt;</code>s with click handlers only; they are not keyboard-focusable. Use <code>TabControl</code> where keyboard access matters.</li>
+            <li><code>TabControl</code> draws its headers with a <code>TabStripControl</code>, so both have the same keyboard: the headers are a <code>tablist</code> of <code>role="tab"</code> elements with <code>aria-selected</code>, and the selected one is the single Tab stop.</li>
+            <li>On a tab, Left or Up selects the previous enabled tab and Right or Down the next; Home and End select the first and last; Delete closes a closable tab. Focus follows the selection.</li>
+            <li>The tab control's pane is a plain <code>&lt;div&gt;</code>: it is not a <code>tabpanel</code> and is not linked to its tab. Every tab control's list is named "Tabs"; a strip used directly takes its name from <code>AriaLabel</code>.</li>
             <li>Each accordion header is a button with <code>aria-expanded</code>; the body is a <code>role="region"</code>. A disabled header is a disabled button.</li>
         </ul>
     </Accessibility>
@@ -143,6 +156,22 @@
 @code {
     // Tab control
     private int _tab;
+    private TabTheme _tabTheme = TabTheme.FolderTabs;
+    private TabOrientation _tabLayout = TabOrientation.Horizontal;
+    private readonly SelectionItem[] _layoutItems =
+    {
+        new("Horizontal", "One row"), new("HybridVertical", "Wrapping rows"), new("Vertical", "Side rail")
+    };
+
+    private void SetTabTheme(IReadOnlyList<string> values)
+    {
+        if (values.Count > 0) _tabTheme = Enum.Parse<TabTheme>(values[0]);
+    }
+
+    private void SetTabLayout(IReadOnlyList<string> values)
+    {
+        if (values.Count > 0) _tabLayout = Enum.Parse<TabOrientation>(values[0]);
+    }
 
     // Tab strip
     private int _doc;
@@ -184,18 +213,18 @@
         _doc = _docs.Count - 1;
     }
 
-    // Vocabulary rows, one per public member (0.2.48).
+    // Vocabulary rows, one per public member (0.2.50).
     private static class Vocab
     {
         public static readonly ApiRow[] TabControl =
         {
             new("SelectedIndex", "Index of the visible pane. Two-way with <code>@bind-SelectedIndex</code>.", "int", "0"),
-            new("SelectedIndexChanged", "Fires when a different header is clicked.", "EventCallback&lt;int&gt;"),
-            new("ChildContent", "<code>TabItem</code>s, optionally inside a <code>TabItems</code> wrapper. Order follows declaration.", "RenderFragment?"),
+            new("SelectedIndexChanged", "Fires when a different header is selected, by a click or by the arrow keys, Home or End.", "EventCallback&lt;int&gt;"),
+            new("ChildContent", "<code>TabItem</code>s, optionally inside a <code>TabItems</code> wrapper. Order follows declaration for items present on the first render. An item rendered later is added at the end, and one removed from the markup keeps its header and pane.", "RenderFragment?"),
             new("CssClass", "Appended to the <code>fx-tabs</code> root. There is no <code>Style</code>; this control does not derive from <code>FlexControlBase</code>.", "string?", "null"),
-            new("Orientation", "Layout of the header strip, passed to its <code>TabStripControl</code>: <code>HybridVertical</code> wraps the headers onto rows, <code>Horizontal</code> keeps one scrolling row, <code>Vertical</code> puts a 220 px rail beside the pane. Two-way with <code>@bind-Orientation</code>. The strip's right-click menu and overflow buttons are always on here; the control has no switch for them.", "TabOrientation", "TabOrientation.HybridVertical"),
+            new("Orientation", "Layout of the header strip, passed to its <code>TabStripControl</code>: <code>HybridVertical</code> wraps the headers onto rows, <code>Horizontal</code> keeps one scrolling row, <code>Vertical</code> puts a rail beside the pane, 220 px wide or 35% of the control if that is less. Two-way with <code>@bind-Orientation</code>. The strip's right-click menu and overflow buttons are always on here; the control has no switch for them.", "TabOrientation", "TabOrientation.HybridVertical"),
             new("OrientationChanged", "After the right-click menu picks an orientation.", "EventCallback&lt;TabOrientation&gt;"),
-            new("Theme", "Colours of the header strip: <code>WindowsClassic</code>, <code>FolderTabs</code>, <code>ColorfulCards</code>, <code>Minimal</code> or <code>Dark</code>; see the strip's <code>Theme</code>. Two-way with <code>@bind-Theme</code>.", "TabTheme", "TabTheme.WindowsClassic"),
+            new("Theme", "Colors of the header strip: <code>WindowsClassic</code>, <code>FolderTabs</code>, <code>ColorfulCards</code>, <code>Minimal</code> or <code>Dark</code>; see the strip's <code>Theme</code>. Two-way with <code>@bind-Theme</code>.", "TabTheme", "TabTheme.WindowsClassic"),
             new("ThemeChanged", "After the right-click menu picks a theme.", "EventCallback&lt;TabTheme&gt;"),
         };
         public static readonly ApiRow[] TabItem =
@@ -208,17 +237,17 @@
         {
             new("Items", "Tabs, in order.", "List&lt;TabStripItem&gt;", "empty"),
             new("SelectedIndex", "Active tab. Two-way with <code>@bind-SelectedIndex</code>. Not clamped when items are removed; clamp it yourself.", "int", "0"),
-            new("SelectedIndexChanged", "Fires on a click on an enabled tab.", "EventCallback&lt;int&gt;"),
-            new("OnTabClose", "Fires with the index when a closable tab's × is clicked. The strip does not remove the item.", "EventCallback&lt;int&gt;"),
+            new("SelectedIndexChanged", "Fires when an enabled tab is selected: a click, the arrow keys, Home, End, Enter or Space. A click on the active tab fires it again.", "EventCallback&lt;int&gt;"),
+            new("OnTabClose", "Fires with the index when a closable tab's × is clicked or Delete is pressed on it. The strip does not remove the item.", "EventCallback&lt;int&gt;"),
             new("CssClass", "Appended to the <code>fx-tabstrip</code> root. Not a <code>FlexControlBase</code> control.", "string?", "null"),
             new("AriaLabel", "<code>aria-label</code> of the <code>role=\"tablist\"</code> element.", "string", "\"Tabs\""),
-            new("Theme", "Writes the <code>--fx-tab-*</code> colour variables inline on the root (see CSS variables) and <code>data-tab-theme</code>: <code>WindowsClassic</code> (bevelled grey; the menu calls it VB6 / Windows), <code>FolderTabs</code>, <code>ColorfulCards</code> (five pastel fills rotating over the resting tabs), <code>Minimal</code>, <code>Dark</code>. Two-way with <code>@bind-Theme</code>.", "TabTheme", "TabTheme.WindowsClassic"),
+            new("Theme", "Writes the <code>--fx-tab-*</code> color variables inline on the root (see CSS variables) and <code>data-tab-theme</code>: <code>WindowsClassic</code> (beveled gray; the menu calls it VB6 / Windows), <code>FolderTabs</code>, <code>ColorfulCards</code> (five pastel fills rotating over the resting tabs), <code>Minimal</code>, <code>Dark</code>. Two-way with <code>@bind-Theme</code>.", "TabTheme", "TabTheme.WindowsClassic"),
             new("ThemeChanged", "After the right-click menu changes the theme; the strip then scrolls the selected tab into view.", "EventCallback&lt;TabTheme&gt;"),
             new("Orientation", "<code>HybridVertical</code> wraps the tabs onto rows and scrolls them vertically past 160 px; <code>Horizontal</code> is one row that scrolls sideways; <code>Vertical</code> is a 220 px rail of 52 px tabs with <code>height: 100%</code>, which the host lays out beside the content. Written to <code>data-tab-orientation</code>. Two-way with <code>@bind-Orientation</code>.", "TabOrientation", "TabOrientation.HybridVertical"),
             new("OrientationChanged", "After the right-click menu changes the orientation; the strip then scrolls the selected tab into view.", "EventCallback&lt;TabOrientation&gt;"),
-            new("ShowOrientationMenu", "A right-click on the strip opens a context menu with the three orientations and five themes, the current ones ticked. False ignores the right-click.", "bool", "true"),
+            new("ShowOrientationMenu", "A right-click on the strip opens a context menu with the three orientations and five themes, the current ones checked. False ignores the right-click.", "bool", "true"),
             new("OnOrientationMenuRequested", "With a delegate, the right-click raises this with the mouse position instead of opening the built-in menu, for a host that draws its own (the report writer does).", "EventCallback&lt;MouseEventArgs&gt;"),
-            new("EnableOverflowNavigation", "Watches the strip's size and scroll position through the library's script and, when the tabs overflow, shows Previous and Next buttons that scroll them (left and right, or up and down); tab text is clipped with an ellipsis. Off, the tab row scrolls natively with no buttons.", "bool", "false"),
+            new("EnableOverflowNavigation", "When the tabs overflow, shows Previous and Next buttons that scroll them (left and right, or up and down), and hides the native scrollbar. Off, the tabs scroll natively with no buttons. The library's script fits labels and reveals the selected tab either way.", "bool", "false"),
             new("ShowSeparators", "Adds <code>fx-tabstrip-separated</code> to the root. The stylesheet has no rule for it yet, so it is a hook for the host's CSS.", "bool", "false"),
         };
         public static readonly ApiRow[] StripItem =
@@ -226,15 +255,17 @@
             new("Text", "Label.", "string", "\"\""),
             new("IconCss", "Leading icon classes.", "string?", "null"),
             new("Closable", "Shows the × button.", "bool", "false"),
-            new("Disabled", "Greys the tab and ignores clicks.", "bool", "false"),
+            new("Disabled", "Grays the tab and ignores clicks.", "bool", "false"),
             new("Tag", "Anything the page wants to carry with the tab.", "object?", "null"),
-            new("ctor", "<code>new(text, iconCss, closable)</code> or an object initialiser.", "", null),
+            new("ctor", "<code>new(text, iconCss, closable)</code> or an object initializer.", "", null),
         };
         public static readonly ApiRow[] Accordion =
         {
             new("Multiple", "true keeps several items open; false closes the others when one opens.", "bool", "false"),
             new("ChildContent", "<code>AccordionItemControl</code>s.", "RenderFragment?"),
             new("CssClass / Style (base)", "On the <code>fx-accordion</code> root.", "string?", "null"),
+            new("(unmatched attributes)", "Forwarded to the <code>fx-accordion</code> root.", "Dictionary&lt;string,object&gt;"),
+            new("Visible / Enabled / Id / Title / Tag / Data / Parent (base)", "Accepted from <code>FlexControlBase</code> but not used: <code>Visible=\"false\"</code> does not hide the accordion and <code>Id</code> is not rendered.", "", null),
         };
         public static readonly ApiRow[] AccordionItem =
         {
@@ -248,8 +279,8 @@
         };
         public static readonly ApiRow[] Css =
         {
-            new("fx-tabs · fx-tab-headers · fx-tab-button (.active) · fx-tab-content", "Tab control root, header row, header buttons and the bordered pane."),
-            new("fx-tabstrip (data-tab-orientation, data-tab-theme) · fx-tabstrip-viewport · fx-tabstrip-tab (-active, -disabled) · fx-tabstrip-icon · fx-tabstrip-text · fx-tabstrip-close", "Strip root with the orientation and theme attributes; the scrolling <code>role=\"tablist\"</code>; each bordered tab (Tahoma, 12 px) with its icon, two-line text and × button. The active tab's bottom edge takes the pane colour."),
+            new("fx-tabs · fx-tab-headers · fx-tab-content", "Tab control root, the class it adds to its header strip, and the bordered pane. The headers themselves are the strip's <code>fx-tabstrip-tab</code> elements."),
+            new("fx-tabstrip (data-tab-orientation, data-tab-theme) · fx-tabstrip-viewport · fx-tabstrip-tab (-active, -disabled) · fx-tabstrip-icon · fx-tabstrip-text · fx-tabstrip-close", "Strip root with the orientation and theme attributes; the scrolling <code>role=\"tablist\"</code>; each bordered tab (Tahoma, 12 px) with its icon, two-line text and × button. The active tab's bottom edge takes <code>--fx-tab-active-border-color</code>, which each theme sets to the tab's own fill."),
             new("fx-tabstrip-navigation · fx-tabstrip-scroll · fx-tabstrip-navigable · fx-tabstrip-separated", "The Previous/Next buttons shown by <code>EnableOverflowNavigation</code>, and the root classes that parameter and <code>ShowSeparators</code> add."),
             new("fx-accordion · fx-accordion-item (.fx-accordion-expanded, .fx-accordion-disabled)", "Rounded bordered stack and each item; the expanded class rotates the arrow."),
             new("fx-accordion-header · -icon · -title · -arrow · -body", "Header button and its parts; the body carries the padding."),
@@ -257,8 +288,8 @@
         public static readonly ApiRow[] Vars =
         {
             new("--fx-tab-bg · --fx-tab-item-bg · --fx-tab-color · --fx-tab-hover-bg", "Strip background, resting tab fill, text and hover fill. <code>Theme</code> writes all eleven <code>--fx-tab-*</code> variables inline on the root, so a page rule needs <code>!important</code> to override one.", "#e4e4e4 · #d4d4d4 · #222 · #dfdfdf"),
-            new("--fx-tab-active-bg · --fx-tab-active-color · --fx-tab-active-border-color", "Active tab fill and text, and its bottom edge; the theme sets the edge to the fill so the tab joins the pane.", "#f5f5f5 · #000 · #f5f5f5"),
-            new("--fx-tab-border · --fx-tab-separator-color · --fx-tab-radius · --fx-tab-shadow", "Tab and strip borders, the line before the scroll buttons, the top corner radius and the tab shadow.", "#7a7a7a · #7a7a7a · 3px · inset 1px 1px 0 #efefef, inset -1px 0 0 #a0a0a0"),
+            new("--fx-tab-active-bg · --fx-tab-active-color · --fx-tab-active-border-color", "Active tab fill and text, and its bottom edge. Each theme sets the edge to the tab's own fill; <code>TabControl</code>'s pane stays white in every theme. <code>Vertical</code> draws all four edges in its own border color and ignores the edge variable.", "#f5f5f5 · #000 · #f5f5f5"),
+            new("--fx-tab-border · --fx-tab-separator-color · --fx-tab-radius · --fx-tab-shadow", "Tab and strip borders, the line before the scroll buttons, the top corner radius and the tab shadow. Every theme sets the separator to its border color. <code>Vertical</code> ignores the radius and shadow.", "#7a7a7a · #aaa · 3px · inset 1px 1px 0 #efefef, inset -1px 0 0 #a0a0a0"),
             new("--fx-font-size · --fx-zoom · --fx-text-muted", "Read from the page, not set by the theme: tab font size, zoom factor and disabled text.", "12px · 1 · #d1d5db"),
             new("(none)", "<code>TabControl</code> hands <code>Theme</code> and <code>Orientation</code> to its strip; the accordion reads no variables.", "—"),
         };
@@ -267,34 +298,74 @@
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Tabs = @"<TabControl @bind-SelectedIndex=""_tab"" CssClass=""site-tabs"" Orientation=""TabOrientation.Horizontal"" Theme=""TabTheme.Minimal"">
-    <TabItems>
-        <TabItem HeaderText=""Summary"">
-            <dl class=""summary"">
-                <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
-                <dt>Status</dt><dd>Quoted, 3 lines</dd>
-                <dt>Total</dt><dd>$1,720</dd>
-            </dl>
-        </TabItem>
-        <TabItem HeaderText=""Lines"">
-            <table class=""lines"">
-                <thead><tr><th>Item</th><th>Qty</th><th class=""num"">Amount</th></tr></thead>
-                <tbody>
-                    <tr><td>Return flights</td><td>2 seats</td><td class=""num"">$420</td></tr>
-                    <tr><td>Old-town hotel</td><td>4 nights</td><td class=""num"">$1,120</td></tr>
-                    <tr><td>Guided food tour</td><td>2 people</td><td class=""num"">$180</td></tr>
-                </tbody>
-            </table>
-        </TabItem>
-        <TabItem HeaderText=""Notes"">
-            <p class=""m0"">Quote valid 14 days. The travellers prefer a morning flight; the hotel holds the rooms until Friday.</p>
-        </TabItem>
-    </TabItems>
-</TabControl>
-<p class=""result"">Tab @(_tab + 1) of 3 selected</p>";
+        public const string Tabs = @"<ButtonGroupControl Items=""_themeItems"" Values=""@(new[] { _tabTheme.ToString() })"" ValuesChanged=""SetTabTheme"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Tab theme"" />
+<ButtonGroupControl Items=""_layoutItems"" Values=""@(new[] { _tabLayout.ToString() })"" ValuesChanged=""SetTabLayout"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Tab layout"" />
+
+<div class=""quote-tabs"">
+    <TabControl @bind-SelectedIndex=""_tab"" @bind-Theme=""_tabTheme"" @bind-Orientation=""_tabLayout"">
+        <TabItems>
+            <TabItem HeaderText=""Summary"">
+                <dl class=""summary"">
+                    <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
+                    <dt>Status</dt><dd>Quoted, 3 lines</dd>
+                    <dt>Total</dt><dd>$1,720</dd>
+                </dl>
+            </TabItem>
+            <TabItem HeaderText=""Lines"">
+                <table class=""lines"">
+                    <thead><tr><th>Item</th><th>Qty</th><th class=""num"">Amount</th></tr></thead>
+                    <tbody>
+                        <tr><td>Return flights</td><td>2 seats</td><td class=""num"">$420</td></tr>
+                        <tr><td>Old-town hotel</td><td>4 nights</td><td class=""num"">$1,120</td></tr>
+                        <tr><td>Guided food tour</td><td>2 people</td><td class=""num"">$180</td></tr>
+                    </tbody>
+                </table>
+            </TabItem>
+            <TabItem HeaderText=""Notes"">
+                <Content>
+                    <p class=""m0"">Quote valid 14 days. The travelers prefer a morning flight; the hotel holds the rooms until Friday.</p>
+                </Content>
+            </TabItem>
+        </TabItems>
+    </TabControl>
+</div>
+<p class=""result"">Tab @(_tab + 1) of 3 selected · @_tabTheme, @_tabLayout</p>";
         public const string TabsCs = @"// Tab control
-private int _tab;";
-        public static string TabsCss => AppSource.Region("app.css", "site-tabs");   // the site stylesheet's own rules
+private int _tab;
+
+private TabTheme _tabTheme = TabTheme.FolderTabs;
+
+private TabOrientation _tabLayout = TabOrientation.Horizontal;
+
+private readonly SelectionItem[] _themeItems =
+{
+    new(""WindowsClassic"", ""Windows""), new(""FolderTabs"", ""Folder""), new(""ColorfulCards"", ""Cards""), new(""Minimal"", ""Minimal""), new(""Dark"", ""Dark"")
+};
+
+private readonly SelectionItem[] _layoutItems =
+{
+    new(""Horizontal"", ""One row""), new(""HybridVertical"", ""Wrapping rows""), new(""Vertical"", ""Side rail"")
+};
+
+private void SetTabTheme(IReadOnlyList<string> values)
+{
+    if (values.Count > 0) _tabTheme = Enum.Parse<TabTheme>(values[0]);
+}
+
+private void SetTabLayout(IReadOnlyList<string> values)
+{
+    if (values.Count > 0) _tabLayout = Enum.Parse<TabOrientation>(values[0]);
+}";
+        public const string TabsCss = @".quote-tabs { max-width: 560px; }
+.result { font-size: 13px; color: #475569; margin: 12px 0 0; }
+.m0 { margin: 0; }
+.summary { display: grid; grid-template-columns: 90px 1fr; gap: 4px 12px; margin: 0; font-size: 13px; }
+.summary dt { color: #64748b; font-weight: 500; }
+.summary dd { margin: 0; color: #1e293b; }
+.lines { border-collapse: collapse; font-size: 13px; width: 100%; max-width: 420px; }
+.lines th, .lines td { padding: 4px 8px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+.lines th { color: #64748b; font-weight: 600; }
+.lines .num { text-align: right; font-variant-numeric: tabular-nums; }";
 
         public const string Strip = @"<ButtonGroupControl Items=""_themeItems"" Values=""@(new[] { _theme.ToString() })"" ValuesChanged=""SetTheme"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Tab theme"" />
 
@@ -353,7 +424,7 @@ private void Reopen()
 
         public const string Accordion = @"<div class=""acc"">
     <AccordionControl Multiple=""true"">
-        <AccordionItemControl Title=""Traveller"" IconCss=""bi bi-person"" InitiallyExpanded=""true"">Clementine Marmalade, two adults, repeat client.</AccordionItemControl>
+        <AccordionItemControl Title=""Traveler"" IconCss=""bi bi-person"" InitiallyExpanded=""true"">Clementine Marmalade, two adults, repeat client.</AccordionItemControl>
         <AccordionItemControl Title=""Flights"" IconCss=""bi bi-airplane"">Return to Lisbon, morning departure, one checked bag each.</AccordionItemControl>
         <AccordionItemControl Title=""Notes"" IconCss=""bi bi-sticky"">Quote valid 14 days.</AccordionItemControl>
         <AccordionItemControl Title=""Attachments (none)"" IconCss=""bi bi-paperclip"" Disabled=""true"">—</AccordionItemControl>

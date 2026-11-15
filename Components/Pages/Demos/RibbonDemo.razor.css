@@ -1,7 +1,14 @@
 .result { display: block; margin-top: 10px; font-size: 13px; color: #475569; }
 
-/* Pressed: the page's own class on the ribbon button (it is the library's element, hence ::deep) */
-.format-ribbon ::deep .fx-ribbon-button.is-on { background: #e0e7ff; border-color: #a5b4fc; }
+/* other markup in a group: the page's own, so the page styles it */
+.ribbon-options { display: flex; flex-direction: column; gap: 6px; padding: 4px 2px; font-size: 12px; }
+
+/* entries of a dropdown button are rendered by ButtonControl inside the ribbon, hence ::deep */
+.desk-ribbon ::deep .ribbon-menu-item { display: block; width: 100%; padding: 6px 14px; border: 0; background: none; text-align: left; font-size: 13px; cursor: pointer; }
+.desk-ribbon ::deep .ribbon-menu-item:hover { background: #eef2f7; }
+
+/* RibbonControl's CssClass lands on its fx-ribbon element, the library's, hence ::deep */
+.paper-ribbon ::deep .fx-ribbon.paper { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; }
 
 .note-text { margin: 12px 4px 0; color: #334155; line-height: 1.5; }
 .note-text.bold { font-weight: 700; }

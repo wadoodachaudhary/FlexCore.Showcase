@@ -1,0 +1,279 @@
+@page "/demo/menu-bar"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-11-14: new page. The menu bar family had no page; the site's own top menu was its only use. Facts from MenuBarControl.razor,
+   MenuDropDownControl.razor, MenuActionControl.razor, MenuSeparatorControl.razor, their stylesheets and wwwroot/menu-control.js
+   (FlexCore 0.2.50 plus the close-on-navigation fix of the same day). The examples keep the library's own look. *@
+
+<PageTitle>Blazor Menu Bar and Dropdown Menu — FlexCore</PageTitle>
+
+<FeatureDemoLayout Title="Menu bar" Category="Components" ControlName="MenuBarControl · MenuDropDownControl · MenuActionControl"
+                   Tagline="A classic application menu: a bar of dropdown menus, or one menu button on its own."
+                   SourcePath="MenuBarControl.razor; MenuDropDownControl.razor; MenuActionControl.razor; MenuSeparatorControl.razor; wwwroot/menu-control.js">
+    <Overview>
+        <p>
+            <code>MenuBarControl</code> is a Blazor menu bar: it holds <code>MenuDropDownControl</code> menus and keeps one open at a time. Each menu lists <code>MenuActionControl</code> entries and <code>MenuSeparatorControl</code> dividers. A <code>MenuDropDownControl</code> also works alone, as a menu button or a split button. This site's top menu is a <code>MenuBarControl</code> of <code>MenuDropDownControl</code> menus.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="bar" Title="An application menu bar" RazorCode="@Code.Bar" CSharpCode="@Code.BarCs" CssCode="@Code.Css">
+            <Description><p>Open Booking, Edit and View: Cut or Copy enables Paste, the View entries tick on and off, one entry and one whole menu are <code>Disabled</code>. Use Down, Up, Home, End, Enter and Escape inside an open menu.</p></Description>
+            <Demo>
+                <div class="menu-window">
+                    <MenuBarControl>
+                        <MenuDropDownControl Label="Booking">
+                            <MenuActionControl Text="New booking" Icon="🧳" OnClick="@(() => Did("Started a new booking"))" />
+                            <MenuActionControl Text="Open…" Icon="📂" OnClick="@(() => Did("Opened booking LIS-0001"))" />
+                            <MenuSeparatorControl />
+                            <MenuActionControl Text="Save" Icon="💾" OnClick="@(() => Did("Saved the booking"))" />
+                            <MenuActionControl Text="Print itinerary" Icon="🖨️" Disabled="true" />
+                        </MenuDropDownControl>
+                        <MenuDropDownControl Label="Edit">
+                            <MenuActionControl Text="Cut" Icon="✂️" OnClick="@(() => Clip("Cut"))" />
+                            <MenuActionControl Text="Copy" Icon="📄" OnClick="@(() => Clip("Copied"))" />
+                            <MenuActionControl Text="Paste" Icon="📋" Disabled="@(_clipboard is null)" OnClick="@(() => Did($"Pasted {_clipboard}"))" />
+                        </MenuDropDownControl>
+                        <MenuDropDownControl Label="View">
+                            <MenuActionControl Text="Show canceled" Icon="@Tick(_showCanceled)" OnClick="@(() => _showCanceled = !_showCanceled)" />
+                            <MenuActionControl Text="Compact rows" Icon="@Tick(_compact)" OnClick="@(() => _compact = !_compact)" />
+                        </MenuDropDownControl>
+                        <MenuDropDownControl Label="Reports" Disabled="true" />
+                    </MenuBarControl>
+                    <div class="menu-body">
+                        <span>@(_last ?? "Open a menu and pick an entry.")</span>
+                        <span class="menu-state">Canceled bookings @(_showCanceled ? "shown" : "hidden") · @(_compact ? "compact" : "normal") rows</span>
+                    </div>
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="standalone" Title="A split button and a menu filled on opening" RazorCode="@Code.Standalone" CSharpCode="@Code.StandaloneCs" CssCode="@Code.Css">
+            <Description><p>Without a bar, each menu opens on its own. Send itinerary is a <code>SplitButton</code>: the left half runs <code>PrimaryClick</code>, the arrow opens the rest. Recent bookings fills its entries in <code>OnOpening</code>.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <MenuDropDownControl Label="Send itinerary" SplitButton="true" ArrowLabel="More things to send" PrimaryClick="@(() => Sent("itinerary"))">
+                        <MenuActionControl Text="Send invoice" OnClick="@(() => Sent("invoice"))" />
+                        <MenuActionControl Text="Send tickets" OnClick="@(() => Sent("tickets"))" />
+                    </MenuDropDownControl>
+
+                    <MenuDropDownControl Label="Recent bookings" OnOpening="LoadRecent">
+                        @foreach (var booking in _recent)
+                        {
+                            <MenuActionControl Text="@booking" OnClick="@(() => _sent = $"Opened {booking}")" />
+                        }
+                    </MenuDropDownControl>
+
+                    <span class="result">@(_sent ?? "Nothing sent yet.") The recent list was loaded @_loads time@(_loads == 1 ? "" : "s").</span>
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <DocSections>
+            <DocSection Id="doc-menubar" Title="MenuBarControl" Count='@DocSection.Label(Vocab.Bar.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="MenuBarControl" Rows="Vocab.Bar" />
+            </DocSection>
+            <DocSection Id="doc-menudropdown" Title="MenuDropDownControl" Count='@DocSection.Label(Vocab.DropDown.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="MenuDropDownControl" Rows="Vocab.DropDown" />
+            </DocSection>
+            <DocSection Id="doc-menuaction" Title="MenuActionControl" Count='@DocSection.Label(Vocab.Action.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="MenuActionControl" Rows="Vocab.Action" />
+                <p class="note"><code>MenuSeparatorControl</code> has no parameters. The four controls accept no attributes beyond the parameters listed here, and none has a public method: a page cannot open or close a menu from code.</p>
+            </DocSection>
+            <DocSection Id="doc-keyboard" Title="Keyboard" Count='@DocSection.Label(Vocab.Keys.Length, "keys")'>
+                <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+                <p class="note">Colors, the font and the borders are fixed in the controls' stylesheets; <code>--fx-zoom</code> scales the text. Restyle through the class parameters, as this site's top menu does.</p>
+            </DocSection>
+        </DocSections>
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>The bar is a <code>menubar</code>, each trigger and entry a native button with <code>role="menuitem"</code>, and an open panel a <code>menu</code>. A trigger carries <code>aria-haspopup</code> and <code>aria-expanded</code>.</li>
+            <li>Opening a menu from the keyboard focuses its first entry, or its last with Up. Escape closes it and returns focus to the trigger; picking an entry does not return focus.</li>
+            <li>While focus is on a trigger or in an open menu, the controls take every key press: Tab does not move on, and there is no Left or Right between menus. Close the menu with Escape, then click the next one.</li>
+            <li>An entry's <code>Icon</code> is text inside the button, so a screen reader reads an emoji before the label.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>A default action with alternatives, outside a menu: <a href="demo/split-button">Split button</a>.</li>
+            <li>Commands in tabs and groups: <a href="demo/ribbon">Ribbon</a>. A single row of commands: <a href="demo/toolbar">Toolbar</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    private string? _clipboard, _last;
+
+    private bool _showCanceled, _compact;
+
+    private void Clip(string verb)
+    {
+        _clipboard = "booking LIS-0001";
+        _last = $"{verb} {_clipboard}";
+    }
+
+    private void Did(string what) => _last = what;
+
+    // A menu entry has no checked state, so the page shows a tick through Icon
+    private static string Tick(bool on) => on ? "✓" : "";
+
+    private string? _sent;
+
+    private int _loads;
+
+    private List<string> _recent = new();
+
+    private void Sent(string what) => _sent = $"Sent the {what}.";
+
+    // OnOpening runs each time the menu opens: fill the entries then, so they are current
+    private void LoadRecent()
+    {
+        _loads++;
+        _recent = new() { "LIS-0001 Marmalade", "ZNZ-0042 Pickle", $"NBO-00{10 + _loads} Crumble" };
+    }
+
+    // Vocabulary rows, one per public member (0.2.50). None of the four controls inherits FlexControlBase.
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Bar =
+        {
+            new("ChildContent", "The <code>MenuDropDownControl</code>s, and any other markup such as links.", "RenderFragment?", "null"),
+            new("CssClass", "Appended after <code>fx-menu-bar</code>.", "string", "\"\""),
+        };
+        public static readonly ApiRow[] DropDown =
+        {
+            new("Label", "Text of the trigger, and of the main half in split mode.", "string", "\"\""),
+            new("ChildContent", "The menu's entries, rendered only while it is open.", "RenderFragment?", "null"),
+            new("Disabled", "Disables the trigger; the menu cannot open.", "bool", "false"),
+            new("SplitButton", "Draws two buttons: a main half and an arrow that opens the menu.", "bool", "false"),
+            new("PrimaryClick", "Split mode: runs when the main half is clicked, then closes the menu. Without a handler the main half opens the menu.", "EventCallback"),
+            new("ArrowLabel", "Split mode: accessible name of the arrow. The default is the label followed by \"menu\".", "string?", "null"),
+            new("OnOpening", "Runs each time the menu opens, by click or key; the place to refresh its entries. The panel opens without waiting: an async handler re-renders it when it finishes.", "EventCallback"),
+            new("TriggerContent", "Markup for the trigger in place of <code>Label</code>; in split mode, for the arrow.", "RenderFragment?", "null"),
+            new("PrimaryContent", "Split mode: markup for the main half in place of <code>Label</code>.", "RenderFragment?", "null"),
+            new("CssClass · TriggerCssClass · PanelCssClass", "Appended to the wrapper, the trigger and the open panel.", "string", "\"\""),
+            new("SplitCssClass · PrimaryCssClass", "Split mode: appended to the pair's wrapper and to the main half.", "string", "\"\""),
+            new("Parent (cascading)", "The enclosing <code>MenuBarControl</code>, which keeps one menu open at a time. Without one the menu tracks its own state.", "MenuBarControl?", "null"),
+        };
+        public static readonly ApiRow[] Action =
+        {
+            new("Text", "Label of the entry.", "string", "\"\""),
+            new("Icon", "Glyph before the label, printed as text: an emoji or a character. Markup and icon-font class names are printed as literal text, not drawn.", "string", "\"\""),
+            new("Disabled", "Sets the <code>disabled</code> attribute; the keyboard skips the entry.", "bool", "false"),
+            new("CssClass", "Appended after <code>fx-menu-action</code>.", "string", "\"\""),
+            new("OnClick", "Runs when the entry is picked, after the menu closes.", "EventCallback"),
+        };
+        public static readonly ApiRow[] Keys =
+        {
+            new("Enter or Space on a trigger", "Opens the menu and focuses its first entry; closes it when open."),
+            new("Down / Up on a trigger", "Opens the menu at its first or last entry."),
+            new("Enter or Space on the main half of a split button", "Runs <code>PrimaryClick</code> and closes the menu. With no handler, opens or closes the menu like the arrow."),
+            new("Down / Up / Escape on the main half of a split button", "Same as on a trigger: Down and Up open the menu at its first or last entry, Escape closes it."),
+            new("Down / Up in a menu", "Focuses the next or previous enabled entry, wrapping at the ends."),
+            new("Home / End in a menu", "Focuses the first or last enabled entry."),
+            new("Enter or Space in a menu", "Picks the focused entry."),
+            new("Escape", "Closes the menu; from inside it, focus returns to the trigger."),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-menu-bar", "The bar: a row of triggers."),
+            new("fx-menu-dropdown", "Wrapper of one menu; the panel is positioned against it."),
+            new("fx-menu-trigger · .active · .disabled", "The trigger button; <code>active</code> while its menu is open."),
+            new("fx-menu-split · fx-menu-primary · fx-menu-trigger-arrow", "Split mode: the pair, its main half and the arrow glyph."),
+            new("fx-menu-panel · fx-menu-keyboard-active", "The open menu, under the trigger and left-aligned; the second class is set while the keyboard is driving it."),
+            new("fx-menu-backdrop", "Full-screen transparent button that closes the menu on a click outside."),
+            new("fx-menu-action · fx-menu-action-icon · fx-menu-action-text", "One entry, its glyph and its label."),
+            new("fx-menu-separator", "A divider line between entries."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Bar = @"<div class=""menu-window"">
+    <MenuBarControl>
+        <MenuDropDownControl Label=""Booking"">
+            <MenuActionControl Text=""New booking"" Icon=""🧳"" OnClick=""@(() => Did(""Started a new booking""))"" />
+            <MenuActionControl Text=""Open…"" Icon=""📂"" OnClick=""@(() => Did(""Opened booking LIS-0001""))"" />
+            <MenuSeparatorControl />
+            <MenuActionControl Text=""Save"" Icon=""💾"" OnClick=""@(() => Did(""Saved the booking""))"" />
+            <MenuActionControl Text=""Print itinerary"" Icon=""🖨️"" Disabled=""true"" />
+        </MenuDropDownControl>
+        <MenuDropDownControl Label=""Edit"">
+            <MenuActionControl Text=""Cut"" Icon=""✂️"" OnClick=""@(() => Clip(""Cut""))"" />
+            <MenuActionControl Text=""Copy"" Icon=""📄"" OnClick=""@(() => Clip(""Copied""))"" />
+            <MenuActionControl Text=""Paste"" Icon=""📋"" Disabled=""@(_clipboard is null)"" OnClick=""@(() => Did($""Pasted {_clipboard}""))"" />
+        </MenuDropDownControl>
+        <MenuDropDownControl Label=""View"">
+            <MenuActionControl Text=""Show canceled"" Icon=""@Tick(_showCanceled)"" OnClick=""@(() => _showCanceled = !_showCanceled)"" />
+            <MenuActionControl Text=""Compact rows"" Icon=""@Tick(_compact)"" OnClick=""@(() => _compact = !_compact)"" />
+        </MenuDropDownControl>
+        <MenuDropDownControl Label=""Reports"" Disabled=""true"" />
+    </MenuBarControl>
+    <div class=""menu-body"">
+        <span>@(_last ?? ""Open a menu and pick an entry."")</span>
+        <span class=""menu-state"">Canceled bookings @(_showCanceled ? ""shown"" : ""hidden"") · @(_compact ? ""compact"" : ""normal"") rows</span>
+    </div>
+</div>";
+        public const string BarCs = @"private string? _clipboard, _last;
+
+private bool _showCanceled, _compact;
+
+private void Clip(string verb)
+{
+    _clipboard = ""booking LIS-0001"";
+    _last = $""{verb} {_clipboard}"";
+}
+
+private void Did(string what) => _last = what;
+
+// A menu entry has no checked state, so the page shows a tick through Icon
+private static string Tick(bool on) => on ? ""✓"" : """";";
+
+        public const string Standalone = @"<div class=""demo-row"">
+    <MenuDropDownControl Label=""Send itinerary"" SplitButton=""true"" ArrowLabel=""More things to send"" PrimaryClick=""@(() => Sent(""itinerary""))"">
+        <MenuActionControl Text=""Send invoice"" OnClick=""@(() => Sent(""invoice""))"" />
+        <MenuActionControl Text=""Send tickets"" OnClick=""@(() => Sent(""tickets""))"" />
+    </MenuDropDownControl>
+
+    <MenuDropDownControl Label=""Recent bookings"" OnOpening=""LoadRecent"">
+        @foreach (var booking in _recent)
+        {
+            <MenuActionControl Text=""@booking"" OnClick=""@(() => _sent = $""Opened {booking}"")"" />
+        }
+    </MenuDropDownControl>
+
+    <span class=""result"">@(_sent ?? ""Nothing sent yet."") The recent list was loaded @_loads time@(_loads == 1 ? """" : ""s"").</span>
+</div>";
+        public const string StandaloneCs = @"private string? _sent;
+
+private int _loads;
+
+private List<string> _recent = new();
+
+private void Sent(string what) => _sent = $""Sent the {what}."";
+
+// OnOpening runs each time the menu opens: fill the entries then, so they are current
+private void LoadRecent()
+{
+    _loads++;
+    _recent = new() { ""LIS-0001 Marmalade"", ""ZNZ-0042 Pickle"", $""NBO-00{10 + _loads} Crumble"" };
+}";
+
+        public const string Css = @"/* a small window, so the bar sits at the top of something */
+.menu-window { border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; max-width: 560px; }
+.menu-body { display: flex; flex-direction: column; gap: 6px; padding: 18px 16px; min-height: 70px; font-size: 14px; color: #334155; }
+.menu-state { font-size: 13px; color: #64748b; }
+
+.demo-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }   /* not .row: Bootstrap owns that name */
+.result { font-size: 13px; color: #475569; }";
+    }
+}

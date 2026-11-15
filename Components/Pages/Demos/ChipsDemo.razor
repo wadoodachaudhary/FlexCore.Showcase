@@ -1,0 +1,230 @@
+@page "/demo/chips"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-11-14: new page for ChipListControl and ChipControl. Facts from ChipListControl.razor, ChipControl.razor(.css),
+   ContentModels.cs, FlexControlBase.cs (FlexCore 0.2.50). *@
+
+<PageTitle>Blazor Chip and Chip List — FlexCore</PageTitle>
+
+<FeatureDemoLayout Title="Chips" Category="Components" ControlName="ChipListControl · ChipControl"
+                   Tagline="Let users filter a view, pick tags or toggle options with compact chips."
+                   SourcePath="ChipListControl.razor; ChipControl.razor">
+    <Overview>
+        <p>
+            <code>ChipListControl</code> is a Blazor chip list: small pills users pick to filter a view or choose tags, and remove with one click. Use it, rather than a dropdown, when the options should stay in sight, such as trip-type filters or a booking's tags; <code>&#64;bind-SelectedIds</code> keeps the picks and <code>&#64;bind-Items</code> the removals up to date. Use <code>ChipControl</code> on its own for a single toggle, action or dismissible pill.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="filter" Title="Filter chips" RazorCode="@Code.Filter" CSharpCode="@Code.FilterCs">
+            <Description><p>Pick a trip type, then pick it again to clear the filter; <code>ChoiceSelectionMode.Single</code> allows one chip and <code>Removable="false"</code> hides the ×.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <ChipListControl Items="_types" @bind-SelectedIds="_type" Selection="ChoiceSelectionMode.Single" Removable="false" AriaLabel="Trip type" />
+                    <span class="result">@(_type.Count == 0 ? "All trips" : $"{_type[0]} trips")</span>
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="tags" Title="Removable tags" RazorCode="@Code.Tags" CSharpCode="@Code.TagsCs">
+            <Description><p>Pick several tags and remove some with ×: <code>&#64;bind-Items</code> tracks the removals, <code>&#64;bind-SelectedIds</code> the picks.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <ChipListControl @bind-Items="_tags" @bind-SelectedIds="_picked" AriaLabel="Trip tags" />
+                    <ButtonControl CssClass="btn-sm" OnClick="ResetTags">Reset</ButtonControl>
+                </div>
+                <span class="result">@_tags.Count tags, @(_picked.Count == 0 ? "none picked" : "picked: " + string.Join(", ", _picked))</span>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="chip" Title="Single chips" RazorCode="@Code.Chip" CSharpCode="@Code.ChipCs">
+            <Description><p>Use <code>ChipControl</code> alone: a toggle, an action with <code>Selectable="false"</code>, a dismissible chip and a disabled one.</p></Description>
+            <Demo>
+                <div class="demo-row">
+                    <ChipControl Text="Window seat" IconCss="bi bi-airplane" @bind-Selected="_window" />
+                    <ChipControl Text="Add a note" IconCss="bi bi-plus-lg" Selectable="false" OnClick="@(() => _notes++)" />
+                    @if (_showVoucher)
+                    {
+                        <ChipControl Text="Voucher SPRING10" Selectable="false" Removable="true" OnRemove="@(() => _showVoucher = false)" />
+                    }
+                    <ChipControl Text="Sold out" Enabled="false" />
+                </div>
+                <span class="result">Window seat @(_window ? "on" : "off"), @_notes notes, voucher @(_showVoucher ? "applied" : "removed")</span>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <DocSections>
+            <DocSection Id="doc-chiplistcontrol-parameters" Title="ChipListControl parameters" Count='@DocSection.Label(Vocab.List.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="ChipListControl parameters" Rows="Vocab.List" />
+            </DocSection>
+            <DocSection Id="doc-chipcontrol-parameters" Title="ChipControl parameters" Count='@DocSection.Label(Vocab.Chip.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="ChipControl parameters" Rows="Vocab.Chip" />
+            </DocSection>
+            <DocSection Id="doc-chipitem" Title="ChipItem" Count='@DocSection.Label(Vocab.Item.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="ChipItem" Rows="Vocab.Item" />
+            </DocSection>
+            <DocSection Id="doc-methods" Title="Methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>The list is a <code>role="group"</code> named by <code>AriaLabel</code>.</li>
+            <li>A chip's label is a native <code>&lt;button&gt;</code> with <code>aria-pressed</code> (left out when <code>Selectable="false"</code>); Space and Enter toggle it.</li>
+            <li>The × is a second native button named "Remove" plus the chip's <code>Text</code>.</li>
+            <li>Tab moves through every chip and every ×. There is no arrow-key handling.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>One choice or several from buttons: <a href="demo/toggle-buttons">Toggle buttons</a> (ButtonGroupControl and SegmentedControl).</li>
+            <li>A status label that is not clickable: <code>BadgeControl</code> in <a href="demo/new-components#status">UI elements</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Filter
+    private readonly ChipItem[] _types =
+    {
+        new("City break", "City break", IconCss: "bi bi-buildings"),
+        new("Beach", "Beach", IconCss: "bi bi-umbrella"),
+        new("Safari", "Safari", IconCss: "bi bi-binoculars"),
+        new("Cruise", "Cruise", Disabled: true, IconCss: "bi bi-water"),
+    };
+
+    private IReadOnlyList<string> _type = new[] { "Beach" };
+
+    // Tags
+    private static readonly ChipItem[] AllTags =
+    {
+        new("family", "Family"), new("honeymoon", "Honeymoon"), new("budget", "Budget"),
+        new("luxury", "Luxury"), new("accessible", "Accessible"),
+    };
+
+    private IReadOnlyList<ChipItem> _tags = AllTags;
+
+    private IReadOnlyList<string> _picked = new[] { "family" };
+
+    private void ResetTags() { _tags = AllTags; _picked = new[] { "family" }; }
+
+    // Single chips
+    private bool _window = true, _showVoucher = true;
+
+    private int _notes;
+
+    // Vocabulary rows, one per public member (0.2.50). Base-class parameters marked (base).
+    private static class Vocab
+    {
+        public static readonly ApiRow[] List =
+        {
+            new("Items", "The chips, in order. Two-way with <code>@bind-Items</code>: a removed chip leaves the list.", "IReadOnlyList&lt;ChipItem&gt;", "empty"),
+            new("ItemsChanged", "Fires after a chip is removed, with the remaining items.", "EventCallback&lt;IReadOnlyList&lt;ChipItem&gt;&gt;"),
+            new("SelectedIds", "Ids of the picked chips. Two-way with <code>@bind-SelectedIds</code>.", "IReadOnlyList&lt;string&gt;", "empty"),
+            new("SelectedIdsChanged", "Fires on each pick and unpick, and when a picked chip is removed.", "EventCallback&lt;IReadOnlyList&lt;string&gt;&gt;"),
+            new("Selection", "<code>Multiple</code> toggles each chip; <code>Single</code> keeps one at most, and picking it again leaves none.", "ChoiceSelectionMode", "Multiple"),
+            new("Removable", "Shows a × on every chip.", "bool", "true"),
+            new("AriaLabel", "Accessible name of the group.", "string", "\"Chips\""),
+            new("Enabled (base)", "false disables every chip.", "bool", "true"),
+            new("Visible (base)", "false hides the list with <code>display:none</code>.", "bool", "true"),
+            new("CssClass / Style (base)", "On the list element.", "string?", "null"),
+            new("Id / Title / Tag / Data / Parent (base)", "Accepted but not rendered.", "", "null"),
+            new("(unmatched attributes)", "Accepted but not rendered: an <code>id</code> or <code>aria-*</code> given here is dropped.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Chip =
+        {
+            new("Text", "Label, and the name used by the × button.", "string", "\"\""),
+            new("ChildContent", "Label markup; replaces <code>Text</code> in the label only.", "RenderFragment?", "null"),
+            new("IconCss", "Leading icon in the label.", "string?", "null"),
+            new("Selected", "Picked state. Two-way with <code>@bind-Selected</code>.", "bool", "false"),
+            new("SelectedChanged", "Fires after each toggle with the new state.", "EventCallback&lt;bool&gt;"),
+            new("Selectable", "false makes the label a plain action: no toggle, no <code>aria-pressed</code>.", "bool", "true"),
+            new("OnClick", "Label clicked, after any toggle. No arguments.", "EventCallback"),
+            new("Removable", "Shows the ×.", "bool", "false"),
+            new("OnRemove", "× clicked. The chip does not remove itself; the page does.", "EventCallback"),
+            new("Enabled (base)", "false disables the label and the ×.", "bool", "true"),
+            new("Visible (base)", "false renders nothing.", "bool", "true"),
+            new("CssClass / Style (base)", "On the chip element.", "string?", "null"),
+            new("Id / Title / Tag / Data / Parent (base)", "Accepted but not rendered.", "", "null"),
+            new("(unmatched attributes)", "Accepted but not rendered: an <code>id</code> or <code>aria-*</code> given here is dropped.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Item =
+        {
+            new("Id", "Key reported in <code>SelectedIds</code>. Unique within the list.", "string"),
+            new("Text", "Label.", "string"),
+            new("Disabled", "Grayed; cannot be picked or removed.", "bool", "false"),
+            new("IconCss", "Leading icon.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Methods =
+        {
+            new("ChipListControl.RemoveAsync(string id)", "Removes a chip from code, as the × does. Needs <code>@bind-Items</code> or an <code>ItemsChanged</code> handler that stores the new list; without one the page's old list is drawn again. Ignored for an unknown or disabled chip, or when the list is disabled.", "Task"),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-chip-list", "The list. Its wrapping flex row and 6px gap are an inline style, not a stylesheet rule, so change them through <code>Style</code>."),
+            new("fx-chip · .selected", "One pill: rounded border and gray fill; <code>selected</code> turns it blue."),
+            new("fx-chip-label", "The label button inside the pill."),
+            new("fx-chip-remove", "The × button inside the pill."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Filter = @"<div class=""demo-row"">
+    <ChipListControl Items=""_types"" @bind-SelectedIds=""_type"" Selection=""ChoiceSelectionMode.Single"" Removable=""false"" AriaLabel=""Trip type"" />
+    <span class=""result"">@(_type.Count == 0 ? ""All trips"" : $""{_type[0]} trips"")</span>
+</div>";
+        public const string FilterCs = @"// Filter
+private readonly ChipItem[] _types =
+{
+    new(""City break"", ""City break"", IconCss: ""bi bi-buildings""),
+    new(""Beach"", ""Beach"", IconCss: ""bi bi-umbrella""),
+    new(""Safari"", ""Safari"", IconCss: ""bi bi-binoculars""),
+    new(""Cruise"", ""Cruise"", Disabled: true, IconCss: ""bi bi-water""),
+};
+
+private IReadOnlyList<string> _type = new[] { ""Beach"" };";
+
+        public const string Tags = @"<div class=""demo-row"">
+    <ChipListControl @bind-Items=""_tags"" @bind-SelectedIds=""_picked"" AriaLabel=""Trip tags"" />
+    <ButtonControl CssClass=""btn-sm"" OnClick=""ResetTags"">Reset</ButtonControl>
+</div>
+<span class=""result"">@_tags.Count tags, @(_picked.Count == 0 ? ""none picked"" : ""picked: "" + string.Join("", "", _picked))</span>";
+        public const string TagsCs = @"// Tags
+private static readonly ChipItem[] AllTags =
+{
+    new(""family"", ""Family""), new(""honeymoon"", ""Honeymoon""), new(""budget"", ""Budget""),
+    new(""luxury"", ""Luxury""), new(""accessible"", ""Accessible""),
+};
+
+private IReadOnlyList<ChipItem> _tags = AllTags;
+
+private IReadOnlyList<string> _picked = new[] { ""family"" };
+
+private void ResetTags() { _tags = AllTags; _picked = new[] { ""family"" }; }";
+
+        public const string Chip = @"<div class=""demo-row"">
+    <ChipControl Text=""Window seat"" IconCss=""bi bi-airplane"" @bind-Selected=""_window"" />
+    <ChipControl Text=""Add a note"" IconCss=""bi bi-plus-lg"" Selectable=""false"" OnClick=""@(() => _notes++)"" />
+    @if (_showVoucher)
+    {
+        <ChipControl Text=""Voucher SPRING10"" Selectable=""false"" Removable=""true"" OnRemove=""@(() => _showVoucher = false)"" />
+    }
+    <ChipControl Text=""Sold out"" Enabled=""false"" />
+</div>
+<span class=""result"">Window seat @(_window ? ""on"" : ""off""), @_notes notes, voucher @(_showVoucher ? ""applied"" : ""removed"")</span>";
+        public const string ChipCs = @"// Single chips
+private bool _window = true, _showVoucher = true;
+
+private int _notes;";
+    }
+}

@@ -1,0 +1,9 @@
+/* a small window, so the bar sits at the top of something */
+.menu-window { border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; max-width: 560px; }
+.menu-body { display: flex; flex-direction: column; gap: 6px; padding: 18px 16px; min-height: 70px; font-size: 14px; color: #334155; }
+.menu-state { font-size: 13px; color: #64748b; }
+
+.demo-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }   /* not .row: Bootstrap owns that name */
+.result { font-size: 13px; color: #475569; }
+.note { font-size: 13.5px; color: #475569; margin: -8px 0 14px; }
+.note code { font-size: 12.5px; background: #f1f5f9; padding: 1px 4px; border-radius: 4px; color: #334155; }

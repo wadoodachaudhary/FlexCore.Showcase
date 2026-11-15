@@ -1,4 +1,5 @@
 /* 2026-10-12: Tabs & accordion page. No Bootstrap names (table, row) as class names in here. */
+.quote-tabs { max-width: 560px; }
 .result { font-size: 13px; color: #475569; margin: 12px 0 0; }
 .m0 { margin: 0; }
 .summary { display: grid; grid-template-columns: 90px 1fr; gap: 4px 12px; margin: 0; font-size: 13px; }

@@ -1,24 +1,23 @@
 @page "/demo/toggle-buttons"
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-12: new page on FeatureDemoLayout. Facts from ToggleButtonControl.razor(.css), ButtonGroupControl.razor(.css),
-   FlexControlBase.cs, ContentModels.cs (FlexCore 0.2.48).
+@* 2026-10-12: new page on FeatureDemoLayout. 
    2026-10-29: example 3, SegmentedControl (SegmentedControl.razor, 0.2.49): a RadioGroupControl drawn as one bar. *@
 
 <PageTitle>Blazor Toggle Button and Button Group — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Toggle buttons" Category="Components" ControlName="ToggleButtonControl · ButtonGroupControl · SegmentedControl"
-                   Tagline="A button that stays pressed, a group that picks one value or many, and a segmented bar for one choice."
+                   Tagline="Switch options on and off, or pick one or several, from a row of buttons."
                    SourcePath="ToggleButtonControl.razor; ButtonGroupControl.razor; SegmentedControl.razor">
     <Overview>
         <p>
-            <code>ToggleButtonControl</code> is a Blazor button that stays pressed; <code>ButtonGroupControl</code> lines several up and keeps one value or many selected; <code>SegmentedControl</code> is a radio group drawn as one bar.
+            <code>ToggleButtonControl</code> is a Blazor button that stays pressed until clicked again, for on-off options such as Bold or Italic. Use <code>ButtonGroupControl</code> for a row of related options, with icons and one or several picks, such as text alignment or working days, and <code>SegmentedControl</code> for one text choice that works as a radio group, such as a calendar's Day, Week or Month view.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="toggle" Title="Toggle button" RazorCode="@Code.Toggle" CSharpCode="@Code.ToggleCs">
-            <Description><p>Press to toggle; <code>&#64;bind-Selected</code> holds the state.</p></Description>
+            <Description><p>Press Bold, Italic or Underline and each stays down until pressed again; <code>&#64;bind-Selected</code> holds its state.</p></Description>
             <Demo>
                 <div class="demo-row">
                     <ToggleButtonControl @bind-Selected="_bold" IconCss="bi bi-type-bold" Title="Bold" aria-label="Bold" />
@@ -32,7 +31,7 @@
         </DemoExample>
 
         <DemoExample Id="group" Title="Button group" RazorCode="@Code.Group" CSharpCode="@Code.GroupCs">
-            <Description><p>Left group picks one value, right group picks several; use the arrow keys to move between buttons.</p></Description>
+            <Description><p>Pick one text alignment on the left and several working days on the right; the arrow keys move between buttons.</p></Description>
             <Demo>
                 <div class="demo-row top">
                     <div class="stack">
@@ -48,7 +47,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="segmented" Title="Segmented control" RazorCode="@Code.Segmented" CSharpCode="@Code.SegmentedCs">
-            <Description><p>One choice as a bar; arrow keys move it like a radio group.</p></Description>
+            <Description><p>Switch the calendar between Day, Week and Month on one bar; the arrow keys move the choice as in a radio group.</p></Description>
             <Demo>
                 <div class="stack">
                     <SegmentedControl Items="_viewItems" @bind-Value="_calendarView" AriaLabel="Calendar view" />
@@ -96,7 +95,7 @@
     <Related>
         <ul>
             <li>Plain and dropdown buttons: <a href="demo/buttons">Buttons</a>. Default action with alternatives: <a href="demo/split-button">Split button</a>.</li>
-            <li>A labelled on/off setting: <code>SwitchControl</code> in <a href="demo/new-components">UI elements</a>.</li>
+            <li>A labeled on/off setting: <code>SwitchControl</code> in <a href="demo/new-components">UI elements</a>.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
@@ -127,7 +126,7 @@
     private readonly SelectionItem[] _viewItems = { new("day", "Day"), new("week", "Week"), new("month", "Month") };
     private string _calendarView = "week";
 
-    // Vocabulary rows, one per public member (0.2.48). Base-class parameters marked (base).
+    // Vocabulary rows, one per public member (0.2.50). Base-class parameters marked (base).
     private static class Vocab
     {
         public static readonly ApiRow[] Toggle =
