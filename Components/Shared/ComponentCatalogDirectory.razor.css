@@ -1,13 +1,52 @@
 /* ── Featured component cards ── */
 .popular-components-section {
-    margin: 56px 0 56px;
+    margin: 0 0 72px;
 }
 
-/* the divider between the workhorses and the full list, the same bar as the home page's (Home.razor.css .section-divider) */
-.section-divider { width: 128px; height: 8px; margin: 0 auto; border-radius: 4px; background: var(--brand-stripe); }
-.section-divider + .catalog-directory-section { margin-top: 56px; }
+/* Laid out like the home page's pillars (2026-11-14). The heading sits in a green strip (Home.razor.css .stats-strip) whose lower
+   half overlaps the top of an indigo band (Home.razor.css .brand-band); the cards sit on the band and get the pillar cards' shadow
+   instead of their border. The rules are copied because scoped CSS does not reach across components. The band's box shadow fills
+   the viewport sideways and clip-path trims it to the band's height, so nothing overflows the page. --overlap is how far the strip
+   reaches down into the band; the band's top padding clears it. */
+.popular-components-section { --overlap: 57px; }   /* half the strip's height (114 px at desktop), as on the home page */
 
-/* 2026-10-28: same heading scale as the home page sections (Home.razor.css .section-title), centred like them since 2026-10-29. */
+.workhorses-strip {
+    position: relative;
+    z-index: 2;
+    max-width: 1100px;
+    margin: 0 auto calc(-1 * var(--overlap));
+    padding: 20px 24px;
+    background: var(--brand-green);
+    border-radius: 6px;
+    box-shadow: 0 14px 30px -14px rgba(15, 23, 42, 0.4);
+}
+
+.workhorses-strip .popular-head { margin: 0; }
+/* the same type as the numbers in the home page's green strip (Home.razor.css .stat-num) */
+.workhorses-strip .popular-title { color: #052e2b; font-size: clamp(30px, 3.6vw, 48px); letter-spacing: -0.04em; line-height: 1; }
+
+.brand-band {
+    position: relative;
+    background: #4f46e5;
+    box-shadow: 0 0 0 100vmax #4f46e5;
+    clip-path: inset(0 -100vmax);
+    padding: calc(var(--overlap) + 28px) 0 72px;
+}
+
+/* the line under the heading, the home page band's .section-desc */
+.workhorses-tagline {
+    max-width: 720px;
+    margin: 0 auto 32px;
+    font-size: 18px;
+    line-height: 1.5;
+    text-align: center;
+    text-wrap: balance;
+    color: #e0e7ff;
+}
+
+.brand-band ::deep .workhorse-card { border-color: transparent; box-shadow: 0 10px 24px -12px rgba(15, 23, 42, 0.45); }
+
+/* 2026-10-28: same heading scale as the home page sections (Home.razor.css .section-title), centered like them since 2026-10-29. */
 .popular-title {
     text-align: center;
     font-size: clamp(32px, 4vw, 48px);
@@ -27,9 +66,11 @@
    who turn motion off. */
 .popular-head { margin-bottom: 28px; }
 .popular-head .popular-title { margin: 0; }
+/* 102 x 68 since 2026-11-14, when the heading moved into the green strip: halfway between the original 132 x 88 (96 x 64 under
+   768 px) and 72 x 48, which made the strip as tall as the home page's but read too small. The drawing is 74 px tall. */
 .horse-race {
-    --fw: 132px;
-    --fh: 88px;
+    --fw: 102px;
+    --fh: 68px;
     --u: calc(var(--fw) / 288);
     position: relative;
     width: calc(var(--u) * 412);
@@ -79,10 +120,6 @@
 
 @keyframes race-ground {
     to { transform: translateX(-96px); }
-}
-
-@media (max-width: 768px) {
-    .horse-race { --fw: 96px; --fh: 64px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
