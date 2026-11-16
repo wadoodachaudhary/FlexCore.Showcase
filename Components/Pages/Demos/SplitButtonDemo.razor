@@ -1,7 +1,9 @@
 @page "/demo/split-button"
 @using FlexCore.Showcase.Components.Shared
 
-
+@* 2026-11-15: examples rebuilt around a quote, a booking and payment reminders; text checked against SplitButtonControl.razor(.css)
+   and SplitButtonItem.cs (FlexCore 0.2.50).
+   2026-11-15: example story moved to the Support desk theme. *@
 
 <PageTitle>Blazor Split Button — FlexCore</PageTitle>
 
@@ -10,49 +12,74 @@
                    SourcePath="SplitButtonControl.razor">
     <Overview>
         <p>
-            <code>SplitButtonControl</code> is a Blazor split button: one click on the main half runs the usual action, and the caret opens a menu of alternatives. Use it when one action is the default and the rest are variants, such as Save with Save as and Save a copy: one button replaces several in a crowded toolbar. The main half raises <code>OnClick</code>, each menu item <code>OnItemClick</code>.
+            <code>SplitButtonControl</code> is a Blazor split button: a click on the main half runs the usual action, and the caret opens a list of its alternatives. Use it when one action is the default and the rest are variants, such as Send reply with Send a copy to me or Add as internal note: one button replaces several in a crowded toolbar, and unlike a dropdown button the main half acts at once. The main half raises <code>OnClick</code>; a picked item raises <code>OnItemClick</code> with its <code>Value</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="basic" Title="Default action with alternatives" RazorCode="@Code.Basic" CSharpCode="@Code.BasicCs">
-            <Description><p>Click the left half to save, the caret for the other ways to save; the grayed menu entry is disabled. The second button is <code>Disabled</code> as a whole.</p></Description>
+            <Description><p>Click the left half to send the reply, or the caret for its alternatives; each enabled entry carries a <code>Value</code> the handler reads, and Reply by chat is disabled. Mark the ticket solved and the whole button is <code>Disabled</code>.</p></Description>
             <Demo>
-                <div class="demo-row">
-                    <SplitButtonControl Text="Save" IconCss="bi bi-save" Items="_saveItems"
-                                        OnClick="@(() => _saved = "Saved")" OnItemClick="@(i => _saved = i.Text)" />
-                    <SplitButtonControl Text="Save" IconCss="bi bi-save" Items="_saveItems" Disabled="true" />
-                    @if (_saved is not null) { <span class="result">@_saved</span> }
+                <div class="sb two">
+                    <div class="demo-row">
+                        <SplitButtonControl Text="Send reply" IconCss="bi bi-envelope" Items="_replyItems" Disabled="_solved"
+                                            OnClick="@(() => Did("Reply emailed to Albus Door"))" OnItemClick="ReplyItem" />
+                        <ButtonControl CssClass="btn-sm" OnClick="() => _solved = !_solved">@(_solved ? "Reopen ticket" : "Mark solved")</ButtonControl>
+                        <BadgeControl Text="@(_solved ? "Solved" : "Open")" Variant="@(_solved ? BadgeVariant.Success : BadgeVariant.Info)" />
+                    </div>
+                    <div class="log-col">
+                        <div class="log-head"><span class="bi bi-clock-history" aria-hidden="true"></span>Activity
+                            <ButtonControl BareStyle="true" CssClass="log-clear" Disabled="@(_log.Count == 0)" OnClick="() => _log.Clear()">Clear</ButtonControl>
+                        </div>
+                        <ul class="log" role="status">
+                            @foreach (var line in _log)
+                            {
+                                <li>@line</li>
+                            }
+                            @if (_log.Count == 0)
+                            {
+                                <li class="log-empty">No activity to show</li>
+                            }
+                        </ul>
+                    </div>
                 </div>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="menu-content" Title="Custom menu content" RazorCode="@Code.MenuContent" CSharpCode="@Code.MenuContentCs">
-            <Description><p>Check Notify subscribers or Pin to top inside the menu before publishing; <code>MenuContent</code> renders after the items and stays open while you click in it.</p></Description>
+        <DemoExample Id="menu-content" Title="Options inside the menu" RazorCode="@Code.MenuContent" CSharpCode="@Code.MenuContentCs">
+            <Description><p>Open the caret and check what to refund on top of the $59 duplicate charge: <code>MenuContent</code> renders after the items, the menu stays open while you click in it, and the total follows. Then approve, or hold the refund for review.</p></Description>
             <Demo>
-                <div class="demo-row">
-                    <SplitButtonControl Text="Publish" IconCss="bi bi-cloud-upload" Items="_publishItems"
-                                        OnClick="@(() => Publish("now"))" OnItemClick="@(i => Publish(i.Text))">
-                        <MenuContent>
-                            <div class="menu-options">
-                                <CheckBoxControl @bind-Checked="_notify" Label="Notify subscribers" />
-                                <CheckBoxControl @bind-Checked="_pin" Label="Pin to top" />
-                            </div>
-                        </MenuContent>
-                    </SplitButtonControl>
-                    @if (_published is not null) { <span class="result">@_published</span> }
+                <div class="sb">
+                    <div class="demo-row">
+                        <SplitButtonControl Text="Approve refund" IconCss="bi bi-check2-circle" Items="_refundItems"
+                                            OnClick="@(() => Refund("Approved"))" OnItemClick="@(i => Refund(i.Text))">
+                            <MenuContent>
+                                <div class="menu-options">
+                                    <CheckBoxControl @bind-Checked="_lateFee" Label="Late fee, $15" />
+                                    <CheckBoxControl @bind-Checked="_goodwill" Label="Goodwill credit, $10" />
+                                </div>
+                            </MenuContent>
+                        </SplitButtonControl>
+                        <span class="total"><span class="bi bi-receipt" aria-hidden="true"></span>Refund for TKT-1043: @Total.ToString("C0")</span>
+                    </div>
+                    <p class="result" role="status">@_refundStatus</p>
                 </div>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="child-content" Title="Custom main half" RazorCode="@Code.ChildContent" CSharpCode="@Code.ChildContentCs">
-            <Description><p>Leave <code>Text</code> unset and put your own markup in the main half; set <code>Title</code> so both halves still have a name.</p></Description>
+        <DemoExample Id="child-content" Title="Custom main half and colors" RazorCode="@Code.ChildContent" CSharpCode="@Code.ChildContentCs">
+            <Description><p>Three tickets are waiting on the customer. Remind everyone with one click or one customer from the menu: the count is your own markup in the main half, <code>Title</code> names both halves, the items are rebuilt as people drop off, and <code>Style</code> sets the <code>--fx-split-btn-*</code> colors.</p></Description>
             <Demo>
-                <div class="demo-row">
-                    <SplitButtonControl Title="Send" Items="_sendItems" OnClick="@(() => _sent = "Sent to all 3")" OnItemClick="@(i => _sent = i.Text)">
-                        <span class="bi bi-send"></span> Send <span class="count">3</span>
-                    </SplitButtonControl>
-                    @if (_sent is not null) { <span class="result">@_sent</span> }
+                <div class="sb">
+                    <div class="demo-row">
+                        <SplitButtonControl Title="Remind all" Items="RemindItems" Disabled="@(_waiting.Count == 0)"
+                                            Style="--fx-split-btn-bg: #b45309; --fx-split-btn-border-color: #92400e; --fx-split-btn-hover-bg: #92400e;"
+                                            OnClick="RemindAll" OnItemClick="@(i => Remind((string)i.Value!))">
+                            <span class="bi bi-bell"></span> Remind <span class="count">@_waiting.Count</span>
+                        </SplitButtonControl>
+                        <ButtonControl CssClass="btn-sm" OnClick="ResetWaiting">Start over</ButtonControl>
+                    </div>
+                    <p class="result" role="status">@(_waiting.Count == 0 ? "Everyone has been reminded" : $"Still to remind: {string.Join(", ", _waiting)}")</p>
                 </div>
             </Demo>
         </DemoExample>
@@ -63,6 +90,9 @@
             <DocSection Id="doc-parameters" Title="Parameters" Count='@DocSection.Label(Vocab.Parameters.Length, "parameters")' Open="true">
                 <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
             </DocSection>
+            <DocSection Id="doc-events" Title="Events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="Events" Rows="Vocab.Events" />
+            </DocSection>
             <DocSection Id="doc-splitbuttonitem" Title="SplitButtonItem" Count='@DocSection.Label(Vocab.Item.Length, "properties")'>
                 <ApiTable Kind="ApiKind.Properties" Title="SplitButtonItem" Rows="Vocab.Item" />
             </DocSection>
@@ -70,6 +100,7 @@
                 <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
             </DocSection>
             <DocSection Id="doc-css-variables" Title="CSS variables" Count='@DocSection.Label(Vocab.Vars.Length, "variables")'>
+                <p>The defaults below are the library's; this site sets the fill and border to its indigo in <code>app.css</code>, so a copied example shows blue.</p>
                 <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
             </DocSection>
         </DocSections>
@@ -77,16 +108,18 @@
 
     <Accessibility>
         <ul>
-            <li>Both halves are native <code>&lt;button&gt;</code>s: Tab reaches each, Space and Enter activate.</li>
-            <li>The caret half sets <code>aria-haspopup="true"</code>, and <code>aria-expanded</code> reads <code>"true"</code> while the menu is open and <code>"false"</code> when closed.</li>
-            <li>Menu entries are native buttons: Tab moves through them, Enter or Space picks. There is no arrow-key or Escape handling; a pick or click-away closes the menu.</li>
-            <li><code>Disabled</code> sets the native <code>disabled</code> attribute on both halves and ignores pointer events on the host.</li>
+            <li>Both halves are native <code>&lt;button&gt;</code>s: Tab reaches each, Enter and Space press it.</li>
+            <li>The main half is named by <code>Title</code> (or <code>Text</code>), the caret by the same text plus "options", or "More options" when neither is set. Keep <code>Title</code> close to the visible text, since it becomes the main half's <code>aria-label</code>.</li>
+            <li>The caret sets <code>aria-haspopup="true"</code>, and <code>aria-expanded</code> reads "true" while the menu is open, "false" when closed.</li>
+            <li>The menu is a panel of native buttons placed after the caret: Tab moves through them and Enter or Space picks one. Picking one of the <code>Items</code> or clicking outside closes the panel.</li>
+            <li><code>Disabled</code> sets the native <code>disabled</code> attribute on both halves, so neither is a Tab stop, and the host ignores the pointer.</li>
         </ul>
     </Accessibility>
 
     <Related>
         <ul>
-            <li>One button with a menu: <a href="demo/buttons#dropdown">ButtonControl dropdown mode</a>.</li>
+            <li>One button with a dropdown panel: <a href="demo/buttons#dropdown">ButtonControl dropdown mode</a>.</li>
+            <li>Inside a <code>ToolbarControl</code> the split button takes the toolbar's gray look, and its label hides when the toolbar's captions are off.</li>
             <li><code>ToolbarButtonControl</code> with <code>HasDropdown</code>, which draws the arrow and leaves the menu to the page: <a href="demo/toolbar#app-bar">Toolbar</a>.</li>
         </ul>
     </Related>
@@ -94,57 +127,73 @@
 
 @code {
     // Basic
-    private readonly List<SplitButtonItem> _saveItems = new()
+    private readonly List<SplitButtonItem> _replyItems = new()
     {
-        new("Save as…", "bi bi-file-earmark"),
-        new("Save a copy", "bi bi-files"),
-        new("Save and close", "bi bi-box-arrow-right"),
-        new("Save as template", "bi bi-file-earmark-lock", disabled: true),
+        new("Send with the router guide", "bi bi-file-earmark-pdf", value: "guide"),
+        new("Send a copy to me", "bi bi-person", value: "copy"),
+        new("Add as internal note", "bi bi-journal-text", value: "note"),
+        new("Reply by chat", "bi bi-chat-dots", disabled: true),
     };
-    private string? _saved;
+    private bool _solved;
+    private readonly List<string> _log = new() { "Reply to Albus Door on TKT-1042 is ready" };
+    private void Did(string line) => _log.Insert(0, line);
+    private void ReplyItem(SplitButtonItem item) => Did(item.Value switch
+    {
+        "guide" => "Reply emailed with the router guide",
+        "copy" => "Copy of the reply sent to the agent",
+        _ => "Internal note added to TKT-1042",
+    });
 
     // Menu content
-    private readonly List<SplitButtonItem> _publishItems = new() { new("Schedule…", "bi bi-calendar-event") };
-    private bool _notify = true, _pin;
-    private string? _published;
-    private void Publish(string how) => _published = $"Publish {how} (notify {(_notify ? "on" : "off")}, pin {(_pin ? "on" : "off")})";
+    private readonly List<SplitButtonItem> _refundItems = new() { new("Hold for review", "bi bi-hourglass-split") };
+    private bool _lateFee = true, _goodwill;
+    private decimal Total => 59 + (_lateFee ? 15 : 0) + (_goodwill ? 10 : 0);
+    private string _refundStatus = "Last decision: none yet";
+    private void Refund(string how) => _refundStatus = $"Last decision: {how} at {Total:C0}";
 
     // Child content
-    private readonly List<SplitButtonItem> _sendItems = new() { new("Send to me only", "bi bi-person"), new("Send later…", "bi bi-clock") };
-    private string? _sent;
+    private List<string> _waiting = new() { "Ron Measly", "Luna Goodlove", "Neville Longbutton" };
+    private List<SplitButtonItem> RemindItems => _waiting.Select(n => new SplitButtonItem($"Remind {n}", "bi bi-person", value: n)).ToList();
+    private void Remind(string name) => _waiting.Remove(name);
+    private void RemindAll() => _waiting.Clear();
+    private void ResetWaiting() => _waiting = new() { "Ron Measly", "Luna Goodlove", "Neville Longbutton" };
 
     // Vocabulary rows, one per public member (0.2.50).
     private static class Vocab
     {
         public static readonly ApiRow[] Parameters =
         {
-            new("Text", "Label of the main half. Wins over <code>ChildContent</code> when set. Also stands in for <code>Title</code> when that is not set.", "string?", "null"),
-            new("IconCss", "Leading icon on the main half.", "string?", "null"),
-            new("ChildContent", "Main-half markup, used when <code>Text</code> is not set.", "RenderFragment?"),
-            new("Items", "Menu entries, in order.", "IList&lt;SplitButtonItem&gt;?", "null"),
-            new("MenuContent", "Extra markup rendered after the items inside the menu.", "RenderFragment?", "null"),
-            new("Disabled", "Disables both halves; the host fades and ignores pointer events.", "bool", "false"),
-            new("OnClick", "Main half clicked. No arguments.", "EventCallback"),
-            new("OnItemClick", "Menu entry picked. The menu closes first.", "EventCallback&lt;SplitButtonItem&gt;"),
+            new("Text", "Label of the main half; wins over <code>ChildContent</code>, and names both halves when <code>Title</code> is not set.", "string?", "null"),
+            new("IconCss", "Classes for an icon before the main half's label, such as <code>bi bi-envelope</code>.", "string?", "null"),
+            new("ChildContent", "Your own markup for the main half, such as a count; used when <code>Text</code> is not set.", "RenderFragment?", "null"),
+            new("Items", "The menu entries, in order. A new list re-renders the menu, so it can follow page state.", "IList&lt;SplitButtonItem&gt;?", "null"),
+            new("MenuContent", "Your own markup after the items, such as options to check; clicks inside it keep the menu open.", "RenderFragment?", "null"),
+            new("Disabled", "Disables both halves and hides the menu; the button fades to 60% and ignores the pointer. A menu left open is only hidden: it shows again when the control is enabled.", "bool", "false"),
             new("Title (base)", "Tooltip and accessible name of the main half; the caret gets the same text plus \" options\". Falls back to <code>Text</code>; with neither, the caret is named \"More options\".", "string?", "null"),
             new("Enabled (base)", "Not read. Use <code>Disabled</code>; <code>Enabled=\"false\"</code> leaves both halves active.", "bool", "true"),
             new("Visible (base)", "Not read. <code>Visible=\"false\"</code> does not hide the control.", "bool", "true"),
             new("Id (base)", "Never rendered. An <code>id</code> attribute binds to this parameter, so it does not reach the host either.", "string?", "null"),
-            new("CssClass / Style", "Appended to, and inline style on, the host element.", "string?", "null"),
+            new("CssClass / Style (base)", "Appended to, and inline style on, the host element.", "string?", "null"),
+            new("Tag / Data / Parent (base)", "Accepted but not rendered.", "", "null"),
             new("(unmatched attributes)", "Forwarded to the host <code>&lt;div&gt;</code>, not to the buttons.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("OnClick", "A click, Enter or Space on the main half. No payload.", "none"),
+            new("OnItemClick", "An enabled entry was picked; the menu has already closed. Read its <code>Value</code> rather than matching on <code>Text</code>.", "SplitButtonItem"),
         };
         public static readonly ApiRow[] Item =
         {
-            new("Text", "Entry label.", "string", "\"\""),
-            new("IconCss", "Leading icon.", "string?", "null"),
+            new("Text", "The entry's label.", "string", "\"\""),
+            new("IconCss", "Classes for an icon before the label.", "string?", "null"),
             new("Value", "Any payload; read it in <code>OnItemClick</code> instead of matching on <code>Text</code>.", "object?", "null"),
-            new("Disabled", "Rendered grayed; clicks ignored.", "bool", "false"),
-            new("ctor", "<code>new(text, iconCss, value, disabled)</code>, all but text optional.", "", null),
+            new("Disabled", "Drawn at half opacity and not clickable.", "bool", "false"),
+            new("ctor", "<code>new(text, iconCss, value, disabled)</code> with all but <code>text</code> optional, or <code>new()</code> with property setters; it is a class.", "", null),
         };
         public static readonly ApiRow[] Css =
         {
             new("fx-split-button-host", "Inline-flex wrapper; the menu is positioned against it. Gets <code>fx-split-button-disabled</code> when disabled."),
-            new("fx-split-button-main · fx-split-button-toggle", "The two halves. Blue fill, shared border, rounded outer corners."),
+            new("fx-split-button-main · fx-split-button-toggle", "The two halves. Filled with <code>--fx-split-btn-bg</code>, shared border, rounded outer corners."),
             new("fx-split-button-dropdown", "The menu: white panel under the control, right-aligned, 150px minimum."),
             new("fx-split-button-item", "One entry; <code>.disabled</code> halves its opacity."),
             new("fx-split-button-backdrop", "Full-screen transparent layer that closes the menu on click."),
@@ -164,53 +213,83 @@
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Basic = @"<div class=""demo-row"">
-    <SplitButtonControl Text=""Save"" IconCss=""bi bi-save"" Items=""_saveItems""
-                        OnClick=""@(() => _saved = ""Saved"")"" OnItemClick=""@(i => _saved = i.Text)"" />
-    <SplitButtonControl Text=""Save"" IconCss=""bi bi-save"" Items=""_saveItems"" Disabled=""true"" />
-    @if (_saved is not null) { <span class=""result"">@_saved</span> }
+        public const string Basic = @"<div class=""sb two"">
+    <div class=""demo-row"">
+        <SplitButtonControl Text=""Send reply"" IconCss=""bi bi-envelope"" Items=""_replyItems"" Disabled=""_solved""
+                            OnClick=""@(() => Did(""Reply emailed to Albus Door""))"" OnItemClick=""ReplyItem"" />
+        <ButtonControl CssClass=""btn-sm"" OnClick=""() => _solved = !_solved"">@(_solved ? ""Reopen ticket"" : ""Mark solved"")</ButtonControl>
+        <BadgeControl Text=""@(_solved ? ""Solved"" : ""Open"")"" Variant=""@(_solved ? BadgeVariant.Success : BadgeVariant.Info)"" />
+    </div>
+    <div class=""log-col"">
+        <div class=""log-head""><span class=""bi bi-clock-history"" aria-hidden=""true""></span>Activity
+            <ButtonControl BareStyle=""true"" CssClass=""log-clear"" Disabled=""@(_log.Count == 0)"" OnClick=""() => _log.Clear()"">Clear</ButtonControl>
+        </div>
+        <ul class=""log"" role=""status"">
+            @foreach (var line in _log)
+            {
+                <li>@line</li>
+            }
+            @if (_log.Count == 0)
+            {
+                <li class=""log-empty"">No activity to show</li>
+            }
+        </ul>
+    </div>
 </div>";
         public const string BasicCs = @"// Basic
-private readonly List<SplitButtonItem> _saveItems = new()
+private readonly List<SplitButtonItem> _replyItems = new()
 {
-    new(""Save as…"", ""bi bi-file-earmark""),
-    new(""Save a copy"", ""bi bi-files""),
-    new(""Save and close"", ""bi bi-box-arrow-right""),
-    new(""Save as template"", ""bi bi-file-earmark-lock"", disabled: true),
+    new(""Send with the router guide"", ""bi bi-file-earmark-pdf"", value: ""guide""),
+    new(""Send a copy to me"", ""bi bi-person"", value: ""copy""),
+    new(""Add as internal note"", ""bi bi-journal-text"", value: ""note""),
+    new(""Reply by chat"", ""bi bi-chat-dots"", disabled: true),
 };
-
-private string? _saved;";
-
-        public const string MenuContent = @"<div class=""demo-row"">
-    <SplitButtonControl Text=""Publish"" IconCss=""bi bi-cloud-upload"" Items=""_publishItems""
-                        OnClick=""@(() => Publish(""now""))"" OnItemClick=""@(i => Publish(i.Text))"">
-        <MenuContent>
-            <div class=""menu-options"">
-                <CheckBoxControl @bind-Checked=""_notify"" Label=""Notify subscribers"" />
-                <CheckBoxControl @bind-Checked=""_pin"" Label=""Pin to top"" />
-            </div>
-        </MenuContent>
-    </SplitButtonControl>
-    @if (_published is not null) { <span class=""result"">@_published</span> }
+private bool _solved;
+private readonly List<string> _log = new() { ""Reply to Albus Door on TKT-1042 is ready"" };
+private void Did(string line) => _log.Insert(0, line);
+private void ReplyItem(SplitButtonItem item) => Did(item.Value switch
+{
+    ""guide"" => ""Reply emailed with the router guide"",
+    ""copy"" => ""Copy of the reply sent to the agent"",
+    _ => ""Internal note added to TKT-1042"",
+});";
+        public const string MenuContent = @"<div class=""sb"">
+    <div class=""demo-row"">
+        <SplitButtonControl Text=""Approve refund"" IconCss=""bi bi-check2-circle"" Items=""_refundItems""
+                            OnClick=""@(() => Refund(""Approved""))"" OnItemClick=""@(i => Refund(i.Text))"">
+            <MenuContent>
+                <div class=""menu-options"">
+                    <CheckBoxControl @bind-Checked=""_lateFee"" Label=""Late fee, $15"" />
+                    <CheckBoxControl @bind-Checked=""_goodwill"" Label=""Goodwill credit, $10"" />
+                </div>
+            </MenuContent>
+        </SplitButtonControl>
+        <span class=""total""><span class=""bi bi-receipt"" aria-hidden=""true""></span>Refund for TKT-1043: @Total.ToString(""C0"")</span>
+    </div>
+    <p class=""result"" role=""status"">@_refundStatus</p>
 </div>";
-        public const string ChildContent = @"<div class=""demo-row"">
-    <SplitButtonControl Title=""Send"" Items=""_sendItems"" OnClick=""@(() => _sent = ""Sent to all 3"")"" OnItemClick=""@(i => _sent = i.Text)"">
-        <span class=""bi bi-send""></span> Send <span class=""count"">3</span>
-    </SplitButtonControl>
-    @if (_sent is not null) { <span class=""result"">@_sent</span> }
+        public const string MenuContentCs = @"// Menu content
+private readonly List<SplitButtonItem> _refundItems = new() { new(""Hold for review"", ""bi bi-hourglass-split"") };
+private bool _lateFee = true, _goodwill;
+private decimal Total => 59 + (_lateFee ? 15 : 0) + (_goodwill ? 10 : 0);
+private string _refundStatus = ""Last decision: none yet"";
+private void Refund(string how) => _refundStatus = $""Last decision: {how} at {Total:C0}"";";
+        public const string ChildContent = @"<div class=""sb"">
+    <div class=""demo-row"">
+        <SplitButtonControl Title=""Remind all"" Items=""RemindItems"" Disabled=""@(_waiting.Count == 0)""
+                            Style=""--fx-split-btn-bg: #b45309; --fx-split-btn-border-color: #92400e; --fx-split-btn-hover-bg: #92400e;""
+                            OnClick=""RemindAll"" OnItemClick=""@(i => Remind((string)i.Value!))"">
+            <span class=""bi bi-bell""></span> Remind <span class=""count"">@_waiting.Count</span>
+        </SplitButtonControl>
+        <ButtonControl CssClass=""btn-sm"" OnClick=""ResetWaiting"">Start over</ButtonControl>
+    </div>
+    <p class=""result"" role=""status"">@(_waiting.Count == 0 ? ""Everyone has been reminded"" : $""Still to remind: {string.Join("", "", _waiting)}"")</p>
 </div>";
         public const string ChildContentCs = @"// Child content
-private readonly List<SplitButtonItem> _sendItems = new() { new(""Send to me only"", ""bi bi-person""), new(""Send later…"", ""bi bi-clock"") };
-
-private string? _sent;";
-
-        public const string MenuContentCs = @"// Menu content
-private readonly List<SplitButtonItem> _publishItems = new() { new(""Schedule…"", ""bi bi-calendar-event"") };
-
-private bool _notify = true, _pin;
-
-private string? _published;
-
-private void Publish(string how) => _published = $""Publish {how} (notify {(_notify ? ""on"" : ""off"")}, pin {(_pin ? ""on"" : ""off"")})"";";
+private List<string> _waiting = new() { ""Ron Measly"", ""Luna Goodlove"", ""Neville Longbutton"" };
+private List<SplitButtonItem> RemindItems => _waiting.Select(n => new SplitButtonItem($""Remind {n}"", ""bi bi-person"", value: n)).ToList();
+private void Remind(string name) => _waiting.Remove(name);
+private void RemindAll() => _waiting.Clear();
+private void ResetWaiting() => _waiting = new() { ""Ron Measly"", ""Luna Goodlove"", ""Neville Longbutton"" };";
     }
 }

@@ -1,7 +1,13 @@
 .demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }   /* not .row: Bootstrap owns that name */
+.mt { margin-top: 12px; }
 .result { font-size: 13px; color: #475569; }
+/* notes under the reference tables, outside the examples */
 .note { font-size: 13.5px; color: #475569; margin: -8px 0 14px; }
 .note code { font-size: 12.5px; background: #f1f5f9; padding: 1px 4px; border-radius: 4px; color: #334155; }
-.dlg-text { margin: 0; }
+.dlg-text { margin: 0 0 8px; }
+/* the ticket the dialogs act on: an app card, as on the other component pages */
+.tk-card { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; max-width: 660px; padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; font-size: 14px; color: #0f172a;
+           box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+.tk-card .result { margin-top: 2px; }
 /* classic frame: the library leaves the footer white; match the gray body */
 .dlg-host ::deep .fx-dialog-classic .fx-dialog-footer { background: #f0f0f0; border-top: 0; padding-top: 0; }

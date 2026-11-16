@@ -6,7 +6,8 @@
 @* 2026-10-21: page added with the FlexKit 0.1.131 choropleth mirror.
    2026-10-23: code tabs generated from this file; inline styles -> page stylesheet; table from Maps/MapStoryControl.razor.
    2026-10-26: example 2, airports per country via MapStoryComposer; a click opens a plain MapControl, since MapControl draws
-   markers only without a Choropleth. Table from Maps/MapControl.razor. *@
+   markers only without a Choropleth. Table from Maps/MapControl.razor.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor Map Chart: Drill-Down Choropleth — FlexCore</PageTitle>
 
@@ -26,7 +27,7 @@
                 <MapStoryControl Story="_story" Width="960" Height="640" />
             </Demo>
         </DemoExample>
-        <DemoExample Id="airports" Title="Airports per country, then one country's airports" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs" CssCode="@Code.AirportsCss">
+        <DemoExample Id="airports" Title="Airports per country, then one country's airports" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs">
             <Description><p>Click a country to open its 4,009-airport share on the plain map with one marker per airport; in the United States, China and Canada nearby markers merge into numbered clusters that zoom on click.</p></Description>
             <Demo>
                 @if (_country is null)
@@ -39,12 +40,13 @@
                     <div class="country-bar">
                         <ButtonControl OnClick="BackToWorld">Back to the world map</ButtonControl>
                         <span><strong>@_byCountry[_country][0].Country</strong>: @_byCountry[_country].Count airports with scheduled service</span>
+                        <span>With the map focused, arrow keys pan and plus or minus zooms.</span>
                         <span class="marker-key"><i class="large"></i>Large <i class="medium"></i>Medium <i class="small"></i>Small</span>
                     </div>
                     <MapControl Shapes="_shapes" Markers="_markers" @bind-Center="_center" @bind-Zoom="_zoom" MinZoom="1" MaxZoom="10"
                                 ClusterMarkers="@(_markers.Count > 200)" MarkerClick="PickAirport" Width="960" Height="520"
                                 Attribution="Airports: OurAirports, public domain. Outlines: Natural Earth."
-                                AriaLabel="@($"Airports in {_byCountry[_country][0].Country}. Arrow keys pan, plus and minus zoom.")" />
+                                AriaLabel="@($"Airports in {_byCountry[_country][0].Country}")" />
                     @if (_picked is { } picked)
                     {
                         <div class="airport-card">
@@ -91,10 +93,13 @@
     </Vocabulary>
 
     <Accessibility>
-        <p>
-            Each region is a button. Enter or Space opens the next map. The breadcrumb is a list of buttons, and the current level is marked <code>aria-current="page"</code>.
-            The title, legend range, source line and the “no regional data” message are in the page for assistive technology. Hover shows the same rate as the button name.
-        </p>
+        <ul>
+            <li>Each region is a focusable element with <code>role="button"</code>, named with the region's name and value, plus "Opens the next map." where it drills down. Enter or Space activates it, and hovering shows the same text.</li>
+            <li>The level trail is a <code>&lt;nav&gt;</code> named "Map levels": earlier levels are buttons and the current level carries <code>aria-current="page"</code>. The Back button is titled "Back to the previous map".</li>
+            <li>The drawn map has <code>aria-hidden="true"</code>. Its title, legend range, sample-data note, source line and any message for a level without data are repeated as visually hidden text, the message with <code>role="status"</code>.</li>
+            <li>The plain map in the second example is a <code>role="application"</code> element named by <code>AriaLabel</code>: arrow keys pan and plus or minus zooms. The toolbar above it has Zoom in, Zoom out and Fit markers buttons.</li>
+            <li>Keep the plain map's <code>AriaLabel</code> short, such as "Airports in Spain", and list its keys in visible text next to the map, as the second example does.</li>
+        </ul>
     </Accessibility>
 
     <Related>
@@ -277,12 +282,13 @@ else
     <div class=""country-bar"">
         <ButtonControl OnClick=""BackToWorld"">Back to the world map</ButtonControl>
         <span><strong>@_byCountry[_country][0].Country</strong>: @_byCountry[_country].Count airports with scheduled service</span>
+        <span>With the map focused, arrow keys pan and plus or minus zooms.</span>
         <span class=""marker-key""><i class=""large""></i>Large <i class=""medium""></i>Medium <i class=""small""></i>Small</span>
     </div>
     <MapControl Shapes=""_shapes"" Markers=""_markers"" @bind-Center=""_center"" @bind-Zoom=""_zoom"" MinZoom=""1"" MaxZoom=""10""
                 ClusterMarkers=""@(_markers.Count > 200)"" MarkerClick=""PickAirport"" Width=""960"" Height=""520""
                 Attribution=""Airports: OurAirports, public domain. Outlines: Natural Earth.""
-                AriaLabel=""@($""Airports in {_byCountry[_country][0].Country}. Arrow keys pan, plus and minus zoom."")"" />
+                AriaLabel=""@($""Airports in {_byCountry[_country][0].Country}"")"" />
     @if (_picked is { } picked)
     {
         <div class=""airport-card"">
@@ -412,16 +418,6 @@ static (GeoPoint Center, int Zoom) Fit(IReadOnlyList<GeoPoint> points, int width
     }
     return (center, 1);
 }" + PaletteCs;
-        public const string AirportsCss = @".country-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; font-size: 14px; color: #334155; }
-.marker-key { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; margin-left: auto; }
-.marker-key i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #cbd5e1; }
-.marker-key .large { background: #e11d48; }
-.marker-key .medium { background: #d97706; }
-.marker-key .small { background: #64748B; }
-.airport-card { margin-top: 10px; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; font-size: 13px; color: #334155; }
-.airport-card p { margin: 0 0 6px; }
-.airport-card ul { margin: 0 0 6px; padding-left: 18px; }
-.airport-card a { color: #0284c7; }";
         public const string Svg = @"<div class=""map-story-static"">@((MarkupString)_europeSvg)</div>";
         public static string SvgCs => @"MapStory _story = null!;
 string _europeSvg = """";

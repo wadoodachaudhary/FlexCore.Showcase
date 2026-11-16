@@ -8,30 +8,35 @@
    2026-10-20: code tabs generated from this file; hand-written copies had drifted.
    2026-10-24: Keyboard and ARIA tables from TreeViewControl.razor, .Operations.cs, wwwroot/browser-capabilities.js; Parameters and
    TreeNode rows re-checked against TreeViewControl.*.cs, TreeViewModels.cs, TreeViewData.cs and corrected.
-   2026-10-26: sample tree is a tour operator's summer program. *@
+   2026-10-26: sample tree is a tour operator's summer program.
+   2026-11-15: search box, Expand/Collapse all and a check box example; Methods table added from TreeViewControl.Operations.cs.
+   2026-11-15: example story moved to the HR tracking theme.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor TreeView — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Tree view" Category="Components" ControlName="TreeViewControl"
-                   Tagline="Show folders, categories or a program as a tree users expand, check and rearrange."
+                   Tagline="Show folders, categories or a staff directory as a tree users expand, check and rearrange."
                    SourcePath="TreeViewControl.razor;TreeViewControl.Appearance.cs;TreeViewControl.Operations.cs;TreeViewModels.cs;TreeViewData.cs;wwwroot/browser-capabilities.js">
     <Overview>
         <p>
-            <code>TreeViewControl</code> is a Blazor tree view that shows nested items, such as folders or a tour program, which users expand, select, check, rename and drag. Use it, rather than a <a href="demo/grid/tree-grid">tree grid</a>, when each node is a name, not a row of columns; <code>LoadChildren</code> fetches a branch when it opens, and <code>EnableVirtualization</code> renders only the nodes in view. <code>UseVb6TreeStyle</code> draws the dotted lines of the classic Windows tree control.
+            <code>TreeViewControl</code> is a Blazor tree view that shows nested items, such as folders or a staff directory, which users expand, select, check, rename and drag. Use it, rather than a <a href="demo/grid/tree-grid">tree grid</a>, when each node is a name, not a row of columns; <code>LoadChildren</code> fetches a branch when it opens, and <code>EnableVirtualization</code> renders only the nodes in view. <code>UseVb6TreeStyle</code> draws the dotted lines of the classic Windows tree control.
         </p>
     </Overview>
 
     <Examples>
-        <DemoExample Id="explorer" Title="Program explorer with a node inspector" RazorCode="@Code.Explorer" CSharpCode="@Code.ExplorerCs">
-            <Description><p>Click a node to inspect it on the right; the switches change the folder icons and the connector lines.</p></Description>
+        <DemoExample Id="explorer" Title="Staff directory with a node inspector" RazorCode="@Code.Explorer" CSharpCode="@Code.ExplorerCs">
+            <Description><p>Browse the staff directory: type in the search box to find a person, click a node to read it on the right, and expand or collapse everything from code. VB6 lines switches to the classic connector lines, and the folder styles apply while it is on.</p></Description>
             <Controls>
-                <ButtonGroupControl Items="_styleItems" @bind-Values="_styleValues" Selection="ChoiceSelectionMode.Single" AriaLabel="Folder style" />
+                <ButtonGroupControl Items="_styleItems" @bind-Values="_styleValues" Selection="ChoiceSelectionMode.Single" Enabled="@_useVb6Style" AriaLabel="Folder style" />
                 <ToggleButtonControl @bind-Selected="_useVb6Style">VB6 lines</ToggleButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _tree!.ExpandAllAsync()">Expand all</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _tree!.CollapseAllAsync()">Collapse all</ButtonControl>
             </Controls>
             <Demo>
                 <div class="explorer">
                     <div class="tree">
-                        <TreeViewControl Nodes="@_treeNodes"
+                        <TreeViewControl @ref="_tree" Nodes="@_treeNodes" ShowSearchBox="true" SearchPlaceholder="Find a person" AriaLabel="Staff directory"
                                          SelectedNode="@_selectedNode"
                                          SelectedNodeChanged="HandleNodeSelected"
                                          ToggleOnNodeClick="true"
@@ -39,24 +44,51 @@
                                          UseVb6TreeStyle="@_useVb6Style"
                                          FolderStyle="@FolderStyle"
                                          TreeIndentPixels="16"
-                                         Height="100%" />
+                                         NodesChanged="TreeChanged" />
                     </div>
                     <div class="inspector">
-                        <h4>Selected node</h4>
+                        <h4>Selected in the directory</h4>
                         @if (_selectedNode is not null)
                         {
                             <dl class="props">
-                                <dt>Id</dt><dd><code>@_selectedNode.Id</code></dd>
-                                <dt>Text</dt><dd>@_selectedNode.Text</dd>
-                                <dt>Children</dt><dd>@_selectedNode.Children.Count</dd>
-                                <dt>Expanded</dt><dd>@(_selectedNode.IsExpanded ? "yes" : "no")</dd>
-                                <dt>Tag</dt><dd>@(_selectedNode.Tag?.ToString() ?? "none")</dd>
+                                <dt>Name</dt><dd><strong>@_selectedNode.Text</strong></dd>
+                                <dt>Kind</dt><dd>@(_selectedNode.Children.Count > 0 ? "Group" : "Person")</dd>
+                                <dt>Entries inside</dt><dd>@_selectedNode.Children.Count</dd>
+                                <dt>Open</dt><dd>@(_selectedNode.IsExpanded ? "yes" : "no")</dd>
+                                <dt>Details</dt><dd>@(_selectedNode.Tag?.ToString() ?? "none")</dd>
                             </dl>
                         }
                         else
                         {
-                            <p class="muted">Click a node to inspect it.</p>
+                            <p class="muted">Click a person or a group to read it.</p>
                         }
+                    </div>
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="extras" Title="Check boxes: pick extras for a new hire" RazorCode="@Code.Extras" CSharpCode="@Code.ExtrasCs">
+            <Description><p>Check the extras for the new hire's onboarding order and the total follows. Checking a group checks everything in it, and a group with only some of its extras checked shows as partly checked, through <code>AutoCheck</code>; the buttons call <code>CheckAllAsync</code>.</p></Description>
+            <Controls>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _extrasTree!.CheckAllAsync(true)">Add everything</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _extrasTree!.CheckAllAsync(false)">Clear</ButtonControl>
+            </Controls>
+            <Demo>
+                <div class="explorer">
+                    <div class="tree">
+                        <TreeViewControl @ref="_extrasTree" Nodes="@_extras" ShowCheckboxes="true" AutoCheck="true" @bind-CheckedNodeIds="_checked"
+                                         ShowIcons="false" Height="100%" AriaLabel="New-hire extras" />
+                    </div>
+                    <div class="inspector" role="status">
+                        <h4>Onboarding order for Sybil Treeline</h4>
+                        <dl class="props">
+                            <dt>Standard kit</dt><dd>$1,450</dd>
+                            @foreach (var extra in Chosen)
+                            {
+                                <dt>@extra.Key</dt><dd>$@extra.Value</dd>
+                            }
+                            <dt><strong>Total</strong></dt><dd><strong>@((1450 + Chosen.Sum(e => e.Value)).ToString("C0"))</strong></dd>
+                        </dl>
                     </div>
                 </div>
             </Demo>
@@ -71,24 +103,28 @@
             <DocSection Id="doc-treenode" Title="TreeNode" Count='@DocSection.Label(Vocab.Node.Length, "properties")'>
                 <ApiTable Kind="ApiKind.Properties" Title="TreeNode" Rows="Vocab.Node" />
             </DocSection>
+            <DocSection Id="doc-methods" Title="Methods" Count='@DocSection.Label(Vocab.Methods.Length, "methods")'>
+                <ApiTable Kind="ApiKind.Methods" Title="Methods" Rows="Vocab.Methods" />
+                <p>Get the control with <code>&#64;ref</code>. Each method re-renders the tree and raises the matching <code>…Changed</code> callbacks, so bound lists stay in step.</p>
+            </DocSection>
             <DocSection Id="doc-keyboard" Title="Keyboard" Count='@DocSection.Label(Vocab.Keys.Length, "keys")'>
                 <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
             </DocSection>
-            <DocSection Id="doc-aria-output" Title="ARIA output" Count='@DocSection.Label(Vocab.Aria.Length, "classes")'>
-                <ApiTable Kind="ApiKind.CssClasses" Title="ARIA output" Rows="Vocab.Aria" />
+            <DocSection Id="doc-aria-output" Title="ARIA output" Count='@DocSection.Label(Vocab.Aria.Length, "attributes")'>
+                <ApiTable Kind="ApiKind.Values" Title="ARIA output" Rows="Vocab.Aria" />
             </DocSection>
         </DocSections>
     </Vocabulary>
 
     <Accessibility>
-        <p>
-            One tab stop: the root <code>div</code> has <code>role="tree"</code>, <code>tabindex</code> from <code>TabIndex</code>,
-            <code>aria-label</code> from <code>AriaLabel</code> (default "Tree") and <code>aria-activedescendant</code> naming the current row,
-            which is outlined while the tree has focus. Rows are flat <code>role="treeitem"</code> elements carrying <code>aria-level</code>,
-            <code>aria-posinset</code> and <code>aria-setsize</code>; there is no nested <code>role="group"</code>. Arrows and checkboxes are
-            not focusable, so the Keyboard table under Documentation is the whole model. A row's accessible name is its <code>Text</code>
-            only; Outline captions, secondary lines and badges are visible but not read as part of the name.
-        </p>
+        <ul>
+            <li>The tree is one Tab stop: the root <code>div</code> has <code>role="tree"</code>, <code>tabindex</code> from <code>TabIndex</code>, <code>aria-label</code> from <code>AriaLabel</code> (default "Tree"), <code>aria-multiselectable</code>, and <code>aria-activedescendant</code> naming the current row, which is outlined while the tree has keyboard focus.</li>
+            <li>Rows are <code>role="treeitem"</code> elements whose <code>aria-level</code>, <code>aria-posinset</code> and <code>aria-setsize</code> carry the hierarchy, with <code>aria-expanded</code>, <code>aria-selected</code>, <code>aria-disabled</code>, and <code>aria-checked</code> when <code>ShowCheckboxes</code> is on.</li>
+            <li>Expanding, collapsing, checking and renaming are keys on the current row, listed in the Keyboard table above; the expander arrows and checkboxes are pointer shortcuts for the same actions.</li>
+            <li>Each row is named by its node <code>Text</code> through <code>aria-label</code>, so put the words that identify a row in <code>Text</code> rather than only in a caption, secondary line or badge.</li>
+            <li>Set <code>AriaLabel</code> to say what the tree holds, as "Staff directory" and "New-hire extras" do on this page; distinct names matter most when a page has more than one tree.</li>
+            <li>The built-in search box sits in a <code>role="search"</code> region and is named by <code>SearchPlaceholder</code>; when nothing matches, <code>EmptyFilterText</code> appears as a <code>role="status"</code> message.</li>
+        </ul>
     </Accessibility>
 
     <Related>
@@ -100,6 +136,7 @@
 </FeatureDemoLayout>
 
 @code {
+    private TreeViewControl? _tree;
     private List<TreeNode> _treeNodes = [];
     private TreeNode? _selectedNode;
     private bool _useVb6Style = true;
@@ -116,6 +153,7 @@
     }
 
     private void HandleNodeSelected(TreeNode node) => _selectedNode = node;
+    private void TreeChanged(List<TreeNode> _) { }   // an expand or collapse re-renders the card, so Open stays true
 
     private static List<TreeNode> BuildSampleTree()
     {
@@ -124,43 +162,43 @@
             new TreeNode
             {
                 Id = "root-1",
-                Text = "Summer 2026 Program",
+                Text = "Staff Directory",
                 IsExpanded = true,
-                Tag = "Program root",
+                Tag = "Current staff",
                 Children =
                 [
                     new TreeNode
                     {
-                        Id = "europe",
-                        Text = "Europe Departures",
+                        Id = "reservations",
+                        Text = "Reservations",
                         IsExpanded = true,
                         Children =
                         [
-                            new TreeNode { Id = "lisbon", Text = "Lisbon City Break", Tag = "Status: On sale" },
-                            new TreeNode { Id = "amalfi", Text = "Amalfi Coast Week", Tag = "Status: Selling fast" },
-                            new TreeNode { Id = "reykjavik", Text = "Reykjavik Northern Lights", Tag = "Status: Waitlist" }
+                            new TreeNode { Id = "hermione-ranger", Text = "Hermione Ranger", Tag = "Team lead, Lisbon office" },
+                            new TreeNode { Id = "ron-measly", Text = "Ron Measly", Tag = "Reservations agent, Lisbon office" },
+                            new TreeNode { Id = "ginny-measly", Text = "Ginny Measly", Tag = "Reservations agent, Denver office" }
                         ]
                     },
                     new TreeNode
                     {
-                        Id = "long-haul",
-                        Text = "Long-haul Departures",
+                        Id = "tour-operations",
+                        Text = "Tour Operations",
                         IsExpanded = false,
                         Children =
                         [
-                            new TreeNode { Id = "kyoto", Text = "Kyoto Culture Tour", Tag = "42 of 50 seats sold" },
-                            new TreeNode { Id = "hoi-an", Text = "Hoi An Food Trail", Tag = "28 travelers booked" },
-                            new TreeNode { Id = "cape-town", Text = "Cape Town & Winelands", Tag = "18 departures confirmed" }
+                            new TreeNode { Id = "albus-door", Text = "Albus Door", Tag = "Operations planner, Kyoto office" },
+                            new TreeNode { Id = "rubeus-haggle", Text = "Rubeus Haggle", Tag = "Supplier coordinator, Cape Town office" },
+                            new TreeNode { Id = "luna-goodlove", Text = "Luna Goodlove", Tag = "Guide scheduler, Kyoto office" }
                         ]
                     },
                     new TreeNode
                     {
-                        Id = "cruises",
-                        Text = "Cruises",
+                        Id = "finance",
+                        Text = "Finance",
                         Children =
                         [
-                            new TreeNode { Id = "greek-islands", Text = "Greek Islands Cruise" },
-                            new TreeNode { Id = "fjords", Text = "Norwegian Fjords Cruise" }
+                            new TreeNode { Id = "minerva-mcgadget", Text = "Minerva McGadget", Tag = "Finance manager, Denver office" },
+                            new TreeNode { Id = "filius-flipwick", Text = "Filius Flipwick", Tag = "Payroll specialist, Denver office" }
                         ]
                     }
                 ]
@@ -168,15 +206,31 @@
             new TreeNode
             {
                 Id = "root-2",
-                Text = "Policies & Supplier Terms",
+                Text = "Joining in December",
                 Children =
                 [
-                    new TreeNode { Id = "booking-terms", Text = "Booking Terms 2026" },
-                    new TreeNode { Id = "supplier-agreement", Text = "Supplier Master Agreement" }
+                    new TreeNode { Id = "cedric-diggle", Text = "Cedric Diggle", Tag = "Starts December 1, Lisbon office" },
+                    new TreeNode { Id = "sybil-treeline", Text = "Sybil Treeline", Tag = "Starts December 7, Denver office" }
                 ]
             }
         ];
     }
+
+    // Extras: the leaf ids are the extras' names, and Prices holds what each one costs
+    private TreeViewControl? _extrasTree;
+    private static readonly Dictionary<string, int> Prices = new()
+    {
+        ["Headset"] = 80, ["Second monitor"] = 210, ["Spreadsheet basics"] = 65, ["Customer care workshop"] = 120, ["First aid course"] = 95, ["Transit pass"] = 120,
+    };
+    private readonly List<TreeNode> _extras =
+    [
+        new() { Id = "desk-setup", Text = "Desk setup", IsExpanded = true, Children = [Extra("Headset"), Extra("Second monitor")] },
+        new() { Id = "training", Text = "Training", IsExpanded = true, Children = [Extra("Spreadsheet basics"), Extra("Customer care workshop"), Extra("First aid course")] },
+        Extra("Transit pass"),
+    ];
+    private IReadOnlyList<string> _checked = new[] { "Headset" };
+    private static TreeNode Extra(string name) => new() { Id = name, Text = $"{name}, ${Prices[name]}" };
+    private IEnumerable<KeyValuePair<string, int>> Chosen => Prices.Where(p => _checked.Contains(p.Key));
 
     // Vocabulary rows from the partial classes and models. 2026-10-24: each grouped row keeps one declared type so Type and
     // Default are exact; Keys and Aria from HandleKeyDown and the markup.
@@ -187,13 +241,13 @@
             new("Nodes", "Root nodes; each carries its <code>Children</code>. A null list is replaced by an empty one on first use. Ids must be non-empty and unique across the tree, or the control throws.", "List&lt;TreeNode&gt;?", "null"),
             new("SelectedNode / SelectedNodeChanged", "The primary selected node, two-way. Setting it selects the node with that <code>Id</code> and clears the others unless <code>AllowMultiSelect</code> is on. Ignored while <code>SelectedNodeIds</code> is set, which then supplies it.", "TreeNode?", "null"),
             new("SelectedNodeIds / CheckedNodeIds / ExpandedNodeIds", "Id lists that drive selection, checks and expansion, each with a <code>…Changed</code> callback. Applied when the sequence changes; null leaves the node flags alone.", "IReadOnlyList&lt;string&gt;?", "null"),
-            new("OnNodeClick / OnNodeDoubleClick / OnNodeActivated / OnNodeExpand", "<code>OnNodeClick</code> follows a click, after the selection. <code>OnNodeDoubleClick</code> follows a double-click, and Enter when <code>OnNodeActivated</code> has no handler; <code>OnNodeActivated</code> is raised by Enter only. <code>OnNodeExpand</code> is raised when a node becomes expanded, after any lazy load.", "EventCallback&lt;TreeNode&gt;"),
+            new("OnNodeClick / OnNodeDoubleClick / OnNodeActivated / OnNodeExpand", "<code>OnNodeClick</code> follows a click, after the selection. <code>OnNodeDoubleClick</code> follows a double-click, and Enter when <code>OnNodeActivated</code> has no handler; <code>OnNodeActivated</code> is raised by Enter only. <code>OnNodeExpand</code> is raised when a single node becomes expanded, after any lazy load; <code>ExpandAllAsync</code> does not raise it.", "EventCallback&lt;TreeNode&gt;"),
             new("ToggleOnNodeClick", "A plain click on a parent expands or collapses it before selecting it; a Ctrl, Cmd or Shift click only selects. The expander arrow toggles regardless.", "bool", "true"),
             new("ShowIcons", "Draws each node's <code>IconCss</code> (<code>ExpandedIconCss</code> while expanded). With the VB6 style a parent without its own icon gets a folder in <code>FolderStyle</code> and a leaf a spacer; the Standard style draws nothing for a node without <code>IconCss</code>.", "bool", "true"),
             new("FolderStyle", "<code>Yellow</code>, <code>Grey</code> or <code>None</code>. Read only when the VB6 style is on; it picks the root modifier class and the folder icon.", "TreeFolderStyle", "TreeFolderStyle.Yellow"),
             new("UseVb6TreeStyle", "Dotted connector lines and plus/minus boxes, as in the Windows common control. A <code>CssClass</code> containing <code>fx-treeview-vb6</code> turns it on too.", "bool", "false"),
             new("TreeIndentPixels", "Indent per level in the VB6 and Outline styles. The Standard style without VB6 lines ignores it and indents 20px per level.", "int", "16"),
-            new("ShowCheckboxes / AutoCheck", "A checkbox per node; Space toggles the focused one. <code>AutoCheck</code> cascades a check down to the children and sets each parent checked or indeterminate from its children.", "bool", "false"),
+            new("ShowCheckboxes / AutoCheck", "A checkbox per node in the Standard display mode (Outline rows draw none, though <code>aria-checked</code> and Space still apply); Space toggles the focused one. <code>AutoCheck</code> cascades a check down to the children and sets each parent checked or indeterminate from its children.", "bool", "false"),
             new("AllowMultiSelect", "Ctrl-click toggles a node, Shift-click selects the visible range from the last node selected without Shift, Ctrl+A selects every visible node. Off, a click or Space selects one node.", "bool", "false"),
             new("Height / CssClass", "<code>Height</code> sizes the root with <code>overflow:auto</code>; <code>CssClass</code> is appended to the root element.", "string?", "null"),
             new("TabIndex", "The <code>tabindex</code> of the root element, the tree's only tab stop.", "int", "0"),
@@ -202,9 +256,9 @@
             new("DisplayMode", "<code>Standard</code> is the classic tree. <code>Outline</code> draws status circles and dots, a connector rail, the node's <code>Caption</code>, <code>SecondaryText</code>, <code>SecondaryIcon</code> and <code>BadgeText</code>, and a chevron on the right.", "TreeViewDisplayMode", "TreeViewDisplayMode.Standard"),
             new("ShowSearchBox", "Shows a search box above the tree whose text filters the nodes as you type. <code>FilterText</code> wins when both are set.", "bool", "false"),
             new("SearchPlaceholder", "Placeholder and <code>aria-label</code> of the search box.", "string", "\"Search\""),
-            new("SearchText / SearchTextChanged", "The search box text, two-way; it filters even while the box is hidden. A node stays visible when its <code>Text</code> contains the filter, ignoring case (current culture), or when a descendant does; the branches above a match are shown expanded whatever their <code>IsExpanded</code>. Whitespace only means no filter.", "string?", "null"),
+            new("SearchText / SearchTextChanged", "The search box text, two-way; it filters even while the box is hidden. A node stays visible when its <code>Text</code> contains the filter, ignoring case (current culture), or when a descendant does; the branches above a match are shown expanded whatever their <code>IsExpanded</code>. The children of a matching group are hidden unless they match too, and nodes cannot be expanded or collapsed while a filter is active. Whitespace only means no filter.", "string?", "null"),
             new("FilterText", "A filter set by the page. It takes precedence over the search box text and matches the same way.", "string?", "null"),
-            new("EmptyFilterText", "Shown in a status region under the search box when its filter matches nothing. Only with <code>ShowSearchBox</code>: a host <code>FilterText</code> that matches nothing leaves the tree empty, as before.", "string", "\"No matches\""),
+            new("EmptyFilterText", "Shown in a status region under the tree when the search box filter matches nothing. Only with <code>ShowSearchBox</code>: a host <code>FilterText</code> that matches nothing leaves the tree empty, as before.", "string", "\"No matches\""),
             new("AllowEditing", "F2 or a double-click opens an inline rename with Save and Cancel buttons; Enter commits, Escape cancels, an empty name is refused. Not shown on this page.", "bool", "false"),
             new("NodeEditing / NodeEditCommitting / NodeEdited", "Before the editor opens, before the new text is applied, and after it. <code>Cancel</code> vetoes the first two; <code>Error</code> on the second shows the message instead of committing.", "EventCallback&lt;TreeNodeEditEventArgs&gt;"),
             new("AllowDragAndDrop", "Nodes become draggable; dropping one on another moves it inside that node as its last child. Not shown on this page.", "bool", "false"),
@@ -215,7 +269,7 @@
             new("LoadChildren", "Called the first time a node with <code>HasUnloadedChildren</code> expands, and for such nodes that start expanded; the result replaces its <code>Children</code>. A failure collapses the node and reports through <code>Error</code>.", "Func&lt;TreeNode, CancellationToken, Task&lt;IReadOnlyList&lt;TreeNode&gt;&gt;&gt;?", "null"),
             new("NodeTemplate", "Replaces the node text; key presses inside it do not reach the tree.", "RenderFragment&lt;TreeNode&gt;?", "null"),
             new("NodeComparer", "Sorts the siblings at every level.", "IComparer&lt;TreeNode&gt;?", "null"),
-            new("NodesChanged", "Raised with the root list after an expand or collapse, a committed rename, and <code>AddNodeAsync</code>, <code>RemoveNodeAsync</code> or <code>MoveNodeAsync</code>.", "EventCallback&lt;List&lt;TreeNode&gt;&gt;"),
+            new("NodesChanged", "Raised with the root list after a single node expands or collapses (not <code>ExpandAllAsync</code> or <code>CollapseAllAsync</code>), a committed rename, and <code>AddNodeAsync</code>, <code>RemoveNodeAsync</code> or <code>MoveNodeAsync</code>.", "EventCallback&lt;List&lt;TreeNode&gt;&gt;"),
             new("Error", "Raised with the message of a failed lazy load, rename or move; the same message appears in an alert under the tree.", "EventCallback&lt;string&gt;"),
         };
         public static readonly ApiRow[] Node =
@@ -232,6 +286,20 @@
             new("SecondaryText / SecondaryIcon", "Outline mode only: a second line under the text, with an icon before it given as a <code>FlexIcons</code> name or raw SVG path data.", "string?", "null"),
             new("BadgeText", "Outline mode only: a right-aligned label after the text. <code>RollUpStatus</code> with <code>setBadges</code> writes a done/total count here.", "string?", "null"),
         };
+        public static readonly ApiRow[] Methods =
+        {
+            new("SelectNodesAsync(IEnumerable&lt;string&gt; ids)", "Selects those nodes: only the first without <code>AllowMultiSelect</code>, and never a disabled one. Raises <code>SelectedNodeChanged</code> for the first and the selection callbacks.", "Task"),
+            new("SetCheckedAsync(string id, bool value)", "Checks or unchecks one node, cascading with <code>AutoCheck</code>. Ignored for a disabled or unknown node.", "Task"),
+            new("CheckAllAsync(bool value = true)", "Checks every enabled node, or unchecks them with false, as Add everything and Clear do in the second example.", "Task"),
+            new("SetExpandedAsync(string id, bool expanded)", "Expands or collapses one node, first loading its children through <code>LoadChildren</code> when they are not loaded yet.", "Task"),
+            new("ExpandAllAsync(bool loadChildren = false)", "Expands every enabled branch whose children are known; with true it also loads the lazy branches, one at a time.", "Task"),
+            new("CollapseAllAsync()", "Collapses every node, including branches still loading.", "Task"),
+            new("EnsureVisibleAsync(string id)", "Expands the node's ancestors, then focuses and scrolls to it. Throws for an unknown node, or one the current filter hides.", "Task"),
+            new("BeginEditAsync(string id) / CommitEditAsync() / CancelEditAsync()", "Open, save or close the inline rename, as F2, Enter and Escape do; only with <code>AllowEditing</code>. Opening raises <code>NodeEditing</code>, which can cancel; saving refuses an empty name, then raises <code>NodeEditCommitting</code> and <code>NodeEdited</code>.", "Task"),
+            new("AddNodeAsync(TreeNode node, string? parentId = null)", "Adds a node at the end of the roots, or of that parent's children. Throws for an unknown parent, or one whose children are not loaded yet.", "Task"),
+            new("RemoveNodeAsync(string id)", "Removes the node with its children. Ignored for a disabled or unknown node.", "Task"),
+            new("MoveNodeAsync(string id, string targetId, TreeDropPosition position = Inside)", "Moves a node as a drop does: <code>CanDrop</code> and <code>NodeMoving</code> can refuse it, then <code>NodeMoved</code> is raised. Throws for an unknown node.", "Task"),
+        };
         public static readonly ApiRow[] Keys =
         {
             new("Tab", "Enters or leaves the tree. The root element is the single tab stop; the current node is named through <code>aria-activedescendant</code> and outlined while the tree has focus. Expander arrows and checkboxes are not tab stops."),
@@ -245,7 +313,6 @@
             new("Ctrl+A / Cmd+A", "With <code>AllowMultiSelect</code>, selects every visible enabled node."),
             new("A printable character", "Type-ahead: moves to the next visible node after the current one whose <code>Text</code> starts with that character, ignoring case, wrapping to the top, and selects it. One character at a time, no multi-character buffer. With Ctrl or Alt held the key is ignored."),
             new("Enter / Escape in the rename box", "Commit or cancel the rename. While the box is open the tree ignores every other key."),
-            new("Escape, asterisk", "Not handled by the tree; the asterisk is treated as a type-ahead character."),
         };
         public static readonly ApiRow[] Aria =
         {
@@ -255,7 +322,7 @@
             new("aria-level / aria-posinset / aria-setsize", "On every row: depth from 1, position among the siblings from 1, and the sibling count. They carry the hierarchy, since the rows are not nested."),
             new("aria-expanded", "true or false on a row with children, or with children still to load; omitted on a leaf. While a filter is active it reflects the filtered view, not <code>IsExpanded</code>."),
             new("aria-selected", "true or false on every row, from <code>IsSelected</code>."),
-            new("aria-checked", "Only with <code>ShowCheckboxes</code>: mixed, true or false on the row. The checkbox input inside repeats it and has <code>tabindex</code> -1."),
+            new("aria-checked", "Only with <code>ShowCheckboxes</code>: mixed, true or false on the row. In the Standard mode the checkbox input inside repeats it and has <code>tabindex</code> -1."),
             new("aria-disabled", "true or false on every row, from <code>IsDisabled</code>."),
             new("aria-busy", "true on a row while <code>LoadChildren</code> runs for it, with a <code>role status</code> span reading Loading… in the row; omitted otherwise."),
             new("role button", "The expander arrow of a parent in Standard mode and the chevron in Outline mode, labeled Expand or Collapse plus the node text. Neither is focusable; they are mouse targets. A leaf's arrow is <code>aria-hidden</code>."),
@@ -271,12 +338,14 @@
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Explorer = @"<ButtonGroupControl Items=""_styleItems"" @bind-Values=""_styleValues"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Folder style"" />
+        public const string Explorer = @"<ButtonGroupControl Items=""_styleItems"" @bind-Values=""_styleValues"" Selection=""ChoiceSelectionMode.Single"" Enabled=""@_useVb6Style"" AriaLabel=""Folder style"" />
 <ToggleButtonControl @bind-Selected=""_useVb6Style"">VB6 lines</ToggleButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""() => _tree!.ExpandAllAsync()"">Expand all</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""() => _tree!.CollapseAllAsync()"">Collapse all</ButtonControl>
 
 <div class=""explorer"">
     <div class=""tree"">
-        <TreeViewControl Nodes=""@_treeNodes""
+        <TreeViewControl @ref=""_tree"" Nodes=""@_treeNodes"" ShowSearchBox=""true"" SearchPlaceholder=""Find a person"" AriaLabel=""Staff directory""
                          SelectedNode=""@_selectedNode""
                          SelectedNodeChanged=""HandleNodeSelected""
                          ToggleOnNodeClick=""true""
@@ -284,27 +353,28 @@
                          UseVb6TreeStyle=""@_useVb6Style""
                          FolderStyle=""@FolderStyle""
                          TreeIndentPixels=""16""
-                         Height=""100%"" />
+                         NodesChanged=""TreeChanged"" />
     </div>
     <div class=""inspector"">
-        <h4>Selected node</h4>
+        <h4>Selected in the directory</h4>
         @if (_selectedNode is not null)
         {
             <dl class=""props"">
-                <dt>Id</dt><dd><code>@_selectedNode.Id</code></dd>
-                <dt>Text</dt><dd>@_selectedNode.Text</dd>
-                <dt>Children</dt><dd>@_selectedNode.Children.Count</dd>
-                <dt>Expanded</dt><dd>@(_selectedNode.IsExpanded ? ""yes"" : ""no"")</dd>
-                <dt>Tag</dt><dd>@(_selectedNode.Tag?.ToString() ?? ""none"")</dd>
+                <dt>Name</dt><dd><strong>@_selectedNode.Text</strong></dd>
+                <dt>Kind</dt><dd>@(_selectedNode.Children.Count > 0 ? ""Group"" : ""Person"")</dd>
+                <dt>Entries inside</dt><dd>@_selectedNode.Children.Count</dd>
+                <dt>Open</dt><dd>@(_selectedNode.IsExpanded ? ""yes"" : ""no"")</dd>
+                <dt>Details</dt><dd>@(_selectedNode.Tag?.ToString() ?? ""none"")</dd>
             </dl>
         }
         else
         {
-            <p class=""muted"">Click a node to inspect it.</p>
+            <p class=""muted"">Click a person or a group to read it.</p>
         }
     </div>
 </div>";
-        public const string ExplorerCs = @"private List<TreeNode> _treeNodes = [];
+        public const string ExplorerCs = @"private TreeViewControl? _tree;
+private List<TreeNode> _treeNodes = [];
 
 private TreeNode? _selectedNode;
 
@@ -324,6 +394,7 @@ protected override void OnInitialized()
 }
 
 private void HandleNodeSelected(TreeNode node) => _selectedNode = node;
+private void TreeChanged(List<TreeNode> _) { }   // an expand or collapse re-renders the card, so Open stays true
 
 private static List<TreeNode> BuildSampleTree()
 {
@@ -332,43 +403,43 @@ private static List<TreeNode> BuildSampleTree()
         new TreeNode
         {
             Id = ""root-1"",
-            Text = ""Summer 2026 Program"",
+            Text = ""Staff Directory"",
             IsExpanded = true,
-            Tag = ""Program root"",
+            Tag = ""Current staff"",
             Children =
             [
                 new TreeNode
                 {
-                    Id = ""europe"",
-                    Text = ""Europe Departures"",
+                    Id = ""reservations"",
+                    Text = ""Reservations"",
                     IsExpanded = true,
                     Children =
                     [
-                        new TreeNode { Id = ""lisbon"", Text = ""Lisbon City Break"", Tag = ""Status: On sale"" },
-                        new TreeNode { Id = ""amalfi"", Text = ""Amalfi Coast Week"", Tag = ""Status: Selling fast"" },
-                        new TreeNode { Id = ""reykjavik"", Text = ""Reykjavik Northern Lights"", Tag = ""Status: Waitlist"" }
+                        new TreeNode { Id = ""hermione-ranger"", Text = ""Hermione Ranger"", Tag = ""Team lead, Lisbon office"" },
+                        new TreeNode { Id = ""ron-measly"", Text = ""Ron Measly"", Tag = ""Reservations agent, Lisbon office"" },
+                        new TreeNode { Id = ""ginny-measly"", Text = ""Ginny Measly"", Tag = ""Reservations agent, Denver office"" }
                     ]
                 },
                 new TreeNode
                 {
-                    Id = ""long-haul"",
-                    Text = ""Long-haul Departures"",
+                    Id = ""tour-operations"",
+                    Text = ""Tour Operations"",
                     IsExpanded = false,
                     Children =
                     [
-                        new TreeNode { Id = ""kyoto"", Text = ""Kyoto Culture Tour"", Tag = ""42 of 50 seats sold"" },
-                        new TreeNode { Id = ""hoi-an"", Text = ""Hoi An Food Trail"", Tag = ""28 travelers booked"" },
-                        new TreeNode { Id = ""cape-town"", Text = ""Cape Town & Winelands"", Tag = ""18 departures confirmed"" }
+                        new TreeNode { Id = ""albus-door"", Text = ""Albus Door"", Tag = ""Operations planner, Kyoto office"" },
+                        new TreeNode { Id = ""rubeus-haggle"", Text = ""Rubeus Haggle"", Tag = ""Supplier coordinator, Cape Town office"" },
+                        new TreeNode { Id = ""luna-goodlove"", Text = ""Luna Goodlove"", Tag = ""Guide scheduler, Kyoto office"" }
                     ]
                 },
                 new TreeNode
                 {
-                    Id = ""cruises"",
-                    Text = ""Cruises"",
+                    Id = ""finance"",
+                    Text = ""Finance"",
                     Children =
                     [
-                        new TreeNode { Id = ""greek-islands"", Text = ""Greek Islands Cruise"" },
-                        new TreeNode { Id = ""fjords"", Text = ""Norwegian Fjords Cruise"" }
+                        new TreeNode { Id = ""minerva-mcgadget"", Text = ""Minerva McGadget"", Tag = ""Finance manager, Denver office"" },
+                        new TreeNode { Id = ""filius-flipwick"", Text = ""Filius Flipwick"", Tag = ""Payroll specialist, Denver office"" }
                     ]
                 }
             ]
@@ -376,14 +447,49 @@ private static List<TreeNode> BuildSampleTree()
         new TreeNode
         {
             Id = ""root-2"",
-            Text = ""Policies & Supplier Terms"",
+            Text = ""Joining in December"",
             Children =
             [
-                new TreeNode { Id = ""booking-terms"", Text = ""Booking Terms 2026"" },
-                new TreeNode { Id = ""supplier-agreement"", Text = ""Supplier Master Agreement"" }
+                new TreeNode { Id = ""cedric-diggle"", Text = ""Cedric Diggle"", Tag = ""Starts December 1, Lisbon office"" },
+                new TreeNode { Id = ""sybil-treeline"", Text = ""Sybil Treeline"", Tag = ""Starts December 7, Denver office"" }
             ]
         }
     ];
 }";
+        public const string Extras = @"<ButtonControl CssClass=""btn-sm"" OnClick=""() => _extrasTree!.CheckAllAsync(true)"">Add everything</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""() => _extrasTree!.CheckAllAsync(false)"">Clear</ButtonControl>
+
+<div class=""explorer"">
+    <div class=""tree"">
+        <TreeViewControl @ref=""_extrasTree"" Nodes=""@_extras"" ShowCheckboxes=""true"" AutoCheck=""true"" @bind-CheckedNodeIds=""_checked""
+                         ShowIcons=""false"" Height=""100%"" AriaLabel=""New-hire extras"" />
+    </div>
+    <div class=""inspector"" role=""status"">
+        <h4>Onboarding order for Sybil Treeline</h4>
+        <dl class=""props"">
+            <dt>Standard kit</dt><dd>$1,450</dd>
+            @foreach (var extra in Chosen)
+            {
+                <dt>@extra.Key</dt><dd>$@extra.Value</dd>
+            }
+            <dt><strong>Total</strong></dt><dd><strong>@((1450 + Chosen.Sum(e => e.Value)).ToString(""C0""))</strong></dd>
+        </dl>
+    </div>
+</div>";
+        public const string ExtrasCs = @"// Extras: the leaf ids are the extras' names, and Prices holds what each one costs
+private TreeViewControl? _extrasTree;
+private static readonly Dictionary<string, int> Prices = new()
+{
+    [""Headset""] = 80, [""Second monitor""] = 210, [""Spreadsheet basics""] = 65, [""Customer care workshop""] = 120, [""First aid course""] = 95, [""Transit pass""] = 120,
+};
+private readonly List<TreeNode> _extras =
+[
+    new() { Id = ""desk-setup"", Text = ""Desk setup"", IsExpanded = true, Children = [Extra(""Headset""), Extra(""Second monitor"")] },
+    new() { Id = ""training"", Text = ""Training"", IsExpanded = true, Children = [Extra(""Spreadsheet basics""), Extra(""Customer care workshop""), Extra(""First aid course"")] },
+    Extra(""Transit pass""),
+];
+private IReadOnlyList<string> _checked = new[] { ""Headset"" };
+private static TreeNode Extra(string name) => new() { Id = name, Text = $""{name}, ${Prices[name]}"" };
+private IEnumerable<KeyValuePair<string, int>> Chosen => Prices.Where(p => _checked.Contains(p.Key));";
     }
 }

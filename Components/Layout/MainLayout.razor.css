@@ -288,3 +288,8 @@
 .preview-banner ::deep .fx-alert { margin: 0; border-radius: 0; border-width: 0 0 1px; padding: 7px 24px; justify-content: center; align-items: center; font-size: 13px; }
 .preview-banner ::deep .fx-alert-content { flex-grow: 0; }
 .preview-banner ::deep .fx-alert a { color: inherit; text-decoration: underline; font-weight: 600; }
+
+/* Toasts start below the sticky top bar, so they do not cover the menu or the Quick Start button (2026-11-15). */
+.showcase-shell-layout ::deep .fx-notification-container { top: 108px; }
+/* On a phone the preview banner wraps to two lines, so the bar ends lower; the library's 320px minimum width would also run off a 320px screen. */
+@media (max-width: 480px) { .showcase-shell-layout ::deep .fx-notification-container { top: 120px; left: 12px; right: 12px; min-width: 0; max-width: none; } }

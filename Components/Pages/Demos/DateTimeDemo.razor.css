@@ -1,7 +1,19 @@
-/* 2026-10-12: Date & time page. No Bootstrap names in here. */
-.fields { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
-.field { display: flex; flex-direction: column; gap: 4px; }
-.field-label { font-size: 12px; color: #64748b; }
-.result { font-size: 13px; color: #475569; margin: 12px 0 0; }
+/* Date & time page. btn-sm is ButtonControl's own small size class. */
+/* App cards, as on the other component pages: white with a soft shadow, the sentence in a footer band */
+.dt { max-width: 760px; padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+.dt > .result { max-width: none; margin: 16px -18px -16px; padding: 10px 18px; border-top: 1px solid #f1f5f9; border-radius: 0 0 10px 10px; background: #f8fafc; }
+.dt ::deep .fx-button.btn-sm { border-color: #cbd5e1; background: #fff; color: #334155; }
+.dt ::deep .fx-button.btn-sm:hover:not(:disabled) { border-color: #94a3b8; background: #f8fafc; }
+
+.fields { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field-label { font-size: 12.5px; font-weight: 600; color: #475569; }
+.result { font-size: 13px; color: #475569; margin: 12px 0 0; max-width: 640px; }
+
+/* Departures: the calendar at the left, the picked dates in a light panel beside it */
 .cal-row { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
-.cal-row .departures { margin: 0; max-width: 260px; }
+.cal-row .departures { flex: 1; min-width: 200px; max-width: 320px; margin: 0; padding: 12px 14px; border: 1px solid #f1f5f9; border-radius: 8px; background: #f8fafc; color: #334155; line-height: 1.6; }
+/* a day cell written with DayTemplate is the page's markup: the day, and its price small enough for the cell */
+.day { display: block; line-height: 1.1; }
+.day-price { display: block; font-size: 9.5px; line-height: 1; opacity: 0.8; font-variant-numeric: tabular-nums; }

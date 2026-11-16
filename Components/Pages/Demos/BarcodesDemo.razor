@@ -2,7 +2,9 @@
 @using FlexCore.Showcase.Components.Shared
 
 @* 2026-10-12: new page on FeatureDemoLayout; checked against Barcode*, QrCodeControl.razor*, FlexCore.csproj (ZXing.Net 0.16.11)
-   in FlexCore 0.2.48. *@
+   in FlexCore 0.2.48.
+   2026-11-15: examples rebuilt (luggage tag, trip voucher); text re-checked against FlexCore 0.2.50.
+   2026-11-15: example story moved to the Warehouse and logistics theme. *@
 
 <PageTitle>Blazor Barcode and QR Code Generator — FlexCore</PageTitle>
 
@@ -11,35 +13,52 @@
                    SourcePath="BarcodeControl.razor; QrCodeControl.razor; BarcodeModels.cs">
     <Overview>
         <p>
-            <code>BarcodeControl</code> and <code>QrCodeControl</code> are Blazor barcode generators that draw a value as a QR code or one of nine linear barcodes, such as EAN-13. Use them for product labels, tickets, shipping slips or a link to share: the code is encoded in C# with ZXing.Net and drawn as inline SVG, so there is no image file to serve. A value the type cannot encode shows the encoder's message instead of bars.
+            <code>BarcodeControl</code> and <code>QrCodeControl</code> are Blazor barcode generators that draw a value as a QR code or one of nine linear barcodes, such as EAN-13. Use them for bin tags, shipping labels, packing slips or a link to share: the code is encoded in C# with ZXing.Net and drawn as inline SVG, so there is no image file to serve. A value the type cannot encode shows the encoder's message instead of bars.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="barcode" Title="Barcode" RazorCode="@Code.Barcode" CSharpCode="@Code.BarcodeCs">
-            <Description><p>Pick a symbology and edit the value; break its rules (EAN-13 wants 12 or 13 digits) and the encoder's message replaces the bars.</p></Description>
+            <Description><p>Build a bin tag: pick a product and the symbology the scanner needs, or edit the value. Break a symbology's rules (EAN-13 wants 12 or 13 digits) and the encoder's message replaces the bars.</p></Description>
             <Demo>
                 <div class="controls">
+                    <ButtonGroupControl Items="_productItems" Values="@(new[] { _product })" ValuesChanged="PickProduct" AriaLabel="Product" />
                     <ButtonGroupControl Items="_typeItems" Values="@(new[] { _type.ToString() })" ValuesChanged="PickType" AriaLabel="Symbology" />
-                    <TextBoxControl @bind-Value="_barcodeValue" UpdateOnInput="true" Width="200px" Placeholder="Value to encode" />
+                    <TextBoxControl @bind-Value="_barcodeValue" UpdateOnInput="true" Width="170px" Placeholder="Value to encode" aria-label="Value to encode" />
                     <ToggleButtonControl @bind-Selected="_showText">Show text</ToggleButtonControl>
                 </div>
-                <BarcodeControl Value="@(_barcodeValue ?? "")" Type="_type" ShowText="_showText" BarHeight="60" />
+                <div class="tag">
+                    <span class="tag-hole"></span>
+                    <div class="tag-title">@Tag.Bin</div>
+                    <div class="tag-name">@_product · @Tag.Zone zone</div>
+                    <BarcodeControl Value="@(_barcodeValue ?? "")" Type="_type" ShowText="_showText" BarHeight="56" ForegroundColor="#1e293b"
+                                    AriaLabel="@($"Bin tag barcode for {_product}")" />
+                </div>
             </Demo>
         </DemoExample>
 
         <DemoExample Id="qr" Title="QR code" RazorCode="@Code.Qr" CSharpCode="@Code.QrCs">
-            <Description><p>Change the size and error correction; higher correction survives more damage and needs more modules.</p></Description>
+            <Description><p>Choose what scanning the packing slip should do: the same control encodes a link, an email address, a phone number or a map position. Higher error correction survives more damage and needs more modules.</p></Description>
             <Demo>
                 <div class="controls">
-                    <TextBoxControl @bind-Value="_qrValue" UpdateOnInput="true" Width="280px" Placeholder="Text or URL" />
+                    <ButtonGroupControl Items="_scanItems" Values="@(new[] { _scan })" ValuesChanged="PickScan" AriaLabel="Scan to" />
                     <ButtonGroupControl Items="_eccItems" Values="@(new[] { _ecc.ToString() })" ValuesChanged="PickEcc" AriaLabel="Error correction" />
                 </div>
                 <div class="qr-row">
-                    <QrCodeControl Value="@(_qrValue ?? "")" Size="@Size" ErrorCorrection="_ecc" />
+                    <div class="slip">
+                        <div>
+                            <div class="tag-title">Shipment SHP-0456</div>
+                            <div class="tag-name">Road freight · 12 cartons · Dock 4</div>
+                            <div class="slip-scan">Scan to @_scanItems.First(i => i.Value == _scan).Text.ToLowerInvariant()</div>
+                        </div>
+                        <QrCodeControl Value="@Payload" Size="@Size" ErrorCorrection="_ecc" ForegroundColor="#1e293b"
+                                       AriaLabel="@($"QR code for shipment SHP-0456: {_scan}")" />
+                    </div>
                     <div class="field">
                         <span class="field-label">Size @Size px</span>
                         <SliderControl @bind-Value="_size" Min="80" Max="240" Step="20" ShowValue="false" aria-label="QR code size" />
+                        <span class="field-label">Encodes</span>
+                        <code class="payload">@Payload</code>
                     </div>
                 </div>
             </Demo>
@@ -72,47 +91,68 @@
 
     <Accessibility>
         <ul>
-            <li>The SVG is <code>role="img"</code> with an <code>aria-label</code> that defaults to "<em>Type</em> barcode: <em>value</em>" or "QR code: <em>value</em>". Set <code>AriaLabel</code> when the value is not meaningful to read out.</li>
-            <li>An encoding error renders as <code>role="alert"</code> text inside the frame.</li>
-            <li>Nothing here is focusable or interactive; the controls above the codes are ordinary FlexCore inputs.</li>
-            <li>The barcode's human-readable text is drawn inside the SVG at 11px monospace; it is not selectable. Print the value next to the code if users must copy it.</li>
+            <li>Each code is an SVG with <code>role="img"</code> and an <code>aria-label</code> that defaults to "<em>Type</em> barcode: <em>value</em>" or "QR code: <em>value</em>". Set <code>AriaLabel</code> to say what the code is for when the raw value means little read aloud, as both examples do.</li>
+            <li>A value the type cannot encode shows the encoder's message as <code>role="alert"</code> text in the frame, in place of the code.</li>
+            <li>The code is a static image outside the Tab order. Place the inputs that change it next to it, each with its own label.</li>
+            <li>With <code>ShowText</code>, the value is also drawn under the bars as SVG text. Where people must read or copy the value, print it as page text beside the code as well.</li>
         </ul>
     </Accessibility>
 
     <Related>
         <ul>
-            <li>Badges, cards and the other small display controls: <a href="demo/new-components">UI elements</a>.</li>
-            <li>Codes inside printed output: <a href="demo/reports/package-costs">Report writer</a>.</li>
+            <li>Badges, alerts and the other small display controls: <a href="demo/new-components">UI elements</a>.</li>
+            <li>A receiving workflow whose bin tag step links to the first example: <a href="demo/diagram#shapes">Diagram</a>.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
 
 @code {
     // Barcode
-    private BarcodeType _type = BarcodeType.Code128;
-    private string? _barcodeValue = "FLEX-9988";
-    private bool _showText = true;
-    private static readonly Dictionary<BarcodeType, string> Samples = new()
+    private sealed record BinTag(string Bin, string Zone, string Sku, string Digits);
+    private static readonly Dictionary<string, BinTag> Tags = new()
     {
-        [BarcodeType.Code128] = "FLEX-9988",
-        [BarcodeType.Code39] = "FLEX-9988",
-        [BarcodeType.Ean13] = "4006381333931",
-        [BarcodeType.UpcA] = "036000291452",
-        [BarcodeType.Itf] = "12345678",
+        ["Camping stove"] = new("C-02-01", "Bulk", "SKU-48213", "200000048213"),
+        ["Headlamp"] = new("A-12-03", "Ambient", "SKU-51907", "200000051907"),
+        ["Trail mix"] = new("B-07-02", "Ambient", "SKU-30466", "200000030466"),
     };
+    private readonly SelectionItem[] _productItems = Tags.Keys.Select(n => new SelectionItem(n, n)).ToArray();
     private readonly SelectionItem[] _typeItems =
     {
-        new("Code128", "Code 128"), new("Code39", "Code 39"), new("Ean13", "EAN-13"), new("UpcA", "UPC-A"), new("Itf", "ITF"),
+        new("Code128", "Code 128"), new("Code39", "Code 39"), new("Ean13", "EAN-13"), new("Itf", "ITF"),
     };
+    private string _product = "Camping stove";
+    private BarcodeType _type = BarcodeType.Code128;
+    private string? _barcodeValue = "SKU-48213";
+    private bool _showText = true;
+    private BinTag Tag => Tags[_product];
+    // Code 128 and Code 39 take the lettered SKU; EAN-13 and ITF take digits only.
+    private string Sample => _type is BarcodeType.Ean13 or BarcodeType.Itf ? Tag.Digits : Tag.Sku;
+    private void PickProduct(IReadOnlyList<string> values)
+    {
+        if (values.Count == 0) return;
+        _product = values[0];
+        _barcodeValue = Sample;
+    }
     private void PickType(IReadOnlyList<string> values)
     {
         if (values.Count == 0) return;
         _type = Enum.Parse<BarcodeType>(values[0]);
-        _barcodeValue = Samples[_type];
+        _barcodeValue = Sample;
     }
 
     // QR
-    private string? _qrValue = "https://flexcoreui.com/demo/barcodes";
+    private readonly SelectionItem[] _scanItems =
+    {
+        new("track", "Track the shipment"), new("email", "Email us"), new("call", "Call us"), new("map", "Find us"),
+    };
+    private string _scan = "track";
+    private string Payload => _scan switch
+    {
+        "email" => "mailto:dispatch@forkliftandfound.example?subject=Shipment%20SHP-0456",
+        "call" => "tel:+12065550142",
+        "map" => "geo:47.25,-122.30",
+        _ => "https://forkliftandfound.example/track/SHP-0456",
+    };
     private QrErrorCorrectionLevel _ecc = QrErrorCorrectionLevel.Medium;
     private double _size = 140;
     private int Size => (int)_size;
@@ -120,6 +160,10 @@
     {
         new("Low", "L 7%"), new("Medium", "M 15%"), new("Quartile", "Q 25%"), new("High", "H 30%"),
     };
+    private void PickScan(IReadOnlyList<string> values)
+    {
+        if (values.Count > 0) _scan = values[0];
+    }
     private void PickEcc(IReadOnlyList<string> values)
     {
         if (values.Count > 0) _ecc = Enum.Parse<QrErrorCorrectionLevel>(values[0]);
@@ -130,34 +174,39 @@
     {
         public static readonly ApiRow[] Barcode =
         {
-            new("Value", "Text to encode. Empty renders nothing.", "string", "\"FLEX-12345\""),
+            new("Value", "Text to encode. Empty draws no code; the empty frame stays.", "string", "\"FLEX-12345\""),
             new("Type", "Symbology; see the table below.", "BarcodeType", "Code128"),
             new("ShowText", "Draws the value under the bars.", "bool", "true"),
             new("ForegroundColor / BackgroundColor", "Bar and text color; background rectangle. Any CSS color.", "string", "#000000 / #ffffff"),
             new("BarHeight", "Bar height in SVG units (pixels at default size); at least 1.", "int", "50"),
-            new("Width / Height", "CSS size of the SVG. Unset means the natural size: one unit per module plus 20 units of quiet zone in total, and the bar height plus 27 (text) or 10.", "string?", "null"),
+            new("Width / Height", "CSS size of the SVG. Unset means the natural size: one unit per module plus a 20-unit quiet zone on each side (40 in total), and the bar height plus 27 (text) or 10.", "string?", "null"),
             new("AriaLabel", "Overrides the default \"<em>Type</em> barcode: <em>value</em>\".", "string?", "null"),
             new("CssClass / Style (base)", "On the <code>fx-barcode</code> frame. <code>Visible</code> from the base is not applied.", "string?", "null"),
-            new("(unmatched attributes)", "Forwarded to the frame <code>&lt;div&gt;</code>.", "Dictionary&lt;string,object&gt;"),
+            new("Enabled / Id / Title / Tag / Data / Parent (base)", "Accepted but have no effect. A written <code>id</code> binds to <code>Id</code>, so it does not reach the frame.", "", "null"),
+            new("(unmatched attributes)", "Written on the frame <code>&lt;div&gt;</code>.", "Dictionary&lt;string,object&gt;"),
         };
         public static readonly ApiRow[] Types =
         {
-            new("Code128", "Any ASCII text; the densest general-purpose choice."),
-            new("Code39", "Upper-case letters, digits and <code>- . $ / + %</code> and space."),
-            new("Code93", "Same character set as Code 39, more compact."),
-            new("Ean8 / Ean13", "7 or 8 digits; 12 or 13 digits. The check digit is computed when omitted and verified when given."),
-            new("UpcA / UpcE", "11 or 12 digits; 7 or 8 digits."),
+            new("Code128", "Any ASCII text; compact for digits and mixed-case text."),
+            new("Code39", "Upper-case letters, digits and <code>- . $ / + %</code> and space, one symbol each. Any other ASCII character is accepted and written in Full ASCII, two symbols each, so the code is wider and the scanner must read Full ASCII. Non-ASCII is rejected."),
+            new("Code93", "Same characters as Code 39, more compact. Other ASCII characters are accepted and take two symbols each."),
+            new("Ean8", "7 or 8 digits. The check digit is computed when omitted and verified when given."),
+            new("Ean13", "12 or 13 digits. The check digit is computed when omitted and verified when given."),
+            new("UpcA", "11 or 12 digits."),
+            new("UpcE", "7 or 8 digits."),
             new("Itf", "Digits, even count (Interleaved 2 of 5)."),
             new("Codabar", "Digits and <code>- $ : / . +</code>; A–D start and stop characters are optional and added when missing."),
         };
         public static readonly ApiRow[] Qr =
         {
-            new("Value", "Text to encode, UTF-8. Empty renders nothing.", "string", "\"FlexCore\""),
+            new("Value", "Text to encode, UTF-8: a link, <code>mailto:</code>, <code>tel:</code>, <code>geo:</code> or plain text. Empty draws no code; the empty frame stays.", "string", "\"FlexCore\""),
             new("Size", "Rendered width and height in pixels; the module count comes from the text length and level.", "int", "150"),
             new("ForegroundColor / BackgroundColor", "Module and background color.", "string", "#000000 / #ffffff"),
             new("ErrorCorrection", "Redundancy level; see below.", "QrErrorCorrectionLevel", "Medium"),
             new("AriaLabel", "Overrides the default \"QR code: <em>value</em>\".", "string?", "null"),
-            new("CssClass / Style (base)", "On the <code>fx-qrcode</code> frame.", "string?", "null"),
+            new("CssClass / Style (base)", "On the <code>fx-qrcode</code> frame. <code>Visible</code> from the base is not applied.", "string?", "null"),
+            new("Enabled / Id / Title / Tag / Data / Parent (base)", "Accepted but have no effect. A written <code>id</code> binds to <code>Id</code>, so it does not reach the frame.", "", "null"),
+            new("(unmatched attributes)", "Written on the frame <code>&lt;div&gt;</code>.", "Dictionary&lt;string,object&gt;"),
         };
         public static readonly ApiRow[] Ecc =
         {
@@ -182,63 +231,95 @@
     private static class Code
     {
         public const string Barcode = @"<div class=""controls"">
+    <ButtonGroupControl Items=""_productItems"" Values=""@(new[] { _product })"" ValuesChanged=""PickProduct"" AriaLabel=""Product"" />
     <ButtonGroupControl Items=""_typeItems"" Values=""@(new[] { _type.ToString() })"" ValuesChanged=""PickType"" AriaLabel=""Symbology"" />
-    <TextBoxControl @bind-Value=""_barcodeValue"" UpdateOnInput=""true"" Width=""200px"" Placeholder=""Value to encode"" />
+    <TextBoxControl @bind-Value=""_barcodeValue"" UpdateOnInput=""true"" Width=""170px"" Placeholder=""Value to encode"" aria-label=""Value to encode"" />
     <ToggleButtonControl @bind-Selected=""_showText"">Show text</ToggleButtonControl>
 </div>
-<BarcodeControl Value=""@(_barcodeValue ?? """")"" Type=""_type"" ShowText=""_showText"" BarHeight=""60"" />";
+<div class=""tag"">
+    <span class=""tag-hole""></span>
+    <div class=""tag-title"">@Tag.Bin</div>
+    <div class=""tag-name"">@_product · @Tag.Zone zone</div>
+    <BarcodeControl Value=""@(_barcodeValue ?? """")"" Type=""_type"" ShowText=""_showText"" BarHeight=""56"" ForegroundColor=""#1e293b""
+                    AriaLabel=""@($""Bin tag barcode for {_product}"")"" />
+</div>";
         public const string BarcodeCs = @"// Barcode
-private BarcodeType _type = BarcodeType.Code128;
-
-private string? _barcodeValue = ""FLEX-9988"";
-
-private bool _showText = true;
-
-private static readonly Dictionary<BarcodeType, string> Samples = new()
+private sealed record BinTag(string Bin, string Zone, string Sku, string Digits);
+private static readonly Dictionary<string, BinTag> Tags = new()
 {
-    [BarcodeType.Code128] = ""FLEX-9988"",
-    [BarcodeType.Code39] = ""FLEX-9988"",
-    [BarcodeType.Ean13] = ""4006381333931"",
-    [BarcodeType.UpcA] = ""036000291452"",
-    [BarcodeType.Itf] = ""12345678"",
+    [""Camping stove""] = new(""C-02-01"", ""Bulk"", ""SKU-48213"", ""200000048213""),
+    [""Headlamp""] = new(""A-12-03"", ""Ambient"", ""SKU-51907"", ""200000051907""),
+    [""Trail mix""] = new(""B-07-02"", ""Ambient"", ""SKU-30466"", ""200000030466""),
 };
-
+private readonly SelectionItem[] _productItems = Tags.Keys.Select(n => new SelectionItem(n, n)).ToArray();
 private readonly SelectionItem[] _typeItems =
 {
-    new(""Code128"", ""Code 128""), new(""Code39"", ""Code 39""), new(""Ean13"", ""EAN-13""), new(""UpcA"", ""UPC-A""), new(""Itf"", ""ITF""),
+    new(""Code128"", ""Code 128""), new(""Code39"", ""Code 39""), new(""Ean13"", ""EAN-13""), new(""Itf"", ""ITF""),
 };
-
+private string _product = ""Camping stove"";
+private BarcodeType _type = BarcodeType.Code128;
+private string? _barcodeValue = ""SKU-48213"";
+private bool _showText = true;
+private BinTag Tag => Tags[_product];
+// Code 128 and Code 39 take the lettered SKU; EAN-13 and ITF take digits only.
+private string Sample => _type is BarcodeType.Ean13 or BarcodeType.Itf ? Tag.Digits : Tag.Sku;
+private void PickProduct(IReadOnlyList<string> values)
+{
+    if (values.Count == 0) return;
+    _product = values[0];
+    _barcodeValue = Sample;
+}
 private void PickType(IReadOnlyList<string> values)
 {
     if (values.Count == 0) return;
     _type = Enum.Parse<BarcodeType>(values[0]);
-    _barcodeValue = Samples[_type];
+    _barcodeValue = Sample;
 }";
-
         public const string Qr = @"<div class=""controls"">
-    <TextBoxControl @bind-Value=""_qrValue"" UpdateOnInput=""true"" Width=""280px"" Placeholder=""Text or URL"" />
+    <ButtonGroupControl Items=""_scanItems"" Values=""@(new[] { _scan })"" ValuesChanged=""PickScan"" AriaLabel=""Scan to"" />
     <ButtonGroupControl Items=""_eccItems"" Values=""@(new[] { _ecc.ToString() })"" ValuesChanged=""PickEcc"" AriaLabel=""Error correction"" />
 </div>
 <div class=""qr-row"">
-    <QrCodeControl Value=""@(_qrValue ?? """")"" Size=""@Size"" ErrorCorrection=""_ecc"" />
+    <div class=""slip"">
+        <div>
+            <div class=""tag-title"">Shipment SHP-0456</div>
+            <div class=""tag-name"">Road freight · 12 cartons · Dock 4</div>
+            <div class=""slip-scan"">Scan to @_scanItems.First(i => i.Value == _scan).Text.ToLowerInvariant()</div>
+        </div>
+        <QrCodeControl Value=""@Payload"" Size=""@Size"" ErrorCorrection=""_ecc"" ForegroundColor=""#1e293b""
+                       AriaLabel=""@($""QR code for shipment SHP-0456: {_scan}"")"" />
+    </div>
     <div class=""field"">
         <span class=""field-label"">Size @Size px</span>
         <SliderControl @bind-Value=""_size"" Min=""80"" Max=""240"" Step=""20"" ShowValue=""false"" aria-label=""QR code size"" />
+        <span class=""field-label"">Encodes</span>
+        <code class=""payload"">@Payload</code>
     </div>
 </div>";
         public const string QrCs = @"// QR
-private string? _qrValue = ""https://flexcoreui.com/demo/barcodes"";
+private readonly SelectionItem[] _scanItems =
+{
+    new(""track"", ""Track the shipment""), new(""email"", ""Email us""), new(""call"", ""Call us""), new(""map"", ""Find us""),
+};
+private string _scan = ""track"";
+private string Payload => _scan switch
+{
+    ""email"" => ""mailto:dispatch@forkliftandfound.example?subject=Shipment%20SHP-0456"",
+    ""call"" => ""tel:+12065550142"",
+    ""map"" => ""geo:47.25,-122.30"",
+    _ => ""https://forkliftandfound.example/track/SHP-0456"",
+};
 private QrErrorCorrectionLevel _ecc = QrErrorCorrectionLevel.Medium;
-
 private double _size = 140;
-
 private int Size => (int)_size;
-
 private readonly SelectionItem[] _eccItems =
 {
     new(""Low"", ""L 7%""), new(""Medium"", ""M 15%""), new(""Quartile"", ""Q 25%""), new(""High"", ""H 30%""),
 };
-
+private void PickScan(IReadOnlyList<string> values)
+{
+    if (values.Count > 0) _scan = values[0];
+}
 private void PickEcc(IReadOnlyList<string> values)
 {
     if (values.Count > 0) _ecc = Enum.Parse<QrErrorCorrectionLevel>(values[0]);

@@ -4,7 +4,12 @@
 @inject IDialogService Dialogs
 
 @* 2026-10-12: rebuilt on FeatureDemoLayout; facts from DialogControl.razor(.css), DefaultButtonScope.cs, Dialogs/* (FlexCore 0.2.48).
-   The dialog service needs DialogService registered (Program.cs) and one DialogHostControl in MainLayout. *@
+   The dialog service needs DialogService registered (Program.cs) and one DialogHostControl in MainLayout.
+   2026-11-15: examples rebuilt around booking LIS-0001 and a Kyoto booking; HeaderContent and HostKeyboardShortcuts rows added
+   from DialogControl.razor (FlexCore 0.2.50).
+   2026-11-15: example story moved to the Support desk theme.
+   2026-11-16: independent review fixes.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor Dialog, Window and Message Box — FlexCore</PageTitle>
 
@@ -13,36 +18,39 @@
                    SourcePath="DialogControl.razor; Dialogs/MessageBoxControl.razor; Dialogs/IDialogService.cs">
     <Overview>
         <p>
-            <code>DialogControl</code> is a Blazor dialog window, modal or non-modal, that users can move and resize, with a default button for Enter and Escape to close. Use modal for a decision the page must wait for, such as deleting an order, and non-modal for a tool window users keep open while they work. For a quick confirm, alert or prompt, any component can await one call on <code>IDialogService</code>, such as <code>ConfirmAsync</code>.
+            <code>DialogControl</code> is a Blazor dialog window, modal or non-modal, that users can move and resize, with a default button for Enter and Escape to close. Use modal for a decision the page must wait for, such as refunding a charge, and non-modal for a tool window users keep open while they work. For a quick confirm, alert or prompt, any component can await one call on <code>IDialogService</code>, such as <code>ConfirmAsync</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="modal" Title="Modal dialog with a default button" RazorCode="@Code.Modal" CSharpCode="@Code.ModalCs">
-            <Description><p>Open the dialog and press Enter anywhere in it: <code>OnEnter</code> fires the default button. The switch applies the classic Win32 frame.</p></Description>
+            <Description><p>Edit the ticket and press Enter anywhere in the dialog: <code>OnEnter</code> fires the default button, and the card behind takes the new values; Cancel leaves it as it was. The Classic look button applies the classic Win32 frame.</p></Description>
             <Controls>
                 <ToggleButtonControl @bind-Selected="_classic">Classic look</ToggleButtonControl>
             </Controls>
             <Demo>
-                <div class="demo-row">
-                    <ButtonControl CssClass="btn-primary" OnClick="@(() => _archiveOpen = true)">Open dialog</ButtonControl>
-                    <span class="result">@_archiveResult</span>
+                <div class="tk-card" role="status">
+                    <div>
+                        <strong>TKT-1042 · Albus Door · Router keeps restarting</strong>
+                        <div class="result">Follow up @_followUp.ToString("ddd MMM d") · @_priority priority · Note: @(string.IsNullOrWhiteSpace(_note) ? "none" : _note)</div>
+                    </div>
+                    <ButtonControl CssClass="btn-primary" OnClick="OpenEdit">Edit ticket</ButtonControl>
                 </div>
                 @* Classic: the frame class, the window icon, classic buttons; .dlg-host lets page CSS gray the footer. *@
                 <div class="dlg-host">
-                    <DialogControl @bind-Visible="_archiveOpen" Header="Archive project" Width="440px" OnEnter="Archive"
+                    <DialogControl @bind-Visible="_editOpen" Header="Edit ticket TKT-1042" Width="440px" OnEnter="Save"
                                    CssClass="@(_classic ? "fx-dialog-classic" : null)" ShowWindowIcon="@_classic">
                         <ChildContent>
-                            <p class="dlg-text">Archive <strong>Northwind rewrite</strong>? Members keep read access; nothing is deleted.</p>
+                            <p class="dlg-text">Change the ticket for <strong>Albus Door</strong>, then press Enter or Save.</p>
                             <div style="display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center;">
-                                <span>Note</span><TextBoxControl @bind-Value="_note" TypingBehavior="TextBoxTypingBehavior.ClientBuffered" Placeholder="Optional note" />
-                                <span>Due</span><DatePickerControl @bind-Value="_due" />
-                                <span>Priority</span><DropDownListControl TItem="string" TValue="string" DataSource="@_priorities" @bind-Value="_priority" Width="160px" />
+                                <span>Follow up</span><DatePickerControl @bind-Value="_editFollowUp" MinDate="DateTime.Today" />
+                                <span>Priority</span><DropDownListControl TItem="string" TValue="string" DataSource="@_priorities" @bind-Value="_editPriority" Width="180px" />
+                                <span>Note</span><TextBoxControl @bind-Value="_editNote" TypingBehavior="TextBoxTypingBehavior.ClientBuffered" Placeholder="Optional note" />
                             </div>
                         </ChildContent>
                         <FooterContent>
-                            <ButtonControl CssClass="@(_classic ? "fx-button-classic" : "btn-primary")" OnClick="Archive">Archive</ButtonControl>
-                            <ButtonControl CssClass="@(_classic ? "fx-button-classic" : "btn-secondary")" OnClick="@(() => _archiveOpen = false)">Cancel</ButtonControl>
+                            <ButtonControl CssClass="@(_classic ? "fx-button-classic" : "btn-primary")" OnClick="Save">Save</ButtonControl>
+                            <ButtonControl CssClass="@(_classic ? "fx-button-classic" : "btn-secondary")" OnClick="@(() => _editOpen = false)">Cancel</ButtonControl>
                         </FooterContent>
                     </DialogControl>
                 </div>
@@ -50,32 +58,41 @@
         </DemoExample>
 
         <DemoExample Id="window" Title="Non-modal window" RazorCode="@Code.Window" CSharpCode="@Code.WindowCs">
-            <Description><p>A non-modal window leaves the page live; drag or resize it and the bound size and position report back.</p></Description>
+            <Description><p>Open the ticket details and keep clicking tickets: a non-modal window leaves the page live and follows the selection. Drag or resize it and the bound size and position report back.</p></Description>
             <Demo>
                 <div class="demo-row">
-                    <ButtonControl CssClass="btn-primary" OnClick="@(() => _winOpen = true)">Open window</ButtonControl>
-                    <ButtonControl OnClick="@(() => _pageClicks++)">Page click (@_pageClicks)</ButtonControl>
-                    <span class="result">@_winWidth × @_winHeight, @(_winPos is null ? "centered" : $"moved {_winPos.X:0}, {_winPos.Y:0}")</span>
+                    @foreach (var ticket in Tickets)
+                    {
+                        <ButtonControl CssClass="@(ticket == _ticket ? "btn-sm btn-primary" : "btn-sm")" OnClick="() => _ticket = ticket">@ticket.Code</ButtonControl>
+                    }
+                    <ButtonControl OnClick="@(() => _winOpen = true)" Disabled="_winOpen">Open ticket details</ButtonControl>
+                    <span class="result" role="status">@_winWidth × @_winHeight, @(_winPos is null ? "centered" : $"moved {_winPos.X:0}, {_winPos.Y:0}")</span>
                 </div>
-                <DialogControl @bind-Visible="_winOpen" Header="Inspector" IsModal="false" ShowWindowIcon="true"
+                <DialogControl @bind-Visible="_winOpen" Header="@($"Ticket details: {_ticket.Code}")" IsModal="false" ShowWindowIcon="true"
                                @bind-Width="_winWidth" @bind-Height="_winHeight" @bind-Position="_winPos"
                                MinResizeWidth="360" MinResizeHeight="200">
-                    <p class="dlg-text">Drag the title bar, resize from any edge or corner, right-click the title for the window menu. The page behind stays clickable.</p>
+                    <p class="dlg-text"><strong>@_ticket.Subject</strong>, reported by @_ticket.Customer</p>
+                    <p class="dlg-text">@_ticket.Details</p>
+                    <p class="dlg-text result">Pick another ticket on the page: this window stays open and follows it.</p>
                 </DialogControl>
             </Demo>
         </DemoExample>
 
         <DemoExample Id="service" Title="Message box, prompt and the dialog service" RazorCode="@Code.Service" CSharpCode="@Code.ServiceCs">
-            <Description><p>Each button awaits an answer from <code>IDialogService</code> or a <code>MessageBoxControl</code>; Notes opens a multi-line prompt.</p></Description>
+            <Description><p>Each button awaits an answer from <code>IDialogService</code> or a <code>MessageBoxControl</code>, and the ticket above follows: rename it with a prompt, send the reply after a confirmation, and refund the charge only after checking the acknowledgment box. Notes opens a multi-line prompt.</p></Description>
             <Demo>
-                <div class="demo-row">
-                    <ButtonControl OnClick="Confirm">Confirm</ButtonControl>
-                    <ButtonControl OnClick="Prompt">Prompt</ButtonControl>
-                    <ButtonControl OnClick="Notes">Notes, multi-line</ButtonControl>
-                    <ButtonControl OnClick="Alert">Alert</ButtonControl>
-                    <ButtonControl OnClick="AskDotNet">Yes / No / Cancel, .NET look</ButtonControl>
-                    <ButtonControl CssClass="btn-danger" OnClick="GatedDelete">Gated delete</ButtonControl>
-                    <span class="result">@_answer</span>
+                <div class="tk-card" role="status">
+                    <div>
+                        <strong>TKT-1043 · Hermione Ranger · @_subject</strong>
+                        <div class="result">Status: @_status · Notes: @_notes.Length characters</div>
+                    </div>
+                </div>
+                <div class="demo-row mt">
+                    <ButtonControl OnClick="Rename" Disabled="@(_status == "Solved")">Rename ticket</ButtonControl>
+                    <ButtonControl OnClick="Notes" Disabled="@(_status == "Solved")">Notes, multi-line</ButtonControl>
+                    <ButtonControl OnClick="SendReply" Disabled="@(_status != "Open")">Send reply</ButtonControl>
+                    <ButtonControl CssClass="btn-danger" OnClick="RefundCharge" Disabled="@(_status == "Solved")">Refund charge</ButtonControl>
+                    <ButtonControl OnClick="Restore" Disabled="@(_status == "Open" && _subject == "Charged twice in October" && _notes.Length == 0)">Start over</ButtonControl>
                 </div>
                 <MessageBoxControl @ref="_box" />
                 <MultiLineEditControl @ref="_editor" />
@@ -90,6 +107,7 @@
             </DocSection>
             <DocSection Id="doc-idialogservice" Title="IDialogService" Count='@DocSection.Label(Vocab.Service.Length, "methods")'>
                 <ApiTable Kind="ApiKind.Methods" Title="IDialogService" Rows="Vocab.Service" />
+                <p class="note">Setup: register <code>DialogService</code> and <code>IDialogService</code> as scoped and render one <code>DialogHostControl</code> in the layout. Without a host the calls return false, Cancel or null. This site has both.</p>
             </DocSection>
             <DocSection Id="doc-messageboxcontrol-parameters" Title="MessageBoxControl parameters" Count='@DocSection.Label(Vocab.MessageBox.Length, "parameters")'>
                 <ApiTable Kind="ApiKind.Parameters" Title="MessageBoxControl parameters" Rows="Vocab.MessageBox" />
@@ -112,12 +130,11 @@
 
     <Accessibility>
         <ul>
-            <li>The dialog has <code>role="dialog"</code>, <code>aria-modal</code> when modal, and is labeled by <code>Header</code> or <code>AriaLabel</code>; <code>AriaDescribedBy</code> points at a description.</li>
-            <li><code>AutoFocus</code> moves focus to the first focusable control on open; focus returns to the opener on close.</li>
+            <li>The dialog has <code>role="dialog"</code>, <code>aria-modal="true"</code> when modal, and is named by <code>AriaLabel</code> or else by its <code>Header</code>. Give <code>AriaDescribedBy</code> the id of the main message so screen readers read it with the title.</li>
+            <li>With <code>AutoFocus</code> (on by default), opening moves focus into the dialog, to a text field first and to a button last; closing returns focus to the control that opened it. Tab and Shift+Tab wrap within the body and footer.</li>
             <li>Escape closes, or runs <code>OnEscape</code> when set. Alt+F4 closes. Ctrl+Enter closes when <code>CloseOnCtrlEnter</code> is on. Enter fires <code>OnEnter</code> unless the focused control keeps the key.</li>
-            <li>The system menu (right-click on the title bar, or the window icon) offers Move and Close; Restore, Size, Minimize and Maximize are listed but disabled.</li>
-            <li>Message box: Escape closes, Enter picks the default button, Arrow keys and Tab move between the buttons.</li>
-            <li>The dialog imports the library's own <code>dialog-control.js</code> for focus capture and restore, Escape and Ctrl+Enter capture, and size measurement. No third-party script.</li>
+            <li>With the mouse, the title bar's close button (named "Close") closes the dialog, and a right-click on the title bar, or the "Window menu" button that <code>ShowWindowIcon</code> adds, opens a <code>role="menu"</code> system menu with Move and Close. From the keyboard, Alt+F4 closes the dialog as that Close does.</li>
+            <li>Message box: a modal <code>role="dialog"</code> named by its title. Focus goes to OK or Yes as soon as that button is enabled; the arrow keys and Tab move between the buttons, the title bar's Close included, Enter or Space presses the focused one, and Escape closes.</li>
         </ul>
     </Accessibility>
 
@@ -125,30 +142,42 @@
         <ul>
             <li>Buttons used in footers, and <code>DefaultButtonScope</code>: <a href="demo/buttons">Buttons</a>.</li>
             <li>Non-blocking messages: <a href="demo/notifications">Toasts</a>.</li>
-            <li><code>MultiLineEditControl</code>, the long-text prompt grids open from a cell: the Notes button in the service example; see the Methods table.</li>
+            <li><code>MultiLineEditControl</code>, the long-text prompt grids open from a cell: the Notes button in the third example; see the Methods table.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
 
 @code {
-    // Modal
-    private bool _archiveOpen, _classic;
-    private string? _archiveResult;
+    // Modal: the dialog edits copies, and Save writes them to the ticket
+    private bool _editOpen, _classic;
+    private DateTime _followUp = DateTime.Today.AddDays(2);
+    private string _priority = "High";
     private string _note = "";
-    private DateTime? _due;
-    private string _priority = "Normal";
-    private readonly List<string> _priorities = new() { "Low", "Normal", "High" };
-    private void Archive()
+    private DateTime? _editFollowUp;
+    private string _editPriority = "", _editNote = "";
+    private readonly List<string> _priorities = new() { "Low", "Normal", "High", "Urgent" };
+    private void OpenEdit()
     {
-        _archiveOpen = false;
-        _archiveResult = $"Archived at {DateTime.Now:HH:mm:ss} — priority {_priority}"
-            + (_due is { } due ? $", due {due:d}" : "")
-            + (string.IsNullOrWhiteSpace(_note) ? "" : $", note: {_note}");
+        (_editFollowUp, _editPriority, _editNote) = (_followUp, _priority, _note);
+        _editOpen = true;
+    }
+    private void Save()
+    {
+        (_followUp, _priority, _note) = (_editFollowUp ?? _followUp, _editPriority, _editNote);
+        _editOpen = false;
     }
 
     // Window
+    private sealed record Ticket(string Code, string Subject, string Customer, string Details);
+    private static readonly Ticket[] Tickets =
+    {
+        new("TKT-1042", "Router keeps restarting", "Albus Door", "Hardware queue, by phone. Restarts every evening since Monday."),
+        new("TKT-1043", "Charged twice in October", "Hermione Ranger", "Billing queue, by email. Two October charges on the same card."),
+        new("TKT-1044", "Cannot reset password", "Ron Measly", "Accounts queue, by chat. The reset email never arrives."),
+        new("TKT-1045", "Slow connection in the evenings", "Luna Goodlove", "Connection queue, by phone. Video calls freeze after 7 PM."),
+    };
+    private Ticket _ticket = Tickets[0];
     private bool _winOpen;
-    private int _pageClicks;
     private string? _winWidth = "480px", _winHeight = "240px";
     private DialogPosition? _winPos;
 
@@ -158,25 +187,30 @@
     // and MainLayout.razor hosts <DialogHostControl />. This page has @inject IDialogService Dialogs at the top.
     private MessageBoxControl? _box;
     private MultiLineEditControl? _editor;
-    private string _notes = "";
-    private string? _answer;
-    private async Task Confirm() => _answer = await Dialogs.ConfirmAsync("Delete 3 rows?", "Confirm") ? "Yes" : "No";
-    private async Task Prompt()
+    private string _subject = "Charged twice in October", _status = "Open", _notes = "";
+    private async Task Rename()
     {
-        var name = await Dialogs.PromptAsync("Project name:", "New project", "Untitled");
-        _answer = name is null ? "Canceled" : $"Named \"{name}\"";
+        var subject = await Dialogs.PromptAsync("Subject:", "Rename ticket", _subject);
+        if (!string.IsNullOrWhiteSpace(subject)) _subject = subject;
     }
-    private Task Alert() => Dialogs.AlertAsync("Export finished. 240 rows written.", "Export");
     private async Task Notes()
     {
-        var text = await _editor!.ShowAsync(_notes, "Booking notes", 500, "Internal notes for the booking; 500 characters at most.");
+        var text = await _editor!.ShowAsync(_notes, "Ticket notes", 500, "Internal notes for the ticket; 500 characters at most.");
         if (text is not null) _notes = text;
-        _answer = text is null ? "Canceled" : $"Notes: {text.Length} characters";
     }
-    private async Task AskDotNet() =>
-        _answer = (await _box!.ShowAsync("Save changes to Report.docx?", "Editor", MessageBoxButtons.YesNoCancel, "question", MessageBoxLook.DotNet)).ToString();
-    private async Task GatedDelete() =>
-        _answer = (await _box!.ShowAsync("Delete the project and its 14 files?", "Delete project", MessageBoxButtons.OkCancel, "warning", null, "I understand this cannot be undone")).ToString();
+    private async Task SendReply()
+    {
+        if (!await Dialogs.ConfirmAsync($"{_subject}: send the reply to Hermione Ranger?", "Send reply")) return;
+        _status = "Waiting on customer";
+        StateHasChanged();   // show the new status behind the alert
+        await Dialogs.AlertAsync("The reply is on its way. The customer has 7 days to answer.", "Reply sent");
+    }
+    private async Task RefundCharge()
+    {
+        var answer = await _box!.ShowAsync($"{_subject}: refund the duplicate charge and solve the ticket?", "Refund charge", MessageBoxButtons.OkCancel, "warning", null, "I understand this cannot be undone");
+        if (answer == MessageBoxResult.Ok) _status = "Solved";
+    }
+    private void Restore() => (_subject, _status, _notes) = ("Charged twice in October", "Open", "");
 
     // Vocabulary rows, one per public member (0.2.48).
     private static class Vocab
@@ -185,6 +219,7 @@
         {
             new("Visible", "Shown or not. Two-way with <code>@bind-Visible</code>; closing sets it false.", "bool", "false"),
             new("Header", "Title-bar text; also the accessible name.", "string?", "null"),
+            new("HeaderContent", "Title-bar markup in place of <code>Header</code>'s plain text, such as a ticket subject with a smaller caption. Dragging, the window menu and the close button work as with <code>Header</code>, and it names the dialog the same way.", "RenderFragment?", "null"),
             new("ChildContent", "Body.", "RenderFragment?"),
             new("FooterContent", "Footer, right-aligned flex row. Rendered only when set.", "RenderFragment?", "null"),
             new("Width / Height", "CSS sizes. Two-way: a resize reports the new values through <code>WidthChanged</code> / <code>HeightChanged</code>.", "string?", "null"),
@@ -195,6 +230,7 @@
             new("OnEscape", "When set, Escape runs this instead of closing. For dialogs whose close commits.", "EventCallback"),
             new("OnEnter", "Default button. A plain Enter anywhere in the dialog runs it after the focused control has handled the key; buttons, links, editors, grids and open dropdowns keep Enter.", "EventCallback"),
             new("CloseOnCtrlEnter", "Ctrl+Enter requests close.", "bool", "false"),
+            new("HostKeyboardShortcuts", "Keys your page handles for the whole window, written like <code>\"Ctrl+S\"</code> or <code>\"Meta+S\"</code>, modifiers in the order Ctrl, Alt, Shift, Meta. The dialog stops the browser's own action for them, such as saving the page, wherever focus is, and lets the key reach your handler. A nested dialog keeps its own keys.", "IReadOnlyCollection&lt;string&gt;?", "null"),
             new("CloseOnOverlayClick", "A click on the dimmed backdrop requests close.", "bool", "false"),
             new("OnClose / Closed", "Both run on every close request (✕, Escape, Alt+F4, system menu), in that order, then <code>Visible</code> goes false.", "EventCallback"),
             new("Draggable", "Title bar drags the window.", "bool", "true"),
@@ -213,7 +249,6 @@
             new("ConfirmCancelAsync(message, title)", "Yes / No / Cancel box.", "Task&lt;MessageBoxResult&gt;"),
             new("AlertAsync(message, title)", "OK box.", "Task"),
             new("PromptAsync(message, title, defaultValue)", "Single-line input; null when canceled.", "Task&lt;string?&gt;"),
-            new("(setup)", "Register <code>DialogService</code> and <code>IDialogService</code> as scoped; render one <code>DialogHostControl</code> in the layout. Without a host the calls return false, Cancel or null.", ""),
         };
         public static readonly ApiRow[] MessageBox =
         {
@@ -233,7 +268,8 @@
             new("Visible", "Two-way; <code>ShowAsync</code> sets it for you.", "bool", "false"),
             new("Title / Prompt", "Title bar and the label above the box.", "string", "\"Input\" / null"),
             new("InputValue", "Current text.", "string", "\"\""),
-            new("Placeholder / InputType / MaxLength", "Passed to the text box.", "string", "null / \"text\" / 256"),
+            new("Placeholder / InputType", "Passed to the text box.", "string? / string", "null / \"text\""),
+            new("MaxLength", "Passed to the text box.", "int", "256"),
             new("OnResult", "Fires with the text, or null on cancel.", "EventCallback&lt;string?&gt;"),
             new("CssClass", "Extra classes on the dialog.", "string?", "null"),
         };
@@ -243,7 +279,7 @@
             new("InputDialogControl.ShowAsync(prompt, title, defaultValue)", "Shows the prompt; null when canceled.", "Task&lt;string?&gt;"),
             new("MultiLineEditControl.ShowAsync(initial, title, maxLength, prompt)", "Multi-line text prompt; null when canceled.", "Task&lt;string?&gt;"),
             new("DefaultButtonScope.ConsumeEnter()", "Cascaded by a dialog with <code>OnEnter</code>. A control calls it to keep one Enter for itself.", "void"),
-            new("DefaultButtonScope.Defer(task)", "The default button waits for this task before deciding.", "void"),
+            new("DefaultButtonScope.Defer(decision)", "The default button waits for this task before deciding.", "void"),
         };
         public static readonly ApiRow[] Css =
         {
@@ -274,73 +310,89 @@
     {
         public const string Modal = @"<ToggleButtonControl @bind-Selected=""_classic"">Classic look</ToggleButtonControl>
 
-<div class=""demo-row"">
-    <ButtonControl CssClass=""btn-primary"" OnClick=""@(() => _archiveOpen = true)"">Open dialog</ButtonControl>
-    <span class=""result"">@_archiveResult</span>
+<div class=""tk-card"" role=""status"">
+    <div>
+        <strong>TKT-1042 · Albus Door · Router keeps restarting</strong>
+        <div class=""result"">Follow up @_followUp.ToString(""ddd MMM d"") · @_priority priority · Note: @(string.IsNullOrWhiteSpace(_note) ? ""none"" : _note)</div>
+    </div>
+    <ButtonControl CssClass=""btn-primary"" OnClick=""OpenEdit"">Edit ticket</ButtonControl>
 </div>
 @* Classic: the frame class, the window icon, classic buttons; .dlg-host lets page CSS gray the footer. *@
 <div class=""dlg-host"">
-    <DialogControl @bind-Visible=""_archiveOpen"" Header=""Archive project"" Width=""440px"" OnEnter=""Archive""
+    <DialogControl @bind-Visible=""_editOpen"" Header=""Edit ticket TKT-1042"" Width=""440px"" OnEnter=""Save""
                    CssClass=""@(_classic ? ""fx-dialog-classic"" : null)"" ShowWindowIcon=""@_classic"">
         <ChildContent>
-            <p class=""dlg-text"">Archive <strong>Northwind rewrite</strong>? Members keep read access; nothing is deleted.</p>
+            <p class=""dlg-text"">Change the ticket for <strong>Albus Door</strong>, then press Enter or Save.</p>
             <div style=""display:grid; grid-template-columns:auto 1fr; gap:6px 10px; align-items:center;"">
-                <span>Note</span><TextBoxControl @bind-Value=""_note"" TypingBehavior=""TextBoxTypingBehavior.ClientBuffered"" Placeholder=""Optional note"" />
-                <span>Due</span><DatePickerControl @bind-Value=""_due"" />
-                <span>Priority</span><DropDownListControl TItem=""string"" TValue=""string"" DataSource=""@_priorities"" @bind-Value=""_priority"" Width=""160px"" />
+                <span>Follow up</span><DatePickerControl @bind-Value=""_editFollowUp"" MinDate=""DateTime.Today"" />
+                <span>Priority</span><DropDownListControl TItem=""string"" TValue=""string"" DataSource=""@_priorities"" @bind-Value=""_editPriority"" Width=""180px"" />
+                <span>Note</span><TextBoxControl @bind-Value=""_editNote"" TypingBehavior=""TextBoxTypingBehavior.ClientBuffered"" Placeholder=""Optional note"" />
             </div>
         </ChildContent>
         <FooterContent>
-            <ButtonControl CssClass=""@(_classic ? ""fx-button-classic"" : ""btn-primary"")"" OnClick=""Archive"">Archive</ButtonControl>
-            <ButtonControl CssClass=""@(_classic ? ""fx-button-classic"" : ""btn-secondary"")"" OnClick=""@(() => _archiveOpen = false)"">Cancel</ButtonControl>
+            <ButtonControl CssClass=""@(_classic ? ""fx-button-classic"" : ""btn-primary"")"" OnClick=""Save"">Save</ButtonControl>
+            <ButtonControl CssClass=""@(_classic ? ""fx-button-classic"" : ""btn-secondary"")"" OnClick=""@(() => _editOpen = false)"">Cancel</ButtonControl>
         </FooterContent>
     </DialogControl>
 </div>";
-        public const string ModalCs = @"// Modal
-private bool _archiveOpen, _classic;
-
-private string? _archiveResult;
-
+        public const string ModalCs = @"// Modal: the dialog edits copies, and Save writes them to the ticket
+private bool _editOpen, _classic;
+private DateTime _followUp = DateTime.Today.AddDays(2);
+private string _priority = ""High"";
 private string _note = """";
-private DateTime? _due;
-private string _priority = ""Normal"";
-private readonly List<string> _priorities = new() { ""Low"", ""Normal"", ""High"" };
-
-private void Archive()
+private DateTime? _editFollowUp;
+private string _editPriority = """", _editNote = """";
+private readonly List<string> _priorities = new() { ""Low"", ""Normal"", ""High"", ""Urgent"" };
+private void OpenEdit()
 {
-    _archiveOpen = false;
-    _archiveResult = $""Archived at {DateTime.Now:HH:mm:ss} — priority {_priority}""
-        + (_due is { } due ? $"", due {due:d}"" : """")
-        + (string.IsNullOrWhiteSpace(_note) ? """" : $"", note: {_note}"");
+    (_editFollowUp, _editPriority, _editNote) = (_followUp, _priority, _note);
+    _editOpen = true;
+}
+private void Save()
+{
+    (_followUp, _priority, _note) = (_editFollowUp ?? _followUp, _editPriority, _editNote);
+    _editOpen = false;
 }";
-
         public const string Window = @"<div class=""demo-row"">
-    <ButtonControl CssClass=""btn-primary"" OnClick=""@(() => _winOpen = true)"">Open window</ButtonControl>
-    <ButtonControl OnClick=""@(() => _pageClicks++)"">Page click (@_pageClicks)</ButtonControl>
-    <span class=""result"">@_winWidth × @_winHeight, @(_winPos is null ? ""centered"" : $""moved {_winPos.X:0}, {_winPos.Y:0}"")</span>
+    @foreach (var ticket in Tickets)
+    {
+        <ButtonControl CssClass=""@(ticket == _ticket ? ""btn-sm btn-primary"" : ""btn-sm"")"" OnClick=""() => _ticket = ticket"">@ticket.Code</ButtonControl>
+    }
+    <ButtonControl OnClick=""@(() => _winOpen = true)"" Disabled=""_winOpen"">Open ticket details</ButtonControl>
+    <span class=""result"" role=""status"">@_winWidth × @_winHeight, @(_winPos is null ? ""centered"" : $""moved {_winPos.X:0}, {_winPos.Y:0}"")</span>
 </div>
-<DialogControl @bind-Visible=""_winOpen"" Header=""Inspector"" IsModal=""false"" ShowWindowIcon=""true""
+<DialogControl @bind-Visible=""_winOpen"" Header=""@($""Ticket details: {_ticket.Code}"")"" IsModal=""false"" ShowWindowIcon=""true""
                @bind-Width=""_winWidth"" @bind-Height=""_winHeight"" @bind-Position=""_winPos""
                MinResizeWidth=""360"" MinResizeHeight=""200"">
-    <p class=""dlg-text"">Drag the title bar, resize from any edge or corner, right-click the title for the window menu. The page behind stays clickable.</p>
+    <p class=""dlg-text""><strong>@_ticket.Subject</strong>, reported by @_ticket.Customer</p>
+    <p class=""dlg-text"">@_ticket.Details</p>
+    <p class=""dlg-text result"">Pick another ticket on the page: this window stays open and follows it.</p>
 </DialogControl>";
         public const string WindowCs = @"// Window
+private sealed record Ticket(string Code, string Subject, string Customer, string Details);
+private static readonly Ticket[] Tickets =
+{
+    new(""TKT-1042"", ""Router keeps restarting"", ""Albus Door"", ""Hardware queue, by phone. Restarts every evening since Monday.""),
+    new(""TKT-1043"", ""Charged twice in October"", ""Hermione Ranger"", ""Billing queue, by email. Two October charges on the same card.""),
+    new(""TKT-1044"", ""Cannot reset password"", ""Ron Measly"", ""Accounts queue, by chat. The reset email never arrives.""),
+    new(""TKT-1045"", ""Slow connection in the evenings"", ""Luna Goodlove"", ""Connection queue, by phone. Video calls freeze after 7 PM.""),
+};
+private Ticket _ticket = Tickets[0];
 private bool _winOpen;
-
-private int _pageClicks;
-
 private string? _winWidth = ""480px"", _winHeight = ""240px"";
-
 private DialogPosition? _winPos;";
-
-        public const string Service = @"<div class=""demo-row"">
-    <ButtonControl OnClick=""Confirm"">Confirm</ButtonControl>
-    <ButtonControl OnClick=""Prompt"">Prompt</ButtonControl>
-    <ButtonControl OnClick=""Notes"">Notes, multi-line</ButtonControl>
-    <ButtonControl OnClick=""Alert"">Alert</ButtonControl>
-    <ButtonControl OnClick=""AskDotNet"">Yes / No / Cancel, .NET look</ButtonControl>
-    <ButtonControl CssClass=""btn-danger"" OnClick=""GatedDelete"">Gated delete</ButtonControl>
-    <span class=""result"">@_answer</span>
+        public const string Service = @"<div class=""tk-card"" role=""status"">
+    <div>
+        <strong>TKT-1043 · Hermione Ranger · @_subject</strong>
+        <div class=""result"">Status: @_status · Notes: @_notes.Length characters</div>
+    </div>
+</div>
+<div class=""demo-row mt"">
+    <ButtonControl OnClick=""Rename"" Disabled=""@(_status == ""Solved"")"">Rename ticket</ButtonControl>
+    <ButtonControl OnClick=""Notes"" Disabled=""@(_status == ""Solved"")"">Notes, multi-line</ButtonControl>
+    <ButtonControl OnClick=""SendReply"" Disabled=""@(_status != ""Open"")"">Send reply</ButtonControl>
+    <ButtonControl CssClass=""btn-danger"" OnClick=""RefundCharge"" Disabled=""@(_status == ""Solved"")"">Refund charge</ButtonControl>
+    <ButtonControl OnClick=""Restore"" Disabled=""@(_status == ""Open"" && _subject == ""Charged twice in October"" && _notes.Length == 0)"">Start over</ButtonControl>
 </div>
 <MessageBoxControl @ref=""_box"" />
 <MultiLineEditControl @ref=""_editor"" />";
@@ -350,31 +402,29 @@ private DialogPosition? _winPos;";
 // and MainLayout.razor hosts <DialogHostControl />. This page has @inject IDialogService Dialogs at the top.
 private MessageBoxControl? _box;
 private MultiLineEditControl? _editor;
-private string _notes = """";
-
-private string? _answer;
-
-private async Task Confirm() => _answer = await Dialogs.ConfirmAsync(""Delete 3 rows?"", ""Confirm"") ? ""Yes"" : ""No"";
-
-private async Task Prompt()
+private string _subject = ""Charged twice in October"", _status = ""Open"", _notes = """";
+private async Task Rename()
 {
-    var name = await Dialogs.PromptAsync(""Project name:"", ""New project"", ""Untitled"");
-    _answer = name is null ? ""Canceled"" : $""Named \""{name}\"""";
+    var subject = await Dialogs.PromptAsync(""Subject:"", ""Rename ticket"", _subject);
+    if (!string.IsNullOrWhiteSpace(subject)) _subject = subject;
 }
-
-private Task Alert() => Dialogs.AlertAsync(""Export finished. 240 rows written."", ""Export"");
-
 private async Task Notes()
 {
-    var text = await _editor!.ShowAsync(_notes, ""Booking notes"", 500, ""Internal notes for the booking; 500 characters at most."");
+    var text = await _editor!.ShowAsync(_notes, ""Ticket notes"", 500, ""Internal notes for the ticket; 500 characters at most."");
     if (text is not null) _notes = text;
-    _answer = text is null ? ""Canceled"" : $""Notes: {text.Length} characters"";
 }
-
-private async Task AskDotNet() =>
-    _answer = (await _box!.ShowAsync(""Save changes to Report.docx?"", ""Editor"", MessageBoxButtons.YesNoCancel, ""question"", MessageBoxLook.DotNet)).ToString();
-
-private async Task GatedDelete() =>
-    _answer = (await _box!.ShowAsync(""Delete the project and its 14 files?"", ""Delete project"", MessageBoxButtons.OkCancel, ""warning"", null, ""I understand this cannot be undone"")).ToString();";
+private async Task SendReply()
+{
+    if (!await Dialogs.ConfirmAsync($""{_subject}: send the reply to Hermione Ranger?"", ""Send reply"")) return;
+    _status = ""Waiting on customer"";
+    StateHasChanged();   // show the new status behind the alert
+    await Dialogs.AlertAsync(""The reply is on its way. The customer has 7 days to answer."", ""Reply sent"");
+}
+private async Task RefundCharge()
+{
+    var answer = await _box!.ShowAsync($""{_subject}: refund the duplicate charge and solve the ticket?"", ""Refund charge"", MessageBoxButtons.OkCancel, ""warning"", null, ""I understand this cannot be undone"");
+    if (answer == MessageBoxResult.Ok) _status = ""Solved"";
+}
+private void Restore() => (_subject, _status, _notes) = (""Charged twice in October"", ""Open"", """");";
     }
 }

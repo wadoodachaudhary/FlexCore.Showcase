@@ -4,7 +4,9 @@
 @* 2026-11-14: new page for ToolbarControl, ToolbarButtonControl, ToolbarSeparatorControl and AppBarControl, moved off the AI prompt
    page. Facts from Toolbar*Control.razor(.css), Layout/AppBarControl.razor(.css), AppBarPosition.cs (FlexCore 0.2.50).
    ToolbarButtonControl.HasDropdown only draws the arrow, so the Export panel is page markup. Code tabs are generated from the
-   Demo blocks, the code sections and the stylesheet. *@
+   Demo blocks, the code sections and the stylesheet.
+   2026-11-15: example story moved to the Project management theme.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor Toolbar and App Bar — FlexCore</PageTitle>
 
@@ -18,65 +20,73 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="commands" Title="Commands, captions and a trailing area" RazorCode="@Code.Commands" CSharpCode="@Code.CommandsCs" CssCode="@Code.Css">
-            <Description><p>Clear Captions to leave icons and tooltips; Share keeps its text because it is the button's child content. Pin is a toggle, and its pressed look comes from this page's CSS, because the library styles <code>Selected</code> only on <code>Large</code> buttons.</p></Description>
+        <DemoExample Id="commands" Title="Commands, captions and a trailing area" RazorCode="@Code.Commands" CSharpCode="@Code.CommandsCs">
+            <Description><p>Work on the task: each button changes the card under the toolbar, and the task's cost sits in <code>TrailingContent</code>. Clear Captions to leave icons and tooltips; Share keeps its text because it is the button's <code>ChildContent</code>. Drop an hour stops at two hours, the smallest estimate the studio gives, and Web form shows where the request came from. Priority and Web form are <code>Selected</code> toggles; the library styles <code>Selected</code> only on <code>Large</code> buttons, so this page adds <code>.tb ::deep .fx-toolbar-btn--selected { background: #eef2ff; border-color: #c7d2fe; }</code>, with the same colors on hover and keyboard focus; Vertical buttons sets <code>Vertical</code>, and <code>fx-toolbar--wrap</code> drops the trailing block below the buttons on a narrow screen.</p></Description>
             <Controls>
                 <SwitchControl @bind-Checked="_vertical" Label="Vertical buttons" />
             </Controls>
             <Demo>
                 <div class="tb">
-                    <ToolbarControl ShowCaptions="_captions" ShowCaptionsChanged="SetCaptions">
+                    <ToolbarControl CssClass="fx-toolbar--wrap" ShowCaptions="_captions" ShowCaptionsChanged="on => _captions = on">
                         <ChildContent>
-                            <ToolbarButtonControl Label="New" IconCss="bi bi-file-earmark-plus" Vertical="_vertical" OnClick="NewRequest" />
-                            <ToolbarButtonControl Label="Save" IconCss="bi bi-save" Vertical="_vertical" Disabled="!_dirty" OnClick="Save" />
+                            <ToolbarButtonControl Label="Add an hour" IconCss="bi bi-plus-circle" Vertical="_vertical" OnClick="() => Hours(1)" />
+                            <ToolbarButtonControl Label="Drop an hour" IconCss="bi bi-dash-circle" Vertical="_vertical" Disabled="@(_hours == 2)" OnClick="() => Hours(-1)" />
+                            <ToolbarButtonControl Label="Save" IconCss="bi bi-save" Vertical="_vertical" Disabled="!_dirty" OnClick="() => _dirty = false" />
                             <ToolbarSeparatorControl />
-                            <ToolbarButtonControl Label="Pin" Title="Pin: keep this request at the top" IconCss="bi bi-pin-angle" Vertical="_vertical"
-                                                  Selected="_pinned" OnClick="TogglePin" />
+                            <ToolbarButtonControl Label="Priority" Title="Priority: put this task at the top of the board" IconCss="bi bi-pin-angle" Vertical="_vertical"
+                                                  Selected="_priority" OnClick="TogglePriority" />
                             <ToolbarButtonControl Label="Web form" IconSrc="images/toolbar-globe.svg" IconAlt="Web form" Vertical="_vertical"
-                                                  OnClick='() => Act("Web form")' />
+                                                  Selected="_source" OnClick="() => _source = !_source" />
                             <ToolbarSeparatorControl />
-                            <ToolbarButtonControl Title="Share" IconCss="bi bi-share" Vertical="_vertical" OnClick='() => Act("Share")'>Share</ToolbarButtonControl>
+                            <ToolbarButtonControl Title="Share" IconCss="bi bi-share" Vertical="_vertical" OnClick="() => _shared++">Share</ToolbarButtonControl>
                         </ChildContent>
                         <TrailingContent>
-                            <BadgeControl Text="@($"{_open} open")" Variant="BadgeVariant.Info" />
+                            <BadgeControl Text="@Total.ToString("C0")" Variant="BadgeVariant.Info" />
                         </TrailingContent>
                     </ToolbarControl>
-                    <p class="tb-status" role="status">Last action: @_last</p>
+                    <div class="tb-task" role="status">
+                        <strong>WEB-123 Photo gallery for Green Fork Cafe</strong>
+                        <span>@_hours hours · @Total.ToString("C0")</span>
+                        @if (_priority) { <BadgeControl Text="Priority" Variant="BadgeVariant.Warning" /> }
+                        <BadgeControl Text="@(_dirty ? "Unsaved" : "Saved")" Variant="@(_dirty ? BadgeVariant.Warning : BadgeVariant.Success)" />
+                        @if (_source) { <span class="tb-note">The client asked for it through the web form on Monday.</span> }
+                        @if (_shared > 0) { <span class="tb-note">Shared with the client @_shared time@(_shared == 1 ? "" : "s").</span> }
+                    </div>
                 </div>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="tiles" Title="Large tool tiles" RazorCode="@Code.Tiles" CSharpCode="@Code.TilesCs" CssCode="@Code.Css">
-            <Description><p>Pick a tool: <code>Large</code> buttons in a toolbar with the <code>fx-toolbar--large-tools</code> class and no Captions checkbox. Select and Text use the two icons the stylesheet draws itself.</p></Description>
+        <DemoExample Id="tiles" Title="Large tool tiles" RazorCode="@Code.Tiles" CSharpCode="@Code.TilesCs">
+            <Description><p>Pick a label and its tasks appear: <code>Large</code>, <code>Vertical</code> buttons in a toolbar with the <code>fx-toolbar--large-tools</code> class and no Captions checkbox; <code>Selected</code> marks the chosen tile, which the library styles on <code>Large</code> buttons.</p></Description>
             <Demo>
                 <div class="tools">
                     <ToolbarControl CssClass="fx-toolbar--large-tools" ShowCaptionsToggle="false">
-                        @foreach (var tool in _tools)
+                        @foreach (var label in _labels)
                         {
-                            <ToolbarButtonControl Large="true" Vertical="true" Label="@tool.Name" IconCss="@tool.Icon"
-                                                  Selected="@(_tool == tool.Name)" OnClick="() => _tool = tool.Name" />
+                            <ToolbarButtonControl Large="true" Vertical="true" Label="@label.Name" IconCss="@label.Icon"
+                                                  Selected="@(_label == label)" OnClick="() => _label = label" />
                         }
                     </ToolbarControl>
-                    <p class="tb-status" role="status">Tool: @_tool</p>
+                    <p class="tb-status" role="status">@_label.Name: @string.Join(", ", _label.Tasks)</p>
                 </div>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="app-bar" Title="App bar over a toolbar" RazorCode="@Code.AppBar" CSharpCode="@Code.AppBarCs" CssCode="@Code.Css">
-            <Description><p>Scroll the frame: the app bar stays at the top while <code>Position</code> is <code>Sticky</code>. This toolbar keeps its own captions state, and Export shows the <code>HasDropdown</code> arrow; the menu under it is page markup, closed by a click anywhere.</p></Description>
+        <DemoExample Id="app-bar" Title="App bar over a toolbar" RazorCode="@Code.AppBar" CSharpCode="@Code.AppBarCs">
+            <Description><p>Scroll the frame: the app bar stays at the top while <code>Position</code> is <code>Sticky</code>. This toolbar keeps its own captions state, and Export shows the <code>HasDropdown</code> arrow; the menu under it is page markup, closed by a click anywhere outside it: its click-catcher sits above the site's top bar too.</p></Description>
             <Controls>
                 <SwitchControl @bind-Checked="_sticky" Label="Sticky app bar" />
             </Controls>
             <Demo>
                 <div class="qd">
                     <AppBarControl Position="@(_sticky ? AppBarPosition.Sticky : AppBarPosition.Static)">
-                        <StartContent><SvgIconControl Name="document" Size="20px" /><strong>Quote desk</strong></StartContent>
-                        <ChildContent><span class="qd-sub">Lisbon desk · requests from the web form</span></ChildContent>
+                        <StartContent><SvgIconControl Name="document" Size="20px" /><strong>QA desk</strong></StartContent>
+                        <ChildContent><span class="qd-sub">Website relaunch · WEB-@(_task) · Hermione Ranger</span></ChildContent>
                         <EndContent><BadgeControl Text="@(_deskDirty ? "Unsaved" : "Saved")" Variant="@(_deskDirty ? BadgeVariant.Warning : BadgeVariant.Success)" /></EndContent>
                     </AppBarControl>
-                    <ToolbarControl CaptionsToggleLabel="Labels">
-                        <ToolbarButtonControl Label="New request" IconCss="bi bi-file-earmark-plus" OnClick="NewQuote" />
-                        <ToolbarButtonControl Label="Save" IconCss="bi bi-save" Disabled="!_deskDirty" OnClick="SaveQuote" />
+                    <ToolbarControl CaptionsToggleLabel="Button text">
+                        <ToolbarButtonControl Label="New task" IconCss="bi bi-file-earmark-plus" OnClick="NewTask" />
+                        <ToolbarButtonControl Label="Save" IconCss="bi bi-save" Disabled="!_deskDirty" OnClick="SaveTask" />
                         <ToolbarSeparatorControl />
                         <span class="qd-export">
                             <ToolbarButtonControl Label="Export" IconCss="bi bi-box-arrow-up" HasDropdown="true"
@@ -85,16 +95,16 @@
                             {
                                 <div class="qd-backdrop" @onclick="() => _exportOpen = false"></div>
                                 <div class="qd-menu">
-                                    <ButtonControl CssClass="qd-menu-item" OnClick='() => Desk("Export › PDF quote")'>PDF quote</ButtonControl>
-                                    <ButtonControl CssClass="qd-menu-item" OnClick='() => Desk("Export › CSV itinerary")'>CSV itinerary</ButtonControl>
+                                    <ButtonControl CssClass="qd-menu-item" OnClick='() => Desk("Export › PDF report")'>PDF report</ButtonControl>
+                                    <ButtonControl CssClass="qd-menu-item" OnClick='() => Desk("Export › CSV checklist")'>CSV checklist</ButtonControl>
                                 </div>
                             }
                         </span>
                         <ToolbarButtonControl Label="Print" IconCss="bi bi-printer" OnClick='() => Desk("Print")' />
                     </ToolbarControl>
                     <p class="tb-status" role="status">Last action: @_deskLast</p>
-                    <div class="qd-label">Agent notes, request QD-@(_request)</div>
-                    <TextBoxControl @bind-Value="_notes" @bind-Value:after="MarkDirty" Multiline="true" Rows="10" Width="100%" aria-label="Agent notes" />
+                    <div class="qd-label">QA notes, task WEB-@(_task)</div>
+                    <TextBoxControl @bind-Value="_notes" @bind-Value:after="MarkDirty" UpdateOnInput="true" Multiline="true" Rows="10" Width="100%" aria-label="QA notes" />
                 </div>
             </Demo>
         </DemoExample>
@@ -113,6 +123,9 @@
             </DocSection>
             <DocSection Id="doc-toolbarbuttoncontrol-parameters" Title="ToolbarButtonControl parameters" Count='@DocSection.Label(Vocab.Button.Length, "parameters")'>
                 <ApiTable Kind="ApiKind.Parameters" Title="ToolbarButtonControl parameters" Rows="Vocab.Button" />
+            </DocSection>
+            <DocSection Id="doc-events" Title="Events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="Events" Rows="Vocab.Events" />
             </DocSection>
             <DocSection Id="doc-toolbarseparatorcontrol-parameters" Title="ToolbarSeparatorControl parameters" Count='@DocSection.Label(Vocab.Separator.Length, "parameters")'>
                 <ApiTable Kind="ApiKind.Parameters" Title="ToolbarSeparatorControl parameters" Rows="Vocab.Separator" />
@@ -133,12 +146,11 @@
 
     <Accessibility>
         <ul>
-            <li><code>ToolbarControl</code> has <code>role="toolbar"</code> but no arrow-key handling, so each button is its own Tab stop. It accepts no <code>aria-label</code>, so two toolbars on one screen cannot be told apart by name. Its Captions checkbox is a native checkbox inside its label.</li>
-            <li><code>ToolbarButtonControl</code> is a native button. It sets <code>aria-label</code> from <code>Title</code>, else <code>Label</code>, else <code>IconAlt</code>, so the name survives hidden captions; an <code>IconCss</code> icon is <code>aria-hidden</code>. Keyboard focus shows a dotted outline.</li>
-            <li><code>Selected</code> writes <code>aria-pressed="true"</code> and leaves the attribute out when false, so a toggle that is off reads as a plain button.</li>
-            <li><code>HasDropdown</code> adds no <code>aria-haspopup</code> or <code>aria-expanded</code>, and the button accepts no extra attributes to add them. The Export menu in the third example is plain page markup with no menu roles.</li>
+            <li><code>ToolbarControl</code> renders a <code>role="toolbar"</code> container. Tab moves through its buttons one by one, and its Captions checkbox is a native checkbox inside its label.</li>
+            <li><code>ToolbarButtonControl</code> is a native button whose <code>aria-label</code> comes from <code>Title</code>, else <code>Label</code>, else <code>IconAlt</code>, so the name stays when captions are hidden; an <code>IconCss</code> icon is <code>aria-hidden</code>. Give every icon-only button a <code>Title</code>.</li>
+            <li>Keyboard focus on a toolbar button shows a dotted outline. A button with <code>Selected</code> carries <code>aria-pressed="true"</code>.</li>
             <li><code>ToolbarSeparatorControl</code> is <code>role="separator"</code> with <code>aria-orientation="vertical"</code>.</li>
-            <li><code>AppBarControl</code> is a <code>&lt;header&gt;</code> (a banner landmark only when it is not inside <code>main</code>, <code>article</code>, <code>aside</code>, <code>nav</code> or <code>section</code>) wrapping a <code>ToolbarControl</code>, so its title and end items sit inside a <code>role="toolbar"</code>.</li>
+            <li><code>AppBarControl</code> renders a <code>&lt;header&gt;</code>, a banner landmark when it is not inside <code>main</code>, <code>article</code>, <code>aside</code>, <code>nav</code> or <code>section</code>. Its start, center and end content sit inside a <code>ToolbarControl</code>.</li>
         </ul>
     </Accessibility>
 
@@ -155,60 +167,48 @@
 
 @code {
     // Commands
-    private bool _captions = true, _vertical, _pinned, _dirty;
-    private int _open = 3;
-    private string _last = "none yet";
-    private void Act(string action) => _last = action;
-    private void NewRequest()
+    private bool _captions = true, _vertical, _priority, _dirty, _source;
+    private int _hours = 3, _shared;
+    private decimal Total => 95 * _hours;
+    private void Hours(int change)
     {
-        _open++;
+        _hours += change;
         _dirty = true;
-        Act("New");
     }
-    private void Save()
+    private void TogglePriority()
     {
-        _dirty = false;
-        Act("Save");
-    }
-    private void TogglePin()
-    {
-        _pinned = !_pinned;
-        Act(_pinned ? "Pin on" : "Pin off");
-    }
-    private void SetCaptions(bool on)
-    {
-        _captions = on;
-        Act(on ? "Captions on" : "Captions off");
+        _priority = !_priority;
+        _dirty = true;
     }
 
     // Tiles
-    private sealed record Tool(string Name, string Icon);
-    private readonly Tool[] _tools =
+    private sealed record TaskLabel(string Name, string Icon, string[] Tasks);
+    private static readonly TaskLabel[] _labels =
     {
-        new("Select", "fx-toolbar-icon-pointer"),
-        new("Text", "fx-toolbar-icon-text"),
-        new("Image", "bi bi-image"),
+        new("Design", "bi bi-palette", new[] { "WEB-101 Style guide", "WEB-102 Logo refresh" }),
+        new("Frontend", "bi bi-code-slash", new[] { "WEB-117 Order form", "WEB-123 Photo gallery" }),
+        new("Content", "bi bi-card-text", new[] { "WEB-121 Menu copy", "WEB-122 About page" }),
     };
-    private string _tool = "Select";
+    private TaskLabel _label = _labels[0];
 
     // App bar
     private bool _sticky = true, _exportOpen, _deskDirty;
-    private int _request = 1042;
+    private int _task = 123;
     private string _deskLast = "none yet";
-    private string _notes = "Phoned on Monday: two adults, May 12–15, hotel within walking distance of the old town.";
+    private string _notes = "Checked WEB-123 on Thursday: the photo gallery on a phone and a laptop, Sprint 8 build.\nCaptions wrap onto a second line on narrow screens.\nPhotos have no alt text; asked Luna Goodlove for the wording.";
     private void Desk(string action)
     {
         _exportOpen = false;
         _deskLast = action;
     }
-    private void NewQuote()
+    private void NewTask()
     {
-        Desk("New request");
-        _request++;
+        Desk("New task");
+        _task++;
         _notes = "";
         _deskDirty = true;
     }
-    private void SaveQuote()
+    private void SaveTask()
     {
         Desk("Save");
         _deskDirty = false;
@@ -223,7 +223,6 @@
             new("ChildContent", "The items, in a row that wraps when there is not enough room.", "RenderFragment?", "null"),
             new("TrailingContent", "Right-hand area, after the Captions checkbox. It does not shrink or wrap.", "RenderFragment?", "null"),
             new("ShowCaptions", "Shows or hides the buttons' <code>Label</code> captions. Null lets the toolbar keep its own state, read from the preference service when there is one and true otherwise; a value wins over that state, so update it from <code>ShowCaptionsChanged</code>.", "bool?", "null"),
-            new("ShowCaptionsChanged", "Raised when the Captions checkbox is toggled.", "EventCallback&lt;bool&gt;"),
             new("ShowCaptionsToggle", "Draws the Captions checkbox at the right. Pass false on a toolbar whose items are not <code>ToolbarButtonControl</code>s with labels, where the checkbox would hide nothing.", "bool", "true"),
             new("CaptionsToggleLabel", "Text beside the checkbox.", "string", "\"Captions\""),
             new("PreferenceKey", "Name for storing the captions setting; <code>Toolbar</code> when blank, so toolbars without a key share one. FlexCore defines no storage or interface: declare and register an <code>Fx.ControlKit.IUserPreferencesService</code> with <code>GetBool(string, string, bool)</code> and <code>PutBool(string, string, bool)</code>. The toolbar calls them by reflection with <code>(\"Toolbar\", \"<em>key</em>.Captions\", …)</code>: a read at start when <code>ShowCaptions</code> is null, a write on every toggle. Without it the setting lasts as long as the component.", "string?", "null"),
@@ -235,7 +234,7 @@
         public static readonly ApiRow[] Button =
         {
             new("Label", "Caption, in a span that is hidden with the captions. Ignored on screen when <code>ChildContent</code> is set, but still used for the name.", "string", "string.Empty"),
-            new("IconCss", "Classes for an <code>aria-hidden</code> icon span before the caption, such as <code>bi bi-save</code>. The span is an 18px box (56px on a <code>Large</code> button), so set the font size of a font icon in your CSS, as the examples do.", "string", "string.Empty"),
+            new("IconCss", "Classes for an <code>aria-hidden</code> icon span before the caption, such as <code>bi bi-save</code>. The span is an 18px box (56px on a <code>Large</code> button), so set the font size of a font icon in your CSS; the examples use 16px with an 18px line height, and 46px on the <code>Large</code> tiles.", "string", "string.Empty"),
             new("IconSrc", "Image address for an icon; wins over <code>IconCss</code>.", "string", "string.Empty"),
             new("IconAlt", "Alt text of the <code>IconSrc</code> image; also the name when there is no <code>Title</code> or <code>Label</code>.", "string", "string.Empty"),
             new("Title", "Tooltip and <code>aria-label</code>; when blank, <code>Label</code>, then <code>IconAlt</code>.", "string", "string.Empty"),
@@ -246,12 +245,16 @@
             new("Disabled", "Native <code>disabled</code>, drawn at half opacity.", "bool", "false"),
             new("HasDropdown", "Draws a small arrow after the caption. That is all: no menu opens, so the host renders and positions its own.", "bool", "false"),
             new("Dropdown", "Same as <code>HasDropdown</code>.", "bool", "false"),
-            new("OnClick", "Raised on click.", "EventCallback"),
             new("ChildContent", "Replaces the <code>Label</code> span, and stays visible with captions off.", "RenderFragment?", "null"),
             new("Type", "The button's <code>type</code>.", "string", "\"button\""),
             new("ParentToolbar", "Cascading parameter, set by the surrounding <code>ToolbarControl</code>; it is what forces the tooltip on while captions are off. Null for a button used outside a toolbar.", "ToolbarControl?", "null"),
             new("CssClass", "Added to <code>fx-toolbar-btn</code>.", "string", "string.Empty"),
             new("(no base class)", "It does not inherit <code>FlexControlBase</code>; any other attribute, such as <code>id</code> or <code>aria-expanded</code>, throws when the page renders."),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("ToolbarControl.ShowCaptionsChanged", "When the Captions checkbox is toggled, with the new state; the toolbar also saves it through <code>PreferenceKey</code>.", "bool"),
+            new("ToolbarButtonControl.OnClick", "A click, Enter or Space on the button; not raised while <code>Disabled</code>.", "none"),
         };
         public static readonly ApiRow[] Separator =
         {
@@ -268,7 +271,7 @@
             new("Visible (base)", "False adds <code>display:none</code>.", "bool", "true"),
             new("Enabled / Title / Tag / Data / Parent (base)", "Accepted but not read by the app bar."),
             new("Id / CssClass / Style (base)", "On the <code>header.fx-app-bar</code>; <code>Style</code> comes after the position, offset and z-index.", "string?", "null"),
-            new("(unmatched attributes)", "Written on the header after its own attributes, so a <code>class</code>, <code>id</code> or <code>style</code> passed this way replaces the one the control writes; use <code>CssClass</code>, <code>Id</code> and <code>Style</code>.", "Dictionary&lt;string,object&gt;?", "null"),
+            new("(unmatched attributes)", "Written on the header after its own attributes, so a <code>class</code> passed this way replaces <code>fx-app-bar</code>; use <code>CssClass</code>. <code>id</code> and <code>style</code> are not unmatched: parameter names ignore case, so they bind to <code>Id</code> and <code>Style</code>.", "Dictionary&lt;string,object&gt;?", "null"),
         };
         public static readonly ApiRow[] Position =
         {
@@ -289,10 +292,10 @@
             new("fx-toolbar-btn", "A button: no border until hover, at least 32px high, 11px text."),
             new("fx-toolbar-btn--vertical · --large · --selected", "Added by <code>Vertical</code>, <code>Large</code> and <code>Selected</code>."),
             new("fx-toolbar-btn-icon · fx-toolbar-btn-label · fx-toolbar-btn-arrow", "The icon box, the caption span and the <code>HasDropdown</code> arrow."),
-            new("fx-toolbar-icon-pointer · fx-toolbar-icon-text", "Two icons drawn in CSS for <code>IconCss</code> on a <code>Large</code> button: an arrow pointer and a serif T."),
+            new("fx-toolbar-icon-pointer · fx-toolbar-icon-text", "Two icons drawn in CSS for <code>IconCss</code> on a <code>Large</code> button: an arrow pointer and a serif T. Not used in this page's examples."),
             new("fx-toolbar-separator", "The separator line."),
             new("fx-app-bar", "The app bar's header: the surface color, a bottom border, 8px by 12px padding."),
-            new("fx-app-bar-toolbar", "The toolbar inside the app bar. No library rule: it keeps the gray, bordered <code>fx-toolbar</code> look, at least 44px high; the third example's CSS resets it."),
+            new("fx-app-bar-toolbar", "The toolbar inside the app bar. No library rule: it keeps the gray, bordered <code>fx-toolbar</code> look, at least 44px high; the third example clears it with <code>min-height: 0; margin: 0; background: transparent; border: 0;</code>."),
             new("fx-app-bar-start · fx-app-bar-center · fx-app-bar-end", "The three areas."),
         };
     }
@@ -303,80 +306,76 @@
         public const string Commands = @"<SwitchControl @bind-Checked=""_vertical"" Label=""Vertical buttons"" />
 
 <div class=""tb"">
-    <ToolbarControl ShowCaptions=""_captions"" ShowCaptionsChanged=""SetCaptions"">
+    <ToolbarControl CssClass=""fx-toolbar--wrap"" ShowCaptions=""_captions"" ShowCaptionsChanged=""on => _captions = on"">
         <ChildContent>
-            <ToolbarButtonControl Label=""New"" IconCss=""bi bi-file-earmark-plus"" Vertical=""_vertical"" OnClick=""NewRequest"" />
-            <ToolbarButtonControl Label=""Save"" IconCss=""bi bi-save"" Vertical=""_vertical"" Disabled=""!_dirty"" OnClick=""Save"" />
+            <ToolbarButtonControl Label=""Add an hour"" IconCss=""bi bi-plus-circle"" Vertical=""_vertical"" OnClick=""() => Hours(1)"" />
+            <ToolbarButtonControl Label=""Drop an hour"" IconCss=""bi bi-dash-circle"" Vertical=""_vertical"" Disabled=""@(_hours == 2)"" OnClick=""() => Hours(-1)"" />
+            <ToolbarButtonControl Label=""Save"" IconCss=""bi bi-save"" Vertical=""_vertical"" Disabled=""!_dirty"" OnClick=""() => _dirty = false"" />
             <ToolbarSeparatorControl />
-            <ToolbarButtonControl Label=""Pin"" Title=""Pin: keep this request at the top"" IconCss=""bi bi-pin-angle"" Vertical=""_vertical""
-                                  Selected=""_pinned"" OnClick=""TogglePin"" />
+            <ToolbarButtonControl Label=""Priority"" Title=""Priority: put this task at the top of the board"" IconCss=""bi bi-pin-angle"" Vertical=""_vertical""
+                                  Selected=""_priority"" OnClick=""TogglePriority"" />
             <ToolbarButtonControl Label=""Web form"" IconSrc=""images/toolbar-globe.svg"" IconAlt=""Web form"" Vertical=""_vertical""
-                                  OnClick='() => Act(""Web form"")' />
+                                  Selected=""_source"" OnClick=""() => _source = !_source"" />
             <ToolbarSeparatorControl />
-            <ToolbarButtonControl Title=""Share"" IconCss=""bi bi-share"" Vertical=""_vertical"" OnClick='() => Act(""Share"")'>Share</ToolbarButtonControl>
+            <ToolbarButtonControl Title=""Share"" IconCss=""bi bi-share"" Vertical=""_vertical"" OnClick=""() => _shared++"">Share</ToolbarButtonControl>
         </ChildContent>
         <TrailingContent>
-            <BadgeControl Text=""@($""{_open} open"")"" Variant=""BadgeVariant.Info"" />
+            <BadgeControl Text=""@Total.ToString(""C0"")"" Variant=""BadgeVariant.Info"" />
         </TrailingContent>
     </ToolbarControl>
-    <p class=""tb-status"" role=""status"">Last action: @_last</p>
+    <div class=""tb-task"" role=""status"">
+        <strong>WEB-123 Photo gallery for Green Fork Cafe</strong>
+        <span>@_hours hours · @Total.ToString(""C0"")</span>
+        @if (_priority) { <BadgeControl Text=""Priority"" Variant=""BadgeVariant.Warning"" /> }
+        <BadgeControl Text=""@(_dirty ? ""Unsaved"" : ""Saved"")"" Variant=""@(_dirty ? BadgeVariant.Warning : BadgeVariant.Success)"" />
+        @if (_source) { <span class=""tb-note"">The client asked for it through the web form on Monday.</span> }
+        @if (_shared > 0) { <span class=""tb-note"">Shared with the client @_shared time@(_shared == 1 ? """" : ""s"").</span> }
+    </div>
 </div>";
         public const string CommandsCs = @"// Commands
-private bool _captions = true, _vertical, _pinned, _dirty;
-private int _open = 3;
-private string _last = ""none yet"";
-private void Act(string action) => _last = action;
-private void NewRequest()
+private bool _captions = true, _vertical, _priority, _dirty, _source;
+private int _hours = 3, _shared;
+private decimal Total => 95 * _hours;
+private void Hours(int change)
 {
-    _open++;
+    _hours += change;
     _dirty = true;
-    Act(""New"");
 }
-private void Save()
+private void TogglePriority()
 {
-    _dirty = false;
-    Act(""Save"");
-}
-private void TogglePin()
-{
-    _pinned = !_pinned;
-    Act(_pinned ? ""Pin on"" : ""Pin off"");
-}
-private void SetCaptions(bool on)
-{
-    _captions = on;
-    Act(on ? ""Captions on"" : ""Captions off"");
+    _priority = !_priority;
+    _dirty = true;
 }";
         public const string Tiles = @"<div class=""tools"">
     <ToolbarControl CssClass=""fx-toolbar--large-tools"" ShowCaptionsToggle=""false"">
-        @foreach (var tool in _tools)
+        @foreach (var label in _labels)
         {
-            <ToolbarButtonControl Large=""true"" Vertical=""true"" Label=""@tool.Name"" IconCss=""@tool.Icon""
-                                  Selected=""@(_tool == tool.Name)"" OnClick=""() => _tool = tool.Name"" />
+            <ToolbarButtonControl Large=""true"" Vertical=""true"" Label=""@label.Name"" IconCss=""@label.Icon""
+                                  Selected=""@(_label == label)"" OnClick=""() => _label = label"" />
         }
     </ToolbarControl>
-    <p class=""tb-status"" role=""status"">Tool: @_tool</p>
+    <p class=""tb-status"" role=""status"">@_label.Name: @string.Join("", "", _label.Tasks)</p>
 </div>";
         public const string TilesCs = @"// Tiles
-private sealed record Tool(string Name, string Icon);
-private readonly Tool[] _tools =
+private sealed record TaskLabel(string Name, string Icon, string[] Tasks);
+private static readonly TaskLabel[] _labels =
 {
-    new(""Select"", ""fx-toolbar-icon-pointer""),
-    new(""Text"", ""fx-toolbar-icon-text""),
-    new(""Image"", ""bi bi-image""),
+    new(""Design"", ""bi bi-palette"", new[] { ""WEB-101 Style guide"", ""WEB-102 Logo refresh"" }),
+    new(""Frontend"", ""bi bi-code-slash"", new[] { ""WEB-117 Order form"", ""WEB-123 Photo gallery"" }),
+    new(""Content"", ""bi bi-card-text"", new[] { ""WEB-121 Menu copy"", ""WEB-122 About page"" }),
 };
-private string _tool = ""Select"";";
+private TaskLabel _label = _labels[0];";
         public const string AppBar = @"<SwitchControl @bind-Checked=""_sticky"" Label=""Sticky app bar"" />
 
 <div class=""qd"">
     <AppBarControl Position=""@(_sticky ? AppBarPosition.Sticky : AppBarPosition.Static)"">
-        <StartContent><SvgIconControl Name=""document"" Size=""20px"" /><strong>Quote desk</strong></StartContent>
-        <ChildContent><span class=""qd-sub"">Lisbon desk · requests from the web form</span></ChildContent>
+        <StartContent><SvgIconControl Name=""document"" Size=""20px"" /><strong>QA desk</strong></StartContent>
+        <ChildContent><span class=""qd-sub"">Website relaunch · WEB-@(_task) · Hermione Ranger</span></ChildContent>
         <EndContent><BadgeControl Text=""@(_deskDirty ? ""Unsaved"" : ""Saved"")"" Variant=""@(_deskDirty ? BadgeVariant.Warning : BadgeVariant.Success)"" /></EndContent>
     </AppBarControl>
-    <ToolbarControl CaptionsToggleLabel=""Labels"">
-        <ToolbarButtonControl Label=""New request"" IconCss=""bi bi-file-earmark-plus"" OnClick=""NewQuote"" />
-        <ToolbarButtonControl Label=""Save"" IconCss=""bi bi-save"" Disabled=""!_deskDirty"" OnClick=""SaveQuote"" />
+    <ToolbarControl CaptionsToggleLabel=""Button text"">
+        <ToolbarButtonControl Label=""New task"" IconCss=""bi bi-file-earmark-plus"" OnClick=""NewTask"" />
+        <ToolbarButtonControl Label=""Save"" IconCss=""bi bi-save"" Disabled=""!_deskDirty"" OnClick=""SaveTask"" />
         <ToolbarSeparatorControl />
         <span class=""qd-export"">
             <ToolbarButtonControl Label=""Export"" IconCss=""bi bi-box-arrow-up"" HasDropdown=""true""
@@ -385,61 +384,39 @@ private string _tool = ""Select"";";
             {
                 <div class=""qd-backdrop"" @onclick=""() => _exportOpen = false""></div>
                 <div class=""qd-menu"">
-                    <ButtonControl CssClass=""qd-menu-item"" OnClick='() => Desk(""Export › PDF quote"")'>PDF quote</ButtonControl>
-                    <ButtonControl CssClass=""qd-menu-item"" OnClick='() => Desk(""Export › CSV itinerary"")'>CSV itinerary</ButtonControl>
+                    <ButtonControl CssClass=""qd-menu-item"" OnClick='() => Desk(""Export › PDF report"")'>PDF report</ButtonControl>
+                    <ButtonControl CssClass=""qd-menu-item"" OnClick='() => Desk(""Export › CSV checklist"")'>CSV checklist</ButtonControl>
                 </div>
             }
         </span>
         <ToolbarButtonControl Label=""Print"" IconCss=""bi bi-printer"" OnClick='() => Desk(""Print"")' />
     </ToolbarControl>
     <p class=""tb-status"" role=""status"">Last action: @_deskLast</p>
-    <div class=""qd-label"">Agent notes, request QD-@(_request)</div>
-    <TextBoxControl @bind-Value=""_notes"" @bind-Value:after=""MarkDirty"" Multiline=""true"" Rows=""10"" Width=""100%"" aria-label=""Agent notes"" />
+    <div class=""qd-label"">QA notes, task WEB-@(_task)</div>
+    <TextBoxControl @bind-Value=""_notes"" @bind-Value:after=""MarkDirty"" UpdateOnInput=""true"" Multiline=""true"" Rows=""10"" Width=""100%"" aria-label=""QA notes"" />
 </div>";
         public const string AppBarCs = @"// App bar
 private bool _sticky = true, _exportOpen, _deskDirty;
-private int _request = 1042;
+private int _task = 123;
 private string _deskLast = ""none yet"";
-private string _notes = ""Phoned on Monday: two adults, May 12–15, hotel within walking distance of the old town."";
+private string _notes = ""Checked WEB-123 on Thursday: the photo gallery on a phone and a laptop, Sprint 8 build.\nCaptions wrap onto a second line on narrow screens.\nPhotos have no alt text; asked Luna Goodlove for the wording."";
 private void Desk(string action)
 {
     _exportOpen = false;
     _deskLast = action;
 }
-private void NewQuote()
+private void NewTask()
 {
-    Desk(""New request"");
-    _request++;
+    Desk(""New task"");
+    _task++;
     _notes = """";
     _deskDirty = true;
 }
-private void SaveQuote()
+private void SaveTask()
 {
     Desk(""Save"");
     _deskDirty = false;
 }
 private void MarkDirty() => _deskDirty = true;";
-        public const string Css = @"/* Toolbar page: font icons sized for the 18px icon box, the pressed look, the tiles and the quote desk frame. */
-
-/* Commands */
-.tb ::deep .fx-toolbar-btn-icon, .qd ::deep .fx-toolbar-btn-icon { font-size: 16px; line-height: 18px; text-align: center; }
-.tb ::deep .fx-toolbar-btn--selected, .tb ::deep .fx-toolbar-btn--selected:hover:not(:disabled), .tb ::deep .fx-toolbar-btn--selected:focus-visible:not(:disabled) { background: #dbeafe; border-color: #93c5fd; }
-.tb-status { margin: 4px 0 0; font-size: 13px; color: #475569; }
-
-/* Tiles */
-.tools ::deep .fx-toolbar { border: 1px solid #cbd5e1; border-radius: 8px; flex-wrap: wrap; }
-.tools ::deep .fx-toolbar-btn-icon.bi { font-size: 46px; line-height: 56px; text-align: center; }
-
-/* App bar */
-.qd { height: 300px; overflow: auto; padding: 0 12px 12px; border: 1px solid #cbd5e1; border-radius: 8px; }
-.qd ::deep .fx-app-bar { margin: 0 -12px; background: #eff6ff; border-bottom: 1px solid #bfdbfe; }
-.qd ::deep .fx-toolbar { margin-top: 8px; }
-.qd ::deep .fx-app-bar-toolbar { min-height: 0; margin: 0; background: transparent; border: 0; }
-.qd-sub { font-size: 13px; color: #475569; }
-.qd-export { position: relative; display: inline-flex; }
-.qd-backdrop { position: fixed; inset: 0; z-index: 4; }
-.qd-menu { position: absolute; top: 100%; left: 0; z-index: 5; display: flex; flex-direction: column; min-width: 160px; padding: 4px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12); }
-.qd-menu ::deep .qd-menu-item { text-align: left; background: transparent; border-color: transparent; }
-.qd-label { margin: 12px 0 4px; font-size: 12px; font-weight: 600; color: #475569; }";
     }
 }

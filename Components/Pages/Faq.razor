@@ -1,6 +1,7 @@
 @page "/faq"
 
-@* 2026-10-29: common pre-adoption questions, 1-3 checkable sentences each; footer link only. *@
+@* 2026-10-29: common pre-adoption questions, 1-3 checkable sentences each; footer link only.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>FlexCore FAQ: .NET Support, Grid, Reports, Comparisons</PageTitle>
 
@@ -60,15 +61,16 @@
 
         <h3 id="theming">Can I theme it to match my brand? Dark mode? Right-to-left?</h3>
         <p>
-            Each control reads <code>--fx-*</code> CSS variables for its colors, borders and sizes (the CSS variables table on its page lists
-            them), and <code>--fx-zoom</code> scales every control together. There is no built-in dark theme and no right-to-left layout
+            Where a control's stylesheet reads <code>--fx-*</code> CSS variables for its colors, borders or sizes, set them to match your
+            brand; pages with a CSS variables table list them, and the other controls are restyled through their CSS classes.
+            <code>--fx-zoom</code> scales the controls whose stylesheets read it. There is no built-in dark theme and no right-to-left layout
             today. Built-in labels are English; numbers and dates follow .NET format strings and the current culture.
         </p>
 
         <h3 id="accessibility">Are the controls accessible?</h3>
         <p>
-            Most demo pages have a <em>Keyboard and accessibility</em> section that states exactly what the control does and does not do:
-            roles, keys, focus order and the gaps. There is no WCAG conformance claim and no VPAT yet.
+            Most demo pages have a <em>Keyboard and accessibility</em> section that lists the control's keys, roles, labels and focus
+            behavior. There is no WCAG conformance claim and no VPAT yet.
         </p>
 
         <h3 id="crystal-reports">Does the report writer run my Crystal Reports?</h3>

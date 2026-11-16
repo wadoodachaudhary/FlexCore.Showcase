@@ -13,7 +13,8 @@
    2026-10-24: Documentation tables from Charts/Chart*.cs, ChartControl.razor(.css) (rows in ChartsVocab.*.cs, from read sites).
    2026-10-24: datasets are small made-up stories; titles name their subject.
    2026-10-25: Sunburst, Gauge and Gantt tiles left for their own pages; ChartType.Gauge/Gantt are drawn on no page (those pages
-   use dedicated controls), their ChartType rows say so. TabSlugs: kpi-gauge -> kpi, project removed. *@
+   use dedicated controls), their ChartType rows say so. TabSlugs: kpi-gauge -> kpi, project removed.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor Charts (Line, Bar, Pie, Area, Scatter) — FlexCore</PageTitle>
 
@@ -364,7 +365,7 @@
     };
     // Range points carry the minimum in Value and the maximum in Value2 (ChartDataPoint.Range)
     ChartSeries _transferRanges = new() { Name = "Minutes", DataPoints = new() {
-        ChartDataPoint.Range("Harbour", 15, 25), ChartDataPoint.Range("Hilltop", 30, 55), ChartDataPoint.Range("Old Town", 20, 40),
+        ChartDataPoint.Range("Harbor", 15, 25), ChartDataPoint.Range("Hilltop", 30, 55), ChartDataPoint.Range("Old Town", 20, 40),
         ChartDataPoint.Range("Beach", 45, 70), ChartDataPoint.Range("Airport", 5, 10) } };
     ChartSeries _heaterSeries = new() { Name = "Setting", DataPoints = new() {
         new("06:00", 24), new("08:00", 26), new("10:00", 28), new("12:00", 29), new("14:00", 29), new("16:00", 28), new("18:00", 27), new("20:00", 25), new("22:00", 23) } };
@@ -385,7 +386,7 @@
     ChartSeries _roomPyramid = new() { Name = "Stays", DataPoints = new() { new("Standard", 520), new("Superior", 280), new("Deluxe", 140), new("Suite", 60) } };
     // DotPlot scales its axis to the data and labels ticks as whole numbers: integer data reads best
     ChartSeries _complaints = new() { Name = "Complaints", DataPoints = new() {
-        new("Harbour", 2), new("Hilltop", 5), new("Old Town", 7), new("Beach", 1), new("Airport", 9) } };
+        new("Harbor", 2), new("Hilltop", 5), new("Old Town", 7), new("Beach", 1), new("Airport", 9) } };
 
     // Tooltips example: the last PointHover context, and the color survey as a named series, each slice in its own color
     private ChartTooltipContext? _hovered;
@@ -771,7 +772,7 @@ List<ChartSeries> _comboSeries = new()
 };
 // Range points carry the minimum in Value and the maximum in Value2 (ChartDataPoint.Range)
 ChartSeries _transferRanges = new() { Name = ""Minutes"", DataPoints = new() {
-    ChartDataPoint.Range(""Harbour"", 15, 25), ChartDataPoint.Range(""Hilltop"", 30, 55), ChartDataPoint.Range(""Old Town"", 20, 40),
+    ChartDataPoint.Range(""Harbor"", 15, 25), ChartDataPoint.Range(""Hilltop"", 30, 55), ChartDataPoint.Range(""Old Town"", 20, 40),
     ChartDataPoint.Range(""Beach"", 45, 70), ChartDataPoint.Range(""Airport"", 5, 10) } };
 ChartSeries _heaterSeries = new() { Name = ""Setting"", DataPoints = new() {
     new(""06:00"", 24), new(""08:00"", 26), new(""10:00"", 28), new(""12:00"", 29), new(""14:00"", 29), new(""16:00"", 28), new(""18:00"", 27), new(""20:00"", 25), new(""22:00"", 23) } };
@@ -792,7 +793,7 @@ ChartSeries _kyotoWeek = new() { Name = ""°C"", DataPoints = new() {
 ChartSeries _roomPyramid = new() { Name = ""Stays"", DataPoints = new() { new(""Standard"", 520), new(""Superior"", 280), new(""Deluxe"", 140), new(""Suite"", 60) } };
 // DotPlot scales its axis to the data and labels ticks as whole numbers: integer data reads best
 ChartSeries _complaints = new() { Name = ""Complaints"", DataPoints = new() {
-    new(""Harbour"", 2), new(""Hilltop"", 5), new(""Old Town"", 7), new(""Beach"", 1), new(""Airport"", 9) } };
+    new(""Harbor"", 2), new(""Hilltop"", 5), new(""Old Town"", 7), new(""Beach"", 1), new(""Airport"", 9) } };
 
 // a bakery's week: Grouped compares the two lines per day, Stacked adds them (Saturday totals 680), StackedBar100 shows the mix
 List<ChartSeries> _groupedBarSeries = new()

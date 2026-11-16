@@ -44,7 +44,7 @@ public static class PackageCostSheet
         {
             ("A", "Transport", new[]
             {
-                ("Meridian Airways", new[]
+                ("Overhead Bin Airways", new[]
                 {
                     ("F", "Return flights, economy",            pax, "pax",  380, 620, "Non-refundable"),
                     ("F", "Checked baggage, 23 kg",             pax, "pax",   40,  60, ""),
@@ -93,7 +93,7 @@ public static class PackageCostSheet
             }),
             ("D", "Services", new[]
             {
-                ("Guardian Travel Cover", new[]
+                ("Rainy Day Travel Cover", new[]
                 {
                     ("S", "Travel insurance, comprehensive", pax, "pax",   38,  75, ""),
                 }),

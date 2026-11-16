@@ -105,12 +105,13 @@
     </Vocabulary>
 
     <Accessibility>
-        <p>
-            Each gauge is a <code>meter</code> named by <code>AriaLabel</code> with <code>aria-valuenow</code>, <code>aria-valuemin</code> and
-            <code>aria-valuemax</code>; its SVG is hidden from assistive technology so the figures are not read twice. The stock chart's
-            pickers are labeled "Stock chart start date" and "Stock chart end date", the navigator sliders "Navigator start" and
-            "Navigator end" (the navigator is off in the example above), and the empty state is a status message.
-        </p>
+        <ul>
+            <li>Each gauge is an element with <code>role="meter"</code>, named by <code>AriaLabel</code>, with <code>aria-valuenow</code>, <code>aria-valuemin</code> and <code>aria-valuemax</code>.</li>
+            <li>The gauge drawing is SVG with <code>aria-hidden="true"</code>, so the value is read once, from the meter.</li>
+            <li>Set <code>AriaLabel</code> on every gauge to say what it measures, as the examples do with "Utilization" and "Capacity"; the default name is "Gauge".</li>
+            <li>The stock chart's date pickers are named "Stock chart start date" and "Stock chart end date", and Zoom in, Zoom out, Earlier, Later and All are text buttons.</li>
+            <li>With <code>ShowNavigator</code> on, the navigator sliders are named "Navigator start" and "Navigator end" (the example above turns the navigator off). With no data, the chart shows "No financial data." as a status message.</li>
+        </ul>
     </Accessibility>
 
     <Related>

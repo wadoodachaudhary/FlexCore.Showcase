@@ -22,7 +22,11 @@
 
 @* 2026-11-14: the tab control example shows the library's own themes and layouts again (buttons bound with @bind-Theme and
    @bind-Orientation, one tab through Content) and no longer takes the site-tabs class, which hid all five themes. Its CSS tab
-   prints the page's own rules. The accessibility notes and the CSS classes row are corrected against TabStripControl.razor. *@
+   prints the page's own rules. The accessibility notes and the CSS classes row are corrected against TabStripControl.razor.
+   2026-11-15: examples rebuilt (quote tabs, booking tabs, checklist accordion); the document tabs no longer switch theme.
+   2026-11-15: example story moved to the HR tracking theme.
+   2026-11-16: independent review fixes: the document tabs bind Theme again (a theme picked from the menu stays) and get
+   overflow buttons; Sign-off is keyed on Ready; the Razor tabs show the pickers and the switch. *@
 
 <PageTitle>Blazor Tabs, TabStrip and Accordion — FlexCore</PageTitle>
 
@@ -36,72 +40,107 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs" CssCode="@Code.TabsCss">
-            <Description><p>Switch between the Summary, Lines and Notes of a trip quote; only the selected pane renders. Pick a theme and a layout with the buttons, or right-click the tabs: every tab control carries that menu, and <code>&#64;bind-Theme</code> and <code>&#64;bind-Orientation</code> follow it.</p></Description>
+        <DemoExample Id="tabs" Title="Tab control" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs">
+            <Description><p>Switch between the Summary, Lines and Notes of a leave request; only the selected pane renders. Review the lines sets the bound <code>SelectedIndex</code> from the page, and the Notes pane holds a button of its own. Pick a theme and a layout with the buttons (One row and Wrapping rows differ only when the tabs overflow), or right-click the tabs: every tab control carries that menu, and <code>&#64;bind-Theme</code> and <code>&#64;bind-Orientation</code> keep the page in step.</p></Description>
             <Controls>
-                <ButtonGroupControl Items="_themeItems" Values="@(new[] { _tabTheme.ToString() })" ValuesChanged="SetTabTheme" Selection="ChoiceSelectionMode.Single" AriaLabel="Tab theme" />
-                <ButtonGroupControl Items="_layoutItems" Values="@(new[] { _tabLayout.ToString() })" ValuesChanged="SetTabLayout" Selection="ChoiceSelectionMode.Single" AriaLabel="Tab layout" />
+                <div class="pickers">
+                    <ButtonGroupControl Items="_themeItems" Values="@(new[] { _tabTheme.ToString() })" ValuesChanged="SetTabTheme" Selection="ChoiceSelectionMode.Single" AriaLabel="Tab theme" />
+                    <ButtonGroupControl Items="_layoutItems" Values="@(new[] { _tabLayout.ToString() })" ValuesChanged="SetTabLayout" Selection="ChoiceSelectionMode.Single" AriaLabel="Tab layout" />
+                </div>
             </Controls>
             <Demo>
-                <div class="quote-tabs">
-                    <TabControl @bind-SelectedIndex="_tab" @bind-Theme="_tabTheme" @bind-Orientation="_tabLayout">
-                        <TabItems>
-                            <TabItem HeaderText="Summary">
-                                <dl class="summary">
-                                    <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
-                                    <dt>Status</dt><dd>Quoted, 3 lines</dd>
-                                    <dt>Total</dt><dd>$1,720</dd>
-                                </dl>
-                            </TabItem>
-                            <TabItem HeaderText="Lines">
-                                <table class="lines">
-                                    <thead><tr><th>Item</th><th>Qty</th><th class="num">Amount</th></tr></thead>
-                                    <tbody>
-                                        <tr><td>Return flights</td><td>2 seats</td><td class="num">$420</td></tr>
-                                        <tr><td>Old-town hotel</td><td>4 nights</td><td class="num">$1,120</td></tr>
-                                        <tr><td>Guided food tour</td><td>2 people</td><td class="num">$180</td></tr>
-                                    </tbody>
-                                </table>
-                            </TabItem>
-                            <TabItem HeaderText="Notes">
-                                <Content>
-                                    <p class="m0">Quote valid 14 days. The travelers prefer a morning flight; the hotel holds the rooms until Friday.</p>
-                                </Content>
-                            </TabItem>
-                        </TabItems>
-                    </TabControl>
-                </div>
-                <p class="result">Tab @(_tab + 1) of 3 selected · @_tabTheme, @_tabLayout</p>
-            </Demo>
-        </DemoExample>
-
-        <DemoExample Id="strip" Title="Document tabs" RazorCode="@Code.Strip" CSharpCode="@Code.StripCs" CssCode="@Code.StripCss">
-            <Description><p>Close a document with its ×, pick a theme with the buttons, and right-click the strip to change its orientation.</p></Description>
-            <Controls>
-                <ButtonGroupControl Items="_themeItems" Values="@(new[] { _theme.ToString() })" ValuesChanged="SetTheme" Selection="ChoiceSelectionMode.Single" AriaLabel="Tab theme" />
-            </Controls>
-            <Demo>
-                <div class="@(_orientation == TabOrientation.Vertical ? "docs docs-vertical" : "docs")">
-                    <TabStripControl Items="_docs" @bind-SelectedIndex="_doc" OnTabClose="CloseDoc" @bind-Theme="_theme" @bind-Orientation="_orientation" AriaLabel="Documents" />
-                    <div class="strip-pane">@(_docs.Count == 0 ? "No documents open." : _docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag)</div>
-                </div>
-                <div class="strip-actions">
-                    <ButtonControl CssClass="btn-sm" OnClick="Reopen" Disabled="@(_closed.Count == 0)">Reopen last closed</ButtonControl>
-                    <span class="result">@_docs.Count open, @_closed.Count closed · @_theme, @_orientation</span>
+                <div class="ta">
+                    <div class="leave-tabs">
+                        <TabControl @bind-SelectedIndex="_tab" @bind-Theme="_tabTheme" @bind-Orientation="_tabLayout">
+                            <TabItems>
+                                <TabItem HeaderText="Summary">
+                                    <dl class="summary">
+                                        <dt>Request</dt><dd>LR-0112 December leave</dd>
+                                        <dt>Employee</dt><dd>Albus Door, Tour Operations</dd>
+                                        <dt>Status</dt><dd>Awaiting approval, 3 lines</dd>
+                                        <dt>Total</dt><dd>8 days</dd>
+                                    </dl>
+                                    <ButtonControl CssClass="btn-sm" OnClick="() => _tab = 1">Review the lines</ButtonControl>
+                                </TabItem>
+                                <TabItem HeaderText="Lines">
+                                    <table class="lines">
+                                        <thead><tr><th>Leave type</th><th>Dates</th><th class="num">Days</th></tr></thead>
+                                        <tbody>
+                                            <tr><td>Vacation</td><td>Dec 14 to 18</td><td class="num">5</td></tr>
+                                            <tr><td>Training day</td><td>Dec 21</td><td class="num">1</td></tr>
+                                            <tr><td>Vacation</td><td>Dec 22 to 23</td><td class="num">2</td></tr>
+                                        </tbody>
+                                    </table>
+                                </TabItem>
+                                <TabItem HeaderText="Notes">
+                                    <Content>
+                                        <ul class="notes">
+                                            @foreach (var note in _notes)
+                                            {
+                                                <li>@note</li>
+                                            }
+                                        </ul>
+                                        <ButtonControl CssClass="btn-sm" Disabled="@(_notes.Count == 4)" OnClick="AddNote">Add a note</ButtonControl>
+                                    </Content>
+                                </TabItem>
+                            </TabItems>
+                        </TabControl>
+                    </div>
+                    <p class="result" role="status">Tab @(_tab + 1) of 3 selected · @_notes.Count notes · @_tabTheme, @_tabLayout</p>
                 </div>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="accordion" Title="Accordion" RazorCode="@Code.Accordion">
-            <Description><p>Open several sections; without <code>Multiple</code>, opening one closes the rest.</p></Description>
+        <DemoExample Id="strip" Title="Document tabs" RazorCode="@Code.Strip" CSharpCode="@Code.StripCs">
+            <Description><p>Open leave requests with the buttons above the tabs: each opens as a closable tab, and one that is already open is selected instead of opened twice. Close a tab with its ×, reopen the last one, and right-click the strip to change its theme or orientation; when the tabs no longer fit, <code>EnableOverflowNavigation</code> adds Previous and Next buttons. Payroll is a <code>Disabled</code> tab.</p></Description>
             <Demo>
-                <div class="acc">
-                    <AccordionControl Multiple="true">
-                        <AccordionItemControl Title="Traveler" IconCss="bi bi-person" InitiallyExpanded="true">Clementine Marmalade, two adults, repeat client.</AccordionItemControl>
-                        <AccordionItemControl Title="Flights" IconCss="bi bi-airplane">Return to Lisbon, morning departure, one checked bag each.</AccordionItemControl>
-                        <AccordionItemControl Title="Notes" IconCss="bi bi-sticky">Quote valid 14 days.</AccordionItemControl>
-                        <AccordionItemControl Title="Attachments (none)" IconCss="bi bi-paperclip" Disabled="true">—</AccordionItemControl>
-                    </AccordionControl>
+                <div class="ta">
+                    <div class="strip-actions">
+                        <span class="result">Open a request:</span>
+                        @foreach (var request in Requests)
+                        {
+                            <ButtonControl CssClass="btn-sm" OnClick="() => Open(request)">@request.Code</ButtonControl>
+                        }
+                    </div>
+                    <div class="@(_orientation == TabOrientation.Vertical ? "docs docs-vertical" : "docs")">
+                        <TabStripControl Items="_docs" @bind-SelectedIndex="_doc" OnTabClose="CloseDoc" @bind-Theme="_docTheme" @bind-Orientation="_orientation" EnableOverflowNavigation="true" AriaLabel="Open leave requests" />
+                        <div class="strip-pane">@_docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag</div>
+                    </div>
+                    <div class="strip-actions">
+                        <ButtonControl CssClass="btn-sm" OnClick="Reopen" Disabled="@(_closed.Count == 0)">Reopen last closed</ButtonControl>
+                        <span class="result" role="status">@(_docs.Count - 2) request@(_docs.Count == 3 ? "" : "s") open, @_closed.Count closed · @_docTheme, @_orientation</span>
+                    </div>
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="accordion" Title="Accordion" RazorCode="@Code.Accordion" CSharpCode="@Code.AccordionCs">
+            <Description><p>Work down the onboarding checklist: checking a step changes the badge in its header, written with <code>HeaderContent</code>, and Sign-off stays <code>Disabled</code> until the three steps are done. Without <code>Multiple</code>, opening one section closes the rest; the switch rebuilds the accordion with it on, so Contract opens again. Unchecking a step while Sign-off is open closes it, because <code>&#64;key</code> rebuilds that item.</p></Description>
+            <Controls>
+                <SwitchControl @bind-Checked="_several" Label="Several open" />
+            </Controls>
+            <Demo>
+                <div class="ta">
+                    <div class="acc">
+                        <AccordionControl @key="_several" Multiple="_several">
+                            <AccordionItemControl InitiallyExpanded="true">
+                                <HeaderContent><span class="acc-head"><span class="bi bi-file-earmark-text"></span> Contract <BadgeControl Text="@Step(_contract)" Variant="@Color(_contract)" Size="BadgeSize.Small" /></span></HeaderContent>
+                                <ChildContent><CheckBoxControl @bind-Checked="_contract" Label="Signed contract received from Cedric Diggle" /></ChildContent>
+                            </AccordionItemControl>
+                            <AccordionItemControl>
+                                <HeaderContent><span class="acc-head"><span class="bi bi-laptop"></span> Equipment <BadgeControl Text="@Step(_equipment)" Variant="@Color(_equipment)" Size="BadgeSize.Small" /></span></HeaderContent>
+                                <ChildContent><CheckBoxControl @bind-Checked="_equipment" Label="Laptop and headset ordered from IT" /></ChildContent>
+                            </AccordionItemControl>
+                            <AccordionItemControl>
+                                <HeaderContent><span class="acc-head"><span class="bi bi-building"></span> Office <BadgeControl Text="@Step(_office)" Variant="@Color(_office)" Size="BadgeSize.Small" /></span></HeaderContent>
+                                <ChildContent><CheckBoxControl @bind-Checked="_office" Label="Desk assigned in the Lisbon office" /></ChildContent>
+                            </AccordionItemControl>
+                            <AccordionItemControl @key="Ready" Title="@(Ready ? "Sign-off" : "Sign-off (finish the steps above)")" IconCss="bi bi-check2-circle" Disabled="@(!Ready)">
+                                Confirm the December 1 start for Cedric Diggle (EMP-0058) and send the welcome email.
+                            </AccordionItemControl>
+                        </AccordionControl>
+                    </div>
+                    <p class="result" role="status">@Done of 3 steps done@(Ready ? ": sign-off is unlocked" : "")</p>
                 </div>
             </Demo>
         </DemoExample>
@@ -138,10 +177,11 @@
 
     <Accessibility>
         <ul>
-            <li><code>TabControl</code> draws its headers with a <code>TabStripControl</code>, so both have the same keyboard: the headers are a <code>tablist</code> of <code>role="tab"</code> elements with <code>aria-selected</code>, and the selected one is the single Tab stop.</li>
-            <li>On a tab, Left or Up selects the previous enabled tab and Right or Down the next; Home and End select the first and last; Delete closes a closable tab. Focus follows the selection.</li>
-            <li>The tab control's pane is a plain <code>&lt;div&gt;</code>: it is not a <code>tabpanel</code> and is not linked to its tab. Every tab control's list is named "Tabs"; a strip used directly takes its name from <code>AriaLabel</code>.</li>
-            <li>Each accordion header is a button with <code>aria-expanded</code>; the body is a <code>role="region"</code>. A disabled header is a disabled button.</li>
+            <li><code>TabControl</code> draws its headers with a <code>TabStripControl</code>, so both render the same tab list: a <code>tablist</code> with <code>aria-orientation</code>, <code>role="tab"</code> headers with <code>aria-selected</code> and <code>aria-disabled</code>, and the selected tab as the single Tab stop.</li>
+            <li>On a tab, Left or Up selects the previous enabled tab and Right or Down the next; Home and End select the first and last enabled tab. Focus moves with the selection and shows an outline.</li>
+            <li>A closable tab's close button is named "Close <em>tab text</em>" and stays out of the Tab order; Delete on the tab raises <code>OnTabClose</code> as the button does.</li>
+            <li>A <code>TabStripControl</code> takes its accessible name from <code>AriaLabel</code>, "Tabs" by default. Set it to what the tabs switch between, as the Document tabs example does with "Open leave requests".</li>
+            <li>Each accordion header is a native button with <code>aria-expanded</code> set to "true" or "false", and its arrow is <code>aria-hidden</code>. An open item's body is a <code>role="region"</code>; a <code>Disabled</code> item's header is a disabled button.</li>
         </ul>
     </Accessibility>
 
@@ -158,60 +198,81 @@
     private int _tab;
     private TabTheme _tabTheme = TabTheme.FolderTabs;
     private TabOrientation _tabLayout = TabOrientation.Horizontal;
+    private readonly SelectionItem[] _themeItems =
+    {
+        new("WindowsClassic", "Windows"), new("FolderTabs", "Folder"), new("ColorfulCards", "Cards"), new("Minimal", "Minimal"), new("Dark", "Dark")
+    };
     private readonly SelectionItem[] _layoutItems =
     {
         new("Horizontal", "One row"), new("HybridVertical", "Wrapping rows"), new("Vertical", "Side rail")
     };
-
+    private readonly List<string> _notes = new() { "Rubeus Haggle covers for Albus in Tour Operations.", "The training day is a first aid course." };
+    private static readonly string[] MoreNotes = { "Manager approval is due by Friday.", "Six vacation days remain after this request." };
+    private void AddNote() => _notes.Add(MoreNotes[_notes.Count - 2]);
     private void SetTabTheme(IReadOnlyList<string> values)
     {
         if (values.Count > 0) _tabTheme = Enum.Parse<TabTheme>(values[0]);
     }
-
     private void SetTabLayout(IReadOnlyList<string> values)
     {
         if (values.Count > 0) _tabLayout = Enum.Parse<TabOrientation>(values[0]);
     }
 
     // Tab strip
+    private sealed record LeaveRequest(string Code, string Summary);
+    private static readonly LeaveRequest[] Requests =
+    {
+        new("LR-0112", "December leave for Albus Door, Tour Operations: eight days from December 14, awaiting approval."),
+        new("LR-0113", "Sick leave for Minerva McGadget, Finance: two days, November 12 and 13, approved."),
+        new("LR-0114", "Parental leave for Nymphadora Tonic, Marketing: twelve weeks from January 4, approved."),
+        new("LR-0115", "Training day for Neville Longbutton, IT: one day on November 20, awaiting approval."),
+        new("LR-0116", "Vacation for Ginny Measly, Reservations: five days from November 30, draft."),
+    };
     private int _doc;
     private readonly List<TabStripItem> _docs = new()
     {
-        new("Home", "bi bi-house") { Tag = "Today: new trip requests, quotes waiting for a reply and departures this week." },
-        new("Quote LIS-0001", "bi bi-file-earmark-text", closable: true) { Tag = "Lisbon city break for two, four nights, quoted at $1,720." },
-        new("Itinerary KYO-0001", "bi bi-map", closable: true) { Tag = "Kyoto long weekend with museum passes and a guided food tour." },
-        new("Suppliers", "bi bi-building", closable: true) { Tag = "Hotels, airlines and guides the desk books with." },
-        new("Invoice", "bi bi-receipt") { Disabled = true, Tag = "Not issued yet." },
+        new("Today", "bi bi-house") { Tag = "Today: new leave requests, requests awaiting approval and absences this week." },
+        new("LR-0112", "bi bi-calendar-event", closable: true) { Tag = Requests[0].Summary },
+        new("Payroll", "bi bi-receipt") { Disabled = true, Tag = "Not run yet." },
     };
     private readonly Stack<TabStripItem> _closed = new();
-    private TabTheme _theme = TabTheme.FolderTabs;
-    private TabOrientation _orientation = TabOrientation.HybridVertical;
-    private readonly SelectionItem[] _themeItems =
+    private TabTheme _docTheme = TabTheme.FolderTabs;
+    private TabOrientation _orientation = TabOrientation.Horizontal;
+    // A request that is already open is selected; a new one goes in before the disabled Payroll tab.
+    private void Open(LeaveRequest request)
     {
-        new("WindowsClassic", "Windows"), new("FolderTabs", "Folder"), new("ColorfulCards", "Cards"), new("Minimal", "Minimal"), new("Dark", "Dark")
-    };
-
-    private void SetTheme(IReadOnlyList<string> values)
-    {
-        if (values.Count > 0) _theme = Enum.Parse<TabTheme>(values[0]);
+        var at = _docs.FindIndex(d => d.Text == request.Code);
+        if (at < 0)
+        {
+            at = _docs.Count - 1;
+            _docs.Insert(at, new(request.Code, "bi bi-calendar-event", closable: true) { Tag = request.Summary });
+        }
+        _doc = at;
     }
-
     private void CloseDoc(int index)
     {
         _closed.Push(_docs[index]);
         _docs.RemoveAt(index);
-        // Keep the same document selected when one before it closes; fall back a step when the last one closes,
-        // and step back past a disabled tab (the strip would show it as active).
+        // Keep the same tab selected when one before it closes, and step back past the disabled tab.
         if (index < _doc || _doc >= _docs.Count) _doc = Math.Max(0, _doc - 1);
         while (_doc > 0 && _docs[_doc].Disabled) _doc--;
     }
-
     private void Reopen()
     {
         if (_closed.Count == 0) return;
-        _docs.Add(_closed.Pop());
-        _doc = _docs.Count - 1;
+        var item = _closed.Pop();
+        var open = _docs.FindIndex(d => d.Text == item.Text);
+        if (open >= 0) { _doc = open; return; }   // reopened from the buttons already: select it
+        _docs.Insert(_docs.Count - 1, item);
+        _doc = _docs.Count - 2;
     }
+
+    // Accordion
+    private bool _several, _contract = true, _equipment, _office;
+    private int Done => (_contract ? 1 : 0) + (_equipment ? 1 : 0) + (_office ? 1 : 0);
+    private bool Ready => Done == 3;
+    private static string Step(bool done) => done ? "Done" : "To do";
+    private static BadgeVariant Color(bool done) => done ? BadgeVariant.Success : BadgeVariant.Secondary;
 
     // Vocabulary rows, one per public member (0.2.50).
     private static class Vocab
@@ -229,7 +290,7 @@
         };
         public static readonly ApiRow[] TabItem =
         {
-            new("HeaderText", "Header button label.", "string", "\"\""),
+            new("HeaderText", "Header label. The tab control reads it when it renders, before the item takes a new value, so a changed <code>HeaderText</code> does not show until the tab control renders again; treat it as fixed.", "string", "\"\""),
             new("Content", "Pane markup; takes precedence over child content.", "RenderFragment?", "null"),
             new("ChildContent", "Pane markup when <code>Content</code> is not set.", "RenderFragment?", "null"),
         };
@@ -241,7 +302,7 @@
             new("OnTabClose", "Fires with the index when a closable tab's × is clicked or Delete is pressed on it. The strip does not remove the item.", "EventCallback&lt;int&gt;"),
             new("CssClass", "Appended to the <code>fx-tabstrip</code> root. Not a <code>FlexControlBase</code> control.", "string?", "null"),
             new("AriaLabel", "<code>aria-label</code> of the <code>role=\"tablist\"</code> element.", "string", "\"Tabs\""),
-            new("Theme", "Writes the <code>--fx-tab-*</code> color variables inline on the root (see CSS variables) and <code>data-tab-theme</code>: <code>WindowsClassic</code> (beveled gray; the menu calls it VB6 / Windows), <code>FolderTabs</code>, <code>ColorfulCards</code> (five pastel fills rotating over the resting tabs), <code>Minimal</code>, <code>Dark</code>. Two-way with <code>@bind-Theme</code>.", "TabTheme", "TabTheme.WindowsClassic"),
+            new("Theme", "Writes the <code>--fx-tab-*</code> color variables inline on the root (see CSS variables) and <code>data-tab-theme</code>: <code>WindowsClassic</code> (beveled gray; the menu calls it VB6 / Windows), <code>FolderTabs</code>, <code>ColorfulCards</code> (five fills (four pastels and white) rotating over the resting tabs), <code>Minimal</code>, <code>Dark</code>. Two-way with <code>@bind-Theme</code>.", "TabTheme", "TabTheme.WindowsClassic"),
             new("ThemeChanged", "After the right-click menu changes the theme; the strip then scrolls the selected tab into view.", "EventCallback&lt;TabTheme&gt;"),
             new("Orientation", "<code>HybridVertical</code> wraps the tabs onto rows and scrolls them vertically past 160 px; <code>Horizontal</code> is one row that scrolls sideways; <code>Vertical</code> is a 220 px rail of 52 px tabs with <code>height: 100%</code>, which the host lays out beside the content. Written to <code>data-tab-orientation</code>. Two-way with <code>@bind-Orientation</code>.", "TabOrientation", "TabOrientation.HybridVertical"),
             new("OrientationChanged", "After the right-click menu changes the orientation; the strip then scrolls the selected tab into view.", "EventCallback&lt;TabOrientation&gt;"),
@@ -261,7 +322,7 @@
         };
         public static readonly ApiRow[] Accordion =
         {
-            new("Multiple", "true keeps several items open; false closes the others when one opens.", "bool", "false"),
+            new("Multiple", "True keeps several items open; false closes the others when one opens. Turned off at run time, it leaves open items open until the next one opens.", "bool", "false"),
             new("ChildContent", "<code>AccordionItemControl</code>s.", "RenderFragment?"),
             new("CssClass / Style (base)", "On the <code>fx-accordion</code> root.", "string?", "null"),
             new("(unmatched attributes)", "Forwarded to the <code>fx-accordion</code> root.", "Dictionary&lt;string,object&gt;"),
@@ -298,138 +359,165 @@
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Tabs = @"<ButtonGroupControl Items=""_themeItems"" Values=""@(new[] { _tabTheme.ToString() })"" ValuesChanged=""SetTabTheme"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Tab theme"" />
-<ButtonGroupControl Items=""_layoutItems"" Values=""@(new[] { _tabLayout.ToString() })"" ValuesChanged=""SetTabLayout"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Tab layout"" />
-
-<div class=""quote-tabs"">
-    <TabControl @bind-SelectedIndex=""_tab"" @bind-Theme=""_tabTheme"" @bind-Orientation=""_tabLayout"">
-        <TabItems>
-            <TabItem HeaderText=""Summary"">
-                <dl class=""summary"">
-                    <dt>Request</dt><dd>LIS-0001 Lisbon city break</dd>
-                    <dt>Status</dt><dd>Quoted, 3 lines</dd>
-                    <dt>Total</dt><dd>$1,720</dd>
-                </dl>
-            </TabItem>
-            <TabItem HeaderText=""Lines"">
-                <table class=""lines"">
-                    <thead><tr><th>Item</th><th>Qty</th><th class=""num"">Amount</th></tr></thead>
-                    <tbody>
-                        <tr><td>Return flights</td><td>2 seats</td><td class=""num"">$420</td></tr>
-                        <tr><td>Old-town hotel</td><td>4 nights</td><td class=""num"">$1,120</td></tr>
-                        <tr><td>Guided food tour</td><td>2 people</td><td class=""num"">$180</td></tr>
-                    </tbody>
-                </table>
-            </TabItem>
-            <TabItem HeaderText=""Notes"">
-                <Content>
-                    <p class=""m0"">Quote valid 14 days. The travelers prefer a morning flight; the hotel holds the rooms until Friday.</p>
-                </Content>
-            </TabItem>
-        </TabItems>
-    </TabControl>
+        public const string Tabs = @"<div class=""pickers"">
+    <ButtonGroupControl Items=""_themeItems"" Values=""@(new[] { _tabTheme.ToString() })"" ValuesChanged=""SetTabTheme"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Tab theme"" />
+    <ButtonGroupControl Items=""_layoutItems"" Values=""@(new[] { _tabLayout.ToString() })"" ValuesChanged=""SetTabLayout"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Tab layout"" />
 </div>
-<p class=""result"">Tab @(_tab + 1) of 3 selected · @_tabTheme, @_tabLayout</p>";
+<div class=""ta"">
+    <div class=""leave-tabs"">
+        <TabControl @bind-SelectedIndex=""_tab"" @bind-Theme=""_tabTheme"" @bind-Orientation=""_tabLayout"">
+            <TabItems>
+                <TabItem HeaderText=""Summary"">
+                    <dl class=""summary"">
+                        <dt>Request</dt><dd>LR-0112 December leave</dd>
+                        <dt>Employee</dt><dd>Albus Door, Tour Operations</dd>
+                        <dt>Status</dt><dd>Awaiting approval, 3 lines</dd>
+                        <dt>Total</dt><dd>8 days</dd>
+                    </dl>
+                    <ButtonControl CssClass=""btn-sm"" OnClick=""() => _tab = 1"">Review the lines</ButtonControl>
+                </TabItem>
+                <TabItem HeaderText=""Lines"">
+                    <table class=""lines"">
+                        <thead><tr><th>Leave type</th><th>Dates</th><th class=""num"">Days</th></tr></thead>
+                        <tbody>
+                            <tr><td>Vacation</td><td>Dec 14 to 18</td><td class=""num"">5</td></tr>
+                            <tr><td>Training day</td><td>Dec 21</td><td class=""num"">1</td></tr>
+                            <tr><td>Vacation</td><td>Dec 22 to 23</td><td class=""num"">2</td></tr>
+                        </tbody>
+                    </table>
+                </TabItem>
+                <TabItem HeaderText=""Notes"">
+                    <Content>
+                        <ul class=""notes"">
+                            @foreach (var note in _notes)
+                            {
+                                <li>@note</li>
+                            }
+                        </ul>
+                        <ButtonControl CssClass=""btn-sm"" Disabled=""@(_notes.Count == 4)"" OnClick=""AddNote"">Add a note</ButtonControl>
+                    </Content>
+                </TabItem>
+            </TabItems>
+        </TabControl>
+    </div>
+    <p class=""result"" role=""status"">Tab @(_tab + 1) of 3 selected · @_notes.Count notes · @_tabTheme, @_tabLayout</p>
+</div>";
         public const string TabsCs = @"// Tab control
 private int _tab;
-
 private TabTheme _tabTheme = TabTheme.FolderTabs;
-
 private TabOrientation _tabLayout = TabOrientation.Horizontal;
-
 private readonly SelectionItem[] _themeItems =
 {
     new(""WindowsClassic"", ""Windows""), new(""FolderTabs"", ""Folder""), new(""ColorfulCards"", ""Cards""), new(""Minimal"", ""Minimal""), new(""Dark"", ""Dark"")
 };
-
 private readonly SelectionItem[] _layoutItems =
 {
     new(""Horizontal"", ""One row""), new(""HybridVertical"", ""Wrapping rows""), new(""Vertical"", ""Side rail"")
 };
-
+private readonly List<string> _notes = new() { ""Rubeus Haggle covers for Albus in Tour Operations."", ""The training day is a first aid course."" };
+private static readonly string[] MoreNotes = { ""Manager approval is due by Friday."", ""Six vacation days remain after this request."" };
+private void AddNote() => _notes.Add(MoreNotes[_notes.Count - 2]);
 private void SetTabTheme(IReadOnlyList<string> values)
 {
     if (values.Count > 0) _tabTheme = Enum.Parse<TabTheme>(values[0]);
 }
-
 private void SetTabLayout(IReadOnlyList<string> values)
 {
     if (values.Count > 0) _tabLayout = Enum.Parse<TabOrientation>(values[0]);
 }";
-        public const string TabsCss = @".quote-tabs { max-width: 560px; }
-.result { font-size: 13px; color: #475569; margin: 12px 0 0; }
-.m0 { margin: 0; }
-.summary { display: grid; grid-template-columns: 90px 1fr; gap: 4px 12px; margin: 0; font-size: 13px; }
-.summary dt { color: #64748b; font-weight: 500; }
-.summary dd { margin: 0; color: #1e293b; }
-.lines { border-collapse: collapse; font-size: 13px; width: 100%; max-width: 420px; }
-.lines th, .lines td { padding: 4px 8px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-.lines th { color: #64748b; font-weight: 600; }
-.lines .num { text-align: right; font-variant-numeric: tabular-nums; }";
-
-        public const string Strip = @"<ButtonGroupControl Items=""_themeItems"" Values=""@(new[] { _theme.ToString() })"" ValuesChanged=""SetTheme"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Tab theme"" />
-
-<div class=""@(_orientation == TabOrientation.Vertical ? ""docs docs-vertical"" : ""docs"")"">
-    <TabStripControl Items=""_docs"" @bind-SelectedIndex=""_doc"" OnTabClose=""CloseDoc"" @bind-Theme=""_theme"" @bind-Orientation=""_orientation"" AriaLabel=""Documents"" />
-    <div class=""strip-pane"">@(_docs.Count == 0 ? ""No documents open."" : _docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag)</div>
-</div>
-<div class=""strip-actions"">
-    <ButtonControl CssClass=""btn-sm"" OnClick=""Reopen"" Disabled=""@(_closed.Count == 0)"">Reopen last closed</ButtonControl>
-    <span class=""result"">@_docs.Count open, @_closed.Count closed · @_theme, @_orientation</span>
+        public const string Strip = @"<div class=""ta"">
+    <div class=""strip-actions"">
+        <span class=""result"">Open a request:</span>
+        @foreach (var request in Requests)
+        {
+            <ButtonControl CssClass=""btn-sm"" OnClick=""() => Open(request)"">@request.Code</ButtonControl>
+        }
+    </div>
+    <div class=""@(_orientation == TabOrientation.Vertical ? ""docs docs-vertical"" : ""docs"")"">
+        <TabStripControl Items=""_docs"" @bind-SelectedIndex=""_doc"" OnTabClose=""CloseDoc"" @bind-Theme=""_docTheme"" @bind-Orientation=""_orientation"" EnableOverflowNavigation=""true"" AriaLabel=""Open leave requests"" />
+        <div class=""strip-pane"">@_docs[Math.Clamp(_doc, 0, _docs.Count - 1)].Tag</div>
+    </div>
+    <div class=""strip-actions"">
+        <ButtonControl CssClass=""btn-sm"" OnClick=""Reopen"" Disabled=""@(_closed.Count == 0)"">Reopen last closed</ButtonControl>
+        <span class=""result"" role=""status"">@(_docs.Count - 2) request@(_docs.Count == 3 ? """" : ""s"") open, @_closed.Count closed · @_docTheme, @_orientation</span>
+    </div>
 </div>";
         public const string StripCs = @"// Tab strip
+private sealed record LeaveRequest(string Code, string Summary);
+private static readonly LeaveRequest[] Requests =
+{
+    new(""LR-0112"", ""December leave for Albus Door, Tour Operations: eight days from December 14, awaiting approval.""),
+    new(""LR-0113"", ""Sick leave for Minerva McGadget, Finance: two days, November 12 and 13, approved.""),
+    new(""LR-0114"", ""Parental leave for Nymphadora Tonic, Marketing: twelve weeks from January 4, approved.""),
+    new(""LR-0115"", ""Training day for Neville Longbutton, IT: one day on November 20, awaiting approval.""),
+    new(""LR-0116"", ""Vacation for Ginny Measly, Reservations: five days from November 30, draft.""),
+};
 private int _doc;
 private readonly List<TabStripItem> _docs = new()
 {
-    new(""Home"", ""bi bi-house"") { Tag = ""Today: new trip requests, quotes waiting for a reply and departures this week."" },
-    new(""Quote LIS-0001"", ""bi bi-file-earmark-text"", closable: true) { Tag = ""Lisbon city break for two, four nights, quoted at $1,720."" },
-    new(""Itinerary KYO-0001"", ""bi bi-map"", closable: true) { Tag = ""Kyoto long weekend with museum passes and a guided food tour."" },
-    new(""Suppliers"", ""bi bi-building"", closable: true) { Tag = ""Hotels, airlines and guides the desk books with."" },
-    new(""Invoice"", ""bi bi-receipt"") { Disabled = true, Tag = ""Not issued yet."" },
+    new(""Today"", ""bi bi-house"") { Tag = ""Today: new leave requests, requests awaiting approval and absences this week."" },
+    new(""LR-0112"", ""bi bi-calendar-event"", closable: true) { Tag = Requests[0].Summary },
+    new(""Payroll"", ""bi bi-receipt"") { Disabled = true, Tag = ""Not run yet."" },
 };
 private readonly Stack<TabStripItem> _closed = new();
-private TabTheme _theme = TabTheme.FolderTabs;
-private TabOrientation _orientation = TabOrientation.HybridVertical;
-private readonly SelectionItem[] _themeItems =
+private TabTheme _docTheme = TabTheme.FolderTabs;
+private TabOrientation _orientation = TabOrientation.Horizontal;
+// A request that is already open is selected; a new one goes in before the disabled Payroll tab.
+private void Open(LeaveRequest request)
 {
-    new(""WindowsClassic"", ""Windows""), new(""FolderTabs"", ""Folder""), new(""ColorfulCards"", ""Cards""), new(""Minimal"", ""Minimal""), new(""Dark"", ""Dark"")
-};
-
-private void SetTheme(IReadOnlyList<string> values)
-{
-    if (values.Count > 0) _theme = Enum.Parse<TabTheme>(values[0]);
+    var at = _docs.FindIndex(d => d.Text == request.Code);
+    if (at < 0)
+    {
+        at = _docs.Count - 1;
+        _docs.Insert(at, new(request.Code, ""bi bi-calendar-event"", closable: true) { Tag = request.Summary });
+    }
+    _doc = at;
 }
-
 private void CloseDoc(int index)
 {
     _closed.Push(_docs[index]);
     _docs.RemoveAt(index);
-    // Keep the same document selected when one before it closes; fall back a step when the last one closes,
-    // and step back past a disabled tab (the strip would show it as active).
+    // Keep the same tab selected when one before it closes, and step back past the disabled tab.
     if (index < _doc || _doc >= _docs.Count) _doc = Math.Max(0, _doc - 1);
     while (_doc > 0 && _docs[_doc].Disabled) _doc--;
 }
-
 private void Reopen()
 {
     if (_closed.Count == 0) return;
-    _docs.Add(_closed.Pop());
-    _doc = _docs.Count - 1;
+    var item = _closed.Pop();
+    var open = _docs.FindIndex(d => d.Text == item.Text);
+    if (open >= 0) { _doc = open; return; }   // reopened from the buttons already: select it
+    _docs.Insert(_docs.Count - 1, item);
+    _doc = _docs.Count - 2;
 }";
-        public const string StripCss = @".docs { display: flex; flex-direction: column; }
-.docs .strip-pane { border: 1px solid #cbd5e1; border-top: 0; border-radius: 0 0 8px 8px; background: #fff; padding: 14px 16px; }
-.docs-vertical { flex-direction: row; align-items: stretch; min-height: 240px; }
-.docs-vertical ::deep .fx-tabstrip { flex: 0 0 220px; }
-.docs-vertical .strip-pane { flex: 1; border-top: 1px solid #cbd5e1; border-left: 0; border-radius: 0 8px 8px 0; }";
-
-        public const string Accordion = @"<div class=""acc"">
-    <AccordionControl Multiple=""true"">
-        <AccordionItemControl Title=""Traveler"" IconCss=""bi bi-person"" InitiallyExpanded=""true"">Clementine Marmalade, two adults, repeat client.</AccordionItemControl>
-        <AccordionItemControl Title=""Flights"" IconCss=""bi bi-airplane"">Return to Lisbon, morning departure, one checked bag each.</AccordionItemControl>
-        <AccordionItemControl Title=""Notes"" IconCss=""bi bi-sticky"">Quote valid 14 days.</AccordionItemControl>
-        <AccordionItemControl Title=""Attachments (none)"" IconCss=""bi bi-paperclip"" Disabled=""true"">—</AccordionItemControl>
-    </AccordionControl>
+        public const string Accordion = @"<SwitchControl @bind-Checked=""_several"" Label=""Several open"" />
+<div class=""ta"">
+    <div class=""acc"">
+        <AccordionControl @key=""_several"" Multiple=""_several"">
+            <AccordionItemControl InitiallyExpanded=""true"">
+                <HeaderContent><span class=""acc-head""><span class=""bi bi-file-earmark-text""></span> Contract <BadgeControl Text=""@Step(_contract)"" Variant=""@Color(_contract)"" Size=""BadgeSize.Small"" /></span></HeaderContent>
+                <ChildContent><CheckBoxControl @bind-Checked=""_contract"" Label=""Signed contract received from Cedric Diggle"" /></ChildContent>
+            </AccordionItemControl>
+            <AccordionItemControl>
+                <HeaderContent><span class=""acc-head""><span class=""bi bi-laptop""></span> Equipment <BadgeControl Text=""@Step(_equipment)"" Variant=""@Color(_equipment)"" Size=""BadgeSize.Small"" /></span></HeaderContent>
+                <ChildContent><CheckBoxControl @bind-Checked=""_equipment"" Label=""Laptop and headset ordered from IT"" /></ChildContent>
+            </AccordionItemControl>
+            <AccordionItemControl>
+                <HeaderContent><span class=""acc-head""><span class=""bi bi-building""></span> Office <BadgeControl Text=""@Step(_office)"" Variant=""@Color(_office)"" Size=""BadgeSize.Small"" /></span></HeaderContent>
+                <ChildContent><CheckBoxControl @bind-Checked=""_office"" Label=""Desk assigned in the Lisbon office"" /></ChildContent>
+            </AccordionItemControl>
+            <AccordionItemControl @key=""Ready"" Title=""@(Ready ? ""Sign-off"" : ""Sign-off (finish the steps above)"")"" IconCss=""bi bi-check2-circle"" Disabled=""@(!Ready)"">
+                Confirm the December 1 start for Cedric Diggle (EMP-0058) and send the welcome email.
+            </AccordionItemControl>
+        </AccordionControl>
+    </div>
+    <p class=""result"" role=""status"">@Done of 3 steps done@(Ready ? "": sign-off is unlocked"" : """")</p>
 </div>";
-
+        public const string AccordionCs = @"// Accordion
+private bool _several, _contract = true, _equipment, _office;
+private int Done => (_contract ? 1 : 0) + (_equipment ? 1 : 0) + (_office ? 1 : 0);
+private bool Ready => Done == 3;
+private static string Step(bool done) => done ? ""Done"" : ""To do"";
+private static BadgeVariant Color(bool done) => done ? BadgeVariant.Success : BadgeVariant.Secondary;";
     }
 }

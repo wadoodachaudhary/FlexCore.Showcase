@@ -5,7 +5,9 @@
    FlexCore equivalent.
    2026-10-18: "Vocabulary" → "Documentation"; source files in the rail, unlinked.
    2026-10-20: rail Examples entry with the example titles nested under it.
-   2026-10-25: DocSections titles nest under Documentation in the rail. *@
+   2026-10-25: DocSections titles nest under Documentation in the rail.
+   2026-11-16: "Keyboard and accessibility" is the last, collapsed section of Documentation (DocSections renders AccessibilityBlock);
+   it stands alone only on a page without Documentation. *@
 <CascadingValue Value="this" IsFixed="true">
 <div class="fd-shell">
     <header class="fd-header">
@@ -49,7 +51,7 @@
                 </section>
             }
 
-            @if (Accessibility is not null)
+            @if (Accessibility is not null && Vocabulary is null)
             {
                 <section class="fd-section" id="accessibility">
                     <h2>Keyboard and accessibility</h2>
@@ -82,7 +84,7 @@
                     <a class="fd-toc-ex" href="@($"{PagePath}#{doc.Id}")" @onclick="doc.Reveal">@doc.Title</a>
                 }
             }
-            @if (Accessibility is not null) { <a href="@($"{PagePath}#accessibility")">Keyboard and accessibility</a> }
+            @if (Accessibility is not null && Vocabulary is null) { <a href="@($"{PagePath}#accessibility")">Keyboard and accessibility</a> }
             @if (Related is not null) { <a href="@($"{PagePath}#related")">Related</a> }
             @if (SourcePaths.Length > 0)
             {
@@ -116,6 +118,9 @@
     [Parameter] public RenderFragment? Vocabulary { get; set; }
     [Parameter] public RenderFragment? Accessibility { get; set; }
     [Parameter] public RenderFragment? Related { get; set; }
+
+    /// <summary>The Accessibility slot wrapped for DocSections, written here so the prose styles of this layout apply.</summary>
+    public RenderFragment? AccessibilityBlock => Accessibility is null ? null : @<div class="fd-prose">@Accessibility</div>;
 
     /// <summary>Current path without query or fragment, so anchors stay on this page.</summary>
     public string PagePath => Nav.ToBaseRelativePath(Nav.Uri).Split('#')[0].Split('?')[0];

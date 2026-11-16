@@ -10,7 +10,8 @@
    Formula grid is example 3 until its own page (SC-218): the site's only GridColumn.Formula / AllowCellFormulas demo.
    Docs (SC-219) from Grid/Pivot*, GridEnums.cs, GridColumn.cs and the formula path in GridControl.razor.cs.
    2026-10-26: examples on OurAirports (Data/AirportData.cs). The builder gets a projection: it offers every public property, and
-   names or codes in Rows and Columns together would build millions of cells. *@
+   names or codes in Rows and Columns together would build millions of cells.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor Pivot Table (PivotGrid) — FlexCore</PageTitle>
 
@@ -115,11 +116,14 @@
     </Vocabulary>
 
     <Accessibility>
-        <p>
-            Sortable headers are buttons titled "Sort <em>header</em>" and carry <code>aria-sort</code> while sorted; the chips' sort arrows
-            are buttons too. The filter dropdowns are native selects with a visible label. The builder's chips move by mouse drag only:
-            apart from each chip's remove button and the aggregation and format controls, there is no keyboard way to place a field.
-        </p>
+        <ul>
+            <li>The pivot is an HTML <code>&lt;table&gt;</code>. Its column headers are <code>&lt;th&gt;</code> cells in a <code>&lt;thead&gt;</code> that span levels with <code>colspan</code> and <code>rowspan</code>.</li>
+            <li>With <code>AllowSorting</code> on, each header holds a button titled "Sort <em>header</em>", and the header cell carries <code>aria-sort</code> while it is sorted. Row and column chips in the builder have sort buttons too, each titled "Sort <em>field</em>" and showing a symbol for the sort state.</li>
+            <li>In the builder, each chip's remove button, the aggregation dropdown and the format box are native controls in the Tab order; the format box's title gives format examples.</li>
+            <li>A field dropped on Filters adds a native <code>&lt;select&gt;</code> above the table, after the field name, listing (All) and each value of that field.</li>
+            <li>Set <code>FieldLabels</code>, and <code>Label</code> on each <code>PivotValueConfig</code>, so chips, headers and filters show readable names instead of property names.</li>
+            <li>With <code>Interactive</code> off, the layout comes from <code>RowFields</code>, <code>ColumnFields</code> and <code>ValueFields</code>, so buttons or selects beside the pivot can offer keyboard users other layouts.</li>
+        </ul>
     </Accessibility>
 
     <Related>

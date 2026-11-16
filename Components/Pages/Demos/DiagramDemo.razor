@@ -4,7 +4,10 @@
 @* 2026-10-25: new page, checked against Diagram/* (FlexCore 0.2.49). No layout engine (OffsetX/OffsetY are hand-set centers);
    no drag, zoom, editing, node keyboard or ARIA: Previous/Next are the keyboard route. Connector Ids page-unique (wf-*, sh-*):
    arrowhead marker ids are document-wide.
-   2026-10-26: Previous/Next stop at the ends instead of wrapping. *@
+   2026-10-26: Previous/Next stop at the ends instead of wrapping.
+   2026-11-15: text re-checked (FlexCore 0.2.50); the shapes description no longer claims every port setting.
+   2026-11-15: example story moved to the Warehouse and logistics theme.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor Diagram Component — FlexCore</PageTitle>
 
@@ -13,13 +16,13 @@
                    SourcePath="Diagram/DiagramControl.razor;Diagram/DiagramControl.razor.css;Diagram/DiagramModels.cs">
     <Overview>
         <p>
-            <code>DiagramControl</code> is a Blazor diagram that draws boxes and arrows, such as a booking workflow, as one inline SVG from nodes and connectors you place. Use it to explain a process or show where a request stands; it offers six node shapes, straight or right-angled connectors with labels and arrowheads, and a click event for details. Users cannot drag or edit it; change the objects in C# and the diagram redraws.
+            <code>DiagramControl</code> is a Blazor diagram that draws boxes and arrows, such as a receiving workflow, as one inline SVG from nodes and connectors you place. Use it to explain a process or show where a request stands; it offers six shape values (Rectangle and RoundedRectangle draw alike), straight or right-angled connectors with labels and arrowheads, and a click event for details. Users cannot drag or edit it; change the objects in C# and the diagram redraws.
         </p>
     </Overview>
 
     <Examples>
-        <DemoExample Id="workflow" Title="A booking workflow" RazorCode="@Code.Workflow" CSharpCode="@Code.WorkflowCs" CssCode="@Code.WorkflowCss">
-            <Description><p>Click a step, or use Previous and Next, to read who handles it and how long it takes.</p></Description>
+        <DemoExample Id="workflow" Title="A receiving workflow" RazorCode="@Code.Workflow" CSharpCode="@Code.WorkflowCs">
+            <Description><p>Click a step, or use Previous step and Next step (they walk the accepted path, then the rejected branch), to read who handles it and how long it takes; the page marks the current step with a thicker outline through its <code>CssClass</code>.</p></Description>
             <Demo>
                 <div class="wf-layout">
                     <div class="canvas">
@@ -37,8 +40,8 @@
                         </ChildContent>
                         <FooterContent>
                             <div class="wf-buttons">
-                                <ButtonControl OnClick="() => Move(-1)">Previous step</ButtonControl>
-                                <ButtonControl OnClick="() => Move(1)">Next step</ButtonControl>
+                                <ButtonControl OnClick="() => Move(-1)" Disabled="@(Index == 0)">Previous step</ButtonControl>
+                                <ButtonControl OnClick="() => Move(1)" Disabled="@(Index == _workflowNodes.Count - 1)">Next step</ButtonControl>
                             </div>
                         </FooterContent>
                     </CardControl>
@@ -47,10 +50,11 @@
         </DemoExample>
 
         <DemoExample Id="shapes" Title="Shapes, connectors and links" RazorCode="@Code.Shapes" CSharpCode="@Code.ShapesCs">
-            <Description><p>See every shape, connector style and port setting on one canvas; hover a node for its tooltip, and note that the gray one is disabled.</p></Description>
+            <Description><p>See every shape value and the connector styles on one canvas, with automatic ports and one connector pinned to the bottom and top. Click Bin tag scanned: the handler sets <code>Handled</code>, so its <code>NavigateUrl</code> is not followed until you switch on Follow links. Hover Bin tag scanned or Shipped for a tooltip; the gray node is disabled.</p></Description>
             <Demo>
                 <div class="controls">
                     <SwitchControl @bind-Checked="_followLinks" Label="Follow links" />
+                    <a href="demo/barcodes#barcode">Bin tag example</a>
                 </div>
                 <div class="canvas">
                     <DiagramControl Nodes="_shapeNodes" Connectors="_shapeConnectors" Width="550" Height="330"
@@ -102,12 +106,12 @@
 
     <Accessibility>
         <ul>
-            <li>Nodes are SVG <code>&lt;g&gt;</code> elements with a click handler and nothing else: no <code>tabindex</code>, role or key handling, so they cannot be reached or activated from the keyboard, and the <code>&lt;svg&gt;</code> has no role or accessible name. Offer another route to the same actions; in the first example the Previous step and Next step buttons walk every step, and the panel is an <code>aria-live="polite"</code> region.</li>
-            <li><code>DiagramControl</code> does not capture extra attributes, so an <code>aria-label</code> passed to it throws at render time. Put any description on an element around it.</li>
-            <li>Labels, sublabels, icons and connector labels are SVG <code>&lt;text&gt;</code>, real text rather than pictures of text.</li>
-            <li><code>Tooltip</code> becomes an SVG <code>&lt;title&gt;</code>, the node's first child; browsers show it on hover. A disabled node has <code>pointer-events: none</code>, so its tooltip never appears.</li>
-            <li>A disabled node is marked only visually, by 45% opacity and a close icon <code>&lt;image&gt;</code> that has no text alternative.</li>
-            <li>Contrast is up to the page. White text on the default <code>#4A90D9</code> fill is about 3.3:1, under the WCAG AA 4.5:1 for text this size; the fills on this page reach at least 5:1 against their text color. Sublabels are drawn at 85% opacity, which brings the white ones here down to about 4.2:1 on blue and 4.4:1 on teal.</li>
+            <li>Labels, sublabels, icons and connector labels are SVG <code>&lt;text&gt;</code> elements: real text, not pictures of text.</li>
+            <li>A node's <code>Tooltip</code> becomes an SVG <code>&lt;title&gt;</code>, the first child of the node's group; browsers show it on hover.</li>
+            <li>Give every node action a second route that works from the keyboard. In the first example, Previous step and Next step walk every step, and the card that describes the step is an <code>aria-live="polite"</code> region. In the second, the Bin tag example link beside the canvas goes where Bin tag scanned leads.</li>
+            <li>To name the diagram, wrap it in a <code>&lt;figure&gt;</code> with a <code>&lt;figcaption&gt;</code>, or put a heading just before it.</li>
+            <li>A disabled node is drawn at 45% opacity with a close icon and ignores clicks. When that state matters, say it in the node's <code>Label</code> or <code>SubLabel</code> as well.</li>
+            <li>Pick <code>FillColor</code> and <code>TextColor</code> with at least 4.5:1 contrast, and leave some margin for sublabels, which are drawn at 85% opacity.</li>
         </ul>
     </Accessibility>
 
@@ -115,7 +119,7 @@
         <ul>
             <li>Tasks with dependency links on a timeline: <a href="demo/gantt">Gantt chart</a>.</li>
             <li>Hierarchies as an expandable list: <a href="demo/tree/treeview-explorer">Tree view</a>.</li>
-            <li>The package cost sheet the second example links to: <a href="demo/reports/package-costs">Report writer</a>.</li>
+            <li>The bin tag the second example links to: <a href="demo/barcodes#barcode">Barcodes &amp; QR</a>.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
@@ -126,37 +130,37 @@
 
     private static readonly Dictionary<string, Step> Steps = new()
     {
-        ["request"] = new("Sales desk", "Same day", "The client asks for a trip by phone, email or the web form; the desk logs dates, party size and destination."),
-        ["quote"] = new("Product team", "1–2 working days", "Flights, hotels and experiences are priced from the rate card into one quote."),
-        ["decide"] = new("Client", "Up to 7 days", "The quote is held for seven days while the client accepts or declines it."),
-        ["booked"] = new("Reservations", "1 working day", "Every supplier on the quote is confirmed and the trip gets a booking reference."),
-        ["deposit"] = new("Finance", "Within 3 days", "A 20% deposit secures the booking; the balance is due before departure."),
-        ["documents"] = new("Operations", "2 weeks before departure", "Tickets, vouchers and the day-by-day itinerary go to the client."),
-        ["declined"] = new("Sales desk", "Same day", "The desk records the reason and releases any rooms held for the quote."),
+        ["arrival"] = new("Dock office", "10 minutes", "The driver hands in the delivery note; the office finds the purchase order and assigns one of the six docks."),
+        ["unload"] = new("Receiving team", "30 minutes", "Pallets come off the trailer at the assigned dock and are counted against the delivery note."),
+        ["inspect"] = new("Receiving lead", "15 minutes", "Cartons are checked for damage and the count is compared with the purchase order; the lead accepts or rejects the delivery."),
+        ["received"] = new("Receiving team", "Same shift", "The accepted quantities are posted to the purchase order and every pallet gets a putaway label."),
+        ["putaway"] = new("Forklift drivers", "Within 4 hours", "Each pallet goes to a bin in the Ambient, Chilled or Bulk zone and is scanned into that location."),
+        ["available"] = new("Inventory control", "Right after putaway", "The stock shows as available to pick and the purchase order line is closed."),
+        ["rejected"] = new("Dock office", "Same day", "The office records the reason on the purchase order and the pallets are reloaded for return to the supplier."),
     };
 
     private readonly List<DiagramNode> _workflowNodes = new()
     {
-        new() { Id = "request", Label = "Request received", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 24, Width = 170, Height = 44, FillColor = "#0f766e", StrokeColor = "#134e4a" },
-        new() { Id = "quote", Label = "Quote prepared", OffsetX = 100, OffsetY = 104, Width = 170, Height = 48, FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
-        new() { Id = "decide", Label = "Client decides", Shape = DiagramControlShape.Diamond, OffsetX = 100, OffsetY = 202, Width = 170, Height = 80, FillColor = "#fbbf24", StrokeColor = "#b45309", TextColor = "#1f2937" },
-        new() { Id = "booked", Label = "Booked", OffsetX = 100, OffsetY = 344, Width = 170, Height = 48, FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
-        new() { Id = "deposit", Label = "Deposit paid", OffsetX = 100, OffsetY = 426, Width = 170, Height = 48, FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
-        new() { Id = "documents", Label = "Documents sent", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 506, Width = 170, Height = 44, FillColor = "#0f766e", StrokeColor = "#134e4a" },
-        new() { Id = "declined", Label = "Declined", Shape = DiagramControlShape.Stadium, OffsetX = 380, OffsetY = 202, Width = 120, Height = 44, FillColor = "#fee2e2", StrokeColor = "#b91c1c", TextColor = "#991b1b" },
+        new() { Id = "arrival", Label = "Truck checked in", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 24, Width = 170, Height = 44, FillColor = "#0f766e", StrokeColor = "#134e4a" },
+        new() { Id = "unload", Label = "Pallets unloaded", OffsetX = 100, OffsetY = 104, Width = 170, Height = 48, FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
+        new() { Id = "inspect", Label = "Goods inspected", Shape = DiagramControlShape.Diamond, OffsetX = 100, OffsetY = 202, Width = 170, Height = 80, FillColor = "#fbbf24", StrokeColor = "#b45309", TextColor = "#1f2937" },
+        new() { Id = "received", Label = "Receipt posted", OffsetX = 100, OffsetY = 344, Width = 170, Height = 48, FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
+        new() { Id = "putaway", Label = "Put away", OffsetX = 100, OffsetY = 426, Width = 170, Height = 48, FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
+        new() { Id = "available", Label = "Stock available", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 506, Width = 170, Height = 44, FillColor = "#0f766e", StrokeColor = "#134e4a" },
+        new() { Id = "rejected", Label = "Sent back", Shape = DiagramControlShape.Stadium, OffsetX = 380, OffsetY = 202, Width = 120, Height = 44, FillColor = "#fee2e2", StrokeColor = "#b91c1c", TextColor = "#991b1b" },
     };
 
     private readonly List<DiagramConnector> _workflowConnectors = new()
     {
-        new() { Id = "wf-1", SourceId = "request", TargetId = "quote" },
-        new() { Id = "wf-2", SourceId = "quote", TargetId = "decide" },
-        new() { Id = "wf-3", SourceId = "decide", TargetId = "booked", Label = "accepted", StrokeColor = "#15803d", LabelColor = "#15803d" },
-        new() { Id = "wf-4", SourceId = "decide", TargetId = "declined", Label = "declined", StrokeColor = "#b91c1c", LabelColor = "#b91c1c", DashArray = "6,4" },
-        new() { Id = "wf-5", SourceId = "booked", TargetId = "deposit" },
-        new() { Id = "wf-6", SourceId = "deposit", TargetId = "documents" },
+        new() { Id = "wf-1", SourceId = "arrival", TargetId = "unload" },
+        new() { Id = "wf-2", SourceId = "unload", TargetId = "inspect" },
+        new() { Id = "wf-3", SourceId = "inspect", TargetId = "received", Label = "accepted", StrokeColor = "#15803d", LabelColor = "#15803d" },
+        new() { Id = "wf-4", SourceId = "inspect", TargetId = "rejected", Label = "rejected", StrokeColor = "#b91c1c", LabelColor = "#b91c1c", DashArray = "6,4" },
+        new() { Id = "wf-5", SourceId = "received", TargetId = "putaway" },
+        new() { Id = "wf-6", SourceId = "putaway", TargetId = "available" },
     };
 
-    private string _currentId = "request";
+    private string _currentId = "arrival";
 
     private int Index => _workflowNodes.FindIndex(n => n.Id == _currentId);
 
@@ -164,11 +168,11 @@
 
     private Step CurrentStep => Steps[_currentId];
 
-    protected override void OnInitialized() => ShowStep("request");
+    protected override void OnInitialized() => ShowStep("arrival");
 
     private void OnStepClicked(DiagramNodeClickEventArgs e) => ShowStep(e.Node.Id);
 
-    private void Move(int delta) => ShowStep(_workflowNodes[Math.Clamp(Index + delta, 0, _workflowNodes.Count - 1)].Id);   // main path, then the declined branch; no wrap
+    private void Move(int delta) => ShowStep(_workflowNodes[Math.Clamp(Index + delta, 0, _workflowNodes.Count - 1)].Id);   // main path, then the rejected branch; no wrap
 
     private void ShowStep(string id)
     {
@@ -184,31 +188,31 @@
 
     private readonly List<DiagramNode> _shapeNodes = new()
     {
-        new() { Id = "package", Label = "Package chosen", SubLabel = "Stadium", Shape = DiagramControlShape.Stadium, OffsetX = 75, OffsetY = 45, Width = 150, Height = 50,
-                FillColor = "#0f766e", StrokeColor = "#134e4a", NavigateUrl = "demo/reports/package-costs", Tooltip = "Opens the package cost sheet on the Report writer page" },
-        new() { Id = "passport", Label = "Passport details", SubLabel = "Parallelogram", Shape = DiagramControlShape.Parallelogram, OffsetX = 275, OffsetY = 45, Width = 150, Height = 50,
+        new() { Id = "scan", Label = "Bin tag scanned", SubLabel = "Stadium", Shape = DiagramControlShape.Stadium, OffsetX = 75, OffsetY = 45, Width = 150, Height = 50,
+                FillColor = "#0f766e", StrokeColor = "#134e4a", NavigateUrl = "demo/barcodes#barcode", Tooltip = "Opens the bin tag example on the Barcodes & QR page" },
+        new() { Id = "quantity", Label = "Quantity entered", SubLabel = "Parallelogram", Shape = DiagramControlShape.Parallelogram, OffsetX = 275, OffsetY = 45, Width = 150, Height = 50,
                 FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
-        new() { Id = "visa", Label = "Visa needed?", SubLabel = "Diamond", Shape = DiagramControlShape.Diamond, OffsetX = 475, OffsetY = 45, Width = 150, Height = 84,
+        new() { Id = "chilled", Label = "Chilled item?", SubLabel = "Diamond", Shape = DiagramControlShape.Diamond, OffsetX = 475, OffsetY = 45, Width = 150, Height = 84,
                 FillColor = "#fbbf24", StrokeColor = "#b45309", TextColor = "#1f2937" },
-        new() { Id = "apply", Label = "Visa applied", SubLabel = "Rectangle, radius 0", OffsetX = 475, OffsetY = 200, Width = 150, Height = 50, CornerRadius = 0,
+        new() { Id = "coldpack", Label = "Cold pack added", SubLabel = "Rectangle, radius 0", OffsetX = 475, OffsetY = 200, Width = 150, Height = 50, CornerRadius = 0,
                 FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
-        new() { Id = "pack", Label = "Travel pack", SubLabel = "RoundedRectangle", Icon = "✉", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 275, OffsetY = 200, Width = 150, Height = 60, CornerRadius = 14,
+        new() { Id = "slip", Label = "Packing slip", SubLabel = "RoundedRectangle", Icon = "✉", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 275, OffsetY = 200, Width = 150, Height = 60, CornerRadius = 14,
                 FillColor = "#2563eb", StrokeColor = "#1e3a8a" },
-        new() { Id = "depart", Label = "Departure", SubLabel = "Ellipse", Icon = "✈", Shape = DiagramControlShape.Ellipse, OffsetX = 75, OffsetY = 200, Width = 150, Height = 64,
-                FillColor = "#0f766e", StrokeColor = "#134e4a", Tooltip = "Flight times are on the final itinerary" },
-        new() { Id = "lounge", Label = "Lounge pass", SubLabel = "Enabled = false", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 75, OffsetY = 300, Width = 150, Height = 50,
+        new() { Id = "shipped", Label = "Shipped", SubLabel = "Ellipse", Icon = "✔", Shape = DiagramControlShape.Ellipse, OffsetX = 75, OffsetY = 200, Width = 150, Height = 64,
+                FillColor = "#0f766e", StrokeColor = "#134e4a", Tooltip = "Pickup times are on the dock schedule" },
+        new() { Id = "proof", Label = "Proof of delivery", SubLabel = "Enabled = false", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 75, OffsetY = 300, Width = 150, Height = 50,
                 FillColor = "#475569", StrokeColor = "#334155", Enabled = false },
     };
 
     private readonly List<DiagramConnector> _shapeConnectors = new()
     {
-        new() { Id = "sh-1", SourceId = "package", TargetId = "passport" },
-        new() { Id = "sh-2", SourceId = "passport", TargetId = "visa", ArrowStyle = ArrowStyle.Closed },
-        new() { Id = "sh-3", SourceId = "visa", TargetId = "apply", Label = "yes" },
-        new() { Id = "sh-4", SourceId = "visa", TargetId = "pack", Label = "no", Type = ConnectorType.Straight, SourcePort = DiagramPort.Bottom, TargetPort = DiagramPort.Top },
-        new() { Id = "sh-5", SourceId = "apply", TargetId = "pack", DashArray = "6,4" },
-        new() { Id = "sh-6", SourceId = "pack", TargetId = "depart", StrokeColor = "#0f766e", StrokeWidth = 3 },
-        new() { Id = "sh-7", SourceId = "depart", TargetId = "lounge", IsBroken = true },
+        new() { Id = "sh-1", SourceId = "scan", TargetId = "quantity" },
+        new() { Id = "sh-2", SourceId = "quantity", TargetId = "chilled", ArrowStyle = ArrowStyle.Closed },
+        new() { Id = "sh-3", SourceId = "chilled", TargetId = "coldpack", Label = "yes" },
+        new() { Id = "sh-4", SourceId = "chilled", TargetId = "slip", Label = "no", Type = ConnectorType.Straight, SourcePort = DiagramPort.Bottom, TargetPort = DiagramPort.Top },
+        new() { Id = "sh-5", SourceId = "coldpack", TargetId = "slip", DashArray = "6,4" },
+        new() { Id = "sh-6", SourceId = "slip", TargetId = "shipped", StrokeColor = "#0f766e", StrokeWidth = 3 },
+        new() { Id = "sh-7", SourceId = "shipped", TargetId = "proof", IsBroken = true },
     };
 
     private void OnShapeClicked(DiagramNodeClickEventArgs e)
@@ -236,7 +240,8 @@
         public static readonly ApiRow[] Node =
         {
             new("Id", "The name connectors use in <code>SourceId</code> and <code>TargetId</code>, matched case-insensitively. A node with a <code>BackgroundImage</code> also uses it for the clip path id <code>clip-<em>Id</em></code>, so keep it unique across diagrams on the same page.", "string", "\"\""),
-            new("OffsetX / OffsetY", "Center of the node, in pixels from the top-left of the drawing area. Nothing is placed automatically.", "double", "0"),
+            new("OffsetX", "Horizontal center of the node, in pixels from the left of the drawing area. Nothing is placed automatically.", "double", "0"),
+            new("OffsetY", "Vertical center of the node, in pixels from the top of the drawing area.", "double", "0"),
             new("Width", "Width of the shape in pixels.", "double", "140"),
             new("Height", "Height of the shape in pixels.", "double", "50"),
             new("Label", "Main text, centered, 13 px semibold in <code>TextColor</code>. <code>\\n</code> starts a new line 15 px lower; the first line keeps the single-line position, so a multi-line label sits low. Text is not wrapped or clipped to the shape.", "string", "\"\""),
@@ -248,7 +253,7 @@
             new("StrokeWidth", "Outline width in pixels.", "double", "2"),
             new("CornerRadius", "Corner radius of <code>Rectangle</code> and <code>RoundedRectangle</code> alike; set 0 for square corners. Other shapes ignore it.", "double", "6"),
             new("NavigateUrl", "Followed with <code>NavigationManager.NavigateTo</code> when the node is clicked, after <code>NodeClicked</code> unless that set <code>Handled</code>. A relative URL resolves against the base href. It makes the node clickable even without <code>NodeClicked</code>.", "string?", "null"),
-            new("CssClass", "Added to the node's <code>&lt;g&gt;</code>. Style it from the page through <code>::deep</code>, as the first example does.", "string?", "null"),
+            new("CssClass", "Added to the node's <code>&lt;g&gt;</code>. Style it from the page through <code>::deep</code>; the first example uses <code>.canvas ::deep .wf-current :is(rect, ellipse, polygon) { stroke: #0f172a; stroke-width: 4px; }</code>.", "string?", "null"),
             new("Tooltip", "Rendered as an SVG <code>&lt;title&gt;</code>, which browsers show on hover.", "string?", "null"),
             new("Icon", "Short text, an emoji or one character, drawn at 16 px above the label; the label moves down to make room.", "string?", "null"),
             new("BackgroundImage", "Image URL drawn inside the shape and clipped to it. The label then moves 14 px below the node, outside the shape, so its <code>TextColor</code> has to read against the canvas.", "string?", "null"),
@@ -260,7 +265,8 @@
         public static readonly ApiRow[] Connector =
         {
             new("Id", "Names the arrowhead marker <code>arrow-<em>Id</em></code>. Marker ids are shared by the whole page, so give every connector a distinct Id, across diagrams too; connectors with the same Id all use the first such marker, color included.", "string", "\"\""),
-            new("SourceId / TargetId", "Ids of the nodes at the start and at the arrow end.", "string", "\"\""),
+            new("SourceId", "Id of the node at the start.", "string", "\"\""),
+            new("TargetId", "Id of the node at the arrow end.", "string", "\"\""),
             new("Type", "Right-angle path or straight line; see <code>ConnectorType</code>.", "ConnectorType", "ConnectorType.Orthogonal"),
             new("StrokeColor", "Line and arrowhead color.", "string", "\"#555555\""),
             new("StrokeWidth", "Line width in pixels; the arrowhead scales with it.", "double", "2"),
@@ -268,7 +274,8 @@
             new("LabelColor", "Label text color.", "string", "\"#333333\""),
             new("ShowArrow", "Draws the arrowhead at the target end; the line is pulled back 6 px toward the source to make room for it.", "bool", "true"),
             new("DashArray", "SVG <code>stroke-dasharray</code>, such as \"6,4\"; null draws a solid line.", "string?", "null"),
-            new("SourcePort / TargetPort", "Side of each node the line leaves or arrives at. <code>Auto</code> picks top or bottom when the two centers are further apart vertically than horizontally, otherwise left or right.", "DiagramPort", "DiagramPort.Auto"),
+            new("SourcePort", "Side of the start node the line leaves from. <code>Auto</code> picks top or bottom when the two centers are further apart vertically than horizontally, otherwise left or right.", "DiagramPort", "DiagramPort.Auto"),
+            new("TargetPort", "Side of the end node the line arrives at, chosen the same way.", "DiagramPort", "DiagramPort.Auto"),
             new("ArrowStyle", "Open chevron or closed triangle; see <code>ArrowStyle</code>.", "ArrowStyle", "ArrowStyle.Open"),
             new("IsBroken", "Draws the connector and its arrowhead gray (#a0a0a0), 1.5 px wide and dashed 3,3, overriding <code>StrokeColor</code>, <code>StrokeWidth</code> and <code>DashArray</code>.", "bool", "false"),
         };
@@ -346,8 +353,8 @@
         </ChildContent>
         <FooterContent>
             <div class=""wf-buttons"">
-                <ButtonControl OnClick=""() => Move(-1)"">Previous step</ButtonControl>
-                <ButtonControl OnClick=""() => Move(1)"">Next step</ButtonControl>
+                <ButtonControl OnClick=""() => Move(-1)"" Disabled=""@(Index == 0)"">Previous step</ButtonControl>
+                <ButtonControl OnClick=""() => Move(1)"" Disabled=""@(Index == _workflowNodes.Count - 1)"">Next step</ButtonControl>
             </div>
         </FooterContent>
     </CardControl>
@@ -357,37 +364,37 @@ private sealed record Step(string Owner, string Typical, string Detail);
 
 private static readonly Dictionary<string, Step> Steps = new()
 {
-    [""request""] = new(""Sales desk"", ""Same day"", ""The client asks for a trip by phone, email or the web form; the desk logs dates, party size and destination.""),
-    [""quote""] = new(""Product team"", ""1–2 working days"", ""Flights, hotels and experiences are priced from the rate card into one quote.""),
-    [""decide""] = new(""Client"", ""Up to 7 days"", ""The quote is held for seven days while the client accepts or declines it.""),
-    [""booked""] = new(""Reservations"", ""1 working day"", ""Every supplier on the quote is confirmed and the trip gets a booking reference.""),
-    [""deposit""] = new(""Finance"", ""Within 3 days"", ""A 20% deposit secures the booking; the balance is due before departure.""),
-    [""documents""] = new(""Operations"", ""2 weeks before departure"", ""Tickets, vouchers and the day-by-day itinerary go to the client.""),
-    [""declined""] = new(""Sales desk"", ""Same day"", ""The desk records the reason and releases any rooms held for the quote.""),
+    [""arrival""] = new(""Dock office"", ""10 minutes"", ""The driver hands in the delivery note; the office finds the purchase order and assigns one of the six docks.""),
+    [""unload""] = new(""Receiving team"", ""30 minutes"", ""Pallets come off the trailer at the assigned dock and are counted against the delivery note.""),
+    [""inspect""] = new(""Receiving lead"", ""15 minutes"", ""Cartons are checked for damage and the count is compared with the purchase order; the lead accepts or rejects the delivery.""),
+    [""received""] = new(""Receiving team"", ""Same shift"", ""The accepted quantities are posted to the purchase order and every pallet gets a putaway label.""),
+    [""putaway""] = new(""Forklift drivers"", ""Within 4 hours"", ""Each pallet goes to a bin in the Ambient, Chilled or Bulk zone and is scanned into that location.""),
+    [""available""] = new(""Inventory control"", ""Right after putaway"", ""The stock shows as available to pick and the purchase order line is closed.""),
+    [""rejected""] = new(""Dock office"", ""Same day"", ""The office records the reason on the purchase order and the pallets are reloaded for return to the supplier.""),
 };
 
 private readonly List<DiagramNode> _workflowNodes = new()
 {
-    new() { Id = ""request"", Label = ""Request received"", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 24, Width = 170, Height = 44, FillColor = ""#0f766e"", StrokeColor = ""#134e4a"" },
-    new() { Id = ""quote"", Label = ""Quote prepared"", OffsetX = 100, OffsetY = 104, Width = 170, Height = 48, FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
-    new() { Id = ""decide"", Label = ""Client decides"", Shape = DiagramControlShape.Diamond, OffsetX = 100, OffsetY = 202, Width = 170, Height = 80, FillColor = ""#fbbf24"", StrokeColor = ""#b45309"", TextColor = ""#1f2937"" },
-    new() { Id = ""booked"", Label = ""Booked"", OffsetX = 100, OffsetY = 344, Width = 170, Height = 48, FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
-    new() { Id = ""deposit"", Label = ""Deposit paid"", OffsetX = 100, OffsetY = 426, Width = 170, Height = 48, FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
-    new() { Id = ""documents"", Label = ""Documents sent"", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 506, Width = 170, Height = 44, FillColor = ""#0f766e"", StrokeColor = ""#134e4a"" },
-    new() { Id = ""declined"", Label = ""Declined"", Shape = DiagramControlShape.Stadium, OffsetX = 380, OffsetY = 202, Width = 120, Height = 44, FillColor = ""#fee2e2"", StrokeColor = ""#b91c1c"", TextColor = ""#991b1b"" },
+    new() { Id = ""arrival"", Label = ""Truck checked in"", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 24, Width = 170, Height = 44, FillColor = ""#0f766e"", StrokeColor = ""#134e4a"" },
+    new() { Id = ""unload"", Label = ""Pallets unloaded"", OffsetX = 100, OffsetY = 104, Width = 170, Height = 48, FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
+    new() { Id = ""inspect"", Label = ""Goods inspected"", Shape = DiagramControlShape.Diamond, OffsetX = 100, OffsetY = 202, Width = 170, Height = 80, FillColor = ""#fbbf24"", StrokeColor = ""#b45309"", TextColor = ""#1f2937"" },
+    new() { Id = ""received"", Label = ""Receipt posted"", OffsetX = 100, OffsetY = 344, Width = 170, Height = 48, FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
+    new() { Id = ""putaway"", Label = ""Put away"", OffsetX = 100, OffsetY = 426, Width = 170, Height = 48, FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
+    new() { Id = ""available"", Label = ""Stock available"", Shape = DiagramControlShape.Stadium, OffsetX = 100, OffsetY = 506, Width = 170, Height = 44, FillColor = ""#0f766e"", StrokeColor = ""#134e4a"" },
+    new() { Id = ""rejected"", Label = ""Sent back"", Shape = DiagramControlShape.Stadium, OffsetX = 380, OffsetY = 202, Width = 120, Height = 44, FillColor = ""#fee2e2"", StrokeColor = ""#b91c1c"", TextColor = ""#991b1b"" },
 };
 
 private readonly List<DiagramConnector> _workflowConnectors = new()
 {
-    new() { Id = ""wf-1"", SourceId = ""request"", TargetId = ""quote"" },
-    new() { Id = ""wf-2"", SourceId = ""quote"", TargetId = ""decide"" },
-    new() { Id = ""wf-3"", SourceId = ""decide"", TargetId = ""booked"", Label = ""accepted"", StrokeColor = ""#15803d"", LabelColor = ""#15803d"" },
-    new() { Id = ""wf-4"", SourceId = ""decide"", TargetId = ""declined"", Label = ""declined"", StrokeColor = ""#b91c1c"", LabelColor = ""#b91c1c"", DashArray = ""6,4"" },
-    new() { Id = ""wf-5"", SourceId = ""booked"", TargetId = ""deposit"" },
-    new() { Id = ""wf-6"", SourceId = ""deposit"", TargetId = ""documents"" },
+    new() { Id = ""wf-1"", SourceId = ""arrival"", TargetId = ""unload"" },
+    new() { Id = ""wf-2"", SourceId = ""unload"", TargetId = ""inspect"" },
+    new() { Id = ""wf-3"", SourceId = ""inspect"", TargetId = ""received"", Label = ""accepted"", StrokeColor = ""#15803d"", LabelColor = ""#15803d"" },
+    new() { Id = ""wf-4"", SourceId = ""inspect"", TargetId = ""rejected"", Label = ""rejected"", StrokeColor = ""#b91c1c"", LabelColor = ""#b91c1c"", DashArray = ""6,4"" },
+    new() { Id = ""wf-5"", SourceId = ""received"", TargetId = ""putaway"" },
+    new() { Id = ""wf-6"", SourceId = ""putaway"", TargetId = ""available"" },
 };
 
-private string _currentId = ""request"";
+private string _currentId = ""arrival"";
 
 private int Index => _workflowNodes.FindIndex(n => n.Id == _currentId);
 
@@ -395,11 +402,11 @@ private DiagramNode Current => _workflowNodes[Index];
 
 private Step CurrentStep => Steps[_currentId];
 
-protected override void OnInitialized() => ShowStep(""request"");
+protected override void OnInitialized() => ShowStep(""arrival"");
 
 private void OnStepClicked(DiagramNodeClickEventArgs e) => ShowStep(e.Node.Id);
 
-private void Move(int delta) => ShowStep(_workflowNodes[Math.Clamp(Index + delta, 0, _workflowNodes.Count - 1)].Id);   // main path, then the declined branch; no wrap
+private void Move(int delta) => ShowStep(_workflowNodes[Math.Clamp(Index + delta, 0, _workflowNodes.Count - 1)].Id);   // main path, then the rejected branch; no wrap
 
 private void ShowStep(string id)
 {
@@ -407,16 +414,9 @@ private void ShowStep(string id)
     foreach (var node in _workflowNodes)
         node.CssClass = node.Id == id ? ""wf-current"" : null;
 }";
-        public const string WorkflowCss = @".wf-layout { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
-.canvas { max-width: 100%; overflow-x: auto; }
-.canvas ::deep .wf-current :is(rect, ellipse, polygon) { stroke: #0f172a; stroke-width: 4px; }
-.wf-layout ::deep .wf-panel { flex: 1 1 240px; max-width: 340px; }
-.wf-facts { margin: 0; font-size: 13px; }
-.wf-facts dt { font-weight: 600; color: #334155; }
-.wf-facts dd { margin: 2px 0 10px; color: #475569; }
-.wf-buttons { display: flex; gap: 8px; flex-wrap: wrap; }";
         public const string Shapes = @"<div class=""controls"">
     <SwitchControl @bind-Checked=""_followLinks"" Label=""Follow links"" />
+    <a href=""demo/barcodes#barcode"">Bin tag example</a>
 </div>
 <div class=""canvas"">
     <DiagramControl Nodes=""_shapeNodes"" Connectors=""_shapeConnectors"" Width=""550"" Height=""330""
@@ -430,31 +430,31 @@ private string _status = ""No node clicked yet."";
 
 private readonly List<DiagramNode> _shapeNodes = new()
 {
-    new() { Id = ""package"", Label = ""Package chosen"", SubLabel = ""Stadium"", Shape = DiagramControlShape.Stadium, OffsetX = 75, OffsetY = 45, Width = 150, Height = 50,
-            FillColor = ""#0f766e"", StrokeColor = ""#134e4a"", NavigateUrl = ""demo/reports/package-costs"", Tooltip = ""Opens the package cost sheet on the Report writer page"" },
-    new() { Id = ""passport"", Label = ""Passport details"", SubLabel = ""Parallelogram"", Shape = DiagramControlShape.Parallelogram, OffsetX = 275, OffsetY = 45, Width = 150, Height = 50,
+    new() { Id = ""scan"", Label = ""Bin tag scanned"", SubLabel = ""Stadium"", Shape = DiagramControlShape.Stadium, OffsetX = 75, OffsetY = 45, Width = 150, Height = 50,
+            FillColor = ""#0f766e"", StrokeColor = ""#134e4a"", NavigateUrl = ""demo/barcodes#barcode"", Tooltip = ""Opens the bin tag example on the Barcodes & QR page"" },
+    new() { Id = ""quantity"", Label = ""Quantity entered"", SubLabel = ""Parallelogram"", Shape = DiagramControlShape.Parallelogram, OffsetX = 275, OffsetY = 45, Width = 150, Height = 50,
             FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
-    new() { Id = ""visa"", Label = ""Visa needed?"", SubLabel = ""Diamond"", Shape = DiagramControlShape.Diamond, OffsetX = 475, OffsetY = 45, Width = 150, Height = 84,
+    new() { Id = ""chilled"", Label = ""Chilled item?"", SubLabel = ""Diamond"", Shape = DiagramControlShape.Diamond, OffsetX = 475, OffsetY = 45, Width = 150, Height = 84,
             FillColor = ""#fbbf24"", StrokeColor = ""#b45309"", TextColor = ""#1f2937"" },
-    new() { Id = ""apply"", Label = ""Visa applied"", SubLabel = ""Rectangle, radius 0"", OffsetX = 475, OffsetY = 200, Width = 150, Height = 50, CornerRadius = 0,
+    new() { Id = ""coldpack"", Label = ""Cold pack added"", SubLabel = ""Rectangle, radius 0"", OffsetX = 475, OffsetY = 200, Width = 150, Height = 50, CornerRadius = 0,
             FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
-    new() { Id = ""pack"", Label = ""Travel pack"", SubLabel = ""RoundedRectangle"", Icon = ""✉"", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 275, OffsetY = 200, Width = 150, Height = 60, CornerRadius = 14,
+    new() { Id = ""slip"", Label = ""Packing slip"", SubLabel = ""RoundedRectangle"", Icon = ""✉"", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 275, OffsetY = 200, Width = 150, Height = 60, CornerRadius = 14,
             FillColor = ""#2563eb"", StrokeColor = ""#1e3a8a"" },
-    new() { Id = ""depart"", Label = ""Departure"", SubLabel = ""Ellipse"", Icon = ""✈"", Shape = DiagramControlShape.Ellipse, OffsetX = 75, OffsetY = 200, Width = 150, Height = 64,
-            FillColor = ""#0f766e"", StrokeColor = ""#134e4a"", Tooltip = ""Flight times are on the final itinerary"" },
-    new() { Id = ""lounge"", Label = ""Lounge pass"", SubLabel = ""Enabled = false"", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 75, OffsetY = 300, Width = 150, Height = 50,
+    new() { Id = ""shipped"", Label = ""Shipped"", SubLabel = ""Ellipse"", Icon = ""✔"", Shape = DiagramControlShape.Ellipse, OffsetX = 75, OffsetY = 200, Width = 150, Height = 64,
+            FillColor = ""#0f766e"", StrokeColor = ""#134e4a"", Tooltip = ""Pickup times are on the dock schedule"" },
+    new() { Id = ""proof"", Label = ""Proof of delivery"", SubLabel = ""Enabled = false"", Shape = DiagramControlShape.RoundedRectangle, OffsetX = 75, OffsetY = 300, Width = 150, Height = 50,
             FillColor = ""#475569"", StrokeColor = ""#334155"", Enabled = false },
 };
 
 private readonly List<DiagramConnector> _shapeConnectors = new()
 {
-    new() { Id = ""sh-1"", SourceId = ""package"", TargetId = ""passport"" },
-    new() { Id = ""sh-2"", SourceId = ""passport"", TargetId = ""visa"", ArrowStyle = ArrowStyle.Closed },
-    new() { Id = ""sh-3"", SourceId = ""visa"", TargetId = ""apply"", Label = ""yes"" },
-    new() { Id = ""sh-4"", SourceId = ""visa"", TargetId = ""pack"", Label = ""no"", Type = ConnectorType.Straight, SourcePort = DiagramPort.Bottom, TargetPort = DiagramPort.Top },
-    new() { Id = ""sh-5"", SourceId = ""apply"", TargetId = ""pack"", DashArray = ""6,4"" },
-    new() { Id = ""sh-6"", SourceId = ""pack"", TargetId = ""depart"", StrokeColor = ""#0f766e"", StrokeWidth = 3 },
-    new() { Id = ""sh-7"", SourceId = ""depart"", TargetId = ""lounge"", IsBroken = true },
+    new() { Id = ""sh-1"", SourceId = ""scan"", TargetId = ""quantity"" },
+    new() { Id = ""sh-2"", SourceId = ""quantity"", TargetId = ""chilled"", ArrowStyle = ArrowStyle.Closed },
+    new() { Id = ""sh-3"", SourceId = ""chilled"", TargetId = ""coldpack"", Label = ""yes"" },
+    new() { Id = ""sh-4"", SourceId = ""chilled"", TargetId = ""slip"", Label = ""no"", Type = ConnectorType.Straight, SourcePort = DiagramPort.Bottom, TargetPort = DiagramPort.Top },
+    new() { Id = ""sh-5"", SourceId = ""coldpack"", TargetId = ""slip"", DashArray = ""6,4"" },
+    new() { Id = ""sh-6"", SourceId = ""slip"", TargetId = ""shipped"", StrokeColor = ""#0f766e"", StrokeWidth = 3 },
+    new() { Id = ""sh-7"", SourceId = ""shipped"", TargetId = ""proof"", IsBroken = true },
 };
 
 private void OnShapeClicked(DiagramNodeClickEventArgs e)

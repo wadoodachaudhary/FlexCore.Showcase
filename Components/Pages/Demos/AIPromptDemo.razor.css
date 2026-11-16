@@ -1,9 +1,16 @@
-/* 2026-10-25: AI prompt page. No Bootstrap names in here. */
+/* 2026-10-25: AI prompt page. */
 
-/* Prompt */
+/* Prompt: the ticket, the control and the draft sit in one app card, as on the other component pages */
+.ai { padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+.ai-request { margin: 0 0 14px; padding: 10px 14px; border: 1px solid #e0e7ff; border-left: 3px solid var(--brand-button, #4f46e5); border-radius: 8px; background: var(--brand-button-soft, #eef2ff); font-size: 13px; color: #334155; }
+.ai-request strong { margin-right: 6px; color: #0f172a; }
+.demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }   /* not .row: Bootstrap owns that name */
+.demo-row ::deep .fx-button.btn-sm:not(.btn-primary) { border-color: #cbd5e1; background: #fff; color: #334155; }
 .ai-note { margin: 10px 0 0; font-size: 13px; color: #475569; }
-.ai-label { margin: 14px 0 4px; font-size: 12px; font-weight: 600; color: #475569; }
+.ai-label { margin: 16px 0 4px; font-size: 12.5px; font-weight: 600; color: #475569; }
+.ai ::deep textarea { box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; font-size: 14px; }
 
-/* Response card colors */
-.ai { --panel: #ffffff; --panel-2: #f1f5f9; --border: #cbd5e1; --ink: #1e293b; --muted: #475569; --accent: #2563eb; --accent-strong: #1d4ed8; --accent-2: #0f766e; }
+/* Response card colors: the card reads these variables; the accent follows the site's button indigo */
+.ai { --panel: #ffffff; --panel-2: #f1f5f9; --border: #cbd5e1; --ink: #1e293b; --muted: #475569; --accent: var(--brand-button, #4f46e5); --accent-strong: var(--brand-button-hover, #4338ca); --accent-2: #0f766e; }
 .ai ::deep .fx-result-output { background: #f8fafc; }

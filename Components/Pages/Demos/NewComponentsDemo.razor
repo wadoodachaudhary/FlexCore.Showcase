@@ -11,7 +11,10 @@
    2026-10-24 (later): dot badge's Title removed, Home crumb given a real href; Overview and tabs updated.
    2026-10-25 (SC-347): "progress" example on a PeriodicTimer-simulated import; docs from ProgressBarControl*,
    ChunkProgressBarControl*, ContentModels.cs, ButtonControl.razor. Cancel placement: see .razor.css.
-   2026-10-26: sample content on the travel theme. *@
+   2026-10-26: sample content on the travel theme.
+   2026-11-15: examples rebuilt (bookings board, booking steps); accessibility notes for all seven controls.
+   2026-11-15: example story moved to the Project management theme.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor Badge, Alert, Timeline and Progress Bar — FlexCore</PageTitle>
 
@@ -20,72 +23,94 @@
                    SourcePath="BadgeControl.razor;BadgeModels.cs;AlertControl.razor;AlertModels.cs;SkeletonControl.razor;SkeletonModels.cs;TimelineControl.razor;TimelineItemControl.razor;TimelineModels.cs;BreadCrumbControl.razor;BreadCrumbItem.cs;FlexControlBase.cs;ProgressBarControl.razor;ChunkProgressBarControl.razor;ContentModels.cs">
     <Overview>
         <p>
-            Seven small Blazor controls, from <code>BadgeControl</code> to <code>ProgressBarControl</code>, that tell users what is happening and where they are. Use <code>BadgeControl</code> for counts and status, <code>AlertControl</code> for a message that stays on the page, <code>SkeletonControl</code> while content loads, <code>TimelineControl</code> for a history, <code>BreadCrumbControl</code> for the path to the current page, and <code>ProgressBarControl</code> or <code>ChunkProgressBarControl</code> for a long import.
+            Seven small Blazor controls, from <code>BadgeControl</code> to <code>ProgressBarControl</code>, that tell users what is happening and where they are. Use <code>BadgeControl</code> for counts and status, <code>AlertControl</code> for a message that stays on the page until closed, <code>SkeletonControl</code> while content loads, <code>TimelineControl</code> for the steps of a task or a history, <code>BreadCrumbControl</code> for the path to the current page, and <code>ProgressBarControl</code> or <code>ChunkProgressBarControl</code> for a long import.
         </p>
     </Overview>
 
     <Examples>
-        <DemoExample Id="status" Title="Badges, alerts and skeletons" RazorCode="@Code.Status">
-            <Description><p>Compare a badge in every variant and size, an alert for each severity, and a skeleton holding the place of content still loading.</p></Description>
+        <DemoExample Id="status" Title="Badges, alerts and skeletons" RazorCode="@Code.Status" CSharpCode="@Code.StatusCs">
+            <Description><p>Dismiss an alert and the count beside Open alerts drops; Refresh board swaps every row for skeletons while it loads. Each task carries a dot, a square code tag and a status badge.</p></Description>
             <Demo>
-                <div class="demo-row">
-                    <BadgeControl Text="Primary" Variant="BadgeVariant.Primary" />
-                    <BadgeControl Text="Success" Variant="BadgeVariant.Success" />
-                    <BadgeControl Text="Danger" Variant="BadgeVariant.Danger" />
-                    <BadgeControl Text="Warning" Variant="BadgeVariant.Warning" />
-                    <BadgeControl Text="Info" Variant="BadgeVariant.Info" />
-                    <BadgeControl Text="Dark" Variant="BadgeVariant.Dark" />
-                    <BadgeControl Text="Small" Size="BadgeSize.Small" Variant="BadgeVariant.Secondary" />
-                    <BadgeControl Text="Large" Size="BadgeSize.Large" Variant="BadgeVariant.Primary" />
-                    <BadgeControl IsDot="true" Variant="BadgeVariant.Success" />
-                </div>
-                <div class="stack mt">
-                    <AlertControl Severity="AlertSeverity.Success" Title="Import finished" Text="1,204 supplier rate rows loaded; 3 skipped as duplicates." AllowClose="true" />
-                    <AlertControl Severity="AlertSeverity.Warning" Title="Slow connection" Text="Round trips are taking about 200 ms." AllowClose="true" />
-                    <AlertControl Severity="AlertSeverity.Error" Title="Sync failed" Text="The upstream server did not answer." AllowClose="true" />
-                    <AlertControl Severity="AlertSeverity.Info" Title="Scheduled maintenance" Text="Saturday 02:00 to 03:00 UTC." AllowClose="true" />
-                </div>
-                <div class="skeletons mt">
-                    <SkeletonControl Variant="SkeletonVariant.Text" />
-                    <SkeletonControl Variant="SkeletonVariant.Text" Animation="SkeletonAnimation.Wave" />
-                    <div class="demo-row"><SkeletonControl Variant="SkeletonVariant.Circular" /><SkeletonControl Variant="SkeletonVariant.Text" Width="140px" /></div>
+                <div class="ui">
+                    <div class="demo-row">
+                        <ButtonControl CssClass="btn-sm" IconCss="bi bi-arrow-clockwise" Disabled="_loading" OnClick="RefreshAsync">Refresh board</ButtonControl>
+                        <ButtonControl CssClass="btn-sm" Disabled="@(_open.Count == Issues.Length)" OnClick="() => _open = Issues.ToList()">Show alerts again</ButtonControl>
+                        <span class="label">Open alerts</span>
+                        <BadgeControl Text="@_open.Count.ToString()" Variant="@(_open.Count > 0 ? BadgeVariant.Danger : BadgeVariant.Success)" Size="BadgeSize.Small" />
+                    </div>
+                    <div class="stack mt">
+                        @foreach (var issue in _open)
+                        {
+                            <AlertControl @key="issue.Title" Severity="issue.Severity" Title="@issue.Title" Text="@issue.Text" AllowClose="true" OnClose="() => _open.Remove(issue)" />
+                        }
+                    </div>
+                    <div class="board mt" aria-busy="@(_loading ? "true" : "false")">
+                        <div class="board-head"><span class="bi bi-kanban" aria-hidden="true"></span>Sprint 8 tasks</div>
+                        @foreach (var t in SprintTasks)
+                        {
+                            <div class="board-row">
+                                @if (_loading)
+                                {
+                                    <SkeletonControl Variant="SkeletonVariant.Circular" Width="12px" Height="12px" />
+                                    <SkeletonControl Variant="SkeletonVariant.Text" Animation="SkeletonAnimation.Wave" Width="60%" />
+                                    <SkeletonControl Variant="SkeletonVariant.Rectangular" Width="84px" Height="20px" />
+                                }
+                                else
+                                {
+                                    <BadgeControl IsDot="true" Variant="@t.Variant" />
+                                    <BadgeControl Text="@t.Code" IsPill="false" Variant="BadgeVariant.Light" />
+                                    <span class="board-task">@t.Title</span>
+                                    <BadgeControl Text="@t.Status" Variant="@t.Variant" />
+                                }
+                            </div>
+                        }
+                    </div>
                 </div>
             </Demo>
         </DemoExample>
 
         <DemoExample Id="content" Title="Timeline and breadcrumb" RazorCode="@Code.Content" CSharpCode="@Code.ContentCs">
-            <Description><p>Read a timeline whose items each carry a time and a colored point, and a breadcrumb whose last item, the current page, is not a link.</p></Description>
+            <Description><p>Complete the next step and the timeline moves on: done steps turn green with a check and a time (<code>PointColor</code>, <code>IconCss</code>, <code>Time</code>), the next one is amber, and each title says done, next or to do, so the state is not shown by color alone. The breadcrumb above shows where the task sits; its last item, the current page, is not a link.</p></Description>
             <Demo>
-                <div class="two">
-                    <TimelineControl>
-                        <TimelineItemControl Title="Deposit received" Time="09:00" PointColor="BadgeVariant.Success">Booking LIS-0001 confirmed.</TimelineItemControl>
-                        <TimelineItemControl Title="Tickets issued" Time="13:30" PointColor="BadgeVariant.Primary">Return flights for two travelers.</TimelineItemControl>
-                        <TimelineItemControl Title="Hotel to confirm" Time="16:45" PointColor="BadgeVariant.Warning">Late arrival noted with the old-town hotel.</TimelineItemControl>
-                    </TimelineControl>
-                </div>
-                <div class="demo-row mt">
+                <div class="ui">
                     <BreadCrumbControl Items="_crumbs" />
+                    <div class="demo-row mt">
+                        <ButtonControl CssClass="btn-primary btn-sm" Disabled="@(_done == Steps.Length)" OnClick="() => _done++">Complete next step</ButtonControl>
+                        <ButtonControl CssClass="btn-sm" Disabled="@(_done == 0)" OnClick="() => _done = 0">Start over</ButtonControl>
+                        <span class="label" role="status">@_done of @Steps.Length steps done</span>
+                    </div>
+                    <div class="two mt">
+                        <TimelineControl>
+                            @foreach (var (step, i) in Steps.Select((step, i) => (step, i)))
+                            {
+                                <TimelineItemControl @key="step.Title" Title="@($"{step.Title}: {StateOf(i)}")" Time="@(i < _done ? step.Time : null)" PointColor="@PointFor(i)"
+                                                     IconCss="@(i < _done ? "bi bi-check-lg" : null)">@step.Note</TimelineItemControl>
+                            }
+                        </TimelineControl>
+                    </div>
                 </div>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="progress" Title="Progress bars" RazorCode="@Code.Progress" CSharpCode="@Code.ProgressCs" CssCode="@Code.ProgressCss">
-            <Description><p>Start the import: a percentage bar with title, status and cancel, and a chunked bar over 0 to 5,000 lines.</p></Description>
+        <DemoExample Id="progress" Title="Progress bars" RazorCode="@Code.Progress" CSharpCode="@Code.ProgressCs">
+            <Description><p>Start the import of Green Fork Cafe's contact lists: a percentage bar with title, status and cancel, and two chunked bars over 0 to 5,000 lines, one horizontal with ten chunks and one vertical with five and no value.</p></Description>
             <Demo>
-                <div class="demo-row">
-                    <ButtonControl CssClass="btn-primary" OnClick="StartImport" Disabled="Running">Start import</ButtonControl>
-                    <ButtonControl OnClick="FailImport" Disabled="@(_phase != ImportPhase.Importing)">Simulate a failure</ButtonControl>
-                </div>
-                <div class="progress-demo mt">
-                    <ProgressBarControl Value="Percent" Title="Importing supplier rates" Status="@ImportStatus" Detail="@ImportDetail"
-                                        Indeterminate="Connecting" IsError="@(_phase == ImportPhase.Failed)" ErrorMessage="@_error"
-                                        OnCancel="CancelCallback" CancelText="Stop import" CancelDisabled="_canceling" />
-                    <div class="chunk-col">
-                        <ChunkProgressBarControl Value="_linesDone" Max="TotalLines" ChunkCount="10" Indeterminate="Connecting"
-                                                 AriaLabel="Supplier rate lines imported" />
+                <div class="ui">
+                    <div class="demo-row">
+                        <ButtonControl CssClass="btn-primary" OnClick="StartImport" Disabled="Running">Start import</ButtonControl>
+                        <ButtonControl OnClick="FailImport" Disabled="@(_phase != ImportPhase.Importing)">Simulate a failure</ButtonControl>
                     </div>
-                    <ChunkProgressBarControl Value="_linesDone" Max="TotalLines" ChunkCount="5" Indeterminate="Connecting" ShowValue="false"
-                                             Orientation="FlexOrientation.Vertical" Style="height: 120px" AriaLabel="Supplier rate lines imported, vertical" />
+                    <div class="progress-demo mt">
+                        <ProgressBarControl Value="Percent" Title="Importing contact lists" Status="@ImportStatus" Detail="@ImportDetail"
+                                            Indeterminate="Connecting" IsError="@(_phase == ImportPhase.Failed)" ErrorMessage="@_error"
+                                            OnCancel="CancelCallback" CancelText="Stop import" CancelDisabled="_canceling" />
+                        <div class="chunk-col">
+                            <ChunkProgressBarControl Value="_linesDone" Max="TotalLines" ChunkCount="10" Indeterminate="Connecting"
+                                                     AriaLabel="Contact list lines imported" />
+                        </div>
+                        <ChunkProgressBarControl Value="_linesDone" Max="TotalLines" ChunkCount="5" Indeterminate="Connecting" ShowValue="false"
+                                                 Orientation="FlexOrientation.Vertical" Style="height: 120px" AriaLabel="Contact list lines imported, vertical" />
+                    </div>
                 </div>
             </Demo>
         </DemoExample>
@@ -148,7 +173,7 @@
                 <ApiTable Kind="ApiKind.Properties" Title="BreadCrumbItem" Rows="Vocab.CrumbItem" />
                 <p>
                 <code>BreadCrumbItem</code> has a parameterless constructor and <code>BreadCrumbItem(string text, string? href = null, string? iconCss = null)</code>.
-                A null or empty <code>Href</code> renders the crumb as text; the example's Home and Requests crumbs have one and render as links, and the
+                A null or empty <code>Href</code> renders the crumb as text; the example's Home and Website relaunch crumbs have one and render as links, and the
                 last crumb is always text.
                 </p>
             </DocSection>
@@ -181,13 +206,13 @@
     </Vocabulary>
 
     <Accessibility>
-        <p>Notes for the two progress controls in the third example.</p>
         <ul>
-            <li><code>ChunkProgressBarControl</code> renders <code>role="progressbar"</code> with <code>aria-valuemin</code>, <code>aria-valuemax</code> and <code>aria-valuenow</code> taken from <code>Min</code>, <code>Max</code> and the clamped <code>Value</code> (here a line count out of 5,000), and <code>aria-valuetext</code> with the whole-number percentage. While <code>Indeterminate</code> is true it leaves out <code>aria-valuenow</code> and the value text is "In progress". The segments are <code>aria-hidden</code>.</li>
-            <li>Its accessible name is <code>AriaLabel</code>, "Progress" unless set. An <code>aria-label</code> attribute does not reach the element: the control captures unmatched attributes but never renders them.</li>
-            <li><code>ProgressBarControl</code> renders no ARIA: no role, no value attributes and no live region. Its title, status, detail and error text are plain text, so a screen reader is not told it is a progress bar or when the text changes. In this example the chunk bars carry the progressbar role for the same count.</li>
-            <li>The Cancel button is a native <code>button</code>, so it is in the tab order and responds to Enter and Space. Its <code>title</code> stays "Cancel" whatever <code>CancelText</code> says. With <code>CancelDisabled</code> it is disabled and drops out of the tab order.</li>
-            <li>Motion: the chunk segments stop blinking under <code>prefers-reduced-motion: reduce</code> and show solid blue instead. <code>ProgressBarControl</code>'s indeterminate sweep has no such rule and keeps moving.</li>
+            <li><code>AlertControl</code> renders <code>role="alert"</code>, so screen readers announce an alert that appears while the page is open. Its close button is named "Close", with the tooltip "Dismiss alert"; the icon is <code>aria-hidden</code>.</li>
+            <li>A badge is a <code>span</code> holding its text; pair a dot badge (<code>IsDot</code>) with words, as each board row does with its status badge. A skeleton is an empty <code>div</code>: put <code>aria-busy="true"</code> on the container while it loads, as the board does.</li>
+            <li>The breadcrumb is a <code>nav</code> named "breadcrumb" around an ordered list; enabled crumbs with an <code>Href</code> are links and the last crumb is plain text. An <code>aria-label</code> attribute replaces the name.</li>
+            <li>A timeline item shows <code>Time</code>, <code>Title</code> and its content as text in markup order. Put the state in that text, such as "done" or "next", as the example's titles do, rather than in the point color alone.</li>
+            <li><code>ChunkProgressBarControl</code> renders <code>role="progressbar"</code> named by <code>AriaLabel</code> ("Progress" unless set), with <code>aria-valuemin</code>, <code>aria-valuemax</code> and <code>aria-valuenow</code> from <code>Min</code>, <code>Max</code> and the clamped <code>Value</code>, and <code>aria-valuetext</code> with the whole-number percentage. While <code>Indeterminate</code> is true it leaves out <code>aria-valuenow</code> and the value text is "In progress". The segments are <code>aria-hidden</code> and stop blinking under <code>prefers-reduced-motion: reduce</code>.</li>
+            <li><code>ProgressBarControl</code> shows its title, status, detail and error as text; its Cancel button is a native <code>button</code> that responds to Enter and Space, and <code>CancelDisabled</code> takes it out of the Tab order. Pair the bar with a <code>ChunkProgressBarControl</code> or a <code>role="status"</code> line when screen readers should follow the progress, as this example does with the chunk bars.</li>
         </ul>
     </Accessibility>
 
@@ -201,12 +226,51 @@
 </FeatureDemoLayout>
 
 @code {
-    private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", "/"), new("Requests", "demo/layout"), new("LIS-0001 Marmalade") };
+    // Sprint 8 tasks
+    private sealed record SprintTask(string Code, string Title, string Status, BadgeVariant Variant);
+    private static readonly SprintTask[] SprintTasks =
+    {
+        new("WEB-113", "Site footer", "Done", BadgeVariant.Success),
+        new("WEB-117", "Order form", "In review", BadgeVariant.Warning),
+        new("WEB-118", "Order emails", "In progress", BadgeVariant.Primary),
+        new("WEB-120", "Payment setup", "To do", BadgeVariant.Secondary),
+    };
+    private sealed record Issue(AlertSeverity Severity, string Title, string Text);
+    private static readonly Issue[] Issues =
+    {
+        new(AlertSeverity.Error, "Preview build failed", "WEB-117: the order form did not deploy to the preview site."),
+        new(AlertSeverity.Warning, "Waiting on the client", "WEB-120 cannot start until Green Fork Cafe picks a payment provider."),
+        new(AlertSeverity.Info, "Client demo moved", "The Sprint 8 demo for Green Fork Cafe is now Thursday at 11:00."),
+        new(AlertSeverity.Success, "Design approved", "Green Fork Cafe signed off on the order email templates for WEB-118."),
+    };
+    private List<Issue> _open = Issues.ToList();
+    private bool _loading;
+    private async Task RefreshAsync()
+    {
+        _loading = true;
+        await Task.Delay(1500);   // stands in for the call that loads the board
+        _loading = false;
+    }
+
+    // Follow a task
+    private readonly List<BreadCrumbItem> _crumbs = new() { new("Home", "/", "bi bi-house"), new("Website relaunch", "demo/new-components#status"), new("WEB-118 Order emails") };
+    private sealed record Step(string Title, string Time, string Note);
+    private static readonly Step[] Steps =
+    {
+        new("Brief", "Mon 9:00 AM", "Order confirmation and pickup reminder emails."),
+        new("Design", "Tue 2:10 PM", "Sign-off on both templates from Green Fork Cafe."),
+        new("Build", "Wed 1:30 PM", "Test sends of both emails from the preview site."),
+        new("Review", "Thu 4:45 PM", "Code review by Hermione Ranger."),
+        new("Release", "Fri 10:40 AM", "Part of the Sprint 8 release."),
+    };
+    private int _done = 2;
+    private string StateOf(int i) => i < _done ? "done" : i == _done ? "next" : "to do";   // the state in words, not only in color
+    private BadgeVariant PointFor(int i) => i < _done ? BadgeVariant.Success : i == _done ? BadgeVariant.Warning : BadgeVariant.Secondary;
 
     // Progress (2026-10-25): the import is simulated; a PeriodicTimer on this page advances it and the controls only display it.
     private enum ImportPhase { Idle, Connecting, Importing, Canceled, Failed, Done }
-    private static readonly (string City, int Lines)[] RateFiles = { ("Lisbon", 2000), ("Kyoto", 1800), ("Cape Town", 1200) };
-    private static readonly int TotalLines = RateFiles.Sum(f => f.Lines);
+    private static readonly (string Name, int Lines)[] ContactFiles = { ("Newsletter", 2000), ("Loyalty club", 1800), ("Catering", 1200) };
+    private static readonly int TotalLines = ContactFiles.Sum(f => f.Lines);
     private ImportPhase _phase;
     private int _linesDone, _connectTicks;
     private bool _canceling;
@@ -222,11 +286,11 @@
     private (int Index, int Done) CurrentFile()
     {
         int i = 0, left = _linesDone;
-        while (i < RateFiles.Length - 1 && left >= RateFiles[i].Lines) left -= RateFiles[i++].Lines;
+        while (i < ContactFiles.Length - 1 && left >= ContactFiles[i].Lines) left -= ContactFiles[i++].Lines;
         return (i, left);
     }
 
-    private string FileStatus() { var (i, done) = CurrentFile(); return $"{RateFiles[i].City}: {done:N0} of {RateFiles[i].Lines:N0} lines"; }
+    private string FileStatus() { var (i, done) = CurrentFile(); return $"{ContactFiles[i].Name}: {done:N0} of {ContactFiles[i].Lines:N0} lines"; }
 
     private string ImportStatus => _phase switch
     {
@@ -237,7 +301,7 @@
         _ => FileStatus(),
     };
 
-    private string ImportDetail => $"file {CurrentFile().Index + 1} of {RateFiles.Length} · {_linesDone:N0} of {TotalLines:N0} lines in all";
+    private string ImportDetail => $"file {CurrentFile().Index + 1} of {ContactFiles.Length} · {_linesDone:N0} of {TotalLines:N0} lines in all";
 
     private void StartImport()
     {
@@ -272,7 +336,7 @@
     private void FailImport()
     {
         var (i, done) = CurrentFile();
-        _error = $"{RateFiles[i].City}, line {done + 1:N0}: the rate column is empty.";
+        _error = $"{ContactFiles[i].Name}, line {done + 1:N0}: the email column is empty.";
         _phase = ImportPhase.Failed;
         StopTimer();
     }
@@ -285,58 +349,118 @@
     // Code tabs are verbatim copies of the Demo blocks above (2026-10-13).
     private static class Code
     {
-        public const string Status = @"<div class=""demo-row"">
-    <BadgeControl Text=""Primary"" Variant=""BadgeVariant.Primary"" />
-    <BadgeControl Text=""Success"" Variant=""BadgeVariant.Success"" />
-    <BadgeControl Text=""Danger"" Variant=""BadgeVariant.Danger"" />
-    <BadgeControl Text=""Warning"" Variant=""BadgeVariant.Warning"" />
-    <BadgeControl Text=""Info"" Variant=""BadgeVariant.Info"" />
-    <BadgeControl Text=""Dark"" Variant=""BadgeVariant.Dark"" />
-    <BadgeControl Text=""Small"" Size=""BadgeSize.Small"" Variant=""BadgeVariant.Secondary"" />
-    <BadgeControl Text=""Large"" Size=""BadgeSize.Large"" Variant=""BadgeVariant.Primary"" />
-    <BadgeControl IsDot=""true"" Variant=""BadgeVariant.Success"" />
-</div>
-<div class=""stack mt"">
-    <AlertControl Severity=""AlertSeverity.Success"" Title=""Import finished"" Text=""1,204 supplier rate rows loaded; 3 skipped as duplicates."" AllowClose=""true"" />
-    <AlertControl Severity=""AlertSeverity.Warning"" Title=""Slow connection"" Text=""Round trips are taking about 200 ms."" AllowClose=""true"" />
-    <AlertControl Severity=""AlertSeverity.Error"" Title=""Sync failed"" Text=""The upstream server did not answer."" AllowClose=""true"" />
-    <AlertControl Severity=""AlertSeverity.Info"" Title=""Scheduled maintenance"" Text=""Saturday 02:00 to 03:00 UTC."" AllowClose=""true"" />
-</div>
-<div class=""skeletons mt"">
-    <SkeletonControl Variant=""SkeletonVariant.Text"" />
-    <SkeletonControl Variant=""SkeletonVariant.Text"" Animation=""SkeletonAnimation.Wave"" />
-    <div class=""demo-row""><SkeletonControl Variant=""SkeletonVariant.Circular"" /><SkeletonControl Variant=""SkeletonVariant.Text"" Width=""140px"" /></div>
-</div>";
-        public const string Content = @"<div class=""two"">
-    <TimelineControl>
-        <TimelineItemControl Title=""Deposit received"" Time=""09:00"" PointColor=""BadgeVariant.Success"">Booking LIS-0001 confirmed.</TimelineItemControl>
-        <TimelineItemControl Title=""Tickets issued"" Time=""13:30"" PointColor=""BadgeVariant.Primary"">Return flights for two travelers.</TimelineItemControl>
-        <TimelineItemControl Title=""Hotel to confirm"" Time=""16:45"" PointColor=""BadgeVariant.Warning"">Late arrival noted with the old-town hotel.</TimelineItemControl>
-    </TimelineControl>
-</div>
-<div class=""demo-row mt"">
-    <BreadCrumbControl Items=""_crumbs"" />
-</div>";
-        public const string ContentCs = @"private readonly List<BreadCrumbItem> _crumbs = new() { new(""Home"", ""/""), new(""Requests"", ""demo/layout""), new(""LIS-0001 Marmalade"") };";
-        public const string Progress = @"<div class=""demo-row"">
-    <ButtonControl CssClass=""btn-primary"" OnClick=""StartImport"" Disabled=""Running"">Start import</ButtonControl>
-    <ButtonControl OnClick=""FailImport"" Disabled=""@(_phase != ImportPhase.Importing)"">Simulate a failure</ButtonControl>
-</div>
-<div class=""progress-demo mt"">
-    <ProgressBarControl Value=""Percent"" Title=""Importing supplier rates"" Status=""@ImportStatus"" Detail=""@ImportDetail""
-                        Indeterminate=""Connecting"" IsError=""@(_phase == ImportPhase.Failed)"" ErrorMessage=""@_error""
-                        OnCancel=""CancelCallback"" CancelText=""Stop import"" CancelDisabled=""_canceling"" />
-    <div class=""chunk-col"">
-        <ChunkProgressBarControl Value=""_linesDone"" Max=""TotalLines"" ChunkCount=""10"" Indeterminate=""Connecting""
-                                 AriaLabel=""Supplier rate lines imported"" />
+        public const string Status = @"<div class=""ui"">
+    <div class=""demo-row"">
+        <ButtonControl CssClass=""btn-sm"" IconCss=""bi bi-arrow-clockwise"" Disabled=""_loading"" OnClick=""RefreshAsync"">Refresh board</ButtonControl>
+        <ButtonControl CssClass=""btn-sm"" Disabled=""@(_open.Count == Issues.Length)"" OnClick=""() => _open = Issues.ToList()"">Show alerts again</ButtonControl>
+        <span class=""label"">Open alerts</span>
+        <BadgeControl Text=""@_open.Count.ToString()"" Variant=""@(_open.Count > 0 ? BadgeVariant.Danger : BadgeVariant.Success)"" Size=""BadgeSize.Small"" />
     </div>
-    <ChunkProgressBarControl Value=""_linesDone"" Max=""TotalLines"" ChunkCount=""5"" Indeterminate=""Connecting"" ShowValue=""false""
-                             Orientation=""FlexOrientation.Vertical"" Style=""height: 120px"" AriaLabel=""Supplier rate lines imported, vertical"" />
+    <div class=""stack mt"">
+        @foreach (var issue in _open)
+        {
+            <AlertControl @key=""issue.Title"" Severity=""issue.Severity"" Title=""@issue.Title"" Text=""@issue.Text"" AllowClose=""true"" OnClose=""() => _open.Remove(issue)"" />
+        }
+    </div>
+    <div class=""board mt"" aria-busy=""@(_loading ? ""true"" : ""false"")"">
+        <div class=""board-head""><span class=""bi bi-kanban"" aria-hidden=""true""></span>Sprint 8 tasks</div>
+        @foreach (var t in SprintTasks)
+        {
+            <div class=""board-row"">
+                @if (_loading)
+                {
+                    <SkeletonControl Variant=""SkeletonVariant.Circular"" Width=""12px"" Height=""12px"" />
+                    <SkeletonControl Variant=""SkeletonVariant.Text"" Animation=""SkeletonAnimation.Wave"" Width=""60%"" />
+                    <SkeletonControl Variant=""SkeletonVariant.Rectangular"" Width=""84px"" Height=""20px"" />
+                }
+                else
+                {
+                    <BadgeControl IsDot=""true"" Variant=""@t.Variant"" />
+                    <BadgeControl Text=""@t.Code"" IsPill=""false"" Variant=""BadgeVariant.Light"" />
+                    <span class=""board-task"">@t.Title</span>
+                    <BadgeControl Text=""@t.Status"" Variant=""@t.Variant"" />
+                }
+            </div>
+        }
+    </div>
+</div>";
+        public const string StatusCs = @"// Sprint 8 tasks
+private sealed record SprintTask(string Code, string Title, string Status, BadgeVariant Variant);
+private static readonly SprintTask[] SprintTasks =
+{
+    new(""WEB-113"", ""Site footer"", ""Done"", BadgeVariant.Success),
+    new(""WEB-117"", ""Order form"", ""In review"", BadgeVariant.Warning),
+    new(""WEB-118"", ""Order emails"", ""In progress"", BadgeVariant.Primary),
+    new(""WEB-120"", ""Payment setup"", ""To do"", BadgeVariant.Secondary),
+};
+private sealed record Issue(AlertSeverity Severity, string Title, string Text);
+private static readonly Issue[] Issues =
+{
+    new(AlertSeverity.Error, ""Preview build failed"", ""WEB-117: the order form did not deploy to the preview site.""),
+    new(AlertSeverity.Warning, ""Waiting on the client"", ""WEB-120 cannot start until Green Fork Cafe picks a payment provider.""),
+    new(AlertSeverity.Info, ""Client demo moved"", ""The Sprint 8 demo for Green Fork Cafe is now Thursday at 11:00.""),
+    new(AlertSeverity.Success, ""Design approved"", ""Green Fork Cafe signed off on the order email templates for WEB-118.""),
+};
+private List<Issue> _open = Issues.ToList();
+private bool _loading;
+private async Task RefreshAsync()
+{
+    _loading = true;
+    await Task.Delay(1500);   // stands in for the call that loads the board
+    _loading = false;
+}";
+        public const string Content = @"<div class=""ui"">
+    <BreadCrumbControl Items=""_crumbs"" />
+    <div class=""demo-row mt"">
+        <ButtonControl CssClass=""btn-primary btn-sm"" Disabled=""@(_done == Steps.Length)"" OnClick=""() => _done++"">Complete next step</ButtonControl>
+        <ButtonControl CssClass=""btn-sm"" Disabled=""@(_done == 0)"" OnClick=""() => _done = 0"">Start over</ButtonControl>
+        <span class=""label"" role=""status"">@_done of @Steps.Length steps done</span>
+    </div>
+    <div class=""two mt"">
+        <TimelineControl>
+            @foreach (var (step, i) in Steps.Select((step, i) => (step, i)))
+            {
+                <TimelineItemControl @key=""step.Title"" Title=""@($""{step.Title}: {StateOf(i)}"")"" Time=""@(i < _done ? step.Time : null)"" PointColor=""@PointFor(i)""
+                                     IconCss=""@(i < _done ? ""bi bi-check-lg"" : null)"">@step.Note</TimelineItemControl>
+            }
+        </TimelineControl>
+    </div>
+</div>";
+        public const string ContentCs = @"// Follow a task
+private readonly List<BreadCrumbItem> _crumbs = new() { new(""Home"", ""/"", ""bi bi-house""), new(""Website relaunch"", ""demo/new-components#status""), new(""WEB-118 Order emails"") };
+private sealed record Step(string Title, string Time, string Note);
+private static readonly Step[] Steps =
+{
+    new(""Brief"", ""Mon 9:00 AM"", ""Order confirmation and pickup reminder emails.""),
+    new(""Design"", ""Tue 2:10 PM"", ""Sign-off on both templates from Green Fork Cafe.""),
+    new(""Build"", ""Wed 1:30 PM"", ""Test sends of both emails from the preview site.""),
+    new(""Review"", ""Thu 4:45 PM"", ""Code review by Hermione Ranger.""),
+    new(""Release"", ""Fri 10:40 AM"", ""Part of the Sprint 8 release.""),
+};
+private int _done = 2;
+private string StateOf(int i) => i < _done ? ""done"" : i == _done ? ""next"" : ""to do"";   // the state in words, not only in color
+private BadgeVariant PointFor(int i) => i < _done ? BadgeVariant.Success : i == _done ? BadgeVariant.Warning : BadgeVariant.Secondary;";
+        public const string Progress = @"<div class=""ui"">
+    <div class=""demo-row"">
+        <ButtonControl CssClass=""btn-primary"" OnClick=""StartImport"" Disabled=""Running"">Start import</ButtonControl>
+        <ButtonControl OnClick=""FailImport"" Disabled=""@(_phase != ImportPhase.Importing)"">Simulate a failure</ButtonControl>
+    </div>
+    <div class=""progress-demo mt"">
+        <ProgressBarControl Value=""Percent"" Title=""Importing contact lists"" Status=""@ImportStatus"" Detail=""@ImportDetail""
+                            Indeterminate=""Connecting"" IsError=""@(_phase == ImportPhase.Failed)"" ErrorMessage=""@_error""
+                            OnCancel=""CancelCallback"" CancelText=""Stop import"" CancelDisabled=""_canceling"" />
+        <div class=""chunk-col"">
+            <ChunkProgressBarControl Value=""_linesDone"" Max=""TotalLines"" ChunkCount=""10"" Indeterminate=""Connecting""
+                                     AriaLabel=""Contact list lines imported"" />
+        </div>
+        <ChunkProgressBarControl Value=""_linesDone"" Max=""TotalLines"" ChunkCount=""5"" Indeterminate=""Connecting"" ShowValue=""false""
+                                 Orientation=""FlexOrientation.Vertical"" Style=""height: 120px"" AriaLabel=""Contact list lines imported, vertical"" />
+    </div>
 </div>";
         public const string ProgressCs = @"// Progress (2026-10-25): the import is simulated; a PeriodicTimer on this page advances it and the controls only display it.
 private enum ImportPhase { Idle, Connecting, Importing, Canceled, Failed, Done }
-private static readonly (string City, int Lines)[] RateFiles = { (""Lisbon"", 2000), (""Kyoto"", 1800), (""Cape Town"", 1200) };
-private static readonly int TotalLines = RateFiles.Sum(f => f.Lines);
+private static readonly (string Name, int Lines)[] ContactFiles = { (""Newsletter"", 2000), (""Loyalty club"", 1800), (""Catering"", 1200) };
+private static readonly int TotalLines = ContactFiles.Sum(f => f.Lines);
 private ImportPhase _phase;
 private int _linesDone, _connectTicks;
 private bool _canceling;
@@ -352,11 +476,11 @@ private EventCallback CancelCallback => Running ? EventCallback.Factory.Create(t
 private (int Index, int Done) CurrentFile()
 {
     int i = 0, left = _linesDone;
-    while (i < RateFiles.Length - 1 && left >= RateFiles[i].Lines) left -= RateFiles[i++].Lines;
+    while (i < ContactFiles.Length - 1 && left >= ContactFiles[i].Lines) left -= ContactFiles[i++].Lines;
     return (i, left);
 }
 
-private string FileStatus() { var (i, done) = CurrentFile(); return $""{RateFiles[i].City}: {done:N0} of {RateFiles[i].Lines:N0} lines""; }
+private string FileStatus() { var (i, done) = CurrentFile(); return $""{ContactFiles[i].Name}: {done:N0} of {ContactFiles[i].Lines:N0} lines""; }
 
 private string ImportStatus => _phase switch
 {
@@ -367,7 +491,7 @@ private string ImportStatus => _phase switch
     _ => FileStatus(),
 };
 
-private string ImportDetail => $""file {CurrentFile().Index + 1} of {RateFiles.Length} · {_linesDone:N0} of {TotalLines:N0} lines in all"";
+private string ImportDetail => $""file {CurrentFile().Index + 1} of {ContactFiles.Length} · {_linesDone:N0} of {TotalLines:N0} lines in all"";
 
 private void StartImport()
 {
@@ -402,7 +526,7 @@ private void CancelImport() => _canceling = true;
 private void FailImport()
 {
     var (i, done) = CurrentFile();
-    _error = $""{RateFiles[i].City}, line {done + 1:N0}: the rate column is empty."";
+    _error = $""{ContactFiles[i].Name}, line {done + 1:N0}: the email column is empty."";
     _phase = ImportPhase.Failed;
     StopTimer();
 }
@@ -411,11 +535,6 @@ private void StopTimer() { _timer?.Dispose(); _timer = null; }
 
 // The page declares @implements IDisposable, so the timer stops when the page goes away.
 public void Dispose() => StopTimer();";
-        public const string ProgressCss = @"/* 2026-10-25: ProgressBarControl's scoped Cancel-button margin misses ButtonControl's button, so the page pushes it right. */
-.progress-demo { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
-.progress-demo ::deep .fx-progress { flex: 1 1 320px; margin: 0; }
-.progress-demo ::deep .fx-progress-cancel { margin-left: auto; }
-.chunk-col { flex: 0 1 240px; }";
     }
 
     // Documentation rows (2026-10-24), from the FlexCore sources in the header comment.
@@ -427,9 +546,9 @@ public void Dispose() => StopTimer();";
             new("ChildContent", "Rendered only when <code>Text</code> is null or empty.", "RenderFragment?", "null"),
             new("Variant", "Picks the color class, <code>fx-badge-primary</code> to <code>fx-badge-dark</code>; see the values below. An unknown value falls back to <code>fx-badge-primary</code>.", "BadgeVariant", "BadgeVariant.Primary"),
             new("Size", "Picks <code>fx-badge-sm</code>, <code>fx-badge-md</code> or <code>fx-badge-lg</code>: font size and padding.", "BadgeSize", "BadgeSize.Medium"),
-            new("IsPill", "Adds <code>fx-badge-pill</code>: fully rounded ends and wider side padding. False keeps the 4px corners of <code>fx-badge</code>.", "bool", "true"),
+            new("IsPill", "Adds <code>fx-badge-pill</code>: fully rounded ends and wider side padding. False keeps the 4px corners of <code>fx-badge</code>. The pill's 0.65em side padding applies at every <code>BadgeSize</code>.", "bool", "true"),
             new("IsDot", "Adds <code>fx-badge-dot</code>: an 8px circle with no padding. <code>Text</code> and <code>ChildContent</code> are still rendered inside it, so give a dot neither.", "bool", "false"),
-            new("Title", "Inherited from <code>FlexControlBase</code>. Declared, but <code>BadgeControl</code> never reads it, and because it binds to a parameter it is not passed through as a <code>title</code> attribute either: the dot badge above renders nothing for its <code>Title</code>.", "string?", "null"),
+            new("Title", "Inherited from <code>FlexControlBase</code>. Declared, but <code>BadgeControl</code> never reads it, and because it binds to a parameter it is not passed through as a <code>title</code> attribute either: a <code>Title</code> on a dot badge renders nothing, so put its meaning in nearby text.", "string?", "null"),
         };
         public static readonly ApiRow[] BadgeVariants =
         {
@@ -464,9 +583,9 @@ public void Dispose() => StopTimer();";
         public static readonly ApiRow[] AlertSeverities =
         {
             new("Info", "Light blue, i-in-circle icon; the default and the fallback for any other value."),
-            new("Success", "Light green, tick-in-circle icon."),
-            new("Warning", "Light amber, triangle icon."),
-            new("Error", "Light red, cross-in-circle icon."),
+            new("Success", "Light green, check-in-circle icon."),
+            new("Warning", "Light amber, filled triangle icon."),
+            new("Error", "Light red, outlined triangle icon with an exclamation mark (the library's warning SvgIconControl)."),
         };
         public static readonly ApiRow[] Skeleton =
         {

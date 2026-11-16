@@ -1,13 +1,13 @@
 namespace FlexCore.Showcase.Data;
 
 /// <summary>
-/// Razor Sharp Getaways, the imagined tour operator: packages, destinations, seasons and categories for the demo pages and the
+/// Razor Sharp Getaways, the imagined tour operator: packages, destinations and seasons for the demo pages and the
 /// grid data in DemoData and BenchDataStore. Package, supplier and service names are invented.
 /// </summary>
 public static class TravelData
 {
-    /// <summary>A packaged trip: region, nights and the city its suppliers are named after. These six feed the Cards, Scheduler,
-    /// Layout and text pages; the full twelve (one per destination) are RazorSharpGetaways.Data.TripPackages in the Quick Start
+    /// <summary>A packaged trip: region, nights and the city its suppliers are named after. Text inputs and the Items grid read them;
+    /// the Cards carousel keeps its own copy of the six; the full twelve (one per destination) are RazorSharpGetaways.Data.TripPackages in the Quick Start
     /// project, used by the cost sheet report and the home window.</summary>
     public record Package(string Name, string Region, string City, int Nights);
 
@@ -24,7 +24,7 @@ public static class TravelData
     /// <summary>Departure seasons.</summary>
     public static readonly string[] Seasons = { "Spring", "Summer", "Fall", "Winter" };
 
-    /// <summary>Every destination, with region and country; the rate card and supplier list cover all of them.</summary>
+    /// <summary>Every destination, with region and country; the rate card covers all of them.</summary>
     public static readonly (string City, string Region, string Country)[] Destinations =
     {
         ("Lisbon", "Southern Europe", "Portugal"), ("Amalfi", "Southern Europe", "Italy"), ("Santorini", "Southern Europe", "Greece"),
@@ -34,6 +34,4 @@ public static class TravelData
         ("Queenstown", "Oceania", "New Zealand"), ("Patagonia", "South America", "Argentina"),
     };
 
-    /// <summary>The four cost categories on every cost sheet and rate card.</summary>
-    public static readonly string[] Categories = { "Transport", "Accommodation", "Experiences", "Services" };
 }

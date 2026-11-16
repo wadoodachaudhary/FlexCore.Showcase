@@ -3,7 +3,11 @@
 
 @* 2026-10-12: new page on FeatureDemoLayout; TimeSpanPickerControl from UI elements (form samples stayed in the Control tour; on
    Forms since 2026-10-19). Facts from DatePicker*, TimePicker*, DateRangePicker*, Calendar*, TimeSpanPicker* (FlexCore 0.2.48).
-   2026-10-26: sample content on the travel theme. *@
+   2026-10-26: sample content on the travel theme.
+   2026-11-15: examples rebuilt (airport transfer, hotel stay, priced departures); DatePicker MinDate/MaxDate and ValueExpression
+   rows corrected against DatePickerControl.razor (FlexCore 0.2.50).
+   2026-11-16: independent review fixes.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor DatePicker, TimePicker and Calendar — FlexCore</PageTitle>
 
@@ -19,32 +23,47 @@
 
     <Examples>
         <DemoExample Id="appointment" Title="Date, time and duration" RazorCode="@Code.Appointment" CSharpCode="@Code.AppointmentCs">
-            <Description><p>Type a date or open the calendar; the time list runs 8:00 to 18:00 in half hours.</p></Description>
+            <Description><p>Book an airport transfer: type a date or open the calendar, which only offers the days of the trip through <code>MinDate</code> and <code>MaxDate</code>. A typed date outside moves the bound date to the first or last day of the trip, though the box keeps the typed text. The time list runs 6:00 AM to 10:00 PM in half hours, and the line below follows every change.</p></Description>
             <Demo>
-                <div class="fields">
-                    <div class="field"><span class="field-label">Date</span><DatePickerControl @bind-Value="_date" MinDate="DateTime.Today" ShowCalendarSidebar="true" AriaLabel="Appointment date" /></div>
-                    <div class="field"><span class="field-label">Start</span><TimePickerControl @bind-Value="_time" Min="@(new TimeOnly(8, 0))" Max="@(new TimeOnly(18, 0))" Width="150px" AriaLabel="Appointment time" /></div>
-                    <div class="field"><span class="field-label">Duration</span><TimeSpanPickerControl @bind-Value="_duration" /></div>
+                <div class="dt">
+                    <div class="fields">
+                        <div class="field"><span class="field-label">Pickup date</span><DatePickerControl @bind-Value="_date" MinDate="TripStart" MaxDate="TripEnd" ShowCalendarSidebar="true" AriaLabel="Pickup date" /></div>
+                        <div class="field"><span class="field-label">Pickup time</span><TimePickerControl @bind-Value="_time" Min="@(new TimeOnly(6, 0))" Max="@(new TimeOnly(22, 0))" Width="150px" AriaLabel="Pickup time" /></div>
+                        <div class="field"><span class="field-label" id="car-needed-title">Car needed for</span><TimeSpanPickerControl @bind-Value="_duration" role="group" aria-labelledby="car-needed-title" /></div>
+                    </div>
+                    <p class="result" role="status">@Transfer</p>
                 </div>
-                <p class="result">@Appointment</p>
             </Demo>
         </DemoExample>
 
         <DemoExample Id="range" Title="Date range" RazorCode="@Code.Range" CSharpCode="@Code.RangeCs">
-            <Description><p>Pick a start and an end; one <code>CalendarRange</code> binds both boxes and the popup.</p></Description>
+            <Description><p>Pick a check-in and a check-out, or press a preset, which calls <code>SetValueAsync</code>: one <code>CalendarRange</code> binds both boxes and the popup, and <code>DisabledDate</code> blocks the sold-out dates. The popup refuses a range that includes one; typed dates still reach the page with an <code>Error</code>, so the quote checks it first.</p></Description>
             <Demo>
-                <DateRangePickerControl @bind-Value="_trip" Min="DateTime.Today" Max="DateTime.Today.AddDays(180)" AriaLabel="Trip dates" />
-                <p class="result">@TripDates</p>
+                <div class="dt">
+                    <div class="fields">
+                        <DateRangePickerControl @ref="_picker" @bind-Value="_stay" Min="DateTime.Today" Max="DateTime.Today.AddDays(180)" DisabledDate="SoldOut" AriaLabel="Stay dates" />
+                        <ButtonControl CssClass="btn-sm" OnClick="@(() => Preset(LongWeekend, 3))">Long weekend</ButtonControl>
+                        <ButtonControl CssClass="btn-sm" OnClick="@(() => Preset(FirstOpen, 7))">One week</ButtonControl>
+                    </div>
+                    <p class="result" role="status">@Stay</p>
+                </div>
             </Demo>
         </DemoExample>
 
         <DemoExample Id="calendar" Title="Calendar, several dates" RazorCode="@Code.Calendar" CSharpCode="@Code.CalendarCs">
-            <Description><p>Click several days; weekends are disabled and the heading switches to year and decade views.</p></Description>
+            <Description><p>Click the departures a group could take: each day shows its price through <code>DayTemplate</code>, Mondays are disabled, and the heading switches to year and decade views.</p></Description>
             <Demo>
-                <div class="cal-row">
-                    <CalendarControl @bind-Values="_departures" SelectionMode="CalendarSelectionMode.Multiple" Min="DateTime.Today" Max="DateTime.Today.AddDays(90)"
-                                     DisabledDate="Weekend" FirstDayOfWeek="DayOfWeek.Monday" />
-                    <p class="result departures">@Departures</p>
+                <div class="dt">
+                    <div class="cal-row">
+                        <CalendarControl @bind-Values="_departures" SelectionMode="CalendarSelectionMode.Multiple" Min="DateTime.Today" Max="DateTime.Today.AddDays(90)"
+                                         DisabledDate="NoDeparture" FirstDayOfWeek="DayOfWeek.Monday">
+                            <DayTemplate Context="day">
+                                <span class="day">@day.Date.Day</span>
+                                @if (!day.Disabled && day.InCurrentMonth) { <span class="day-price">$@Price(day.Date)</span> }
+                            </DayTemplate>
+                        </CalendarControl>
+                        <p class="result departures" role="status">@Departures</p>
+                    </div>
                 </div>
             </Demo>
         </DemoExample>
@@ -78,6 +97,7 @@
             </DocSection>
             <DocSection Id="doc-css-variables" Title="CSS variables" Count='@DocSection.Label(Vocab.Vars.Length, "variables")'>
                 <ApiTable Kind="ApiKind.CssVariables" Title="CSS variables" Rows="Vocab.Vars" />
+                <p>This site sets <code>--fx-primary</code> to its indigo, so the range popup and the departures calendar select in indigo; without that setting <code>CalendarControl</code> uses the library blue. The date picker's own drop-down does not read it.</p>
             </DocSection>
         </DocSections>
     </Vocabulary>
@@ -86,10 +106,11 @@
         <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard: date picker input" Rows="Vocab.DateKeys" />
         <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard: calendar grid" Rows="Vocab.CalendarKeys" />
         <ul>
-            <li>The date input carries <code>aria-label</code>, <code>aria-expanded</code> and <code>aria-invalid</code>; the 📅 button is named "Toggle calendar". A parse error renders in a <code>role="alert"</code> pill with <code>aria-live="assertive"</code>.</li>
-            <li>The time picker's error and the range picker's error are <code>role="alert"</code>. The range picker is a <code>role="group"</code> whose inputs are named "Start date" and "End date".</li>
-            <li>The calendar is a <code>role="grid"</code> with column headers and <code>aria-selected</code> cells. Each day is a button named with the full date; one day holds the Tab stop and the arrows move it.</li>
-            <li>The time span boxes have no label beyond the unit letters d, h, m, s; put a visible label before the control.</li>
+            <li>The date picker's text box is named by <code>AriaLabel</code> and carries <code>aria-expanded</code> and <code>aria-invalid</code>; the 📅 button is named "Toggle calendar". A parse error renders in a <code>role="alert"</code> pill with <code>aria-live="assertive"</code>.</li>
+            <li>The time picker is an editable <code>role="combobox"</code> named by <code>AriaLabel</code>; its error is <code>role="alert"</code>.</li>
+            <li>The range picker is a <code>role="group"</code> named by <code>AriaLabel</code> ("Date range" by default) whose inputs are named "Start date" and "End date"; its error is <code>role="alert"</code>.</li>
+            <li><code>CalendarControl</code>, also the range picker's popup, is a <code>role="grid"</code> with column headers and <code>aria-selected</code> cells. Each day is a button named with the full date; one day holds the Tab stop and the arrows move it.</li>
+            <li>The time span picker passes extra attributes to its outer element. To give the picker the field's name, add <code>role="group"</code> and <code>aria-labelledby</code> pointing at the visible label, as the example does.</li>
         </ul>
     </Accessibility>
 
@@ -102,33 +123,45 @@
 </FeatureDemoLayout>
 
 @code {
-    // Appointment
-    private DateTime? _date = DateTime.Today.AddDays(1);
+    // Transfer
+    private static DateTime TripStart => DateTime.Today.AddDays(7);
+    private static DateTime TripEnd => DateTime.Today.AddDays(11);
+    private DateTime? _date = TripStart;
     private TimeOnly? _time = new(9, 30);
     private TimeSpan? _duration = TimeSpan.FromMinutes(90);
-    private string Appointment => _date is { } d && _time is { } t
-        ? $"{d:ddd d MMM yyyy}, {t:h:mm tt} – {t.Add(_duration ?? TimeSpan.Zero):h:mm tt}"
-        : "Pick a date and a start time.";
+    private string Transfer => _date is { } d && _time is { } t
+        ? $"Car for Albus Door, Lisbon airport to the old town: {d:ddd MMM d}, {t:h:mm tt} to {t.Add(_duration ?? TimeSpan.Zero):h:mm tt}. The trip runs {TripStart:MMM d} to {TripEnd:MMM d}."
+        : "Pick a pickup date and time.";
 
     // Date range
-    private CalendarRange _trip = new(DateTime.Today.AddDays(7), DateTime.Today.AddDays(10));
-    private string TripDates => _trip is { Start: { } s, End: { } e } && e >= s
-        ? $"{(e - s).Days} night{((e - s).Days == 1 ? "" : "s")}, {s:ddd d MMM} to {e:ddd d MMM}"
-        : "Pick a start and an end date.";
+    private static DateTime FirstOpen => DateTime.Today.AddDays(14);
+    // A long weekend starts on the first Friday from FirstOpen on.
+    private static DateTime LongWeekend => FirstOpen.AddDays(((int)DayOfWeek.Friday - (int)FirstOpen.DayOfWeek + 7) % 7);
+    private DateRangePickerControl? _picker;
+    private CalendarRange _stay = new(FirstOpen, FirstOpen.AddDays(3));
+    // Three dates next week are sold out: no stay can include them, not even as its check-out day.
+    private static bool SoldOut(DateTime day) => day >= DateTime.Today.AddDays(8) && day <= DateTime.Today.AddDays(10);
+    private Task Preset(DateTime start, int nights) => _picker!.SetValueAsync(new(start, start.AddDays(nights)));
+    // Error is set before ValueChanged, so a typed range across a sold-out date gets no quote.
+    private string Stay => _picker?.Error is { } error
+        ? $"No quote. {error}"
+        : _stay is { Start: { } s, End: { } e } && e >= s
+        ? $"Amalfi hotel for Albus Door: {(e - s).Days} night{((e - s).Days == 1 ? "" : "s")}, {s:ddd MMM d} to {e:ddd MMM d}, {((e - s).Days * 180).ToString("C0")} at $180 a night. {DateTime.Today.AddDays(8):MMM d} to {DateTime.Today.AddDays(10):MMM d} is sold out."
+        : "Pick a check-in and a check-out date.";
 
     // Calendar
-    private IReadOnlyList<DateTime> _departures = Weekdays(DateTime.Today.AddDays(1), 5).Where((_, i) => i % 2 == 0).ToArray();
-    private static bool Weekend(DateTime d) => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
-    private static List<DateTime> Weekdays(DateTime from, int count)
+    private IReadOnlyList<DateTime> _departures = new[] { NextDeparture(1), NextDeparture(4) };
+    // The Kyoto garden tour does not leave on Mondays; weekend departures cost more.
+    private static bool NoDeparture(DateTime d) => d.DayOfWeek == DayOfWeek.Monday;
+    private static int Price(DateTime d) => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? 95 : 80;
+    private static DateTime NextDeparture(int daysAhead)
     {
-        var list = new List<DateTime>();
-        for (var d = from.Date; list.Count < count; d = d.AddDays(1))
-            if (!Weekend(d)) list.Add(d);
-        return list;
+        var d = DateTime.Today.AddDays(daysAhead);
+        return NoDeparture(d) ? d.AddDays(1) : d;
     }
     private string Departures => _departures.Count == 0
         ? "No departures picked."
-        : $"{_departures.Count} departure{(_departures.Count == 1 ? "" : "s")}: {string.Join(", ", _departures.OrderBy(d => d).Select(d => d.ToString("ddd d MMM")))}";
+        : $"{_departures.Count} departure{(_departures.Count == 1 ? "" : "s")}: {string.Join(", ", _departures.OrderBy(d => d).Select(d => $"{d:ddd MMM d} (${Price(d)})"))}. Cheapest: ${_departures.Min(Price)}.";
 
     // Vocabulary rows (0.2.48). Base-class parameters marked (base).
     private static class Vocab
@@ -137,14 +170,14 @@
         {
             new("Value", "Selected date, or date and time with <code>ShowTime</code>. Two-way with <code>@bind-Value</code>.", "DateTime?", "null"),
             new("ValueChanged", "Fires when typed text parses (Enter or blur) or a day is picked.", "EventCallback&lt;DateTime?&gt;"),
-            new("ValueExpression", "Set by <code>@bind-Value</code>; marks the field changed on the cascaded <code>EditContext</code>.", "Expression&lt;Func&lt;DateTime?&gt;&gt;?", "null"),
+            new("ValueExpression", "Set by <code>@bind-Value</code>, but the date picker never reads it: it reports nothing to an <code>EditContext</code>.", "Expression&lt;Func&lt;DateTime?&gt;&gt;?", "null"),
             new("Format", "Display format. Typed text is tried against this first, then the built-in list.", "string?", "\"MM/dd/yyyy\" (with time: \"MM/dd/yyyy hh:mm tt\")"),
             new("Placeholder", "Input placeholder.", "string?", "the format"),
             new("ShowTime", "Adds a time box to the drop-down and time formats to parsing.", "bool", "false"),
-            new("MinDate / MaxDate", "Days outside are disabled in the calendar and rejected when typed.", "DateTime?", "null"),
+            new("MinDate / MaxDate", "Days outside are disabled in the calendar. A typed date outside is not refused: the bound value moves to the nearest bound, but the box keeps showing the typed date. The time picker refuses its own.", "DateTime?", "null"),
             new("ShowCalendarSidebar", "Expandable sidebar of shortcuts: Today, Yesterday, Tomorrow, Start and End of Week, Next Week, Start and End of Month, Clear Date.", "bool", "false"),
             new("ParseFormats", "Extra formats tried before the sixteen built-in ones (ISO, US, day-month, <code>dd-MMM-yy</code>, digit runs).", "IEnumerable&lt;string&gt;?", "null"),
-            new("Culture", "Parsing and formatting culture.", "CultureInfo?", "current"),
+            new("Culture", "Formatting and parsing culture; null uses the invariant culture (typed text also falls back to the current culture). Month names in the drop-down follow the current culture.", "CultureInfo?", "invariant"),
             new("ShowTriggerButton", "Shows the 📅 button. Without it Enter on an empty field no longer opens the calendar.", "bool", "true"),
             new("OpenCalendarOnDoubleClick", "Double-click in the input opens the calendar.", "bool", "false"),
             new("AutoFocus", "Focuses the input once after first render.", "bool", "false"),
@@ -156,11 +189,11 @@
         public static readonly ApiRow[] TimePicker =
         {
             new("Value", "Selected time. Two-way with <code>@bind-Value</code>.", "TimeOnly?", "null"),
-            new("ValueChanged", "Fires when a list entry is chosen or typed text parses on Enter.", "EventCallback&lt;TimeOnly?&gt;"),
+            new("ValueChanged", "Fires when a list entry is chosen or typed text parses on Enter or on leaving the box.", "EventCallback&lt;TimeOnly?&gt;"),
             new("ValueExpression", "Set by <code>@bind-Value</code>; validation messages go to the <code>EditContext</code>.", "Expression&lt;Func&lt;TimeOnly?&gt;&gt;?", "null"),
             new("Min / Max", "First and last entry; typed times outside are refused.", "TimeOnly", "00:00 / 23:59:59.9999999"),
             new("Step", "Gap between entries. At least one second, and at most 1441 entries, or the control throws.", "TimeSpan", "30 minutes"),
-            new("Format", "Display and parse format; free-form input is also tried with the culture's parser.", "string", "\"hh:mm tt\""),
+            new("Format", "Display and parse format; text in another layout is also tried with the culture's parser.", "string", "\"hh:mm tt\""),
             new("Culture", "Formatting culture.", "CultureInfo", "current"),
             new("Width", "CSS width of the drop-down.", "string?", "null"),
             new("AriaLabel", "Accessible name of the input.", "string?", "null"),
@@ -174,7 +207,7 @@
             new("ValueChanged", "Fires after either picker or the popup calendar changes the range, even when it is invalid.", "EventCallback&lt;CalendarRange&gt;"),
             new("ValueExpression", "Set by <code>@bind-Value</code>; the error goes to the <code>EditContext</code>.", "Expression&lt;Func&lt;CalendarRange&gt;&gt;?", "null"),
             new("Min / Max", "Bounds for both dates. <code>Min</code> after <code>Max</code> throws.", "DateTime?", "null"),
-            new("DisabledDate", "Days that cannot be inside the range.", "Func&lt;DateTime,bool&gt;?", "null"),
+            new("DisabledDate", "Days that cannot be inside the range, the start and end days included.", "Func&lt;DateTime,bool&gt;?", "null"),
             new("AriaLabel", "Accessible name of the group.", "string", "\"Date range\""),
             new("Enabled (base)", "false disables the pickers and the Choose range button.", "bool", "true"),
         };
@@ -232,7 +265,7 @@
         {
             new("--fx-border · --fx-surface · --fx-text · --fx-primary", "Read by <code>CalendarControl</code> for its frame, background, text and the selected day.", "#cbd5e1 · #fff · #202630 · #2563eb"),
             new("--fx-zoom", "Scales the date picker's drop-down.", "1"),
-            new("(none)", "The time, range and time span pickers read no variables.", "—"),
+            new("(none)", "The range and time span pickers' own stylesheets read none, and the time picker has none. Their inner controls do: the range popup is a <code>CalendarControl</code>, and the time list is a <code>DropDownListControl</code>, which reads <code>--fx-zoom</code>.", "—"),
         };
         public static readonly ApiRow[] DateKeys =
         {
@@ -256,52 +289,70 @@
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Appointment = @"<div class=""fields"">
-    <div class=""field""><span class=""field-label"">Date</span><DatePickerControl @bind-Value=""_date"" MinDate=""DateTime.Today"" ShowCalendarSidebar=""true"" AriaLabel=""Appointment date"" /></div>
-    <div class=""field""><span class=""field-label"">Start</span><TimePickerControl @bind-Value=""_time"" Min=""@(new TimeOnly(8, 0))"" Max=""@(new TimeOnly(18, 0))"" Width=""150px"" AriaLabel=""Appointment time"" /></div>
-    <div class=""field""><span class=""field-label"">Duration</span><TimeSpanPickerControl @bind-Value=""_duration"" /></div>
-</div>
-<p class=""result"">@Appointment</p>";
-        public const string AppointmentCs = @"// Appointment
-private DateTime? _date = DateTime.Today.AddDays(1);
-
+        public const string Appointment = @"<div class=""dt"">
+    <div class=""fields"">
+        <div class=""field""><span class=""field-label"">Pickup date</span><DatePickerControl @bind-Value=""_date"" MinDate=""TripStart"" MaxDate=""TripEnd"" ShowCalendarSidebar=""true"" AriaLabel=""Pickup date"" /></div>
+        <div class=""field""><span class=""field-label"">Pickup time</span><TimePickerControl @bind-Value=""_time"" Min=""@(new TimeOnly(6, 0))"" Max=""@(new TimeOnly(22, 0))"" Width=""150px"" AriaLabel=""Pickup time"" /></div>
+        <div class=""field""><span class=""field-label"" id=""car-needed-title"">Car needed for</span><TimeSpanPickerControl @bind-Value=""_duration"" role=""group"" aria-labelledby=""car-needed-title"" /></div>
+    </div>
+    <p class=""result"" role=""status"">@Transfer</p>
+</div>";
+        public const string AppointmentCs = @"// Transfer
+private static DateTime TripStart => DateTime.Today.AddDays(7);
+private static DateTime TripEnd => DateTime.Today.AddDays(11);
+private DateTime? _date = TripStart;
 private TimeOnly? _time = new(9, 30);
-
 private TimeSpan? _duration = TimeSpan.FromMinutes(90);
-
-private string Appointment => _date is { } d && _time is { } t
-    ? $""{d:ddd d MMM yyyy}, {t:h:mm tt} – {t.Add(_duration ?? TimeSpan.Zero):h:mm tt}""
-    : ""Pick a date and a start time."";";
-
-        public const string Range = @"<DateRangePickerControl @bind-Value=""_trip"" Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(180)"" AriaLabel=""Trip dates"" />
-<p class=""result"">@TripDates</p>";
+private string Transfer => _date is { } d && _time is { } t
+    ? $""Car for Albus Door, Lisbon airport to the old town: {d:ddd MMM d}, {t:h:mm tt} to {t.Add(_duration ?? TimeSpan.Zero):h:mm tt}. The trip runs {TripStart:MMM d} to {TripEnd:MMM d}.""
+    : ""Pick a pickup date and time."";";
+        public const string Range = @"<div class=""dt"">
+    <div class=""fields"">
+        <DateRangePickerControl @ref=""_picker"" @bind-Value=""_stay"" Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(180)"" DisabledDate=""SoldOut"" AriaLabel=""Stay dates"" />
+        <ButtonControl CssClass=""btn-sm"" OnClick=""@(() => Preset(LongWeekend, 3))"">Long weekend</ButtonControl>
+        <ButtonControl CssClass=""btn-sm"" OnClick=""@(() => Preset(FirstOpen, 7))"">One week</ButtonControl>
+    </div>
+    <p class=""result"" role=""status"">@Stay</p>
+</div>";
         public const string RangeCs = @"// Date range
-private CalendarRange _trip = new(DateTime.Today.AddDays(7), DateTime.Today.AddDays(10));
-
-private string TripDates => _trip is { Start: { } s, End: { } e } && e >= s
-    ? $""{(e - s).Days} night{((e - s).Days == 1 ? """" : ""s"")}, {s:ddd d MMM} to {e:ddd d MMM}""
-    : ""Pick a start and an end date."";";
-
-        public const string Calendar = @"<div class=""cal-row"">
-    <CalendarControl @bind-Values=""_departures"" SelectionMode=""CalendarSelectionMode.Multiple"" Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(90)""
-                     DisabledDate=""Weekend"" FirstDayOfWeek=""DayOfWeek.Monday"" />
-    <p class=""result departures"">@Departures</p>
+private static DateTime FirstOpen => DateTime.Today.AddDays(14);
+// A long weekend starts on the first Friday from FirstOpen on.
+private static DateTime LongWeekend => FirstOpen.AddDays(((int)DayOfWeek.Friday - (int)FirstOpen.DayOfWeek + 7) % 7);
+private DateRangePickerControl? _picker;
+private CalendarRange _stay = new(FirstOpen, FirstOpen.AddDays(3));
+// Three dates next week are sold out: no stay can include them, not even as its check-out day.
+private static bool SoldOut(DateTime day) => day >= DateTime.Today.AddDays(8) && day <= DateTime.Today.AddDays(10);
+private Task Preset(DateTime start, int nights) => _picker!.SetValueAsync(new(start, start.AddDays(nights)));
+// Error is set before ValueChanged, so a typed range across a sold-out date gets no quote.
+private string Stay => _picker?.Error is { } error
+    ? $""No quote. {error}""
+    : _stay is { Start: { } s, End: { } e } && e >= s
+    ? $""Amalfi hotel for Albus Door: {(e - s).Days} night{((e - s).Days == 1 ? """" : ""s"")}, {s:ddd MMM d} to {e:ddd MMM d}, {((e - s).Days * 180).ToString(""C0"")} at $180 a night. {DateTime.Today.AddDays(8):MMM d} to {DateTime.Today.AddDays(10):MMM d} is sold out.""
+    : ""Pick a check-in and a check-out date."";";
+        public const string Calendar = @"<div class=""dt"">
+    <div class=""cal-row"">
+        <CalendarControl @bind-Values=""_departures"" SelectionMode=""CalendarSelectionMode.Multiple"" Min=""DateTime.Today"" Max=""DateTime.Today.AddDays(90)""
+                         DisabledDate=""NoDeparture"" FirstDayOfWeek=""DayOfWeek.Monday"">
+            <DayTemplate Context=""day"">
+                <span class=""day"">@day.Date.Day</span>
+                @if (!day.Disabled && day.InCurrentMonth) { <span class=""day-price"">$@Price(day.Date)</span> }
+            </DayTemplate>
+        </CalendarControl>
+        <p class=""result departures"" role=""status"">@Departures</p>
+    </div>
 </div>";
         public const string CalendarCs = @"// Calendar
-private IReadOnlyList<DateTime> _departures = Weekdays(DateTime.Today.AddDays(1), 5).Where((_, i) => i % 2 == 0).ToArray();
-
-private static bool Weekend(DateTime d) => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
-
-private static List<DateTime> Weekdays(DateTime from, int count)
+private IReadOnlyList<DateTime> _departures = new[] { NextDeparture(1), NextDeparture(4) };
+// The Kyoto garden tour does not leave on Mondays; weekend departures cost more.
+private static bool NoDeparture(DateTime d) => d.DayOfWeek == DayOfWeek.Monday;
+private static int Price(DateTime d) => d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? 95 : 80;
+private static DateTime NextDeparture(int daysAhead)
 {
-    var list = new List<DateTime>();
-    for (var d = from.Date; list.Count < count; d = d.AddDays(1))
-        if (!Weekend(d)) list.Add(d);
-    return list;
+    var d = DateTime.Today.AddDays(daysAhead);
+    return NoDeparture(d) ? d.AddDays(1) : d;
 }
-
 private string Departures => _departures.Count == 0
     ? ""No departures picked.""
-    : $""{_departures.Count} departure{(_departures.Count == 1 ? """" : ""s"")}: {string.Join("", "", _departures.OrderBy(d => d).Select(d => d.ToString(""ddd d MMM"")))}"";";
+    : $""{_departures.Count} departure{(_departures.Count == 1 ? """" : ""s"")}: {string.Join("", "", _departures.OrderBy(d => d).Select(d => $""{d:ddd MMM d} (${Price(d)})""))}. Cheapest: ${_departures.Min(Price)}."";";
     }
 }

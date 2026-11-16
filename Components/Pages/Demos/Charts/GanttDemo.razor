@@ -111,12 +111,13 @@
     </Vocabulary>
 
     <Accessibility>
-        <p>
-            Each bar is a button labeled "Edit <em>title</em>" and each end handle "Resize start of <em>title</em>" or "Resize end of
-            <em>title</em>", so they are reachable with Tab. The validation message has <code>role="alert"</code>. The timescale dropdown
-            is labeled "Gantt timescale". The dependency arrows are SVG hidden from assistive technology; the relation itself is in the
-            task's Predecessor tasks field in the editor.
-        </p>
+        <ul>
+            <li>Each bar is a button named "Edit <em>title</em>"; hovering a bar shows the task's title, dates and progress.</li>
+            <li>With <code>AllowTaskDrag</code> on, each bar has two end handles, buttons named "Resize start of <em>title</em>" and "Resize end of <em>title</em>". Bars and handles are in the Tab order while the chart can be edited.</li>
+            <li>Validation messages have <code>role="alert"</code>, both in the chart and in the task editor. The timescale dropdown is named "Gantt timescale".</li>
+            <li>Dependency arrows are SVG with <code>aria-hidden="true"</code>; the task editor's Predecessor tasks field lists the same links as text.</li>
+            <li>Give each task a short, distinct <code>Title</code>: it names the bar and both of its handles.</li>
+        </ul>
     </Accessibility>
 
     <Related>

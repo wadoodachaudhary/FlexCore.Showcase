@@ -24,7 +24,7 @@ public static class DemoData
     /// currency units before the region factor.</summary>
     private static readonly (string Category, string Supplier, string Description, string Unit, int Low, int High)[] RateCardServices =
     {
-        ("Transport",     "Meridian Airways",             "Return flights, economy",         "pax",     380, 620),
+        ("Transport",     "Overhead Bin Airways",         "Return flights, economy",         "pax",     380, 620),
         ("Transport",     "{0} Airport Transfers",        "Airport to hotel, private car",   "trip",     45,  90),
         ("Transport",     "{0} Rail & Bus",             "Day-trip bus with driver",      "day",     120, 260),
         ("Accommodation", "Hotel {0} Central",            "Double room with breakfast",      "night",   110, 260),
@@ -33,7 +33,7 @@ public static class DemoData
         ("Experiences",   "{0} Walks",                    "Old town walking tour",           "pax",      25,  45),
         ("Experiences",   "{0} Day Tours",                "Full-day excursion with lunch",   "pax",      80, 160),
         ("Experiences",   "Taste of {0}",                 "Cooking class with market visit", "pax",      70, 120),
-        ("Services",      "Guardian Travel Cover",        "Travel insurance, comprehensive", "pax",      38,  75),
+        ("Services",      "Rainy Day Travel Cover",       "Travel insurance, comprehensive", "pax",      38,  75),
         ("Services",      "Razor Sharp Getaways, head office", "Booking fee",                     "booking",  45,  60),
         ("Services",      "Razor Sharp Getaways, head office", "Documents and delivery",          "booking",  12,  25),
     };
@@ -72,8 +72,8 @@ public static class DemoData
     /// city), description, unit, rate range before the season factor, Contract or Spot rate, per person or per booking.</summary>
     private static readonly (string CostGroup, string Supplier, string Description, string Unit, int Low, int High, string RateBasis, string Pricing)[] PackageServices =
     {
-        ("A Transport",     "Meridian Airways",             "Return flights, economy",         "pax",     380, 620, "Contract", "Per person"),
-        ("A Transport",     "Meridian Airways",             "Checked baggage, 23 kg",          "pax",      40,  60, "Contract", "Per person"),
+        ("A Transport",     "Overhead Bin Airways",         "Return flights, economy",         "pax",     380, 620, "Contract", "Per person"),
+        ("A Transport",     "Overhead Bin Airways",         "Checked baggage, 23 kg",          "pax",      40,  60, "Contract", "Per person"),
         ("A Transport",     "{0} Airport Transfers",        "Airport to hotel, private car",   "trip",     45,  90, "Spot",     "Per booking"),
         ("A Transport",     "{0} Airport Transfers",        "Hotel to airport, private car",   "trip",     45,  90, "Spot",     "Per booking"),
         ("A Transport",     "{0} Rail & Bus",             "Day-trip bus with driver",      "day",     120, 260, "Spot",     "Per booking"),
@@ -84,7 +84,7 @@ public static class DemoData
         ("C Experiences",   "{0} Day Tours",                "Full-day excursion with lunch",   "pax",      80, 160, "Contract", "Per person"),
         ("C Experiences",   "{0} Day Tours",                "Entrance tickets",                "pax",      18,  40, "Spot",     "Per person"),
         ("C Experiences",   "Taste of {0}",                 "Cooking class with market visit", "pax",      70, 120, "Contract", "Per person"),
-        ("D Services",      "Guardian Travel Cover",        "Travel insurance, comprehensive", "pax",      38,  75, "Contract", "Per person"),
+        ("D Services",      "Rainy Day Travel Cover",       "Travel insurance, comprehensive", "pax",      38,  75, "Contract", "Per person"),
         ("D Services",      "Razor Sharp Getaways, head office", "Booking fee",                     "booking",  45,  60, "Contract", "Per booking"),
         ("D Services",      "Razor Sharp Getaways, head office", "Documents and delivery",          "booking",  12,  25, "Contract", "Per booking"),
     };

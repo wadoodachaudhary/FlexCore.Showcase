@@ -1,7 +1,39 @@
 .demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }   /* not .row: Bootstrap owns that name */
-.result { font-size: 13px; color: #475569; }
-.note { font-size: 13.5px; color: #475569; margin: -8px 0 14px; }
-.note code { font-size: 12.5px; background: #f1f5f9; padding: 1px 4px; border-radius: 4px; color: #334155; }
+.result { margin: 10px 0 0; font-size: 13px; color: #475569; }
+
+/* App cards, as on the Buttons page: white with a soft shadow, the result in a footer band */
+.sb { max-width: 880px; padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+.sb { margin-bottom: 64px; }   /* room for the open menu inside the example */
+.sb.two { margin-bottom: 112px; }   /* its menu has four entries */
+.sb > .result { margin: 16px -18px -16px; padding: 10px 18px; border-top: 1px solid #f1f5f9; border-radius: 0 0 10px 10px; background: #f8fafc; }
+/* the small helper buttons beside a split button: a quiet outline, so the split button stays the one that stands out */
+.sb ::deep .fx-button.btn-sm { border-color: #cbd5e1; background: #fff; color: #334155; }
+.sb ::deep .fx-button.btn-sm:hover:not(:disabled) { border-color: #94a3b8; background: #f8fafc; }
+/* the menus open from the button's left edge and grow to their longest item */
+.sb ::deep .fx-split-button-dropdown { left: 0; right: auto; min-width: max-content; }
+
+/* Send reply: the activity log sits beside the buttons on a wide screen, as a timeline with the newest entry on top */
+.sb.two { display: grid; grid-template-columns: auto minmax(220px, 1fr); gap: 16px 28px; align-items: start; }
+@media (max-width: 640px) { .sb.two { grid-template-columns: 1fr; } }
+/* the rule is drawn inside the padding, so the scrolling list does not clip the dots */
+.log { display: flex; flex-direction: column; gap: 8px; max-height: 136px; overflow-y: auto; margin: 0; padding: 2px 0 2px 24px; list-style: none; font-size: 13px; color: #475569;
+       background: linear-gradient(#e2e8f0, #e2e8f0) 6px 0 / 2px 100% no-repeat; }
+.log li { position: relative; }
+.log li::before { content: ''; position: absolute; top: 5px; left: -21px; width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; box-shadow: 0 0 0 3px #fff; }
+.log li:first-child { color: #0f172a; font-weight: 600; }
+.log li:first-child::before { background: var(--brand-button, #4f46e5); }
+/* the log's header: a small caption with a Clear button at the right; an empty log says so */
+.log-head { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #64748b; }
+.log-col ::deep .log-clear { margin-left: auto; padding: 2px 8px; border: 0; border-radius: 4px; background: none; color: var(--brand-button-soft-text, #4338ca); font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; cursor: pointer; }
+.log-col ::deep .log-clear:hover:not(:disabled) { background: var(--brand-button-soft, #eef2ff); }
+.log-col ::deep .log-clear:disabled { color: #94a3b8; cursor: default; }
+.log li.log-empty { color: #94a3b8; font-weight: 400; }
+.log li.log-empty::before { background: #e2e8f0; }
+
+/* Approve refund: the total as a soft tag beside the button */
+.total { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: #f1f5f9; font-size: 14px; font-weight: 600; color: #0f172a; }
+.total > .bi { color: #64748b; }
 /* rendered inside the control's menu via MenuContent */
 .menu-options { display: flex; flex-direction: column; gap: 6px; padding: 8px 14px 6px; margin-top: 4px; border-top: 1px solid #f1f5f9; font-size: 13px; min-width: 190px; white-space: nowrap; }
 /* rendered inside the control's main half via ChildContent */

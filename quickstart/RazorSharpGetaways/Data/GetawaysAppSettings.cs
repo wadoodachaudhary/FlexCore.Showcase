@@ -22,7 +22,7 @@ public sealed class GetawaysAppSettings
     public static readonly GetawaysScheme[] Schemes =
     [
         new("razor", "Razor Sharp", "#4f46e5", "Indigo accents and a soft lavender menu.", ["#10b981", "#0284c7", "#38bdf8", "#6366f1"]),
-        new("harbour", "Harbour", "#0369a1", "Deep blue accents and a navy menu.", ["#0369a1", "#059669", "#38bdf8", "#d97706"]),
+        new("harbour", "Harbor", "#0369a1", "Deep blue accents and a navy menu.", ["#0369a1", "#059669", "#38bdf8", "#d97706"]),
         new("evergreen", "Evergreen", "#047857", "Green accents and a pale mint menu.", ["#047857", "#65a30d", "#0284c7", "#d97706"]),
         new("sunset", "Sunset", "#be123c", "Rose accents and a warm sand menu.", ["#be123c", "#d97706", "#7c3aed", "#0284c7"]),
     ];

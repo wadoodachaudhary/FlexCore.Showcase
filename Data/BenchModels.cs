@@ -20,39 +20,6 @@ public sealed class RateCardItem
     public string Notes { get; set; } = string.Empty;
 }
 
-/// <summary>Supplier at one destination: hotel, transfer company, tour operator or service. Page navigation.</summary>
-public sealed class SupplierRecord
-{
-    public string Code { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Category { get; set; } = string.Empty;
-    public string Address { get; set; } = string.Empty;
-    public string City { get; set; } = string.Empty;
-    public string Country { get; set; } = string.Empty;
-    public string PostalCode { get; set; } = string.Empty;
-    public string Phone { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    /// <summary>A signed rate agreement is on file.</summary>
-    public bool Contracted { get; set; }
-    /// <summary>The supplier's liability insurance certificate has been received.</summary>
-    public bool InsuranceOnFile { get; set; }
-    /// <summary>The supplier takes bookings through its own online system.</summary>
-    public bool OnlineBooking { get; set; }
-    public bool Active { get; set; } = true;
-}
-
-/// <summary>A person at a supplier; <see cref="SupplierCode"/> is the <see cref="SupplierRecord.Code"/>.</summary>
-public sealed class SupplierContactRecord
-{
-    public int ContactID { get; set; }
-    public string SupplierCode { get; set; } = string.Empty;
-    public string DisplayName { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
-    public string Phone { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public bool Active { get; set; } = true;
-}
-
 /// <summary>
 /// Column specification for dynamic swapping bench.
 /// </summary>

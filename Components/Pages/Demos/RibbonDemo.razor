@@ -5,7 +5,9 @@
    load; only the open tab's groups render; Icon prints as text.
    2026-11-14: fuller examples (four tabs, a dropdown button, a group of check boxes, a hide and show button, toggles, a disabled
    group, a hidden tab) on the library's ribbon work of the same day: tab roles and arrow keys, Collapsible, Pressed,
-   DropDownContent, Visible and Disabled on tabs and groups, wrapping when narrow. *@
+   DropDownContent, Visible and Disabled on tabs and groups, wrapping when narrow.
+   2026-11-15: examples rebuilt (booking desk, a tab for the selected traveler); text re-checked.
+   2026-11-16: independent review fixes. *@
 
 <PageTitle>Blazor Ribbon Control — FlexCore</PageTitle>
 
@@ -19,44 +21,33 @@
     </Overview>
 
     <Examples>
-        <DemoExample Id="tabs" Title="A booking desk ribbon" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs" CssCode="@Code.TabsCss">
-            <Description><p>Work the four tabs: Cut or Copy enables Paste, Email opens a <code>DropDownContent</code> menu, and one group holds check boxes instead of buttons. Hide the ribbon with the arrow on the right or a double-click on a tab; Reports is a <code>Disabled</code> tab.</p></Description>
+        <DemoExample Id="tabs" Title="A booking desk ribbon" RazorCode="@Code.Tabs" CSharpCode="@Code.TabsCs">
+            <Description><p>Build the booking from the ribbon: each Trip button adds its line once and then turns <code>Disabled</code>, and the total grows; Hold is a toggle, and Cancel disables what no longer applies. Email opens a <code>DropDownContent</code> menu, and one group holds check boxes instead of buttons, which show or hide the line prices and the total. Hide the ribbon with the arrow on the right or a double-click on a tab; Reports is a <code>Disabled</code> tab.</p></Description>
             <Demo>
                 <div class="desk-ribbon">
                     <RibbonControl Collapsible="true" @bind-Collapsed="_hidden">
                         <RibbonTab Title="Home">
-                            <RibbonGroup Title="Clipboard">
-                                <RibbonButton Text="Paste" Icon="📋" Large="true" Disabled="@(_clipboard is null)" OnClick="@(() => Did($"Pasted {_clipboard}"))" />
-                                <RibbonButton Text="Cut" Icon="✂️" OnClick="@(() => Clip("Cut"))" />
-                                <RibbonButton Text="Copy" Icon="📄" OnClick="@(() => Clip("Copied"))" />
-                            </RibbonGroup>
                             <RibbonGroup Title="Booking">
-                                <RibbonButton Text="New booking" Icon="🧳" Large="true" OnClick="@(() => Did("Started a new booking"))" />
-                                <RibbonButton Text="Hold" Icon="⏸️" Tooltip="Hold the seats for 24 hours" OnClick="@(() => Did("Held the seats"))" />
-                                <RibbonButton Text="Duplicate" Icon="🗂️" OnClick="@(() => Did("Duplicated the booking"))" />
-                                <RibbonButton Text="Cancel" Icon="✖️" OnClick="@(() => Did("Canceled the booking"))" />
+                                <RibbonButton Text="Hold" Icon="⏸️" Large="true" Tooltip="Hold the seats for 24 hours" Pressed="@_held" Disabled="@_canceled" OnClick="@(() => _held = !_held)" />
+                                <RibbonButton Text="Cancel" Icon="✖️" Disabled="@_canceled" OnClick="@(() => _canceled = true)" />
+                                <RibbonButton Text="Reopen" Icon="↩️" Disabled="@(!_canceled)" OnClick="@(() => _canceled = false)" />
                             </RibbonGroup>
                             <RibbonGroup>
                                 <div class="ribbon-options">
-                                    <CheckBoxControl @bind-Checked="_showCanceled" Label="Show canceled" />
-                                    <CheckBoxControl @bind-Checked="_autoSave" Label="Save as I go" />
+                                    <CheckBoxControl @bind-Checked="_showPrices" Label="Show prices" />
+                                    <CheckBoxControl @bind-Checked="_showTotal" Label="Show total" />
                                 </div>
                             </RibbonGroup>
                         </RibbonTab>
                         <RibbonTab Title="Trip">
-                            <RibbonGroup Title="Flights">
-                                <RibbonButton Text="Add flight" Icon="✈️" Large="true" OnClick="@(() => Did("Added a flight"))" />
-                                <RibbonButton Text="Change" Icon="🔁" OnClick="@(() => Did("Changed the flight"))" />
-                                <RibbonButton Text="Seats" Icon="💺" OnClick="@(() => Did("Opened the seat map"))" />
+                            <RibbonGroup Title="Travel" Disabled="@_canceled">
+                                <RibbonButton Text="Add flight" Icon="✈️" Large="true" Disabled="@Has("Return flights")" OnClick="@(() => Add("Return flights", 420))" />
+                                <RibbonButton Text="Transfer" Icon="🚐" Disabled="@Has("Airport transfer")" OnClick="@(() => Add("Airport transfer", 80))" />
                             </RibbonGroup>
-                            <RibbonGroup Title="Stay">
-                                <RibbonButton Text="Add hotel" Icon="🏨" Large="true" OnClick="@(() => Did("Added a hotel"))" />
-                                <RibbonButton Text="Upgrade" Icon="⭐" OnClick="@(() => Did("Upgraded the room"))" />
-                            </RibbonGroup>
-                            <RibbonGroup Title="Extras">
-                                <RibbonButton Text="Transfer" Icon="🚐" OnClick="@(() => Did("Added an airport transfer"))" />
-                                <RibbonButton Text="Insurance" Icon="🛡️" OnClick="@(() => Did("Added travel insurance"))" />
-                                <RibbonButton Text="Excursion" Icon="🗺️" OnClick="@(() => Did("Added an excursion"))" />
+                            <RibbonGroup Title="Stay" Disabled="@_canceled">
+                                <RibbonButton Text="Add hotel" Icon="🏨" Large="true" Disabled="@Has("Old-town hotel, 4 nights")" OnClick="@(() => Add("Old-town hotel, 4 nights", 1120))" />
+                                <RibbonButton Text="Excursion" Icon="🗺️" Disabled="@Has("Guided food tour")" OnClick="@(() => Add("Guided food tour", 180))" />
+                                <RibbonButton Text="Insurance" Icon="🛡️" Disabled="@Has("Travel insurance")" OnClick="@(() => Add("Travel insurance", 120))" />
                             </RibbonGroup>
                         </RibbonTab>
                         <RibbonTab Title="Documents">
@@ -69,49 +60,70 @@
                                         }
                                     </DropDownContent>
                                 </RibbonButton>
-                                <RibbonButton Text="Print" Icon="🖨️" OnClick="@(() => Did("Printed the itinerary"))" />
-                                <RibbonButton Text="Download" Icon="⬇️" OnClick="@(() => Did("Downloaded the documents"))" />
+                                <RibbonButton Text="Print" Icon="🖨️" OnClick="@(() => _sent = "Itinerary printed")" />
                             </RibbonGroup>
                         </RibbonTab>
                         <RibbonTab Title="Reports" Disabled="true" />
                     </RibbonControl>
+                    <div class="desk-booking" role="status">
+                        <div class="desk-head">
+                            <strong>LIS-0001 · Lisbon city break for Albus Door</strong>
+                            <BadgeControl Text="@(_canceled ? "Canceled" : _held ? "On hold" : "Open")" Variant="@(_canceled ? BadgeVariant.Danger : _held ? BadgeVariant.Warning : BadgeVariant.Success)" />
+                        </div>
+                        <ul class="desk-lines">
+                            @if (_lines.Count == 0) { <li><span>No lines yet; add them on the Trip tab.</span></li> }
+                            @foreach (var line in _lines)
+                            {
+                                <li><span>@line.Item</span>@if (_showPrices) { <span>@line.Price.ToString("C0")</span> }</li>
+                            }
+                        </ul>
+                        <div class="desk-foot">
+                            <span>@(_sent ?? "Nothing sent yet")</span>
+                            @if (_showTotal) { <strong>Total @_lines.Sum(l => l.Price).ToString("C0")</strong> }
+                        </div>
+                    </div>
                 </div>
-                <span class="result">@(_last ?? "Click a button, open another tab, or hide the ribbon with the arrow on the right.")</span>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="pressed" Title="Toggles, disabled groups and hidden tabs" RazorCode="@Code.Pressed" CSharpCode="@Code.PressedCs" CssCode="@Code.PressedCss">
-            <Description><p>Bold, Italic and Highlight are toggles through <code>Pressed</code>. Lock the text to disable both groups with <code>Disabled</code>, and show the Review tab with <code>Visible</code>.</p></Description>
-            <Controls>
-                <ToggleButtonControl @bind-Selected="_locked">Lock the text</ToggleButtonControl>
-                <ToggleButtonControl @bind-Selected="_review">Show the Review tab</ToggleButtonControl>
-            </Controls>
+        <DemoExample Id="pressed" Title="Toggles, disabled groups and hidden tabs" RazorCode="@Code.Pressed" CSharpCode="@Code.PressedCs">
+            <Description><p>Pick a traveler and a tab named after them joins the strip through <code>Visible</code>. Its buttons are toggles through <code>Pressed</code>, and the badges on the traveler's row follow; confirm the traveler and two groups turn <code>Disabled</code>.</p></Description>
             <Demo>
                 <div class="paper-ribbon">
                     <RibbonControl CssClass="paper">
-                        <RibbonTab Title="Format">
-                            <RibbonGroup Title="Style" Disabled="@_locked">
-                                <RibbonButton Text="Bold" Icon="B" Pressed="@_bold" OnClick="@(() => _bold = !_bold)" />
-                                <RibbonButton Text="Italic" Icon="I" Pressed="@_italic" OnClick="@(() => _italic = !_italic)" />
-                                <RibbonButton Text="Highlight" Icon="🖍️" Pressed="@_highlight" OnClick="@(() => _highlight = !_highlight)" />
-                            </RibbonGroup>
-                            <RibbonGroup Title="Text size" Disabled="@_locked">
-                                <RibbonButton Text="Larger" Icon="A+" Disabled="@(_size >= 22)" OnClick="@(() => _size += 2)" />
-                                <RibbonButton Text="Smaller" Icon="A−" Disabled="@(_size <= 12)" OnClick="@(() => _size -= 2)" />
+                        <RibbonTab Title="Group">
+                            <RibbonGroup Title="Kyoto Classic, four travelers">
+                                <RibbonButton Text="Confirm all" Icon="✔️" Large="true" Disabled="@_travelers.All(t => t.Confirmed)" OnClick="@(() => _travelers.ForEach(t => t.Confirmed = true))" />
+                                <RibbonButton Text="Start over" Icon="↩️" OnClick="Reset" />
                             </RibbonGroup>
                         </RibbonTab>
-                        <RibbonTab Title="Review" Visible="@_review">
-                            <RibbonGroup Title="Check">
-                                <RibbonButton Text="Spelling" Icon="✔️" Large="true" OnClick="@(() => _checked = "No spelling mistakes found.")" />
-                                <RibbonButton Text="Word count" Icon="🔢" OnClick="@(() => _checked = "17 words.")" />
+                        <RibbonTab Title="@(_who?.Name ?? "Traveler")" Visible="@(_who is not null)">
+                            <RibbonGroup Title="Seat and meal" Disabled="@(_who?.Confirmed == true)">
+                                <RibbonButton Text="Window seat" Icon="💺" Pressed="@(_who?.Window == true)" OnClick="@(() => _who!.Window = !_who.Window)" />
+                                <RibbonButton Text="Vegetarian" Icon="🥗" Pressed="@(_who?.Vegetarian == true)" OnClick="@(() => _who!.Vegetarian = !_who.Vegetarian)" />
+                            </RibbonGroup>
+                            <RibbonGroup Title="Room" Disabled="@(_who?.Confirmed == true)">
+                                <RibbonButton Text="Quiet room" Icon="🌙" Pressed="@(_who?.Quiet == true)" OnClick="@(() => _who!.Quiet = !_who.Quiet)" />
+                            </RibbonGroup>
+                            <RibbonGroup Title="Booking">
+                                <RibbonButton Text="@(_who?.Confirmed == true ? "Reopen" : "Confirm")" Icon="✔️" Large="true" OnClick="@(() => _who!.Confirmed = !_who.Confirmed)" />
                             </RibbonGroup>
                         </RibbonTab>
                     </RibbonControl>
                 </div>
-                <p class="note-text @(_bold ? "bold" : "") @(_italic ? "italic" : "") @(_highlight ? "highlight" : "")" style="font-size:@(_size)px">
-                    Meet the group at the old town gate at nine. Bring water, a hat and comfortable shoes.
-                </p>
-                <span class="result">@_checked</span>
+                <ul class="who-list">
+                    @foreach (var t in _travelers)
+                    {
+                        <li class="@(t == _who ? "picked" : null)">
+                            <ButtonControl BareStyle="true" CssClass="who-name" OnClick="@(() => _who = t == _who ? null : t)">@t.Name</ButtonControl>
+                            @if (t.Window) { <BadgeControl Text="Window seat" Variant="BadgeVariant.Info" Size="BadgeSize.Small" /> }
+                            @if (t.Vegetarian) { <BadgeControl Text="Vegetarian" Variant="BadgeVariant.Info" Size="BadgeSize.Small" /> }
+                            @if (t.Quiet) { <BadgeControl Text="Quiet room" Variant="BadgeVariant.Info" Size="BadgeSize.Small" /> }
+                            <BadgeControl Text="@(t.Confirmed ? "Confirmed" : "Open")" Variant="@(t.Confirmed ? BadgeVariant.Success : BadgeVariant.Secondary)" Size="BadgeSize.Small" />
+                        </li>
+                    }
+                </ul>
+                <span class="result">@(_who is null ? "Pick a traveler to add their tab." : _who.Confirmed ? $"{_who.Name}'s tab is on the strip; Reopen there unlocks their seat, meal and room." : $"{_who.Name}'s tab is on the strip; open it to set their seat, meal and room.")</span>
             </Demo>
         </DemoExample>
     </Examples>
@@ -143,11 +155,12 @@
 
     <Accessibility>
         <ul>
-            <li>The tab strip is a <code>tablist</code> of native buttons with <code>role="tab"</code> and <code>aria-selected</code>; the open tab's groups sit in a <code>tabpanel</code> named by its tab. The tabs share one Tab stop: Left and Right move to the next tab that can be opened, Home and End to the first and last. With <code>Collapsible</code>, the hide and show button is a second Tab stop inside the <code>tablist</code>; it carries <code>aria-expanded</code> and the label "Show the ribbon" or "Hide the ribbon".</li>
-            <li>Each <code>RibbonButton</code> is a native <code>&lt;button type="button"&gt;</code>, so Tab reaches it and Enter or Space runs it. Its <code>title</code> is the tooltip, or the label when there is none. A toggle carries <code>aria-pressed</code>. A dropdown button carries <code>aria-haspopup</code> and <code>aria-expanded</code>, and no <code>aria-pressed</code> even when <code>Pressed</code> is set.</li>
-            <li>A group is a <code>role="group"</code> named by its <code>Title</code>.</li>
-            <li>The glyph is plain text inside the button, so a screen reader reads an emoji glyph before the label.</li>
-            <li>A dropdown panel closes on a click outside it. There is no Escape or arrow-key handling inside the panel.</li>
+            <li>The tab strip is a <code>tablist</code> of native buttons with <code>role="tab"</code>, <code>aria-selected</code> and <code>aria-controls</code>; the open tab's groups sit in a <code>tabpanel</code> named by its tab. The open tab is the strip's one Tab stop: Left and Right move to the next tab that can be opened, wrapping at the ends, and Home and End to the first and last.</li>
+            <li>With <code>Collapsible</code>, the hide and show button after the tabs is a second Tab stop; it carries <code>aria-expanded</code> and the label "Show the ribbon" or "Hide the ribbon".</li>
+            <li>Each <code>RibbonButton</code> is a native <code>&lt;button type="button"&gt;</code>, so Tab reaches it and Enter or Space runs it. Its <code>title</code> is the tooltip, or the label when there is none. A toggle carries <code>aria-pressed</code> set to "true" or "false"; a dropdown button carries <code>aria-haspopup</code> and <code>aria-expanded</code>, and its panel closes on a click outside it.</li>
+            <li>Tabs and buttons show a 2px outline under keyboard focus.</li>
+            <li>A group is a <code>role="group"</code> named by its <code>Title</code>, so give every group a title.</li>
+            <li>A button's <code>Icon</code> is text and is read as part of its name. Pick a glyph that reads well aloud, or leave <code>Icon</code> empty.</li>
         </ul>
     </Accessibility>
 
@@ -161,31 +174,46 @@
 </FeatureDemoLayout>
 
 @code {
-    private string? _clipboard, _last;
-
-    private bool _hidden, _showCanceled, _autoSave = true;
-
+    // Booking desk
+    private bool _hidden, _held, _canceled, _showPrices = true, _showTotal = true;
     private RibbonButton? _send;
-
-    // The front desk's clipboard holds the booking on screen
-    private void Clip(string verb)
+    private string? _sent;
+    private sealed record Line(string Item, decimal Price);
+    private readonly List<Line> _lines = new();
+    private void Add(string item, decimal price)
     {
-        _clipboard = "booking LIS-0001";
-        _last = $"{verb} {_clipboard}";
+        if (!Has(item)) _lines.Add(new(item, price));
     }
-
-    private void Did(string what) => _last = what;
-
+    private bool Has(string item) => _lines.Any(l => l.Item == item);
     private void Send(string document)
     {
-        _last = $"Emailed the {document.ToLowerInvariant()}";
+        _sent = $"{document} emailed to Albus Door";
         _send?.CloseDropDown();
     }
 
-    // Toggles, disabled groups and hidden tabs
-    private bool _bold, _italic, _highlight, _locked, _review;
-    private int _size = 16;
-    private string? _checked;
+    // A tab for the selected traveler
+    private sealed class Traveler
+    {
+        public string Name { get; init; } = "";
+        public bool Window { get; set; }
+        public bool Vegetarian { get; set; }
+        public bool Quiet { get; set; }
+        public bool Confirmed { get; set; }
+    }
+    private List<Traveler> _travelers = Seed();
+    private Traveler? _who;
+    private static List<Traveler> Seed() => new()
+    {
+        new() { Name = "Hermione Ranger", Window = true },
+        new() { Name = "Albus Door" },
+        new() { Name = "Ron Measly", Vegetarian = true },
+        new() { Name = "Luna Goodlove", Confirmed = true },
+    };
+    private void Reset()
+    {
+        _travelers = Seed();
+        _who = null;
+    }
 
     // Vocabulary rows, one per public member (0.2.50 plus the ribbon work of 2026-11-14)
     private static class Vocab
@@ -200,7 +228,7 @@
         };
         public static readonly ApiRow[] Tab =
         {
-            new("Title", "Text of the tab's header.", "string", "\"\""),
+            new("Title", "Text of the tab's header. A new value redraws the strip, so it can follow page state, as the traveler tab does.", "string", "\"\""),
             new("ChildContent", "The tab's <code>RibbonGroup</code>s, rendered only while the tab is open.", "RenderFragment?", "null"),
             new("Visible", "false takes the tab off the strip. If it was open, the first tab that can be opened takes over.", "bool", "true"),
             new("Disabled", "The tab stays on the strip and cannot be opened.", "bool", "false"),
@@ -253,38 +281,27 @@
         public const string Tabs = @"<div class=""desk-ribbon"">
     <RibbonControl Collapsible=""true"" @bind-Collapsed=""_hidden"">
         <RibbonTab Title=""Home"">
-            <RibbonGroup Title=""Clipboard"">
-                <RibbonButton Text=""Paste"" Icon=""📋"" Large=""true"" Disabled=""@(_clipboard is null)"" OnClick=""@(() => Did($""Pasted {_clipboard}""))"" />
-                <RibbonButton Text=""Cut"" Icon=""✂️"" OnClick=""@(() => Clip(""Cut""))"" />
-                <RibbonButton Text=""Copy"" Icon=""📄"" OnClick=""@(() => Clip(""Copied""))"" />
-            </RibbonGroup>
             <RibbonGroup Title=""Booking"">
-                <RibbonButton Text=""New booking"" Icon=""🧳"" Large=""true"" OnClick=""@(() => Did(""Started a new booking""))"" />
-                <RibbonButton Text=""Hold"" Icon=""⏸️"" Tooltip=""Hold the seats for 24 hours"" OnClick=""@(() => Did(""Held the seats""))"" />
-                <RibbonButton Text=""Duplicate"" Icon=""🗂️"" OnClick=""@(() => Did(""Duplicated the booking""))"" />
-                <RibbonButton Text=""Cancel"" Icon=""✖️"" OnClick=""@(() => Did(""Canceled the booking""))"" />
+                <RibbonButton Text=""Hold"" Icon=""⏸️"" Large=""true"" Tooltip=""Hold the seats for 24 hours"" Pressed=""@_held"" Disabled=""@_canceled"" OnClick=""@(() => _held = !_held)"" />
+                <RibbonButton Text=""Cancel"" Icon=""✖️"" Disabled=""@_canceled"" OnClick=""@(() => _canceled = true)"" />
+                <RibbonButton Text=""Reopen"" Icon=""↩️"" Disabled=""@(!_canceled)"" OnClick=""@(() => _canceled = false)"" />
             </RibbonGroup>
             <RibbonGroup>
                 <div class=""ribbon-options"">
-                    <CheckBoxControl @bind-Checked=""_showCanceled"" Label=""Show canceled"" />
-                    <CheckBoxControl @bind-Checked=""_autoSave"" Label=""Save as I go"" />
+                    <CheckBoxControl @bind-Checked=""_showPrices"" Label=""Show prices"" />
+                    <CheckBoxControl @bind-Checked=""_showTotal"" Label=""Show total"" />
                 </div>
             </RibbonGroup>
         </RibbonTab>
         <RibbonTab Title=""Trip"">
-            <RibbonGroup Title=""Flights"">
-                <RibbonButton Text=""Add flight"" Icon=""✈️"" Large=""true"" OnClick=""@(() => Did(""Added a flight""))"" />
-                <RibbonButton Text=""Change"" Icon=""🔁"" OnClick=""@(() => Did(""Changed the flight""))"" />
-                <RibbonButton Text=""Seats"" Icon=""💺"" OnClick=""@(() => Did(""Opened the seat map""))"" />
+            <RibbonGroup Title=""Travel"" Disabled=""@_canceled"">
+                <RibbonButton Text=""Add flight"" Icon=""✈️"" Large=""true"" Disabled=""@Has(""Return flights"")"" OnClick=""@(() => Add(""Return flights"", 420))"" />
+                <RibbonButton Text=""Transfer"" Icon=""🚐"" Disabled=""@Has(""Airport transfer"")"" OnClick=""@(() => Add(""Airport transfer"", 80))"" />
             </RibbonGroup>
-            <RibbonGroup Title=""Stay"">
-                <RibbonButton Text=""Add hotel"" Icon=""🏨"" Large=""true"" OnClick=""@(() => Did(""Added a hotel""))"" />
-                <RibbonButton Text=""Upgrade"" Icon=""⭐"" OnClick=""@(() => Did(""Upgraded the room""))"" />
-            </RibbonGroup>
-            <RibbonGroup Title=""Extras"">
-                <RibbonButton Text=""Transfer"" Icon=""🚐"" OnClick=""@(() => Did(""Added an airport transfer""))"" />
-                <RibbonButton Text=""Insurance"" Icon=""🛡️"" OnClick=""@(() => Did(""Added travel insurance""))"" />
-                <RibbonButton Text=""Excursion"" Icon=""🗺️"" OnClick=""@(() => Did(""Added an excursion""))"" />
+            <RibbonGroup Title=""Stay"" Disabled=""@_canceled"">
+                <RibbonButton Text=""Add hotel"" Icon=""🏨"" Large=""true"" Disabled=""@Has(""Old-town hotel, 4 nights"")"" OnClick=""@(() => Add(""Old-town hotel, 4 nights"", 1120))"" />
+                <RibbonButton Text=""Excursion"" Icon=""🗺️"" Disabled=""@Has(""Guided food tour"")"" OnClick=""@(() => Add(""Guided food tour"", 180))"" />
+                <RibbonButton Text=""Insurance"" Icon=""🛡️"" Disabled=""@Has(""Travel insurance"")"" OnClick=""@(() => Add(""Travel insurance"", 120))"" />
             </RibbonGroup>
         </RibbonTab>
         <RibbonTab Title=""Documents"">
@@ -297,83 +314,102 @@
                         }
                     </DropDownContent>
                 </RibbonButton>
-                <RibbonButton Text=""Print"" Icon=""🖨️"" OnClick=""@(() => Did(""Printed the itinerary""))"" />
-                <RibbonButton Text=""Download"" Icon=""⬇️"" OnClick=""@(() => Did(""Downloaded the documents""))"" />
+                <RibbonButton Text=""Print"" Icon=""🖨️"" OnClick=""@(() => _sent = ""Itinerary printed"")"" />
             </RibbonGroup>
         </RibbonTab>
         <RibbonTab Title=""Reports"" Disabled=""true"" />
     </RibbonControl>
-</div>
-<span class=""result"">@(_last ?? ""Click a button, open another tab, or hide the ribbon with the arrow on the right."")</span>";
-        public const string TabsCs = @"private string? _clipboard, _last;
-
-private bool _hidden, _showCanceled, _autoSave = true;
-
+    <div class=""desk-booking"" role=""status"">
+        <div class=""desk-head"">
+            <strong>LIS-0001 · Lisbon city break for Albus Door</strong>
+            <BadgeControl Text=""@(_canceled ? ""Canceled"" : _held ? ""On hold"" : ""Open"")"" Variant=""@(_canceled ? BadgeVariant.Danger : _held ? BadgeVariant.Warning : BadgeVariant.Success)"" />
+        </div>
+        <ul class=""desk-lines"">
+            @if (_lines.Count == 0) { <li><span>No lines yet; add them on the Trip tab.</span></li> }
+            @foreach (var line in _lines)
+            {
+                <li><span>@line.Item</span>@if (_showPrices) { <span>@line.Price.ToString(""C0"")</span> }</li>
+            }
+        </ul>
+        <div class=""desk-foot"">
+            <span>@(_sent ?? ""Nothing sent yet"")</span>
+            @if (_showTotal) { <strong>Total @_lines.Sum(l => l.Price).ToString(""C0"")</strong> }
+        </div>
+    </div>
+</div>";
+        public const string TabsCs = @"// Booking desk
+private bool _hidden, _held, _canceled, _showPrices = true, _showTotal = true;
 private RibbonButton? _send;
-
-// The front desk's clipboard holds the booking on screen
-private void Clip(string verb)
+private string? _sent;
+private sealed record Line(string Item, decimal Price);
+private readonly List<Line> _lines = new();
+private void Add(string item, decimal price)
 {
-    _clipboard = ""booking LIS-0001"";
-    _last = $""{verb} {_clipboard}"";
+    if (!Has(item)) _lines.Add(new(item, price));
 }
-
-private void Did(string what) => _last = what;
-
+private bool Has(string item) => _lines.Any(l => l.Item == item);
 private void Send(string document)
 {
-    _last = $""Emailed the {document.ToLowerInvariant()}"";
+    _sent = $""{document} emailed to Albus Door"";
     _send?.CloseDropDown();
 }";
-        public const string TabsCss = @".result { display: block; margin-top: 10px; font-size: 13px; color: #475569; }
-
-/* other markup in a group: the page's own, so the page styles it */
-.ribbon-options { display: flex; flex-direction: column; gap: 6px; padding: 4px 2px; font-size: 12px; }
-
-/* entries of a dropdown button are rendered by ButtonControl inside the ribbon, hence ::deep */
-.desk-ribbon ::deep .ribbon-menu-item { display: block; width: 100%; padding: 6px 14px; border: 0; background: none; text-align: left; font-size: 13px; cursor: pointer; }
-.desk-ribbon ::deep .ribbon-menu-item:hover { background: #eef2f7; }";
-
-        public const string Pressed = @"<ToggleButtonControl @bind-Selected=""_locked"">Lock the text</ToggleButtonControl>
-<ToggleButtonControl @bind-Selected=""_review"">Show the Review tab</ToggleButtonControl>
-
-<div class=""paper-ribbon"">
+        public const string Pressed = @"<div class=""paper-ribbon"">
     <RibbonControl CssClass=""paper"">
-        <RibbonTab Title=""Format"">
-            <RibbonGroup Title=""Style"" Disabled=""@_locked"">
-                <RibbonButton Text=""Bold"" Icon=""B"" Pressed=""@_bold"" OnClick=""@(() => _bold = !_bold)"" />
-                <RibbonButton Text=""Italic"" Icon=""I"" Pressed=""@_italic"" OnClick=""@(() => _italic = !_italic)"" />
-                <RibbonButton Text=""Highlight"" Icon=""🖍️"" Pressed=""@_highlight"" OnClick=""@(() => _highlight = !_highlight)"" />
-            </RibbonGroup>
-            <RibbonGroup Title=""Text size"" Disabled=""@_locked"">
-                <RibbonButton Text=""Larger"" Icon=""A+"" Disabled=""@(_size >= 22)"" OnClick=""@(() => _size += 2)"" />
-                <RibbonButton Text=""Smaller"" Icon=""A−"" Disabled=""@(_size <= 12)"" OnClick=""@(() => _size -= 2)"" />
+        <RibbonTab Title=""Group"">
+            <RibbonGroup Title=""Kyoto Classic, four travelers"">
+                <RibbonButton Text=""Confirm all"" Icon=""✔️"" Large=""true"" Disabled=""@_travelers.All(t => t.Confirmed)"" OnClick=""@(() => _travelers.ForEach(t => t.Confirmed = true))"" />
+                <RibbonButton Text=""Start over"" Icon=""↩️"" OnClick=""Reset"" />
             </RibbonGroup>
         </RibbonTab>
-        <RibbonTab Title=""Review"" Visible=""@_review"">
-            <RibbonGroup Title=""Check"">
-                <RibbonButton Text=""Spelling"" Icon=""✔️"" Large=""true"" OnClick=""@(() => _checked = ""No spelling mistakes found."")"" />
-                <RibbonButton Text=""Word count"" Icon=""🔢"" OnClick=""@(() => _checked = ""17 words."")"" />
+        <RibbonTab Title=""@(_who?.Name ?? ""Traveler"")"" Visible=""@(_who is not null)"">
+            <RibbonGroup Title=""Seat and meal"" Disabled=""@(_who?.Confirmed == true)"">
+                <RibbonButton Text=""Window seat"" Icon=""💺"" Pressed=""@(_who?.Window == true)"" OnClick=""@(() => _who!.Window = !_who.Window)"" />
+                <RibbonButton Text=""Vegetarian"" Icon=""🥗"" Pressed=""@(_who?.Vegetarian == true)"" OnClick=""@(() => _who!.Vegetarian = !_who.Vegetarian)"" />
+            </RibbonGroup>
+            <RibbonGroup Title=""Room"" Disabled=""@(_who?.Confirmed == true)"">
+                <RibbonButton Text=""Quiet room"" Icon=""🌙"" Pressed=""@(_who?.Quiet == true)"" OnClick=""@(() => _who!.Quiet = !_who.Quiet)"" />
+            </RibbonGroup>
+            <RibbonGroup Title=""Booking"">
+                <RibbonButton Text=""@(_who?.Confirmed == true ? ""Reopen"" : ""Confirm"")"" Icon=""✔️"" Large=""true"" OnClick=""@(() => _who!.Confirmed = !_who.Confirmed)"" />
             </RibbonGroup>
         </RibbonTab>
     </RibbonControl>
 </div>
-<p class=""note-text @(_bold ? ""bold"" : """") @(_italic ? ""italic"" : """") @(_highlight ? ""highlight"" : """")"" style=""font-size:@(_size)px"">
-    Meet the group at the old town gate at nine. Bring water, a hat and comfortable shoes.
-</p>
-<span class=""result"">@_checked</span>";
-        public const string PressedCs = @"private bool _bold, _italic, _highlight, _locked, _review;
-
-private int _size = 16;
-
-private string? _checked;";
-        public const string PressedCss = @"/* RibbonControl's CssClass lands on its fx-ribbon element, the library's, hence ::deep */
-.paper-ribbon ::deep .fx-ribbon.paper { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; }
-
-.note-text { margin: 12px 4px 0; color: #334155; line-height: 1.5; }
-.note-text.bold { font-weight: 700; }
-.note-text.italic { font-style: italic; }
-.note-text.highlight { background: #fef08a; }
-.result { display: block; margin-top: 10px; font-size: 13px; color: #475569; }";
+<ul class=""who-list"">
+    @foreach (var t in _travelers)
+    {
+        <li class=""@(t == _who ? ""picked"" : null)"">
+            <ButtonControl BareStyle=""true"" CssClass=""who-name"" OnClick=""@(() => _who = t == _who ? null : t)"">@t.Name</ButtonControl>
+            @if (t.Window) { <BadgeControl Text=""Window seat"" Variant=""BadgeVariant.Info"" Size=""BadgeSize.Small"" /> }
+            @if (t.Vegetarian) { <BadgeControl Text=""Vegetarian"" Variant=""BadgeVariant.Info"" Size=""BadgeSize.Small"" /> }
+            @if (t.Quiet) { <BadgeControl Text=""Quiet room"" Variant=""BadgeVariant.Info"" Size=""BadgeSize.Small"" /> }
+            <BadgeControl Text=""@(t.Confirmed ? ""Confirmed"" : ""Open"")"" Variant=""@(t.Confirmed ? BadgeVariant.Success : BadgeVariant.Secondary)"" Size=""BadgeSize.Small"" />
+        </li>
+    }
+</ul>
+<span class=""result"">@(_who is null ? ""Pick a traveler to add their tab."" : _who.Confirmed ? $""{_who.Name}'s tab is on the strip; Reopen there unlocks their seat, meal and room."" : $""{_who.Name}'s tab is on the strip; open it to set their seat, meal and room."")</span>";
+        public const string PressedCs = @"// A tab for the selected traveler
+private sealed class Traveler
+{
+    public string Name { get; init; } = """";
+    public bool Window { get; set; }
+    public bool Vegetarian { get; set; }
+    public bool Quiet { get; set; }
+    public bool Confirmed { get; set; }
+}
+private List<Traveler> _travelers = Seed();
+private Traveler? _who;
+private static List<Traveler> Seed() => new()
+{
+    new() { Name = ""Hermione Ranger"", Window = true },
+    new() { Name = ""Albus Door"" },
+    new() { Name = ""Ron Measly"", Vegetarian = true },
+    new() { Name = ""Luna Goodlove"", Confirmed = true },
+};
+private void Reset()
+{
+    _travelers = Seed();
+    _who = null;
+}";
     }
 }

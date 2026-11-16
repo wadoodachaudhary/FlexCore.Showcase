@@ -21,7 +21,7 @@ internal static partial class CodeUsings
     // System namespaces the examples use beyond a new project's imports.
     private static readonly (Regex Pattern, string Namespace)[] Framework =
     [
-        (new(@"\[(Required|Range|MinLength|MaxLength|StringLength|Display|EmailAddress|Phone|RegularExpression|Compare|Url)\b"), "System.ComponentModel.DataAnnotations"),
+        (new(@"\[(Required|Range|MinLength|MaxLength|StringLength|Display|EmailAddress|Phone|RegularExpression|Compare|Url|Editable|DataType)\b"), "System.ComponentModel.DataAnnotations"),
         (new(@"\b(CultureInfo|NumberStyles|DateTimeStyles)\b"), "System.Globalization"),
         (new(@"\bStopwatch\b"), "System.Diagnostics"),
         (new(@"\bStringBuilder\b"), "System.Text"),
@@ -29,6 +29,9 @@ internal static partial class CodeUsings
         (new(@"\bJsonSerializer\b"), "System.Text.Json"),
         (new(@"\bExpression<"), "System.Linq.Expressions"),
         (new(@"\bObservableCollection<"), "System.Collections.ObjectModel"),
+        (new(@"\bWebUtility\b"), "System.Net"),
+        (new(@"\bExpandoObject\b"), "System.Dynamic"),
+        (new(@"\[(DisplayName|ReadOnly|Browsable|Category|Description|DefaultValue)\b"), "System.ComponentModel"),
     ];
 
     /// <summary>The using lines for one example, Razor style (@using X) or C# style (using X;), or "" when it needs none.</summary>

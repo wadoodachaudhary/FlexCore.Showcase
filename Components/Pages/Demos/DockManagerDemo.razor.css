@@ -1,4 +1,21 @@
-/* 2026-10-19: Dock manager page. No Bootstrap names in here. */
+/* 2026-10-19: Dock manager page. No Bootstrap names in here. 2026-11-16: the two .desk rules merged. */
+
+/* App cards, as on the other component pages: the dock surface fills the card, the summary sits in a footer band */
+.desk { padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+@media (max-width: 600px) { .desk { overflow-x: auto; } .desk ::deep .fx-dock-manager { min-width: 600px; } }   /* on a phone the panes scroll inside the card */
 .result { font-size: 13px; color: #475569; margin: 8px 0 0; }
+.desk > .result { margin: 12px -12px -12px; padding: 10px 16px; border-top: 1px solid #f1f5f9; border-radius: 0 0 10px 10px; background: #f8fafc; }
+.desk > .result:not(:last-child) { margin-bottom: 0; border-radius: 0; }
+.desk > .json { margin: 12px 4px 0; }
+
+/* pane content is HTML rendered inside the library's panes, so the page reaches it through ::deep from the card */
+.desk ::deep .fx-dock-group > [role=tabpanel] { padding: 8px 12px; }   /* the library's pane body has no padding */
+.desk ::deep .fx-dock-manager ul { margin: 0; padding: 0; list-style: none; }
+.desk ::deep .fx-dock-manager li { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; }
+.desk ::deep .fx-dock-manager li:last-child { border-bottom: 0; }
+.desk ::deep .fx-dock-manager p { margin: 0 0 8px; font-size: 13px; line-height: 1.5; color: #334155; }
+
 .json { margin-top: 8px; font-size: 13px; color: #475569; }
+.json summary { cursor: pointer; font-weight: 600; color: #334155; }
 .json pre { max-height: 180px; overflow: auto; font-size: 11.5px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; white-space: pre-wrap; word-break: break-all; }

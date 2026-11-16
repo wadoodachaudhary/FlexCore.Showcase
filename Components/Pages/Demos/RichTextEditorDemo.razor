@@ -5,7 +5,10 @@
 @* 2026-10-25: new page on FeatureDemoLayout (SC-347). Facts from Editor*.razor/.cs, FormatControl.razor and its stylesheet,
    wwwroot/editor-control.js (FlexCore 0.2.49, main 58a62e0). Nothing in the library calls FormatControl; the wiring follows its
    titles and EditorControl's public methods. The letter uses one-word font names: the browser writes multi-word families in
-   double quotes, and the read-back (editor-control.js safeStyleValue) drops a style value containing one: the font is lost. *@
+   double quotes, and the read-back (editor-control.js safeStyleValue) drops a style value containing one: the font is lost.
+   2026-11-15: the light editor example saves booking notes; note added that sanitizing happens in the browser (editor-control.js).
+   2026-11-15: example story moved to the Project management theme.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor Rich Text Editor — FlexCore</PageTitle>
 
@@ -14,13 +17,13 @@
                    SourcePath="Editor/EditorControl.razor.cs; Editor/EditorControl.Commands.cs; Editor/FormatControl.razor; Editor/EditorLiteControl.razor.cs; wwwroot/editor-control.js">
     <Overview>
         <p>
-            <code>EditorControl</code> is a Blazor editor for letters and long documents: paragraphs, two heading levels, images and page breaks, with undo and find and replace. Use it for quotes, contracts or customer letters written in the app; <code>FormatControl</code> is the formatting toolbar you connect to it, and <code>EditorLiteControl</code> binds a short note to an HTML string.
+            <code>EditorControl</code> is a Blazor editor for letters and long documents: paragraphs, two heading levels, images and page breaks, with undo and find and replace. Use it for proposals, contracts or client letters written in the app; <code>FormatControl</code> is the formatting toolbar you connect to it, and <code>EditorLiteControl</code> binds a short note to an HTML string.
         </p>
     </Overview>
 
     <Examples>
-        <DemoExample Id="document" Title="A document with its formatting toolbar" RazorCode="@Code.Document" CSharpCode="@Code.DocumentCs" CssCode="@Code.DocumentCss">
-            <Description><p>Select text and use the toolbar; Undo, Redo and Find and replace (Ctrl+F) are the editor's own, and the line below recounts on every change.</p></Description>
+        <DemoExample Id="document" Title="A document with its formatting toolbar" RazorCode="@Code.Document" CSharpCode="@Code.DocumentCs">
+            <Description><p>Select text and use the toolbar; Undo, Redo and Find and replace (Ctrl+F) are the editor's own, and the line below recounts on every change. Two limits show here: S draws a strike the editor does not read back, so it is not counted and the next Undo removes it; and Font, Size and Line show your last pick, not the format of the selection, so to apply the value already shown, pick another value first.</p></Description>
             <Demo>
                 <div class="doc">
                     <div class="doc-bar">
@@ -41,20 +44,33 @@
                     <div class="doc-page">
                         <EditorControl @ref="_editor" Blocks="Letter" PageWidth="_width" FontFamily="Georgia" FontSizePx="16" LineHeight="1.6"
                                        EnableHistory="true" HistoryChanged="h => _history = h" OnBlocksChanged="LetterChanged"
-                                       AriaLabel="Letter to a Lisbon Explorer traveler" />
+                                       AriaLabel="Status letter to Green Fork Cafe" />
                     </div>
                     <p class="doc-status">Words: @_words · Blocks: @_blocks · OnBlocksChanged calls: @_changes</p>
                 </div>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="comment" Title="A light editor for short text" RazorCode="@Code.Comment" CSharpCode="@Code.CommentCs" CssCode="@Code.CommentCss">
-            <Description><p>Type a note; every keystroke raises <code>ValueChanged</code> with the sanitized HTML shown below.</p></Description>
+        <DemoExample Id="comment" Title="A light editor for short text" RazorCode="@Code.Comment" CSharpCode="@Code.CommentCs">
+            <Description><p>Type a note with some bold or a list and save it to the task; every keystroke raises <code>ValueChanged</code> with the sanitized HTML shown under Value, and a saved note is drawn from that same HTML.</p></Description>
             <Demo>
-                <EditorLiteControl @bind-Value="_note" MinHeight="120px"
-                                   Placeholder="A note for the Lisbon desk: dietary needs, mobility, a birthday to mark…" />
-                <div class="note-label">Value</div>
-                <pre class="note-out">@(_note.Length > 0 ? _note : "(empty)")</pre>
+                <div class="rt">
+                    <div class="note-label">Task WEB-117 · Order form · a note for Hermione Ranger</div>
+                    <EditorLiteControl @bind-Value="_note" MinHeight="120px"
+                                       Placeholder="What changed, how to test it, what is still open…" />
+                    <div class="note-bar">
+                        <ButtonControl CssClass="btn-primary btn-sm" Disabled="@NoteEmpty" OnClick="SaveNote">Save note</ButtonControl>
+                        <span class="note-count" role="status">@_saved.Count note@(_saved.Count == 1 ? "" : "s") on the task</span>
+                    </div>
+                    <ul class="note-list">
+                        @foreach (var saved in _saved)
+                        {
+                            <li>@((MarkupString)saved)</li>
+                        }
+                    </ul>
+                    <div class="note-label">Value</div>
+                    <pre class="note-out">@(_note.Length > 0 ? _note : "(empty)")</pre>
+                </div>
             </Demo>
         </DemoExample>
     </Examples>
@@ -85,7 +101,7 @@
                 <p>
                     The B, I, U, S and alignment groups are always drawn. The stylesheet takes its colors from <code>--surface</code>,
                     <code>--border</code>, <code>--ink</code>, <code>--accent</code> and <code>--muted</code>, with built-in fallbacks; the first example sets
-                    them on its wrapper (CSS tab), and <code>EditorControl</code> reads <code>--ink</code> and <code>--accent-2</code> (section headings)
+                    them on its wrapper, and <code>EditorControl</code> reads <code>--ink</code> and <code>--accent-2</code> (section headings)
                     the same way.
                 </p>
             </DocSection>
@@ -98,6 +114,15 @@
                     Pasted HTML goes through the same sanitizer as <code>Value</code> before it is inserted; pasted plain text is escaped, with its line
                     breaks kept as <code>br</code>.
                 </p>
+                <p>
+                    The sanitizer runs in the editor's script in the browser, so a tampered client can still send any HTML. Showing your own note back,
+                    as the second example does, is safe; sanitize again on the server before you store HTML or show it to other users.
+                </p>
+                <p>
+                    On Blazor Server each change sends every read-back format, several times the size of the HTML, in one SignalR message. Under the
+                    default 32 KB limit (<code>HubOptions.MaximumReceiveMessageSize</code>), a note longer than about 4 KB of HTML stops updating
+                    <code>Value</code>, with no error on the page: the connection drops and reconnects, and only the browser console shows it. Raise the limit in <code>Program.cs</code> if notes can be longer.
+                </p>
             </DocSection>
             <DocSection Id="doc-editorlitevalue" Title="EditorLiteValue" Count='@DocSection.Label(Vocab.LiteValue.Length, "properties")'>
                 <ApiTable Kind="ApiKind.Properties" Title="EditorLiteValue" Rows="Vocab.LiteValue" />
@@ -108,12 +133,11 @@
     <Accessibility>
         <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
         <ul>
-            <li><code>EditorControl</code>'s editable element is a <code>div</code> with <code>role="textbox"</code>, <code>aria-multiline="true"</code>, <code>aria-readonly</code> and <code>tabindex="0"</code>, named by <code>AriaLabel</code>. Keyboard focus draws a 2px blue outline.</li>
-            <li>The control handles only the keys above. Ctrl+B and similar keys are left to the browser; the browser's own Undo and Redo commands go to the control's history when <code>EnableHistory</code> is on.</li>
+            <li><code>EditorControl</code>'s editable element is a <code>div</code> with <code>role="textbox"</code>, <code>aria-multiline="true"</code>, <code>aria-readonly</code> and <code>tabindex="0"</code>, named by <code>AriaLabel</code> (default "Document editor"). Focus draws a 2px blue outline. With <code>EnableHistory</code> on, the browser's own Undo and Redo commands also go to the control's history.</li>
             <li>The search panel is <code>role="search"</code>, named "Search document". Its text boxes are named "Find text" and "Replacement text", and the match count is a <code>role="status"</code> element.</li>
-            <li><code>FormatControl</code>'s buttons sit in groups named "Text formatting", "Heading styles" and "Paragraph alignment". B, I, U, S, H1 and H2 are named by their letters and carry a title; the alignment buttons hold only an icon and take their name from the title. No button reports a pressed state. The dropdowns are native <code>select</code> elements inside labels reading Font, Size, Width and Line.</li>
+            <li><code>FormatControl</code>'s buttons sit in groups named "Text formatting", "Heading styles" and "Paragraph alignment"; the icon-only alignment buttons are named by their titles. The drop-downs are native <code>select</code> elements inside labels reading Font, Size, Width and Line.</li>
             <li>The editor remembers the last selection made inside it, and each formatting call restores that selection before it runs, so a toolbar button reached with Tab still acts on the text selected before.</li>
-            <li><code>EditorLiteControl</code>'s toolbar is <code>role="toolbar"</code>, named by <code>ToolbarLabel</code>. Its buttons carry <code>aria-label</code> and <code>title</code>, the text style list only a <code>title</code>, and every button is its own Tab stop. The editing area has no role or accessible name of its own, so give it a visible label.</li>
+            <li><code>EditorLiteControl</code>'s toolbar is <code>role="toolbar"</code>, named by <code>ToolbarLabel</code> (default "Editor formatting"). Its buttons carry <code>aria-label</code> and <code>title</code>, the text style list is named by its title, and Tab moves through each of them in turn.</li>
         </ul>
     </Accessibility>
 
@@ -127,7 +151,7 @@
 </FeatureDemoLayout>
 
 @code {
-    // Document
+    // Document (needs @using Fx.ControlKit.Editor, System.Net and System.Text.RegularExpressions)
     private EditorControl? _editor;
     private EditorHistoryState _history = new(false, false, 0, 0);
     private EditorPageWidth _width = EditorPageWidth.Normal;
@@ -140,21 +164,21 @@
 
     private static readonly EditorBlock[] Letter =
     {
-        new("title", EditorBlockKind.ChapterHeading, "Your Lisbon Explorer itinerary"),
-        P("greeting", "Dear Maya,"),
-        P("intro", "Thank you for booking <b>Lisbon Explorer</b> with Razor Sharp Getaways. Your seven nights in Lisbon start on 12 May; this is the plan our Southern Europe desk has put together."),
-        new("days", EditorBlockKind.SectionHeading, "Day by day"),
-        P("day1", "<b>Days 1–2.</b> A transfer from the airport to your hotel in Baixa, then a guided walk up through Alfama to the castle."),
-        P("day3", "<b>Days 3–4.</b> A day in Sintra by train, with timed entry to the palace gardens; the next day is yours to explore the city."),
-        P("day5", "<b>Days 5–7.</b> Belém and the riverside, a cooking class on day six, and a late checkout before your flight home."),
-        new("before", EditorBlockKind.SectionHeading, "Before you travel"),
-        P("passport", "Please check that your passport is valid for the whole stay, and send us your flight numbers so that we can confirm the transfer."),
-        P("signoff", "Kind regards,<br>The Razor Sharp Getaways team"),
+        new("title", EditorBlockKind.ChapterHeading, "Website relaunch: Sprint 8 update"),
+        P("greeting", "Dear Albus,"),
+        P("intro", "Sprint 8 of the <b>Website relaunch</b> for Green Fork Cafe is underway. Here is where the four milestones stand and what we need from you."),
+        new("milestones", EditorBlockKind.SectionHeading, "Milestone by milestone"),
+        P("design", "<b>Discovery and Design.</b> Both milestones are complete: you signed off on the style guide and the refreshed logo."),
+        P("build", "<b>Build.</b> The order form and the menu copy are in review, the order emails and the photo gallery are in progress, and the payment setup has not started."),
+        P("launch", "<b>Launch.</b> Once Build is done, we will go through the launch checklist with you and switch the new site on while the cafe is closed."),
+        new("next", EditorBlockKind.SectionHeading, "What we need from you"),
+        P("provider", "Please choose a payment provider so that we can start the payment setup, and send us any menu changes so that the menu copy is right before you approve it."),
+        P("signoff", "Kind regards,<br>The Scope Creep Studio team"),
     };
 
     private static readonly EditorDropDownControl.EditorDropDownOption[] Fonts = { new("Georgia", "Georgia"), new("Arial", "Arial"), new("Verdana", "Verdana") };
     private static readonly EditorDropDownControl.EditorDropDownOption[] Sizes = { new("14", "14"), new("16", "16"), new("18", "18"), new("20", "20"), new("24", "24") };
-    private static readonly EditorDropDownControl.EditorDropDownOption[] Widths = { new("Narrow", "Narrow"), new("Normal", "Normal"), new("Wide", "Wide"), new("Full", "Full") };
+    private static readonly EditorDropDownControl.EditorDropDownOption[] Widths = { new("Narrow", "Narrow"), new("Normal", "Normal"), new("Full", "Full") };
     private static readonly EditorDropDownControl.EditorDropDownOption[] Lines = { new("1.4", "1.4"), new("1.6", "1.6"), new("2", "2") };
 
     private Task Format(string command) => _editor!.ExecFormatCommandAsync(command);
@@ -188,6 +212,7 @@
     {
         await _editor!.PushAsync();
         (_words, _blocks, _changes) = (Words(Letter), Letter.Length, 0);
+        (_font, _size, _line, _width) = ("Georgia", 16, "1.6", EditorPageWidth.Normal);
     }
 
     private void LetterChanged(IReadOnlyList<EditorBlock> blocks)
@@ -198,10 +223,18 @@
     }
 
     private static int Words(IEnumerable<EditorBlock> blocks) =>
-        blocks.Sum(b => Regex.Count(WebUtility.HtmlDecode(Regex.Replace(b.Text, "<[^>]+>", " ")), @"\S+"));
+        blocks.Sum(b => Regex.Count(WebUtility.HtmlDecode(Regex.Replace(Regex.Replace(b.Text, @"<br\s*/?>", " "), "<[^>]+>", "")), @"\S+"));
 
-    // Booking note
+    // Task note: Value is sanitized HTML, so a saved note can be shown as markup
     private string _note = "";
+    private readonly List<string> _saved = new();
+    // An emptied editor can still hold <br>, so test the visible text.
+    private bool NoteEmpty => string.IsNullOrWhiteSpace(WebUtility.HtmlDecode(Regex.Replace(_note, "<[^>]+>", "")));
+    private void SaveNote()
+    {
+        _saved.Insert(0, _note);
+        _note = "";   // a changed Value is written back into the editor
+    }
 
     // Vocabulary rows, one per public member (FlexCore 0.2.49).
     private static class Vocab
@@ -225,7 +258,7 @@
             new("EnableHistory", "Turns on the control's undo and redo: a snapshot after each change, with typing of one kind in one place within 750 ms merged into one step; Ctrl+Z, Ctrl+Y and Ctrl+Shift+Z (or ⌘); <code>UndoAsync</code> and <code>RedoAsync</code>. Leave it off when the host keeps its own history.", "bool", "false"),
             new("HistoryLimit", "Most undo steps, and most redo steps, kept. Below 1 throws <code>ArgumentOutOfRangeException</code>.", "int", "100"),
             new("HistoryChanged", "Raised when <code>CanUndo</code>, <code>CanRedo</code>, <code>UndoCount</code> or <code>RedoCount</code> changes, including the reset after <code>PushAsync</code>.", "EventCallback&lt;EditorHistoryState&gt;"),
-            new("OnBlocksChanged", "Raised after each change in the editor (typing, a formatting command that changed the blocks, undo, redo, replace) with the whole document read back as blocks.", "EventCallback&lt;IReadOnlyList&lt;EditorBlock&gt;&gt;"),
+            new("OnBlocksChanged", "Raised after each change in the editor (typing, a formatting command that changed the blocks, undo, redo, replace) with the whole document read back as blocks. On Blazor Server the document arrives as one SignalR message, so under the default 32 KB limit a long document stops syncing with no error on the page (only the browser console shows the dropped connection); raise <code>HubOptions.MaximumReceiveMessageSize</code> for long documents.", "EventCallback&lt;IReadOnlyList&lt;EditorBlock&gt;&gt;"),
             new("OnSelectionChanged", "Raised 10 ms after a mouse-up inside the editor with the selected text, its block id and its position relative to the editor's nearest positioned ancestor, or <code>null</code> when nothing is selected. Selecting with the keyboard does not raise it.", "EventCallback&lt;EditorSelectionInfo?&gt;"),
         };
         public static readonly ApiRow[] Methods =
@@ -236,11 +269,11 @@
             new("GetSelectionAsync()", "The selected text, trimmed, with its block id and position; <code>null</code> when the selection is empty or outside the editor.", "Task&lt;EditorSelectionInfo?&gt;"),
             new("SelectAllAsync()", "Selects all of the editor's content.", "Task"),
             new("ClearSelectionAsync()", "Clears the page's selection and focuses the editor.", "Task"),
-            new("ExecFormatCommandAsync(string command)", "Runs a browser editing command (<code>bold</code>, <code>italic</code>, <code>underline</code>, <code>strikeThrough</code>) on the selection. Like the other formatting methods it first restores the editor's last selection when focus is elsewhere, and records one undo step when the blocks read back afterward differ.", "Task"),
+            new("ExecFormatCommandAsync(string command)", "Runs a browser editing command (<code>bold</code>, <code>italic</code>, <code>underline</code>, <code>strikeThrough</code>) on the selection. Like the other formatting methods it first restores the editor's last selection when focus is elsewhere, and records one undo step when the blocks read back afterward differ. The browser writes <code>strikeThrough</code> as a <code>strike</code> element, which the read-back does not keep: it is not reported, not undoable and is lost on the next undo, redo or read.", "Task"),
             new("ApplyInlineStyleAsync(string property, string value)", "Wraps the selected text in spans carrying one CSS property, or sets it on a span that already wraps just that text. Does nothing when the selection is collapsed. Only the four properties <code>ReadBlocksAsync</code> keeps survive a read.", "Task"),
             new("ApplyHeadingStyleAsync(string fontFamily, int fontSizePx, bool bold = true)", "Font family, size in pixels and, when <code>bold</code>, weight 700 on the selection: three <code>ApplyInlineStyleAsync</code> calls, so three undo steps. The paragraph stays a paragraph.", "Task"),
-            new("ApplyBlockStyleAsync(string property, string value)", "Sets one CSS property on every block the selection or caret touches; an empty value removes it. <code>line-height</code> is the one <code>ReadBlocksAsync</code> keeps.", "Task"),
-            new("SetBlockAlignmentAsync(EditorAlignment alignment)", "Sets <code>data-align</code> on every block the selection or caret touches; <code>Left</code> removes it. <code>EditorAlignment</code> is <code>Left</code>, <code>Center</code>, <code>Right</code> or <code>Justify</code>.", "Task"),
+            new("ApplyBlockStyleAsync(string property, string value)", "Sets one CSS property on every block the selection or caret touches; an empty value removes it. <code>line-height</code> is the one <code>ReadBlocksAsync</code> keeps. A triple-click selection ends at the start of the next block, so that block is changed too.", "Task"),
+            new("SetBlockAlignmentAsync(EditorAlignment alignment)", "Sets <code>data-align</code> on every block the selection or caret touches; <code>Left</code> removes it. <code>EditorAlignment</code> is <code>Left</code>, <code>Center</code>, <code>Right</code> or <code>Justify</code>. A triple-click selection ends at the start of the next block, so that block is changed too.", "Task"),
             new("GetCaretAsync()", "The caret as a block id and character offset, or <code>null</code> outside a block.", "Task&lt;EditorCaretInfo?&gt;"),
             new("SetCaretAsync(string blockId, int offset)", "Focuses the editor and places the caret at that offset in that block.", "Task"),
             new("ScrollToBlockAsync(string blockId)", "Scrolls the block into view; an unknown id does nothing.", "Task"),
@@ -344,11 +377,11 @@
     <div class=""doc-page"">
         <EditorControl @ref=""_editor"" Blocks=""Letter"" PageWidth=""_width"" FontFamily=""Georgia"" FontSizePx=""16"" LineHeight=""1.6""
                        EnableHistory=""true"" HistoryChanged=""h => _history = h"" OnBlocksChanged=""LetterChanged""
-                       AriaLabel=""Letter to a Lisbon Explorer traveler"" />
+                       AriaLabel=""Status letter to Green Fork Cafe"" />
     </div>
     <p class=""doc-status"">Words: @_words · Blocks: @_blocks · OnBlocksChanged calls: @_changes</p>
 </div>";
-        public const string DocumentCs = @"// Document
+        public const string DocumentCs = @"// Document (needs @using Fx.ControlKit.Editor, System.Net and System.Text.RegularExpressions)
 private EditorControl? _editor;
 private EditorHistoryState _history = new(false, false, 0, 0);
 private EditorPageWidth _width = EditorPageWidth.Normal;
@@ -361,21 +394,21 @@ private static EditorBlock P(string id, string html) => new(id, EditorBlockKind.
 
 private static readonly EditorBlock[] Letter =
 {
-    new(""title"", EditorBlockKind.ChapterHeading, ""Your Lisbon Explorer itinerary""),
-    P(""greeting"", ""Dear Maya,""),
-    P(""intro"", ""Thank you for booking <b>Lisbon Explorer</b> with Razor Sharp Getaways. Your seven nights in Lisbon start on 12 May; this is the plan our Southern Europe desk has put together.""),
-    new(""days"", EditorBlockKind.SectionHeading, ""Day by day""),
-    P(""day1"", ""<b>Days 1–2.</b> A transfer from the airport to your hotel in Baixa, then a guided walk up through Alfama to the castle.""),
-    P(""day3"", ""<b>Days 3–4.</b> A day in Sintra by train, with timed entry to the palace gardens; the next day is yours to explore the city.""),
-    P(""day5"", ""<b>Days 5–7.</b> Belém and the riverside, a cooking class on day six, and a late checkout before your flight home.""),
-    new(""before"", EditorBlockKind.SectionHeading, ""Before you travel""),
-    P(""passport"", ""Please check that your passport is valid for the whole stay, and send us your flight numbers so that we can confirm the transfer.""),
-    P(""signoff"", ""Kind regards,<br>The Razor Sharp Getaways team""),
+    new(""title"", EditorBlockKind.ChapterHeading, ""Website relaunch: Sprint 8 update""),
+    P(""greeting"", ""Dear Albus,""),
+    P(""intro"", ""Sprint 8 of the <b>Website relaunch</b> for Green Fork Cafe is underway. Here is where the four milestones stand and what we need from you.""),
+    new(""milestones"", EditorBlockKind.SectionHeading, ""Milestone by milestone""),
+    P(""design"", ""<b>Discovery and Design.</b> Both milestones are complete: you signed off on the style guide and the refreshed logo.""),
+    P(""build"", ""<b>Build.</b> The order form and the menu copy are in review, the order emails and the photo gallery are in progress, and the payment setup has not started.""),
+    P(""launch"", ""<b>Launch.</b> Once Build is done, we will go through the launch checklist with you and switch the new site on while the cafe is closed.""),
+    new(""next"", EditorBlockKind.SectionHeading, ""What we need from you""),
+    P(""provider"", ""Please choose a payment provider so that we can start the payment setup, and send us any menu changes so that the menu copy is right before you approve it.""),
+    P(""signoff"", ""Kind regards,<br>The Scope Creep Studio team""),
 };
 
 private static readonly EditorDropDownControl.EditorDropDownOption[] Fonts = { new(""Georgia"", ""Georgia""), new(""Arial"", ""Arial""), new(""Verdana"", ""Verdana"") };
 private static readonly EditorDropDownControl.EditorDropDownOption[] Sizes = { new(""14"", ""14""), new(""16"", ""16""), new(""18"", ""18""), new(""20"", ""20""), new(""24"", ""24"") };
-private static readonly EditorDropDownControl.EditorDropDownOption[] Widths = { new(""Narrow"", ""Narrow""), new(""Normal"", ""Normal""), new(""Wide"", ""Wide""), new(""Full"", ""Full"") };
+private static readonly EditorDropDownControl.EditorDropDownOption[] Widths = { new(""Narrow"", ""Narrow""), new(""Normal"", ""Normal""), new(""Full"", ""Full"") };
 private static readonly EditorDropDownControl.EditorDropDownOption[] Lines = { new(""1.4"", ""1.4""), new(""1.6"", ""1.6""), new(""2"", ""2"") };
 
 private Task Format(string command) => _editor!.ExecFormatCommandAsync(command);
@@ -409,6 +442,7 @@ private async Task StartOver()
 {
     await _editor!.PushAsync();
     (_words, _blocks, _changes) = (Words(Letter), Letter.Length, 0);
+    (_font, _size, _line, _width) = (""Georgia"", 16, ""1.6"", EditorPageWidth.Normal);
 }
 
 private void LetterChanged(IReadOnlyList<EditorBlock> blocks)
@@ -419,24 +453,34 @@ private void LetterChanged(IReadOnlyList<EditorBlock> blocks)
 }
 
 private static int Words(IEnumerable<EditorBlock> blocks) =>
-    blocks.Sum(b => Regex.Count(WebUtility.HtmlDecode(Regex.Replace(b.Text, ""<[^>]+>"", "" "")), @""\S+""));";
-        public const string DocumentCss = @"/* Document */
-.doc { --surface: #ffffff; --border: #cbd5e1; --ink: #1e293b; --muted: #475569; --accent: #2563eb; --accent-2: #0f766e; }
-.doc-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-.doc ::deep .fx-format-control { display: flex; width: 100%; padding: 6px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-bottom: 0; border-radius: 8px 8px 0 0; }
-.doc-page { height: 440px; overflow: auto; padding: 6px; background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px; }
-.doc-page ::deep .fx-editor { padding: 4px 24px 24px; }
-.doc-page ::deep .fx-editor-search { position: sticky; top: 0; z-index: 1; }
-.doc-status { margin: 8px 0 0; font-size: 13px; color: #475569; }";
+    blocks.Sum(b => Regex.Count(WebUtility.HtmlDecode(Regex.Replace(Regex.Replace(b.Text, @""<br\s*/?>"", "" ""), ""<[^>]+>"", """")), @""\S+""));";
 
-        public const string Comment = @"<EditorLiteControl @bind-Value=""_note"" MinHeight=""120px""
-                   Placeholder=""A note for the Lisbon desk: dietary needs, mobility, a birthday to mark…"" />
-<div class=""note-label"">Value</div>
-<pre class=""note-out"">@(_note.Length > 0 ? _note : ""(empty)"")</pre>";
-        public const string CommentCs = @"// Booking note
-private string _note = """";";
-        public const string CommentCss = @"/* Booking note */
-.note-label { margin-top: 12px; font-size: 12px; font-weight: 600; color: #475569; }
-.note-out { margin: 4px 0 0; padding: 10px 12px; min-height: 44px; max-height: 180px; overflow: auto; white-space: pre-wrap; word-break: break-word; font-size: 12.5px; color: #1e293b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; }";
+        public const string Comment = @"<div class=""rt"">
+    <div class=""note-label"">Task WEB-117 · Order form · a note for Hermione Ranger</div>
+    <EditorLiteControl @bind-Value=""_note"" MinHeight=""120px""
+                       Placeholder=""What changed, how to test it, what is still open…"" />
+    <div class=""note-bar"">
+        <ButtonControl CssClass=""btn-primary btn-sm"" Disabled=""@NoteEmpty"" OnClick=""SaveNote"">Save note</ButtonControl>
+        <span class=""note-count"" role=""status"">@_saved.Count note@(_saved.Count == 1 ? """" : ""s"") on the task</span>
+    </div>
+    <ul class=""note-list"">
+        @foreach (var saved in _saved)
+        {
+            <li>@((MarkupString)saved)</li>
+        }
+    </ul>
+    <div class=""note-label"">Value</div>
+    <pre class=""note-out"">@(_note.Length > 0 ? _note : ""(empty)"")</pre>
+</div>";
+        public const string CommentCs = @"// Task note: Value is sanitized HTML, so a saved note can be shown as markup
+private string _note = """";
+private readonly List<string> _saved = new();
+// An emptied editor can still hold <br>, so test the visible text.
+private bool NoteEmpty => string.IsNullOrWhiteSpace(WebUtility.HtmlDecode(Regex.Replace(_note, ""<[^>]+>"", """")));
+private void SaveNote()
+{
+    _saved.Insert(0, _note);
+    _note = """";   // a changed Value is written back into the editor
+}";
     }
 }

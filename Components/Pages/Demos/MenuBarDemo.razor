@@ -3,7 +3,10 @@
 
 @* 2026-11-14: new page. The menu bar family had no page; the site's own top menu was its only use. Facts from MenuBarControl.razor,
    MenuDropDownControl.razor, MenuActionControl.razor, MenuSeparatorControl.razor, their stylesheets and wwwroot/menu-control.js
-   (FlexCore 0.2.50 plus the close-on-navigation fix of the same day). The examples keep the library's own look. *@
+   (FlexCore 0.2.50 plus the close-on-navigation fix of the same day). The examples keep the library's own look.
+   2026-11-15: three examples (booking desk, split button, menu filled on opening); events in their own table.
+   2026-11-15: example story moved to the Project management theme.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor Menu Bar and Dropdown Menu — FlexCore</PageTitle>
 
@@ -12,59 +15,81 @@
                    SourcePath="MenuBarControl.razor; MenuDropDownControl.razor; MenuActionControl.razor; MenuSeparatorControl.razor; wwwroot/menu-control.js">
     <Overview>
         <p>
-            <code>MenuBarControl</code> is a Blazor menu bar: it holds <code>MenuDropDownControl</code> menus and keeps one open at a time. Each menu lists <code>MenuActionControl</code> entries and <code>MenuSeparatorControl</code> dividers. A <code>MenuDropDownControl</code> also works alone, as a menu button or a split button. This site's top menu is a <code>MenuBarControl</code> of <code>MenuDropDownControl</code> menus.
+            <code>MenuBarControl</code> is a Blazor menu bar: it holds <code>MenuDropDownControl</code> menus and keeps one open at a time. Each menu lists <code>MenuActionControl</code> entries and <code>MenuSeparatorControl</code> dividers. A <code>MenuDropDownControl</code> also works alone, as a menu button or a split button, and can fill its entries as it opens. This site's top menu is a <code>MenuBarControl</code> of <code>MenuDropDownControl</code> menus.
         </p>
     </Overview>
 
     <Examples>
-        <DemoExample Id="bar" Title="An application menu bar" RazorCode="@Code.Bar" CSharpCode="@Code.BarCs" CssCode="@Code.Css">
-            <Description><p>Open Booking, Edit and View: Cut or Copy enables Paste, the View entries tick on and off, one entry and one whole menu are <code>Disabled</code>. Use Down, Up, Home, End, Enter and Escape inside an open menu.</p></Description>
+        <DemoExample Id="bar" Title="An application menu bar" RazorCode="@Code.Bar" CSharpCode="@Code.BarCs">
+            <Description><p>Run the Website relaunch task list from its menus: Task adds, starts and finishes tasks, and View changes how the list is shown. Entries turn <code>Disabled</code> when they have nothing to act on, View's check marks are text set through <code>Icon</code>, and one whole menu is disabled. Use Down, Up, Home, End, Enter and Escape inside an open menu.</p></Description>
             <Demo>
                 <div class="menu-window">
+                    <div class="mw-chrome" aria-hidden="true"><span></span><span></span><span></span></div>
                     <MenuBarControl>
-                        <MenuDropDownControl Label="Booking">
-                            <MenuActionControl Text="New booking" Icon="🧳" OnClick="@(() => Did("Started a new booking"))" />
-                            <MenuActionControl Text="Open…" Icon="📂" OnClick="@(() => Did("Opened booking LIS-0001"))" />
+                        <MenuDropDownControl Label="Task">
+                            <MenuActionControl Text="New task" Icon="📝" Disabled="@(_tasks.Count >= 6)" OnClick="AddTask" />
+                            <MenuActionControl Text="Start first to-do task" Icon="🔨" Disabled="@(!_tasks.Any(t => t.Status == "To do"))" OnClick="StartTask" />
                             <MenuSeparatorControl />
-                            <MenuActionControl Text="Save" Icon="💾" OnClick="@(() => Did("Saved the booking"))" />
-                            <MenuActionControl Text="Print itinerary" Icon="🖨️" Disabled="true" />
-                        </MenuDropDownControl>
-                        <MenuDropDownControl Label="Edit">
-                            <MenuActionControl Text="Cut" Icon="✂️" OnClick="@(() => Clip("Cut"))" />
-                            <MenuActionControl Text="Copy" Icon="📄" OnClick="@(() => Clip("Copied"))" />
-                            <MenuActionControl Text="Paste" Icon="📋" Disabled="@(_clipboard is null)" OnClick="@(() => Did($"Pasted {_clipboard}"))" />
+                            <MenuActionControl Text="Finish last open task" Icon="🏁" Disabled="@(!_tasks.Any(t => t.Status != "Done"))" OnClick="FinishLast" />
                         </MenuDropDownControl>
                         <MenuDropDownControl Label="View">
-                            <MenuActionControl Text="Show canceled" Icon="@Tick(_showCanceled)" OnClick="@(() => _showCanceled = !_showCanceled)" />
-                            <MenuActionControl Text="Compact rows" Icon="@Tick(_compact)" OnClick="@(() => _compact = !_compact)" />
+                            <MenuActionControl Text="Show done" Icon="@Check(_showDone)" OnClick="@(() => _showDone = !_showDone)" />
+                            <MenuActionControl Text="Compact rows" Icon="@Check(_compact)" OnClick="@(() => _compact = !_compact)" />
                         </MenuDropDownControl>
                         <MenuDropDownControl Label="Reports" Disabled="true" />
                     </MenuBarControl>
-                    <div class="menu-body">
-                        <span>@(_last ?? "Open a menu and pick an entry.")</span>
-                        <span class="menu-state">Canceled bookings @(_showCanceled ? "shown" : "hidden") · @(_compact ? "compact" : "normal") rows</span>
-                    </div>
+                    <ul class="menu-list @(_compact ? "compact" : null)">
+                        @foreach (var t in _tasks.Where(t => _showDone || t.Status != "Done"))
+                        {
+                            <li><span>@t.Title</span><BadgeControl Text="@t.Status" Variant="@(t.Status == "Done" ? BadgeVariant.Success : t.Status == "In progress" ? BadgeVariant.Primary : t.Status == "In review" ? BadgeVariant.Warning : BadgeVariant.Secondary)" /></li>
+                        }
+                    </ul>
                 </div>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="standalone" Title="A split button and a menu filled on opening" RazorCode="@Code.Standalone" CSharpCode="@Code.StandaloneCs" CssCode="@Code.Css">
-            <Description><p>Without a bar, each menu opens on its own. Send itinerary is a <code>SplitButton</code>: the left half runs <code>PrimaryClick</code>, the arrow opens the rest. Recent bookings fills its entries in <code>OnOpening</code>.</p></Description>
+        <DemoExample Id="standalone" Title="A split button" RazorCode="@Code.Standalone" CSharpCode="@Code.StandaloneCs">
+            <Description><p>Without a bar, a menu opens on its own. Send status report is a <code>SplitButton</code>: the left half runs <code>PrimaryClick</code>, and the arrow opens the other things to send.</p></Description>
             <Demo>
-                <div class="demo-row">
-                    <MenuDropDownControl Label="Send itinerary" SplitButton="true" ArrowLabel="More things to send" PrimaryClick="@(() => Sent("itinerary"))">
-                        <MenuActionControl Text="Send invoice" OnClick="@(() => Sent("invoice"))" />
-                        <MenuActionControl Text="Send tickets" OnClick="@(() => Sent("tickets"))" />
-                    </MenuDropDownControl>
-
-                    <MenuDropDownControl Label="Recent bookings" OnOpening="LoadRecent">
-                        @foreach (var booking in _recent)
+                <div class="mb">
+                    <div class="demo-row">
+                        <MenuDropDownControl Label="Send status report" SplitButton="true" ArrowLabel="More things to send" PrimaryClick="@(() => Send("Status report"))">
+                            <MenuActionControl Text="Send invoice" OnClick="@(() => Send("Invoice"))" />
+                            <MenuActionControl Text="Send meeting notes" OnClick="@(() => Send("Meeting notes"))" />
+                        </MenuDropDownControl>
+                        <span class="result">Website relaunch for Green Fork Cafe, client contact Albus Door</span>
+                    </div>
+                    <ul class="sent" role="status">
+                        @foreach (var line in _sent)
                         {
-                            <MenuActionControl Text="@booking" OnClick="@(() => _sent = $"Opened {booking}")" />
+                            <li>@line</li>
                         }
-                    </MenuDropDownControl>
+                    </ul>
+                </div>
+            </Demo>
+        </DemoExample>
 
-                    <span class="result">@(_sent ?? "Nothing sent yet.") The recent list was loaded @_loads time@(_loads == 1 ? "" : "s").</span>
+        <DemoExample Id="opening" Title="A menu filled when it opens" RazorCode="@Code.Opening" CSharpCode="@Code.OpeningCs">
+            <Description><p>Open In review and approve a task: <code>OnOpening</code> reads the list each time the menu opens, so an approved task is gone the next time, and the count in the trigger, your own <code>TriggerContent</code>, drops.</p></Description>
+            <Demo>
+                <div class="mb">
+                    <div class="demo-row">
+                        <MenuDropDownControl OnOpening="LoadWaiting">
+                            <TriggerContent>In review <span class="count">@_waiting.Count</span></TriggerContent>
+                            <ChildContent>
+                                @if (_menuTasks.Count == 0)
+                                {
+                                    <MenuActionControl Text="Nothing in review" Disabled="true" />
+                                }
+                                @foreach (var task in _menuTasks)
+                                {
+                                    <MenuActionControl Text="@($"Approve {task}")" OnClick="@(() => Approve(task))" />
+                                }
+                            </ChildContent>
+                        </MenuDropDownControl>
+                        <ButtonControl CssClass="btn-sm" Disabled="@(_waiting.Count == 3)" OnClick="ResetWaiting">Start over</ButtonControl>
+                    </div>
+                    <p class="result" role="status">@_approved The list was read @_loads time@(_loads == 1 ? "" : "s").</p>
                 </div>
             </Demo>
         </DemoExample>
@@ -82,6 +107,9 @@
                 <ApiTable Kind="ApiKind.Parameters" Title="MenuActionControl" Rows="Vocab.Action" />
                 <p class="note"><code>MenuSeparatorControl</code> has no parameters. The four controls accept no attributes beyond the parameters listed here, and none has a public method: a page cannot open or close a menu from code.</p>
             </DocSection>
+            <DocSection Id="doc-events" Title="Events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="Events" Rows="Vocab.Events" />
+            </DocSection>
             <DocSection Id="doc-keyboard" Title="Keyboard" Count='@DocSection.Label(Vocab.Keys.Length, "keys")'>
                 <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
             </DocSection>
@@ -94,10 +122,11 @@
 
     <Accessibility>
         <ul>
-            <li>The bar is a <code>menubar</code>, each trigger and entry a native button with <code>role="menuitem"</code>, and an open panel a <code>menu</code>. A trigger carries <code>aria-haspopup</code> and <code>aria-expanded</code>.</li>
-            <li>Opening a menu from the keyboard focuses its first entry, or its last with Up. Escape closes it and returns focus to the trigger; picking an entry does not return focus.</li>
-            <li>While focus is on a trigger or in an open menu, the controls take every key press: Tab does not move on, and there is no Left or Right between menus. Close the menu with Escape, then click the next one.</li>
-            <li>An entry's <code>Icon</code> is text inside the button, so a screen reader reads an emoji before the label.</li>
+            <li>The bar is a <code>menubar</code>, each trigger and entry a native button with <code>role="menuitem"</code>, an open panel a <code>menu</code> and a divider a <code>separator</code>.</li>
+            <li>A trigger carries <code>aria-haspopup="true"</code> and <code>aria-expanded</code> set to "true" or "false". In split mode the arrow half is named by <code>ArrowLabel</code>, else "<em>Label</em> menu", else "Open menu"; set <code>ArrowLabel</code> to say what the menu holds.</li>
+            <li>Opening a menu from the keyboard focuses its first enabled entry, or its last with Up. Escape in an open menu closes it and puts focus back on its trigger. The Keyboard section lists the keys.</li>
+            <li>A trigger under keyboard focus shows a dotted outline, and an entry focused from the keyboard is highlighted.</li>
+            <li>An entry's <code>Icon</code> is text and is read as part of its name. Pick a character that reads well aloud, and for an on or off entry say the state in <code>Text</code> as well.</li>
         </ul>
     </Accessibility>
 
@@ -110,34 +139,54 @@
 </FeatureDemoLayout>
 
 @code {
-    private string? _clipboard, _last;
-
-    private bool _showCanceled, _compact;
-
-    private void Clip(string verb)
+    // Menu bar
+    private sealed class ProjectTask
     {
-        _clipboard = "booking LIS-0001";
-        _last = $"{verb} {_clipboard}";
+        public string Title { get; init; } = "";
+        public string Status { get; set; } = "To do";
+    }
+    private readonly List<ProjectTask> _tasks = new()
+    {
+        new() { Title = "WEB-113 Site footer", Status = "Done" },
+        new() { Title = "WEB-123 Photo gallery", Status = "In progress" },
+        new() { Title = "WEB-124 Allergen icons" },
+    };
+    private static readonly string[] More = { "WEB-125 Contact form", "WEB-126 Opening hours banner", "WEB-127 Launch checklist" };
+    private bool _showDone, _compact;
+    private void AddTask() => _tasks.Add(new() { Title = More[(_tasks.Count - 3) % More.Length] });
+    private void StartTask() => _tasks.First(t => t.Status == "To do").Status = "In progress";
+    private void FinishLast() => _tasks.Last(t => t.Status != "Done").Status = "Done";
+    // A menu entry has no checked state, so the page shows a check mark through Icon
+    private static string Check(bool on) => on ? "✓" : "";
+
+    // Split button
+    private readonly List<string> _sent = new() { "Nothing sent yet" };
+    private void Send(string what)
+    {
+        if (_sent[0] == "Nothing sent yet") _sent.Clear();
+        _sent.Insert(0, $"{what} sent to Albus Door");
     }
 
-    private void Did(string what) => _last = what;
-
-    // A menu entry has no checked state, so the page shows a tick through Icon
-    private static string Tick(bool on) => on ? "✓" : "";
-
-    private string? _sent;
-
+    // A menu filled when it opens
+    private List<string> _waiting = new() { "WEB-117 Order form", "WEB-121 Menu copy", "WEB-122 About page" };
+    private List<string> _menuTasks = new();
+    private string _approved = "Nothing approved yet.";
     private int _loads;
-
-    private List<string> _recent = new();
-
-    private void Sent(string what) => _sent = $"Sent the {what}.";
-
     // OnOpening runs each time the menu opens: fill the entries then, so they are current
-    private void LoadRecent()
+    private void LoadWaiting()
     {
         _loads++;
-        _recent = new() { "LIS-0001 Marmalade", "ZNZ-0042 Pickle", $"NBO-00{10 + _loads} Crumble" };
+        _menuTasks = _waiting.ToList();
+    }
+    private void Approve(string task)
+    {
+        _waiting.Remove(task);
+        _approved = $"Approved {task}.";
+    }
+    private void ResetWaiting()
+    {
+        _waiting = new() { "WEB-117 Order form", "WEB-121 Menu copy", "WEB-122 About page" };
+        (_approved, _loads) = ("Nothing approved yet.", 0);
     }
 
     // Vocabulary rows, one per public member (0.2.50). None of the four controls inherits FlexControlBase.
@@ -154,10 +203,8 @@
             new("ChildContent", "The menu's entries, rendered only while it is open.", "RenderFragment?", "null"),
             new("Disabled", "Disables the trigger; the menu cannot open.", "bool", "false"),
             new("SplitButton", "Draws two buttons: a main half and an arrow that opens the menu.", "bool", "false"),
-            new("PrimaryClick", "Split mode: runs when the main half is clicked, then closes the menu. Without a handler the main half opens the menu.", "EventCallback"),
             new("ArrowLabel", "Split mode: accessible name of the arrow. The default is the label followed by \"menu\".", "string?", "null"),
-            new("OnOpening", "Runs each time the menu opens, by click or key; the place to refresh its entries. The panel opens without waiting: an async handler re-renders it when it finishes.", "EventCallback"),
-            new("TriggerContent", "Markup for the trigger in place of <code>Label</code>; in split mode, for the arrow.", "RenderFragment?", "null"),
+            new("TriggerContent", "Your own markup for the trigger in place of <code>Label</code>, such as a label with a count; its text is the trigger's name. In split mode it replaces the arrow glyph.", "RenderFragment?", "null"),
             new("PrimaryContent", "Split mode: markup for the main half in place of <code>Label</code>.", "RenderFragment?", "null"),
             new("CssClass · TriggerCssClass · PanelCssClass", "Appended to the wrapper, the trigger and the open panel.", "string", "\"\""),
             new("SplitCssClass · PrimaryCssClass", "Split mode: appended to the pair's wrapper and to the main half.", "string", "\"\""),
@@ -169,7 +216,13 @@
             new("Icon", "Glyph before the label, printed as text: an emoji or a character. Markup and icon-font class names are printed as literal text, not drawn.", "string", "\"\""),
             new("Disabled", "Sets the <code>disabled</code> attribute; the keyboard skips the entry.", "bool", "false"),
             new("CssClass", "Appended after <code>fx-menu-action</code>.", "string", "\"\""),
-            new("OnClick", "Runs when the entry is picked, after the menu closes.", "EventCallback"),
+            new("ParentMenu (cascading)", "The enclosing <code>MenuDropDownControl</code>, which the entry closes before raising <code>OnClick</code>.", "MenuDropDownControl?", "null"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("MenuDropDownControl.OnOpening", "Each time the menu opens, by click or key; the place to refresh its entries. The panel opens without waiting: an async handler re-renders it when it finishes.", "none"),
+            new("MenuDropDownControl.PrimaryClick", "Split mode: the main half was clicked or pressed; the menu then closes. Without a handler the main half opens the menu.", "none"),
+            new("MenuActionControl.OnClick", "The entry was picked, after the menu closes.", "none"),
         };
         public static readonly ApiRow[] Keys =
         {
@@ -199,81 +252,107 @@
     private static class Code
     {
         public const string Bar = @"<div class=""menu-window"">
+    <div class=""mw-chrome"" aria-hidden=""true""><span></span><span></span><span></span></div>
     <MenuBarControl>
-        <MenuDropDownControl Label=""Booking"">
-            <MenuActionControl Text=""New booking"" Icon=""🧳"" OnClick=""@(() => Did(""Started a new booking""))"" />
-            <MenuActionControl Text=""Open…"" Icon=""📂"" OnClick=""@(() => Did(""Opened booking LIS-0001""))"" />
+        <MenuDropDownControl Label=""Task"">
+            <MenuActionControl Text=""New task"" Icon=""📝"" Disabled=""@(_tasks.Count >= 6)"" OnClick=""AddTask"" />
+            <MenuActionControl Text=""Start first to-do task"" Icon=""🔨"" Disabled=""@(!_tasks.Any(t => t.Status == ""To do""))"" OnClick=""StartTask"" />
             <MenuSeparatorControl />
-            <MenuActionControl Text=""Save"" Icon=""💾"" OnClick=""@(() => Did(""Saved the booking""))"" />
-            <MenuActionControl Text=""Print itinerary"" Icon=""🖨️"" Disabled=""true"" />
-        </MenuDropDownControl>
-        <MenuDropDownControl Label=""Edit"">
-            <MenuActionControl Text=""Cut"" Icon=""✂️"" OnClick=""@(() => Clip(""Cut""))"" />
-            <MenuActionControl Text=""Copy"" Icon=""📄"" OnClick=""@(() => Clip(""Copied""))"" />
-            <MenuActionControl Text=""Paste"" Icon=""📋"" Disabled=""@(_clipboard is null)"" OnClick=""@(() => Did($""Pasted {_clipboard}""))"" />
+            <MenuActionControl Text=""Finish last open task"" Icon=""🏁"" Disabled=""@(!_tasks.Any(t => t.Status != ""Done""))"" OnClick=""FinishLast"" />
         </MenuDropDownControl>
         <MenuDropDownControl Label=""View"">
-            <MenuActionControl Text=""Show canceled"" Icon=""@Tick(_showCanceled)"" OnClick=""@(() => _showCanceled = !_showCanceled)"" />
-            <MenuActionControl Text=""Compact rows"" Icon=""@Tick(_compact)"" OnClick=""@(() => _compact = !_compact)"" />
+            <MenuActionControl Text=""Show done"" Icon=""@Check(_showDone)"" OnClick=""@(() => _showDone = !_showDone)"" />
+            <MenuActionControl Text=""Compact rows"" Icon=""@Check(_compact)"" OnClick=""@(() => _compact = !_compact)"" />
         </MenuDropDownControl>
         <MenuDropDownControl Label=""Reports"" Disabled=""true"" />
     </MenuBarControl>
-    <div class=""menu-body"">
-        <span>@(_last ?? ""Open a menu and pick an entry."")</span>
-        <span class=""menu-state"">Canceled bookings @(_showCanceled ? ""shown"" : ""hidden"") · @(_compact ? ""compact"" : ""normal"") rows</span>
-    </div>
-</div>";
-        public const string BarCs = @"private string? _clipboard, _last;
-
-private bool _showCanceled, _compact;
-
-private void Clip(string verb)
-{
-    _clipboard = ""booking LIS-0001"";
-    _last = $""{verb} {_clipboard}"";
-}
-
-private void Did(string what) => _last = what;
-
-// A menu entry has no checked state, so the page shows a tick through Icon
-private static string Tick(bool on) => on ? ""✓"" : """";";
-
-        public const string Standalone = @"<div class=""demo-row"">
-    <MenuDropDownControl Label=""Send itinerary"" SplitButton=""true"" ArrowLabel=""More things to send"" PrimaryClick=""@(() => Sent(""itinerary""))"">
-        <MenuActionControl Text=""Send invoice"" OnClick=""@(() => Sent(""invoice""))"" />
-        <MenuActionControl Text=""Send tickets"" OnClick=""@(() => Sent(""tickets""))"" />
-    </MenuDropDownControl>
-
-    <MenuDropDownControl Label=""Recent bookings"" OnOpening=""LoadRecent"">
-        @foreach (var booking in _recent)
+    <ul class=""menu-list @(_compact ? ""compact"" : null)"">
+        @foreach (var t in _tasks.Where(t => _showDone || t.Status != ""Done""))
         {
-            <MenuActionControl Text=""@booking"" OnClick=""@(() => _sent = $""Opened {booking}"")"" />
+            <li><span>@t.Title</span><BadgeControl Text=""@t.Status"" Variant=""@(t.Status == ""Done"" ? BadgeVariant.Success : t.Status == ""In progress"" ? BadgeVariant.Primary : t.Status == ""In review"" ? BadgeVariant.Warning : BadgeVariant.Secondary)"" /></li>
         }
-    </MenuDropDownControl>
-
-    <span class=""result"">@(_sent ?? ""Nothing sent yet."") The recent list was loaded @_loads time@(_loads == 1 ? """" : ""s"").</span>
+    </ul>
 </div>";
-        public const string StandaloneCs = @"private string? _sent;
-
+        public const string BarCs = @"// Menu bar
+private sealed class ProjectTask
+{
+    public string Title { get; init; } = """";
+    public string Status { get; set; } = ""To do"";
+}
+private readonly List<ProjectTask> _tasks = new()
+{
+    new() { Title = ""WEB-113 Site footer"", Status = ""Done"" },
+    new() { Title = ""WEB-123 Photo gallery"", Status = ""In progress"" },
+    new() { Title = ""WEB-124 Allergen icons"" },
+};
+private static readonly string[] More = { ""WEB-125 Contact form"", ""WEB-126 Opening hours banner"", ""WEB-127 Launch checklist"" };
+private bool _showDone, _compact;
+private void AddTask() => _tasks.Add(new() { Title = More[(_tasks.Count - 3) % More.Length] });
+private void StartTask() => _tasks.First(t => t.Status == ""To do"").Status = ""In progress"";
+private void FinishLast() => _tasks.Last(t => t.Status != ""Done"").Status = ""Done"";
+// A menu entry has no checked state, so the page shows a check mark through Icon
+private static string Check(bool on) => on ? ""✓"" : """";";
+        public const string Standalone = @"<div class=""mb"">
+    <div class=""demo-row"">
+        <MenuDropDownControl Label=""Send status report"" SplitButton=""true"" ArrowLabel=""More things to send"" PrimaryClick=""@(() => Send(""Status report""))"">
+            <MenuActionControl Text=""Send invoice"" OnClick=""@(() => Send(""Invoice""))"" />
+            <MenuActionControl Text=""Send meeting notes"" OnClick=""@(() => Send(""Meeting notes""))"" />
+        </MenuDropDownControl>
+        <span class=""result"">Website relaunch for Green Fork Cafe, client contact Albus Door</span>
+    </div>
+    <ul class=""sent"" role=""status"">
+        @foreach (var line in _sent)
+        {
+            <li>@line</li>
+        }
+    </ul>
+</div>";
+        public const string StandaloneCs = @"// Split button
+private readonly List<string> _sent = new() { ""Nothing sent yet"" };
+private void Send(string what)
+{
+    if (_sent[0] == ""Nothing sent yet"") _sent.Clear();
+    _sent.Insert(0, $""{what} sent to Albus Door"");
+}";
+        public const string Opening = @"<div class=""mb"">
+    <div class=""demo-row"">
+        <MenuDropDownControl OnOpening=""LoadWaiting"">
+            <TriggerContent>In review <span class=""count"">@_waiting.Count</span></TriggerContent>
+            <ChildContent>
+                @if (_menuTasks.Count == 0)
+                {
+                    <MenuActionControl Text=""Nothing in review"" Disabled=""true"" />
+                }
+                @foreach (var task in _menuTasks)
+                {
+                    <MenuActionControl Text=""@($""Approve {task}"")"" OnClick=""@(() => Approve(task))"" />
+                }
+            </ChildContent>
+        </MenuDropDownControl>
+        <ButtonControl CssClass=""btn-sm"" Disabled=""@(_waiting.Count == 3)"" OnClick=""ResetWaiting"">Start over</ButtonControl>
+    </div>
+    <p class=""result"" role=""status"">@_approved The list was read @_loads time@(_loads == 1 ? """" : ""s"").</p>
+</div>";
+        public const string OpeningCs = @"// A menu filled when it opens
+private List<string> _waiting = new() { ""WEB-117 Order form"", ""WEB-121 Menu copy"", ""WEB-122 About page"" };
+private List<string> _menuTasks = new();
+private string _approved = ""Nothing approved yet."";
 private int _loads;
-
-private List<string> _recent = new();
-
-private void Sent(string what) => _sent = $""Sent the {what}."";
-
 // OnOpening runs each time the menu opens: fill the entries then, so they are current
-private void LoadRecent()
+private void LoadWaiting()
 {
     _loads++;
-    _recent = new() { ""LIS-0001 Marmalade"", ""ZNZ-0042 Pickle"", $""NBO-00{10 + _loads} Crumble"" };
+    _menuTasks = _waiting.ToList();
+}
+private void Approve(string task)
+{
+    _waiting.Remove(task);
+    _approved = $""Approved {task}."";
+}
+private void ResetWaiting()
+{
+    _waiting = new() { ""WEB-117 Order form"", ""WEB-121 Menu copy"", ""WEB-122 About page"" };
+    (_approved, _loads) = (""Nothing approved yet."", 0);
 }";
-
-        public const string Css = @"/* a small window, so the bar sits at the top of something */
-.menu-window { border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; max-width: 560px; }
-.menu-body { display: flex; flex-direction: column; gap: 6px; padding: 18px 16px; min-height: 70px; font-size: 14px; color: #334155; }
-.menu-state { font-size: 13px; color: #64748b; }
-
-.demo-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }   /* not .row: Bootstrap owns that name */
-.result { font-size: 13px; color: #475569; }";
     }
 }

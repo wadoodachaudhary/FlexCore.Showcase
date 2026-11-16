@@ -2,7 +2,10 @@
 @using FlexCore.Showcase.Components.Shared
 
 @* 2026-10-12: new page on FeatureDemoLayout. 
-   2026-10-29: example 3, SegmentedControl (SegmentedControl.razor, 0.2.49): a RadioGroupControl drawn as one bar. *@
+   2026-10-29: example 3, SegmentedControl (SegmentedControl.razor, 0.2.49): a RadioGroupControl drawn as one bar.
+   2026-11-15: the three examples tell a trip-quote story: extras that change a price, a board and day filter over departures,
+   a price view switch. Code tabs generated from the Demo blocks.
+   2026-11-15: example story moved to the Project management theme. *@
 
 <PageTitle>Blazor Toggle Button and Button Group — FlexCore</PageTitle>
 
@@ -11,47 +14,68 @@
                    SourcePath="ToggleButtonControl.razor; ButtonGroupControl.razor; SegmentedControl.razor">
     <Overview>
         <p>
-            <code>ToggleButtonControl</code> is a Blazor button that stays pressed until clicked again, for on-off options such as Bold or Italic. Use <code>ButtonGroupControl</code> for a row of related options, with icons and one or several picks, such as text alignment or working days, and <code>SegmentedControl</code> for one text choice that works as a radio group, such as a calendar's Day, Week or Month view.
+            <code>ToggleButtonControl</code> is a Blazor toggle button: it stays pressed until clicked again, so users turn an option on or off in one click, such as a blog on a website estimate. <code>ButtonGroupControl</code> joins related buttons in one bar, with every option in view, for one choice or several, such as a task status or its labels. <code>SegmentedControl</code> shows a few text choices as one bar that works as a radio group, such as a budget per sprint or per week.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="toggle" Title="Toggle button" RazorCode="@Code.Toggle" CSharpCode="@Code.ToggleCs">
-            <Description><p>Press Bold, Italic or Underline and each stays down until pressed again; <code>&#64;bind-Selected</code> holds its state.</p></Description>
+            <Description><p>Add extras to the estimate: each button stays down until pressed again, <code>&#64;bind-Selected</code> holds its state, and the total follows. Core pages is <code>Selected</code> with <code>Enabled</code> false; the flag is icon-only, named with <code>aria-label</code>.</p></Description>
             <Demo>
-                <div class="demo-row">
-                    <ToggleButtonControl @bind-Selected="_bold" IconCss="bi bi-type-bold" Title="Bold" aria-label="Bold" />
-                    <ToggleButtonControl @bind-Selected="_italic" IconCss="bi bi-type-italic" Title="Italic" aria-label="Italic" />
-                    <ToggleButtonControl @bind-Selected="_underline" IconCss="bi bi-type-underline" Title="Underline" aria-label="Underline" />
-                    <ToggleButtonControl @bind-Selected="_notify">Notifications @(_notify ? "on" : "off")</ToggleButtonControl>
-                    <ToggleButtonControl Selected="true" Enabled="false">Locked</ToggleButtonControl>
-                    <span class="result">@FormatState</span>
+                <div class="estimate">
+                    <div class="est-head"><span class="est-icon bi bi-kanban" aria-hidden="true"></span><span class="lbl">Website relaunch for Green Fork Cafe: extras</span></div>
+                    <div class="demo-row">
+                        <ToggleButtonControl Selected="true" Enabled="false" IconCss="bi bi-window">Core pages included</ToggleButtonControl>
+                        <ToggleButtonControl @bind-Selected="_ordering" IconCss="bi bi-bag">Online ordering</ToggleButtonControl>
+                        <ToggleButtonControl @bind-Selected="_blog" IconCss="bi bi-journal-text">Blog</ToggleButtonControl>
+                        <ToggleButtonControl @bind-Selected="_photos" IconCss="bi bi-camera">Photo shoot</ToggleButtonControl>
+                        <ToggleButtonControl @bind-Selected="_flagged" IconCss="@(_flagged ? "bi bi-flag-fill" : "bi bi-flag")"
+                                             Title="Flag for review" aria-label="Flag for review" />
+                    </div>
+                    <p class="price" role="status">@Total.ToString("C0") <span class="result">estimate@(_flagged ? ", flagged for review" : "")</span><span class="extras">Includes @Extras</span></p>
                 </div>
             </Demo>
         </DemoExample>
 
         <DemoExample Id="group" Title="Button group" RazorCode="@Code.Group" CSharpCode="@Code.GroupCs">
-            <Description><p>Pick one text alignment on the left and several working days on the right; the arrow keys move between buttons.</p></Description>
+            <Description><p>Pick one status and any labels to filter the open Sprint 8 tasks: <code>Selection</code> makes a group single or multiple choice, <code>AllowEmpty</code> lets the labels be cleared (then every label matches), QA is a disabled item, and Stack the labels sets <code>Orientation</code>.</p></Description>
+            <Controls>
+                <SwitchControl @bind-Checked="_stackLabels" Label="Stack the labels" />
+            </Controls>
             <Demo>
-                <div class="demo-row top">
+                <div class="demo-row top panel">
                     <div class="stack">
-                        <ButtonGroupControl Items="_alignItems" @bind-Values="_align" Selection="ChoiceSelectionMode.Single" AriaLabel="Text alignment" />
-                        <span class="result">@_align[0]</span>
+                        <span class="lbl">Status</span>
+                        <ButtonGroupControl Items="_statusItems" @bind-Values="_status" Selection="ChoiceSelectionMode.Single" AriaLabel="Status" />
                     </div>
                     <div class="stack">
-                        <ButtonGroupControl Items="_dayItems" @bind-Values="_days" Selection="ChoiceSelectionMode.Multiple"
-                                            Orientation="FlexOrientation.Vertical" AllowEmpty="true" AriaLabel="Working days" />
-                        <span class="result">@(_days.Count == 0 ? "none" : string.Join(", ", _days))</span>
+                        <span class="lbl">Labels</span>
+                        <ButtonGroupControl Items="_labelItems" @bind-Values="_labels" Selection="ChoiceSelectionMode.Multiple" AllowEmpty="true"
+                                            Orientation="@(_stackLabels ? FlexOrientation.Vertical : FlexOrientation.Horizontal)" AriaLabel="Labels" />
+                    </div>
+                    <div class="stack res">
+                        <span class="lbl" role="status">@Matches.Length of @_tasks.Length open tasks match</span>
+                        <ul class="tasks">
+                            @foreach (var t in Matches)
+                            {
+                                <li><span class="bi bi-card-checklist" aria-hidden="true"></span>@t.Title<span class="task-label">@t.Label</span></li>
+                            }
+                        </ul>
                     </div>
                 </div>
             </Demo>
         </DemoExample>
+
         <DemoExample Id="segmented" Title="Segmented control" RazorCode="@Code.Segmented" CSharpCode="@Code.SegmentedCs">
-            <Description><p>Switch the calendar between Day, Week and Month on one bar; the arrow keys move the choice as in a radio group.</p></Description>
+            <Description><p>Switch the Build budget between per sprint, in total and per week on one bar; the arrow keys move the choice as in a radio group.</p></Description>
             <Demo>
-                <div class="stack">
-                    <SegmentedControl Items="_viewItems" @bind-Value="_calendarView" AriaLabel="Calendar view" />
-                    <span class="result">@_calendarView</span>
+                <div class="estimate">
+                    <div class="demo-row">
+                        <span class="est-icon bi bi-cash-coin" aria-hidden="true"></span>
+                        <span class="lbl">Build milestone, 4 sprints, 8 weeks</span>
+                        <SegmentedControl Items="_budgetItems" @bind-Value="_budgetView" AriaLabel="Budget view" />
+                    </div>
+                    <p class="price" role="status">@Budget.ToString("C0") <span class="result">@_budgetItems.First(i => i.Value == _budgetView).Text.ToLowerInvariant()</span></p>
                 </div>
             </Demo>
         </DemoExample>
@@ -67,6 +91,9 @@
             </DocSection>
             <DocSection Id="doc-segmentedcontrol-parameters" Title="SegmentedControl parameters" Count='@DocSection.Label(Vocab.Segmented.Length, "parameters")'>
                 <ApiTable Kind="ApiKind.Parameters" Title="SegmentedControl parameters" Rows="Vocab.Segmented" />
+            </DocSection>
+            <DocSection Id="doc-events" Title="Events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="Events" Rows="Vocab.Events" />
             </DocSection>
             <DocSection Id="doc-selectionitem" Title="SelectionItem" Count='@DocSection.Label(Vocab.Item.Length, "properties")'>
                 <ApiTable Kind="ApiKind.Properties" Title="SelectionItem" Rows="Vocab.Item" />
@@ -85,161 +112,204 @@
 
     <Accessibility>
         <ul>
-            <li>Both render <code>ButtonControl</code>, so every button is a native <code>&lt;button&gt;</code>: Space and Enter toggle it.</li>
-            <li>Every button carries <code>aria-pressed</code>. The group has <code>role="group"</code> and the <code>AriaLabel</code> text.</li>
-            <li>In a group, Arrow Right or Down moves focus to the next button, Arrow Left or Up to the previous, Home and End to the first and last. Focus wraps and skips disabled items. Arrows move focus only; Space or Enter selects.</li>
-            <li>Icon-only toggles need <code>Title</code> plus <code>aria-label</code>.</li>
+            <li>Toggle and group buttons are native buttons drawn by <code>ButtonControl</code>: Tab reaches each one, Enter and Space press it, and <code>aria-pressed</code> reads "true" or "false".</li>
+            <li>A button group is a <code>role="group"</code> named by <code>AriaLabel</code> ("Button group" by default); set it to say what the group chooses.</li>
+            <li>Inside a button group, the arrow keys, Home and End move focus between the enabled buttons, and the arrow keys wrap at either end.</li>
+            <li><code>SegmentedControl</code> is a <code>role="radiogroup"</code> of native radio inputs named by <code>AriaLabel</code> ("Segments" by default): one Tab stop, and the arrow keys move the choice. Each segment's label is its <code>Text</code>.</li>
+            <li>Name an icon-only toggle with <code>aria-label</code> as well as <code>Title</code>, and give every group item visible <code>Text</code>, which names its button.</li>
         </ul>
     </Accessibility>
 
     <Related>
         <ul>
-            <li>Plain and dropdown buttons: <a href="demo/buttons">Buttons</a>. Default action with alternatives: <a href="demo/split-button">Split button</a>.</li>
-            <li>A labeled on/off setting: <code>SwitchControl</code> in <a href="demo/new-components">UI elements</a>.</li>
+            <li>Plain and dropdown buttons: <a href="demo/buttons">Buttons</a>. A default action with alternatives: <a href="demo/split-button">Split button</a>.</li>
+            <li>A labeled on/off setting, and the radio group under <code>SegmentedControl</code>: <code>SwitchControl</code> and <code>RadioGroupControl</code> in <a href="demo/checks">Checks &amp; switches</a>.</li>
         </ul>
     </Related>
 </FeatureDemoLayout>
 
 @code {
     // Toggle
-    private bool _bold, _italic, _underline, _notify = true;
-    private string FormatState => string.Join(" ", new[] { (_bold, "B"), (_italic, "I"), (_underline, "U") }.Where(t => t.Item1).Select(t => t.Item2)) is { Length: > 0 } s ? $"Format: {s}" : "Format: none";
+    private bool _ordering = true, _blog, _photos, _flagged;
+    private decimal Total => 21000 + (_ordering ? 3000 : 0) + (_blog ? 1800 : 0) + (_photos ? 1200 : 0);
+    private string Extras => string.Join(", ", new[] { "core pages", _ordering ? "online ordering" : "", _blog ? "blog" : "", _photos ? "photo shoot" : "" }.Where(x => x != ""));
 
     // Group
-    private readonly SelectionItem[] _alignItems =
+    private bool _stackLabels;
+    private readonly SelectionItem[] _statusItems =
     {
-        new("left", "", IconCss: "bi bi-text-left"),
-        new("center", "", IconCss: "bi bi-text-center"),
-        new("right", "", IconCss: "bi bi-text-right"),
-        new("justify", "", IconCss: "bi bi-justify"),
+        new("todo", "To do", IconCss: "bi bi-circle"),
+        new("progress", "In progress", IconCss: "bi bi-hourglass-split"),
+        new("review", "In review", IconCss: "bi bi-eye"),
     };
-    private IReadOnlyList<string> _align = new[] { "left" };
-
-    private readonly SelectionItem[] _dayItems =
+    private IReadOnlyList<string> _status = new[] { "progress" };
+    private readonly SelectionItem[] _labelItems =
     {
-        new("mon", "Monday"), new("tue", "Tuesday"), new("wed", "Wednesday"),
-        new("thu", "Thursday"), new("fri", "Friday"), new("sat", "Saturday", Disabled: true),
+        new("Design", "Design"), new("Frontend", "Frontend"), new("Backend", "Backend"), new("Content", "Content"), new("QA", "QA", Disabled: true),
     };
-    private IReadOnlyList<string> _days = new[] { "mon", "tue", "wed", "thu", "fri" };
+    private IReadOnlyList<string> _labels = new[] { "Frontend", "Backend" };
+    private sealed record TaskItem(string Title, string Label, string Status);
+    private readonly TaskItem[] _tasks =
+    {
+        new("WEB-112 Menu page layout", "Design", "progress"), new("WEB-115 Navigation bar", "Frontend", "progress"),
+        new("WEB-117 Order form", "Frontend", "review"), new("WEB-118 Order emails", "Backend", "progress"),
+        new("WEB-120 Payment setup", "Backend", "todo"), new("WEB-121 Menu copy", "Content", "review"),
+        new("WEB-123 Photo gallery", "Frontend", "progress"), new("WEB-124 Allergen icons", "Design", "todo"),
+    };
+    private TaskItem[] Matches => _tasks.Where(t => t.Status == _status[0] && (_labels.Count == 0 || _labels.Contains(t.Label))).ToArray();
 
     // Segmented
-    private readonly SelectionItem[] _viewItems = { new("day", "Day"), new("week", "Week"), new("month", "Month") };
-    private string _calendarView = "week";
+    private readonly SelectionItem[] _budgetItems = { new("sprint", "Per sprint"), new("total", "In total"), new("week", "Per week") };
+    private string _budgetView = "sprint";
+    private decimal Budget => _budgetView switch { "total" => 12000, "week" => 12000 / 8m, _ => 3000 };
 
     // Vocabulary rows, one per public member (0.2.50). Base-class parameters marked (base).
     private static class Vocab
     {
         public static readonly ApiRow[] Toggle =
         {
-            new("Selected", "Pressed state. Two-way with <code>@bind-Selected</code>.", "bool", "false"),
-            new("SelectedChanged", "Fires after each toggle with the new state.", "EventCallback&lt;bool&gt;"),
-            new("ChildContent", "Label or any markup.", "RenderFragment?"),
-            new("IconCss", "Leading icon.", "string?", "null"),
-            new("OnClick", "Fires after the toggle and after <code>SelectedChanged</code>.", "EventCallback&lt;MouseEventArgs&gt;"),
-            new("Enabled (base)", "false disables the button. There is no <code>Disabled</code> parameter.", "bool", "true"),
-            new("Title (base)", "Native tooltip. Required on icon-only toggles.", "string?", "null"),
-            new("CssClass / Style (base)", "Appended to the inner button's classes; inline style.", "string?", "null"),
-            new("(unmatched attributes)", "Forwarded to the inner <code>&lt;button&gt;</code>: <code>aria-*</code>, <code>data-*</code>, <code>id</code>.", "Dictionary&lt;string,object&gt;"),
+            new("Selected", "Pressed state; two-way with <code>@bind-Selected</code>.", "bool", "false"),
+            new("ChildContent", "The label: text or any markup, after the icon.", "RenderFragment?", "null"),
+            new("IconCss", "Classes for an icon before the label, such as <code>bi bi-journal-text</code>.", "string?", "null"),
+            new("Enabled (base)", "False disables the button and keeps its pressed look. There is no <code>Disabled</code> parameter.", "bool", "true"),
+            new("Title (base)", "Native tooltip. An icon-only toggle also needs <code>aria-label</code>.", "string?", "null"),
+            new("Visible (base)", "False hides the button with <code>display:none</code>.", "bool", "true"),
+            new("CssClass / Style (base)", "On the inner button.", "string?", "null"),
+            new("Id / Tag / Data / Parent (base)", "Accepted but not rendered. A written <code>id</code> binds to <code>Id</code>, so it does not reach the button.", "", "null"),
+            new("(unmatched attributes)", "Passed to the inner button, such as <code>aria-label</code> and <code>data-*</code>.", "Dictionary&lt;string,object&gt;"),
         };
         public static readonly ApiRow[] Group =
         {
-            new("Items", "Buttons, in order. Values must be unique or the control throws.", "IReadOnlyList&lt;SelectionItem&gt;", "empty"),
-            new("Values", "Selected values. Two-way with <code>@bind-Values</code>.", "IReadOnlyList&lt;string&gt;", "empty"),
-            new("ValuesChanged", "Fires after each change with the full selection.", "EventCallback&lt;IReadOnlyList&lt;string&gt;&gt;"),
-            new("Selection", "<code>Single</code> replaces the selection; <code>Multiple</code> toggles the value.", "ChoiceSelectionMode", "Single"),
-            new("Orientation", "<code>Horizontal</code> or <code>Vertical</code>.", "FlexOrientation", "Horizontal"),
-            new("AllowEmpty", "When false the last selected value cannot be cleared.", "bool", "false"),
-            new("AriaLabel", "Accessible name of the group.", "string", "\"Button group\""),
-            new("Enabled (base)", "false disables every button.", "bool", "true"),
-            new("Visible (base)", "false renders nothing.", "bool", "true"),
+            new("Items", "The buttons, in order, each with its text, icon and disabled state. Values must be unique, or the control throws.", "IReadOnlyList&lt;SelectionItem&gt;", "empty"),
+            new("Values", "The selected values; two-way with <code>@bind-Values</code>.", "IReadOnlyList&lt;string&gt;", "empty"),
+            new("Selection", "<code>Single</code> works like radio buttons: a click selects that button alone. <code>Multiple</code> works like checkboxes: a click adds or removes it.", "ChoiceSelectionMode", "Single"),
+            new("AllowEmpty", "Lets a click clear the last selected button. When false, one stays selected once picked.", "bool", "false"),
+            new("Orientation", "<code>Horizontal</code> is one row; <code>Vertical</code> stacks the buttons.", "FlexOrientation", "Horizontal"),
+            new("AriaLabel", "Accessible name of the group; give each group its own.", "string", "\"Button group\""),
+            new("Enabled (base)", "False disables every button.", "bool", "true"),
+            new("Visible (base)", "False renders nothing.", "bool", "true"),
             new("CssClass / Style (base)", "On the group element.", "string?", "null"),
+            new("Id / Title / Tag / Data / Parent (base) · unmatched attributes", "Accepted but not rendered.", "", "null"),
         };
         public static readonly ApiRow[] Segmented =
         {
             new("Items", "The segments: <code>Value</code>, <code>Text</code> and <code>Disabled</code> are used; <code>IconCss</code> is not drawn.", "IReadOnlyList&lt;SelectionItem&gt;", "empty"),
-            new("Value", "Value of the chosen segment. Two-way with <code>@bind-Value</code>.", "string", "\"\""),
-            new("ValueChanged", "Fires when a segment is chosen.", "EventCallback&lt;string&gt;"),
+            new("Value", "Value of the chosen segment; two-way with <code>@bind-Value</code>.", "string", "\"\""),
             new("Orientation", "<code>Vertical</code> stacks the segments.", "FlexOrientation", "Horizontal"),
             new("AriaLabel", "Accessible name of the radio group.", "string", "\"Segments\""),
-            new("Enabled / CssClass / Style (base)", "<code>Enabled</code> false disables every segment; the class and inline style land on the <code>fx-segmented</code> wrapper.", "", ""),
+            new("Enabled / Visible (base)", "<code>Enabled</code> false disables every segment; <code>Visible</code> false hides the bar.", "bool", "true"),
+            new("CssClass / Style (base)", "On the <code>fx-segmented</code> wrapper.", "string?", "null"),
+            new("Id / Title / Tag / Data / Parent (base) · unmatched attributes", "Accepted but not rendered.", "", "null"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("ToggleButtonControl.SelectedChanged", "After each press, with the new state.", "bool"),
+            new("ToggleButtonControl.OnClick", "After the toggle and after <code>SelectedChanged</code>.", "MouseEventArgs"),
+            new("ButtonGroupControl.ValuesChanged", "After each click on an enabled button, with the whole selection, even when the click changed nothing.", "IReadOnlyList&lt;string&gt;"),
+            new("SegmentedControl.ValueChanged", "When a segment is chosen, by click or arrow key.", "string"),
         };
         public static readonly ApiRow[] Item =
         {
-            new("Value", "Key reported in <code>Values</code>. Unique within the group.", "string"),
-            new("Text", "Label. Empty for icon-only buttons.", "string"),
-            new("Disabled", "Rendered disabled and skipped by the arrow keys.", "bool", "false"),
-            new("IconCss", "Leading icon.", "string?", "null"),
-            new("ctor", "<code>new(value, text, disabled, iconCss)</code>; it is a positional record.", "", null),
+            new("Value", "Key reported in <code>Values</code> or <code>Value</code>; unique within a group.", "string"),
+            new("Text", "The label. Left empty, a group button shows only its icon and has no accessible name, since there is no title field.", "string"),
+            new("Disabled", "Drawn disabled and skipped by the arrow keys.", "bool", "false"),
+            new("IconCss", "Classes for an icon before the text; drawn by <code>ButtonGroupControl</code> only.", "string?", "null"),
+            new("ctor", "<code>new(value, text, disabled, iconCss)</code>; a positional record, so name the later arguments, as in <code>IconCss: \"bi bi-eye\"</code>.", "", null),
         };
         public static readonly ApiRow[] Methods =
         {
-            new("ButtonGroupControl.SelectAsync(value)", "Same as a click on that button: applies the current mode and raises <code>ValuesChanged</code>. Ignored when disabled or unknown.", "Task"),
+            new("ButtonGroupControl.SelectAsync(string value)", "Same as a click on that button: applies the selection mode and raises <code>ValuesChanged</code>. Ignored when the group or the item is disabled, or the value is unknown.", "Task"),
         };
         public static readonly ApiRow[] Css =
         {
-            new("fx-toggle-button · .selected", "The toggle's button; <code>selected</code> fills it with the accent color and an inset shadow."),
-            new("fx-button-group · .vertical", "Inline flex row of buttons with no gap; <code>vertical</code> stacks them."),
+            new("fx-toggle-host · fx-toggle-button · .selected", "The wrapper span and the toggle's button; <code>selected</code> adds the accent fill, white text and an inset shadow."),
+            new("fx-button-group · .horizontal · .vertical", "Inline row of buttons with no gap; <code>vertical</code> stacks them."),
             new("fx-selected", "A selected button inside a group: accent fill, white text."),
             new("fx-button-group button", "Square corners, 28px minimum height, 2px focus ring on keyboard focus."),
+            new("fx-segmented", "The segmented bar: light blue-gray fill and border, rounded, 3px padding. The checked segment takes the accent fill, a keyboard-focused one a 2px outline; the radio circles are hidden."),
         };
         public static readonly ApiRow[] Vars =
         {
-            new("--fx-accent", "Pressed fill. The two stylesheets fall back to different blues.", "#1c6ebf (toggle) · #2465b9 (group)"),
-            new("--fx-btn-*", "Resting look, inherited from ButtonControl. See <a href=\"demo/buttons#documentation\">Buttons</a>.", "—"),
+            new("--fx-accent", "Pressed or chosen fill. Each stylesheet falls back to its own blue.", "#1c6ebf (toggle) · #2465b9 (group) · #2768bd (segmented)"),
+            new("--fx-btn-*", "Resting look of toggle and group buttons, from <code>ButtonControl</code>; see <a href=\"demo/buttons#doc-css-variables\">Buttons</a>.", "—"),
         };
     }
 
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Toggle = @"<div class=""demo-row"">
-    <ToggleButtonControl @bind-Selected=""_bold"" IconCss=""bi bi-type-bold"" Title=""Bold"" aria-label=""Bold"" />
-    <ToggleButtonControl @bind-Selected=""_italic"" IconCss=""bi bi-type-italic"" Title=""Italic"" aria-label=""Italic"" />
-    <ToggleButtonControl @bind-Selected=""_underline"" IconCss=""bi bi-type-underline"" Title=""Underline"" aria-label=""Underline"" />
-    <ToggleButtonControl @bind-Selected=""_notify"">Notifications @(_notify ? ""on"" : ""off"")</ToggleButtonControl>
-    <ToggleButtonControl Selected=""true"" Enabled=""false"">Locked</ToggleButtonControl>
-    <span class=""result"">@FormatState</span>
+        public const string Toggle = @"<div class=""estimate"">
+    <div class=""est-head""><span class=""est-icon bi bi-kanban"" aria-hidden=""true""></span><span class=""lbl"">Website relaunch for Green Fork Cafe: extras</span></div>
+    <div class=""demo-row"">
+        <ToggleButtonControl Selected=""true"" Enabled=""false"" IconCss=""bi bi-window"">Core pages included</ToggleButtonControl>
+        <ToggleButtonControl @bind-Selected=""_ordering"" IconCss=""bi bi-bag"">Online ordering</ToggleButtonControl>
+        <ToggleButtonControl @bind-Selected=""_blog"" IconCss=""bi bi-journal-text"">Blog</ToggleButtonControl>
+        <ToggleButtonControl @bind-Selected=""_photos"" IconCss=""bi bi-camera"">Photo shoot</ToggleButtonControl>
+        <ToggleButtonControl @bind-Selected=""_flagged"" IconCss=""@(_flagged ? ""bi bi-flag-fill"" : ""bi bi-flag"")""
+                             Title=""Flag for review"" aria-label=""Flag for review"" />
+    </div>
+    <p class=""price"" role=""status"">@Total.ToString(""C0"") <span class=""result"">estimate@(_flagged ? "", flagged for review"" : """")</span><span class=""extras"">Includes @Extras</span></p>
 </div>";
         public const string ToggleCs = @"// Toggle
-private bool _bold, _italic, _underline, _notify = true;
+private bool _ordering = true, _blog, _photos, _flagged;
+private decimal Total => 21000 + (_ordering ? 3000 : 0) + (_blog ? 1800 : 0) + (_photos ? 1200 : 0);
+private string Extras => string.Join("", "", new[] { ""core pages"", _ordering ? ""online ordering"" : """", _blog ? ""blog"" : """", _photos ? ""photo shoot"" : """" }.Where(x => x != """"));";
+        public const string Group = @"<SwitchControl @bind-Checked=""_stackLabels"" Label=""Stack the labels"" />
 
-private string FormatState => string.Join("" "", new[] { (_bold, ""B""), (_italic, ""I""), (_underline, ""U"") }.Where(t => t.Item1).Select(t => t.Item2)) is { Length: > 0 } s ? $""Format: {s}"" : ""Format: none"";";
-
-        public const string Group = @"<div class=""demo-row top"">
+<div class=""demo-row top panel"">
     <div class=""stack"">
-        <ButtonGroupControl Items=""_alignItems"" @bind-Values=""_align"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Text alignment"" />
-        <span class=""result"">@_align[0]</span>
+        <span class=""lbl"">Status</span>
+        <ButtonGroupControl Items=""_statusItems"" @bind-Values=""_status"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Status"" />
     </div>
     <div class=""stack"">
-        <ButtonGroupControl Items=""_dayItems"" @bind-Values=""_days"" Selection=""ChoiceSelectionMode.Multiple""
-                            Orientation=""FlexOrientation.Vertical"" AllowEmpty=""true"" AriaLabel=""Working days"" />
-        <span class=""result"">@(_days.Count == 0 ? ""none"" : string.Join("", "", _days))</span>
+        <span class=""lbl"">Labels</span>
+        <ButtonGroupControl Items=""_labelItems"" @bind-Values=""_labels"" Selection=""ChoiceSelectionMode.Multiple"" AllowEmpty=""true""
+                            Orientation=""@(_stackLabels ? FlexOrientation.Vertical : FlexOrientation.Horizontal)"" AriaLabel=""Labels"" />
+    </div>
+    <div class=""stack res"">
+        <span class=""lbl"" role=""status"">@Matches.Length of @_tasks.Length open tasks match</span>
+        <ul class=""tasks"">
+            @foreach (var t in Matches)
+            {
+                <li><span class=""bi bi-card-checklist"" aria-hidden=""true""></span>@t.Title<span class=""task-label"">@t.Label</span></li>
+            }
+        </ul>
     </div>
 </div>";
-        public const string Segmented = @"<div class=""stack"">
-    <SegmentedControl Items=""_viewItems"" @bind-Value=""_calendarView"" AriaLabel=""Calendar view"" />
-    <span class=""result"">@_calendarView</span>
+        public const string GroupCs = @"// Group
+private bool _stackLabels;
+private readonly SelectionItem[] _statusItems =
+{
+    new(""todo"", ""To do"", IconCss: ""bi bi-circle""),
+    new(""progress"", ""In progress"", IconCss: ""bi bi-hourglass-split""),
+    new(""review"", ""In review"", IconCss: ""bi bi-eye""),
+};
+private IReadOnlyList<string> _status = new[] { ""progress"" };
+private readonly SelectionItem[] _labelItems =
+{
+    new(""Design"", ""Design""), new(""Frontend"", ""Frontend""), new(""Backend"", ""Backend""), new(""Content"", ""Content""), new(""QA"", ""QA"", Disabled: true),
+};
+private IReadOnlyList<string> _labels = new[] { ""Frontend"", ""Backend"" };
+private sealed record TaskItem(string Title, string Label, string Status);
+private readonly TaskItem[] _tasks =
+{
+    new(""WEB-112 Menu page layout"", ""Design"", ""progress""), new(""WEB-115 Navigation bar"", ""Frontend"", ""progress""),
+    new(""WEB-117 Order form"", ""Frontend"", ""review""), new(""WEB-118 Order emails"", ""Backend"", ""progress""),
+    new(""WEB-120 Payment setup"", ""Backend"", ""todo""), new(""WEB-121 Menu copy"", ""Content"", ""review""),
+    new(""WEB-123 Photo gallery"", ""Frontend"", ""progress""), new(""WEB-124 Allergen icons"", ""Design"", ""todo""),
+};
+private TaskItem[] Matches => _tasks.Where(t => t.Status == _status[0] && (_labels.Count == 0 || _labels.Contains(t.Label))).ToArray();";
+        public const string Segmented = @"<div class=""estimate"">
+    <div class=""demo-row"">
+        <span class=""est-icon bi bi-cash-coin"" aria-hidden=""true""></span>
+        <span class=""lbl"">Build milestone, 4 sprints, 8 weeks</span>
+        <SegmentedControl Items=""_budgetItems"" @bind-Value=""_budgetView"" AriaLabel=""Budget view"" />
+    </div>
+    <p class=""price"" role=""status"">@Budget.ToString(""C0"") <span class=""result"">@_budgetItems.First(i => i.Value == _budgetView).Text.ToLowerInvariant()</span></p>
 </div>";
         public const string SegmentedCs = @"// Segmented
-private readonly SelectionItem[] _viewItems = { new(""day"", ""Day""), new(""week"", ""Week""), new(""month"", ""Month"") };
-private string _calendarView = ""week"";";
-        public const string GroupCs = @"// Group
-private readonly SelectionItem[] _alignItems =
-{
-    new(""left"", """", IconCss: ""bi bi-text-left""),
-    new(""center"", """", IconCss: ""bi bi-text-center""),
-    new(""right"", """", IconCss: ""bi bi-text-right""),
-    new(""justify"", """", IconCss: ""bi bi-justify""),
-};
-
-private IReadOnlyList<string> _align = new[] { ""left"" };
-
-private readonly SelectionItem[] _dayItems =
-{
-    new(""mon"", ""Monday""), new(""tue"", ""Tuesday""), new(""wed"", ""Wednesday""),
-    new(""thu"", ""Thursday""), new(""fri"", ""Friday""), new(""sat"", ""Saturday"", Disabled: true),
-};
-
-private IReadOnlyList<string> _days = new[] { ""mon"", ""tue"", ""wed"", ""thu"", ""fri"" };";
+private readonly SelectionItem[] _budgetItems = { new(""sprint"", ""Per sprint""), new(""total"", ""In total""), new(""week"", ""Per week"") };
+private string _budgetView = ""sprint"";
+private decimal Budget => _budgetView switch { ""total"" => 12000, ""week"" => 12000 / 8m, _ => 3000 };";
     }
 }

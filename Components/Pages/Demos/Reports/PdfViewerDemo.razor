@@ -102,12 +102,13 @@
     </Vocabulary>
 
     <Accessibility>
-        <p>
-            The page buttons are labeled "Previous page" and "Next page", the search box "Search document", and the canvas
-            "PDF page <em>n</em>"; the page viewport is a focusable region. Busy text and the match count use <code>role="status"</code>
-            and errors <code>role="alert"</code>. Bookmarks, search hits and notes in the Details pane are buttons, and the current hit
-            carries <code>aria-current</code>. Form fields in the pane are ordinary labeled controls.
-        </p>
+        <ul>
+            <li>The page buttons are named "Previous page" and "Next page", and the search box "Search document".</li>
+            <li>The page area is a focusable region named "PDF page", so arrow keys scroll it once it has focus. The page's text lies over the canvas as transparent, selectable text.</li>
+            <li>Busy text and the match count have <code>role="status"</code>, and errors <code>role="alert"</code>.</li>
+            <li>The Details pane is an <code>&lt;aside&gt;</code> named "Document details". Bookmarks are a nested list of buttons, each search hit is a button with <code>aria-current="true"</code> on the current one, and each form field is named with the field's name.</li>
+            <li>Notes and highlights added in the viewer are listed in the pane as buttons that go to their page, each with a remove button named "Remove annotation"; the note box is named "Note text".</li>
+        </ul>
     </Accessibility>
 
     <Related>

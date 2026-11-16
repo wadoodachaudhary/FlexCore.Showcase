@@ -1,9 +1,32 @@
-/* a small window, so the bar sits at the top of something */
-.menu-window { border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; max-width: 560px; }
-.menu-body { display: flex; flex-direction: column; gap: 6px; padding: 18px 16px; min-height: 70px; font-size: 14px; color: #334155; }
-.menu-state { font-size: 13px; color: #64748b; }
+/* a small window, so the bar sits at the top of something: a title strip with three dots, the bar, then the list */
+.menu-window { max-width: 600px; overflow: visible; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+               box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+.mw-chrome { display: flex; gap: 6px; padding: 9px 12px; border-bottom: 1px solid #eef2f7; border-radius: 10px 10px 0 0; background: #f8fafc; }
+.mw-chrome > span { width: 10px; height: 10px; border-radius: 50%; background: #fca5a5; }
+.mw-chrome > span:nth-child(2) { background: #fcd34d; }
+.mw-chrome > span:nth-child(3) { background: #86efac; }
+.menu-list { margin: 0; padding: 8px 12px 12px; list-style: none; min-height: 150px; }
+.menu-list li { display: flex; justify-content: space-between; align-items: center; padding: 9px 4px; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #0f172a; }
+.menu-list li:last-child { border-bottom: 0; }
+.menu-list.compact li { padding: 3px 4px; font-size: 13px; }
 
 .demo-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }   /* not .row: Bootstrap owns that name */
 .result { font-size: 13px; color: #475569; }
+
+/* App cards for the split button and the menu filled on opening; the result in a footer band */
+.mb { max-width: 760px; padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+.mb > .result { margin: 16px -18px -16px; padding: 10px 18px; border-top: 1px solid #f1f5f9; border-radius: 0 0 10px 10px; background: #f8fafc; }
+.mb ::deep .fx-button.btn-sm { border-color: #cbd5e1; background: #fff; color: #334155; }
+.mb ::deep .fx-button.btn-sm:hover:not(:disabled) { border-color: #94a3b8; background: #f8fafc; }
+
+/* Sent: a timeline with the newest entry on top, as on the Split button page */
+.sent { display: flex; flex-direction: column; gap: 8px; min-height: 58px; margin: 14px 0 0; padding: 2px 0 2px 18px; border-left: 2px solid #e2e8f0; list-style: none; font-size: 13px; color: #475569; }
+.sent li { position: relative; }
+.sent li::before { content: ''; position: absolute; top: 5px; left: -23px; width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; box-shadow: 0 0 0 3px #fff; }
+.sent li:first-child { color: #0f172a; font-weight: 600; }
+.sent li:first-child::before { background: var(--brand-button, #4f46e5); }
+/* rendered inside the control's trigger via TriggerContent */
+::deep .count { margin-left: 4px; padding: 0 7px; border-radius: 999px; background: #e0e7ff; color: #3730a3; font-size: 12px; font-weight: 600; }
 .note { font-size: 13.5px; color: #475569; margin: -8px 0 14px; }
 .note code { font-size: 12.5px; background: #f1f5f9; padding: 1px 4px; border-radius: 4px; color: #334155; }

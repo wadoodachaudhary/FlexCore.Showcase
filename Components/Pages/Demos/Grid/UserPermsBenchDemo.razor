@@ -7,7 +7,8 @@
 @using FlexCore.Showcase.Components.Shared
 
 @* 2026-10-25 (SC-344): master-detail example on sales desks and agents (Data/BenchModels.cs, BenchDataStore).
-   2026-10-26: example 1 on countries and their airports (Data/AirportData.cs, Airport.CountryCode); desks, agents removed. *@
+   2026-10-26: example 1 on countries and their airports (Data/AirportData.cs, Airport.CountryCode); desks, agents removed.
+   2026-11-16: pre-deploy review fixes. *@
 
 @* 2026-10-18: on FeatureDemoLayout; detail rows carry their master's key (SC-189, SC-193). Bench leftovers removed (SC-190,
    SC-191, SC-192); legacy jargon removed (SC-188; old route an alias until 2026-10-25).
@@ -71,8 +72,8 @@
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="warehouses" Title="Products and their warehouse stock" RazorCode="@Code.Warehouses" CSharpCode="@Code.WarehousesCs" CssCode="@Code.WarehousesCss">
-            <Description><p>Open the arrow on a product row to see its stock per warehouse, then receive or reserve stock in the detail and watch the product row recalculate.</p></Description>
+        <DemoExample Id="warehouses" Title="Products and their warehouse stock" RazorCode="@Code.Warehouses" CSharpCode="@Code.WarehousesCs">
+            <Description><p>Open the arrow on a product row to see its stock per warehouse, then receive or reserve stock in the detail and watch the product row recalculate. The stock grid has no <code>Height</code>, so this page adds <code>.detail ::deep .fx-grid-content { flex: 0 0 auto; }</code> to let it grow to its rows; without that rule or a <code>Height</code>, a grid in a detail row shrinks to its scrollbar.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="CategoryItems" Values="@(new[] { _category })" ValuesChanged="Filter" Selection="ChoiceSelectionMode.Single" AriaLabel="Category" />
             </Controls>
@@ -310,13 +311,6 @@ private void Show(CountryRow? country)
 }
 
 private sealed record CountryRow(string Code, string Name, int Airports);";
-        public const string WarehousesCss = @".detail { display: grid; gap: 6px; padding: 2px 4px 4px; }
-/* With no Height, a GridControl's scroll area (flex-basis 0) shrinks to its scrollbar in a table cell; this lets it grow to its rows. */
-.detail ::deep .fx-grid-content { flex: 0 0 auto; }
-.detail-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: #334155; }
-.detail-bar span { margin-right: auto; }
-.low { color: #b45309; font-weight: 600; }
-.out { color: #b91c1c; font-weight: 600; }";
         public const string Warehouses = @"<ButtonGroupControl Items=""CategoryItems"" Values=""@(new[] { _category })"" ValuesChanged=""Filter"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Category"" />
 
 <GridControl @ref=""_grid""

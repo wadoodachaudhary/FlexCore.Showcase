@@ -26,6 +26,12 @@
     --fx-btn-hover-border-color: transparent;
     --fx-btn-active-bg: #c7d2fe;
     --fx-accent: var(--brand-button);
+    /* 2026-11-15: split buttons, dock-manager tabs and calendar picks used the library blue (#2563eb) next to the indigo buttons;
+       they follow the button indigo, so every page shows one primary color. */
+    --fx-primary: var(--brand-button);
+    --fx-split-btn-bg: var(--brand-button);
+    --fx-split-btn-border-color: var(--brand-button-hover);
+    --fx-split-btn-hover-bg: var(--brand-button-hover);
 }
 
 /* Buttons beyond the --fx-btn-* variables: type and weight, indigo for library-fixed variants; doubled classes beat the library's
@@ -1073,8 +1079,7 @@ td:has(.fx-dropdown-grid.fx-open),
 .fx-grid-content::-webkit-scrollbar-thumb:hover { background: #8a8a8a; }
 .fx-grid-content::-webkit-scrollbar-corner { background: #f3f3f3; }
 
-/* Site tabs (2026-10-29): the top menu's look for every tab row. The Tabs & accordion page's CSS tab prints the rules between
-   the markers verbatim (AppSource.Region). */
+/* Site tabs (2026-10-29): the top menu's look for every tab row. */
 /* code-tab:site-tabs */
 /* class="site-tabs" on a TabStripControl, or on a TabControl for its header row. :root and :is() outrank the strip's own
    styles and the colors its Theme writes inline. */

@@ -5,7 +5,10 @@
 
 @* 2026-10-25: new page; facts from DropDownListControl*, dropdown-list-control.js, Grid/DropDownGridControl*, ListBox*
    (FlexCore 0.2.49). DropDownListControl never reads AllowFiltering or ChildContent; none of the three captures unmatched attributes.
-   2026-10-26: lookup example on OurAirports (Data/AirportData.cs): two airports and their great-circle distance. *@
+   2026-10-26: lookup example on OurAirports (Data/AirportData.cs): two airports and their great-circle distance.
+   2026-11-15: examples rebuilt (a quote's destination, travelers and lead traveler); text re-checked against FlexCore 0.2.50.
+   2026-11-16: independent review fixes.
+   2026-11-16: pre-deploy review fixes. *@
 
 <PageTitle>Blazor DropDownList, DropDownGrid and ListBox — FlexCore</PageTitle>
 
@@ -21,102 +24,122 @@
 
     <Examples>
         <DemoExample Id="dropdown" Title="Pick a destination" RazorCode="@Code.Dropdown" CSharpCode="@Code.DropdownCs">
-            <Description><p>Pick a destination on the left; on the right the box is editable, so type a city that is not listed and press Enter.</p></Description>
+            <Description><p>Start a quote: pick a Destination; Flying from is <code>Editable</code>, so type a city that is not listed and press Enter. Mark the quote sent and <code>Enabled</code> locks both.</p></Description>
             <Demo>
-                <div class="pair">
-                    <div class="field">
-                        <span class="field-label">Destination</span>
-                        <DropDownListControl TValue="string" TItem="Destination" DataSource="@_destinations" TextFieldName="City" ValueFieldName="City"
-                                             @bind-Value="_city" ValueChange="args => _picked = args.ItemData" Placeholder="Choose a destination"
-                                             Width="220px" Enabled="_enabled" AriaLabel="Destination">
-                            <ItemTemplate Context="d"><span>@d.City</span> <span class="muted">@d.Country</span></ItemTemplate>
-                        </DropDownListControl>
+                <div class="ld">
+                    <div class="pair">
+                        <div class="field">
+                            <span class="field-label">Destination</span>
+                            <DropDownListControl TValue="string" TItem="Destination" DataSource="@_destinations" TextFieldName="City" ValueFieldName="City"
+                                                 @bind-Value="_city" ValueChange="args => _picked = args.ItemData" Placeholder="Choose a destination"
+                                                 Width="220px" Enabled="@(!_sent)" AriaLabel="Destination">
+                                <ItemTemplate Context="d"><span>@d.City</span> <span class="muted">@d.Country</span></ItemTemplate>
+                            </DropDownListControl>
+                        </div>
+                        <div class="field">
+                            <span class="field-label">Flying from</span>
+                            <DropDownListControl TValue="string" TItem="string" DataSource="@_gateways" @bind-Value="_from" Editable="true"
+                                                 Placeholder="Pick or type a city" Width="220px" Enabled="@(!_sent)" AriaLabel="Flying from" />
+                        </div>
+                        <div class="switch-cell">
+                            <SwitchControl @bind-Checked="_sent" Label="Quote sent" />
+                        </div>
                     </div>
-                    <div class="field">
-                        <span class="field-label">Flying from</span>
-                        <DropDownListControl TValue="string" TItem="string" DataSource="@_gateways" @bind-Value="_from" Editable="true"
-                                             Placeholder="Pick or type a city" Width="220px" Enabled="_enabled" AriaLabel="Flying from" />
-                    </div>
-                    <div class="switch-cell">
-                        <SwitchControl @bind-Checked="_enabled" Label="Enabled" />
-                    </div>
+                    <p class="quote" role="status">
+                        <strong>Quote for Hermione Ranger</strong>
+                        <span>@(_picked is null ? "No destination yet" : $"{_picked.City}, {_picked.Country} ({_picked.Region})"), flying from @(string.IsNullOrWhiteSpace(_from) ? "a city still to choose" : _from)</span>
+                        <span>@(_sent ? "Sent to the traveler: the fields are locked." : "Draft: both fields can still change.")</span>
+                    </p>
                 </div>
-                <p class="result">Value <strong>@(_city ?? "null")</strong> · ItemData @(_picked is null ? "null" : $"{_picked.City}, {_picked.Region}, {_picked.Country}") · Flying from <strong>@(_from ?? "null")</strong></p>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="lookup" Title="Pick two airports from a 4,009-row grid" RazorCode="@Code.Lookup" CSharpCode="@Code.LookupCs" CssCode="@Code.LookupCss">
-            <Description><p>Search 4,009 airports by code, city or country, pick two, and the page works out the distance between them.</p></Description>
+        <DemoExample Id="lookup" Title="Pick two airports from a 4,009-row grid" RazorCode="@Code.Lookup" CSharpCode="@Code.LookupCs">
+            <Description><p>Search 4,009 airports by code, city or country, pick two, and the page works out the distance between them. The boxes start on London Heathrow and Naples, the airport for the Amalfi trip below.</p></Description>
             <Demo>
-                <div class="pair">
-                    <div class="lookup">
-                        <span class="field-label">Flying from</span>
-                        <div class="lookup-box">
-                            <DropDownGridControl TItem="Airport" TValue="string" DataSource="@AirportData.Airports" @bind-Value="_fromCode"
-                                                 ValueFieldName="Code" ClosedTextFieldName="Label" Placeholder="Choose an airport"
-                                                 SearchPlaceholder="Code, city, country or name" PopupWidth="560px" PopupHeight="260px" RowHeight="24">
-                                <Columns>
-                                    <GridColumn Field="Code" HeaderText="Code" Width="60px" />
-                                    <GridColumn Field="Name" HeaderText="Airport" Width="230px" />
-                                    <GridColumn Field="City" HeaderText="City" Width="120px" />
-                                    <GridColumn Field="Country" HeaderText="Country" Width="130px" />
-                                </Columns>
-                            </DropDownGridControl>
+                <div class="ld">
+                    <div class="pair">
+                        <div class="lookup">
+                            <span class="field-label">Flying from</span>
+                            <div class="lookup-box">
+                                <DropDownGridControl TItem="Airport" TValue="string" DataSource="@AirportData.Airports" @bind-Value="_fromCode"
+                                                     ValueFieldName="Code" ClosedTextFieldName="Label" Placeholder="Choose an airport"
+                                                     SearchPlaceholder="Code, city, country or name" PopupWidth="560px" PopupHeight="260px" RowHeight="24">
+                                    <Columns>
+                                        <GridColumn Field="Code" HeaderText="Code" Width="60px" />
+                                        <GridColumn Field="Name" HeaderText="Airport" Width="230px" />
+                                        <GridColumn Field="City" HeaderText="City" Width="120px" />
+                                        <GridColumn Field="Country" HeaderText="Country" Width="130px" />
+                                    </Columns>
+                                </DropDownGridControl>
+                            </div>
+                        </div>
+                        <div class="lookup">
+                            <span class="field-label">Flying to</span>
+                            <div class="lookup-box">
+                                <DropDownGridControl TItem="Airport" TValue="string" DataSource="@AirportData.Airports" @bind-Value="_toCode"
+                                                     ValueFieldName="Code" ClosedTextFieldName="Label" Placeholder="Choose an airport"
+                                                     SearchPlaceholder="Code, city, country or name" PopupWidth="560px" PopupHeight="260px" RowHeight="24">
+                                    <Columns>
+                                        <GridColumn Field="Code" HeaderText="Code" Width="60px" />
+                                        <GridColumn Field="Name" HeaderText="Airport" Width="230px" />
+                                        <GridColumn Field="City" HeaderText="City" Width="120px" />
+                                        <GridColumn Field="Country" HeaderText="Country" Width="130px" />
+                                    </Columns>
+                                </DropDownGridControl>
+                            </div>
                         </div>
                     </div>
-                    <div class="lookup">
-                        <span class="field-label">Flying to</span>
-                        <div class="lookup-box">
-                            <DropDownGridControl TItem="Airport" TValue="string" DataSource="@AirportData.Airports" @bind-Value="_toCode"
-                                                 ValueFieldName="Code" ClosedTextFieldName="Label" Placeholder="Choose an airport"
-                                                 SearchPlaceholder="Code, city, country or name" PopupWidth="560px" PopupHeight="260px" RowHeight="24">
-                                <Columns>
-                                    <GridColumn Field="Code" HeaderText="Code" Width="60px" />
-                                    <GridColumn Field="Name" HeaderText="Airport" Width="230px" />
-                                    <GridColumn Field="City" HeaderText="City" Width="120px" />
-                                    <GridColumn Field="Country" HeaderText="Country" Width="130px" />
-                                </Columns>
-                            </DropDownGridControl>
-                        </div>
-                    </div>
+                    @if (Find(_fromCode) is { } from && Find(_toCode) is { } to)
+                    {
+                        <p class="result"><strong>@from.Code → @to.Code</strong>: @from.Name, @from.Country to @to.Name, @to.Country.
+                            Great-circle distance <strong>@Kilometers(from, to).ToString("N0") km</strong> (@((Kilometers(from, to) / 1.609344).ToString("N0")) miles).</p>
+                    }
+                    else
+                    {
+                        <p class="result">Pick both airports for the distance: from <strong>@(_fromCode ?? "no airport yet")</strong>, to <strong>@(_toCode ?? "no airport yet")</strong>.</p>
+                    }
                 </div>
-                @if (Find(_fromCode) is { } from && Find(_toCode) is { } to)
-                {
-                    <p class="result"><strong>@from.Code → @to.Code</strong>: @from.Name, @from.Country to @to.Name, @to.Country.
-                        Great-circle distance <strong>@Kilometers(from, to).ToString("N0") km</strong> (@((Kilometers(from, to) / 1.609344).ToString("N0")) miles).</p>
-                }
-                else
-                {
-                    <p class="result">Value from <strong>@(_fromCode ?? "null")</strong> · to <strong>@(_toCode ?? "null")</strong>: pick both airports for the distance.</p>
-                }
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="listbox" Title="Choose several destinations" RazorCode="@Code.Listbox" CSharpCode="@Code.ListboxCs" CssCode="@Code.ListboxCss">
-            <Description><p>Check several destinations on the left; the right list keeps one choice, with checkboxes when the switch is on.</p></Description>
+        <DemoExample Id="listbox" Title="Choose several travelers" RazorCode="@Code.Listbox" CSharpCode="@Code.ListboxCs">
+            <Description><p>Check who is going to Amalfi in a <code>Multiple</code> list of two columns; Lead traveler lists only those and keeps one choice, and its switch sets <code>ShowCheckbox</code>, so a check box replaces each radio button and the choice can be cleared.</p></Description>
             <Demo>
-                <div class="pair">
-                    <div>
-                        <p class="pane-title" id="wish-title">Wish list</p>
-                        <div role="group" aria-labelledby="wish-title">
-                            <ListBoxControl TItem="Destination" DataSource="@_destinations" TextField="City" ValueField="City"
-                                            SelectionMode="ListBoxSelectionMode.Multiple" @bind-Value="_wishlist" CssClass="two-columns" />
+                <div class="ld">
+                    <div class="pair">
+                        <div>
+                            <p class="pane-title" id="going-title">Who is going to Amalfi</p>
+                            <div role="group" aria-labelledby="going-title">
+                                <ListBoxControl TItem="Traveler" DataSource="@_travelers" TextField="Name" ValueField="Name"
+                                                SelectionMode="ListBoxSelectionMode.Multiple" Value="_going" ValueChanged="GoingChanged" CssClass="two-columns" />
+                            </div>
+                            <div class="actions">
+                                <ButtonControl CssClass="btn-sm" OnClick="() => GoingChanged(new())" Disabled="@(_going.Count == 0)">Clear the travelers</ButtonControl>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="pane-title" id="lead-title">Lead traveler</p>
+                            <div role="group" aria-labelledby="lead-title">
+                                <ListBoxControl TItem="Traveler" DataSource="@Going" TextField="Name" ValueField="Name"
+                                                ShowCheckbox="_leadBoxes" @bind-Value="_lead" />
+                            </div>
+                            <div class="switch-row">
+                                <SwitchControl @bind-Checked="_leadBoxes" Label="Check boxes on this list" />
+                            </div>
                         </div>
                     </div>
-                    <div>
-                        <p class="pane-title" id="spend-title">Spend most on</p>
-                        <div role="group" aria-labelledby="spend-title">
-                            <ListBoxControl TItem="Category" DataSource="@_categories" TextField="Name" ValueField="Name"
-                                            ShowCheckbox="_singleCheckbox" @bind-Value="_spend" />
-                        </div>
-                        <div class="switch-row">
-                            <SwitchControl @bind-Checked="_singleCheckbox" Label="ShowCheckbox" />
-                        </div>
-                    </div>
-                </div>
-                <p class="result">Wish list (@_wishlist.Count): <strong>@string.Join(", ", WishedFor.Select(d => d.City))</strong> · Spend most on: <strong>@(_spend.FirstOrDefault() ?? "nothing")</strong></p>
-                <div class="actions">
-                    <ButtonControl CssClass="btn-sm" OnClick="() => _wishlist = new()" Disabled="@(_wishlist.Count == 0)">Clear the wish list</ButtonControl>
+                    <p class="result" role="status">
+                        @if (_going.Count == 0)
+                        {
+                            <span>Nobody going yet</span>
+                        }
+                        else
+                        {
+                            <span>@_going.Count going: <strong>@string.Join(", ", _going)</strong></span>
+                        }
+                        · Lead traveler: <strong>@(_lead.FirstOrDefault() ?? "nobody yet")</strong>
+                    </p>
                 </div>
             </Demo>
         </DemoExample>
@@ -175,12 +198,11 @@
         <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard: DropDownListControl" Rows="Vocab.KeysList" />
         <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard: DropDownGridControl" Rows="Vocab.KeysGrid" />
         <ul>
-            <li><code>DropDownListControl</code> is a button with <code>aria-haspopup="listbox"</code> and <code>aria-expanded</code>; the open list is <code>role="listbox"</code> of <code>role="option"</code> buttons carrying <code>aria-selected</code>. <code>AriaLabel</code> becomes the button's <code>aria-label</code>, which takes precedence over the button's text when the browser computes its name, so the chosen value is not part of that name.</li>
+            <li><code>DropDownListControl</code> is a button with <code>aria-haspopup="listbox"</code> and <code>aria-expanded</code>, given <code>AriaLabel</code> as its <code>aria-label</code>; the open list is a <code>role="listbox"</code> of <code>role="option"</code> buttons carrying <code>aria-selected</code>.</li>
             <li>While the list is open, focus sits on the highlighted option; a pick or Escape returns it to the button. Focus leaving an open list takes an option highlighted with the keys and otherwise only closes the list.</li>
-            <li>In editable mode the text box is <code>role="combobox"</code> with <code>aria-autocomplete="list"</code>, <code>aria-controls</code> naming the list and <code>aria-expanded</code>; focus stays in the box and the control's script keeps <code>aria-activedescendant</code> on the highlighted option. F4 or Alt+Down opens the list and, pressed again, closes it as Enter would; Up, Down, Home, End, Page Up and Page Down move the highlight while it is open, and Up and Down select the previous or next option while it is closed. Enter takes the highlighted option after an arrow key and commits the typed text otherwise. Escape closes the list; pressed again it puts back the committed text.</li>
-            <li><code>DropDownGridControl</code> renders no ARIA roles: the closed box is a read-only text input with no role and no <code>aria-expanded</code>, and the control takes no <code>AriaLabel</code> or extra attributes, so show a visible caption next to it. The ✕ button's accessible name is its text, the ✕ character; "Clear" is only its <code>title</code>.</li>
-            <li><code>ListBoxControl</code> renders native inputs inside labels, so each row is named by its text and the browser supplies the keys: Tab reaches each checkbox and Space toggles it; the radio buttons of one list share a group name, so Tab enters the group and the arrow keys move the choice. The control names neither the list nor its role; the example wraps each list in <code>role="group"</code> with <code>aria-labelledby</code> pointing at its caption.</li>
-            <li>None of the three controls accepts unmatched attributes, so <code>aria-*</code> attributes cannot be added to them directly.</li>
+            <li>In editable mode the text box is a <code>role="combobox"</code> with <code>aria-autocomplete="list"</code>, <code>aria-controls</code> naming the list, <code>aria-expanded</code>, and <code>aria-activedescendant</code> on the highlighted option; focus stays in the box. F4 or Alt+Down opens and closes the list, the arrow keys, Home, End, Page Up and Page Down move the highlight, Enter commits the highlighted option or the typed text, and Escape closes the list.</li>
+            <li><code>DropDownGridControl</code> shows the value in a read-only text box; its popup holds a search box and a <code>role="grid"</code> table.</li>
+            <li><code>ListBoxControl</code> renders native inputs inside labels, so each row is named by its text and the browser supplies the keys: Tab reaches each checkbox and Space toggles it; the radio buttons of one list share a group name, so Tab enters the group and the arrow keys move the choice. Wrap each list in an element with <code>role="group"</code> and <code>aria-labelledby</code> pointing at its caption, as the example does.</li>
         </ul>
     </Accessibility>
 
@@ -199,24 +221,32 @@
     private Destination? _picked;
     private readonly string[] _gateways = { "Amsterdam", "Chicago", "Dublin", "Frankfurt", "London", "New York", "Singapore", "Toronto" };
     private string? _from = "London";
-    private bool _enabled = true;
+    private bool _sent;
 
-    // Destinations (the dropdown and the list boxes)
+    // Destinations (the dropdown)
     private sealed record Destination(string City, string Region, string Country);
     private static readonly Destination[] _destinations =
         TravelData.Destinations.Select(d => new Destination(d.City, d.Region, d.Country)).ToArray();
 
-    // List boxes
-    private sealed record Category(string Name);
-    private static readonly Category[] _categories = TravelData.Categories.Select(c => new Category(c)).ToArray();
-    private List<string> _wishlist = new() { "Kyoto", "Reykjavik" };
-    private List<string> _spend = new() { "Experiences" };
-    private bool _singleCheckbox;
-    private IEnumerable<Destination> WishedFor => _destinations.Where(d => _wishlist.Contains(d.City));
+    // List boxes: the second list holds only the travelers checked in the first
+    private sealed record Traveler(string Name);
+    private static readonly Traveler[] _travelers =
+    {
+        new("Albus Door"), new("Hermione Ranger"), new("Ron Measly"), new("Luna Goodlove"), new("Neville Longbutton"), new("Ginny Measly"),
+    };
+    private List<string> _going = new() { "Albus Door", "Hermione Ranger" };
+    private List<string> _lead = new() { "Hermione Ranger" };
+    private bool _leadBoxes;
+    private IEnumerable<Traveler> Going => _travelers.Where(t => _going.Contains(t.Name));
+    private void GoingChanged(List<string> going)
+    {
+        _going = going;
+        _lead = _lead.Where(going.Contains).ToList();   // a lead who is no longer going is dropped
+    }
 
     // Airport lookups: the OurAirports snapshot from Data/AirportData.cs; the values are airport codes
     private string? _fromCode = "LHR";
-    private string? _toCode = "LIS";
+    private string? _toCode = "NAP";
     private static readonly Dictionary<string, Airport> _airportsByCode = AirportData.Airports.ToDictionary(a => a.Code);
     private static Airport? Find(string? code) => code is not null && _airportsByCode.TryGetValue(code, out var airport) ? airport : null;
 
@@ -368,85 +398,88 @@
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Dropdown = @"<div class=""pair"">
-    <div class=""field"">
-        <span class=""field-label"">Destination</span>
-        <DropDownListControl TValue=""string"" TItem=""Destination"" DataSource=""@_destinations"" TextFieldName=""City"" ValueFieldName=""City""
-                             @bind-Value=""_city"" ValueChange=""args => _picked = args.ItemData"" Placeholder=""Choose a destination""
-                             Width=""220px"" Enabled=""_enabled"" AriaLabel=""Destination"">
-            <ItemTemplate Context=""d""><span>@d.City</span> <span class=""muted"">@d.Country</span></ItemTemplate>
-        </DropDownListControl>
+        public const string Dropdown = @"<div class=""ld"">
+    <div class=""pair"">
+        <div class=""field"">
+            <span class=""field-label"">Destination</span>
+            <DropDownListControl TValue=""string"" TItem=""Destination"" DataSource=""@_destinations"" TextFieldName=""City"" ValueFieldName=""City""
+                                 @bind-Value=""_city"" ValueChange=""args => _picked = args.ItemData"" Placeholder=""Choose a destination""
+                                 Width=""220px"" Enabled=""@(!_sent)"" AriaLabel=""Destination"">
+                <ItemTemplate Context=""d""><span>@d.City</span> <span class=""muted"">@d.Country</span></ItemTemplate>
+            </DropDownListControl>
+        </div>
+        <div class=""field"">
+            <span class=""field-label"">Flying from</span>
+            <DropDownListControl TValue=""string"" TItem=""string"" DataSource=""@_gateways"" @bind-Value=""_from"" Editable=""true""
+                                 Placeholder=""Pick or type a city"" Width=""220px"" Enabled=""@(!_sent)"" AriaLabel=""Flying from"" />
+        </div>
+        <div class=""switch-cell"">
+            <SwitchControl @bind-Checked=""_sent"" Label=""Quote sent"" />
+        </div>
     </div>
-    <div class=""field"">
-        <span class=""field-label"">Flying from</span>
-        <DropDownListControl TValue=""string"" TItem=""string"" DataSource=""@_gateways"" @bind-Value=""_from"" Editable=""true""
-                             Placeholder=""Pick or type a city"" Width=""220px"" Enabled=""_enabled"" AriaLabel=""Flying from"" />
-    </div>
-    <div class=""switch-cell"">
-        <SwitchControl @bind-Checked=""_enabled"" Label=""Enabled"" />
-    </div>
-</div>
-<p class=""result"">Value <strong>@(_city ?? ""null"")</strong> · ItemData @(_picked is null ? ""null"" : $""{_picked.City}, {_picked.Region}, {_picked.Country}"") · Flying from <strong>@(_from ?? ""null"")</strong></p>";
+    <p class=""quote"" role=""status"">
+        <strong>Quote for Hermione Ranger</strong>
+        <span>@(_picked is null ? ""No destination yet"" : $""{_picked.City}, {_picked.Country} ({_picked.Region})""), flying from @(string.IsNullOrWhiteSpace(_from) ? ""a city still to choose"" : _from)</span>
+        <span>@(_sent ? ""Sent to the traveler: the fields are locked."" : ""Draft: both fields can still change."")</span>
+    </p>
+</div>";
         public const string DropdownCs = @"// Destination dropdown
 private string? _city;
 private Destination? _picked;
 private readonly string[] _gateways = { ""Amsterdam"", ""Chicago"", ""Dublin"", ""Frankfurt"", ""London"", ""New York"", ""Singapore"", ""Toronto"" };
 private string? _from = ""London"";
-private bool _enabled = true;
+private bool _sent;
 
-// Destinations (the dropdown and the list boxes)
+// Destinations (the dropdown)
 private sealed record Destination(string City, string Region, string Country);
 private static readonly Destination[] _destinations =
     TravelData.Destinations.Select(d => new Destination(d.City, d.Region, d.Country)).ToArray();";
-        public const string Lookup = @"<div class=""pair"">
-    <div class=""lookup"">
-        <span class=""field-label"">Flying from</span>
-        <div class=""lookup-box"">
-            <DropDownGridControl TItem=""Airport"" TValue=""string"" DataSource=""@AirportData.Airports"" @bind-Value=""_fromCode""
-                                 ValueFieldName=""Code"" ClosedTextFieldName=""Label"" Placeholder=""Choose an airport""
-                                 SearchPlaceholder=""Code, city, country or name"" PopupWidth=""560px"" PopupHeight=""260px"" RowHeight=""24"">
-                <Columns>
-                    <GridColumn Field=""Code"" HeaderText=""Code"" Width=""60px"" />
-                    <GridColumn Field=""Name"" HeaderText=""Airport"" Width=""230px"" />
-                    <GridColumn Field=""City"" HeaderText=""City"" Width=""120px"" />
-                    <GridColumn Field=""Country"" HeaderText=""Country"" Width=""130px"" />
-                </Columns>
-            </DropDownGridControl>
+        public const string Lookup = @"<div class=""ld"">
+    <div class=""pair"">
+        <div class=""lookup"">
+            <span class=""field-label"">Flying from</span>
+            <div class=""lookup-box"">
+                <DropDownGridControl TItem=""Airport"" TValue=""string"" DataSource=""@AirportData.Airports"" @bind-Value=""_fromCode""
+                                     ValueFieldName=""Code"" ClosedTextFieldName=""Label"" Placeholder=""Choose an airport""
+                                     SearchPlaceholder=""Code, city, country or name"" PopupWidth=""560px"" PopupHeight=""260px"" RowHeight=""24"">
+                    <Columns>
+                        <GridColumn Field=""Code"" HeaderText=""Code"" Width=""60px"" />
+                        <GridColumn Field=""Name"" HeaderText=""Airport"" Width=""230px"" />
+                        <GridColumn Field=""City"" HeaderText=""City"" Width=""120px"" />
+                        <GridColumn Field=""Country"" HeaderText=""Country"" Width=""130px"" />
+                    </Columns>
+                </DropDownGridControl>
+            </div>
+        </div>
+        <div class=""lookup"">
+            <span class=""field-label"">Flying to</span>
+            <div class=""lookup-box"">
+                <DropDownGridControl TItem=""Airport"" TValue=""string"" DataSource=""@AirportData.Airports"" @bind-Value=""_toCode""
+                                     ValueFieldName=""Code"" ClosedTextFieldName=""Label"" Placeholder=""Choose an airport""
+                                     SearchPlaceholder=""Code, city, country or name"" PopupWidth=""560px"" PopupHeight=""260px"" RowHeight=""24"">
+                    <Columns>
+                        <GridColumn Field=""Code"" HeaderText=""Code"" Width=""60px"" />
+                        <GridColumn Field=""Name"" HeaderText=""Airport"" Width=""230px"" />
+                        <GridColumn Field=""City"" HeaderText=""City"" Width=""120px"" />
+                        <GridColumn Field=""Country"" HeaderText=""Country"" Width=""130px"" />
+                    </Columns>
+                </DropDownGridControl>
+            </div>
         </div>
     </div>
-    <div class=""lookup"">
-        <span class=""field-label"">Flying to</span>
-        <div class=""lookup-box"">
-            <DropDownGridControl TItem=""Airport"" TValue=""string"" DataSource=""@AirportData.Airports"" @bind-Value=""_toCode""
-                                 ValueFieldName=""Code"" ClosedTextFieldName=""Label"" Placeholder=""Choose an airport""
-                                 SearchPlaceholder=""Code, city, country or name"" PopupWidth=""560px"" PopupHeight=""260px"" RowHeight=""24"">
-                <Columns>
-                    <GridColumn Field=""Code"" HeaderText=""Code"" Width=""60px"" />
-                    <GridColumn Field=""Name"" HeaderText=""Airport"" Width=""230px"" />
-                    <GridColumn Field=""City"" HeaderText=""City"" Width=""120px"" />
-                    <GridColumn Field=""Country"" HeaderText=""Country"" Width=""130px"" />
-                </Columns>
-            </DropDownGridControl>
-        </div>
-    </div>
-</div>
-@if (Find(_fromCode) is { } from && Find(_toCode) is { } to)
-{
-    <p class=""result""><strong>@from.Code → @to.Code</strong>: @from.Name, @from.Country to @to.Name, @to.Country.
-        Great-circle distance <strong>@Kilometers(from, to).ToString(""N0"") km</strong> (@((Kilometers(from, to) / 1.609344).ToString(""N0"")) miles).</p>
-}
-else
-{
-    <p class=""result"">Value from <strong>@(_fromCode ?? ""null"")</strong> · to <strong>@(_toCode ?? ""null"")</strong>: pick both airports for the distance.</p>
-}";
-        public const string LookupCss = @".pair { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
-.field-label, .pane-title { display: block; font-size: 12px; color: #64748b; margin: 0 0 6px; }
-.result { font-size: 13px; color: #475569; margin: 14px 0 0; }
-.lookup { width: 280px; max-width: 100%; }
-.lookup-box { height: 26px; }";
+    @if (Find(_fromCode) is { } from && Find(_toCode) is { } to)
+    {
+        <p class=""result""><strong>@from.Code → @to.Code</strong>: @from.Name, @from.Country to @to.Name, @to.Country.
+            Great-circle distance <strong>@Kilometers(from, to).ToString(""N0"") km</strong> (@((Kilometers(from, to) / 1.609344).ToString(""N0"")) miles).</p>
+    }
+    else
+    {
+        <p class=""result"">Pick both airports for the distance: from <strong>@(_fromCode ?? ""no airport yet"")</strong>, to <strong>@(_toCode ?? ""no airport yet"")</strong>.</p>
+    }
+</div>";
         public const string LookupCs = @"// Airport lookups: the OurAirports snapshot from Data/AirportData.cs; the values are airport codes
 private string? _fromCode = ""LHR"";
-private string? _toCode = ""LIS"";
+private string? _toCode = ""NAP"";
 private static readonly Dictionary<string, Airport> _airportsByCode = AirportData.Airports.ToDictionary(a => a.Code);
 private static Airport? Find(string? code) => code is not null && _airportsByCode.TryGetValue(code, out var airport) ? airport : null;
 
@@ -459,44 +492,55 @@ private static double Kilometers(Airport a, Airport b)
     var h = Math.Pow(Math.Sin(dLat / 2), 2) + Math.Cos(Radians(a.Latitude)) * Math.Cos(Radians(b.Latitude)) * Math.Pow(Math.Sin(dLon / 2), 2);
     return 2 * 6371 * Math.Asin(Math.Sqrt(h));
 }";
-        public const string Listbox = @"<div class=""pair"">
-    <div>
-        <p class=""pane-title"" id=""wish-title"">Wish list</p>
-        <div role=""group"" aria-labelledby=""wish-title"">
-            <ListBoxControl TItem=""Destination"" DataSource=""@_destinations"" TextField=""City"" ValueField=""City""
-                            SelectionMode=""ListBoxSelectionMode.Multiple"" @bind-Value=""_wishlist"" CssClass=""two-columns"" />
+        public const string Listbox = @"<div class=""ld"">
+    <div class=""pair"">
+        <div>
+            <p class=""pane-title"" id=""going-title"">Who is going to Amalfi</p>
+            <div role=""group"" aria-labelledby=""going-title"">
+                <ListBoxControl TItem=""Traveler"" DataSource=""@_travelers"" TextField=""Name"" ValueField=""Name""
+                                SelectionMode=""ListBoxSelectionMode.Multiple"" Value=""_going"" ValueChanged=""GoingChanged"" CssClass=""two-columns"" />
+            </div>
+            <div class=""actions"">
+                <ButtonControl CssClass=""btn-sm"" OnClick=""() => GoingChanged(new())"" Disabled=""@(_going.Count == 0)"">Clear the travelers</ButtonControl>
+            </div>
+        </div>
+        <div>
+            <p class=""pane-title"" id=""lead-title"">Lead traveler</p>
+            <div role=""group"" aria-labelledby=""lead-title"">
+                <ListBoxControl TItem=""Traveler"" DataSource=""@Going"" TextField=""Name"" ValueField=""Name""
+                                ShowCheckbox=""_leadBoxes"" @bind-Value=""_lead"" />
+            </div>
+            <div class=""switch-row"">
+                <SwitchControl @bind-Checked=""_leadBoxes"" Label=""Check boxes on this list"" />
+            </div>
         </div>
     </div>
-    <div>
-        <p class=""pane-title"" id=""spend-title"">Spend most on</p>
-        <div role=""group"" aria-labelledby=""spend-title"">
-            <ListBoxControl TItem=""Category"" DataSource=""@_categories"" TextField=""Name"" ValueField=""Name""
-                            ShowCheckbox=""_singleCheckbox"" @bind-Value=""_spend"" />
-        </div>
-        <div class=""switch-row"">
-            <SwitchControl @bind-Checked=""_singleCheckbox"" Label=""ShowCheckbox"" />
-        </div>
-    </div>
-</div>
-<p class=""result"">Wish list (@_wishlist.Count): <strong>@string.Join("", "", WishedFor.Select(d => d.City))</strong> · Spend most on: <strong>@(_spend.FirstOrDefault() ?? ""nothing"")</strong></p>
-<div class=""actions"">
-    <ButtonControl CssClass=""btn-sm"" OnClick=""() => _wishlist = new()"" Disabled=""@(_wishlist.Count == 0)"">Clear the wish list</ButtonControl>
+    <p class=""result"" role=""status"">
+        @if (_going.Count == 0)
+        {
+            <span>Nobody going yet</span>
+        }
+        else
+        {
+            <span>@_going.Count going: <strong>@string.Join("", "", _going)</strong></span>
+        }
+        · Lead traveler: <strong>@(_lead.FirstOrDefault() ?? ""nobody yet"")</strong>
+    </p>
 </div>";
-        public const string ListboxCs = @"// Destinations (the dropdown and the list boxes)
-private sealed record Destination(string City, string Region, string Country);
-private static readonly Destination[] _destinations =
-    TravelData.Destinations.Select(d => new Destination(d.City, d.Region, d.Country)).ToArray();
-
-// List boxes
-private sealed record Category(string Name);
-private static readonly Category[] _categories = TravelData.Categories.Select(c => new Category(c)).ToArray();
-private List<string> _wishlist = new() { ""Kyoto"", ""Reykjavik"" };
-private List<string> _spend = new() { ""Experiences"" };
-private bool _singleCheckbox;
-private IEnumerable<Destination> WishedFor => _destinations.Where(d => _wishlist.Contains(d.City));";
-        public const string ListboxCss = @"/* List boxes */
-.pair ::deep .two-columns { display: grid; grid-template-columns: repeat(2, minmax(110px, 1fr)); column-gap: 24px; }
-.switch-row { margin-top: 12px; }
-.actions { margin-top: 10px; }";
+        public const string ListboxCs = @"// List boxes: the second list holds only the travelers checked in the first
+private sealed record Traveler(string Name);
+private static readonly Traveler[] _travelers =
+{
+    new(""Albus Door""), new(""Hermione Ranger""), new(""Ron Measly""), new(""Luna Goodlove""), new(""Neville Longbutton""), new(""Ginny Measly""),
+};
+private List<string> _going = new() { ""Albus Door"", ""Hermione Ranger"" };
+private List<string> _lead = new() { ""Hermione Ranger"" };
+private bool _leadBoxes;
+private IEnumerable<Traveler> Going => _travelers.Where(t => _going.Contains(t.Name));
+private void GoingChanged(List<string> going)
+{
+    _going = going;
+    _lead = _lead.Where(going.Contains).ToList();   // a lead who is no longer going is dropped
+}";
     }
 }

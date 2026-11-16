@@ -1,5 +1,33 @@
-/* 2026-10-12: Barcodes & QR page. No Bootstrap names in here. */
-.controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
-.qr-row { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
-.field { display: flex; flex-direction: column; gap: 6px; width: 220px; }
-.field-label { font-size: 12px; color: #64748b; }
+/* Barcodes & QR page. No Bootstrap names in here. */
+/* The options sit in a light strip above the tag, like a settings bar */
+.controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; padding: 10px 12px; border: 1px solid #eef2f7; border-radius: 10px; background: #f8fafc; }
+.controls ::deep .fx-button-group.horizontal > .fx-button:first-child { border-radius: 8px 0 0 8px; }
+.controls ::deep .fx-button-group.horizontal > .fx-button:last-child { border-radius: 0 8px 8px 0; }
+.controls ::deep input[type=text] { height: 30px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: var(--fx-btn-radius, 4px); font: inherit; font-size: 14px; background: #fff; }
+.controls ::deep input[type=text]:focus { border-color: var(--brand-button, #4f46e5); box-shadow: 0 0 0 3px var(--brand-button-soft, #eef2ff); outline: none; }
+.qr-row { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+.field { display: flex; flex-direction: column; gap: 6px; width: 240px; }
+.field-label { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #64748b; }
+.payload { padding: 6px 8px; border-radius: 6px; background: #f1f5f9; font-size: 12px; color: #334155; word-break: break-all; }
+
+/* Bin tag and packing slip: page markup around the two controls, drawn like the real things */
+.tag, .slip { position: relative; padding: 16px 18px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+              box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 24px -12px rgba(15, 23, 42, 0.25); }
+/* the bin tag: a warehouse-yellow band down the left edge holds the punched hole */
+.tag { width: max-content; max-width: 100%; padding-left: 56px; background: linear-gradient(90deg, #fef3c7 0 38px, #fff 38px); }
+.tag-hole { position: absolute; left: 12px; top: 50%; width: 14px; height: 14px; margin-top: -7px; border: 2px solid #f59e0b; border-radius: 50%; background: #fff; }
+.tag-title { font-size: 20px; font-weight: 800; letter-spacing: 0.04em; color: #0f172a; }
+.tag-name { margin-bottom: 8px; font-size: 13px; color: #475569; }
+/* the packing slip: a dashed tear line between the shipment and the code */
+.slip { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.slip > div:first-child { padding-right: 20px; border-right: 2px dashed #e2e8f0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+.slip-scan { font-size: 13px; font-weight: 600; color: var(--brand-button, #4f46e5); }
+@media (max-width: 560px) {
+    .slip > div:first-child { padding: 0 0 14px; border-right: 0; border-bottom: 2px dashed #e2e8f0; width: 100%; }
+}
+
+/* On a phone each option group fills the strip and its buttons share the width, instead of running past the strip's edge */
+@media (max-width: 560px) {
+    .controls ::deep .fx-button-group { width: 100%; }
+    .controls ::deep .fx-button-group > .fx-button { flex: 1 1 0; min-width: 0; padding-inline: 6px; }
+}

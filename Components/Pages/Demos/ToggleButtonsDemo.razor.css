@@ -1,4 +1,56 @@
 .demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }   /* not .row: Bootstrap owns that name */
-.demo-row.top { align-items: flex-start; }
+.demo-row.top { align-items: flex-start; gap: 28px; }
 .result { font-size: 13px; color: #475569; }
 .stack { display: flex; flex-direction: column; gap: 8px; }
+.lbl { font-size: 13px; font-weight: 600; color: #475569; }
+
+/* ToggleButtonControl and ButtonGroupControl put the IconCss icon right against the caption, so the page adds the space */
+::deep .fx-button > .bi:first-child { margin-right: 6px; }
+::deep .fx-button[aria-label] > .bi:first-child { margin-right: 0; font-size: 15px; }
+::deep .fx-button[aria-label]:has(> .bi) { min-width: 0; padding-inline: 12px; }   /* icon-only: no 75px minimum */
+
+/* App cards, as on the Buttons page: white with a soft shadow, an icon tile by the title, the price in a footer band */
+.estimate, .panel { max-width: 880px; padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+                    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+.estimate { display: flex; flex-direction: column; gap: 14px; }
+.est-head { display: flex; align-items: center; gap: 10px; }
+.est-head .lbl, .estimate .demo-row > .lbl { font-size: 15px; color: #0f172a; }
+.est-icon { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 8px; background: var(--brand-button-soft, #eef2ff); color: var(--brand-button, #4f46e5); font-size: 17px; }
+.price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin: 2px -18px -16px; padding: 12px 18px; border-top: 1px solid #f1f5f9; border-radius: 0 0 10px 10px; background: #f8fafc; font-size: 24px; font-weight: 700; color: #0f172a; }
+.price .result { font-weight: 400; }
+.price .extras { flex-basis: 100%; font-size: 13px; font-weight: 400; color: #64748b; }   /* what the price includes */
+
+/* Extras: off is white with a slate border; on takes the accent color with a check after the caption; the included core pages
+   (Selected with Enabled false) are a dashed soft-indigo chip with a lock; the flag turns red once the estimate is flagged. */
+.estimate ::deep .fx-toggle-button { border: 1px solid #cbd5e1; background: #fff; color: #334155; }
+.estimate ::deep .fx-toggle-button:not(.selected):hover:not(:disabled) { border-color: #94a3b8; background: #f8fafc; }
+.estimate ::deep .fx-toggle-button.selected { border-color: var(--brand-button, #4f46e5); background: var(--brand-button, #4f46e5); color: #fff; box-shadow: none; }
+.estimate ::deep .fx-toggle-button.selected:hover:not(:disabled) { border-color: var(--brand-button-hover, #4338ca); background: var(--brand-button-hover, #4338ca); }
+.estimate ::deep .fx-toggle-button.selected:not([aria-label])::after { content: '\f272'; margin-left: 6px; font-family: bootstrap-icons; font-size: .9em; vertical-align: -1px; }
+.estimate ::deep .fx-toggle-button.selected:disabled { opacity: 1; border: 1px dashed #a5b4fc; background: var(--brand-button-soft, #eef2ff); color: var(--brand-button-soft-text, #4338ca); cursor: not-allowed; }
+.estimate ::deep .fx-toggle-button.selected:disabled:not([aria-label])::after { content: '\f47a'; }
+.estimate ::deep .fx-toggle-button.selected[aria-label],
+.estimate ::deep .fx-toggle-button.selected[aria-label]:hover:not(:disabled) { border-color: #fda4af; background: #fff1f2; color: #e11d48; }
+
+/* Budget view: the title takes the spare width, so the bar sits at the right; on a phone the bar fills the card */
+.estimate .demo-row > .lbl { flex: 1 1 180px; }
+.estimate ::deep .fx-radio { white-space: nowrap; }
+@media (max-width: 560px) {
+    .estimate ::deep .fx-segmented { display: block; width: 100%; }
+    .estimate ::deep .fx-radio { flex: 1; justify-content: center; padding-inline: 4px; font-size: 14px; }
+    /* the Status and Labels groups fill the card and their buttons share the width, instead of running past the screen */
+    .panel > .stack { width: 100%; min-width: 0; }
+    .panel ::deep .fx-button-group.horizontal { width: 100%; flex-wrap: wrap; }
+    .panel ::deep .fx-button-group.horizontal > .fx-button { flex: 1 1 auto; min-width: 0; padding-inline: 8px; }
+}
+
+/* Status and labels: rounded ends on each group, and the matching tasks in a light panel at the right */
+.panel ::deep .fx-button-group.horizontal > .fx-button:first-child { border-radius: 8px 0 0 8px; }
+.panel ::deep .fx-button-group.horizontal > .fx-button:last-child { border-radius: 0 8px 8px 0; }
+.panel ::deep .fx-button-group.vertical > .fx-button:first-child { border-radius: 8px 8px 0 0; }
+.panel ::deep .fx-button-group.vertical > .fx-button:last-child { border-radius: 0 0 8px 8px; }
+.res { flex: 1; min-width: 230px; padding: 12px 14px; border: 1px solid #f1f5f9; border-radius: 8px; background: #f8fafc; }
+.tasks { display: flex; flex-direction: column; gap: 6px; min-height: 60px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: #1e293b; }
+.tasks li { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; }
+.tasks li > .bi { color: var(--brand-button, #4f46e5); }
+.task-label { margin-left: auto; padding: 1px 8px; border-radius: 999px; background: var(--brand-button-soft, #eef2ff); color: var(--brand-button-soft-text, #4338ca); font-size: 12px; font-weight: 600; }

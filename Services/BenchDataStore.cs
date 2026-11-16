@@ -5,7 +5,7 @@ namespace FlexCore.Showcase.Services;
 
 /// <summary>
 /// In-memory grid page data, built per circuit (scoped in Program.cs) so one visitor's edits never reach another's: the rate card
-/// (5,000 lines over <see cref="TravelData.Destinations"/>), suppliers and contacts (Page navigation). Deterministic, so
+/// (5,000 lines over <see cref="TravelData.Destinations"/>). Deterministic, so
 /// screenshots and timings repeat.
 /// </summary>
 public sealed class BenchDataStore
@@ -14,8 +14,6 @@ public sealed class BenchDataStore
     private bool _loaded;
 
     public IReadOnlyList<RateCardItem> RateCard { get; private set; } = [];
-    public IReadOnlyList<SupplierRecord> Suppliers { get; private set; } = [];
-    public IReadOnlyList<SupplierContactRecord> SupplierContacts { get; private set; } = [];
 
     public string LoadReport { get; private set; } = "Initializing...";
 
@@ -30,11 +28,9 @@ public sealed class BenchDataStore
             var sw = Stopwatch.StartNew();
 
             RateCard = SynthesizeRateCard(5000);
-            Suppliers = SynthesizeSuppliers(200);
-            SupplierContacts = SynthesizeSupplierContacts(Suppliers);
 
             sw.Stop();
-            LoadReport = $"Data synthesized in {sw.ElapsedMilliseconds} ms | Rate card: {RateCard.Count:N0} lines | Suppliers: {Suppliers.Count:N0}";
+            LoadReport = $"Data synthesized in {sw.ElapsedMilliseconds} ms | Rate card: {RateCard.Count:N0} lines";
             _loaded = true;
         }
     }
@@ -51,7 +47,7 @@ public sealed class BenchDataStore
         {
             ("Transport", 10, new[]
             {
-                ("Meridian Airways", new[] { ("Return flights, economy", "pax", 380, 620), ("Return flights, premium economy", "pax", 900, 1500), ("Checked baggage, 23 kg", "pax", 40, 60) }),
+                ("Overhead Bin Airways", new[] { ("Return flights, economy", "pax", 380, 620), ("Return flights, premium economy", "pax", 900, 1500), ("Checked baggage, 23 kg", "pax", 40, 60) }),
                 ("{0} Airport Transfers", new[] { ("Airport to hotel, private car", "trip", 45, 90), ("Hotel to airport, private car", "trip", 45, 90), ("Shared shuttle", "pax", 18, 30) }),
                 ("{0} Rail & Bus", new[] { ("Day-trip bus with driver", "day", 120, 260), ("Regional rail pass, 3 days", "pax", 90, 180), ("Car rental, compact", "day", 35, 70) }),
             }),
@@ -70,7 +66,7 @@ public sealed class BenchDataStore
             }),
             ("Services", 12, new[]
             {
-                ("Guardian Travel Cover", new[] { ("Travel insurance, comprehensive", "pax", 38, 75) }),
+                ("Rainy Day Travel Cover", new[] { ("Travel insurance, comprehensive", "pax", 38, 75) }),
                 ("{0} Guide Co-op", new[] { ("Private guide, full day", "day", 180, 320), ("Airport meet and greet", "pax", 25, 45) }),
                 ("Razor Sharp Getaways, head office", new[] { ("Booking fee", "booking", 45, 60), ("Documents and delivery", "booking", 12, 25), ("Restaurant reservations", "booking", 10, 20) }),
             }),
@@ -109,79 +105,6 @@ public sealed class BenchDataStore
                 Bookable = i % 17 != 0,
                 Notes = notes[random.Next(notes.Length)]
             });
-        }
-        return list;
-    }
-
-    /// <summary>
-    /// Suppliers per destination (hotels, transfer companies, tour operators, services), named from the city (Hotel Lisbon
-    /// Central, Kyoto Walks). Deterministic; about a third have no contract.
-    /// </summary>
-    private static List<SupplierRecord> SynthesizeSuppliers(int count)
-    {
-        var patterns = new (string Name, string Category)[]
-        {
-            ("Hotel {0} Central", "Accommodation"), ("{0} Boutique Stays", "Accommodation"), ("{0} Apartments", "Accommodation"), ("{0} Villas", "Accommodation"),
-            ("{0} Airport Transfers", "Transport"), ("{0} Rail & Bus", "Transport"), ("{0} Car Rental", "Transport"),
-            ("{0} Walks", "Experiences"), ("{0} Day Tours", "Experiences"), ("Taste of {0}", "Experiences"), ("{0} Adventures", "Experiences"),
-            ("{0} Harbour Cruises", "Experiences"), ("{0} Bike Tours", "Experiences"), ("{0} Cooking School", "Experiences"),
-            ("{0} Guide Co-op", "Services"), ("{0} Concierge", "Services"), ("{0} Spa Retreat", "Services"),
-        };
-        var streets = new[] { "Harbour Road", "Market Street", "Station Square", "Old Town Lane", "Cathedral Close", "Riverside Walk", "Hill Road", "Garden Street" };
-        var random = new Random(7);
-        var list = new List<SupplierRecord>(count);
-        for (var i = 0; i < count; i++)
-        {
-            var (city, _, country) = TravelData.Destinations[i % TravelData.Destinations.Length];
-            var pattern = patterns[(i / TravelData.Destinations.Length) % patterns.Length];
-            var slug = string.Format(pattern.Name, city).ToLowerInvariant().Replace(" & ", "-").Replace(' ', '-');
-            list.Add(new SupplierRecord
-            {
-                Code = $"SUP-{i + 1:D3}",
-                Name = string.Format(pattern.Name, city),
-                Category = pattern.Category,
-                Address = $"{random.Next(2, 180)} {streets[random.Next(streets.Length)]}",
-                City = city,
-                Country = country,
-                PostalCode = $"{random.Next(1000, 9999)}-{random.Next(100, 999)}",
-                Phone = $"+{random.Next(20, 99)} {random.Next(10, 99)} {random.Next(100, 999)} {random.Next(1000, 9999)}",
-                Email = $"bookings@{slug}.example",
-                Contracted = i % 3 != 2,
-                InsuranceOnFile = i % 4 != 3,
-                OnlineBooking = i % 2 == 0,
-                Active = i % 23 != 22
-            });
-        }
-        return list;
-    }
-
-    /// <summary>One or two contacts per supplier: reservations first, then accounts for every other supplier.</summary>
-    private static List<SupplierContactRecord> SynthesizeSupplierContacts(IReadOnlyList<SupplierRecord> suppliers)
-    {
-        string[] firstNames = ["Agatha", "Basil", "Crispin", "Dahlia", "Esme", "Florian", "Gideon", "Hazel", "Ignatius", "Jasper", "Mabel", "Nell", "Octavia", "Peregrine", "Quentin", "Rowan", "Sorrel", "Tobias", "Ursula", "Wren"];
-        string[] lastNames = ["Applebottom", "Butterworth", "Cobblestone", "Dimplewick", "Elderflower", "Fiddlesticks", "Gumboot", "Honeysuckle", "Inkwell", "Jumble", "Kettleby", "Larkspur", "Muddlecombe", "Noodle", "Oddfellow", "Picklesby", "Quickfoot", "Rumbletum", "Snodgrass", "Tiddlywink"];
-        var list = new List<SupplierContactRecord>();
-        var id = 1;
-        for (var i = 0; i < suppliers.Count; i++)
-        {
-            var s = suppliers[i];
-            var domain = s.Email[(s.Email.IndexOf('@') + 1)..];
-            var count = i % 2 == 0 ? 2 : 1;
-            for (var k = 0; k < count; k++)
-            {
-                var first = firstNames[(i * 3 + k * 7) % firstNames.Length];
-                var last = lastNames[(i * 5 + k * 11) % lastNames.Length];
-                list.Add(new SupplierContactRecord
-                {
-                    ContactID = id++,
-                    SupplierCode = s.Code,
-                    DisplayName = $"{first} {last}",
-                    Role = k == 0 ? "Reservations" : "Accounts",
-                    Phone = s.Phone,
-                    Email = $"{first.ToLowerInvariant()}.{last.ToLowerInvariant()}@{domain}",
-                    Active = (i + k) % 9 != 8
-                });
-            }
         }
         return list;
     }
