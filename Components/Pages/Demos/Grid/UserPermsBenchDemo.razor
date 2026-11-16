@@ -6,55 +6,31 @@
 @using FlexCore.Showcase.Services
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-25 (Baaria, SC-344): the master-detail example runs on sales desks and agents (Data/BenchModels.cs SalesDesk, AgentListItem;
-   BenchDataStore.SalesDesks, Agents) instead of the earlier security groups and users.
-   2026-10-26: the first example became countries and their airports (Data/AirportData.cs, the OurAirports data the Data Grid page
-   opens on); the desks, the agents and their generator in BenchDataStore are gone. The relation is Airport.CountryCode. *@
+@* 2026-10-25 (SC-344): master-detail example on sales desks and agents (Data/BenchModels.cs, BenchDataStore).
+   2026-10-26: example 1 on countries and their airports (Data/AirportData.cs, Airport.CountryCode); desks, agents removed.
+   2026-11-16: pre-deploy review fixes. *@
 
-@* 2026-10-18: moved onto FeatureDemoLayout (Saturday plan) and given a real relation: each detail row carries its master's key and
-   BenchDataStore generates one detail row per master count (today AgentListItem.DeskID and SalesDesk.AgentCount), so the detail
-   grid filters on a.DeskID == desk.DeskID and the master's Agents column equals the detail's row count (SC-189, SC-193). Gone: the
-   Take((GroupID % 4) + 3) subset, the "Create Group & Rename" button that never opened an editor (SC-190), the manual dirty checkbox
-   (SC-191; the real veto is on Unsaved-row lock), the benchmark wording (SC-192) and the legacy form's jargon in the copy (SC-188;
-   the old route stays as an alias).
-   2026-10-18: vocabulary written from GridControl.razor.cs (selection parameters, the private SelectRow/ToggleRowSelection paths that
-   raise RowSelecting/RowSelected, SelectFirstVisibleRowAsync, the public Select*/Clear* methods and NotifySelectionChangedAsync),
-   GridControl.KeyboardSelection.cs, GridControlEvents.cs, SelectionSettings.cs and GridModels.cs; rows checked with
-   scratchpad/vocabcheck.py. Members the grid declares but never raises or reads (RowDeselecting, RowDeselected, EnableToggle,
-   PersistSelection) are listed as such; the library note is in SC-253.
-   2026-10-23 (developer meeting, point 2; SC-338, SC-115): the inventory scenario from Four scenarios is the second example, rebuilt on
-   the grid's own detail rows: DetailTemplate with a second GridControl inside, ExpandMode.Single, RowExpand/RowCollapse, and
-   CollapseRow when a filter hides the open product. The old page drew the detail as an HTML table. Model types renamed from
-   AgInventoryProductRow/AgWarehouseStockDetail to InventoryProduct/WarehouseStock (the Ag prefix was the competitor's name, SC-048);
-   the categories on the buttons come from the data (the old page offered Networking, Displays and Peripherals, which no product has).
-   Detail-row vocabulary from GridControl.AdvancedFeatures.cs and the expand column / detail row markup in GridControl.razor and
-   GridControl.razor.cs; checked with scratchpad/vocabcheck.py. *@
+@* 2026-10-18: on FeatureDemoLayout; detail rows carry their master's key (SC-189, SC-193). Bench leftovers removed (SC-190,
+   SC-191, SC-192); legacy jargon removed (SC-188; old route an alias until 2026-10-25).
+   2026-10-18: vocabulary from GridControl.razor.cs, GridControl.KeyboardSelection.cs, GridControlEvents.cs, SelectionSettings.cs,
+   GridModels.cs; declared-but-unused members marked (SC-253).
+   2026-10-23 (SC-338, SC-115): Four scenarios' inventory is example 2, on the grid's detail rows. Ag prefix dropped from the model
+   types (a competitor's name, SC-048). Detail-row vocabulary from GridControl.AdvancedFeatures.cs, GridControl.razor(.cs). *@
 
-<PageTitle>Master-detail — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Master-Detail Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Master-detail" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Pick a row and see what belongs to it: in a second grid, or in a detail row that opens under it."
+                   Tagline="Pick a row and see what belongs to it, beside it or right under it."
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridControl.AdvancedFeatures.cs;Grid/GridControlEvents.cs;Grid/SelectionSettings.cs;Grid/GridModels.cs">
     <Overview>
         <p>
-            A master-detail screen is two ordinary grids and one event. The master grid raises <code>RowSelected</code> (a
-            <code>GridControlEvents</code> callback passed through <code>EventsRef</code>) with the selected row in <code>args.Data</code>;
-            the page filters its detail list by that row's key and binds the result to the second grid's <code>DataSource</code>.
-            <code>SelectionSettings</code> with <code>SelectionType.Single</code> keeps one master row selected, and
-            <code>AutoSelectFirstRow</code> selects the first row as soon as the grid has rows and raises <code>RowSelected</code> for it, so
-            the detail fills on arrival. <code>RowSelecting</code> can refuse a move while the detail has unsaved edits; the
-            <a href="demo/grid/unsaved-row-lock">Unsaved-row lock</a> page shows that.
-        </p>
-        <p>
-            When the detail is short, one grid will do. A <code>DetailTemplate</code> renders under the row that owns it, behind an arrow
-            column the grid adds on the left; the grid keeps track of which rows are open and tells the page through <code>RowExpand</code>
-            and <code>RowCollapse</code>. Anything can go in the template. The second example puts a second <code>GridControl</code> there.
+            Master-detail views let users pick a row in a Blazor <code>GridControl</code> and see what belongs to it, such as a country's airports. Use them for orders and their lines or customers and their contacts: filter a second grid from <code>RowSelected</code>, or open a <code>DetailTemplate</code> under the row with any markup, another grid included. <code>AutoSelectFirstRow</code> fills the detail as soon as the page opens.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="countries" Title="Countries and their airports" RazorCode="@Code.Countries" CSharpCode="@Code.CountriesCs">
-            <Description><p>The airports from the <a href="demo/grid#airports">Data Grid</a> page, 233 countries on the left and 4,009 airports on the right. Click a country and the right grid shows its airports: every airport row carries its country's ISO code, and the page keeps the rows whose code matches. The Airports column of the country row, the airport grid's footer and the line under the grids count the same airports. Search the countries (try <em>Portugal</em>) and click the result, or sort either grid on its own.</p></Description>
+            <Description><p>Click a country on the left, or search for one (try Portugal), and the right grid shows its airports; both grids sort on their own.</p></Description>
             <Demo>
                 <div class="pair">
                     <div>
@@ -96,8 +72,8 @@
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="warehouses" Title="Products and their warehouse stock" RazorCode="@Code.Warehouses" CSharpCode="@Code.WarehousesCs" CssCode="@Code.WarehousesCss">
-            <Description><p>Fifteen products in one grid. The arrow at the left of a row opens a second grid under it with that product's stock per warehouse; <code>ExpandMode.Single</code> keeps one open at a time. Receive the next shipment or reserve stock inside the detail and the product row above recalculates on hand, available and valuation. The category buttons filter the products; when the filter hides the open product the page closes it with <code>CollapseRow</code>.</p></Description>
+        <DemoExample Id="warehouses" Title="Products and their warehouse stock" RazorCode="@Code.Warehouses" CSharpCode="@Code.WarehousesCs">
+            <Description><p>Open the arrow on a product row to see its stock per warehouse, then receive or reserve stock in the detail and watch the product row recalculate. The stock grid has no <code>Height</code>, so this page adds <code>.detail ::deep .fx-grid-content { flex: 0 0 auto; }</code> to let it grow to its rows; without that rule or a <code>Height</code>, a grid in a detail row shrinks to its scrollbar.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="CategoryItems" Values="@(new[] { _category })" ValuesChanged="Filter" Selection="ChoiceSelectionMode.Single" AriaLabel="Category" />
             </Controls>
@@ -270,7 +246,7 @@
         product.TotalReserved += 10;
     }
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    // Code tabs: generated verbatim copies of the Demo block and members above.
     private static class Code
     {
         public const string Countries = @"<div class=""pair"">
@@ -335,14 +311,6 @@ private void Show(CountryRow? country)
 }
 
 private sealed record CountryRow(string Code, string Name, int Airports);";
-        public const string WarehousesCss = @".detail { display: grid; gap: 6px; padding: 2px 4px 4px; }
-/* A GridControl with no Height sizes its scroll area with flex-basis 0, which inside a table cell collapses to the
-   scrollbar; this lets the nested grid grow to its rows instead. */
-.detail ::deep .fx-grid-content { flex: 0 0 auto; }
-.detail-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: #334155; }
-.detail-bar span { margin-right: auto; }
-.low { color: #b45309; font-weight: 600; }
-.out { color: #b91c1c; font-weight: 600; }";
         public const string Warehouses = @"<ButtonGroupControl Items=""CategoryItems"" Values=""@(new[] { _category })"" ValuesChanged=""Filter"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Category"" />
 
 <GridControl @ref=""_grid""

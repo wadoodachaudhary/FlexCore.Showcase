@@ -1,24 +1,18 @@
-.frame { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+/* the status line under each example */
+.result { display: block; margin-top: 10px; font-size: 13px; color: #475569; }
+
+/* Application shell: a framed page layout with three panes */
+.frame { border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+@media (max-width: 600px) { .frame { overflow-x: auto; } .frame ::deep .fx-page-layout { min-width: 560px; } }   /* on a phone the shell scrolls inside its frame */
 .pane { padding: 12px 14px; font-size: 13px; color: #334155; }
 .pane h4 { margin: 0 0 6px; font-size: 13px; font-weight: 600; color: #0f172a; }
 .pane ul { list-style: none; margin: 0; padding: 0; }
 .pane li { padding: 3px 0; }
 .pane p { margin: 0; }
-.pane.muted { color: #64748b; }
-.result { display: block; margin-top: 10px; font-size: 13px; color: #475569; }
-.dash ::deep .dash-card { height: 100%; box-sizing: border-box; }
-.demo-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-.mt { margin-top: 12px; }
-/* KPI tiles: block anchor for the tooltip, lift on hover, ring when expanded */
-.dash ::deep .tile-anchor { display: block; height: 100%; }
-.tile { height: 100%; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; border-radius: 8px; }
-.tile:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(15, 23, 42, .12); }
-.tile.focused ::deep .fx-card { border-color: #2563eb; }
 .pane-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .pane-head h4 { margin: 0; }
 .icon-row { display: flex; gap: 4px; }
 /* nav and list items are BareStyle ButtonControls, so ::deep from the page-scoped .pane */
-.nav { list-style: none; margin: 0; padding: 0; }
 .pane ::deep .nav-item { display: block; width: 100%; text-align: left; padding: 4px 6px; border: 0; background: none; border-radius: 4px; font-size: 13px; color: #334155; cursor: pointer; }
 .pane ::deep .nav-item:hover { background: #eef2f7; }
 .pane ::deep .nav-item.active { background: #e0e7ff; color: #1e3a8a; font-weight: 600; }
@@ -26,8 +20,19 @@
 .props dt { color: #64748b; }
 .props dd { margin: 0; }
 
+/* Dashboard grid: the cards fill their panels; .dash is the page-scoped ancestor the ::deep rules need */
+.dash ::deep .dash-card { height: 100%; box-sizing: border-box; }
+/* KPI tiles: block anchor for the tooltip, lift on hover, ring when expanded */
+.dash ::deep .tile-anchor { display: block; height: 100%; }
+/* the tooltip wraps each tile in an inline popup host; as blocks they let the tile fill its grid cell, so the three cards line up */
+.dash ::deep .tile-anchor .fx-popup-host, .dash ::deep .tile-anchor .fx-popup-host > span { display: block; height: 100%; }
+.tile { height: 100%; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; border-radius: 8px; }
+.tile:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(15, 23, 42, .12); }
+.tile.focused ::deep .fx-card { border-color: var(--brand-button, #4f46e5); box-shadow: 0 0 0 3px var(--brand-button-soft, #eef2ff); }
+
 /* Grid and stack example: a package summary. Stacks and grid items are library elements, so ::deep from the page-scoped .summary */
-.summary { max-width: 640px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; font-size: 13px; color: #334155; }
+.summary { max-width: 640px; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 18px; background: #fff; font-size: 13px; color: #334155;
+           box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
 .summary h4 { margin: 0; font-size: 15px; font-weight: 600; color: #0f172a; }
 .field-label { display: block; margin-bottom: 3px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #64748b; }
 .field-value { display: block; overflow-wrap: anywhere; }

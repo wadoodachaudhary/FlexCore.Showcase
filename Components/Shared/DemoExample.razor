@@ -2,13 +2,10 @@
 @inject IJSRuntime JS
 @inject NavigationManager Nav
 
-@* One example (2026-10-12): title with anchor, one-line description, then Example | Razor | C# | CSS
-   tabs on TabStripControl inside a CardControl. The live markup stays mounted while a code tab is
-   shown, so demo state and @ref captures survive switching. Registers with FeatureDemoLayout.
-   2026-10-20: a catalog link such as demo/checks#radio lands on this page from another page, and Blazor does not
-   scroll to the fragment on that navigation. The section is focusable (tabindex -1) and focuses itself on its first
-   interactive render when the fragment names it; the browser scrolls it into view (scroll-margin-top clears the
-   sticky header). Blazor's FocusAsync, no custom script. *@
+@* One example (2026-10-12), registered with FeatureDemoLayout. Live markup stays mounted under the code tabs: demo state and @ref
+   captures survive.
+   2026-10-20: Blazor skips cross-page fragment scrolling (demo/checks#radio), so the section the fragment names focuses itself on
+   first interactive render (FocusAsync, no script); scroll-margin-top clears the sticky header. *@
 <section class="ex" id="@Id" tabindex="-1" @ref="_section">
     <CardControl Elevation="0" CssClass="ex-card">
         <HeaderContent>
@@ -27,7 +24,8 @@
         <ChildContent>
             @if (_codes.Count > 0)
             {
-                <TabStripControl Items="_tabs" @bind-SelectedIndex="_tab" CssClass="ex-tabs" />
+                <TabStripControl Items="_tabs" SelectedIndex="_tab" SelectedIndexChanged="Select" OnTabClose="@(_ => Select(0))"
+                                 CssClass="ex-tabs site-tabs" Theme="TabTheme.Minimal" ShowOrientationMenu="false" />
             }
             <div class="ex-live" hidden="@(_tab != 0)">@Demo</div>
             @if (_tab > 0)
@@ -70,14 +68,27 @@
     protected override void OnParametersSet()
     {
         _tabs.Clear(); _codes.Clear();
-        Add("Razor", RazorCode); Add("C#", CSharpCode); Add("CSS", CssCode);
+        // 2026-10-27: each tab opens with the @using lines it needs, so a copied example compiles in a new project.
+        var razorHeader = string.IsNullOrEmpty(RazorCode) ? "" : CodeUsings.Header(RazorCode, CSharpCode, razorStyle: true);
+        var csharpHeader = string.IsNullOrEmpty(RazorCode) && !string.IsNullOrEmpty(CSharpCode) ? CodeUsings.Header(null, CSharpCode, razorStyle: false) : "";
+        Add("Razor", string.IsNullOrEmpty(RazorCode) ? RazorCode : razorHeader + RazorCode);
+        Add("C#", string.IsNullOrEmpty(CSharpCode) ? CSharpCode : csharpHeader + CSharpCode);
+        Add("CSS", CssCode);
         if (_codes.Count > 0) _tabs.Insert(0, new TabStripItem("Example"));
         if (_tab > _codes.Count) _tab = 0;
+        Select(_tab);
         void Add(string name, string? code)
         {
             if (string.IsNullOrEmpty(code)) return;
             _tabs.Add(new TabStripItem(name)); _codes.Add(code);
         }
+    }
+
+    // The open code tab carries an X that goes back to Example (2026-10-29)
+    private void Select(int index)
+    {
+        _tab = index;
+        for (var i = 0; i < _tabs.Count; i++) _tabs[i].Closable = i > 0 && i == index;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

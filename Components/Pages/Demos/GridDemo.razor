@@ -3,32 +3,25 @@
 @using FlexCore.Showcase.Components.Shared
 @using FlexCore.Showcase.Data
 
-@* 2026-10-17: moved onto FeatureDemoLayout (one-example-plus-code push, tracker section 6). The grid and its data are unchanged;
-   the hand-typed markup block became Razor and C# tabs copied from the live example. "Right-click for menu" left the copy:
-   GridControl only raises OnContextMenu when the host handles it, and this page does not. Parameter tables are a later pass (SC-278). 
-   2026-10-24: Documentation written: all 224 GridControl parameters in 27 purpose groups plus AggregateRow and AggregateColumn, rows in
-   GridVocab.A.cs and GridVocab.B.cs (two agents, read sites checked with scratchpad/vocabcheck.py).
-   2026-10-26 (Baaria: a better grid example, on open data used by several pages): the ten-employee list became the 4,009 airports
-   with an IATA code and scheduled service in the OurAirports dump (public domain; Data/OurAirports, Data/AirportData.cs), grouped by
-   continent with count, average elevation and longest runway in the captions; search, sort, filter, group, frozen code column. *@
+@* 2026-10-17: on FeatureDemoLayout, code tabs from the live example. No "Right-click for menu": OnContextMenu fires only when the
+   host handles it; this page does not.
+   2026-10-24 (SC-278): tables for all GridControl parameters, AggregateRow, AggregateColumn (GridVocab.A.cs, .B.cs).
+   2026-10-26: example on OurAirports (public domain; Data/OurAirports, AirportData.cs): IATA airports with scheduled service. *@
 
-<PageTitle>Data Grid — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Data Grid (DataGrid, Table) — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Data Grid" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Search, sort, filter and group 4,009 real airports. Every other grid page takes one feature further."
+                   Tagline="Turn any list into a table users can search, sort, filter and group."
                    SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs;Grid/GridControl.AdvancedFeatures.cs;Grid/GridControl.PresentationFeatures.cs;Grid/GridControl.ItemsProvider.cs;Grid/GridControl.ColumnVirtualization.cs;Grid/GridControl.ProviderGrouping.cs;Grid/GridControl.ProviderExport.cs;Grid/GridModels.cs">
     <Overview>
         <p>
-            <code>GridControl</code> binds a list through <code>DataSource</code> and <code>TValue</code>, declares its columns in
-            <code>GridColumnsBase</code> and switches behaviours on with <code>Allow*</code> flags. This page shows the core set on real data:
-            4,009 airports from <a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports</a>, which is in the public domain. The pages in the Data Grid menu each take one feature further, from batch editing and frozen columns to
-            on-demand loading, grouping with totals and the tree grid; they are listed under Related.
+            <code>GridControl</code> is a Blazor data grid that lets users search, sort, filter and group tabular data and edit it in place. Use it for any list someone has to work through, from a page of orders to <a href="demo/grid/row-selection-50k">100,000 rows</a>: give it a height and only the rows in view, plus a small band around them, are rendered. Bind a list to <code>DataSource</code>, declare columns, and switch features on with parameters such as <code>AllowSorting</code>, <code>AllowGrouping</code> and <code>ShowSearchBar</code>.
         </p>
     </Overview>
 
     <Examples>
-        <DemoExample Id="airports" Title="4,009 airports: search, sort, filter and group" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs" CssCode="@Code.AirportsCss">
-            <Description><p>Every airport with an IATA code and scheduled passenger service in the <a href="https://ourairports.com/data/" target="_blank" rel="noopener">OurAirports</a> data (public domain, snapshot of 26 October 2026). The grid opens grouped by continent, and each caption counts the airports and gives their average elevation and longest runway. Type in the search box (try <em>Lisbon</em> or <em>Iceland</em>), click a header to sort (Elevation finds the highest airports), use a header's filter icon, or drag the Continent chip out of the bar above the grid for one flat list. Scroll sideways for runways, city and the Wikipedia article: the Code column stays put. Only the rows in view are rendered. The same airports are counted per country, and placed on a map, on the <a href="demo/charts/map-story#airports">Map story</a> page.</p></Description>
+        <DemoExample Id="airports" Title="4,009 airports: search, sort, filter and group" RazorCode="@Code.Airports" CSharpCode="@Code.AirportsCs">
+            <Description><p>Search 4,009 airports from OurAirports (try Lisbon), sort by a header, open a filter icon, or drag the Continent chip off the group bar; group captions carry counts and averages.</p></Description>
             <Demo>
                 <div class="airports">
                     <GridControl TValue="Airport" DataSource="@_airports"
@@ -252,12 +245,5 @@ private List<AggregateRow> _aggregates = new()
         }
     }
 };";
-        public const string AirportsCss = @".airports ::deep .code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; color: #0f172a; }
-.airports ::deep .type { font-size: 11px; font-weight: 600; }
-.airports ::deep .type-large { background: #dbeafe; color: #1e40af; }
-.airports ::deep .type-medium { background: #ccfbf1; color: #115e59; }
-.airports ::deep .type-small { background: #f1f5f9; color: #475569; }
-.airports ::deep .fx-group-caption-agg { margin-left: 12px; color: #475569; font-weight: 400; }
-.airports ::deep a { color: #0284c7; }";
     }
 }

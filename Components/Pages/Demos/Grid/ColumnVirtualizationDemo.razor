@@ -3,35 +3,24 @@
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (row 3 of the Data Grid list). Same 1,000 rows and 21 columns. Changes, closing SC-132 to
-   SC-134: a line under the grid reads the grid's own ColumnVirtualizationStatus so a viewer can see that windowing is on; the
-   developer-syntax card header went; Height="100%" became the 520px the old card gave the grid. AllowMultiColumnSorting="true" was
-   removed because no such parameter exists in FlexCore (it fell through as an unmatched attribute); ShowMultiColumnSortingIndex went
-   with it as off-topic here. The .wide wrapper exists for the page CSS: frozen body cells use background-color:inherit and the
-   library gives rows none, so scrolled columns show through the pinned ones; the page gives rows a white background until the
-   library fix (SC-292).
-   2026-10-18: vocabulary written from GridControl.ColumnVirtualization.cs (parameters, status properties, every fallback reason in
-   TryCreateColumnVirtualizationLayout and TryResolveColumnVirtualizationWidth), GridEnums.cs (GridWidthMode) and the markup/CSS hooks in
-   GridControl.razor and GridControl.razor.css; rows checked against the source with scratchpad/vocabcheck.py. *@
+@* 2026-10-17: on FeatureDemoLayout; closes SC-132 to SC-134. Height 520px, the old card's. AllowMultiColumnSorting removed (not a
+   FlexCore parameter), ShowMultiColumnSortingIndex with it. .wide is for the page CSS: white rows until the library fix (SC-292).
+   2026-10-18: vocabulary from GridControl.ColumnVirtualization.cs, GridEnums.cs, GridControl.razor(.css). *@
 
-<PageTitle>Wide grids — FlexCore Showcase</PageTitle>
+<PageTitle>Column Virtualization in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Wide grids" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Twenty-one columns and a thousand rows: pinned edges, and only the columns in view kept in the page."
+                   Tagline="Give users wide tables to scroll through while only the columns in view are rendered."
                    SourcePath="Grid/GridControl.ColumnVirtualization.cs;Grid/GridEnums.cs;Grid/GridControl.razor.cs">
     <Overview>
         <p>
-            <code>EnableColumnVirtualization</code> renders only the non-frozen columns that are horizontally in view, plus
-            <code>ColumnVirtualizationOverscan</code> columns on either side; the rest become fixed-width spacers so the scrollbar and the
-            column positions stay right. Frozen columns stay mounted. The grid exposes <code>ColumnVirtualizationStatus</code> (Disabled,
-            Active or Fallback) and, when it has to fall back to a full render, <code>ColumnVirtualizationFallbackReason</code>.
-            <code>WidthMode="GridWidthMode.FitColumns"</code> sizes the grid to the sum of its column widths, up to the space available.
+            Column virtualization lets a Blazor <code>GridControl</code> show a table far wider than the screen, such as monthly figures, rendering only the columns in view. Turn on <code>EnableColumnVirtualization</code> and the off-screen columns become fixed-width spacers, so column positions and the scroll bar stay right while frozen columns stay mounted. <code>ColumnVirtualizationStatus</code> tells you when a layout makes the grid fall back to rendering every column.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="wide" Title="Twenty-one columns, three of them pinned" RazorCode="@Code.Wide" CSharpCode="@Code.WideCs">
-            <Description><p>Scroll the grid sideways. ID and Code stay on the left, Status on the right, and the eighteen metric columns move between them. The first paint mounts every column; from the first scroll on, only the metrics in view plus two on each side stay mounted and the rest become spacers. The line under the grid reports the grid's own status.</p></Description>
+            <Description><p>Scroll sideways across eighteen metric columns: ID, Code and Status stay pinned, only the metrics in view stay mounted, and the status line reports the grid's own state.</p></Description>
             <Demo>
                 <div class="wide">
                 <GridControl @ref="_grid"
@@ -161,7 +150,7 @@
         public string Status { get; set; } = "";
     }
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    // Code tabs: generated verbatim copies of the Demo block and members above.
     private static class Code
     {
         public const string Wide = @"<div class=""wide"">
@@ -280,7 +269,7 @@ public sealed class WideGridRow
             new("data-fx-column-virtualization", "On the grid's root element: <code>disabled</code>, <code>active</code> or <code>fallback</code>."),
             new("data-fx-column-virtualization-fallback", "On the root element: the fallback reason, empty otherwise."),
             new("fx-column-window-spacer-col / fx-column-window-spacer", "The <code>&lt;col&gt;</code> and the header, filter, body and aggregate cells that stand in for the omitted columns' width."),
-            new("fx-grid-column-virtualization-fallback", "The fallback note: one grey 9px line with <code>role=\"status\"</code> and the reason in its tooltip."),
+            new("fx-grid-column-virtualization-fallback", "The fallback note: one gray 9px line with <code>role=\"status\"</code> and the reason in its tooltip."),
         };
     }
 }

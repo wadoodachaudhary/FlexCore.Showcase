@@ -5,45 +5,32 @@
 @using Fx.ControlKit.Reports
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Components.Shared
+@using RazorSharpGetaways.Data
 @inject IWebHostEnvironment Env
 
-@* 2026-10-18: moved onto FeatureDemoLayout (Saturday list). Same report, same auto-run on first paint. Changes, closing SC-220 to
-   SC-223 and SC-225: the copy says four group levels (the XML defines Community, Model, Group and Phase; the old intro said four
-   and the bullet list said three); the "real production report" claim, "@DivisionID" and the stub class names left the copy, which
-   now says what the control does before how this page wires it; the logger and its typo went; title, h1 and menu label all read
-   "Report writer". The model and community pickers are DropDownListControls and Run is a ButtonControl; the inline <style> block
-   became a scoped stylesheet.
-   2026-10-18: vocabulary written from ReportWriterControl.razor (the six parameters, public state, the public methods and their doc
-   comments, the @inject list, the toolbar export items), ReportNativeExport.cs, ReportOptions.cs and the five host interfaces; rows
-   checked with scratchpad/vocabcheck.py. ShowReportAsync seeds a literal "DivisionID" from the session context (lines ~1317 and ~1549),
-   a host name inside the library; noted in SC-253.
-   2026-10-25 (Baaria, SC-344): the report is a tour operator's Package Cost Sheet (wwwroot/reports/Package Cost Sheet.xml, data from
-   Data/TravelData.cs through Services/ShowcaseReportDataExecutor.cs). It replaced an earlier cut-down cost report. Same
-   shape: four group levels with a sum in every footer; new: a grand total in the report footer (the loader's GrandTotals). The page
-   file moved from ModelCostsDemo to PackageCostsDemo and the old address is kept as an alias.
-   2026-10-25 (catalog audit SC-345): the page loads through ShowReportAsync with Package and Season as seeds instead of ShowXmlReport.
-   ShowXmlReport never sets ReportFilePath, so the toolbar's Parameters button (ChromeOnEditParameters) returned early and the
-   catalog's Report Parameter Dialog row led to a page where the dialog could not open; noted for the owner in SC-253. *@
+@* 2026-10-18: on FeatureDemoLayout, titled "Report writer"; closes SC-220 to SC-223 and SC-225 (no production-report claim, host
+   or stub names in the copy; logger removed).
+   2026-10-18: vocabulary from ReportWriterControl.razor, ReportNativeExport.cs, ReportOptions.cs and the host interfaces.
+   ShowReportAsync seeds a literal "DivisionID" from the session context, a host name inside the library (SC-253).
+   2026-10-25 (SC-344): Package Cost Sheet (wwwroot/reports/Package Cost Sheet.xml) on Data/TravelData.cs via a data executor
+   (since 2026-11-04 from quickstart/RazorSharpGetaways/Data). ModelCostsDemo -> PackageCostsDemo; the old address is an alias.
+   2026-10-25 (SC-345): loads through ShowReportAsync, not ShowXmlReport: ShowXmlReport never sets ReportFilePath, so the
+   Parameters button (ChromeOnEditParameters) returned early and the Report Parameter Dialog could not open (SC-253). *@
 
-<PageTitle>Report writer — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Report Writer for Crystal Reports XML — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Report writer" Category="Reports" CategoryHref="demo/reports/package-costs" ControlName="ReportWriterControl"
-                   Tagline="Paginated, grouped reports from a Crystal-style XML definition, with a group tree, search, print and export."
+                   Tagline="Run reports exported from Crystal Reports as paginated, grouped pages in Blazor."
                    SourcePath="Reports/ReportWriterControl.razor;Reports/CrystalXmlReportLoader.cs;Reports/ReportOptions.cs;Reports/IReportDataExecutor.cs;Reports/IReportSessionContext.cs;Reports/IReportPickListProvider.cs;Reports/IReportExporter.cs;Reports/IReportViewerSettings.cs">
     <Overview>
         <p>
-            <code>ReportWriterControl</code> renders a <code>ReportDefinition</code> as paginated HTML pages with Crystal-style group headers
-            and footers, a clickable group tree and drill-down tabs. The definition is built in code or loaded from a Crystal XML export by
-            <code>CrystalXmlReportLoader</code>, which reads the tables, joins, groups, formulas and field placement. The control has no data
-            access of its own: the host registers <code>IReportDataExecutor</code>, <code>IReportSessionContext</code> and
-            <code>IReportPickListProvider</code> in dependency injection, and optionally an <code>IReportExporter</code>. The toolbar prints,
-            exports, searches the report text and zooms the pages.
+            <code>ReportWriterControl</code> is a Blazor report writer that runs a report definition and shows paginated pages with group headers, footers and a group tree. Use it to move Crystal Reports to the web: <code>CrystalXmlReportLoader</code> reads a Crystal XML export, your <code>IReportDataExecutor</code> supplies the rows, and no Crystal engine is needed to run the report or export it to HTML, CSV or Excel. Users search, zoom and print from the toolbar.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="report" Title="Package costs by region, package, cost group and supplier" RazorCode="@Code.Report" CSharpCode="@Code.ReportCs">
-            <Description><p>The bundled XML is a tour operator's cost sheet: four group levels (region, package, cost group, supplier), a sum in the package, cost group and supplier footers and a grand total at the end. Pick a package and a departure season and press Run; the report loads on arrival too. This site's data executor ignores the SQL in the definition and synthesises the supplier lines for the chosen package and season, so every choice returns a report. Press <strong>Parameters</strong> in the report's toolbar and the writer opens its own parameter dialog with the packages and seasons the XML lists; it reruns the report with what you pick there (the two pickers above belong to this page and do not follow the dialog). Open the group tree on the left to jump between groups, or search the report text from the toolbar.</p></Description>
+            <Description><p>Pick a package and a season and press Run, open the group tree to jump between the four group levels, or press Parameters in the toolbar for the writer's own dialog.</p></Description>
             <Controls>
                 <DropDownListControl TItem="string" TValue="string" DataSource="@_packages" @bind-Value="_package" AriaLabel="Package" Width="210px" />
                 <DropDownListControl TItem="string" TValue="string" DataSource="@_seasons" @bind-Value="_season" AriaLabel="Season" Width="120px" />
@@ -73,7 +60,7 @@
                 <p>
                 The toolbar's Print / Save as PDF uses the browser's print dialog, and its HTML, CSV and Excel data exports are the control's own
                 (<code>ReportNativeExport</code>), so none of them need <code>IReportExporter</code>. This site registers
-                <code>ReportOptions</code> with an empty schema prefix and DivisionID and UserId as session parameters, its own data executor and
+                <code>ReportOptions</code> with an empty schema prefix and AgencyId and UserId as session parameters, the Quick Start project's data executor and
                 session context, the empty pick-list provider, the in-memory viewer settings and a no-op exporter.
                 </p>
             </DocSection>
@@ -91,10 +78,10 @@
 
 @code {
     private ReportWriterControl? _writer;
-    private readonly string[] _packages = TravelData.Packages.Select(p => p.Name).ToArray();
-    private readonly string[] _seasons = TravelData.Seasons;
-    private string _package = TravelData.Packages[0].Name;
-    private string _season = TravelData.Seasons[0];
+    private readonly string[] _packages = TripPackages.All.Select(p => p.Name).ToArray();
+    private readonly string[] _seasons = TripPackages.Seasons;
+    private string _package = TripPackages.All[0].Name;
+    private string _season = TripPackages.Seasons[0];
     private bool _running;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -127,18 +114,19 @@
         }
     }
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed). The data executor this site
-    // registers is Services/ShowcaseReportDataExecutor.cs; Program.cs shows the registrations.
+    // Code tabs: generated verbatim copies of the Demo block and the members above. The data executor is the Quick Start project's
+    // quickstart/RazorSharpGetaways/Data/GetawaysReportServices.cs (2026-11-04; registered in Program.cs); packages are that
+    // project's TripPackages (all twelve).
     private static class Code
     {
         public const string Report = @"<div class=""report-frame"">
     <ReportWriterControl @ref=""_writer"" />
 </div>";
         public const string ReportCs = @"private ReportWriterControl? _writer;
-private readonly string[] _packages = TravelData.Packages.Select(p => p.Name).ToArray();
-private readonly string[] _seasons = TravelData.Seasons;
-private string _package = TravelData.Packages[0].Name;
-private string _season = TravelData.Seasons[0];
+private readonly string[] _packages = TripPackages.All.Select(p => p.Name).ToArray();
+private readonly string[] _seasons = TripPackages.Seasons;
+private string _package = TripPackages.All[0].Name;
+private string _season = TripPackages.Seasons[0];
 private bool _running;
 
 protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -180,6 +168,8 @@ private async Task RunReport()
             new("UsePositionedLayout", "Renders with the Crystal band and object geometry instead of table columns, in <code>ShowReportAsync</code>, the parameter dialog and refresh.", "bool", "false"),
             new("PdfViewerComponentType", "The PDF viewer component used for .rpt output, for trimmed hosts that bring the Documents package.", "Type?", "null"),
             new("PromptOptionalParameters", "Includes optional parameters in the parameter dialog.", "bool", "false"),
+            new("TabsOrientation", "Layout of the report tabs (the main report and its drill-downs, shown once there are two): <code>Vertical</code>, a rail; <code>HybridVertical</code>, wrapped rows; <code>Horizontal</code>, one scrolling row. A right-click on the strip opens the viewer's own orientation and theme menu; the choice goes to <code>IReportViewerSettings</code> and is read back when the viewer first loads.", "TabOrientation", "TabOrientation.Vertical"),
+            new("TabsTheme", "Colors of that strip: <code>WindowsClassic</code>, <code>FolderTabs</code>, <code>ColorfulCards</code>, <code>Minimal</code> or <code>Dark</code>; saved and restored the same way.", "TabTheme", "TabTheme.WindowsClassic"),
             new("OnClose", "The toolbar's Close button. Unset with <code>ShowChrome</code> on, the button is still there and does nothing.", "EventCallback"),
             new("OnPageTitleChanged", "Raised by <code>ShowReportAsync</code> with the report's file name without extension, for a host's title bar.", "EventCallback&lt;string&gt;"),
         };
@@ -216,7 +206,7 @@ private async Task RunReport()
             new("IReportDataExecutor", "Runs the SQL the loader builds and returns a <code>DataTable</code>. The host decides the data layer.", "DataTable Execute(string sql, IDictionary&lt;string, object&gt;? parameters)", "required"),
             new("IReportSessionContext", "Turns a session parameter name into a value, for the names listed in <code>ReportOptions.SessionAutoInjectParameters</code>.", "object? Get(string parameterName)", "required"),
             new("IReportPickListProvider", "Pick-list values for the parameter dialog, by <code>ReportParameter</code> (preferred, runs its <code>PickListSql</code>) or by name. <code>EmptyReportPickListProvider</code> ships for hosts without lists.", "GetPickList(ReportParameter) / GetPickList(string) / HasPickList(string)", "required"),
-            new("IReportViewerSettings", "Per-user zoom persistence; <code>InMemoryReportViewerSettings</code> ships as the default.", "Task&lt;int&gt; GetZoomLevelAsync() / Task SetZoomLevelAsync(int)", "required"),
+            new("IReportViewerSettings", "Per-user zoom, tab orientation and tab theme persistence; <code>InMemoryReportViewerSettings</code> ships as the default, and the four tab methods are default interface methods, so older adapters still compile.", "Task&lt;int&gt; GetZoomLevelAsync() / Task SetZoomLevelAsync(int) / Task&lt;TabOrientation?&gt; GetTabOrientationAsync() / Task SetTabOrientationAsync(TabOrientation) / Task&lt;TabTheme?&gt; GetTabThemeAsync() / Task SetTabThemeAsync(TabTheme)", "required"),
             new("IReportExporter", "A Crystal Reports engine for native .rpt files only. Blazor cannot inject a missing service, so a host without Crystal registers a no-op.", "LoadReport, SetParameters, ExportToPdf / ExportToExcel / ExportToWord / ExportToRtf / ExportToCsv", "registered"),
             new("ReportOptions", "Singleton settings: <code>SchemaPrefix</code> (default dbo), <code>SessionAutoInjectParameters</code>, <code>MaxRowsPerReport</code> (100,000; 0 is unlimited), <code>EagerGroupColumnsInMainQuery</code>.", "class", "singleton"),
         };

@@ -1,9 +1,9 @@
 namespace FlexCore.Showcase.Data;
 
 /// <summary>
-/// One post at Razor Sharp Getaways. <see cref="ManagerId"/> is the solid reporting line and <see cref="DottedLineId"/> a second,
-/// dotted one (a finance or HR partner who also answers to the head of the area they support). A vacant post keeps its place
-/// in the tree, its people and its budgeted salary, but has no name, start date or rating.
+/// One post at Razor Sharp Getaways. <see cref="ManagerId"/>: solid reporting line; <see cref="DottedLineId"/>: dotted line (a
+/// finance or HR partner to the head of the area they support). A vacant post keeps its tree place, its people and budgeted
+/// salary; no name, start date or rating.
 /// </summary>
 public sealed record StaffMember
 {
@@ -33,14 +33,13 @@ public sealed record StaffMember
 }
 
 /// <summary>
-/// The staff of Razor Sharp Getaways, the imagined tour operator of the people demos: a head office in Boston, a ground team in
-/// each destination of <see cref="TravelData"/>, contact centres in Lisbon, Manila and Boston, and the usual central functions.
-/// Generated from a fixed seed, so every visitor and every build sees the same people. Every name is made up: the executive team
-/// is fixed, everyone else gets a first name and a surname drawn from the two lists below.
+/// Staff of Razor Sharp Getaways for the people demos: Boston head office, a ground team per <see cref="TravelData"/> destination,
+/// contact centers in Lisbon, Manila and Boston, central functions. Fixed seed: every visitor and build sees the same people.
+/// Names are made up: executives fixed, everyone else drawn from the two lists below.
 /// </summary>
 public static class TravelOrg
 {
-    /// <summary>The date the figures are as of: tenure, ratings and seasonal start dates count from it.</summary>
+    /// <summary>As-of date: tenure, ratings and seasonal start dates count from it.</summary>
     public static readonly DateOnly AsOf = new(2026, 10, 1);
 
     public static IReadOnlyList<StaffMember> Staff => Built.Value;
@@ -137,11 +136,11 @@ public static class TravelOrg
         var care = b.Add(coo, "Director of Customer Care", 7, "Customer care", "Customer care leadership", Lisbon);
         var quality = b.Add(care, "Quality and Training Manager", 5, "Customer care", "Quality and training", Lisbon);
         b.Many(3, quality, "Quality Analyst", 3, "Customer care", "Quality and training", Lisbon);
-        b.Many(3, quality, "Contact Centre Trainer", 3, "Customer care", "Quality and training", Lisbon);
+        b.Many(3, quality, "Contact Center Trainer", 3, "Customer care", "Quality and training", Lisbon);
         foreach (var (site, teams) in new[] { (Lisbon, 6), (Manila, 9), (Boston, 3) })
         {
-            var dept = $"Contact centre {site.City}";
-            var siteManager = b.Add(care, "Contact Centre Manager", 6, "Customer care", dept, site);
+            var dept = $"Contact center {site.City}";
+            var siteManager = b.Add(care, "Contact Center Manager", 6, "Customer care", dept, site);
             for (var t = 0; t < teams; t++)
             {
                 var leader = b.Add(siteManager, "Team Leader", 4, "Customer care", dept, site);

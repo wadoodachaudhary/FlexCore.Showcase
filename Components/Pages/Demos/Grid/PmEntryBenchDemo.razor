@@ -4,39 +4,26 @@
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (row 6 of the Data Grid list). Same five rows and columns. Changes, closing SC-164 to
-   SC-169: the "Simulated Latency" buttons went (nothing read the value, no delay was injected); the Keystrokes/Server Commits pair
-   went (both counted the same event); the counter now counts saves through OnCellSave; the transport switch is a ButtonGroupControl;
-   the unused @ref went; the old internal names, "zero network lag", "lag-free", "up to 95%" and the
-   WAN sentence left the copy. What each mode does comes from TextBoxTypingBehavior.cs and GridControl.razor.cs:511-514.
-   Parameter tables are a later pass (SC-278).
-   2026-10-24 (SC-278): documentation tables written from TextBoxTypingBehavior.cs, Grid/GridControl.razor.cs (parameters 518-529,
-   the editor builder 9676-9771, SynchronizeClientBufferedBatchEditorValueAsync 1584-1606 and its callers, the counters and the two
-   diagnostics methods 1474-1481 / 10223-10239, the Tab and Enter read sites 10330 / 10403), Grid/GridTextEditingDiagnosticsSnapshot.cs,
-   TextBoxControl.razor (parameters 232-402, EffectiveTypingBehavior 328, OnNativeKeyDown / OnNativeBlur / the sync and JSInvokable
-   commit 416-574, the attach in OnAfterRenderAsync 745-826, OnNativeInput / OnNativeChange 983-1037) and the listener those call in
-   wwwroot/textbox-control.js (pre-attach shield 192-224, suppressTypingKeyDispatch 558-577, enableClientBufferedTyping 580-806);
-   rows checked with scratchpad/vocabcheck.py.
-   2026-10-25 (Baaria, SC-344): the rows are travel agents with a discount limit instead of the earlier project managers and PO
-   limit. *@
+@* 2026-10-17: on FeatureDemoLayout; closes SC-164 to SC-169. Latency buttons (no delay was injected) and claims removed; counter
+   counts saves (OnCellSave). Tables added 2026-10-24 (SC-278).
+   2026-10-24 (SC-278): tables from TextBoxTypingBehavior.cs, Grid/GridControl.razor.cs, Grid/GridTextEditingDiagnosticsSnapshot.cs,
+   TextBoxControl.razor, wwwroot/textbox-control.js.
+   2026-10-25 (SC-344): rows are travel agents with a discount limit. *@
 
-<PageTitle>Typing modes — FlexCore Showcase</PageTitle>
+<PageTitle>Cell Editor Typing Modes in a Blazor Server Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Typing modes" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Decide whether each keystroke in a cell editor goes to the server or stays in the browser until commit."
+                   Tagline="Send every keystroke to the server, or keep typing in the browser until commit."
                    SourcePath="TextBoxTypingBehavior.cs;Grid/GridControl.razor.cs;Grid/GridTextEditingDiagnosticsSnapshot.cs;TextBoxControl.razor;wwwroot/textbox-control.js">
     <Overview>
         <p>
-            Text cell editors are <code>TextBoxControl</code>s, and <code>TextEditorTypingBehavior</code> picks their transport.
-            <code>ServerBacked</code>, the default, keeps the ordinary Blazor event path: the server sees the text as it is typed.
-            <code>ClientBuffered</code> keeps typing in the browser and sends the completed value when the cell commits, so a slow or
-            busy connection does not get a round trip per character. Both modes write the same value to the row on commit.
+            Typing modes decide how text editors in a Blazor <code>GridControl</code> send what users type: every keystroke to the server, or once when the cell commits. Use <code>ClientBuffered</code> for heavy data entry or a distant server: keystrokes stay in the browser and the value is sent once, on commit. <code>ServerBacked</code>, the default, is the ordinary Blazor path with a round trip per key; both write the same value.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="transport" Title="Switch the transport, then type" RazorCode="@Code.Transport" CSharpCode="@Code.TransportCs">
-            <Description><p>Pick a transport, double-click an agent's Full Name, Email, Phone or Desk cell, type and press Enter. The line under the grid counts the saves and names the last one. On a local connection the two modes feel the same; the difference is how many messages travel while you type.</p></Description>
+            <Description><p>Pick a transport, double-click a Full Name, Email, Phone or Desk cell, type and press Enter; the difference is how many messages travel while you type.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_transports" Values="@(new[] { _clientBuffered ? "client" : "server" })"
                                     ValuesChanged="@(v => SetTransport(v.Count > 0 && v[0] == "client"))"
@@ -144,17 +131,17 @@
 
         _rows =
         [
-            new AgentRow { ID = "AG-01", FullName = "Nadia Okafor", Email = "nokafor@razorsharp-getaways.example", Phone = "(512) 555-0114", Desk = "Leisure desk", TeamLead = true, DiscountLimit = 1000m },
-            new AgentRow { ID = "AG-02", FullName = "Lucas Moreau", Email = "lmoreau@razorsharp-getaways.example", Phone = "(512) 555-0157", Desk = "Adventure desk", TeamLead = false, DiscountLimit = 250m },
-            new AgentRow { ID = "AG-03", FullName = "Hannah Byrne", Email = "hbyrne@razorsharp-getaways.example", Phone = "(512) 555-0208", Desk = "Cruise desk", TeamLead = false, DiscountLimit = 500m },
-            new AgentRow { ID = "AG-04", FullName = "Kenji Watanabe", Email = "kwatanabe@razorsharp-getaways.example", Phone = "(512) 555-0263", Desk = "Touring desk", TeamLead = true, DiscountLimit = 1000m },
-            new AgentRow { ID = "AG-05", FullName = "Imogen Hart", Email = "ihart@razorsharp-getaways.example", Phone = "(512) 555-0329", Desk = "Luxury desk", TeamLead = false, DiscountLimit = 250m }
+            new AgentRow { ID = "AG-01", FullName = "Saffron Kettleby", Email = "skettleby@razorsharp-getaways.example", Phone = "(512) 555-0114", Desk = "Leisure desk", TeamLead = true, DiscountLimit = 1000m },
+            new AgentRow { ID = "AG-02", FullName = "Rupert Inglenook", Email = "ringlenook@razorsharp-getaways.example", Phone = "(512) 555-0157", Desk = "Adventure desk", TeamLead = false, DiscountLimit = 250m },
+            new AgentRow { ID = "AG-03", FullName = "Ottoline Figgis", Email = "ofiggis@razorsharp-getaways.example", Phone = "(512) 555-0208", Desk = "Cruise desk", TeamLead = false, DiscountLimit = 500m },
+            new AgentRow { ID = "AG-04", FullName = "Cornelius Quill", Email = "cquill@razorsharp-getaways.example", Phone = "(512) 555-0263", Desk = "Touring desk", TeamLead = true, DiscountLimit = 1000m },
+            new AgentRow { ID = "AG-05", FullName = "Wilhelmina Sprocket", Email = "wsprocket@razorsharp-getaways.example", Phone = "(512) 555-0329", Desk = "Luxury desk", TeamLead = false, DiscountLimit = 250m }
         ];
     }
 
     private void SetTransport(bool clientBuffered) => _clientBuffered = clientBuffered;
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    // Code tabs: generated verbatim copies of the Demo block and members above.
     private static class Code
     {
         public const string Transport = @"<GridControl TValue=""AgentRow""
@@ -216,19 +203,17 @@ protected override void OnInitialized()
 
     _rows =
     [
-        new AgentRow { ID = ""AG-01"", FullName = ""Nadia Okafor"", Email = ""nokafor@razorsharp-getaways.example"", Phone = ""(512) 555-0114"", Desk = ""Leisure desk"", TeamLead = true, DiscountLimit = 1000m },
-        new AgentRow { ID = ""AG-02"", FullName = ""Lucas Moreau"", Email = ""lmoreau@razorsharp-getaways.example"", Phone = ""(512) 555-0157"", Desk = ""Adventure desk"", TeamLead = false, DiscountLimit = 250m },
-        new AgentRow { ID = ""AG-03"", FullName = ""Hannah Byrne"", Email = ""hbyrne@razorsharp-getaways.example"", Phone = ""(512) 555-0208"", Desk = ""Cruise desk"", TeamLead = false, DiscountLimit = 500m },
-        new AgentRow { ID = ""AG-04"", FullName = ""Kenji Watanabe"", Email = ""kwatanabe@razorsharp-getaways.example"", Phone = ""(512) 555-0263"", Desk = ""Touring desk"", TeamLead = true, DiscountLimit = 1000m },
-        new AgentRow { ID = ""AG-05"", FullName = ""Imogen Hart"", Email = ""ihart@razorsharp-getaways.example"", Phone = ""(512) 555-0329"", Desk = ""Luxury desk"", TeamLead = false, DiscountLimit = 250m }
+        new AgentRow { ID = ""AG-01"", FullName = ""Saffron Kettleby"", Email = ""skettleby@razorsharp-getaways.example"", Phone = ""(512) 555-0114"", Desk = ""Leisure desk"", TeamLead = true, DiscountLimit = 1000m },
+        new AgentRow { ID = ""AG-02"", FullName = ""Rupert Inglenook"", Email = ""ringlenook@razorsharp-getaways.example"", Phone = ""(512) 555-0157"", Desk = ""Adventure desk"", TeamLead = false, DiscountLimit = 250m },
+        new AgentRow { ID = ""AG-03"", FullName = ""Ottoline Figgis"", Email = ""ofiggis@razorsharp-getaways.example"", Phone = ""(512) 555-0208"", Desk = ""Cruise desk"", TeamLead = false, DiscountLimit = 500m },
+        new AgentRow { ID = ""AG-04"", FullName = ""Cornelius Quill"", Email = ""cquill@razorsharp-getaways.example"", Phone = ""(512) 555-0263"", Desk = ""Touring desk"", TeamLead = true, DiscountLimit = 1000m },
+        new AgentRow { ID = ""AG-05"", FullName = ""Wilhelmina Sprocket"", Email = ""wsprocket@razorsharp-getaways.example"", Phone = ""(512) 555-0329"", Desk = ""Luxury desk"", TeamLead = false, DiscountLimit = 250m }
     ];
 }
 
 private void SetTransport(bool clientBuffered) => _clientBuffered = clientBuffered;";
     }
 
-    // 2026-10-24: every row below was read at its declaration and at the sites that use it; the vocabcheck limits (enum members,
-    // positional record parameters, the getter-only TotalServerCallbacks and the tuple-typed OnPasteTruncated) were checked by grep.
     private static class Vocab
     {
         public static readonly ApiRow[] Modes =

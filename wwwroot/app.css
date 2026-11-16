@@ -1,15 +1,69 @@
+/* 2026-10-28: Inter site font (Google Fonts, App.razor), system fallback; brand colors = the logo's tiles (MainLayout.razor). */
+:root {
+    --site-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --brand-blue: #0284c7;
+    --brand-sky: #38bdf8;
+    --brand-indigo: #6366f1;
+    --brand-green: #10b981;
+    --brand-stripe: linear-gradient(90deg, var(--brand-blue) 0 25%, var(--brand-sky) 25% 50%, var(--brand-indigo) 50% 75%, var(--brand-green) 75% 100%);
+    --brand-stripe-down: linear-gradient(180deg, var(--brand-blue) 0 25%, var(--brand-sky) 25% 50%, var(--brand-indigo) 50% 75%, var(--brand-green) 75% 100%);
+    /* Buttons (2026-10-29): logo indigo. Text-only hovers keep the menu blue (2026-10-25 note below). */
+    --brand-button: #4f46e5;
+    --brand-button-hover: #4338ca;
+    --brand-button-soft: #eef2ff;
+    --brand-button-soft-hover: #e0e7ff;
+    --brand-button-soft-text: #4338ca;
+
+    /* ButtonControl themed site-wide (demos included) through its own variables (2026-10-29); several controls take their
+       pressed/picked color from --fx-accent. The rest: "Buttons" block below. */
+    --fx-btn-bg: var(--brand-button-soft);
+    --fx-btn-color: var(--brand-button-soft-text);
+    --fx-btn-border: 1px solid transparent;
+    --fx-btn-border-color: transparent;
+    --fx-btn-radius: 8px;
+    --fx-btn-hover-bg: var(--brand-button-soft-hover);
+    --fx-btn-hover-border: 1px solid transparent;
+    --fx-btn-hover-border-color: transparent;
+    --fx-btn-active-bg: #c7d2fe;
+    --fx-accent: var(--brand-button);
+    /* 2026-11-15: split buttons, dock-manager tabs and calendar picks used the library blue (#2563eb) next to the indigo buttons;
+       they follow the button indigo, so every page shows one primary color. */
+    --fx-primary: var(--brand-button);
+    --fx-split-btn-bg: var(--brand-button);
+    --fx-split-btn-border-color: var(--brand-button-hover);
+    --fx-split-btn-hover-bg: var(--brand-button-hover);
+}
+
+/* Buttons beyond the --fx-btn-* variables: type and weight, indigo for library-fixed variants; doubled classes beat the library's
+   scoped rules. Padding stays with the library: its controls tighten it internally (scheduler entries, pagers). */
+:root .fx-button.fx-button:not(.fx-button-classic) {
+    font-family: inherit;
+    font-weight: 600;
+    line-height: 1.35;
+    transition: background-color 0.15s ease;
+}
+:root .fx-button.btn-sm.btn-sm:not(.fx-button-classic) { padding: 4px 10px; font-size: calc(12px * var(--fx-zoom, 1)); }
+:root .fx-button.btn-lg.btn-lg:not(.fx-button-classic) { padding: 10px 22px; font-size: calc(16px * var(--fx-zoom, 1)); border-radius: 10px; }
+:root .fx-button.btn-primary.btn-primary { background: var(--brand-button); border-color: var(--brand-button); color: #ffffff; }
+:root .fx-button.btn-primary.btn-primary:hover:not(:disabled) { background: var(--brand-button-hover); border-color: var(--brand-button-hover); }
+:root .fx-button.btn-outline-primary.btn-outline-primary { background: transparent; border-color: var(--brand-button); color: var(--brand-button-soft-text); }
+:root .fx-button.btn-outline-primary.btn-outline-primary:hover:not(:disabled) { background: var(--brand-button); color: #ffffff; }
+
+/* Brand marks (2026-10-28; title bar, heading tiles) live with each page type: .docs-page below, FeatureDemoLayout.razor.css,
+   DemoExample.razor.css, SignUp.razor.css. */
+
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--site-font);
 }
 
 a, .btn-link {
-    color: #006bb7;
+    color: var(--brand-blue);
 }
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: var(--brand-button);
+    border-color: var(--brand-button-hover);
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
@@ -100,9 +154,37 @@ h1:focus {
 .footer-section { max-width: 1100px; margin: 32px auto; padding: 32px;
     border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
 
+/* Doodle headings (2026-10-28; centered 2026-10-29): fx-hand wobble filter from DoodleFilters.razor; is-playing (App.razor's
+   fxToggleClassWhenVisible) cycles its three seeds. Movements live in Home.razor.css, ComponentCatalogDirectory.razor.css. */
+.doodle-head { display: flex; align-items: center; justify-content: center; gap: 20px; text-align: center; }
+.doodle { flex: none; width: 112px; height: auto; overflow: visible; filter: url(#fx-hand); }
+.doodle-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
+.doodle-head.is-playing .doodle { animation: doodle-boil 0.42s 7; }
+
+@keyframes doodle-boil {
+    0% { filter: url(#fx-hand); }
+    33% { filter: url(#fx-hand-b); }
+    67% { filter: url(#fx-hand-c); }
+    100% { filter: url(#fx-hand); }
+}
+
+@media (max-width: 768px) {
+    .doodle-head { flex-direction: column; align-items: center; gap: 6px; }
+    .doodle { width: 76px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .doodle-head.is-playing .doodle { animation: none; }
+}
+
 .docs-page { max-width: 880px; margin: 0 auto; padding: 16px 32px; }
-.docs-page h1 { font-size: 32px; margin: 0 0 16px; color: #0d3b66; }
-.docs-page h2 { font-size: 20px; margin: 32px 0 12px; color: #0d3b66; }
+.docs-page h1 { font-size: clamp(34px, 4vw, 48px); font-weight: 700; line-height: 1.1; letter-spacing: -0.035em; margin: 0 0 24px; color: #0f172a; }
+.docs-page h1::after { content: ""; display: block; width: 64px; height: 4px; border-radius: 2px; background: var(--brand-stripe); margin-top: 14px; }
+.docs-page h2 { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 36px 0 12px; color: #0f172a; }
+.docs-page h2::before { content: ""; flex: none; width: 12px; height: 12px; border-radius: 3px; background: var(--brand-blue); }
+.docs-page section:nth-of-type(4n + 2) h2::before { background: var(--brand-sky); }
+.docs-page section:nth-of-type(4n + 3) h2::before { background: var(--brand-indigo); }
+.docs-page section:nth-of-type(4n + 4) h2::before { background: var(--brand-green); }
 .docs-page section { margin-bottom: 16px; }
 .docs-page p { color: #374151; line-height: 1.6; }
 .docs-page pre {
@@ -254,224 +336,8 @@ h1:focus {
     font-size: 20px; cursor: pointer; line-height: 1;
 }
 
-/* ── Home hero grid theme ──────────────────────────────────────────────── */
-/* The trip-type DropDownGridControl renders its popup grid inside the hero grid's cells, so the hero's cell and row rules carry
-   :not(.fx-dropdown-grid-popup *); without it the popup took the hero's 36 px rows and padding. Header rules still reach the
-   popup's headers on purpose (the popup grid sorts too). */
-.fx-grid.hero-grid-theme {
-    --fx-grid-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-    --fx-grid-font-size: 13px !important;
-    --fx-grid-header-font-size: 13px !important;
-    --fx-grid-bg: #ffffff !important;
-    --fx-grid-text-color: #1e293b !important;
-    --fx-grid-border-color: #cbd5e1 !important;
-    --fx-grid-line-color: #e2e8f0 !important;
-    --fx-grid-table-border-color: #e2e8f0 !important;
-    --fx-grid-cell-border-color: #e2e8f0 !important;
-    --fx-grid-cell-border-right-color: #e2e8f0 !important;
-    --fx-grid-header-bg: #f8fafc !important;
-    --fx-grid-header-hover-bg: #f1f5f9 !important;
-    --fx-grid-header-text-color: #0f172a !important;
-    --fx-grid-header-border-color: #cbd5e1 !important;
-    --fx-grid-header-shadow-color: #cbd5e1 !important;
-    --fx-grid-header-highlight-color: #ffffff !important;
-    --fx-grid-row-hover-bg: #f1f5f9 !important;
-    --fx-grid-alt-row-bg: #fbfcfe !important;
-    --fx-grid-selected-row-bg: #dbeafe !important;
-    --fx-grid-selected-row-color: #1e3a8a !important;
-    --fx-grid-selected-row-hover-bg: #bfdbfe !important;
-    --fx-grid-selected-row-border: #93c5fd !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
-}
-
-.fx-grid.hero-grid-theme .fx-header-cell {
-    padding: 8px 12px !important;
-    font-weight: 600 !important;
-    font-size: 13px !important;
-    color: #0f172a !important;
-    background: #f8fafc !important;
-    border-bottom: 2px solid #cbd5e1 !important;
-    border-right: 1px solid #e2e8f0 !important;
-    letter-spacing: 0.01em !important;
-    height: 38px !important;
-}
-
-.fx-grid.hero-grid-theme .fx-cell:not(.fx-dropdown-grid-popup *) {
-    padding: 7px 12px !important;
-    font-size: 13px !important;
-    line-height: 1.4 !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-    border-right: 1px solid #f1f5f9 !important;
-    color: #334155 !important;
-    height: 36px !important;
-}
-
-/* Frozen cells paint background-color: inherit, so a row with no background let the scrolled cells show through the
-   Request column; every row gets an opaque one (the hover rule below is more specific and still wins). */
-.fx-grid.hero-grid-theme .fx-row:not(.fx-dropdown-grid-popup *) {
-    background-color: #ffffff !important;
-}
-.fx-grid.hero-grid-theme .fx-row.fx-alt-row:not(.fx-dropdown-grid-popup *) {
-    background-color: #fbfcfe !important;
-}
-
-.fx-grid.hero-grid-theme .fx-row:not(.fx-dropdown-grid-popup *):hover {
-    background-color: #f1f5f9 !important;
-}
-
-/* GridControl's scoped selected-row rule ends in a descendant `.fx-cell`, so it also paints the cells of the popup grid opened in
-   a selected hero row: every option took the selected colours. Inside the popup the selection colour variables are reset on the
-   popup's grid (it declares its own defaults) and set again on its selected row, so only the current option is tinted. */
-.fx-grid.hero-grid-theme .fx-dropdown-grid-popup .fx-grid {
-    --fx-grid-selected-row-bg: #ffffff;
-    --fx-grid-selected-row-color: #1e293b;
-}
-.fx-grid.hero-grid-theme .fx-dropdown-grid-popup tr.fx-row.fx-selected {
-    --fx-grid-selected-row-bg: #e0f2fe;
-    --fx-grid-selected-row-color: #0369a1;
-}
-
-/* Every hero column has a Field and sorts on a header click: a faint arrow says so until the grid draws its own ▲ / ▼ (the
-   popup grid's headers sort as well and get the same hint). */
-.fx-grid.hero-grid-theme th.fx-header-cell[data-field] {
-    cursor: pointer;
-}
-.fx-grid.hero-grid-theme th.fx-header-cell[data-field]:not(.fx-sorted) .fx-header-text::after {
-    content: "↕";
-    margin-left: 4px;
-    color: #94a3b8;
-    font-weight: 400;
-}
-.fx-grid.hero-grid-theme th.fx-header-cell[data-field]:not(.fx-sorted):hover .fx-header-text::after {
-    color: #0284c7;
-}
-.fx-grid.hero-grid-theme th.fx-header-cell[data-field]:active {
-    background: #e0f2fe !important;
-}
-.fx-grid.hero-grid-theme .fx-sort-icon {
-    color: #0284c7;
-}
-
-.fx-grid.hero-grid-theme .fx-row.fx-selected:not(.fx-dropdown-grid-popup *) > td,
-.fx-grid.hero-grid-theme .fx-row.fx-selected:not(.fx-dropdown-grid-popup *) > .fx-cell {
-    background-color: #dbeafe !important;
-    color: #1e3a8a !important;
-    font-weight: 500 !important;
-}
-
-.grid-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    border-radius: 9999px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    line-height: 1.3;
-}
-.grid-badge-blue   { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-.grid-badge-green  { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-.grid-badge-amber  { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-.grid-badge-purple { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
-.grid-badge-rose   { background: #ffe4e6; color: #be123c; border: 1px solid #fecdd3; }
-.grid-badge-gray   { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-
-.grid-badge-cyan   { background: #cffafe; color: #0e7490; border: 1px solid #a5f3fc; }
-
-.grid-request-code {
-    font-family: "SF Mono", Menlo, Consolas, Monaco, monospace;
-    font-weight: 700;
-    color: #0284c7;
-    background: #f0f9ff;
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid #e0f2fe;
-}
-
-/* Salesperson avatar & name */
-.agent-cell {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-.agent-avatar {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    color: #ffffff;
-    font-size: 10px;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-transform: uppercase;
-    flex-shrink: 0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-}
-.agent-name {
-    font-weight: 500;
-    color: #1e293b;
-    white-space: nowrap;
-}
-
-/* Hero popup editor badge (BadgeControl root, so it cannot live in Home.razor.css) */
-.modal-card-header .modal-badge-request {
-    background: #0284c7 !important; /* BadgeControl's own primary rule wins otherwise */
-    color: #ffffff;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 6px;
-}
-
-/* Inline SVG Sparkline Micro-Chart Cell */
-.sparkline-cell {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-}
-.sparkline-svg {
-    flex-shrink: 0;
-    overflow: visible;
-}
-.sparkline-delta {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 1px 6px;
-    border-radius: 4px;
-    white-space: nowrap;
-    line-height: 1.2;
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-}
-.delta-up {
-    color: #059669;
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-}
-.delta-down {
-    color: #dc2626;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-}
-
-/* Subtitle / hint banner matching screen_frame8.png */
-.grid-banner-hint {
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 8px 18px;
-    font-size: 13px;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.grid-banner-hint strong {
-    color: #0f172a;
-}
+/* ── Home hero grid (2026-11-04): app window rules moved to quickstart/RazorSharpGetaways/wwwroot/getaways.css (linked by this
+   site); shared rules below. ── */
 
 /* ── Performance & Feature Highlight Bar ── */
 .grid-perf-highlights {
@@ -518,116 +384,15 @@ h1:focus {
     line-height: 1.2;
 }
 
-/* ── Description cell popup edit trigger ── */
-.desc-cell-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    width: 100%;
-}
-
-.desc-text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex-grow: 1;
-}
-
-.btn-cell-popup-edit {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: #e0f2fe;
-    color: #0369a1;
-    border: 1px solid #bae6fd;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 4px;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.15s ease;
-}
-
-.btn-cell-popup-edit:hover {
-    background: #0284c7;
-    color: #ffffff;
-    border-color: #0284c7;
-}
-
-.btn-cell-popup-edit:active {
-    background: #0369a1;
-    border-color: #0369a1;
-    transform: scale(0.96);
-}
-
-/* ── In-Grid DropDownGrid styling ── */
-.grid-cell-dropdowngrid {
-    width: 100%;
-    height: 28px;
-    display: flex;
-    align-items: center;
-}
-
-.grid-cell-dropdowngrid .fx-dropdown-grid {
-    width: 100% !important;
-    height: 28px !important;
-    position: relative !important;
-}
-
-.grid-cell-dropdowngrid .fx-dropdown-grid-input-wrap {
-    height: 28px !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 6px !important;
-    background: #ffffff !important;
-    transition: all 0.15s ease !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
-    display: flex !important;
-    align-items: center !important;
-    cursor: pointer !important;
-}
-
-.grid-cell-dropdowngrid .fx-dropdown-grid-input-wrap:hover {
-    border-color: #0284c7 !important;
-    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15) !important;
-}
-
-.grid-cell-dropdowngrid .fx-dropdown-grid-input {
-    border: none !important;
-    border-radius: 6px 0 0 6px !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    color: #0f172a !important;
-    padding: 0 24px 0 8px !important;
-    background: transparent !important;
-    height: 26px !important;
-    line-height: 26px !important;
-    cursor: pointer !important;
-}
-
-.grid-cell-dropdowngrid .fx-dropdown-grid-arrow {
-    border-left: 1px solid #e2e8f0 !important;
-    background: #f1f5f9 !important;
-    width: 20px !important;
-    border-top-right-radius: 5px !important;
-    border-bottom-right-radius: 5px !important;
-    cursor: pointer !important;
-}
-
-/* DropDownGridControl keeps its popup hidden at top/left -9999px until two JS round trips (loading its module, then measuring) and
-   a server render place it: 0.6 to 0.85 s on the live site from Pakistan, against about 0.23 s for the popup's markup to arrive.
-   Its placement is also a fixed screen position taken once, so when the popup grid reveals its current row and the hero grid
-   scrolls under it (seen 2026-10-26), the popup is left a row away from its box. CSS anchor positioning ties the open popup to
-   its box instead, from the first render (the library's inline top/left are overridden), and flips it when it would leave the
-   window. Browsers without anchor positioning (position-area) keep the library's placement. */
+/* DropDownGridControl places its popup once, at a fixed screen position, after two JS round trips; when the popup grid reveals
+   its current row and the hero grid scrolls under it (2026-10-26), it ends a row off its box. Anchor positioning ties it to its
+   box from the first render; browsers without position-area keep the library's placement. */
 @supports (position-area: bottom) {
     .fx-dropdown-grid.fx-open > .fx-dropdown-grid-input-wrap {
         anchor-name: --fx-dropdown-grid-open;
     }
-    /* position-area, not top/left: the try fallbacks can only flip declarations that are not !important, so the library's inline
-       top/left are cleared with !important and the area itself stays overridable (checked 2026-10-26: at the window's bottom
-       edge the popup now opens upward). */
+    /* position-area, not top/left: try fallbacks flip only non-!important declarations, so the library's inline top/left are
+       cleared with !important and the area stays overridable (2026-10-26: opens upward at the bottom edge). */
     .fx-dropdown-grid.fx-open > .fx-dropdown-grid-popup {
         position: fixed !important;
         position-anchor: --fx-dropdown-grid-open;
@@ -694,273 +459,12 @@ td:has(.fx-dropdown-grid.fx-open),
     box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
 }
 
-/* ── Modal Dialog Overlay for Popup Editing ── */
-.modal-backdrop-blur {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.55);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    padding: 16px;
-    animation: fadeIn 0.15s ease-out;
-}
-
-.edit-modal-card {
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    width: 100%;
-    max-width: 580px;
-    overflow: visible !important;
-    border: 1px solid #cbd5e1;
-}
-
-.modal-card-header {
-    background: #0d3b66;
-    color: #ffffff;
-    padding: 16px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top-left-radius: 11px;
-    border-top-right-radius: 11px;
-}
-
-.modal-header-titles {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-
-.modal-h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-    color: #ffffff;
-}
-
-.modal-sub {
-    margin: 2px 0 0;
-    font-size: 12px;
-    color: #cbd5e1;
-}
-
-.btn-close-modal {
-    background: transparent;
-    border: none;
-    color: #ffffff;
-    font-size: 20px;
-    line-height: 1;
-    cursor: pointer;
-    opacity: 0.8;
-    transition: opacity 0.15s;
-}
-
-.btn-close-modal:hover {
-    opacity: 1;
-}
-
-.modal-card-body {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    background: #ffffff;
-    overflow: visible !important;
-}
-
-.modal-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-}
-
-.modal-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-/* Elevate stacking context when dropdown is open so it paints over subsequent fields */
-.modal-field:has(.fx-dropdown-panel),
-.modal-grid-2:has(.fx-dropdown-panel) {
-    z-index: 50 !important;
-    position: relative !important;
-}
-
-.modal-field label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.modal-input {
-    width: 100%;
-    box-sizing: border-box;
-    height: 38px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 13px;
-    color: #0f172a;
-    background: #ffffff;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.modal-input:focus,
-.modal-textarea:focus {
-    outline: none;
-    border-color: #0284c7;
-    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
-}
-
-.modal-textarea {
-    width: 100%;
-    box-sizing: border-box;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 13px;
-    color: #0f172a;
-    resize: vertical;
-    font-family: inherit;
-    line-height: 1.5;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.modal-card-footer {
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-    padding: 14px 20px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    border-bottom-left-radius: 11px;
-    border-bottom-right-radius: 11px;
-}
-
-.btn-modal-cancel {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #475569;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.15s;
-}
-
-.btn-modal-cancel:hover {
-    background: #f1f5f9;
-}
-
-.btn-modal-save {
-    background: #0284c7;
-    border: 1px solid #0369a1;
-    color: #ffffff;
-    padding: 8px 18px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
-    transition: background-color 0.15s;
-}
-
-.btn-modal-save:hover {
-    background: #0369a1;
-}
-
-/* ── Modern DatePickerControl Enterprise Theme ── */
-.modal-flex-datepicker {
-    width: 100% !important;
-    display: block !important;
-}
-
-.modal-flex-datepicker .fx-datepicker-input-group {
-    height: 38px !important;
-    min-height: 38px !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 6px !important;
-    background: #ffffff !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    align-items: stretch !important;
-    transition: border-color 0.15s, box-shadow 0.15s !important;
-    box-shadow: none !important;
-}
-
-.modal-flex-datepicker .fx-datepicker-input-group:focus-within {
-    border-color: #0284c7 !important;
-    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
-}
-
-.modal-flex-datepicker .fx-datepicker-input {
-    font-size: 13px !important;
-    font-family: inherit !important;
-    padding: 8px 12px !important;
-    color: #0f172a !important;
-    height: 100% !important;
-    border: none !important;
-    outline: none !important;
-    box-sizing: border-box !important;
-    flex: 1 1 auto !important;
-    background: transparent !important;
-}
-
-.modal-flex-datepicker .fx-datepicker-trigger {
-    width: 38px !important;
-    min-width: 38px !important;
-    height: 100% !important;
-    border: none !important;
-    border-left: 1px solid #e2e8f0 !important;
-    background: #f8fafc !important;
-    cursor: pointer !important;
-    font-size: 0 !important;
-    position: relative !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: background-color 0.15s !important;
-    padding: 0 !important;
-}
-
-.modal-flex-datepicker .fx-datepicker-trigger::after {
-    content: "";
-    width: 16px;
-    height: 16px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-    transition: all 0.15s ease;
-}
-
-.modal-flex-datepicker .fx-datepicker-trigger:hover {
-    background: #f1f5f9 !important;
-}
-
-.modal-flex-datepicker .fx-datepicker-trigger:hover::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%230284c7' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E");
-}
-
 /* Modern Calendar Dropdown Popover */
 .fx-datepicker-dropdown {
     border-radius: 12px !important;
     border: 1px solid #e2e8f0 !important;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-family: var(--site-font) !important;
     overflow: hidden !important;
     padding: 12px !important;
     background: #ffffff !important;
@@ -1132,255 +636,13 @@ td:has(.fx-dropdown-grid.fx-open),
 .fx-datepicker-dropdown .fx-today-link:hover { color: #0284c7 !important;
 }
 
-/* ── Modern DropDownListControl Enterprise Theme ── */
-.modal-flex-dropdown {
-    width: 100% !important;
-    display: block !important;
-}
-
-.modal-flex-dropdown .fx-dropdown {
-    height: 38px !important;
-    min-height: 38px !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 6px !important;
-    background: #ffffff !important;
-    padding: 0 34px 0 12px !important;
-    font-family: inherit !important;
-    font-size: 13px !important;
-    color: #0f172a !important;
-    box-shadow: none !important;
-    outline: none !important;
-    box-sizing: border-box !important;
-    transition: border-color 0.15s, box-shadow 0.15s !important;
-    cursor: pointer !important;
-    display: flex !important;
-    align-items: center !important;
-    position: relative !important;
-    text-align: left !important;
-}
-
-.modal-flex-dropdown .fx-dropdown:focus,
-.modal-flex-dropdown.fx-dropdown-host:focus-within .fx-dropdown {
-    border-color: #0284c7 !important;
-    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
-    outline: none !important;
-}
-
-.modal-flex-dropdown .fx-dropdown-text {
-    font-family: inherit !important;
-    font-size: 13px !important;
-    color: #0f172a !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    display: block !important;
-}
-
-.modal-flex-dropdown .fx-dropdown-arrow {
-    width: 32px !important;
-    border-left: 1px solid #e2e8f0 !important;
-    background: #f8fafc !important;
-    border-radius: 0 5px 5px 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    top: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    position: absolute !important;
-    transition: background-color 0.15s !important;
-}
-
-.modal-flex-dropdown:hover .fx-dropdown-arrow {
-    background: #f1f5f9 !important;
-}
-
-.modal-flex-dropdown .fx-dropdown-arrow::before {
-    content: "" !important;
-    position: absolute !important;
-    left: calc(50% - 4px) !important;
-    top: calc(50% - 2px) !important;
-    width: 0 !important;
-    height: 0 !important;
-    border-left: 4px solid transparent !important;
-    border-right: 4px solid transparent !important;
-    border-top: 5px solid #64748b !important;
-    border-bottom: none !important;
-}
-
-.modal-flex-dropdown:hover .fx-dropdown-arrow::before {
-    border-top-color: #0284c7 !important;
-}
-
-.modal-flex-dropdown .fx-dropdown-panel {
-    border-radius: 8px !important;
-    border: 1px solid #cbd5e1 !important;
-    box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.18), 0 6px 10px -4px rgba(0, 0, 0, 0.08) !important;
-    background: #ffffff !important;
-    overflow-y: auto !important;
-    max-height: 220px !important;
-    padding: 4px !important;
-    z-index: 10001 !important;
-    box-sizing: border-box !important;
-}
-
-.modal-flex-dropdown .fx-dropdown-option {
-    font-family: inherit !important;
-    font-size: 13px !important;
-    color: #334155 !important;
-    padding: 8px 12px !important;
-    border-radius: 6px !important;
-    border: none !important;
-    background: transparent !important;
-    text-align: left !important;
-    width: 100% !important;
-    cursor: pointer !important;
-    transition: background-color 0.1s, color 0.1s !important;
-    display: block !important;
-    box-sizing: border-box !important;
-}
-
-.modal-flex-dropdown .fx-dropdown-option:hover,
-.modal-flex-dropdown .fx-dropdown-option.highlighted {
-    background: #f0f9ff !important;
-    color: #0284c7 !important;
-}
-
-.modal-flex-dropdown .fx-dropdown-option.selected {
-    background: #0284c7 !important;
-    color: #ffffff !important;
-    font-weight: 600 !important;
-}
-
-/* ── Toolbar View DropDownListControl Enterprise Styling ── */
-.grid-card-toolbar {
-    overflow: visible !important;
-    position: relative !important;
-    z-index: 20 !important;
-}
-
-.view-flex-dropdown {
-    display: inline-block !important;
-    position: relative !important;
-}
-
-.view-flex-dropdown .fx-dropdown {
-    height: 32px !important;
-    min-height: 32px !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 6px !important;
-    background: #ffffff !important;
-    padding: 0 30px 0 10px !important;
-    font-family: inherit !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    color: #0f172a !important;
-    box-shadow: none !important;
-    outline: none !important;
-    display: flex !important;
-    align-items: center !important;
-    position: relative !important;
-    cursor: pointer !important;
-    box-sizing: border-box !important;
-    transition: border-color 0.15s, box-shadow 0.15s !important;
-}
-
-.view-flex-dropdown .fx-dropdown:focus,
-.view-flex-dropdown.fx-dropdown-host:focus-within .fx-dropdown {
-    border-color: #0284c7 !important;
-    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
-    outline: none !important;
-}
-
-.view-flex-dropdown .fx-dropdown-text {
-    font-family: inherit !important;
-    font-size: 13px !important;
-    color: #0f172a !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-}
-
-.view-flex-dropdown .fx-dropdown-arrow {
-    width: 28px !important;
-    border-left: 1px solid #e2e8f0 !important;
-    background: #f8fafc !important;
-    border-radius: 0 5px 5px 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    position: absolute !important;
-    top: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    transition: background-color 0.15s !important;
-}
-
-.view-flex-dropdown:hover .fx-dropdown-arrow {
-    background: #f1f5f9 !important;
-}
-
-.view-flex-dropdown .fx-dropdown-arrow::before {
-    content: "" !important;
-    width: 0 !important;
-    height: 0 !important;
-    border-left: 4px solid transparent !important;
-    border-right: 4px solid transparent !important;
-    border-top: 5px solid #64748b !important;
-    border-bottom: none !important;
-}
-
-.view-flex-dropdown:hover .fx-dropdown-arrow::before {
-    border-top-color: #0284c7 !important;
-}
-
-.view-flex-dropdown .fx-dropdown-panel {
-    border-radius: 8px !important;
-    border: 1px solid #cbd5e1 !important;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-    background: #ffffff !important;
-    z-index: 1000 !important;
-    padding: 4px !important;
-    max-height: 220px !important;
-    overflow-y: auto !important;
-    box-sizing: border-box !important;
-}
-
-.view-flex-dropdown .fx-dropdown-option {
-    font-family: inherit !important;
-    font-size: 13px !important;
-    padding: 6px 10px !important;
-    border-radius: 6px !important;
-    border: none !important;
-    background: transparent !important;
-    text-align: left !important;
-    width: 100% !important;
-    cursor: pointer !important;
-    display: block !important;
-    box-sizing: border-box !important;
-    color: #334155 !important;
-    transition: background-color 0.1s, color 0.1s !important;
-}
-
-.view-flex-dropdown .fx-dropdown-option:hover,
-.view-flex-dropdown .fx-dropdown-option.highlighted {
-    background: #f0f9ff !important;
-    color: #0284c7 !important;
-}
-
-.view-flex-dropdown .fx-dropdown-option.selected {
-    background: #0284c7 !important;
-    color: #ffffff !important;
-    font-weight: 600 !important;
-}
-
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 
 /* ==========================================================================
-   Syncfusion-Style Live Demo & Documentation Showcase Layout
+   Live demo and documentation layout
    ========================================================================== */
 
 .sf-demo-shell {
@@ -1388,7 +650,7 @@ td:has(.fx-dropdown-grid.fx-open),
     margin: 0 auto;
     padding: 1.5rem 2rem 4rem;
     color: #1e293b;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--site-font);
 }
 
 .sf-demo-header {
@@ -1712,86 +974,6 @@ td:has(.fx-dropdown-grid.fx-open),
 }
 
 /* ── Showcase Landing Page Button Enhancements ───────────────────────── */
-.landing-container .showcase-tabs {
-    display: inline-flex !important;
-    align-items: center !important;
-    background: #f1f5f9 !important;
-    padding: 4px !important;
-    border-radius: 8px !important;
-    gap: 4px !important;
-    border: 1px solid #e2e8f0 !important;
-    overflow-x: auto !important;
-}
-
-.landing-container .tab-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    color: #64748b !important;
-    font-weight: 600 !important;
-    font-size: 13px !important;
-    padding: 7px 16px !important;
-    border-radius: 6px !important;
-    cursor: pointer !important;
-    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    white-space: nowrap !important;
-    user-select: none !important;
-    line-height: 1.4 !important;
-    box-shadow: none !important;
-}
-
-.landing-container .tab-btn:hover { color: #0284c7 !important;
-    background: rgba(255, 255, 255, 0.7) !important;
-}
-
-.landing-container .tab-btn.active {
-    background: #ffffff !important;
-    color: #0284c7 !important;
-    font-weight: 700 !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
-}
-
-.landing-container .tab-btn .bi {
-    font-size: 14px !important;
-    color: #94a3b8 !important;
-    transition: color 0.15s ease !important;
-}
-
-.landing-container .tab-btn.active .bi {
-    color: #0284c7 !important;
-}
-
-.landing-container .btn-code-toggle {
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    color: #334155 !important;
-    font-size: 12.5px !important;
-    font-weight: 600 !important;
-    padding: 7px 14px !important;
-    border-radius: 6px !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 7px !important;
-    transition: all 0.15s ease !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
-    outline: none !important;
-}
-
-.landing-container .btn-code-toggle:hover {
-    background: #f8fafc !important;
-    border-color: #94a3b8 !important;
-    color: #0284c7 !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
-}
-
-.landing-container .btn-code-toggle .bi {
-    color: #0284c7 !important;
-}
-
 .landing-container .btn-grid-action {
     display: inline-flex !important;
     align-items: center !important;
@@ -1799,7 +981,7 @@ td:has(.fx-dropdown-grid.fx-open),
     font-size: 12.5px !important;
     font-weight: 600 !important;
     padding: 7px 16px !important;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
     cursor: pointer !important;
     transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
     border: none !important;
@@ -1809,26 +991,25 @@ td:has(.fx-dropdown-grid.fx-open),
 }
 
 .landing-container .btn-excel {
-    background: linear-gradient(180deg, #107c41 0%, #0c6936 100%) !important;
-    color: #ffffff !important;
-    box-shadow: 0 1px 3px rgba(16, 124, 65, 0.35) !important;
+    background: var(--brand-button-soft) !important;
+    color: var(--brand-button-soft-text) !important;
+    box-shadow: none !important;
 }
 
 .landing-container .btn-excel:hover {
-    background: #0b5e30 !important;
-    box-shadow: 0 3px 8px rgba(16, 124, 65, 0.45) !important;
+    background: var(--brand-button-soft-hover) !important;
     transform: translateY(-1px) !important;
 }
 
 .landing-container .btn-new {
-    background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%) !important;
+    background: linear-gradient(180deg, var(--brand-button) 0%, var(--brand-button-hover) 100%) !important;
     color: #ffffff !important;
-    box-shadow: 0 1px 3px rgba(2, 132, 199, 0.35) !important;
+    box-shadow: 0 1px 3px rgba(79, 70, 229, 0.35) !important;
 }
 
 .landing-container .btn-new:hover {
-    background: #0274b0 !important;
-    box-shadow: 0 3px 8px rgba(2, 132, 199, 0.45) !important;
+    background: var(--brand-button-hover) !important;
+    box-shadow: 0 3px 8px rgba(79, 70, 229, 0.45) !important;
     transform: translateY(-1px) !important;
 }
 
@@ -1874,37 +1055,54 @@ td:has(.fx-dropdown-grid.fx-open),
 }
 
 .landing-container .btn-filter-pill.active {
-    background: #0284c7 !important;
-    border-color: #0284c7 !important;
+    background: var(--brand-button) !important;
+    border-color: var(--brand-button) !important;
     color: #ffffff !important;
     font-weight: 700 !important;
-    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4) !important;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.4) !important;
 }
 
-/* 2026-10-25 (Baaria): the library's tab strips (Example | Razor | C# on every example, the home hero's Example | Razor) follow the
-   same hover and active blue, through the control's own CSS variables. */
+/* 2026-10-25: library tab strips take the same hover and active blue via the control's CSS variables. */
 .fx-tabstrip { --fx-tab-active-color: #0284c7; --fx-tab-active-border-color: #0284c7; }
 .fx-tabstrip-tab:hover:not(.fx-tabstrip-tab-disabled) { --fx-text-color: #0284c7; }
-/* TabControl (the chart gallery and the Tabs & accordion page): its colours sit in a scoped stylesheet with no variables, so these
-   selectors carry an extra class to outrank the scoped ones. Active: bold blue text and the 2px bar; hover: blue text on the tint. */
-.fx-tabs .fx-tab-headers .fx-tab-button.active { color: #0284c7; font-weight: 700; box-shadow: inset 0 -2px 0 #0284c7; }
-.fx-tabs .fx-tab-headers .fx-tab-button:not(.active):hover { color: #0284c7; background: #f1f5f9; }
-/* Labels stay on one line: 10px side padding fits the chart gallery's ten tabs in the 945px column at a 1280px window (14px wrapped
-   "Part-to-Whole" and "KPI cards"); on narrower screens the row wraps instead of squeezing the labels. */
-.fx-tabs .fx-tab-headers { flex-wrap: wrap; }
-.fx-tabs .fx-tab-headers .fx-tab-button { white-space: nowrap; padding: 8px 10px; }
-/* 2026-10-25 (Baaria): one hover design site-wide: text turns #0284c7 (the top menu's blue), neutral backgrounds tint #f1f5f9;
-   filled blue buttons still darken to #0369a1; the 2px bar is reserved for the active or open item. */
-/* ── 2026-10-18, Baaria's review ─────────────────────────────────────────────
-   Frozen header cells: GridControl.razor writes style="…position:sticky;left:…; position:relative;" on every header cell, so the
-   later position:relative wins and a frozen column's header scrolls away while its body cells stay pinned (SC-292). Until the
-   library fix, force sticky on header cells whose inline style asked for it. */
+/* 2026-10-25: site-wide hover: text #0284c7 (top menu blue), neutral backgrounds #f1f5f9, filled buttons darker indigo
+   (2026-10-29); the 2px bar marks only the active or open item. */
+/* ── 2026-10-18 ──────────────────────────────────────────────────────────────
+   Frozen header cells: GridControl.razor writes position:sticky then position:relative inline on header cells, so
+   frozen headers scroll away. Force sticky until the library fix. */
 .fx-grid th.fx-header-cell[style*="position:sticky"] { position: sticky !important; }
 
-/* Grid scrollbars: macOS overlay scrollbars hide the horizontal bar until a sideways gesture, so a wide grid looked unscrollable.
-   Styling the WebKit scrollbar makes it a classic, always-visible bar in Chrome, Edge and Safari. */
+/* Grid scrollbars: macOS overlay scrollbars hide a wide grid's horizontal bar; a styled WebKit scrollbar stays visible. */
 .fx-grid-content::-webkit-scrollbar { width: 12px; height: 12px; }
 .fx-grid-content::-webkit-scrollbar-track { background: #f3f3f3; }
 .fx-grid-content::-webkit-scrollbar-thumb { background: #b9b9b9; border-radius: 6px; border: 2px solid #f3f3f3; }
 .fx-grid-content::-webkit-scrollbar-thumb:hover { background: #8a8a8a; }
 .fx-grid-content::-webkit-scrollbar-corner { background: #f3f3f3; }
+
+/* Site tabs (2026-10-29): the top menu's look for every tab row. */
+/* code-tab:site-tabs */
+/* class="site-tabs" on a TabStripControl, or on a TabControl for its header row. :root and :is() outrank the strip's own
+   styles and the colors its Theme writes inline. */
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) { padding: 6px 8px; gap: 4px; background: none; border: 0; border-bottom: 1px solid #f1f5f9; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-viewport { gap: 4px; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab {
+    min-height: 0;
+    margin: 0;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    box-shadow: none;
+    color: #475569;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+}
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab + .fx-tabstrip-tab { margin-left: 0; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab:hover:not(.fx-tabstrip-tab-disabled) { background: #f1f5f9; color: #0284c7; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab.fx-tabstrip-tab-active { padding: 6px 12px; background: #e0f2fe; color: #0284c7; font-weight: 600; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab .fx-tabstrip-close { width: 18px; height: 18px; margin: 0 -4px 0 2px; border-radius: 50%; color: #0284c7; }
+:root :is(.fx-tabstrip.site-tabs, .fx-tabs.site-tabs > .fx-tabstrip) .fx-tabstrip-tab .fx-tabstrip-close:hover { background: #bae6fd; color: #075985; }
+/* A TabControl's pane drops the box drawn under its tabs */
+:root .fx-tabs.site-tabs > .fx-tab-content { border: 0; padding: 16px 0 0; }
+/* /code-tab */

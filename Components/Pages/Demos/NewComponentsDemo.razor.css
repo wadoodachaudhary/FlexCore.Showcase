@@ -1,14 +1,29 @@
 .demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }   /* not .row: Bootstrap owns that name */
-.stack { display: flex; flex-direction: column; gap: 6px; }
+.stack { display: flex; flex-direction: column; gap: 8px; }
+.stack ::deep .fx-alert { margin: 0; }   /* the stack's gap spaces the alerts; AlertControl adds 16px below each */
 .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
 .mt { margin-top: 14px; }
-.m0 { margin: 0; }
-.label { font-size: 12px; color: #64748b; }
-.skeletons { max-width: 420px; display: flex; flex-direction: column; gap: 8px; }
+.label { font-size: 12px; font-weight: 600; color: #64748b; }
 
-/* 2026-10-25: progress example. ProgressBarControl's margin-left rule for its Cancel button is scoped to ProgressBarControl
-   and does not reach the button that ButtonControl renders, so the page pushes the button to the right. */
+/* App cards, as on the other component pages */
+.ui { max-width: 760px; padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+/* ButtonControl puts its icon right against the caption, so the page adds the space */
+.ui ::deep .fx-button > .bi:first-child { margin-right: 6px; }
+
+/* Sprint 8 tasks: a list with a header bar */
+.board { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+.board-head { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; font-size: 13px; font-weight: 600; color: #0f172a; }
+.board-head > .bi { color: var(--brand-button, #4f46e5); }
+.board-head + .board-row { border-top: 0; }
+.board-row { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 6px 12px; font-size: 13px; color: #0f172a; }
+.board-row + .board-row { border-top: 1px solid #e2e8f0; }
+.board-task { flex: 1; min-width: 0; }
+
+/* ProgressBarControl's scoped Cancel-button margin misses ButtonControl's button, so the page pushes it right. */
 .progress-demo { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
-.progress-demo ::deep .fx-progress { flex: 1 1 320px; margin: 0; }
-.progress-demo ::deep .fx-progress-cancel { margin-left: auto; }
+.progress-demo ::deep .fx-progress { flex: 1 1 100%; min-width: 0; margin: 0; }
+.progress-demo ::deep .fx-progress-header { flex-wrap: wrap; }
+.progress-demo ::deep .fx-progress-cancel { margin-left: auto; white-space: nowrap; padding: 3px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; font-size: 12px; }
+.two ::deep .fx-timeline-point .bi { font-size: 10px; line-height: 1; color: #fff; }
 .chunk-col { flex: 0 1 240px; }

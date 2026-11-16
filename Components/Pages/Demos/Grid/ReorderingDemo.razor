@@ -2,35 +2,24 @@
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (row 5 of the Data Grid list). Same twelve rows and nine columns. Changes, closing SC-181
-   and SC-182: the QA-checklist copy ("validate first-drop reorder", "reload the page and repeat") became a description of what the
-   user does; the reorder-pipe colour picker went (a test knob; the parameter is named in the overview instead); the "Other Grid
-   Demos" list went (the menu and Related cover it). OnLayoutChanged (GridSettings snapshot, fired from the header drop handler,
-   GridControl.razor.cs ~12931) feeds a line under the grid with the new column order, so a drop has a visible result and the hook
-   for saving user layouts is on show.
-   2026-10-18: vocabulary written from GridControl.razor.cs (AllowColumnReorder ~675, ColumnReorderPipeColor ~713,
-   OnLayoutChanged ~781, PersistenceKey ~794) and GridSettings.cs; rows checked against the source with scratchpad/vocabcheck.py.
-   Library doc gaps found on the way are in SC-253 (owner-gated).
-   2026-10-26 (Baaria): sample data moved to the travel theme *@
+@* 2026-10-17: on FeatureDemoLayout; closes SC-181, SC-182. Color picker removed; OnLayoutChanged (header drop) feeds the order line.
+   2026-10-18: vocabulary from GridControl.razor.cs and GridSettings.cs; library doc gaps in SC-253 (owner-gated).
+   2026-10-26: sample data on the travel theme *@
 
-<PageTitle>Column reorder — FlexCore Showcase</PageTitle>
+<PageTitle>Column Reorder by Drag and Drop in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Column reorder" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Drag a header sideways and drop it where the column should go."
+                   Tagline="Let users drag columns into the order they work in."
                    SourcePath="Grid/GridControl.razor;Grid/GridControl.razor.cs;Grid/GridSettings.cs">
     <Overview>
         <p>
-            <code>AllowColumnReorder</code> is on by default: every header is draggable, and while a header is being dragged the grid shows a
-            vertical pipe at the position where the column would land. Drop to the left half of a header to land before it, to the right
-            half to land after it. <code>ColumnReorderPipeColor</code> takes any CSS colour for the pipe; the default is a dark grey. After a drop the grid raises
-            <code>OnLayoutChanged</code> with a <code>GridSettings</code> snapshot whose <code>ColumnOrder</code> lists the fields in their new
-            order, which is what a host saves to restore a user's layout later.
+            Column reordering lets users of a Blazor <code>GridControl</code> drag a header sideways and drop the column where they want it. Use it on work lists where each person reads the columns in a different order; it is on by default, and every move raises <code>OnLayoutChanged</code> with the new <code>ColumnOrder</code>. Set <code>PersistenceKey</code> and register an <code>IGridSettingsStore</code>, and the grid saves the order and loads it again next time.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="reorder" Title="Move columns by dragging headers" RazorCode="@Code.Reorder" CSharpCode="@Code.ReorderCs">
-            <Description><p>Drag <strong>Priority</strong> in front of <strong>Booking</strong>, or <strong>Agent</strong> to the right of <strong>Cost</strong>. Only the dragged column moves; sorting, filtering and the search box keep working on the new order.</p></Description>
+            <Description><p>Drag Priority in front of Booking, or Agent to the right of Cost; sorting, filtering and search keep working on the new order.</p></Description>
             <Demo>
                 <GridControl TValue="ReorderingRow"
                              DataSource="@_rows"
@@ -113,21 +102,21 @@
 
     private readonly List<ReorderingRow> _rows = new()
     {
-        new("BK-1100", "Lisbon",     "Reservations",  "Confirm hotel rooming list", "Alex Nguyen",   "High",   6.5m,  845.50m, new(2026, 1, 8)),
-        new("BK-1100", "Lisbon",     "Ticketing",     "Reissue changed e-tickets",  "Sana Patel",    "High",   4.0m,  620.00m, new(2026, 1, 9)),
-        new("BK-1180", "Amalfi",     "Ground",        "Rebook coast road transfer", "Marcus Lee",    "Medium", 3.0m,  410.25m, new(2026, 1, 10)),
-        new("BK-1250", "Kyoto",      "Documents",     "Send rail pass vouchers",    "Diana Ortiz",   "Low",    2.5m,  275.00m, new(2026, 1, 11)),
-        new("BK-1310", "Cape Town",  "Reservations",  "Hold winery lunch table",    "Jonah Kim",     "Medium", 1.5m,  190.00m, new(2026, 1, 12)),
-        new("BK-1310", "Cape Town",  "Customer care", "Call the lead traveller",    "Aisha Brown",   "High",   5.0m,  700.00m, new(2026, 1, 13)),
-        new("BK-1460", "Reykjavik",  "Ground",        "Confirm glacier walk guide", "Noah Garcia",   "Medium", 3.5m,  535.75m, new(2026, 1, 14)),
-        new("BK-1460", "Reykjavik",  "Documents",     "Issue final itinerary",      "Priya Menon",   "Low",    2.0m,  260.00m, new(2026, 1, 15)),
-        new("BK-1520", "Queenstown", "Ticketing",     "Request long-haul seats",    "Ethan Walker",  "High",   4.5m,  655.40m, new(2026, 1, 16)),
-        new("BK-1520", "Queenstown", "Accounts",      "Chase balance payment",      "Mina Hassan",   "Medium", 2.0m,  285.30m, new(2026, 1, 17)),
-        new("BK-1610", "Marrakech",  "Ground",        "Note riad late check-in",    "Luca Romano",   "Low",    1.0m,  140.00m, new(2026, 1, 18)),
-        new("BK-1610", "Marrakech",  "Customer care", "Post-trip feedback call",    "Grace Mitchell","Medium", 2.8m,  360.00m, new(2026, 1, 19)),
+        new("BK-1100", "Lisbon",     "Reservations",  "Confirm hotel rooming list", "Basil Crabapple",   "High",   6.5m,  845.50m, new(2026, 1, 8)),
+        new("BK-1100", "Lisbon",     "Ticketing",     "Reissue changed e-tickets",  "Poppy Gingersnap",    "High",   4.0m,  620.00m, new(2026, 1, 9)),
+        new("BK-1180", "Amalfi",     "Ground",        "Rebook coast road transfer", "Jasper Hollyhock",    "Medium", 3.0m,  410.25m, new(2026, 1, 10)),
+        new("BK-1250", "Kyoto",      "Documents",     "Send rail pass vouchers",    "Mabel Candlewick",   "Low",    2.5m,  275.00m, new(2026, 1, 11)),
+        new("BK-1310", "Cape Town",  "Reservations",  "Hold winery lunch table",    "Felix Toadflax",     "Medium", 1.5m,  190.00m, new(2026, 1, 12)),
+        new("BK-1310", "Cape Town",  "Customer care", "Call the lead traveler",    "Esme Biscuit",   "High",   5.0m,  700.00m, new(2026, 1, 13)),
+        new("BK-1460", "Reykjavik",  "Ground",        "Confirm glacier walk guide", "Otto Mossgrove",   "Medium", 3.5m,  535.75m, new(2026, 1, 14)),
+        new("BK-1460", "Reykjavik",  "Documents",     "Issue final itinerary",      "Wren Periwinkle",   "Low",    2.0m,  260.00m, new(2026, 1, 15)),
+        new("BK-1520", "Queenstown", "Ticketing",     "Request long-haul seats",    "Crispin Wafflestone",  "High",   4.5m,  655.40m, new(2026, 1, 16)),
+        new("BK-1520", "Queenstown", "Accounts",      "Chase balance payment",      "Dahlia Hedgerow",   "Medium", 2.0m,  285.30m, new(2026, 1, 17)),
+        new("BK-1610", "Marrakech",  "Ground",        "Note riad late check-in",    "Florian Pumpernickel",   "Low",    1.0m,  140.00m, new(2026, 1, 18)),
+        new("BK-1610", "Marrakech",  "Customer care", "Post-trip feedback call",    "Agatha Lamplighter","Medium", 2.8m,  360.00m, new(2026, 1, 19)),
     };
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    // Code tabs: generated verbatim copies of the Demo block and members above.
     private static class Code
     {
         public const string Reorder = @"<GridControl TValue=""ReorderingRow""
@@ -175,18 +164,18 @@ private void LayoutChanged(GridSettings layout) => _order = string.Join("" · ""
 
 private readonly List<ReorderingRow> _rows = new()
 {
-    new(""BK-1100"", ""Lisbon"",     ""Reservations"",  ""Confirm hotel rooming list"", ""Alex Nguyen"",   ""High"",   6.5m,  845.50m, new(2026, 1, 8)),
-    new(""BK-1100"", ""Lisbon"",     ""Ticketing"",     ""Reissue changed e-tickets"",  ""Sana Patel"",    ""High"",   4.0m,  620.00m, new(2026, 1, 9)),
-    new(""BK-1180"", ""Amalfi"",     ""Ground"",        ""Rebook coast road transfer"", ""Marcus Lee"",    ""Medium"", 3.0m,  410.25m, new(2026, 1, 10)),
-    new(""BK-1250"", ""Kyoto"",      ""Documents"",     ""Send rail pass vouchers"",    ""Diana Ortiz"",   ""Low"",    2.5m,  275.00m, new(2026, 1, 11)),
-    new(""BK-1310"", ""Cape Town"",  ""Reservations"",  ""Hold winery lunch table"",    ""Jonah Kim"",     ""Medium"", 1.5m,  190.00m, new(2026, 1, 12)),
-    new(""BK-1310"", ""Cape Town"",  ""Customer care"", ""Call the lead traveller"",    ""Aisha Brown"",   ""High"",   5.0m,  700.00m, new(2026, 1, 13)),
-    new(""BK-1460"", ""Reykjavik"",  ""Ground"",        ""Confirm glacier walk guide"", ""Noah Garcia"",   ""Medium"", 3.5m,  535.75m, new(2026, 1, 14)),
-    new(""BK-1460"", ""Reykjavik"",  ""Documents"",     ""Issue final itinerary"",      ""Priya Menon"",   ""Low"",    2.0m,  260.00m, new(2026, 1, 15)),
-    new(""BK-1520"", ""Queenstown"", ""Ticketing"",     ""Request long-haul seats"",    ""Ethan Walker"",  ""High"",   4.5m,  655.40m, new(2026, 1, 16)),
-    new(""BK-1520"", ""Queenstown"", ""Accounts"",      ""Chase balance payment"",      ""Mina Hassan"",   ""Medium"", 2.0m,  285.30m, new(2026, 1, 17)),
-    new(""BK-1610"", ""Marrakech"",  ""Ground"",        ""Note riad late check-in"",    ""Luca Romano"",   ""Low"",    1.0m,  140.00m, new(2026, 1, 18)),
-    new(""BK-1610"", ""Marrakech"",  ""Customer care"", ""Post-trip feedback call"",    ""Grace Mitchell"",""Medium"", 2.8m,  360.00m, new(2026, 1, 19)),
+    new(""BK-1100"", ""Lisbon"",     ""Reservations"",  ""Confirm hotel rooming list"", ""Basil Crabapple"",   ""High"",   6.5m,  845.50m, new(2026, 1, 8)),
+    new(""BK-1100"", ""Lisbon"",     ""Ticketing"",     ""Reissue changed e-tickets"",  ""Poppy Gingersnap"",    ""High"",   4.0m,  620.00m, new(2026, 1, 9)),
+    new(""BK-1180"", ""Amalfi"",     ""Ground"",        ""Rebook coast road transfer"", ""Jasper Hollyhock"",    ""Medium"", 3.0m,  410.25m, new(2026, 1, 10)),
+    new(""BK-1250"", ""Kyoto"",      ""Documents"",     ""Send rail pass vouchers"",    ""Mabel Candlewick"",   ""Low"",    2.5m,  275.00m, new(2026, 1, 11)),
+    new(""BK-1310"", ""Cape Town"",  ""Reservations"",  ""Hold winery lunch table"",    ""Felix Toadflax"",     ""Medium"", 1.5m,  190.00m, new(2026, 1, 12)),
+    new(""BK-1310"", ""Cape Town"",  ""Customer care"", ""Call the lead traveler"",    ""Esme Biscuit"",   ""High"",   5.0m,  700.00m, new(2026, 1, 13)),
+    new(""BK-1460"", ""Reykjavik"",  ""Ground"",        ""Confirm glacier walk guide"", ""Otto Mossgrove"",   ""Medium"", 3.5m,  535.75m, new(2026, 1, 14)),
+    new(""BK-1460"", ""Reykjavik"",  ""Documents"",     ""Issue final itinerary"",      ""Wren Periwinkle"",   ""Low"",    2.0m,  260.00m, new(2026, 1, 15)),
+    new(""BK-1520"", ""Queenstown"", ""Ticketing"",     ""Request long-haul seats"",    ""Crispin Wafflestone"",  ""High"",   4.5m,  655.40m, new(2026, 1, 16)),
+    new(""BK-1520"", ""Queenstown"", ""Accounts"",      ""Chase balance payment"",      ""Dahlia Hedgerow"",   ""Medium"", 2.0m,  285.30m, new(2026, 1, 17)),
+    new(""BK-1610"", ""Marrakech"",  ""Ground"",        ""Note riad late check-in"",    ""Florian Pumpernickel"",   ""Low"",    1.0m,  140.00m, new(2026, 1, 18)),
+    new(""BK-1610"", ""Marrakech"",  ""Customer care"", ""Post-trip feedback call"",    ""Agatha Lamplighter"",""Medium"", 2.8m,  360.00m, new(2026, 1, 19)),
 };";
     }
 
@@ -195,7 +184,7 @@ private readonly List<ReorderingRow> _rows = new()
         public static readonly ApiRow[] Grid =
         {
             new("AllowColumnReorder", "Lets a header be dragged onto another header. When off, headers stay draggable only for grouping (with <code>AllowGrouping</code> on) and a drop on a header does nothing.", "bool", "true"),
-            new("ColumnReorderPipeColor", "Colour of the vertical pipe that marks where the column will land; any CSS colour, written to the grid's <code>--fx-grid-reorder-pipe-color</code> variable. Blank falls back to the default.", "string", "\"#2b2b2b\""),
+            new("ColumnReorderPipeColor", "Color of the vertical pipe that marks where the column will land; any CSS color, written to the grid's <code>--fx-grid-reorder-pipe-color</code> variable. Blank falls back to the default.", "string", "\"#2b2b2b\""),
             new("OnLayoutChanged", "Fires after a layout change the grid can persist: a header drop, the end of a column or row resize, fit-to-grid and auto-fit, a group added or removed, the header menu's rename, lock and hide commands, a column shown or hidden from the options panel, and OK in the Choose Columns dialog. The argument is a <code>GridSettings</code> snapshot of the whole layout, not just the part that changed; save it to restore the layout later.", "EventCallback&lt;GridSettings&gt;"),
             new("PersistenceKey", "Opt-in persistence. When set and an <code>IGridSettingsStore</code> is registered in DI, the grid loads the saved snapshot once it has its columns and saves a new one at every change that raises <code>OnLayoutChanged</code>.", "string?", "null"),
         };

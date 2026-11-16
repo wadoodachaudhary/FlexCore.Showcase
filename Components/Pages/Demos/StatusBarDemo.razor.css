@@ -1,0 +1,37 @@
+.demo-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 10px; }   /* not .row: Bootstrap owns that name */
+
+/* a small window so the bar sits at the foot of something: a title strip with three dots, the content, then the bar */
+.sb-frame { max-width: 640px; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+.sb-chrome { display: flex; gap: 6px; padding: 9px 12px; border-bottom: 1px solid #eef2f7; background: #f8fafc; }
+.sb-chrome > span { width: 10px; height: 10px; border-radius: 50%; background: #fca5a5; }
+.sb-chrome > span:nth-child(2) { background: #fcd34d; }
+.sb-chrome > span:nth-child(3) { background: #86efac; }
+.sb-body { display: flex; flex-direction: column; gap: 10px; padding: 18px 16px; min-height: 64px; font-size: 14px; color: #334155; }
+.sb-body > strong { font-size: 15px; color: #0f172a; }
+
+/* the notes box matches the buttons; ButtonControl puts its icon right against the caption, so the page adds the space */
+.sb-body ::deep input[type=text] { height: 32px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: var(--fx-btn-radius, 4px); font: inherit; font-size: 14px; }
+.sb-body ::deep input[type=text]:focus { border-color: var(--brand-button, #4f46e5); box-shadow: 0 0 0 3px var(--brand-button-soft, #eef2ff); outline: none; }
+.sb-body ::deep .fx-button > .bi:first-child { margin-right: 6px; }
+
+/* the order lines as rows with a divider, so the window reads as a list */
+.sb-list { gap: 0; padding-block: 6px; }
+.sb-list ::deep .fx-checkbox { padding: 9px 2px; border-bottom: 1px solid #f1f5f9; }
+.sb-list ::deep .fx-checkbox:last-child { border-bottom: 0; }
+
+/* the whole bar is tinted through CssClass while the connection is down */
+.sb-frame ::deep .sb-offline { background: #fef3c7; }
+
+/* panels written as ChildContent are this page's markup, so this page styles them */
+.sb-panel { display: flex; align-items: center; gap: 4px; padding: 0 8px; height: 100%; white-space: nowrap; border-right: 1px solid #e5e7eb; }
+.sb-panel:last-child { border-right: none; }
+.sb-spring { flex: 1; min-width: 0; }
+
+/* On a phone the fixed-width panels share the first line and the spring panel takes a line of its own, instead of being
+   squeezed until its text is cut */
+@media (max-width: 560px) {
+    .sb-frame ::deep .fx-statusbar { flex-wrap: wrap; height: auto; }
+    .sb-frame ::deep .fx-statusbar > * { height: 28px; }
+    .sb-frame ::deep .fx-statusbar-spring, .sb-frame .sb-spring { order: 3; flex-basis: 100%; border-right: 0; border-top: 1px solid #e5e7eb; }
+}

@@ -1,0 +1,139 @@
+/* The four big workhorse cards (WorkhorseCards.razor), moved here from Home.razor.css on 2026-11-13 when the components page
+   started showing them too. */
+.workhorse-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.workhorse-card {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.workhorse-card:hover {
+    color: inherit;
+    text-decoration: none;
+    transform: translateY(-4px);
+    box-shadow: 0 18px 36px -12px rgba(15, 23, 42, 0.18);
+}
+
+.workhorse-art {
+    height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.workhorse-art svg { width: 100%; max-width: 320px; height: 100%; }
+
+.workhorse-art.blue   { background: #e0f2fe; }
+.workhorse-art.indigo { background: #eef2ff; }
+.workhorse-art.green  { background: #ecfdf5; }
+.workhorse-art.sky    { background: #f0f9ff; }
+
+.workhorse-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 22px 24px 24px;
+    flex: 1;
+}
+
+.workhorse-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+}
+
+.workhorse-tile {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+}
+
+.workhorse-tile.blue   { background: #e0f2fe; color: var(--brand-blue); }
+.workhorse-tile.indigo { background: #e0e7ff; color: var(--brand-indigo); }
+.workhorse-tile.green  { background: #d1fae5; color: #059669; }
+.workhorse-tile.sky    { background: #e0f2fe; color: #0ea5e9; }
+
+.workhorse-desc {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #475569;
+}
+
+.workhorse-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.workhorse-chips li {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
+    background: #f1f5f9;
+    border-radius: 9999px;
+    padding: 4px 10px;
+}
+
+.workhorse-link {
+    margin-top: auto;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0284c7;
+}
+
+.workhorse-card:hover .workhorse-link { color: #0369a1; }
+
+@media (max-width: 768px) {
+    .workhorse-grid { grid-template-columns: 1fr; }
+    .workhorse-art { height: 140px; }
+}
+
+/* Compact: the components page shows the four cards smaller and in one row (two by two on tablets and phones). Each card
+   is mostly its drawing, with a slim white strip under it holding the icon, the name and one short line; the whole card is the link. */
+.workhorse-grid.compact { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.compact .workhorse-card { border-radius: 12px; }
+.compact .workhorse-art { height: 150px; padding: 14px; }
+.compact .workhorse-body { flex: none; padding: 10px 14px; border-top: 1px solid #e2e8f0; }
+.compact .workhorse-name { justify-content: center; gap: 10px; font-size: 15.5px; }
+.compact .workhorse-body { gap: 4px; }
+.workhorse-line { margin: 0; font-size: 12.5px; line-height: 1.4; color: #64748b; text-align: center; text-wrap: balance; }
+.workhorse-line .nb { white-space: nowrap; }   /* keep "in-cell" and "drill-down" whole when the line wraps on phones */
+.compact .workhorse-tile { width: 28px; height: 28px; border-radius: 8px; font-size: 14px; }
+
+@media (max-width: 1100px) {
+    .workhorse-grid.compact { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 560px) {
+    .workhorse-grid.compact { gap: 10px; }
+    .compact .workhorse-art { height: 96px; padding: 10px; }
+    .compact .workhorse-body { padding: 8px 10px; }
+    .compact .workhorse-name { gap: 8px; font-size: 14px; }
+    .compact .workhorse-tile { width: 24px; height: 24px; font-size: 12px; }
+    .workhorse-line { font-size: 11.5px; }
+}

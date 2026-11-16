@@ -5,8 +5,8 @@
 .country-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; font-size: 14px; color: #334155; }
 .marker-key { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; margin-left: auto; }
 .marker-key i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #cbd5e1; }
-.marker-key .large { background: #1D4ED8; }
-.marker-key .medium { background: #0D9488; }
+.marker-key .large { background: #e11d48; }
+.marker-key .medium { background: #d97706; }
 .marker-key .small { background: #64748B; }
 .airport-card { margin-top: 10px; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; font-size: 13px; color: #334155; }
 .airport-card p { margin: 0 0 6px; }

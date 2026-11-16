@@ -17,9 +17,8 @@ public sealed record Runway(
     string AirportCode, string Name, int? LengthFt, int? WidthFt, string Surface, string SurfaceCode, bool Lighted, bool Closed);
 
 /// <summary>
-/// The airport examples' data (2026-10-26): every airport with an IATA code and scheduled service in the OurAirports dump, with its
-/// runways, built by Data/OurAirports/build-snapshot.py and embedded in the assembly. Read-only and immutable, so one copy is shared
-/// by every visitor; a page that edits rows copies them first.
+/// Airport examples' data (2026-10-26): every OurAirports airport with an IATA code and scheduled service, plus runways; built by
+/// Data/OurAirports/build-snapshot.py, embedded in the assembly. Immutable, shared by all visitors; editing pages copy rows first.
 /// </summary>
 public static class AirportData
 {

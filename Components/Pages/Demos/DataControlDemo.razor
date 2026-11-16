@@ -6,46 +6,26 @@
 @using Fx.ControlKit.Data
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
-@* Retitled 2026-10-06 to match the site nav.
-   2026-10-20: rebuilt on FeatureDemoLayout (developer meeting, point 2; the old API-reference page is docs/retired-pages/DataControlDemo.razor.txt).
-   DataControl is a non-visual class, so the one example shows it doing something: one frame behind a grid, a chart and a CSV, with a
-   filter and a sort applied to the frame and every view following. Facts checked against Data/DataControl.cs: DataFrame, ConvertDtypes
-   and InferDtypes (bool, int, long, decimal, DateTime, in that order, only when every value parses), Filter/Sort (DataView
-   expressions), Query, SortBy, GroupBy, Find, ToGridRows/ToExpandoRows, ToChartSeries/ToChartBars, ToReportColumns/ToReportDefinition,
-   ToCsv/ToJson/SaveAs.
-   2026-10-23 (developer meeting, point 5: chart labels too small): the SVG bar chart draws on a fixed 600x300 viewBox and scales to
-   min(tile width / 600, Height / 300), so the chart tile was widened to half the row (.views 1fr/1fr, about 465 px at 1280) and Height
-   set to the width-bound 232px. ShowValues and ValueFormat were dropped: only the legacy Bars mode and the gauges read them, the SVG
-   renderer never did, so they drew nothing. YAxis gets Max 4000 with five ticks so the axis reads 0, 1000 ... 4000 instead of
-   multiples of 858 (GetNiceRange takes 1.1 x the data maximum and GetTicks divides evenly); the fixed Max keeps the scale the same
-   under every filter.
-   2026-10-26 (Baaria): sample content moved to the travel theme. *@
+@* 2026-10-06: retitled to match the site nav.
+   2026-10-20: rebuilt on FeatureDemoLayout; old API-reference page in docs/retired-pages/DataControlDemo.razor.txt.
+   2026-10-23: SVG chart scales its 600x300 viewBox by min(width / 600, Height / 300): tile is .views' 1fr column (1.1fr/1fr), Height
+   232px. ShowValues/ValueFormat dropped (SVG renderer ignores them). YAxis Max 4000: GetNiceRange (1.1 x max) gave multiples of 858.
+   2026-10-26: sample content on the travel theme. *@
 
-<PageTitle>Data control — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor DataTable Wrapper: DataControl — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Data control" Category="Data Grid" CategoryHref="demo/grid" ControlName="DataControl"
-                   Tagline="One in-memory table behind a grid, a chart and a CSV: filter and sort it once and every view follows."
+                   Tagline="Filter and sort one table, then read it as grid rows, chart series or CSV."
                    SourcePath="Data/DataControl.cs">
     <Overview>
         <p>
-            <code>DataControl</code> is not a visual control. It wraps a <code>DataTable</code> and gives it a small, typed surface: build it
-            with <code>DataFrame</code> from column arrays and optional row labels, with <code>FromRows</code> from any objects, or from a
-            <code>DataTable</code>; <code>ConvertDtypes</code> turns text columns into <code>bool</code>, <code>int</code>, <code>long</code>,
-            <code>decimal</code> or <code>DateTime</code> when every value parses. <code>Filter</code> and <code>Sort</code> are
-            <code>DataView</code> expressions applied to the current view, and <code>Query</code> returns a new frame of the matching rows.
-        </p>
-        <p>
-            The converters read the current view, filtered and sorted: <code>ToGridRows</code> gives <code>ExpandoObject</code> rows a
-            <code>GridControl</code> binds to, <code>ToChartBars</code> and <code>ToChartSeries</code> shape it for <code>ChartControl</code>,
-            <code>ToReportDefinition</code> describes it for <code>ReportWriterControl</code>, and <code>ToCsv</code> / <code>ToJson</code>
-            write it out. <code>At</code> and <code>Iat</code> read and write single cells; <code>IsDirty</code> and
-            <code>GetChanges</code> track edits the way a <code>DataTable</code> does.
+            <code>DataControl</code> wraps a <code>DataTable</code> for Blazor apps: filter and sort the rows once, then read them as grid rows, chart series, CSV or JSON. Use it when one data set, such as a list of orders, feeds several views, and when you need to know what users changed: <code>IsDirty</code> and <code>GetChanges</code> track edits. If you know pandas or the PowerBuilder DataWindow, the API will feel familiar: <code>DataFrame</code>, <code>ConvertDtypes</code> and a 1-based <code>GetItem</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="frame" Title="Filter and sort once; a grid, a chart and a CSV follow" RazorCode="@Code.Frame" CSharpCode="@Code.FrameCs">
-            <Description><p>Eight orders, entered as text and converted once: <code>Amount</code> became <code>decimal</code>, <code>Open</code> became <code>bool</code> and <code>Ordered</code> became <code>DateTime</code>. Type a <code>DataView</code> filter such as <code>Amount > 1000</code>, <code>Open = true</code> or <code>Customer LIKE 'A%'</code> and apply it; pick a sort. The grid, the chart and the CSV under them are all read from the same frame, so they change together. An expression the view cannot parse is reported and the previous filter stays.</p></Description>
+            <Description><p>Type a <code>DataView</code> filter like <code>Amount &gt; 1000</code> or <code>Customer LIKE 'A%'</code> and pick a sort; grid, chart and CSV change together, and a bad expression is reported, keeping the old filter.</p></Description>
             <Controls>
                 <TextBoxControl @bind-Value="_filterText" Placeholder="Amount > 1000" Width="220px" />
                 <ButtonControl CssClass="btn-sm btn-primary" OnClick="ApplyFilter">Apply filter</ButtonControl>
@@ -65,7 +45,7 @@
                             }
                         </GridColumnsBase>
                     </GridControl>
-                    <ChartControl Type="ChartType.Bar" Title="Amount by order" Series="@_series" YAxis="_amountAxis" Height="232px" />
+                    <ChartControl Type="ChartType.Bar" ColorPalette="@ChartPalette.Site" Title="Amount by order" Series="@_series" YAxis="_amountAxis" Height="232px" />
                 </div>
                 <pre class="csv">@_csv</pre>
                 <p class="result @(_error is null ? null : "bad")">@Status</p>
@@ -110,7 +90,7 @@
         data: new Dictionary<string, object?>
         {
             ["Order"] = new[] { "A100", "A101", "A102", "A103", "A104", "A105", "A106", "A107" },
-            ["Customer"] = new[] { "Alvarez", "Moreau", "Brennan", "Lindqvist", "Alvarez", "Moreau", "Brennan", "Alvarez" },
+            ["Customer"] = new[] { "Peppercorn", "Marmalade", "Puddleby", "Thistlewood", "Peppercorn", "Marmalade", "Puddleby", "Peppercorn" },
             ["Amount"] = new[] { "1280.50", "845.25", "2210.00", "1640.75", "420.00", "1995.10", "760.40", "3120.00" },
             ["Open"] = new[] { "true", "false", "true", "true", "false", "true", "false", "true" },
             ["Ordered"] = new[] { "2026-09-02", "2026-09-05", "2026-09-09", "2026-09-12", "2026-09-15", "2026-09-19", "2026-09-23", "2026-09-30" },
@@ -196,7 +176,7 @@
             new("GroupBy(groupColumn, valueColumn, aggregate)", "One result per distinct group value over the current view: the aggregate of valueColumn and the row count.", "IReadOnlyList&lt;DataControlAggregateResult&gt;"),
             new("Find(expression, startRow, endRow)", "1-based number of the first row in the range matching the expression; 0 when none.", "int"),
             new("ToGridRows()", "Current view as ExpandoObject rows, one key per column.", "IEnumerable&lt;ExpandoObject&gt;"),
-            new("ToChartBars(labelColumn, valueColumn, colorColumn)", "One bar per row of the current view; the optional colour column names each bar's colour.", "List&lt;ChartControl.ChartBar&gt;"),
+            new("ToChartBars(labelColumn, valueColumn, colorColumn)", "One bar per row of the current view; the optional color column names each bar's color.", "List&lt;ChartControl.ChartBar&gt;"),
             new("ToChartSeries(labelColumn, valueColumns)", "One series per value column, with a point per row of the current view.", "List&lt;ChartSeries&gt;"),
             new("ToReportDefinition(title)", "A report definition whose columns mirror the table: header from the column caption, numeric columns right-aligned.", "ReportDefinition"),
             new("ToCsv() / ToJson(options) / SaveAs(format)", "The current view as text; SaveAs picks Csv or Json.", "string"),
@@ -211,6 +191,9 @@
     // Code tabs are verbatim
     private static class Code
     {
+        // The palette the charts pass, printed from Components/Shared/ChartPalette.cs
+        private static string PaletteCs => "\n\n" + AppSource.Region("ChartPalette.cs", "chart-palette");
+
         public const string Frame = @"<TextBoxControl @bind-Value=""_filterText"" Placeholder=""Amount > 1000"" Width=""220px"" />
 <ButtonControl CssClass=""btn-sm btn-primary"" OnClick=""ApplyFilter"">Apply filter</ButtonControl>
 <ButtonGroupControl Items=""_sortItems"" Values=""@(new[] { _sortKey })"" ValuesChanged=""PickSort"" Selection=""ChoiceSelectionMode.Single"" AriaLabel=""Sort"" />
@@ -228,16 +211,16 @@
             }
         </GridColumnsBase>
     </GridControl>
-    <ChartControl Type=""ChartType.Bar"" Title=""Amount by order"" Series=""@_series"" YAxis=""_amountAxis"" Height=""232px"" />
+    <ChartControl Type=""ChartType.Bar"" ColorPalette=""@ChartPalette.Site"" Title=""Amount by order"" Series=""@_series"" YAxis=""_amountAxis"" Height=""232px"" />
 </div>
 <pre class=""csv"">@_csv</pre>
 <p class=""result @(_error is null ? null : ""bad"")"">@Status</p>";
-        public const string FrameCs = @"// Eight orders typed as text, then converted once: Amount -> decimal, Open -> bool, Ordered -> DateTime.
+        public static string FrameCs => @"// Eight orders typed as text, then converted once: Amount -> decimal, Open -> bool, Ordered -> DateTime.
 private readonly DataControl _frame = DataControl.DataFrame(
     data: new Dictionary<string, object?>
     {
         [""Order""] = new[] { ""A100"", ""A101"", ""A102"", ""A103"", ""A104"", ""A105"", ""A106"", ""A107"" },
-        [""Customer""] = new[] { ""Alvarez"", ""Moreau"", ""Brennan"", ""Lindqvist"", ""Alvarez"", ""Moreau"", ""Brennan"", ""Alvarez"" },
+        [""Customer""] = new[] { ""Peppercorn"", ""Marmalade"", ""Puddleby"", ""Thistlewood"", ""Peppercorn"", ""Marmalade"", ""Puddleby"", ""Peppercorn"" },
         [""Amount""] = new[] { ""1280.50"", ""845.25"", ""2210.00"", ""1640.75"", ""420.00"", ""1995.10"", ""760.40"", ""3120.00"" },
         [""Open""] = new[] { ""true"", ""false"", ""true"", ""true"", ""false"", ""true"", ""false"", ""true"" },
         [""Ordered""] = new[] { ""2026-09-02"", ""2026-09-05"", ""2026-09-09"", ""2026-09-12"", ""2026-09-15"", ""2026-09-19"", ""2026-09-23"", ""2026-09-30"" },
@@ -298,6 +281,6 @@ private void Refresh()
     _rows = _frame.ToGridRows().ToList();
     _series = _frame.ToChartSeries(""Order"", ""Amount"");
     _csv = _frame.ToCsv();
-}";
+}" + PaletteCs;
     }
 }

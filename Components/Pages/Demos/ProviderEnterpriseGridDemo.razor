@@ -7,57 +7,29 @@
 @using FlexCore.Showcase.Data
 @inject FlexCore.Showcase.Services.BenchDataStore BenchData
 
-@* 2026-10-18: moved onto FeatureDemoLayout (Saturday plan). Same provider and the same 12,000 rows. Changes, closing SC-021 and
-   SC-170 to SC-173: the copy states the setup (in-memory list, simulated delay) and says in plain words that groups and rows load
-   when they are opened before it names the request purposes; one title everywhere; the "bench" wording went (nothing is timed).
-   AllowFiltering="true" was removed because the provider never read request.Query.Filters, so a column filter changed nothing
-   (a provider-backed checklist would also need EnableProviderFilterValueRequests). ExportAllProviderItems went because the page
-   calls ExportProviderQueryAsync, which does not need it. The readout under the grid now counts the requests and names the group
-   each one was for. Fixed on the way: the provider answered GroupChildren and GroupItems requests with the aggregates of the whole
-   query, and the grid stores a child page's aggregates on the parent group (GridControl.ProviderGrouping.cs ~512), so an opened
-   region's footer showed the grand total; child pages now carry the parent group's totals. The .orders wrapper exists for the page
-   CSS: the caption count and sum pills are built in C# and never get the scoped library styling (SC-253), so the page spaces them.
-   Parameter tables are a later pass (SC-278). *@
+@* 2026-10-18: on FeatureDemoLayout; closes SC-021, SC-170 to SC-173 (setup stated, one title, no "bench" wording). Tables
+   followed (SC-278). AllowFiltering removed: the provider never read request.Query.Filters (a provider checklist also needs
+   EnableProviderFilterValueRequests). ExportAllProviderItems removed: ExportProviderQueryAsync does not need it.
+   Fix: GroupChildren and GroupItems pages return the parent group's totals (opened footers showed the grand total).
+   .orders wrapper: the page CSS spaces the caption pills (SC-253). *@
 
-@* 2026-10-25 (Baaria, SC-344): the search example runs on the operator's rate card (Data/BenchModels.cs RateCardItem,
-   BenchDataStore.RateCard) instead of the earlier estimating items. Same provider shape as before: the search
-   matches the code, description and supplier; SortItems still sorts by property name; paging and the readout are unchanged.
-   Supplier is a new column and the others were narrowed so the eight fit the main column. Code.Search and Code.SearchCs were
-   regenerated verbatim; the orders example was not touched. *@
+@* 2026-10-25 (SC-344): search example on the rate card (Data/BenchModels.cs RateCardItem); Supplier column added, the rest
+   narrowed to fit the main column. *@
 
-<PageTitle>On-demand loading — FlexCore Showcase</PageTitle>
+<PageTitle>On-Demand Data Loading in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="On-demand loading" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Rows, groups, totals and exports fetched from a provider as they are needed, never all at once."
+                   Tagline="Fetch rows, groups and totals as users need them, never the whole table at once."
                    SourcePath="Grid/GridItemsProvider.cs;Grid/GridControl.ItemsProvider.cs;Grid/GridControl.ProviderGrouping.cs;Grid/GridControl.ProviderExport.cs">
     <Overview>
         <p>
-            An <code>ItemsProvider</code> replaces <code>DataSource</code> with a delegate the grid calls whenever it needs rows: the first
-            window, a scroll past what is loaded, a new sort or search, an export. Each <code>GridItemsRequest</code> says what is wanted
-            (<code>Purpose</code>), where in the result it starts (<code>StartIndex</code>, <code>Count</code>) and the current
-            <code>Query</code>: sorts, filters, search text, group fields and the aggregates to compute. The provider translates that into its
-            own LINQ or SQL and answers with a <code>GridItemsResult</code> of items and the total count. The grid keeps only a few recent
-            ranges in memory.
-        </p>
-        <p>
-            With <code>EnableProviderGrouping</code> the same delegate also serves the group tree. <code>Groups</code> asks for the top-level
-            groups, <code>GroupChildren</code> for the groups under one of them and <code>GroupItems</code> for the rows under the innermost,
-            each with the parent keys in <code>GroupRequest</code>. Groups start collapsed (<code>ProviderGroupsInitiallyCollapsed</code>), so
-            opening one is what sends its request; <code>ProviderGroupPageSize</code> and <code>ProviderGroupItemPageSize</code> cap each page,
-            and the grid adds a <em>Load more</em> row while the provider reports <code>HasMore</code>. Group counts and aggregates come from
-            the provider too, so captions and footers are right before any row is loaded.
-        </p>
-        <p>
-            <code>ExportProviderQueryAsync</code> exports the whole current query rather than the loaded window: it pages through
-            <code>Export</code> requests of <code>ProviderExportPageSize</code> rows, reports each page through
-            <code>ProviderExportProgressChanged</code>, and <code>CancelProviderExport</code> stops it. Column filters travel in the same request
-            as <code>Query.Filters</code>; this example leaves column filtering off because its provider does not translate them.
+            On-demand loading lets a Blazor <code>GridControl</code> show an order history too large to load at once, fetching only what users scroll to or open. Set an <code>ItemsProvider</code> instead of <code>DataSource</code>: the grid calls it for each scroll window, sort, search or export with a <code>GridItemsRequest</code>, and you answer from your database or API with the items and a total. <code>EnableProviderGrouping</code> pages the group tree the same way.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="orders" Title="Twelve thousand orders, loaded group by group" RazorCode="@Code.Orders" CSharpCode="@Code.OrdersCs">
-            <Description><p>The orders sit in an in-memory list behind a 90 ms delay (60 ms for export pages) and stand in for a database. Open a region to fetch its categories, open a category to fetch its first 75 rows, and use <em>Load more</em> for the rest; the line under the grid counts the requests and names the last one. Sorting a column or typing in the search box starts a new query. <em>Export all to CSV</em> writes every order that matches the search, 400 at a time, with progress and a Cancel.</p></Description>
+            <Description><p>Open a region, then a category, then Load more: each step sends one request to a provider behind a 90 ms delay, and Export all pages through every matching order with progress and Cancel.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="ExportCsvAsync" Disabled="@(_grid?.IsProviderExporting == true)">Export all to CSV</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="CancelExport" Disabled="@(_grid?.IsProviderExporting != true)">Cancel export</ButtonControl>
@@ -98,7 +70,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="search" Title="A flat list, searched, sorted and paged by the provider" RazorCode="@Code.Search" CSharpCode="@Code.SearchCs">
-            <Description><p>The rate card is an in-memory list of 5,000 lines synthesized for each visitor and stands in for a database: each line is one supplier's service at one destination, with the net rate the operator pays. The provider gets every request the grid makes and returns only the range asked for, with the total. Type in the search box and the next request carries <code>SearchText</code>, which this provider matches against the code, description and supplier; sort a column and it carries <code>Sorts</code>; scroll and the grid asks for the next range. The line under the grid describes the last request. Column filters are off because this provider does not translate them.</p></Description>
+            <Description><p>Type in the search box or sort a column and the next request carries <code>SearchText</code> or <code>Sorts</code>; the line under the grid describes the last request the provider answered.</p></Description>
             <Demo>
                 <GridControl TValue="RateCardItem"
                              ItemsProvider="LoadItemsAsync"
@@ -136,11 +108,24 @@
             <DocSection Id="doc-griditemsresult-tvalue" Title="GridItemsResult&lt;TValue&gt;" Count='@DocSection.Label(Vocab.Result.Length, "properties")'>
                 <ApiTable Kind="ApiKind.Properties" Title="GridItemsResult&lt;TValue&gt;" Rows="Vocab.Result" />
                 <p>
-                A sort term is a <code>GridSortDescriptor</code> of <code>Field</code> and <code>Direction</code>; earlier terms rank higher. The
-                group records (<code>GridProviderGroup</code>, <code>GridProviderGroupRequest</code>, <code>GridProviderGroupKey</code>) and the grid's
-                provider parameters named in the overview are still to be written up from <code>Grid/GridControl.ItemsProvider.cs</code>,
-                <code>Grid/GridControl.ProviderGrouping.cs</code> and <code>Grid/GridControl.ProviderExport.cs</code>.
+                A sort term is a <code>GridSortDescriptor</code> of <code>Field</code> and <code>Direction</code>; earlier terms rank higher.
                 </p>
+            </DocSection>
+            <DocSection Id="doc-gridcontrol-provider-parameters" Title="GridControl provider parameters" Count='@DocSection.Label(Vocab.Provider.Length, "parameters")'>
+                <ApiTable Kind="ApiKind.Parameters" Title="GridControl provider parameters" Rows="Vocab.Provider" />
+                <p>
+                The grouped example sets <code>ProviderGroupPageSize</code> to 2 and <code>ProviderGroupItemPageSize</code> to 75 so the
+                <em>Load more</em> rows appear after a few clicks; the defaults are 100 and 250.
+                </p>
+            </DocSection>
+            <DocSection Id="doc-gridprovidergroup-tvalue" Title="GridProviderGroup&lt;TValue&gt; and the group request" Count='@DocSection.Label(Vocab.Group.Length + Vocab.GroupRequest.Length + Vocab.GroupKey.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridProviderGroup&lt;TValue&gt;" Rows="Vocab.Group" />
+                <ApiTable Kind="ApiKind.Properties" Title="GridProviderGroupRequest, the request's GroupRequest" Rows="Vocab.GroupRequest" />
+                <ApiTable Kind="ApiKind.Properties" Title="GridProviderGroupKey" Rows="Vocab.GroupKey" />
+            </DocSection>
+            <DocSection Id="doc-export-progress-and-aggregate-records" Title="Export progress and aggregate records" Count='@DocSection.Label(Vocab.Progress.Length + Vocab.Aggregate.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="GridProviderExportProgress" Rows="Vocab.Progress" />
+                <ApiTable Kind="ApiKind.Properties" Title="GridAggregateResult" Rows="Vocab.Aggregate" />
             </DocSection>
         </DocSections>
     </Vocabulary>
@@ -188,7 +173,7 @@
 
     private string ExportText => _exportProgress is not { } p ? "" :
         $"· Export: {p.ExportedRows:N0}" + (p.TotalRows is { } total ? $" of {total:N0}" : "")
-        + (p.IsCanceled ? " (cancelled)" : p.IsCompleted ? " (complete)" : "");
+        + (p.IsCanceled ? " (canceled)" : p.IsCompleted ? " (complete)" : "");
 
     private async ValueTask<GridItemsResult<ProviderOrder>> LoadOrdersAsync(GridItemsRequest request)
     {
@@ -430,7 +415,7 @@
             new("IncludeTotalCount", "True when the grid needs an authoritative total for this query generation, so a provider can skip a repeated count.", "bool"),
             new("Query", "The current sorts, filters, search text and grouping; the next table.", "GridQueryDescriptor"),
             new("ContextKey", "Opaque host value for the surrounding dataset, passed through uninterpreted.", "object?"),
-            new("CancellationToken", "Cancelled when a newer range or query supersedes the request.", "CancellationToken"),
+            new("CancellationToken", "Canceled when a newer range or query supersedes the request.", "CancellationToken"),
             new("Purpose", "Why the range is requested: Rows, Groups, GroupChildren, GroupItems, Export or FilterValues.", "GridItemsRequestPurpose", "Rows"),
             new("GroupRequest", "Parent group for lazy grouping requests; null for row windows, root groups and exports.", "GridProviderGroupRequest?", "null"),
             new("FilterField", "Field whose distinct values are requested for a FilterValues request; null otherwise.", "string?", "null"),
@@ -455,6 +440,60 @@
             new("ResultSetCount", "Entries in this result set; when omitted the grid uses TotalCount for root rows and group metadata for child ranges.", "int?", "null"),
             new("HasMore", "Continuation hint for providers whose result size is costly to count; the grid also infers it from known counts.", "bool", "false"),
             new("FilterValues", "Distinct values for a FilterValues request.", "IReadOnlyList&lt;GridProviderFilterValue&gt;", "empty"),
+        };
+        // GridControl.ItemsProvider.cs, GridControl.ProviderGrouping.cs and GridControl.ProviderExport.cs (0.2.49).
+        public static readonly ApiRow[] Provider =
+        {
+            new("ItemsProvider", "Delegate the grid calls for every range it needs. Set, it replaces <code>DataSource</code> and the local pipeline.", "GridItemsProvider&lt;TValue&gt;?", "null"),
+            new("ItemsProviderContextKey", "Opaque host value sent with every request. Changing it starts a new query generation and reloads from the first row.", "object?", "null"),
+            new("ItemKeySelector", "Stable identity used as the row key when provider calls return new objects for the same database row.", "Func&lt;TValue, object?&gt;?", "null"),
+            new("ItemsProviderCacheSize", "Completed ranges the grid keeps in memory; clamped to a small bounded range.", "int", "4"),
+            new("EnableProviderFilterValueRequests", "Sends <code>FilterValues</code> requests, with <code>FilterField</code> set, so the checklist filter can list a column's distinct values from the provider.", "bool", "false"),
+            new("ProviderFilterValueRequestSize", "Most distinct values asked for in one checklist menu.", "int", "1000"),
+            new("EnableProviderGrouping", "Lets the provider serve the group tree when group descriptors are active. Off, so existing flat providers keep their contract.", "bool", "false"),
+            new("ProviderGroupPageSize", "Most groups requested per lazy group page.", "int", "100"),
+            new("ProviderGroupItemPageSize", "Most leaf rows requested per lazy group page.", "int", "250"),
+            new("ProviderGroupsInitiallyCollapsed", "New provider groups arrive collapsed, so enabling remote grouping never loads the whole hierarchy at once.", "bool", "true"),
+            new("ExportAllProviderItems", "Exports page through the complete current query with <code>Export</code> requests instead of the loaded window only. Local <code>DataSource</code> exports are unaffected.", "bool", "false"),
+            new("ProviderExportPageSize", "Rows requested per export page.", "int", "1000"),
+            new("ProviderExportProgressChanged", "After every received export page, and on completion or cancellation.", "EventCallback&lt;GridProviderExportProgress&gt;"),
+        };
+        public static readonly ApiRow[] Group =
+        {
+            new("Field", "Field the group is keyed on.", "string"),
+            new("Key", "The group's value of that field.", "object?"),
+            new("DisplayText", "Caption text; null shows the key.", "string?"),
+            new("Count", "Rows in the group, counted through every level below it.", "int"),
+            new("GroupPath", "Stable path; when empty the grid derives one from the parent path, field and key.", "string?", "null"),
+            new("HasChildren", "True when expanding can reveal sub-groups or rows; false draws a leaf group.", "bool", "true"),
+            new("Groups", "Child groups supplied with the parent, so no <code>GroupChildren</code> request is needed for them.", "IReadOnlyList&lt;GridProviderGroup&lt;TValue&gt;&gt;", "empty"),
+            new("Items", "Leaf rows supplied with the group, so no <code>GroupItems</code> request is needed for them.", "IReadOnlyList&lt;TValue&gt;", "empty"),
+            new("Aggregates", "Aggregate values across every row in the group, for its caption and footer.", "IReadOnlyList&lt;GridAggregateResult&gt;", "empty"),
+            new("ChildCount", "Direct children at the next level, as distinct from the recursive <code>Count</code>.", "int?", "null"),
+        };
+        public static readonly ApiRow[] GroupRequest =
+        {
+            new("Level", "Zero-based grouping level of the parent whose children or rows are wanted.", "int"),
+            new("ParentKeys", "Field and value of each ancestor, from the root group down to the parent.", "IReadOnlyList&lt;GridProviderGroupKey&gt;"),
+            new("ParentPath", "The parent's <code>GroupPath</code>.", "string"),
+        };
+        public static readonly ApiRow[] GroupKey =
+        {
+            new("Field", "Field of one ancestor group.", "string"),
+            new("Value", "Its key value.", "object?"),
+        };
+        public static readonly ApiRow[] Progress =
+        {
+            new("ExportedRows", "Rows received so far.", "int"),
+            new("TotalRows", "Rows in the whole query when the provider reported a total; null otherwise.", "int?"),
+            new("IsCompleted", "True on the final notification.", "bool"),
+            new("IsCanceled", "True when the export stopped before the end.", "bool", "false"),
+        };
+        public static readonly ApiRow[] Aggregate =
+        {
+            new("Field", "Field the value was computed over.", "string"),
+            new("Type", "Sum, Average, Count, Min or Max.", "AggregateType"),
+            new("Value", "The computed value, boxed.", "object?"),
         };
     }
 
@@ -593,7 +632,7 @@ private readonly List<AggregateRow> _aggregates =
 
 private string ExportText => _exportProgress is not { } p ? """" :
     $""· Export: {p.ExportedRows:N0}"" + (p.TotalRows is { } total ? $"" of {total:N0}"" : """")
-    + (p.IsCanceled ? "" (cancelled)"" : p.IsCompleted ? "" (complete)"" : """");
+    + (p.IsCanceled ? "" (canceled)"" : p.IsCompleted ? "" (complete)"" : """");
 
 private async ValueTask<GridItemsResult<ProviderOrder>> LoadOrdersAsync(GridItemsRequest request)
 {

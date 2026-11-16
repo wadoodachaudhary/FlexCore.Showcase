@@ -1,0 +1,19 @@
+@namespace FlexCore.Showcase.Components.Shared
+
+@* Doodle wobble filter (2026-10-28): fx-hand at rest; while playing (app.css .doodle) flicks between three noise seeds ("boil").
+   Rendered once by MainLayout. Zero-size SVG, not display:none: some browsers ignore filters in an undisplayed SVG. *@
+<svg class="doodle-filters" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+        @foreach (var (id, seed) in _filters)
+        {
+            <filter id="@id" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="@seed" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        }
+    </defs>
+</svg>
+
+@code {
+    private static readonly (string Id, int Seed)[] _filters = [("fx-hand", 3), ("fx-hand-b", 7), ("fx-hand-c", 12)];
+}

@@ -1,6 +1,8 @@
 ﻿<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        @* Canonical, description, link-preview and JSON-LD tags for the page (2026-10-29); see Components/Shared/SiteHead.razor. *@
+        <SiteHead />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>

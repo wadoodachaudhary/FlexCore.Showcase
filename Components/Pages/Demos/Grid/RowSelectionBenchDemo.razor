@@ -4,40 +4,25 @@
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
-@* Retitled 2026-10-06 to match the site nav.
-   2026-10-20: rebuilt on FeatureDemoLayout (developer meeting, point 2). The old copy claimed 50 columns, 2.5 million cells, a
-   dropdown editor, a hand-incremented render counter and unmeasured "silky-smooth" scrolling; the grid has 12 columns and the only
-   timing was list generation. Now: one example, the real column count, two timings the page takes itself (build, and the server's
-   first render after the swap) and counters fed by the grid's own events. The cell budget is switched off so the overscan choice
-   applies as written (with the default 900-cell budget and 12 columns, 260 would be capped at 75 rows). Facts checked against
-   2026-10-23: 100,000 joined the row-count switch and the page became "100k rows", absorbing the Four scenarios performance tab.
-   GridControl.razor.cs (windowing comments around WindowOverscanRows), SelectionSettings.cs and GridControlEvents.cs. Edits are counted
-   with OnCellSave: GridControlEvents also declares CellSaved, but nothing in the library raises it. *@
+@* 2026-10-06: retitled to match the site nav.
+   2026-10-20: rebuilt on FeatureDemoLayout; real column count, measured timings. Cell budget 0: the default 900-cell budget at
+   12 columns caps the 260-row overscan at 75 rows. Edits via OnCellSave: CellSaved is declared but never raised.
+   2026-10-23: 100,000 added to the row-count switch; page became "100k rows", absorbing the Four scenarios performance tab. *@
 
-<PageTitle>100k rows — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Grid with 100,000 Rows — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="100k rows" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Twelve columns and up to a hundred thousand generated rows: what the row window costs, measured on this page."
+                   Tagline="Scroll, select and edit up to 100,000 rows, with the server cost measured here."
                    SourcePath="Grid/GridControl.razor.cs;Grid/SelectionSettings.cs;Grid/GridControlEvents.cs">
     <Overview>
         <p>
-            <code>GridControl</code> renders only the rows in view plus an overscan band above and below; spacer rows stand in for the
-            rest, and a small scroll-position reader in the grid's script tells the server where the window is. Grouped grids are
-            windowed the same way unless <code>EnableGroupedRowWindowing</code> is turned off. <code>WindowOverscanRows</code> sets the
-            band; by default a cell budget (<code>WindowOverscanCellBudget</code>, 900 cells per side) shrinks it on wide grids, and this
-            page turns that budget off so the number you pick is the number you get.
-        </p>
-        <p>
-            Two timings are taken here, both on the server with <code>Stopwatch</code>: how long it takes to build the list of rows in
-            C#, and how long the first render after a swap takes, from the click to the component's next <code>OnAfterRender</code>.
-            Browser layout and paint are not included, so the wait you see is a little longer than the second number. The selected and
-            edited counts come from the grid's own events.
+            Row windowing lets users work through a Blazor <code>GridControl</code> of 100,000 rows while only the rows in view, plus an overscan band, are rendered. Use it for long lists such as a full price list or a booking history, flat or grouped; <code>WindowOverscanRows</code> and <code>WindowOverscanCellBudget</code> size the band. The timings shown are server-side <code>Stopwatch</code> figures for building the rows and for the first render after a swap.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="rows" Title="Row count, overscan and grouping" RazorCode="@Code.Rows" CSharpCode="@Code.RowsCs">
-            <Description><p>Pick a row count: the page rebuilds the list and remounts the grid, and the line under the grid reports both timings. The overscan switch sets the band of rows rendered beyond the view on each side. Group by Category to see grouped rows windowed too, and turn Window grouped rows off to render every grouped row for comparison. Click rows and edit the Description, Category, Qty, Unit Cost and Active cells: the counts update from <code>SelectionChanged</code> and <code>OnCellSave</code>. With the grid focused, typing jumps to the first row whose active column starts with the typed text.</p></Description>
+            <Description><p>Pick up to 100,000 rows, set the overscan band and group by Category, then select and edit; the line under the grid reports both timings and the selection and save counts.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_rowCountItems" Values="@(new[] { _rowCount.ToString() })" ValuesChanged="PickRowCount" Selection="ChoiceSelectionMode.Single" AriaLabel="Row count" />
                 <ButtonGroupControl Items="_overscanItems" Values="@(new[] { _overscan.ToString() })" ValuesChanged="PickOverscan" Selection="ChoiceSelectionMode.Single" AriaLabel="Overscan rows" />
@@ -72,12 +57,12 @@
                         <GridColumn Field="@nameof(SRow.Qty)" HeaderText="Qty" Width="85px" Type="ColumnType.Number" TextAlign="TextAlign.Right" SelectAllOnEdit="true" />
                         <GridColumn Field="@nameof(SRow.UnitCost)" HeaderText="Unit Cost" Width="95px" Type="ColumnType.Number" Format="N2" TextAlign="TextAlign.Right" SelectAllOnEdit="true" />
                         <GridColumn Field="@nameof(SRow.Active)" HeaderText="Active" Width="75px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
-                        <GridColumn Field="@nameof(SRow.C07)" HeaderText="C07 Spec" Width="100px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(SRow.C08)" HeaderText="C08 Code" Width="100px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(SRow.C09)" HeaderText="C09 Phase" Width="100px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(SRow.C10)" HeaderText="C10 Lot" Width="100px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(SRow.C11)" HeaderText="C11 Zone" Width="100px" AllowEditing="false" />
-                        <GridColumn Field="@nameof(SRow.C12)" HeaderText="C12 Bin" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Season)" HeaderText="Season" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Currency)" HeaderText="Currency" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Board)" HeaderText="Board" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Desk)" HeaderText="Desk" Width="100px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Supplier)" HeaderText="Supplier" Width="120px" AllowEditing="false" />
+                        <GridColumn Field="@nameof(SRow.Ref)" HeaderText="Booking ref" Width="100px" AllowEditing="false" />
                     </GridColumnsBase>
                 </GridControl>
                 <p class="result">@Summary</p>
@@ -122,12 +107,12 @@
         public decimal Qty { get; set; }
         public decimal UnitCost { get; set; }
         public bool Active { get; set; }
-        public string C07 { get; set; } = "Spec-07";
-        public string C08 { get; set; } = "CD-08";
-        public string C09 { get; set; } = "PH-09";
-        public string C10 { get; set; } = "LOT-10";
-        public string C11 { get; set; } = "ZN-11";
-        public string C12 { get; set; } = "BIN-12";
+        public string Season { get; set; } = "";
+        public string Currency { get; set; } = "";
+        public string Board { get; set; } = "";
+        public string Desk { get; set; } = "";
+        public string Supplier { get; set; } = "";
+        public string Ref { get; set; } = "";
     }
 
     private readonly SelectionItem[] _rowCountItems = { new("1000", "1,000"), new("5000", "5,000"), new("20000", "20,000"), new("50000", "50,000"), new("100000", "100,000") };
@@ -172,7 +157,11 @@
     private void Rebuild()
     {
         var sw = Stopwatch.StartNew();
-        var categories = new[] { "Foundation", "Framing", "Roofing", "Plumbing", "Electrical", "HVAC", "Interior", "Landscaping" };
+        var categories = new[] { "Flights", "Hotels", "Transfers", "Excursions", "Cruises", "Rail", "Insurance", "Car rental" };
+        var seasons = new[] { "Summer", "Fall", "Winter", "Spring" };
+        var currencies = new[] { "EUR", "USD", "GBP" };
+        var boards = new[] { "Room only", "Bed and breakfast", "Half board", "All inclusive" };
+        var desks = new[] { "Boston", "Lisbon", "Kyoto", "Cape Town", "Manila" };
         var rand = new Random(77);
         var list = new List<SRow>(_rowCount);
         for (var i = 1; i <= _rowCount; i++)
@@ -180,8 +169,9 @@
             var cat = categories[i % categories.Length];
             list.Add(new SRow
             {
-                Item = $"HF-{i:D6}", Description = $"{cat} Component Item #{i}", Category = cat,
+                Item = $"ITM-{i:D6}", Description = $"{cat} rate line #{i}", Category = cat,
                 Qty = rand.Next(1, 100), UnitCost = Math.Round((decimal)(rand.NextDouble() * 180 + 12), 2), Active = i % 5 != 0,
+                Season = seasons[i % 4], Currency = currencies[i % 3], Board = boards[i % 4], Desk = desks[i % 5], Supplier = $"Supplier {i % 97 + 1:D2}", Ref = $"RSG-{i:D6}",
             });
         }
         _rows = list;
@@ -281,12 +271,12 @@
         <GridColumn Field=""@nameof(SRow.Qty)"" HeaderText=""Qty"" Width=""85px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"" SelectAllOnEdit=""true"" />
         <GridColumn Field=""@nameof(SRow.UnitCost)"" HeaderText=""Unit Cost"" Width=""95px"" Type=""ColumnType.Number"" Format=""N2"" TextAlign=""TextAlign.Right"" SelectAllOnEdit=""true"" />
         <GridColumn Field=""@nameof(SRow.Active)"" HeaderText=""Active"" Width=""75px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" />
-        <GridColumn Field=""@nameof(SRow.C07)"" HeaderText=""C07 Spec"" Width=""100px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(SRow.C08)"" HeaderText=""C08 Code"" Width=""100px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(SRow.C09)"" HeaderText=""C09 Phase"" Width=""100px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(SRow.C10)"" HeaderText=""C10 Lot"" Width=""100px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(SRow.C11)"" HeaderText=""C11 Zone"" Width=""100px"" AllowEditing=""false"" />
-        <GridColumn Field=""@nameof(SRow.C12)"" HeaderText=""C12 Bin"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Season)"" HeaderText=""Season"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Currency)"" HeaderText=""Currency"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Board)"" HeaderText=""Board"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Desk)"" HeaderText=""Desk"" Width=""100px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Supplier)"" HeaderText=""Supplier"" Width=""120px"" AllowEditing=""false"" />
+        <GridColumn Field=""@nameof(SRow.Ref)"" HeaderText=""Booking ref"" Width=""100px"" AllowEditing=""false"" />
     </GridColumnsBase>
 </GridControl>
 <p class=""result"">@Summary</p>";
@@ -298,12 +288,12 @@
     public decimal Qty { get; set; }
     public decimal UnitCost { get; set; }
     public bool Active { get; set; }
-    public string C07 { get; set; } = ""Spec-07"";
-    public string C08 { get; set; } = ""CD-08"";
-    public string C09 { get; set; } = ""PH-09"";
-    public string C10 { get; set; } = ""LOT-10"";
-    public string C11 { get; set; } = ""ZN-11"";
-    public string C12 { get; set; } = ""BIN-12"";
+    public string Season { get; set; } = """";
+    public string Currency { get; set; } = """";
+    public string Board { get; set; } = """";
+    public string Desk { get; set; } = """";
+    public string Supplier { get; set; } = """";
+    public string Ref { get; set; } = """";
 }
 
 private readonly SelectionItem[] _rowCountItems = { new(""1000"", ""1,000""), new(""5000"", ""5,000""), new(""20000"", ""20,000""), new(""50000"", ""50,000""), new(""100000"", ""100,000"") };
@@ -360,7 +350,11 @@ protected override void OnAfterRender(bool firstRender)
 private void Rebuild()
 {
     var sw = Stopwatch.StartNew();
-    var categories = new[] { ""Foundation"", ""Framing"", ""Roofing"", ""Plumbing"", ""Electrical"", ""HVAC"", ""Interior"", ""Landscaping"" };
+    var categories = new[] { ""Flights"", ""Hotels"", ""Transfers"", ""Excursions"", ""Cruises"", ""Rail"", ""Insurance"", ""Car rental"" };
+    var seasons = new[] { ""Summer"", ""Fall"", ""Winter"", ""Spring"" };
+    var currencies = new[] { ""EUR"", ""USD"", ""GBP"" };
+    var boards = new[] { ""Room only"", ""Bed and breakfast"", ""Half board"", ""All inclusive"" };
+    var desks = new[] { ""Boston"", ""Lisbon"", ""Kyoto"", ""Cape Town"", ""Manila"" };
     var rand = new Random(77);
     var list = new List<SRow>(_rowCount);
     for (var i = 1; i <= _rowCount; i++)
@@ -368,8 +362,9 @@ private void Rebuild()
         var cat = categories[i % categories.Length];
         list.Add(new SRow
         {
-            Item = $""HF-{i:D6}"", Description = $""{cat} Component Item #{i}"", Category = cat,
+            Item = $""ITM-{i:D6}"", Description = $""{cat} rate line #{i}"", Category = cat,
             Qty = rand.Next(1, 100), UnitCost = Math.Round((decimal)(rand.NextDouble() * 180 + 12), 2), Active = i % 5 != 0,
+            Season = seasons[i % 4], Currency = currencies[i % 3], Board = boards[i % 4], Desk = desks[i % 5], Supplier = $""Supplier {i % 97 + 1:D2}"", Ref = $""RSG-{i:D6}"",
         });
     }
     _rows = list;

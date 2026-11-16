@@ -1,18 +1,26 @@
-@* 2026-10-25 (Baaria): a long Documentation section folds into the library's AccordionControl, one DocSection per topic, so a reader
-   opens the part they need; FeatureDemoLayout lists the sections under Documentation in the rail. Expand all and Collapse all
-   re-create the items with the wanted initial state, because AccordionItemControl has no public expand method (library item). *@
+@* 2026-10-25: long Documentation as an AccordionControl, one DocSection per topic. 2026-11-16: the page's keyboard and
+   accessibility notes are added as the last section, collapsed. Expand/Collapse all re-create the items with
+   the wanted initial state: AccordionItemControl has no public expand method (library item). *@
 <div class="doc-sections">
     <div class="doc-sections-bar">
         <ButtonControl CssClass="btn-sm" OnClick="() => SetAll(true)">Expand all</ButtonControl>
         <ButtonControl CssClass="btn-sm" OnClick="() => SetAll(false)">Collapse all</ButtonControl>
     </div>
     <CascadingValue Value="this" IsFixed="true">
-        <AccordionControl Multiple="true">@ChildContent</AccordionControl>
+        <AccordionControl Multiple="true">
+            @ChildContent
+            @if (Layout?.AccessibilityBlock is { } a11y)
+            {
+                <DocSection Id="accessibility" Title="Keyboard and accessibility">@a11y</DocSection>
+            }
+        </AccordionControl>
     </CascadingValue>
 </div>
 
 @code {
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    /// <summary>The page frame; its keyboard and accessibility notes become the last section (2026-11-16).</summary>
+    [CascadingParameter] public FeatureDemoLayout? Layout { get; set; }
 
     private readonly List<DocSection> _sections = new();
 

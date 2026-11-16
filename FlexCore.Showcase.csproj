@@ -5,11 +5,27 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <!-- quickstart/RazorSharpGetaways is a project of its own (the Quick Start download); its files are linked in below, one by one. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);quickstart/**</DefaultItemExcludes>
   </PropertyGroup>
 
   <!-- OurAirports snapshot (public domain) used by the airport examples; Data/AirportData.cs reads it. -->
   <ItemGroup>
     <EmbeddedResource Include="Data\OurAirports\*.tsv" LogicalName="FlexCore.Showcase.Data.OurAirports.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- Home page app window = Quick Start project (2026-11-04), compiled in so download and demo are the same code; Home.razor
+       hosts the parts. Stylesheet and report are copied, not linked (SyncQuickStartShared): static web assets serve a linked
+       Content item empty. -->
+  <ItemGroup>
+    <RazorComponent Include="quickstart\RazorSharpGetaways\Components\Getaways\*.razor" Link="Quickstart\Components\Getaways\%(Filename)%(Extension)" />
+    <Compile Include="quickstart\RazorSharpGetaways\Components\Getaways\*.cs" Link="Quickstart\Components\Getaways\%(Filename)%(Extension)" />
+    <Compile Include="quickstart\RazorSharpGetaways\Data\*.cs" Link="Quickstart\Data\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- Printed in code tabs (Components/Shared/AppSource.cs); app.css for its site-tabs rules (Tabs & accordion page). -->
+  <ItemGroup>
+    <EmbeddedResource Include="quickstart\RazorSharpGetaways\Components\Getaways\Getaways*.razor;quickstart\RazorSharpGetaways\Data\GetawaysAppSettings.cs;Components\Shared\ChartPalette.cs;wwwroot\app.css" LogicalName="FlexCore.Showcase.Source.%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,5 +34,36 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
   </ItemGroup>
+
+  <!-- Last commit date per page file, embedded for the sitemap's lastmod (Seo/PageDates.cs). A build without git embeds nothing. -->
+  <Target Name="PageDates" BeforeTargets="BeforeBuild">
+    <Exec Command="git log --format=%25cI --name-only -- Components/Pages &gt; &quot;$(IntermediateOutputPath)pagedates.txt&quot;"
+          WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="true" IgnoreExitCode="true" StandardOutputImportance="low" StandardErrorImportance="low" />
+    <ItemGroup>
+      <EmbeddedResource Include="$(IntermediateOutputPath)pagedates.txt" LogicalName="FlexCore.Showcase.Seo.pagedates.txt" Condition="Exists('$(IntermediateOutputPath)pagedates.txt')" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Files both apps serve; the Quick Start copies are the source. wwwroot copies are committed so a fresh clone's first build
+       has them. -->
+  <Target Name="SyncQuickStartShared" BeforeTargets="BeforeBuild">
+    <Copy SourceFiles="quickstart\RazorSharpGetaways\wwwroot\getaways.css;quickstart\RazorSharpGetaways\wwwroot\reports\Package Cost Sheet.xml"
+          DestinationFiles="wwwroot\getaways.css;wwwroot\reports\Package Cost Sheet.xml" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- Quick Start download, zipped and embedded; Services/QuickStartDownload.cs serves it at /downloads/razor-sharp-getaways.zip. -->
+  <ItemGroup>
+    <QuickStartFile Include="quickstart\RazorSharpGetaways\**" Exclude="quickstart\**\bin\**;quickstart\**\obj\**;quickstart\**\.DS_Store;quickstart\**\*.user" />
+  </ItemGroup>
+  <Target Name="PackQuickStart" BeforeTargets="BeforeBuild" Inputs="@(QuickStartFile)" Outputs="$(IntermediateOutputPath)razor-sharp-getaways.zip">
+    <RemoveDir Directories="$(IntermediateOutputPath)quickstart" />
+    <Copy SourceFiles="@(QuickStartFile)" DestinationFiles="@(QuickStartFile->'$(IntermediateOutputPath)quickstart\RazorSharpGetaways\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ZipDirectory SourceDirectory="$(IntermediateOutputPath)quickstart" DestinationFile="$(IntermediateOutputPath)razor-sharp-getaways.zip" Overwrite="true" />
+  </Target>
+  <Target Name="EmbedQuickStart" BeforeTargets="BeforeBuild" DependsOnTargets="PackQuickStart">
+    <ItemGroup>
+      <EmbeddedResource Include="$(IntermediateOutputPath)razor-sharp-getaways.zip" LogicalName="FlexCore.Showcase.Downloads.razor-sharp-getaways.zip" Condition="Exists('$(IntermediateOutputPath)razor-sharp-getaways.zip')" />
+    </ItemGroup>
+  </Target>
 
 </Project>

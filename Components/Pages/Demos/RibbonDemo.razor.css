@@ -1,0 +1,32 @@
+.result { display: block; margin-top: 10px; font-size: 13px; color: #475569; }
+/* documentation paragraphs under the tables */
+.note { margin: 10px 0 0; font-size: 13.5px; color: #475569; }
+.note code { font-size: 12.5px; background: #f1f5f9; padding: 1px 4px; border-radius: 4px; color: #334155; }
+
+/* other markup in a group: the page's own, so the page styles it */
+.ribbon-options { display: flex; flex-direction: column; gap: 6px; padding: 4px 2px; font-size: 12px; }
+
+/* entries of a dropdown button are rendered by ButtonControl inside the ribbon, hence ::deep */
+.desk-ribbon ::deep .ribbon-menu-item { display: block; width: 100%; padding: 6px 14px; border: 0; border-radius: 5px; background: none; text-align: left; font-size: 13px; cursor: pointer; }
+.desk-ribbon ::deep .ribbon-menu-item:hover { background: var(--brand-button-soft, #eef2ff); }
+
+/* the booking and the travelers under the ribbons: app cards, as on the other component pages */
+.desk-booking, .who-list { max-width: 600px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+                          box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+.desk-booking { margin-top: 14px; font-size: 13px; color: #0f172a; }
+.desk-head, .desk-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; }
+.desk-head { font-size: 14px; }
+.desk-foot { border-top: 1px solid #f1f5f9; border-radius: 0 0 10px 10px; background: #f8fafc; color: #475569; }
+.desk-lines { margin: 0; padding: 0 16px 10px; list-style: none; min-height: 60px; }
+.desk-lines li { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f8fafc; }
+
+/* RibbonControl's CssClass lands on its fx-ribbon element, the library's, hence ::deep */
+.paper-ribbon ::deep .fx-ribbon.paper { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; }
+
+/* the travelers under the ribbon; the name is a bare ButtonControl, hence ::deep */
+.who-list { margin: 14px 0 0; padding: 0; list-style: none; overflow: hidden; }
+.who-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; font-size: 13px; }
+.who-list li + li { border-top: 1px solid #f1f5f9; }
+.who-list li.picked { background: var(--brand-button-soft, #eef2ff); }
+.who-list ::deep .who-name { margin-right: auto; padding: 0; border: 0; background: none; font-weight: 600; color: var(--brand-button-soft-text, #4338ca); cursor: pointer; }
+.who-list ::deep .who-name:hover { text-decoration: underline; text-underline-offset: 3px; }

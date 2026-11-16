@@ -4,86 +4,76 @@
 @using FlexCore.Showcase.Components.Shared
 @using FlexCore.Showcase.Data
 
-@* 2026-10-19: new page (Baaria approved the Control tour split; third page). The tour's Selection tab moved here and was removed
-   there. Of that tab, RadioGroupControl already lives on Checks & switches and CalendarControl and TimePickerControl on Date & time,
-   so this page carries AutoCompleteControl, StepperControl and ColorPaletteControl; DropDownListControl (29 parameters) is proposed
-   as a page of its own (SC-279). Documentation written from AutoCompleteControl.razor, StepperControl.razor, WizardModels.cs,
-   ColorPaletteControl.razor and ColorPalettes.cs; rows checked with scratchpad/vocabcheck.py; behaviour sentences read from
-   SearchAsync/CommitAsync, CanSelect/SelectAsync/KeyAsync and SelectAsync/KeyAsync/OnParametersSet.
-   2026-10-26 (Baaria): the suggestions example now lists the operator's twelve destinations and looks up the 4,009 airports of the
-   Data Grid page (OurAirports, Data/AirportData.cs) through the callback, instead of mostly US cities and a hardware list. *@
+@* 2026-10-19: new page from the Control tour's Selection tab; DropDownListControl is on Lists & dropdowns (SC-279). Docs from
+   AutoCompleteControl.razor, StepperControl.razor, WizardModels.cs, ColorPaletteControl.razor, ColorPalettes.cs.
+   2026-10-26: suggestions example searches the airports (Data/AirportData.cs) through the callback.
+   2026-11-15: examples rebuilt (one quote from two boxes, a four-step booking, a departures board in custom colors); text re-checked.
+   2026-11-16: independent review fixes; palette example removed, ColorPaletteControl docs kept.
+   2026-11-16: pre-deploy review fixes. *@
 
-<PageTitle>Pickers &amp; selectors — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor AutoComplete, Stepper and Color Palette — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Pickers &amp; selectors" Category="Components" CategoryHref="components"
                    ControlName="AutoCompleteControl · StepperControl · ColorPaletteControl"
-                   Tagline="Suggestions while typing, a step indicator that knows which steps may be entered, and a colour palette."
+                   Tagline="Suggest as users type, guide them step by step, and let them pick a color."
                    SourcePath="AutoCompleteControl.razor;StepperControl.razor;WizardModels.cs;ColorPaletteControl.razor;ColorPalettes.cs">
     <Overview>
         <p>
-            Three small controls that pick one thing. <code>AutoCompleteControl</code> is an editable dropdown whose popup fills with
-            suggestions while the user types, from a list it filters itself or from a callback you supply; its value is the text, and it tells
-            you separately when that text is one of the suggestions. <code>StepperControl</code> draws the steps of a process as buttons and
-            decides which of them may be entered: in linear mode only earlier steps and the next one, never past an invalid step, never a
-            disabled step. <code>ColorPaletteControl</code> is a grid of swatches with one focusable tile and arrow-key movement.
-            Radio groups are on <a href="demo/checks">Checks &amp; switches</a>, calendars and time pickers on <a href="demo/date-time">Date &amp; time</a>.
+            <code>AutoCompleteControl</code> is a Blazor autocomplete that suggests matches as users type, from a list or from a callback that searches your data. Use the callback for large sets. Unlike a dropdown list, it also accepts text that matches no suggestion; for a fixed list, use <code>DropDownListControl</code> on <a href="demo/lists-dropdowns">Lists &amp; dropdowns</a>. <code>StepperControl</code> guides users through a process, skipping disabled steps and closing later ones while the current one is invalid, and <code>ColorPaletteControl</code> offers swatches in your own colors, which users move through with the arrow keys.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="suggest" Title="Suggestions while typing" RazorCode="@Code.Suggest" CSharpCode="@Code.SuggestCs">
-            <Description><p>Left: the twelve destinations, filtered by the control, case-insensitive, anywhere in the name, after one character and a 250 ms pause; an <code>ItemTemplate</code> adds the country, and <code>ItemSelected</code> reports the destination once the text matches a suggestion. Right: <code>OnRead</code> searches the 4,009 airports from the <a href="demo/grid">Data Grid</a> page through a callback that waits 300 ms like a server would, after two characters and a 400 ms pause, five suggestions at most: an exact code first, then cities and names that start with the text. Try <em>KEF</em>, <em>Lisbon</em> or <em>Portugal</em>. Typing on cancels the previous lookup. In both, the bound value is the text, whether or not it came from the list.</p></Description>
+            <Description><p>Type in both boxes: Going to filters twelve destinations itself, and Flying from asks a callback that searches 4,000 airports (try LHR, Lisbon or Iceland).</p></Description>
             <Demo>
-                <div class="pair">
-                    <div>
-                        <p class="pane-title">From a list</p>
-                        <AutoCompleteControl TItem="City" DataSource="@_cities" TextField="Name" @bind-Value="_cityText" ItemSelected="c => _pickedCity = c" Placeholder="Type a city" AriaLabel="City" Width="100%">
-                            <ItemTemplate Context="city"><span>@city.Name</span> <span class="muted">@city.Country</span></ItemTemplate>
-                        </AutoCompleteControl>
-                        <p class="result">Text: @(_cityText ?? "") · Picked: @(_pickedCity is null ? "nothing yet" : $"{_pickedCity.Name}, {_pickedCity.Country}")</p>
+                <div class="pk">
+                    <div class="pair">
+                        <div>
+                            <p class="pane-title">Going to</p>
+                            <AutoCompleteControl TItem="City" DataSource="@_cities" TextField="Name" Value="@_cityText" ValueChanged="CityTyped" ItemSelected="c => _pickedCity = c" Placeholder="Type a city" AriaLabel="Destination" Width="100%">
+                                <ItemTemplate Context="city"><span>@city.Name</span> <span class="muted">@city.Country</span></ItemTemplate>
+                            </AutoCompleteControl>
+                        </div>
+                        <div>
+                            <p class="pane-title">Flying from: 4,009 airports</p>
+                            <AutoCompleteControl TItem="Airport" OnRead="LookupAsync" TextField="Name" MinLength="2" DebounceDelay="400" MaxSuggestions="5" Value="@_airportText" ValueChanged="AirportTyped" ItemSelected="a => _pickedAirport = a" Placeholder="Airport, city or code" AriaLabel="Departure airport" Width="100%">
+                                <ItemTemplate Context="airport"><strong>@airport.Code</strong> @airport.Name <span class="muted">@airport.City, @airport.Country</span></ItemTemplate>
+                            </AutoCompleteControl>
+                        </div>
                     </div>
-                    <div>
-                        <p class="pane-title">From a callback: 4,009 airports</p>
-                        <AutoCompleteControl TItem="Airport" OnRead="LookupAsync" TextField="Name" MinLength="2" DebounceDelay="400" MaxSuggestions="5" @bind-Value="_airportText" ItemSelected="a => _pickedAirport = a" Placeholder="Airport, city, code or country" AriaLabel="Airport" Width="100%">
-                            <ItemTemplate Context="airport"><strong>@airport.Code</strong> @airport.Name <span class="muted">@airport.City, @airport.Country</span></ItemTemplate>
-                        </AutoCompleteControl>
-                        <p class="result">Text: @(_airportText ?? "") · Picked: @(_pickedAirport is null ? "nothing yet" : $"{_pickedAirport.Code}, {_pickedAirport.City}, {_pickedAirport.Country}") · @_lookups lookups so far.</p>
-                    </div>
+                    <p class="result" role="status">Quote for Albus Door: @Quote. @_lookups airport @(_lookups == 1 ? "lookup" : "lookups") so far.</p>
                 </div>
             </Demo>
         </DemoExample>
 
         <DemoExample Id="steps" Title="Steps" RazorCode="@Code.Steps" CSharpCode="@Code.StepsCs">
-            <Description><p>Four steps in the default linear mode: any earlier step can be clicked, the next one too, the ones after it are disabled. Mark the current step invalid and it gains a warning sign while every later step closes, so Next does nothing until the step is valid again; going back is always allowed. The Back and Next buttons call <code>SelectAsync</code> from the page, <code>CanNavigate</code> sees every move before it happens, and the arrow keys walk from step to step.</p></Description>
+            <Description><p>Work through a booking: check the box under the stepper to open the next step, since an unchecked step is in <code>InvalidSteps</code>. No extras puts the Extras step in <code>DisabledSteps</code>, Vertical stacks the steps, and once the booking is confirmed <code>CanNavigate</code> refuses every move.</p></Description>
             <Controls>
-                <ButtonControl CssClass="btn-sm" OnClick="() => _stepper!.SelectAsync(_step - 1)" Disabled="@(_step == 0)">Back</ButtonControl>
-                <ButtonControl CssClass="btn-sm" OnClick="() => _stepper!.SelectAsync(_step + 1)" Disabled="@(_step == _steps.Count - 1)">Next</ButtonControl>
-                <ButtonControl CssClass="btn-sm" OnClick="() => _stepValid = !_stepValid">@(_stepValid ? "Mark this step invalid" : "Mark this step valid")</ButtonControl>
+                <SwitchControl @bind-Checked="_vertical" Label="Vertical" />
+                <SwitchControl @bind-Checked="_noExtras" Label="No extras" />
+                <ButtonControl CssClass="btn-sm" OnClick="() => _stepper!.SelectAsync(Before)" Disabled="@(_step == 0 || _confirmed)">Back</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => _stepper!.SelectAsync(After)" Disabled="@(_step == _steps.Count - 1 || !_done[_step])">Next</ButtonControl>
             </Controls>
             <Demo>
-                <StepperControl @ref="_stepper" Steps="@_steps" @bind-Value="_step" InvalidSteps="@InvalidSteps" CanNavigate="Navigating" AriaLabel="Checkout steps" />
-                <p class="result">Step @(_step + 1) of @_steps.Count: @_steps[_step].Title. @_navLog</p>
+                <div class="pk">
+                    <StepperControl @ref="_stepper" Steps="@_steps" @bind-Value="_step" Vertical="_vertical" DisabledSteps="@DisabledSteps" InvalidSteps="@InvalidSteps"
+                                    CanNavigate="Navigating" AriaLabel="Booking steps" />
+                    <div class="step-pane">
+                        @if (_step < 3)
+                        {
+                            <CheckBoxControl @bind-Checked="_done[_step]" Label="@Checks[_step]" />
+                        }
+                        else
+                        {
+                            <ButtonControl CssClass="btn-primary btn-sm" Disabled="_confirmed" OnClick="() => _confirmed = true">Confirm the booking</ButtonControl>
+                        }
+                    </div>
+                    <p class="result" role="status">Step @(_step + 1) of @_steps.Count: @_steps[_step].Title. @(_confirmed ? "Booking KYO-0005 is confirmed; the steps are locked." : _navLog)</p>
+                </div>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="palette" Title="Colour palette" RazorCode="@Code.Palette" CSharpCode="@Code.PaletteCs">
-            <Description><p>Left: the built-in 48-colour palette, eight across. Right: ten colours of your own, five across, larger tiles, and a <code>TileTemplate</code> that prints the hex value instead of the tick. Click a swatch or move with the arrow keys, Home and End; Up and Down jump by a row. The selected swatch keeps an outline whatever the template shows.</p></Description>
-            <Demo>
-                <div class="pair">
-                    <div>
-                        <p class="pane-title">Default palette</p>
-                        <ColorPaletteControl @bind-Value="_color" />
-                    </div>
-                    <div>
-                        <p class="pane-title">Custom colours</p>
-                        <ColorPaletteControl Colors="@_brand" Columns="5" TileSize="36px" @bind-Value="_accent" AriaLabel="Accent colour">
-                            <TileTemplate Context="colour"><span class="tile-label">@colour.TrimStart('#')</span></TileTemplate>
-                        </ColorPaletteControl>
-                    </div>
-                </div>
-                <p class="result"><span class="swatch" style="background:@_color"></span>@_color · <span class="swatch" style="background:@_accent"></span>@_accent</p>
-            </Demo>
-        </DemoExample>
     </Examples>
 
     <Vocabulary>
@@ -101,7 +91,7 @@
                 <ApiTable Kind="ApiKind.Properties" Title="AutoCompleteControl read-only state" Rows="Vocab.AutoState" />
                 <p>
                 The text box and the popup are a <code>DropDownListControl</code> in editable mode. A search starts when the text has at least
-                <code>MinLength</code> characters, waits <code>DebounceDelay</code> milliseconds, and is cancelled by the next keystroke. Without
+                <code>MinLength</code> characters, waits <code>DebounceDelay</code> milliseconds, and is canceled by the next keystroke. Without
                 <code>OnRead</code> the suggestions are the items whose text contains the typed text, ignoring case. The popup opens when there is at
                 least one suggestion and closes when there is none, when the text is too short, when the control is disabled, or when the page
                 changes <code>Value</code>. An exception thrown by <code>OnRead</code> becomes <code>ErrorMessage</code>, shown under the box.
@@ -123,7 +113,7 @@
                 <ApiTable Kind="ApiKind.Properties" Title="WizardStepContext, passed to StepTemplate" Rows="Vocab.StepCtx" />
                 <p>
                 A step can be entered when the control is enabled, no move is in progress, the step is not in <code>DisabledSteps</code>, and, in linear
-                mode, it is at most one past the current step and the current step is not in <code>InvalidSteps</code> when moving forward. A step that
+                mode, it is no further than the next step that is not in <code>DisabledSteps</code>, and the current step is not in <code>InvalidSteps</code> when moving forward. A step that
                 cannot be entered renders as a disabled button. The current step carries <code>aria-current="step"</code>, an invalid step a warning
                 sign, and each button's tooltip is the step's <code>Description</code>.
                 </p>
@@ -137,7 +127,7 @@
             <DocSection Id="doc-colorpalettecontrol-methods" Title="ColorPaletteControl methods" Count='@DocSection.Label(Vocab.PaletteMethods.Length, "methods")'>
                 <ApiTable Kind="ApiKind.Methods" Title="ColorPaletteControl methods" Rows="Vocab.PaletteMethods" />
                 <p>
-                Colours are compared ignoring case. <code>ColorPalettes.Basic</code> is the default list: 48 colours in six rows of eight. One swatch at a
+                <code>Value</code> is matched to a swatch ignoring case; <code>SelectAsync</code> needs the exact string. <code>ColorPalettes.Basic</code> is the default list: 48 colors in six rows of eight. One swatch at a
                 time is in the Tab order; it follows <code>Value</code> when the page changes it and the focus when the user moves with the keys.
                 </p>
             </DocSection>
@@ -151,13 +141,12 @@
     </Vocabulary>
 
     <Accessibility>
-        <p>
-            The autocomplete box takes <code>AriaLabel</code>, sets <code>aria-busy</code> while it searches and announces "Loading suggestions…"
-            through a status element. The stepper is a <code>nav</code> labelled by <code>AriaLabel</code>; its steps are buttons, the current one
-            marked with <code>aria-current</code>, and steps that may not be entered are disabled rather than hidden. The palette is a
-            <code>listbox</code> of <code>option</code> buttons, each labelled with its colour value and carrying <code>aria-selected</code>, with one
-            tab stop and arrow-key movement.
-        </p>
+        <ul>
+            <li>The autocomplete box is an editable <code>role="combobox"</code> named by <code>AriaLabel</code>. The element around it carries <code>aria-busy="true"</code> while a search runs, and a failed search shows its message in a <code>role="alert"</code> element.</li>
+            <li>The stepper is a <code>nav</code> named by <code>AriaLabel</code> ("Steps" by default). Its steps are buttons, the current one marked with <code>aria-current="step"</code>; steps that may not be entered are disabled rather than hidden.</li>
+            <li>The palette is a <code>role="listbox"</code> named by <code>AriaLabel</code> ("Color palette" by default) of <code>role="option"</code> buttons, each named by its color value and carrying <code>aria-selected</code>. One swatch holds the Tab stop; the arrow keys, Home and End move it.</li>
+            <li>Set <code>AriaLabel</code> on each control to say what it picks, for example "Accent color" for a palette.</li>
+        </ul>
     </Accessibility>
 
     <Related>
@@ -170,15 +159,14 @@
 </FeatureDemoLayout>
 
 @code {
+    // Suggestions
     private sealed record City(string Name, string Country);
     private readonly City[] _cities = TravelData.Destinations.Select(d => new City(d.City, d.Country)).ToArray();
     private string? _cityText;
     private City? _pickedCity;
-
     private string? _airportText;
     private Airport? _pickedAirport;
     private int _lookups;
-
     // Stands in for a server search over the airports (Data/AirportData.cs): an exact code first, then cities and names that start
     // with the text, larger airports before smaller ones; the control keeps the first five.
     private async Task<IEnumerable<Airport>> LookupAsync(string text, CancellationToken token)
@@ -193,57 +181,89 @@
             .ThenBy(a => a.Type switch { "Large" => 0, "Medium" => 1, _ => 2 })
             .ThenBy(a => a.Name);
     }
+    // Committed text that matches no suggestion drops the old pick; after a match, ItemSelected follows ValueChanged and sets it again.
+    private void CityTyped(string? text)
+    {
+        _cityText = text;
+        if (_pickedCity?.Name != text) _pickedCity = null;
+    }
+    private void AirportTyped(string? text)
+    {
+        _airportText = text;
+        if (_pickedAirport?.Name != text) _pickedAirport = null;
+    }
+    // The quote line: the picked item, or the committed text when it matches no suggestion
+    private string Quote
+    {
+        get
+        {
+            var from = _pickedAirport is { } a ? $"{a.Code} ({a.City})" : _airportText;
+            var to = _pickedCity is { } c ? $"{c.Name}, {c.Country}" : _cityText;
+            return (string.IsNullOrWhiteSpace(from), string.IsNullOrWhiteSpace(to)) switch
+            {
+                (true, true) => "no airport or destination yet",
+                (false, true) => $"from {from}, no destination yet",
+                (true, false) => $"to {to}, no airport yet",
+                _ => $"from {from} to {to}",
+            };
+        }
+    }
 
+    // Booking steps
     private StepperControl? _stepper;
     private readonly IReadOnlyList<WizardStepDescriptor> _steps =
     [
-        new() { Title = "Details", Description = "Who is ordering" },
-        new() { Title = "Shipping", Description = "Where it goes" },
-        new() { Title = "Payment", Description = "How it is paid" },
-        new() { Title = "Review", Description = "Check and confirm" },
+        new() { Title = "Traveler", Description = "Who is going" },
+        new() { Title = "Trip", Description = "Where and when" },
+        new() { Title = "Extras", Description = "Transfers and tours" },
+        new() { Title = "Confirm", Description = "Check and confirm" },
     ];
+    private static readonly string[] Checks = { "Passport checked for Hermione Ranger", "Kyoto Classic, eight nights, dates agreed", "Airport transfer added" };
+    private readonly bool[] _done = new bool[4];
     private int _step;
-    private bool _stepValid = true;
-    private string _navLog = "No moves yet.";
-    private IReadOnlyCollection<int> InvalidSteps => _stepValid ? Array.Empty<int>() : [_step];
+    private bool _vertical, _noExtras, _confirmed;
+    private string _navLog = "Check the box to open the next step.";
+    // A step whose box is not checked is invalid, which blocks forward moves; No extras takes the Extras step out.
+    private IReadOnlyCollection<int> InvalidSteps => _step < 3 && !_done[_step] ? [_step] : Array.Empty<int>();
+    private IReadOnlyCollection<int> DisabledSteps => _noExtras ? [2] : Array.Empty<int>();
+    private int Before => _noExtras && _step == 3 ? 1 : _step - 1;
+    private int After => _noExtras && _step == 1 ? 3 : _step + 1;
+    // CanNavigate sees every move first: once the booking is confirmed it refuses them all.
     private Task<bool> Navigating(int from, int to)
     {
-        _navLog = $"Last move: {from + 1} to {to + 1}.";
+        if (_confirmed) return Task.FromResult(false);
+        _navLog = $"Last move: {_steps[from].Title} to {_steps[to].Title}.";
         return Task.FromResult(true);
     }
 
-    private string? _color = "#0080FF";
-    private string? _accent = "#0284c7";
-    private readonly string[] _brand = ["#0f172a", "#1d4ed8", "#0284c7", "#0f766e", "#b45309", "#be123c", "#7c3aed", "#475569", "#e2e8f0", "#ffffff"];
-
-    // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
+    // Code tabs are verbatim copies of each Demo block and of the members behind it.
     private static class Code
     {
-        public const string Suggest = @"<div class=""pair"">
-    <div>
-        <p class=""pane-title"">From a list</p>
-        <AutoCompleteControl TItem=""City"" DataSource=""@_cities"" TextField=""Name"" @bind-Value=""_cityText"" ItemSelected=""c => _pickedCity = c"" Placeholder=""Type a city"" AriaLabel=""City"" Width=""100%"">
-            <ItemTemplate Context=""city""><span>@city.Name</span> <span class=""muted"">@city.Country</span></ItemTemplate>
-        </AutoCompleteControl>
-        <p class=""result"">Text: @(_cityText ?? """") · Picked: @(_pickedCity is null ? ""nothing yet"" : $""{_pickedCity.Name}, {_pickedCity.Country}"")</p>
+        public const string Suggest = @"<div class=""pk"">
+    <div class=""pair"">
+        <div>
+            <p class=""pane-title"">Going to</p>
+            <AutoCompleteControl TItem=""City"" DataSource=""@_cities"" TextField=""Name"" Value=""@_cityText"" ValueChanged=""CityTyped"" ItemSelected=""c => _pickedCity = c"" Placeholder=""Type a city"" AriaLabel=""Destination"" Width=""100%"">
+                <ItemTemplate Context=""city""><span>@city.Name</span> <span class=""muted"">@city.Country</span></ItemTemplate>
+            </AutoCompleteControl>
+        </div>
+        <div>
+            <p class=""pane-title"">Flying from: 4,009 airports</p>
+            <AutoCompleteControl TItem=""Airport"" OnRead=""LookupAsync"" TextField=""Name"" MinLength=""2"" DebounceDelay=""400"" MaxSuggestions=""5"" Value=""@_airportText"" ValueChanged=""AirportTyped"" ItemSelected=""a => _pickedAirport = a"" Placeholder=""Airport, city or code"" AriaLabel=""Departure airport"" Width=""100%"">
+                <ItemTemplate Context=""airport""><strong>@airport.Code</strong> @airport.Name <span class=""muted"">@airport.City, @airport.Country</span></ItemTemplate>
+            </AutoCompleteControl>
+        </div>
     </div>
-    <div>
-        <p class=""pane-title"">From a callback: 4,009 airports</p>
-        <AutoCompleteControl TItem=""Airport"" OnRead=""LookupAsync"" TextField=""Name"" MinLength=""2"" DebounceDelay=""400"" MaxSuggestions=""5"" @bind-Value=""_airportText"" ItemSelected=""a => _pickedAirport = a"" Placeholder=""Airport, city, code or country"" AriaLabel=""Airport"" Width=""100%"">
-            <ItemTemplate Context=""airport""><strong>@airport.Code</strong> @airport.Name <span class=""muted"">@airport.City, @airport.Country</span></ItemTemplate>
-        </AutoCompleteControl>
-        <p class=""result"">Text: @(_airportText ?? """") · Picked: @(_pickedAirport is null ? ""nothing yet"" : $""{_pickedAirport.Code}, {_pickedAirport.City}, {_pickedAirport.Country}"") · @_lookups lookups so far.</p>
-    </div>
+    <p class=""result"" role=""status"">Quote for Albus Door: @Quote. @_lookups airport @(_lookups == 1 ? ""lookup"" : ""lookups"") so far.</p>
 </div>";
-        public const string SuggestCs = @"private sealed record City(string Name, string Country);
+        public const string SuggestCs = @"// Suggestions
+private sealed record City(string Name, string Country);
 private readonly City[] _cities = TravelData.Destinations.Select(d => new City(d.City, d.Country)).ToArray();
 private string? _cityText;
 private City? _pickedCity;
-
 private string? _airportText;
 private Airport? _pickedAirport;
 private int _lookups;
-
 // Stands in for a server search over the airports (Data/AirportData.cs): an exact code first, then cities and names that start
 // with the text, larger airports before smaller ones; the control keeps the first five.
 private async Task<IEnumerable<Airport>> LookupAsync(string text, CancellationToken token)
@@ -257,50 +277,79 @@ private async Task<IEnumerable<Airport>> LookupAsync(string text, CancellationTo
         .OrderBy(a => a.Code.Equals(text, ignoreCase) ? 0 : a.City.StartsWith(text, ignoreCase) ? 1 : a.Name.StartsWith(text, ignoreCase) ? 2 : 3)
         .ThenBy(a => a.Type switch { ""Large"" => 0, ""Medium"" => 1, _ => 2 })
         .ThenBy(a => a.Name);
+}
+// Committed text that matches no suggestion drops the old pick; after a match, ItemSelected follows ValueChanged and sets it again.
+private void CityTyped(string? text)
+{
+    _cityText = text;
+    if (_pickedCity?.Name != text) _pickedCity = null;
+}
+private void AirportTyped(string? text)
+{
+    _airportText = text;
+    if (_pickedAirport?.Name != text) _pickedAirport = null;
+}
+// The quote line: the picked item, or the committed text when it matches no suggestion
+private string Quote
+{
+    get
+    {
+        var from = _pickedAirport is { } a ? $""{a.Code} ({a.City})"" : _airportText;
+        var to = _pickedCity is { } c ? $""{c.Name}, {c.Country}"" : _cityText;
+        return (string.IsNullOrWhiteSpace(from), string.IsNullOrWhiteSpace(to)) switch
+        {
+            (true, true) => ""no airport or destination yet"",
+            (false, true) => $""from {from}, no destination yet"",
+            (true, false) => $""to {to}, no airport yet"",
+            _ => $""from {from} to {to}"",
+        };
+    }
 }";
-        public const string Steps = @"<StepperControl @ref=""_stepper"" Steps=""@_steps"" @bind-Value=""_step"" InvalidSteps=""@InvalidSteps"" CanNavigate=""Navigating"" AriaLabel=""Checkout steps"" />
-<p class=""result"">Step @(_step + 1) of @_steps.Count: @_steps[_step].Title. @_navLog</p>";
-        public const string StepsCs = @"private StepperControl? _stepper;
-
+        public const string Steps = @"<SwitchControl @bind-Checked=""_vertical"" Label=""Vertical"" />
+<SwitchControl @bind-Checked=""_noExtras"" Label=""No extras"" />
+<ButtonControl CssClass=""btn-sm"" OnClick=""() => _stepper!.SelectAsync(Before)"" Disabled=""@(_step == 0 || _confirmed)"">Back</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""() => _stepper!.SelectAsync(After)"" Disabled=""@(_step == _steps.Count - 1 || !_done[_step])"">Next</ButtonControl>
+<div class=""pk"">
+    <StepperControl @ref=""_stepper"" Steps=""@_steps"" @bind-Value=""_step"" Vertical=""_vertical"" DisabledSteps=""@DisabledSteps"" InvalidSteps=""@InvalidSteps""
+                    CanNavigate=""Navigating"" AriaLabel=""Booking steps"" />
+    <div class=""step-pane"">
+        @if (_step < 3)
+        {
+            <CheckBoxControl @bind-Checked=""_done[_step]"" Label=""@Checks[_step]"" />
+        }
+        else
+        {
+            <ButtonControl CssClass=""btn-primary btn-sm"" Disabled=""_confirmed"" OnClick=""() => _confirmed = true"">Confirm the booking</ButtonControl>
+        }
+    </div>
+    <p class=""result"" role=""status"">Step @(_step + 1) of @_steps.Count: @_steps[_step].Title. @(_confirmed ? ""Booking KYO-0005 is confirmed; the steps are locked."" : _navLog)</p>
+</div>";
+        public const string StepsCs = @"// Booking steps
+private StepperControl? _stepper;
 private readonly IReadOnlyList<WizardStepDescriptor> _steps =
 [
-    new() { Title = ""Details"", Description = ""Who is ordering"" },
-    new() { Title = ""Shipping"", Description = ""Where it goes"" },
-    new() { Title = ""Payment"", Description = ""How it is paid"" },
-    new() { Title = ""Review"", Description = ""Check and confirm"" },
+    new() { Title = ""Traveler"", Description = ""Who is going"" },
+    new() { Title = ""Trip"", Description = ""Where and when"" },
+    new() { Title = ""Extras"", Description = ""Transfers and tours"" },
+    new() { Title = ""Confirm"", Description = ""Check and confirm"" },
 ];
-
+private static readonly string[] Checks = { ""Passport checked for Hermione Ranger"", ""Kyoto Classic, eight nights, dates agreed"", ""Airport transfer added"" };
+private readonly bool[] _done = new bool[4];
 private int _step;
-
-private bool _stepValid = true;
-
-private string _navLog = ""No moves yet."";
-
-private IReadOnlyCollection<int> InvalidSteps => _stepValid ? Array.Empty<int>() : [_step];
-
+private bool _vertical, _noExtras, _confirmed;
+private string _navLog = ""Check the box to open the next step."";
+// A step whose box is not checked is invalid, which blocks forward moves; No extras takes the Extras step out.
+private IReadOnlyCollection<int> InvalidSteps => _step < 3 && !_done[_step] ? [_step] : Array.Empty<int>();
+private IReadOnlyCollection<int> DisabledSteps => _noExtras ? [2] : Array.Empty<int>();
+private int Before => _noExtras && _step == 3 ? 1 : _step - 1;
+private int After => _noExtras && _step == 1 ? 3 : _step + 1;
+// CanNavigate sees every move first: once the booking is confirmed it refuses them all.
 private Task<bool> Navigating(int from, int to)
 {
-    _navLog = $""Last move: {from + 1} to {to + 1}."";
+    if (_confirmed) return Task.FromResult(false);
+    _navLog = $""Last move: {_steps[from].Title} to {_steps[to].Title}."";
     return Task.FromResult(true);
 }";
-        public const string Palette = @"<div class=""pair"">
-    <div>
-        <p class=""pane-title"">Default palette</p>
-        <ColorPaletteControl @bind-Value=""_color"" />
-    </div>
-    <div>
-        <p class=""pane-title"">Custom colours</p>
-        <ColorPaletteControl Colors=""@_brand"" Columns=""5"" TileSize=""36px"" @bind-Value=""_accent"" AriaLabel=""Accent colour"">
-            <TileTemplate Context=""colour""><span class=""tile-label"">@colour.TrimStart('#')</span></TileTemplate>
-        </ColorPaletteControl>
-    </div>
-</div>
-<p class=""result""><span class=""swatch"" style=""background:@_color""></span>@_color · <span class=""swatch"" style=""background:@_accent""></span>@_accent</p>";
-        public const string PaletteCs = @"private string? _color = ""#0080FF"";
-
-private string? _accent = ""#0284c7"";
-
-private readonly string[] _brand = [""#0f172a"", ""#1d4ed8"", ""#0284c7"", ""#0f766e"", ""#b45309"", ""#be123c"", ""#7c3aed"", ""#475569"", ""#e2e8f0"", ""#ffffff""];";
     }
 
     private static class Vocab
@@ -310,21 +359,24 @@ private readonly string[] _brand = [""#0f172a"", ""#1d4ed8"", ""#0284c7"", ""#0f
             new("DataSource", "Items to filter when <code>OnRead</code> is not set.", "IEnumerable&lt;TItem&gt;", "Array.Empty&lt;TItem&gt;()"),
             new("TextSelector", "Text of an item. When null, <code>TextField</code> is read by reflection; when that is blank too, <code>ToString()</code>.", "Func&lt;TItem, string&gt;?", "null"),
             new("TextField", "Name of the property that holds an item's text.", "string", "\"\""),
-            new("Value", "The text in the box: what was typed or the suggestion that was chosen. A new value from the page clears the suggestions.", "string?", "null"),
+            new("Value", "The committed text: a chosen suggestion, or typed text accepted with Enter, Tab or by leaving the box. It does not change while the user types. A new value from the page clears the suggestions.", "string?", "null"),
             new("ValueExpression", "Set by <code>@bind-Value</code>; lets an enclosing form hear the change.", "Expression&lt;Func&lt;string?&gt;&gt;?", "null"),
-            new("OnRead", "Supplies the suggestions for the typed text; the token is cancelled by the next keystroke.", "Func&lt;string, CancellationToken, Task&lt;IEnumerable&lt;TItem&gt;&gt;&gt;?", "null"),
+            new("OnRead", "Supplies the suggestions for the typed text; the token is canceled by the next keystroke.", "Func&lt;string, CancellationToken, Task&lt;IEnumerable&lt;TItem&gt;&gt;&gt;?", "null"),
             new("ItemTemplate", "Renders a suggestion in the popup; the default is the item's text.", "RenderFragment&lt;TItem&gt;?", "null"),
             new("MinLength", "Characters needed before a search runs.", "int", "1"),
             new("DebounceDelay", "Milliseconds of quiet after a keystroke before the search runs.", "int", "250"),
             new("MaxSuggestions", "Upper bound on the suggestions shown, at least 1.", "int", "25"),
-            new("Width", "Width of the box.", "string?", "null"),
+            new("Width", "Width of the box. When null, the box sizes to the longer of the placeholder and the longest current suggestion, between 8 and 28 characters, so it can change as suggestions arrive. With no placeholder and no suggestions, no width is set.", "string?", "null"),
             new("AriaLabel", "Accessible name of the box.", "string?", "null"),
             new("Placeholder", "Text shown while the box is empty.", "string?", "null"),
+            new("Enabled (base)", "false disables the box, closes the popup and stops searches.", "bool", "true"),
+            new("Visible (base)", "false hides the control with <code>display:none</code>.", "bool", "true"),
+            new("CssClass / Style (base)", "On the <code>fx-autocomplete</code> root, which also receives unmatched attributes.", "string?", "null"),
         };
         public static readonly ApiRow[] AutoEvents =
         {
             new("ValueChanged", "When text is committed: a suggestion picked or the typed text accepted.", "string?"),
-            new("ItemSelected", "Right after <code>ValueChanged</code>, when the committed text equals a current suggestion's text; carries that item.", "TItem"),
+            new("ItemSelected", "Right after <code>ValueChanged</code>, when the committed text equals a current suggestion's text. Carries the first suggestion with that text, so give items distinct text.", "TItem"),
         };
         public static readonly ApiRow[] AutoMethods =
         {
@@ -339,13 +391,14 @@ private readonly string[] _brand = [""#0f172a"", ""#1d4ed8"", ""#0284c7"", ""#0f
         {
             new("Steps", "The steps, in order; only <code>Title</code> and <code>Description</code> are used here.", "IReadOnlyList&lt;WizardStepDescriptor&gt;", "Array.Empty&lt;WizardStepDescriptor&gt;()"),
             new("Value", "Index of the current step, from 0.", "int", "0"),
-            new("Linear", "True allows only earlier steps and the next one, and blocks forward moves while the current step is invalid. False lets any enabled step be entered.", "bool", "true"),
-            new("Vertical", "Stacks the steps.", "bool", "false"),
-            new("DisabledSteps", "Indexes that can never be entered.", "IReadOnlyCollection&lt;int&gt;", "Array.Empty&lt;int&gt;()"),
+            new("Linear", "True allows only earlier steps and the next step that is not disabled, and blocks forward moves while the current step is invalid. False lets any step that is not in <code>DisabledSteps</code> be entered.", "bool", "true"),
+            new("Vertical", "Stacks the steps in a column instead of a row.", "bool", "false"),
+            new("DisabledSteps", "Indexes that can never be entered. In linear mode the step after a disabled one counts as the next step.", "IReadOnlyCollection&lt;int&gt;", "Array.Empty&lt;int&gt;()"),
             new("InvalidSteps", "Indexes shown with a warning sign; in linear mode an invalid current step blocks forward moves.", "IReadOnlyCollection&lt;int&gt;", "Array.Empty&lt;int&gt;()"),
             new("CanNavigate", "Called with the current and the requested index before a move; return false to refuse it.", "Func&lt;int, int, Task&lt;bool&gt;&gt;?", "null"),
             new("AriaLabel", "Accessible name of the <code>nav</code> element.", "string", "\"Steps\""),
             new("StepTemplate", "Renders the inside of a step button; the default is \"<em>n</em>. Title\".", "RenderFragment&lt;WizardStepContext&gt;?", "null"),
+            new("Enabled (base)", "false disables every step button.", "bool", "true"),
         };
         public static readonly ApiRow[] StepperEvents =
         {
@@ -357,7 +410,7 @@ private readonly string[] _brand = [""#0f172a"", ""#1d4ed8"", ""#0284c7"", ""#0f
         };
         public static readonly ApiRow[] StepDesc =
         {
-            new("Key", "Identifier for the hosting wizard; not read by the stepper.", "string", "\"\""),
+            new("Key", "Identifier for the app's own use; no library control reads it.", "string", "\"\""),
             new("Title", "Text of the step.", "string", "\"\""),
             new("Description", "Tooltip of the step button.", "string", "\"\""),
             new("IconCss / IconUrl", "Icon hints for the hosting wizard; not read by the stepper.", "string", "\"\""),
@@ -371,12 +424,16 @@ private readonly string[] _brand = [""#0f172a"", ""#1d4ed8"", ""#0284c7"", ""#0f
         };
         public static readonly ApiRow[] Palette =
         {
-            new("Colors", "The swatches, as CSS colour strings.", "IReadOnlyList&lt;string&gt;", "ColorPalettes.Basic"),
-            new("Value", "The selected colour; must be one of <code>Colors</code>, compared ignoring case.", "string?", "null"),
+            new("Colors", "The swatches, as CSS color strings.", "IReadOnlyList&lt;string&gt;", "ColorPalettes.Basic"),
+            new("Value", "The selected color; must be one of <code>Colors</code>, compared ignoring case.", "string?", "null"),
             new("Columns", "Swatches per row; also the distance of an Up or Down key press.", "int", "8"),
             new("TileSize", "Width and height of a swatch.", "string", "\"28px\""),
             new("AriaLabel", "Accessible name of the listbox.", "string", "\"Color palette\""),
-            new("TileTemplate", "Content drawn inside each swatch instead of the tick on the selected one; it receives the colour string.", "RenderFragment&lt;string&gt;?", "null"),
+            new("TileTemplate", "Content drawn inside each swatch instead of the check mark on the selected one; it receives the color string. Not used in this page's examples.", "RenderFragment&lt;string&gt;?", "null"),
+            new("Enabled (base)", "false disables every swatch and makes <code>SelectAsync</code> do nothing.", "bool", "true"),
+            new("Visible (base)", "false hides the palette with <code>display:none</code>.", "bool", "true"),
+            new("CssClass / Style (base)", "On the listbox element, which also receives unmatched attributes.", "string?", "null"),
+            new("Id (base)", "DOM id of the listbox element.", "string?", "null"),
         };
         public static readonly ApiRow[] PaletteEvents =
         {
@@ -384,10 +441,16 @@ private readonly string[] _brand = [""#0f172a"", ""#1d4ed8"", ""#0284c7"", ""#0f
         };
         public static readonly ApiRow[] PaletteMethods =
         {
-            new("SelectAsync(string color)", "Selects that colour from code; ignored when the control is disabled or the colour is not in <code>Colors</code>.", "Task"),
+            new("SelectAsync(string color)", "Selects that color from code and raises <code>ValueChanged</code>, even when it is already selected. Ignored when the control is disabled or the color is not in <code>Colors</code>; that check is case-sensitive.", "Task"),
         };
         public static readonly ApiRow[] Keys =
         {
+            new("Autocomplete: Down / Up", "With the list open, moves the highlight. With it closed, commits the next or previous suggestion at once."),
+            new("Autocomplete: Home / End / PageUp / PageDown", "With the list open, moves the highlight to the first or last suggestion, or a page up or down."),
+            new("Autocomplete: Enter", "Commits the suggestion highlighted with the keys, otherwise the typed text, and closes the list."),
+            new("Autocomplete: Tab", "Commits the same way when the text was edited or the list is open, then moves on."),
+            new("Autocomplete: Escape", "Closes the list without committing."),
+            new("Autocomplete: F4 or Alt+Down", "Opens the list. With the list open, commits and closes it, as does Alt+Up."),
             new("Stepper: Left, Up / Right, Down", "Moves to the previous or next step that can be entered and focuses it."),
             new("Palette: Left / Right", "Focuses the previous or next swatch."),
             new("Palette: Up / Down", "Focuses the swatch one row up or down."),
@@ -398,6 +461,7 @@ private readonly string[] _brand = [""#0f172a"", ""#1d4ed8"", ""#0284c7"", ""#0f
         {
             new("fx-autocomplete", "The autocomplete's root; the box and popup inside it are the dropdown list's own elements."),
             new("fx-stepper", "The <code>nav</code> holding the step buttons."),
+            new("fx-step · fx-step-current", "On every step button; <code>fx-step-current</code> fills the current one with <code>--fx-stepper-current-bg</code> (falls back to <code>--fx-accent</code> when your app sets it, then <code>#1c6ebf</code>) and writes its text in <code>--fx-stepper-current-color</code> (<code>#ffffff</code>), weight 600."),
             new("fx-color-palette", "The palette grid; <code>--fx-palette-columns</code> and <code>--fx-swatch-size</code> carry <code>Columns</code> and <code>TileSize</code>."),
             new("fx-palette-swatch", "A swatch button; <code>selected</code> is added to the chosen one."),
         };

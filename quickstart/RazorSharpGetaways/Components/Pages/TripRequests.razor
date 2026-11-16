@@ -1,0 +1,20 @@
+@page "/requests"
+@inject NavigationManager Nav
+
+<PageTitle>Trip Requests · Razor Sharp Getaways</PageTitle>
+
+<GetawaysRequests OpenRequestId="Open" StartNew="New" />
+
+@code {
+    /// <summary>?open=586 opens that request in the editor; used by the Dashboard, the bell and the Itinerary.</summary>
+    [SupplyParameterFromQuery(Name = "open")] public int? Open { get; set; }
+
+    /// <summary>?new=true opens the editor on a blank request; used by the + button.</summary>
+    [SupplyParameterFromQuery(Name = "new")] public bool New { get; set; }
+
+    // After acting on the query, go back to /requests so a reload or a second + press starts clean
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (Open is not null || New) Nav.NavigateTo("requests", replace: true);
+    }
+}

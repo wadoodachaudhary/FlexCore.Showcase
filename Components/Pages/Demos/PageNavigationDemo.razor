@@ -3,61 +3,43 @@
 @rendermode InteractiveServer
 @using Fx.ControlKit
 @using Fx.ControlKit.Grid
-@using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Components.Shared
-@inject FlexCore.Showcase.Services.BenchDataStore BenchData
-@* 2026-10-20 (developer meeting, point 2): replaces the PageControl bench (docs/retired-pages/PageControlBenchDemo.razor.txt), whose
-   tabs were plain buttons, whose code tab showed a PageControl it never rendered, and whose summary promised keyboard shortcuts it
-   did not have. The library's PageControl is not a tab control: it is a page region with a keyboard navigation graph, so this page
-   is about that. One example: the same vendor record, laid out as three regions the keyboard moves between. Facts checked against
-   PageControl.razor, PageNavigationMap.cs, wwwroot/page-control.js (registerPageNavigationGraph, resolveShortcut) and
-   GridControl.razor.cs (TabNavigationMode, PageNavigationContext). Zoom shortcuts are off here because this site registers a
-   ZoomService but applies its value nowhere. *@
+@* 2026-10-20: replaces the PageControl bench (docs/retired-pages/PageControlBenchDemo.razor.txt); PageControl shown as a keyboard
+   navigation graph, not tabs. Facts from PageControl.razor, PageNavigationMap.cs, wwwroot/page-control.js, GridControl.razor.cs.
+   Zoom shortcuts off: the site registers a ZoomService but never applies its value. *@
 
-@* 2026-10-25 (Baaria, SC-344): the record is a supplier (Data/BenchModels.cs SupplierRecord, BenchDataStore.Suppliers) instead of
-   the earlier vendor record. The three nodes, their shortcuts and the documentation tables are unchanged; the section
-   ids, the page class and the example id say supplier, and the scoped CSS follows them. The Code field is read-only because the
-   contacts grid filters on it. The record's flags are plain bools, so the switches bind to it directly and the three wrapper
-   properties are gone. Code.Supplier is the Demo block alone (the old constant also carried the Controls buttons and did not match
-   the live markup); Code.SupplierCs was regenerated verbatim. *@
+@* 2026-10-25 (SC-344): vendor -> supplier (Data/BenchModels.cs SupplierRecord) in section ids, page class, example id and CSS.
+   The Code field is read-only: the contacts grid filters on it. Code.Supplier holds the Demo block only.
+   2026-11-15: claims checked against page-control.js: Tab, Shift+Tab and node shortcuts only; shortcuts match event.key, so
+   Alt+letter does not fire on a Mac.
+   2026-11-15: example story moved to the Warehouse and logistics theme.
+   2026-11-16: pre-deploy review fixes. *@
 
-<PageTitle>Page navigation — FlexCore Showcase</PageTitle>
+<PageTitle>Keyboard Navigation for Blazor Forms: PageControl — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Page navigation" Category="Components" CategoryHref="components" ControlName="PageControl"
-                   Tagline="A page region the keyboard can work through: named focus nodes, Tab order across controls and grids, and shortcuts."
+                   Tagline="Let users work through a form from the keyboard, as in a desktop app."
                    SourcePath="PageControl.razor;PageNavigationMap.cs;Grid/GridControl.razor.cs">
     <Overview>
         <p>
-            <code>PageControl</code> wraps a page or a form and owns its Tab key. A <code>PageNavigationGraph</code> names the focus
-            nodes, each a CSS selector: one focusable control such as a grid, or a region whose controls are visited in DOM order. Tab
-            and Shift+Tab move through the nodes' targets in declared order (or <code>Order</code>), wrapping at the ends when
-            <code>Wrap</code> is on; <code>Next</code> and <code>Previous</code> override the order for a page that is not linear, and
-            <code>Entry</code> says whether a node is entered at its first or last target. A node's <code>Shortcuts</code> jump to it, or
-            activate it, from anywhere in the page; while the user is typing in an editor a shortcut is ignored unless it allows that.
-        </p>
-        <p>
-            A <code>GridControl</code> inside keeps Tab for its own cells by default; set its <code>TabNavigationMode</code> to
-            <code>PageControl</code> and Tab leaves the grid for the next node. <code>FocusFirstNodeOnLoad</code> puts the keyboard on the
-            first target once the page has data, the way a desktop form opens. <code>ScrollMode</code> decides how the region scrolls
-            when its content is larger than its space, and with a <code>ZoomService</code> that the host applies, Ctrl with plus, minus
-            and zero zoom the page's FlexCore text.
+            <code>PageControl</code> gives a Blazor page desktop-style keyboard navigation: Tab and Shift+Tab follow the order you define across inputs and grids, and keyboard shortcuts jump between regions. Use it on data-entry screens such as a supplier record, so users keep their hands on the keyboard; the order is a graph of named focus nodes that can wrap at the ends, and <code>FocusFirstNodeOnLoad</code> puts the cursor in the first field when the page opens.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="supplier" Title="A supplier record worked from the keyboard" RazorCode="@Code.Supplier" CSharpCode="@Code.SupplierCs">
-            <Description><p>Three regions, three nodes: the supplier's details, its contacts grid and three status switches. Click into the first field and press Tab repeatedly: focus walks the fields, enters the grid, leaves it after its last cell for the switches, and wraps back to the first field. Alt with D, C or O jumps to a region from anywhere on the page. Previous and Next load another supplier into the same regions; the switches are bound to the record, so a change survives moving away and back.</p></Description>
+            <Description><p>Click into the first field and press Tab: focus walks the details, enters the grid at its first cell, leaves it for the switches, and after the last switch leaves the record for the rest of the page. Alt+D, Alt+C and Alt+S jump to a region (not on a Mac; see Keys); Previous and Next show another supplier and put focus back in the first field.</p></Description>
             <Controls>
-                <ButtonControl CssClass="btn-sm" OnClick="@(() => Show(_index - 1))" Disabled="@(_index <= 0)">Previous</ButtonControl>
-                <ButtonControl CssClass="btn-sm" OnClick="@(() => Show(_index + 1))" Disabled="@(_index >= _suppliers.Count - 1)">Next</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="@(() => ShowAndFocus(_index - 1))" Disabled="@(_index <= 0)">Previous</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="@(() => ShowAndFocus(_index + 1))" Disabled="@(_index >= _suppliers.Count - 1)">Next</ButtonControl>
             </Controls>
             <Demo>
-                <PageControl NavigationGraph="@Graph" FocusFirstNodeOnLoad="true" EnableZoomShortcuts="false" CssClass="supplier-page">
+                <PageControl NavigationGraph="@Graph" FocusFirstNodeOnLoad="true" EnableZoomShortcuts="false" @ref="_page">
                     <div class="supplier-head"><strong>@_supplier.Name</strong> <span class="muted">supplier @(_index + 1) of @_suppliers.Count</span></div>
                     <section id="supplier-details" class="region">
                         <h4>Details <kbd>Alt</kbd>+<kbd>D</kbd></h4>
                         <div class="fields">
-                            <label>Code <TextBoxControl Value="@_supplier.Code" readonly Width="110px" /></label>
+                            <label>Code <TextBoxControl Value="@_supplier.Code" readonly Width="110px" aria-keyshortcuts="Alt+D" /></label>
                             <label>Name <TextBoxControl @bind-Value="_supplier.Name" /></label>
                             <label>Category <TextBoxControl @bind-Value="_supplier.Category" /></label>
                             <label>Address <TextBoxControl @bind-Value="_supplier.Address" /></label>
@@ -70,22 +52,22 @@
                     </section>
                     <section id="supplier-contacts" class="region">
                         <h4>Contacts <kbd>Alt</kbd>+<kbd>C</kbd></h4>
-                        <GridControl TValue="SupplierContactRecord" DataSource="@_contacts" Height="200px" AllowSorting="true"
+                        <GridControl TValue="Contact" DataSource="@_contacts" Height="200px" AllowSorting="true"
                                      TabNavigationMode="GridTabNavigationMode.PageControl">
                             <GridColumnsBase>
-                                <GridColumn Field="@nameof(SupplierContactRecord.DisplayName)" HeaderText="Contact" Width="180px" />
-                                <GridColumn Field="@nameof(SupplierContactRecord.Role)" HeaderText="Role" Width="160px" />
-                                <GridColumn Field="@nameof(SupplierContactRecord.Phone)" HeaderText="Phone" Width="130px" />
-                                <GridColumn Field="@nameof(SupplierContactRecord.Email)" HeaderText="Email" Width="220px" />
-                                <GridColumn Field="@nameof(SupplierContactRecord.Active)" HeaderText="Active" Width="80px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
+                                <GridColumn Field="@nameof(Contact.DisplayName)" HeaderText="Contact" Width="180px" />
+                                <GridColumn Field="@nameof(Contact.Role)" HeaderText="Role" Width="160px" />
+                                <GridColumn Field="@nameof(Contact.Phone)" HeaderText="Phone" Width="130px" />
+                                <GridColumn Field="@nameof(Contact.Email)" HeaderText="Email" Width="220px" />
+                                <GridColumn Field="@nameof(Contact.Active)" HeaderText="Active" Width="80px" Type="ColumnType.Boolean" TextAlign="TextAlign.Center" />
                             </GridColumnsBase>
                         </GridControl>
                     </section>
-                    <section id="supplier-options" class="region">
-                        <h4>Status <kbd>Alt</kbd>+<kbd>O</kbd></h4>
-                        <SwitchControl @bind-Checked="_supplier.Contracted" Label="Contracted" />
+                    <section id="supplier-status" class="region">
+                        <h4>Status <kbd>Alt</kbd>+<kbd>S</kbd></h4>
+                        <SwitchControl @bind-Checked="_supplier.Contracted" Label="Contracted" aria-keyshortcuts="Alt+S" />
                         <SwitchControl @bind-Checked="_supplier.InsuranceOnFile" Label="Insurance on file" />
-                        <SwitchControl @bind-Checked="_supplier.OnlineBooking" Label="Online booking" />
+                        <SwitchControl @bind-Checked="_supplier.SendsShipNotices" Label="Sends advance ship notices" />
                     </section>
                 </PageControl>
             </Demo>
@@ -119,6 +101,13 @@
 
     <Accessibility>
         <ApiTable Kind="ApiKind.Keyboard" Title="Keys" Rows="Vocab.Keys" />
+        <ul>
+            <li><code>PageControl</code> renders a <code>div</code> around your markup and passes extra attributes to it; the fields inside keep their own roles and names.</li>
+            <li>Tab and Shift+Tab follow the node order you define. A shortcut focuses the first target of its node, or also clicks it when its action is <code>Activate</code>.</li>
+            <li><code>FocusFirstNodeOnLoad</code> puts focus in the first target when the page opens; <code>FocusFirstNavigationTargetAsync</code> does the same from code, as the example's Previous and Next buttons do.</li>
+            <li>Build the graph with <code>wrap: false</code> when the page has content outside the <code>PageControl</code>, as the example does, so Tab can leave the record. <code>wrap</code> is true by default.</li>
+            <li>List the shortcuts on the screen, as the example's description does, and add <code>aria-keyshortcuts</code> to the field each shortcut focuses, as the example's Code box and Contracted switch do.</li>
+        </ul>
     </Accessibility>
 
     <Related>
@@ -131,30 +120,84 @@
 </FeatureDemoLayout>
 
 @code {
-    // Three nodes in page order; Alt+letter jumps to each. The grid node needs no mode: its focus element is focusable, so Auto picks it.
+    // Three nodes in page order; Alt+letter jumps to each. Each selector is a region, so the details and status nodes take their focusable
+    // descendants; the grid node enters at its first data cell. No wrap: Tab past the last switch leaves the record for the rest of the page.
     private static readonly PageNavigationGraph Graph = new(
     [
         new("details", "#supplier-details", Mode: PageNavigationNodeMode.Descendants, Shortcuts: [new("d", PageShortcutModifiers.Alt)]),
-        new("contacts", "#supplier-contacts", Shortcuts: [new("c", PageShortcutModifiers.Alt)]),
-        new("options", "#supplier-options", Mode: PageNavigationNodeMode.Descendants, Shortcuts: [new("o", PageShortcutModifiers.Alt)]),
-    ], wrap: true);
+        new("contacts", "#supplier-contacts", Entry: PageNavigationEntry.First, Shortcuts: [new("c", PageShortcutModifiers.Alt)]),
+        new("status", "#supplier-status", Mode: PageNavigationNodeMode.Descendants, Shortcuts: [new("s", PageShortcutModifiers.Alt)]),
+    ], wrap: false);
 
-    private List<SupplierRecord> _suppliers = [];
-    private SupplierRecord _supplier = new();
-    private List<SupplierContactRecord> _contacts = [];
+    // Four suppliers of the Forklift & Found Logistics distribution center and the people to call at each.
+    private readonly List<Supplier> _suppliers =
+    [
+        new() { Code = "SUP-001", Name = "Simmer Down Stoves", Category = "Camp cooking", Address = "410 Foundry Road", City = "Denver", Country = "United States",
+                PostalCode = "80216", Phone = "+1 303 555 0142", Email = "orders@simmerdown.example", Contracted = true, InsuranceOnFile = true, SendsShipNotices = true },
+        new() { Code = "SUP-002", Name = "Peg to Differ Supply", Category = "Tent hardware", Address = "27 Anvil Street", City = "Boulder", Country = "United States",
+                PostalCode = "80301", Phone = "+1 303 555 0117", Email = "orders@pegtodiffer.example", Contracted = true, InsuranceOnFile = true },
+        new() { Code = "SUP-003", Name = "Top It Up Bottle Co.", Category = "Drinkware", Address = "960 Canal Avenue", City = "Salt Lake City", Country = "United States",
+                PostalCode = "84104", Phone = "+1 801 555 0164", Email = "orders@topitup.example", InsuranceOnFile = true, SendsShipNotices = true },
+        new() { Code = "SUP-004", Name = "Lumen Being Headlamps", Category = "Lighting", Address = "5 Copper Lane", City = "Albuquerque", Country = "United States",
+                PostalCode = "87102", Phone = "+1 505 555 0128", Email = "orders@lumenbeing.example", Contracted = true },
+    ];
+
+    private static readonly Contact[] AllContacts =
+    [
+        new() { SupplierCode = "SUP-001", DisplayName = "Rubeus Haggle", Role = "Order desk", Phone = "+1 303 555 0143", Email = "rubeus.haggle@simmerdown.example" },
+        new() { SupplierCode = "SUP-001", DisplayName = "Minerva McGadget", Role = "Accounts", Phone = "+1 303 555 0144", Email = "minerva.mcgadget@simmerdown.example" },
+        new() { SupplierCode = "SUP-002", DisplayName = "Cedric Diggle", Role = "Order desk", Phone = "+1 303 555 0118", Email = "cedric.diggle@pegtodiffer.example" },
+        new() { SupplierCode = "SUP-003", DisplayName = "Nymphadora Tonic", Role = "Order desk", Phone = "+1 801 555 0165", Email = "nymphadora.tonic@topitup.example" },
+        new() { SupplierCode = "SUP-003", DisplayName = "Filius Flipwick", Role = "Accounts", Phone = "+1 801 555 0166", Email = "filius.flipwick@topitup.example", Active = false },
+        new() { SupplierCode = "SUP-004", DisplayName = "Sybil Treeline", Role = "Order desk", Phone = "+1 505 555 0129", Email = "sybil.treeline@lumenbeing.example" },
+    ];
+
+    private Supplier _supplier = new();
+    private List<Contact> _contacts = [];
     private int _index;
 
-    protected override void OnInitialized()
+    private PageControl? _page;
+    protected override void OnInitialized() => Show(0);
+    // Previous and Next sit outside the PageControl, so focus goes back into the record after them.
+    private async Task ShowAndFocus(int index)
     {
-        _suppliers = BenchData.Suppliers.ToList();
-        if (_suppliers.Count > 0) Show(0);
+        Show(index);
+        await Task.Yield();   // let the new record render first
+        if (_page is not null) await _page.FocusFirstNavigationTargetAsync();
     }
 
     private void Show(int index)
     {
         _index = Math.Clamp(index, 0, _suppliers.Count - 1);
         _supplier = _suppliers[_index];
-        _contacts = BenchData.SupplierContacts.Where(c => c.SupplierCode == _supplier.Code).ToList();
+        _contacts = AllContacts.Where(c => c.SupplierCode == _supplier.Code).ToList();
+    }
+
+    private sealed class Supplier
+    {
+        public string Code { get; init; } = "";
+        public string Name { get; set; } = "";
+        public string Category { get; set; } = "";
+        public string Address { get; set; } = "";
+        public string City { get; set; } = "";
+        public string Country { get; set; } = "";
+        public string PostalCode { get; set; } = "";
+        public string Phone { get; set; } = "";
+        public string Email { get; set; } = "";
+        public bool Contracted { get; set; }
+        public bool InsuranceOnFile { get; set; }
+        public bool SendsShipNotices { get; set; }
+    }
+
+    // SupplierCode is the Code of the supplier the person works for.
+    private sealed class Contact
+    {
+        public string SupplierCode { get; init; } = "";
+        public string DisplayName { get; init; } = "";
+        public string Role { get; init; } = "";
+        public string Phone { get; init; } = "";
+        public string Email { get; init; } = "";
+        public bool Active { get; init; } = true;
     }
 
     // Documentation rows (2026-10-20) from PageControl.razor and PageNavigationMap.cs.
@@ -164,8 +207,8 @@
         {
             new("NavigationGraph", "The focus nodes and their order; the next table. With no graph the page does not take Tab.", "PageNavigationGraph?", "null"),
             new("NavigationMap", "Older linear form: named regions visited in order. Converted to a graph.", "PageNavigationMap?", "null"),
-            new("FocusFirstNodeOnLoad", "Focus the first target once the page has loaded, retried over a few renders until a grid has rows; never takes focus the user already placed.", "bool", "false"),
-            new("EnableZoomShortcuts", "With a ZoomService registered on the host, Ctrl with plus, minus and zero zoom FlexCore text. Off on this page because this site does not apply the service's value.", "bool", "true"),
+            new("FocusFirstNodeOnLoad", "Focus the first target once the page has loaded, retried over a few renders until a grid has rows; never takes focus the user already placed inside the page region.", "bool", "false"),
+            new("EnableZoomShortcuts", "With a ZoomService registered on the host, Ctrl with plus, minus and zero zoom FlexCore text. Off on this page so Ctrl with plus and minus keep the browser's own zoom.", "bool", "true"),
             new("ScrollMode", "How the region scrolls when its content is larger than its space. Auto turns each scrollbar on only when that axis overflows.", "PageScrollMode", "Auto"),
             new("MaxHeight", "Height cap for the scroll container, e.g. 100dvh, when the host layout gives none.", "string?", "null"),
             new("ChildContent", "The page content.", "RenderFragment?"),
@@ -178,15 +221,15 @@
             new("Next", "Node Tab goes to instead of the next in order.", "string?", "null"),
             new("Previous", "Node Shift+Tab goes to instead of the previous in order.", "string?", "null"),
             new("Mode", "Which elements are the node's targets: Auto, Element or Descendants.", "PageNavigationNodeMode", "Auto"),
-            new("Shortcuts", "Keys that jump to or activate the node from anywhere in the page.", "IReadOnlyList&lt;PageNavigationShortcut&gt;?", "null"),
+            new("Shortcuts", "Keys that jump to or activate the node from anywhere inside the PageControl.", "IReadOnlyList&lt;PageNavigationShortcut&gt;?", "null"),
             new("Entry", "Where focus lands when arriving from another node: Directional, First or Last.", "PageNavigationEntry", "Directional"),
         };
         public static readonly ApiRow[] Shortcut =
         {
-            new("Key", "The key, as the browser names it.", "string"),
+            new("Key", "The key as the browser reports it (<code>event.key</code>), compared without case: a letter, or a name such as <code>F2</code>. On a Mac, Option changes the character a letter key types, so an Alt+letter shortcut does not fire there.", "string"),
             new("Modifiers", "Alt, Control, Meta, Shift, combined as flags.", "PageShortcutModifiers", "None"),
             new("Action", "Focus the node's target, or Activate it.", "PageShortcutAction", "Focus"),
-            new("AllowInEditor", "Also fire while the user is typing in a text editor.", "bool", "false"),
+            new("AllowInEditor", "Lets a shortcut without Alt, Control or Meta fire while the user types in a text editor. Shortcuts with one of those always fire.", "bool", "false"),
         };
         public static readonly ApiRow[] Methods =
         {
@@ -194,21 +237,23 @@
         };
         public static readonly ApiRow[] Keys =
         {
-            new("Tab / Shift+Tab", "Next or previous target across the nodes, wrapping at the ends when the graph wraps."),
-            new("Alt+D, Alt+C, Alt+O", "This page's shortcuts: focus the details, the contacts grid or the status switches."),
-            new("Inside the grid", "The grid's own keys; Tab leaves it at the last cell because its TabNavigationMode is PageControl."),
+            new("Tab / Shift+Tab", "Next or previous target across the nodes. A graph wraps at the ends unless it is built with wrap: false; this page's is, so Tab past the last switch goes on to the rest of the page."),
+            new("Alt+D, Alt+C, Alt+S", "This page's shortcuts: focus the details, the contacts grid or the status switches."),
+            new("Inside the grid", "The grid's own keys, except Tab and Shift+Tab: with TabNavigationMode PageControl the grid is one stop, so Tab leaves it from any cell. WrapRowsUntilEdge walks the cells first and leaves at the last one."),
         };
     }
 
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Supplier = @"<PageControl NavigationGraph=""@Graph"" FocusFirstNodeOnLoad=""true"" EnableZoomShortcuts=""false"" CssClass=""supplier-page"">
+        public const string Supplier = @"<ButtonControl CssClass=""btn-sm"" OnClick=""@(() => ShowAndFocus(_index - 1))"" Disabled=""@(_index <= 0)"">Previous</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""@(() => ShowAndFocus(_index + 1))"" Disabled=""@(_index >= _suppliers.Count - 1)"">Next</ButtonControl>
+<PageControl NavigationGraph=""@Graph"" FocusFirstNodeOnLoad=""true"" EnableZoomShortcuts=""false"" @ref=""_page"">
     <div class=""supplier-head""><strong>@_supplier.Name</strong> <span class=""muted"">supplier @(_index + 1) of @_suppliers.Count</span></div>
     <section id=""supplier-details"" class=""region"">
         <h4>Details <kbd>Alt</kbd>+<kbd>D</kbd></h4>
         <div class=""fields"">
-            <label>Code <TextBoxControl Value=""@_supplier.Code"" readonly Width=""110px"" /></label>
+            <label>Code <TextBoxControl Value=""@_supplier.Code"" readonly Width=""110px"" aria-keyshortcuts=""Alt+D"" /></label>
             <label>Name <TextBoxControl @bind-Value=""_supplier.Name"" /></label>
             <label>Category <TextBoxControl @bind-Value=""_supplier.Category"" /></label>
             <label>Address <TextBoxControl @bind-Value=""_supplier.Address"" /></label>
@@ -221,51 +266,102 @@
     </section>
     <section id=""supplier-contacts"" class=""region"">
         <h4>Contacts <kbd>Alt</kbd>+<kbd>C</kbd></h4>
-        <GridControl TValue=""SupplierContactRecord"" DataSource=""@_contacts"" Height=""200px"" AllowSorting=""true""
+        <GridControl TValue=""Contact"" DataSource=""@_contacts"" Height=""200px"" AllowSorting=""true""
                      TabNavigationMode=""GridTabNavigationMode.PageControl"">
             <GridColumnsBase>
-                <GridColumn Field=""@nameof(SupplierContactRecord.DisplayName)"" HeaderText=""Contact"" Width=""180px"" />
-                <GridColumn Field=""@nameof(SupplierContactRecord.Role)"" HeaderText=""Role"" Width=""160px"" />
-                <GridColumn Field=""@nameof(SupplierContactRecord.Phone)"" HeaderText=""Phone"" Width=""130px"" />
-                <GridColumn Field=""@nameof(SupplierContactRecord.Email)"" HeaderText=""Email"" Width=""220px"" />
-                <GridColumn Field=""@nameof(SupplierContactRecord.Active)"" HeaderText=""Active"" Width=""80px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" />
+                <GridColumn Field=""@nameof(Contact.DisplayName)"" HeaderText=""Contact"" Width=""180px"" />
+                <GridColumn Field=""@nameof(Contact.Role)"" HeaderText=""Role"" Width=""160px"" />
+                <GridColumn Field=""@nameof(Contact.Phone)"" HeaderText=""Phone"" Width=""130px"" />
+                <GridColumn Field=""@nameof(Contact.Email)"" HeaderText=""Email"" Width=""220px"" />
+                <GridColumn Field=""@nameof(Contact.Active)"" HeaderText=""Active"" Width=""80px"" Type=""ColumnType.Boolean"" TextAlign=""TextAlign.Center"" />
             </GridColumnsBase>
         </GridControl>
     </section>
-    <section id=""supplier-options"" class=""region"">
-        <h4>Status <kbd>Alt</kbd>+<kbd>O</kbd></h4>
-        <SwitchControl @bind-Checked=""_supplier.Contracted"" Label=""Contracted"" />
+    <section id=""supplier-status"" class=""region"">
+        <h4>Status <kbd>Alt</kbd>+<kbd>S</kbd></h4>
+        <SwitchControl @bind-Checked=""_supplier.Contracted"" Label=""Contracted"" aria-keyshortcuts=""Alt+S"" />
         <SwitchControl @bind-Checked=""_supplier.InsuranceOnFile"" Label=""Insurance on file"" />
-        <SwitchControl @bind-Checked=""_supplier.OnlineBooking"" Label=""Online booking"" />
+        <SwitchControl @bind-Checked=""_supplier.SendsShipNotices"" Label=""Sends advance ship notices"" />
     </section>
 </PageControl>";
-        public const string SupplierCs = @"// Three nodes in page order; Alt+letter jumps to each. The grid node needs no mode: its focus element is focusable, so Auto picks it.
+        public const string SupplierCs = @"// Three nodes in page order; Alt+letter jumps to each. Each selector is a region, so the details and status nodes take their focusable
+// descendants; the grid node enters at its first data cell. No wrap: Tab past the last switch leaves the record for the rest of the page.
 private static readonly PageNavigationGraph Graph = new(
 [
     new(""details"", ""#supplier-details"", Mode: PageNavigationNodeMode.Descendants, Shortcuts: [new(""d"", PageShortcutModifiers.Alt)]),
-    new(""contacts"", ""#supplier-contacts"", Shortcuts: [new(""c"", PageShortcutModifiers.Alt)]),
-    new(""options"", ""#supplier-options"", Mode: PageNavigationNodeMode.Descendants, Shortcuts: [new(""o"", PageShortcutModifiers.Alt)]),
-], wrap: true);
+    new(""contacts"", ""#supplier-contacts"", Entry: PageNavigationEntry.First, Shortcuts: [new(""c"", PageShortcutModifiers.Alt)]),
+    new(""status"", ""#supplier-status"", Mode: PageNavigationNodeMode.Descendants, Shortcuts: [new(""s"", PageShortcutModifiers.Alt)]),
+], wrap: false);
 
-private List<SupplierRecord> _suppliers = [];
+// Four suppliers of the Forklift & Found Logistics distribution center and the people to call at each.
+private readonly List<Supplier> _suppliers =
+[
+    new() { Code = ""SUP-001"", Name = ""Simmer Down Stoves"", Category = ""Camp cooking"", Address = ""410 Foundry Road"", City = ""Denver"", Country = ""United States"",
+            PostalCode = ""80216"", Phone = ""+1 303 555 0142"", Email = ""orders@simmerdown.example"", Contracted = true, InsuranceOnFile = true, SendsShipNotices = true },
+    new() { Code = ""SUP-002"", Name = ""Peg to Differ Supply"", Category = ""Tent hardware"", Address = ""27 Anvil Street"", City = ""Boulder"", Country = ""United States"",
+            PostalCode = ""80301"", Phone = ""+1 303 555 0117"", Email = ""orders@pegtodiffer.example"", Contracted = true, InsuranceOnFile = true },
+    new() { Code = ""SUP-003"", Name = ""Top It Up Bottle Co."", Category = ""Drinkware"", Address = ""960 Canal Avenue"", City = ""Salt Lake City"", Country = ""United States"",
+            PostalCode = ""84104"", Phone = ""+1 801 555 0164"", Email = ""orders@topitup.example"", InsuranceOnFile = true, SendsShipNotices = true },
+    new() { Code = ""SUP-004"", Name = ""Lumen Being Headlamps"", Category = ""Lighting"", Address = ""5 Copper Lane"", City = ""Albuquerque"", Country = ""United States"",
+            PostalCode = ""87102"", Phone = ""+1 505 555 0128"", Email = ""orders@lumenbeing.example"", Contracted = true },
+];
 
-private SupplierRecord _supplier = new();
+private static readonly Contact[] AllContacts =
+[
+    new() { SupplierCode = ""SUP-001"", DisplayName = ""Rubeus Haggle"", Role = ""Order desk"", Phone = ""+1 303 555 0143"", Email = ""rubeus.haggle@simmerdown.example"" },
+    new() { SupplierCode = ""SUP-001"", DisplayName = ""Minerva McGadget"", Role = ""Accounts"", Phone = ""+1 303 555 0144"", Email = ""minerva.mcgadget@simmerdown.example"" },
+    new() { SupplierCode = ""SUP-002"", DisplayName = ""Cedric Diggle"", Role = ""Order desk"", Phone = ""+1 303 555 0118"", Email = ""cedric.diggle@pegtodiffer.example"" },
+    new() { SupplierCode = ""SUP-003"", DisplayName = ""Nymphadora Tonic"", Role = ""Order desk"", Phone = ""+1 801 555 0165"", Email = ""nymphadora.tonic@topitup.example"" },
+    new() { SupplierCode = ""SUP-003"", DisplayName = ""Filius Flipwick"", Role = ""Accounts"", Phone = ""+1 801 555 0166"", Email = ""filius.flipwick@topitup.example"", Active = false },
+    new() { SupplierCode = ""SUP-004"", DisplayName = ""Sybil Treeline"", Role = ""Order desk"", Phone = ""+1 505 555 0129"", Email = ""sybil.treeline@lumenbeing.example"" },
+];
 
-private List<SupplierContactRecord> _contacts = [];
-
+private Supplier _supplier = new();
+private List<Contact> _contacts = [];
 private int _index;
 
-protected override void OnInitialized()
+private PageControl? _page;
+protected override void OnInitialized() => Show(0);
+// Previous and Next sit outside the PageControl, so focus goes back into the record after them.
+private async Task ShowAndFocus(int index)
 {
-    _suppliers = BenchData.Suppliers.ToList();
-    if (_suppliers.Count > 0) Show(0);
+    Show(index);
+    await Task.Yield();   // let the new record render first
+    if (_page is not null) await _page.FocusFirstNavigationTargetAsync();
 }
 
 private void Show(int index)
 {
     _index = Math.Clamp(index, 0, _suppliers.Count - 1);
     _supplier = _suppliers[_index];
-    _contacts = BenchData.SupplierContacts.Where(c => c.SupplierCode == _supplier.Code).ToList();
+    _contacts = AllContacts.Where(c => c.SupplierCode == _supplier.Code).ToList();
+}
+
+private sealed class Supplier
+{
+    public string Code { get; init; } = """";
+    public string Name { get; set; } = """";
+    public string Category { get; set; } = """";
+    public string Address { get; set; } = """";
+    public string City { get; set; } = """";
+    public string Country { get; set; } = """";
+    public string PostalCode { get; set; } = """";
+    public string Phone { get; set; } = """";
+    public string Email { get; set; } = """";
+    public bool Contracted { get; set; }
+    public bool InsuranceOnFile { get; set; }
+    public bool SendsShipNotices { get; set; }
+}
+
+// SupplierCode is the Code of the supplier the person works for.
+private sealed class Contact
+{
+    public string SupplierCode { get; init; } = """";
+    public string DisplayName { get; init; } = """";
+    public string Role { get; init; } = """";
+    public string Phone { get; init; } = """";
+    public string Email { get; init; } = """";
+    public bool Active { get; init; } = true;
 }";
     }
 }

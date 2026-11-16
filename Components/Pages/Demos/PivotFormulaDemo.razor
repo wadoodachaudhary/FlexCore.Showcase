@@ -6,39 +6,27 @@
 @using FlexCore.Showcase.Components.Shared
 @using FlexCore.Showcase.Data
 
-@* 2026-10-19: moved onto FeatureDemoLayout (SC-275). The four pivots and the hand-typed snippets became three examples with
-   generated code tabs (SC-217: the old section 5 copy said Count of Quantity while the live pivot summed it). Route /demo/pivot
-   added and the old route kept as an alias (SC-216). The formula grid stays as the third example until it has a page of its own
-   (SC-218): it is the only place on the site that shows GridColumn.Formula and AllowCellFormulas. Documentation (SC-219) written
-   from Grid/PivotControl.razor(.cs), PivotSortDescriptor.cs, GridEnums.cs, GridColumn.cs and the formula path in
-   GridControl.razor.cs (ResolveCellValue, EvaluateFormula, FormulaValueLiteral); rows checked with scratchpad/vocabcheck.py.
-   2026-10-26: all three examples use the OurAirports data (Data/AirportData.cs) instead of the invented sales and deals.
-   The builder pivots a small projection: it offers every public property of the row type, and names or codes in Rows and
-   Columns at once would build millions of cells. *@
+@* 2026-10-19: on FeatureDemoLayout (SC-275), generated code tabs (SC-217), route /demo/pivot; old route an alias (SC-216).
+   Formula grid is example 3 until its own page (SC-218): the site's only GridColumn.Formula / AllowCellFormulas demo.
+   Docs (SC-219) from Grid/Pivot*, GridEnums.cs, GridColumn.cs and the formula path in GridControl.razor.cs.
+   2026-10-26: examples on OurAirports (Data/AirportData.cs). The builder gets a projection: it offers every public property, and
+   names or codes in Rows and Columns together would build millions of cells.
+   2026-11-16: pre-deploy review fixes. *@
 
-<PageTitle>Pivot tables — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Pivot Table (PivotGrid) — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Pivot tables" Category="Data Grid" CategoryHref="demo/grid" ControlName="PivotControl"
-                   Tagline="Cross-tabs with grouped headers, subtotals, several measures, sorting and a drag-and-drop field builder."
+                   Tagline="Summarize rows into a cross-tab that users rearrange by dragging fields."
                    SourcePath="Grid/PivotControl.razor;Grid/PivotControl.razor.cs;Grid/PivotSortDescriptor.cs;Grid/GridEnums.cs;Grid/GridColumn.cs;Grid/GridControl.razor.cs">
     <Overview>
         <p>
-            <code>PivotControl</code> turns a list of objects into a cross-tab: the values of the <code>RowFields</code> label the rows,
-            the values of the <code>ColumnFields</code> spread across the columns, and each cell aggregates one or more measures with
-            <code>Sum</code>, <code>Average</code>, <code>Count</code>, <code>Min</code> or <code>Max</code>. Two row fields give grouped rows
-            with a subtotal per group; two column fields give a two-row header; more than one measure adds a sub-column per measure. Headers
-            sort either a dimension or the rows by a column's values, and the sort keys can be read and set from the page. With
-            <code>Interactive</code> the control adds the field builder: available fields, four drop zones and a filter bar.
-        </p>
-        <p>
-            <code>GridControl</code> can switch into this control: <code>AllowPivoting</code> enables its embedded pivot view,
-            <code>ShowPivotPanelButton</code> puts the button on the grid's option rail, and the grid's export then takes the pivot's rows and columns.
+            <code>PivotControl</code> is a Blazor pivot table that summarizes rows into a cross-tab, with a sum, average, count, minimum or maximum in each cell. Use it for questions such as how many airports each continent has, by type; with <code>Interactive</code> on, users drag fields between Filters, Rows, Columns and Values, as in an Excel PivotTable. Two row fields add subtotals, and <code>GridControl</code> opens the same view through <code>AllowPivoting</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="builder" Title="Interactive builder" RazorCode="@Code.Builder" CSharpCode="@Code.BuilderCs">
-            <Description><p>The 4,009 airports from the <a href="demo/grid#airports">Data Grid</a> page, as a small record: the builder lists every public property of the row type, so names, codes and coordinates are left out. <code>Airports</code> is 1 on every row, so its sum counts airports. Try Runway class in Columns under Type, or Hemisphere in Filters. Drag a field from the list into Filters, Rows, Columns or Values; drag a chip to another area to move it; the ✕ removes it. Each value chip has an aggregation dropdown and a format box (a .NET numeric format such as N0 or C2; blank prints the plain number). A filter field adds a dropdown above the table that narrows the data before grouping. The arrows on row and column chips sort that dimension; a click on a column header sorts the rows by that column's values, and Shift-click adds a second key. The builder starts from the parameters below and then keeps its own state.</p></Description>
+            <Description><p>Drag fields between Filters, Rows, Columns and Values, set each value chip's aggregation and format, and click headers (Shift-click for a second key) to sort 4,009 airports.</p></Description>
             <Demo>
                 <PivotControl TValue="AirportFacts"
                               DataSource="@_facts"
@@ -53,11 +41,13 @@
         </DemoExample>
 
         <DemoExample Id="grouped" Title="Grouped rows, subtotals and two measures" RazorCode="@Code.Grouped" CSharpCode="@Code.GroupedCs">
-            <Description><p>The same airports as full <code>Airport</code> records; with no builder, the page decides which fields are pivoted. Two row fields: Continent spans its countries and a "<em>continent</em> Total" row closes each group. Two measures: Airports (a <code>Count</code>) and Longest runway (a <code>Max</code>) sit side by side under each airport type and under Total, each with its own format and label. The table opens sorted by the Airports total, largest first, so each continent lists its countries by airport count; rows stay inside their continent when sorted by a value. Click a header to sort by that column (ascending, then descending, then off); Shift-click adds a key. The buttons set <code>SortDescriptors</code> from the page with the generated names of the Total columns, and the line below shows the keys the control reports through <code>SortDescriptorsChanged</code>, whichever side changed them.</p></Description>
+            <Description><p>Sort by airport count or longest runway with the buttons, which set <code>SortDescriptors</code>, and switch totals on and off; each continent closes with its own Total row.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [MostAirports])">Most airports first</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [LongestRunway])">Longest runway first</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="@(() => _sorts = [])">Clear sort</ButtonControl>
+                <ToggleButtonControl Selected="@_grand" SelectedChanged="v => _grand = v">Grand totals</ToggleButtonControl>
+                <ToggleButtonControl Selected="@_sub" SelectedChanged="v => _sub = v">Subtotals</ToggleButtonControl>
             </Controls>
             <Demo>
                 <PivotControl TValue="Airport"
@@ -67,13 +57,15 @@
                               ValueFields="@_measures"
                               SortDescriptors="@_sorts"
                               SortDescriptorsChanged="s => _sorts = s"
+                              ShowGrandTotals="@_grand"
+                              ShowSubTotals="@_sub"
                               Height="480px" />
                 <p class="result">Sort: @SortText</p>
             </Demo>
         </DemoExample>
 
         <DemoExample Id="formulas" Title="Formula columns in a grid" RazorCode="@Code.Formulas" CSharpCode="@Code.FormulasCs">
-            <Description><p>Not a pivot, but the other way to compute numbers in a table. A column's <code>Formula</code> is evaluated per row: <code>[Field]</code> references and bare property names are replaced by the row's values and the expression runs through .NET's <code>DataTable.Compute</code>, so arithmetic, comparisons, <code>IIF</code> and the other DataColumn expression functions work. With <code>AllowCellFormulas</code>, a text cell that starts with <code>=</code> is evaluated the same way. Here twelve airports, from Amsterdam below sea level to La Paz at 13,355 ft: Elevation (m) is the column formula <code>[ElevationFt] * 0.3048</code>, and Longest runway (km) reads a property that returns <code>=[LongestRunwayFt] * 0.0003048</code>. Values that are not numbers count as 0, and an expression that fails shows as <code>#</code> followed by the expression. The results are display only; the row's data is not changed.</p></Description>
+            <Description><p>Elevation (m) is a column <code>Formula</code>, <code>[ElevationFt] * 0.3048</code>, worked out per row; Longest runway (km) holds cell values that start with <code>=</code>, evaluated because <code>AllowCellFormulas</code> is on.</p></Description>
             <Demo>
                 <GridControl TValue="Hub" DataSource="@_hubs"
                              AllowCellFormulas="true"
@@ -124,11 +116,14 @@
     </Vocabulary>
 
     <Accessibility>
-        <p>
-            Sortable headers are buttons titled "Sort <em>header</em>" and carry <code>aria-sort</code> while sorted; the chips' sort arrows
-            are buttons too. The filter dropdowns are native selects with a visible label. The builder's chips move by mouse drag only:
-            apart from each chip's remove button and the aggregation and format controls, there is no keyboard way to place a field.
-        </p>
+        <ul>
+            <li>The pivot is an HTML <code>&lt;table&gt;</code>. Its column headers are <code>&lt;th&gt;</code> cells in a <code>&lt;thead&gt;</code> that span levels with <code>colspan</code> and <code>rowspan</code>.</li>
+            <li>With <code>AllowSorting</code> on, each header holds a button titled "Sort <em>header</em>", and the header cell carries <code>aria-sort</code> while it is sorted. Row and column chips in the builder have sort buttons too, each titled "Sort <em>field</em>" and showing a symbol for the sort state.</li>
+            <li>In the builder, each chip's remove button, the aggregation dropdown and the format box are native controls in the Tab order; the format box's title gives format examples.</li>
+            <li>A field dropped on Filters adds a native <code>&lt;select&gt;</code> above the table, after the field name, listing (All) and each value of that field.</li>
+            <li>Set <code>FieldLabels</code>, and <code>Label</code> on each <code>PivotValueConfig</code>, so chips, headers and filters show readable names instead of property names.</li>
+            <li>With <code>Interactive</code> off, the layout comes from <code>RowFields</code>, <code>ColumnFields</code> and <code>ValueFields</code>, so buttons or selects beside the pivot can offer keyboard users other layouts.</li>
+        </ul>
     </Accessibility>
 
     <Related>
@@ -178,6 +173,7 @@
         new() { Field = "LongestRunwayFt", Aggregation = AggregateType.Max, Format = "N0", Label = "Longest runway (ft)" }
     ];
     // A Total column's field name is "__Total_" + the measure's Field + "_" + its Aggregation.
+    private bool _grand = true, _sub = true;
     private static readonly PivotSortDescriptor MostAirports = new("__Total_Code_Count", SortDirection.Descending);
     private static readonly PivotSortDescriptor LongestRunway = new("__Total_LongestRunwayFt_Max", SortDirection.Descending);
     private IReadOnlyList<PivotSortDescriptor> _sorts = [MostAirports];
@@ -195,7 +191,7 @@
         public string RunwayKmFormula => "=[LongestRunwayFt] * 0.0003048";
     }
 
-    // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
+    // Code tabs are verbatim copies of each Demo block and of the members behind it.
     private static class Code
     {
         public const string Builder = @"<PivotControl TValue=""AirportFacts""
@@ -242,9 +238,12 @@ private sealed record AirportFacts(string Continent, string Type, string Runway,
               ValueFields=""@_measures""
               SortDescriptors=""@_sorts""
               SortDescriptorsChanged=""s => _sorts = s""
+              ShowGrandTotals=""@_grand""
+              ShowSubTotals=""@_sub""
               Height=""480px"" />
 <p class=""result"">Sort: @SortText</p>";
-        public const string GroupedCs = @"private readonly string[] _byType = [""Type""];
+        public const string GroupedCs = @"private bool _grand = true, _sub = true;
+private readonly string[] _byType = [""Type""];
 
 // Grouped: Continent and Country on the full Airport records.
 private readonly string[] _byContinentAndCountry = [""Continent"", ""Country""];

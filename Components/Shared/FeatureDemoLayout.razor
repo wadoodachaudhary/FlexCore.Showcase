@@ -1,13 +1,13 @@
 @namespace FlexCore.Showcase.Components.Shared
 @inject NavigationManager Nav
 
-@* Page frame for one feature (2026-10-12): header → Overview → Examples → Documentation →
-   Keyboard and accessibility → Related, plus an "On this page" list filled by the DemoExamples.
-   Breadcrumb is BreadCrumbControl; the two-column frame has no FlexCore equivalent.
-   2026-10-18 (Baaria's review): "Vocabulary" became "Documentation"; the source files moved from the header to the rail under
-   "On this page" and are listed without links, because whether the full source stays public is still an open decision.
-   2026-10-20 (developer meeting): the rail shows an Examples entry with the example titles nested under it.
-   2026-10-25: Documentation can hold DocSections (accordion); their titles nest under Documentation in the rail. *@
+@* Page frame for one feature (2026-10-12), with an "On this page" rail filled by the DemoExamples; the two-column frame has no
+   FlexCore equivalent.
+   2026-10-18: "Vocabulary" → "Documentation"; source files in the rail, unlinked.
+   2026-10-20: rail Examples entry with the example titles nested under it.
+   2026-10-25: DocSections titles nest under Documentation in the rail.
+   2026-11-16: "Keyboard and accessibility" is the last, collapsed section of Documentation (DocSections renders AccessibilityBlock);
+   it stands alone only on a page without Documentation. *@
 <CascadingValue Value="this" IsFixed="true">
 <div class="fd-shell">
     <header class="fd-header">
@@ -51,7 +51,7 @@
                 </section>
             }
 
-            @if (Accessibility is not null)
+            @if (Accessibility is not null && Vocabulary is null)
             {
                 <section class="fd-section" id="accessibility">
                     <h2>Keyboard and accessibility</h2>
@@ -84,7 +84,7 @@
                     <a class="fd-toc-ex" href="@($"{PagePath}#{doc.Id}")" @onclick="doc.Reveal">@doc.Title</a>
                 }
             }
-            @if (Accessibility is not null) { <a href="@($"{PagePath}#accessibility")">Keyboard and accessibility</a> }
+            @if (Accessibility is not null && Vocabulary is null) { <a href="@($"{PagePath}#accessibility")">Keyboard and accessibility</a> }
             @if (Related is not null) { <a href="@($"{PagePath}#related")">Related</a> }
             @if (SourcePaths.Length > 0)
             {
@@ -119,6 +119,9 @@
     [Parameter] public RenderFragment? Accessibility { get; set; }
     [Parameter] public RenderFragment? Related { get; set; }
 
+    /// <summary>The Accessibility slot wrapped for DocSections, written here so the prose styles of this layout apply.</summary>
+    public RenderFragment? AccessibilityBlock => Accessibility is null ? null : @<div class="fd-prose">@Accessibility</div>;
+
     /// <summary>Current path without query or fragment, so anchors stay on this page.</summary>
     public string PagePath => Nav.ToBaseRelativePath(Nav.Uri).Split('#')[0].Split('?')[0];
 
@@ -127,7 +130,9 @@
     private readonly List<DocSection> _sections = new();   // DocSections inside Documentation (2026-10-25)
 
     protected override void OnParametersSet() =>
-        _crumbs = new() { new("Home", ""), new(Category, CategoryHref), new(Title) };
+        _crumbs = Title == Category
+            ? new() { new("Home", ""), new(Title) }                              // an overview page is its own category
+            : new() { new("Home", ""), new(Category, CategoryHref), new(Title) };
 
     /// <summary>Called by each DemoExample on init; feeds the "On this page" list.</summary>
     public void Register(string id, string title)

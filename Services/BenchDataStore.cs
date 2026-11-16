@@ -4,10 +4,9 @@ using FlexCore.Showcase.Data;
 namespace FlexCore.Showcase.Services;
 
 /// <summary>
-/// In-memory data for the grid pages, synthesized per circuit (scoped in Program.cs, built in the constructor) so one visitor's
-/// edits never reach another's: the tour operator's
-/// rate card (5,000 lines over <see cref="TravelData.Destinations"/>), the supplier list with its contacts (Page navigation) and
-/// the sales desks with their agents (Master-detail). Deterministic, so screenshots and timings repeat.
+/// In-memory grid page data, built per circuit (scoped in Program.cs) so one visitor's edits never reach another's: the rate card
+/// (5,000 lines over <see cref="TravelData.Destinations"/>). Deterministic, so
+/// screenshots and timings repeat.
 /// </summary>
 public sealed class BenchDataStore
 {
@@ -15,8 +14,6 @@ public sealed class BenchDataStore
     private bool _loaded;
 
     public IReadOnlyList<RateCardItem> RateCard { get; private set; } = [];
-    public IReadOnlyList<SupplierRecord> Suppliers { get; private set; } = [];
-    public IReadOnlyList<SupplierContactRecord> SupplierContacts { get; private set; } = [];
 
     public string LoadReport { get; private set; } = "Initializing...";
 
@@ -31,30 +28,28 @@ public sealed class BenchDataStore
             var sw = Stopwatch.StartNew();
 
             RateCard = SynthesizeRateCard(5000);
-            Suppliers = SynthesizeSuppliers(200);
-            SupplierContacts = SynthesizeSupplierContacts(Suppliers);
 
             sw.Stop();
-            LoadReport = $"Data synthesized in {sw.ElapsedMilliseconds} ms | Rate card: {RateCard.Count:N0} lines | Suppliers: {Suppliers.Count:N0}";
+            LoadReport = $"Data synthesized in {sw.ElapsedMilliseconds} ms | Rate card: {RateCard.Count:N0} lines";
             _loaded = true;
         }
     }
 
     /// <summary>
-    /// The rate card: for every destination, every supplier's services in every season. Supplier names are built from the
-    /// destination's city (Hotel Lisbon Central, Kyoto Walks); the rates move with the region and the season; the margin
-    /// depends on the category. Every seventeenth line is not bookable.
+    /// Rate card: lines cycle through destinations and categories; supplier, service and season drawn at random (seeded).
+    /// Supplier names from the city (Hotel Lisbon Central, Kyoto Walks) plus a few operator-wide names; rates move with region
+    /// and season; margin by category. Every 17th line is not bookable.
     /// </summary>
     private static List<RateCardItem> SynthesizeRateCard(int count)
     {
         // category → suppliers (a {0} placeholder takes the city) → services (description, unit, low rate, high rate)
-        var catalogue = new (string Category, int Margin, (string Supplier, (string Desc, string Unit, int Low, int High)[] Services)[] Suppliers)[]
+        var catalog = new (string Category, int Margin, (string Supplier, (string Desc, string Unit, int Low, int High)[] Services)[] Suppliers)[]
         {
             ("Transport", 10, new[]
             {
-                ("Meridian Airways", new[] { ("Return flights, economy", "pax", 380, 620), ("Return flights, premium economy", "pax", 900, 1500), ("Checked baggage, 23 kg", "pax", 40, 60) }),
+                ("Overhead Bin Airways", new[] { ("Return flights, economy", "pax", 380, 620), ("Return flights, premium economy", "pax", 900, 1500), ("Checked baggage, 23 kg", "pax", 40, 60) }),
                 ("{0} Airport Transfers", new[] { ("Airport to hotel, private car", "trip", 45, 90), ("Hotel to airport, private car", "trip", 45, 90), ("Shared shuttle", "pax", 18, 30) }),
-                ("{0} Rail & Coach", new[] { ("Day-trip coach with driver", "day", 120, 260), ("Regional rail pass, 3 days", "pax", 90, 180), ("Car hire, compact", "day", 35, 70) }),
+                ("{0} Rail & Bus", new[] { ("Day-trip bus with driver", "day", 120, 260), ("Regional rail pass, 3 days", "pax", 90, 180), ("Car rental, compact", "day", 35, 70) }),
             }),
             ("Accommodation", 15, new[]
             {
@@ -67,11 +62,11 @@ public sealed class BenchDataStore
                 ("{0} Walks", new[] { ("Old town walking tour", "pax", 25, 45), ("Evening food tour", "pax", 65, 110) }),
                 ("{0} Day Tours", new[] { ("Full-day excursion with lunch", "pax", 80, 160), ("Entrance tickets", "pax", 18, 40), ("Sunset boat trip", "pax", 45, 95) }),
                 ("Taste of {0}", new[] { ("Cooking class with market visit", "pax", 70, 120), ("Wine tasting with transfer", "pax", 60, 120) }),
-                ("{0} Adventures", new[] { ("Guided hike, half day", "pax", 40, 80), ("Kayak hire with guide", "pax", 55, 95) }),
+                ("{0} Adventures", new[] { ("Guided hike, half day", "pax", 40, 80), ("Kayak rental with guide", "pax", 55, 95) }),
             }),
             ("Services", 12, new[]
             {
-                ("Guardian Travel Cover", new[] { ("Travel insurance, comprehensive", "pax", 38, 75) }),
+                ("Rainy Day Travel Cover", new[] { ("Travel insurance, comprehensive", "pax", 38, 75) }),
                 ("{0} Guide Co-op", new[] { ("Private guide, full day", "day", 180, 320), ("Airport meet and greet", "pax", 25, 45) }),
                 ("Razor Sharp Getaways, head office", new[] { ("Booking fee", "booking", 45, 60), ("Documents and delivery", "booking", 12, 25), ("Restaurant reservations", "booking", 10, 20) }),
             }),
@@ -83,7 +78,7 @@ public sealed class BenchDataStore
         for (var i = 1; i <= count; i++)
         {
             var (city, region, _) = TravelData.Destinations[i % TravelData.Destinations.Length];
-            var cat = catalogue[(i / TravelData.Destinations.Length) % catalogue.Length];
+            var cat = catalog[(i / TravelData.Destinations.Length) % catalog.Length];
             var sup = cat.Suppliers[random.Next(cat.Suppliers.Length)];
             var svc = sup.Services[random.Next(sup.Services.Length)];
             var season = TravelData.Seasons[random.Next(TravelData.Seasons.Length)];
@@ -92,7 +87,7 @@ public sealed class BenchDataStore
                 "East Asia" => 1.15m, "Southern Africa" => 1.1m, "North Africa" => 0.85m, "Northern Europe" => 1.4m,
                 "North America" => 1.3m, "Oceania" => 1.35m, "South America" => 1.05m, _ => 1.0m
             };
-            var seasonFactor = season switch { "Summer" => 1.25m, "Autumn" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
+            var seasonFactor = season switch { "Summer" => 1.25m, "Fall" => 1.05m, "Winter" => 0.85m, _ => 1.0m };
             var rate = Math.Round(random.Next(svc.Low * 100, svc.High * 100 + 1) / 100m * regionFactor * seasonFactor, 2);
 
             list.Add(new RateCardItem
@@ -114,79 +109,6 @@ public sealed class BenchDataStore
         return list;
     }
 
-    /// <summary>
-    /// The supplier list: every destination's hotels, transfer companies, tour operators and services, named from the city
-    /// (Hotel Lisbon Central, Kyoto Walks) with a few operator-wide names. Deterministic; about a third have no contract yet.
-    /// </summary>
-    private static List<SupplierRecord> SynthesizeSuppliers(int count)
-    {
-        var patterns = new (string Name, string Category)[]
-        {
-            ("Hotel {0} Central", "Accommodation"), ("{0} Boutique Stays", "Accommodation"), ("{0} Apartments", "Accommodation"), ("{0} Villas", "Accommodation"),
-            ("{0} Airport Transfers", "Transport"), ("{0} Rail & Coach", "Transport"), ("{0} Car Hire", "Transport"),
-            ("{0} Walks", "Experiences"), ("{0} Day Tours", "Experiences"), ("Taste of {0}", "Experiences"), ("{0} Adventures", "Experiences"),
-            ("{0} Harbour Cruises", "Experiences"), ("{0} Bike Tours", "Experiences"), ("{0} Cooking School", "Experiences"),
-            ("{0} Guide Co-op", "Services"), ("{0} Concierge", "Services"), ("{0} Spa Retreat", "Services"),
-        };
-        var streets = new[] { "Harbour Road", "Market Street", "Station Square", "Old Town Lane", "Cathedral Close", "Riverside Walk", "Hill Road", "Garden Street" };
-        var random = new Random(7);
-        var list = new List<SupplierRecord>(count);
-        for (var i = 0; i < count; i++)
-        {
-            var (city, _, country) = TravelData.Destinations[i % TravelData.Destinations.Length];
-            var pattern = patterns[(i / TravelData.Destinations.Length) % patterns.Length];
-            var slug = string.Format(pattern.Name, city).ToLowerInvariant().Replace(" & ", "-").Replace(' ', '-');
-            list.Add(new SupplierRecord
-            {
-                Code = $"SUP-{i + 1:D3}",
-                Name = string.Format(pattern.Name, city),
-                Category = pattern.Category,
-                Address = $"{random.Next(2, 180)} {streets[random.Next(streets.Length)]}",
-                City = city,
-                Country = country,
-                PostalCode = $"{random.Next(1000, 9999)}-{random.Next(100, 999)}",
-                Phone = $"+{random.Next(20, 99)} {random.Next(10, 99)} {random.Next(100, 999)} {random.Next(1000, 9999)}",
-                Email = $"bookings@{slug}.example",
-                Contracted = i % 3 != 2,
-                InsuranceOnFile = i % 4 != 3,
-                OnlineBooking = i % 2 == 0,
-                Active = i % 23 != 22
-            });
-        }
-        return list;
-    }
-
-    /// <summary>One or two contacts per supplier: reservations first, then accounts for every other supplier.</summary>
-    private static List<SupplierContactRecord> SynthesizeSupplierContacts(IReadOnlyList<SupplierRecord> suppliers)
-    {
-        string[] firstNames = ["Ana", "Bruno", "Chiara", "Daniel", "Elif", "Farid", "Greta", "Hiro", "Ines", "Jonas", "Keiko", "Luis", "Mai", "Nadia", "Omar", "Paula", "Quang", "Rosa", "Sven", "Thandi"];
-        string[] lastNames = ["Almeida", "Bianchi", "Costa", "Dubois", "Eriksen", "Fujimoto", "Gomez", "Haddad", "Ivanova", "Jensen", "Khan", "Lund", "Mbeki", "Nakamura", "Okafor", "Pereira", "Quinn", "Rossi", "Santos", "Tran"];
-        var list = new List<SupplierContactRecord>();
-        var id = 1;
-        for (var i = 0; i < suppliers.Count; i++)
-        {
-            var s = suppliers[i];
-            var domain = s.Email[(s.Email.IndexOf('@') + 1)..];
-            var count = i % 2 == 0 ? 2 : 1;
-            for (var k = 0; k < count; k++)
-            {
-                var first = firstNames[(i * 3 + k * 7) % firstNames.Length];
-                var last = lastNames[(i * 5 + k * 11) % lastNames.Length];
-                list.Add(new SupplierContactRecord
-                {
-                    ContactID = id++,
-                    SupplierCode = s.Code,
-                    DisplayName = $"{first} {last}",
-                    Role = k == 0 ? "Reservations" : "Accounts",
-                    Phone = s.Phone,
-                    Email = $"{first.ToLowerInvariant()}.{last.ToLowerInvariant()}@{domain}",
-                    Active = (i + k) % 9 != 8
-                });
-            }
-        }
-        return list;
-    }
-
     // ══════════════════════════════════════════════════════════════════════
     // ── AG GRID SHOWCASE DATA GENERATORS ──────────────────────────────────
     // ══════════════════════════════════════════════════════════════════════
@@ -196,28 +118,27 @@ public sealed class BenchDataStore
         var rand = new Random(101);
         var assets = new (string Ticker, string Name, string Instrument, decimal Price, int Qty)[]
         {
-            ("AAPL", "Apple Inc.", "Stock", 232.50m, 150),
-            ("MSFT", "Microsoft Corp.", "Stock", 448.20m, 120),
-            ("NVDA", "NVIDIA Corp.", "Stock", 128.40m, 400),
-            ("GOOGL", "Alphabet Inc.", "Stock", 176.90m, 200),
-            ("AMZN", "Amazon.com Inc.", "Stock", 185.30m, 250),
-            ("META", "Meta Platforms Inc.", "Stock", 512.10m, 100),
-            ("TSLA", "Tesla Inc.", "Stock", 218.70m, 180),
-            ("BTC-USD", "Bitcoin USD", "Crypto", 61450.00m, 4),
-            ("ETH-USD", "Ethereum USD", "Crypto", 2740.00m, 25),
-            ("SOL-USD", "Solana USD", "Crypto", 145.20m, 120),
+            ("RSGW", "Razor Sharp Getaways", "Stock", 48.20m, 400),
+            ("BCAIR", "Buttercup Airways", "Stock", 23.75m, 600),
+            ("PLUH", "Plum & Underhill Hotels", "Stock", 112.40m, 150),
+            ("PWRL", "Pennywhistle Rail", "Stock", 64.10m, 250),
+            ("CRMP", "Crumpet Cruises", "Stock", 38.90m, 300),
+            ("TDLY", "Tiddlywink Travel Tech", "Stock", 215.60m, 90),
+            ("MGLD", "Marigold Resorts", "Stock", 87.30m, 200),
+            ("HBNB", "Hobnob Hostels", "Stock", 12.85m, 900),
+            ("QFJT", "Quickfoot Jets", "Stock", 156.20m, 120),
+            ("LMPL", "Lamplighter Luggage", "Stock", 41.50m, 260),
+            ("FZWK", "Fizzwick Ferries", "Stock", 27.40m, 500),
+            ("TCUP-USD", "Teacup Coin", "Crypto", 61450.00m, 4),
+            ("MBEAM-USD", "Moonbeam Token", "Crypto", 2740.00m, 25),
+            ("PMPK-USD", "Pumpernickel Coin", "Crypto", 145.20m, 120),
             ("US10Y", "U.S. 10-Year Treasury Note", "Bond", 99.85m, 1000),
             ("CAD30Y", "Canada 30-Year Gov Bond", "Bond", 96.40m, 600),
             ("FRN2027", "France Gov Bond 2027", "Bond", 102.15m, 500),
-            ("SPY", "SPDR S&P 500 ETF Trust", "ETF", 552.30m, 80),
-            ("QQQ", "Invesco QQQ Trust", "ETF", 478.60m, 90),
-            ("GLD", "SPDR Gold Shares ETF", "ETF", 231.80m, 110),
-            ("MUB", "iShares National Muni Bond", "ETF", 108.40m, 300),
-            ("JPM", "JPMorgan Chase & Co.", "Stock", 214.60m, 140),
-            ("V", "Visa Inc.", "Stock", 278.30m, 110),
-            ("WMT", "Walmart Inc.", "Stock", 74.50m, 350),
-            ("DIS", "Walt Disney Co.", "Stock", 91.20m, 220),
-            ("NFLX", "Netflix Inc.", "Stock", 685.40m, 60)
+            ("HGTE", "Hedgerow Global Travel ETF", "ETF", 552.30m, 80),
+            ("LKLI", "Larkspur Leisure Index", "ETF", 478.60m, 90),
+            ("GSBG", "Gooseberry Gold Trust", "ETF", 231.80m, 110),
+            ("TMBF", "Thistlewood Muni Bond Fund", "ETF", 108.40m, 300)
         };
 
         var list = new List<TickerRow>();

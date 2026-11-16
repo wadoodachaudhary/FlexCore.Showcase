@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Package Cost Sheet: a tour operator's cost breakdown for one package in one departure season.
-  Four group levels (region, package, cost group, supplier), a sum in every group footer and a
-  grand total in the report footer. Written in the Crystal XML export shape that
-  CrystalXmlReportLoader reads, with a single table and a handful of fields.
-
-  Backing data comes from FlexCore.Showcase.Services.ShowcaseReportDataExecutor, which synthesises
-  the rows from FlexCore.Showcase.Data.TravelData; no database is involved.
+  Package Cost Sheet: costs for one package in one departure season, in the Crystal XML export shape CrystalXmlReportLoader reads.
+  Rows come from Data/PackageCostSheet.cs via the app's IReportDataExecutor (Data/GetawaysReportServices.cs), not a database;
+  the Package pick list from Data/TripPackages.cs.
 -->
 <Report Name="" FileName="Package Cost Sheet.rpt" HasSavedData="False">
-  <Summaryinfo KeywordsinReport="" ReportAuthor="FlexCore Showcase" ReportComments="Showcase report with synthesised data" ReportSubject="" ReportTitle="Package Cost Sheet" />
+  <Summaryinfo KeywordsinReport="" ReportAuthor="Razor Sharp Getaways" ReportComments="Cost sheet of one package in one season" ReportSubject="" ReportTitle="Package Cost Sheet" />
   <ReportOptions EnableSaveDataWithReport="False" EnableSavePreviewPicture="True" EnableSaveSummariesWithReport="True" EnableUseDummyData="False" initialDataContext="" initialReportPartName="" />
   <PrintOptions PageContentHeight="11520" PageContentWidth="15120" PaperOrientation="Landscape" PaperSize="PaperLetter" PaperSource="FormSource" PrinterDuplex="Default" PrinterName="">
     <PageMargins bottomMargin="360" leftMargin="360" rightMargin="360" topMargin="360" />
@@ -73,6 +69,12 @@
           <ParameterDefaultValue Description="Hoi An Lantern Trail" Value="Hoi An Lantern Trail" />
           <ParameterDefaultValue Description="Cape Winelands" Value="Cape Winelands" />
           <ParameterDefaultValue Description="Marrakech to the Dunes" Value="Marrakech to the Dunes" />
+          <ParameterDefaultValue Description="Santorini Blue Domes" Value="Santorini Blue Domes" />
+          <ParameterDefaultValue Description="Reykjavik Northern Lights" Value="Reykjavik Northern Lights" />
+          <ParameterDefaultValue Description="Vancouver and the Islands" Value="Vancouver and the Islands" />
+          <ParameterDefaultValue Description="Banff Mountain Week" Value="Banff Mountain Week" />
+          <ParameterDefaultValue Description="Queenstown Adventure" Value="Queenstown Adventure" />
+          <ParameterDefaultValue Description="Patagonia Trek" Value="Patagonia Trek" />
         </ParameterDefaultValues>
         <ParameterInitialValues />
         <ParameterCurrentValues>
@@ -83,7 +85,7 @@
         <ParameterDefaultValues>
           <ParameterDefaultValue Description="Spring" Value="Spring" />
           <ParameterDefaultValue Description="Summer" Value="Summer" />
-          <ParameterDefaultValue Description="Autumn" Value="Autumn" />
+          <ParameterDefaultValue Description="Fall" Value="Fall" />
           <ParameterDefaultValue Description="Winter" Value="Winter" />
         </ParameterDefaultValues>
         <ParameterInitialValues />

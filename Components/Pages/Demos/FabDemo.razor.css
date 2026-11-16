@@ -2,14 +2,35 @@
 .note { font-size: 13.5px; color: #475569; margin: -8px 0 14px; }
 .note code { font-size: 12.5px; background: #f1f5f9; padding: 1px 4px; border-radius: 4px; color: #334155; }
 
-/* Stage: pins the fixed-position control inside the card. The host goes static so the backdrop's
-   containing block is the stage; isolation keeps the control's z-indexes under the site nav. */
+/* Stage: pins the fixed-position control in the card. A static host keeps the backdrop in the stage;
+   isolation keeps the control under the site nav. */
 .fab-stage { position: relative; isolation: isolate; height: 320px; border-radius: 8px; background: #f1f5f9; overflow: hidden;
              display: flex; justify-content: flex-end; align-items: flex-end; padding: 1rem; box-sizing: border-box; }
-.fab-stage.short { height: 240px; }
+.fab-stage.short { height: 300px; }   /* tall enough for three actions and the note above them */
 .fab-stage ::deep .fx-fab-host { position: static; }
 .fab-stage ::deep .fx-fab-backdrop { position: absolute; }
 
-.stage-lines { position: absolute; inset: 0; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
-.stage-lines span { display: block; height: 10px; border-radius: 5px; background: #e2e8f0; }
-.fab-note { background: #fff; color: #334155; font-size: 12px; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,.15); }
+/* The stage reads as an app screen: a light dotted canvas in a bordered frame, with the result line as its footer band */
+.fab-stage { border: 1px solid #e2e8f0; border-radius: 10px 10px 0 0; background: #f8fafc radial-gradient(#dbe3ee 1px, transparent 1.2px) 0 0 / 18px 18px; }
+.fab-stage + .result { margin-top: 0; padding: 10px 16px; border: 1px solid #e2e8f0; border-top: 0; border-radius: 0 0 10px 10px; background: #fff; }
+/* the trigger glyph at 22px, the size of the built-in plus; on the help desk stage the headset skips the control's 45-degree turn */
+.fab-stage ::deep .fx-fab-trigger-icon > .bi { font-size: 22px; line-height: 1; }
+.fab-stage.short ::deep .fx-fab-open .fx-fab-trigger-icon { transform: none; }
+/* the trigger takes the site's button indigo, as the buttons beside it do; this stands in for a color variable
+   FabMenuControl does not have yet (it draws the trigger in a fixed blue) */
+.fab-stage ::deep .fx-fab-trigger { background-color: var(--brand-button, #4f46e5); }
+.fab-stage ::deep .fx-fab-trigger:hover:not(:disabled) { background-color: var(--brand-button-hover, #4338ca); }
+
+/* The list under the button: a header bar, then one row per request with an icon for its kind */
+.board-head { position: absolute; inset: 0 0 auto; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-bottom: 1px solid #e2e8f0; background: #fff; font-size: 14px; font-weight: 600; color: #0f172a; }
+.board-head > .bi { color: var(--brand-button, #4f46e5); }
+.board { position: absolute; inset: 44px 0 0; margin: 0; padding: 12px 14px; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.board li { display: flex; align-items: center; gap: 10px; padding: 7px 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; color: #0f172a;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); }
+.board li > .bi { color: #64748b; }
+.board .subject { flex: 1; min-width: 0; }
+.board .ref { font-size: 12px; color: #64748b; font-variant-numeric: tabular-nums; }   /* ticket number on an open ticket */
+
+/* rendered inside the control's fan via ChildContent */
+.fab-note { display: flex; align-items: center; gap: 8px; background: #fff; color: #334155; font-size: 12px; padding: 6px 10px; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16); }
+.fab-note .dot { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; box-shadow: 0 0 0 3px #dcfce7; }

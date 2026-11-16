@@ -8,11 +8,9 @@ public sealed record NavItem(string Text, string? Href);
 public sealed record NavGroup(string Label, string Icon, string? Href, string AllLabel, NavItem[] Items);
 
 /// <summary>
-/// The single source of truth for site navigation (2026-10-06). The menubar, phone drawer,
-/// footer and the Grid overview's link list all read this, so they cannot drift apart.
-/// Rules: labels say what the page shows; no internal application names; a page appears here
-/// only if it exists. Phase 2 pages (AI prompt,
-/// /performance, /migration) are added when they render.
+/// Single source of truth for site navigation (2026-10-06): menubar, phone drawer, footer and the Grid overview's link list.
+/// Rules: labels say what the page shows; no internal application names; only pages that exist. Phase 2 pages (/performance,
+/// /migration) are added when they render.
 /// </summary>
 public static class SiteNav
 {
@@ -25,6 +23,7 @@ public static class SiteNav
             new("Split button", "demo/split-button"),
             new("Toggle buttons", "demo/toggle-buttons"),
             new("Floating action button", "demo/fab"),
+            new("Chips", "demo/chips"),                        // 2026-11-14: ChipListControl and ChipControl
             new("Dialogs", "demo/dialog"),
             new("Toasts", "demo/notifications"),
             new("Sliders", "demo/sliders"),
@@ -42,6 +41,10 @@ public static class SiteNav
             new("Page navigation", "demo/page-navigation"),               // PageControl: keyboard navigation graph (2026-10-20)
             new("Dock manager", "demo/dock-manager"),           // own page since 2026-10-19; was the tour's Docking tab
             new("Tabs & accordion", "demo/tabs-accordion"),
+            new("Menu bar", "demo/menu-bar"),                   // 2026-11-14: MenuBarControl family
+            new("Status bar", "demo/status-bar"),               // 2026-11-14: StatusBarControl
+            new("Toolbar", "demo/toolbar"),                     // 2026-11-14: ToolbarControl family and AppBarControl
+            new("Ribbon", "demo/ribbon"),                       // own page since 2026-10-29; was the home window's Front Desk tab
             new("Tree view", "demo/tree/treeview-explorer"),
             new("Display", null),
             new("Cards", "demo/cards"),
@@ -84,7 +87,6 @@ public static class SiteNav
         })),
         new("Reports", "bi-file-earmark-spreadsheet", "demo/reports/package-costs", "Report writer", AtoZ(new NavItem[]
         {
-            new("Report writer (Model Costs)", "demo/reports/model-costs"),
             new("Crystal Reports bench", "demo/reports/crystal-bench"),
             new("PDF viewer", "demo/pdf-viewer"),                  // own page since 2026-10-19; was a Control tour tab
         })),
@@ -98,9 +100,8 @@ public static class SiteNav
     };
 
     /// <summary>
-    /// Menu order (Baaria, 2026-10-26): the group's overview link (<see cref="NavGroup.AllLabel"/>) stays first, then the
-    /// sub-headings A to Z, and the items under each heading A to Z. Items listed before the first heading come first, A to Z.
-    /// The arrays above may be written in any order.
+    /// Menu order (2026-10-26): the group's overview link (<see cref="NavGroup.AllLabel"/>) first, then sub-headings A to Z, each
+    /// with its items A to Z. Items before the first heading come first, A to Z. The arrays above may be in any order.
     /// </summary>
     private static NavItem[] AtoZ(NavItem[] items)
     {

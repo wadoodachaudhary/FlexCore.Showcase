@@ -9,37 +9,23 @@
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Services
 @using FlexCore.Showcase.Components.Shared
-@* 2026-10-23 (developer meeting, point 2): the finance ticker scenario from Four scenarios, on its own page. Four scenarios was retired
-   the same day (SC-338) and both of its addresses stay as aliases here. The grid is bound to one
-   list that a timer changes in place; the page calls StateHasChanged after each tick and the grid re-renders its window. What is
-   measured: ticks applied, rows changed per tick, and the server's render time per tick (Stopwatch from the tick to the component's
-   next OnAfterRender), kept as a running average. Facts checked against GridColumn.cs (Template is RenderFragment<object>) and
-   GridControl.razor.cs. Data: BenchDataStore.GetFinanceTickers (seeded, not live market data; the page says so). *@
+@* 2026-10-23: finance ticker from Four scenarios, now retired (SC-338; its routes alias here). Render time per tick = tick ->
+   next OnAfterRender, averaged. Facts from GridColumn.cs, GridControl.razor.cs. Data: BenchDataStore.GetFinanceTickers (seeded). *@
 
-<PageTitle>Live updates — FlexCore Showcase</PageTitle>
+<PageTitle>Real-Time Blazor Grid with Live Updates — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Live updates" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="A grid whose rows change several times a second: templated cells, sorting while it moves, and the cost of each tick measured."
+                   Tagline="Show live prices in a grid that users can still sort while rows change."
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridColumn.cs">
     <Overview>
         <p>
-            Nothing special is needed to bind a grid to data that changes: keep the same list, change the rows in place, and call
-            <code>StateHasChanged</code>. The grid renders only the rows in its window, so each pass re-renders those rows and the
-            cells Blazor finds changed. A column's <code>Template</code> is a <code>RenderFragment</code> over the row object, which is
-            how the price, change, trend and profit cells below draw colour, arrows and a small SVG from the row's values; sorting by
-            any column keeps working while rows move.
-        </p>
-        <p>
-            The simulated market below is seeded data, not a live feed: every tick changes three to seven instruments by up to 1.5
-            percent. Two numbers are measured on the server with <code>Stopwatch</code>: how long the tick's render took, from the tick
-            to the component's next <code>OnAfterRender</code>, and the running average over the last twenty ticks. Browser paint is
-            not included.
+            The Blazor <code>GridControl</code> shows live data, such as prices changing several times a second, and users can sort it while the rows move. Use it for tickers, dashboards and order queues: change the bound rows in place and call <code>StateHasChanged</code>, and only the rows in view and the cells that changed re-render. A column <code>Template</code> draws color, arrows and SVG sparklines from each row's values.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="ticker" Title="A portfolio that moves" RazorCode="@Code.Ticker" CSharpCode="@Code.TickerCs">
-            <Description><p>Start the stream and pick an interval; the status line counts ticks and rows changed and reports the render time per tick. Sort by Change while it runs to watch rows re-order, or click Tick once to step. Reset puts the prices back. The last movement tints the price cell up or down.</p></Description>
+            <Description><p>Start the stream, sort by Change while it runs, or click Tick to step once; the status line reports rows changed and the server render time per tick.</p></Description>
             <Controls>
                 <ButtonControl CssClass="@(_streaming ? "btn-sm btn-danger" : "btn-sm btn-success")" OnClick="ToggleStreaming">@(_streaming ? "Pause" : "Start")</ButtonControl>
                 <ButtonGroupControl Items="_intervalItems" Values="@(new[] { _intervalMs.ToString() })" ValuesChanged="PickInterval" Selection="ChoiceSelectionMode.Single" AriaLabel="Tick interval" />
@@ -89,7 +75,7 @@
                         </GridColumn>
                         <GridColumn Field="@nameof(TickerRow.Quantity)" HeaderText="Holdings" Width="85px" Type="ColumnType.Number" Format="N0" TextAlign="TextAlign.Right" />
                         <GridColumn Field="@nameof(TickerRow.TotalValue)" HeaderText="Market value" Width="120px" Type="ColumnType.Number" Format="C2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(TickerRow.UnrealizedPL)" HeaderText="Unrealised P&amp;L" Width="125px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
+                        <GridColumn Field="@nameof(TickerRow.UnrealizedPL)" HeaderText="Unrealized P&amp;L" Width="125px" Type="ColumnType.Number" TextAlign="TextAlign.Right">
                             <Template>
                                 @{ var row = (TickerRow)context; }
                                 <span class="@(row.UnrealizedPL >= 0 ? "gain" : "loss")">@(row.UnrealizedPL > 0 ? "+" : "")@row.UnrealizedPL.ToString("C2")</span>
@@ -242,7 +228,7 @@
         {
             new("Field", "Property the column reads, and sorts by.", "string"),
             new("HeaderText", "Header caption.", "string?"),
-            new("Template", "Markup for the cell, given the row object as context; used here for the price tint, the change arrows, the trend line and the profit colour.", "RenderFragment&lt;object&gt;?"),
+            new("Template", "Markup for the cell, given the row object as context; used here for the price tint, the change arrows, the trend line and the profit color.", "RenderFragment&lt;object&gt;?"),
             new("Type", "Text, Number, Date or Boolean: decides editor, alignment default and sorting.", "ColumnType"),
             new("Format", "Format string for the cell text when there is no template.", "string?"),
             new("TextAlign", "Left, Right or Center; the type's default when null.", "TextAlign?", "null"),
@@ -301,7 +287,7 @@
         </GridColumn>
         <GridColumn Field=""@nameof(TickerRow.Quantity)"" HeaderText=""Holdings"" Width=""85px"" Type=""ColumnType.Number"" Format=""N0"" TextAlign=""TextAlign.Right"" />
         <GridColumn Field=""@nameof(TickerRow.TotalValue)"" HeaderText=""Market value"" Width=""120px"" Type=""ColumnType.Number"" Format=""C2"" TextAlign=""TextAlign.Right"" />
-        <GridColumn Field=""@nameof(TickerRow.UnrealizedPL)"" HeaderText=""Unrealised P&amp;L"" Width=""125px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
+        <GridColumn Field=""@nameof(TickerRow.UnrealizedPL)"" HeaderText=""Unrealized P&amp;L"" Width=""125px"" Type=""ColumnType.Number"" TextAlign=""TextAlign.Right"">
             <Template>
                 @{ var row = (TickerRow)context; }
                 <span class=""@(row.UnrealizedPL >= 0 ? ""gain"" : ""loss"")"">@(row.UnrealizedPL > 0 ? ""+"" : """")@row.UnrealizedPL.ToString(""C2"")</span>

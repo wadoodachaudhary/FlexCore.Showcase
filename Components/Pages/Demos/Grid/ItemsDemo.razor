@@ -5,42 +5,28 @@
 @using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (one-example-plus-code push, tracker section 6). Same grid, data and aggregates, with
-   three corrections: ShowGroupCount dropped because the Count aggregate's caption template already prints "(n items)", so every
-   caption showed the count twice; the internal catalog name left the intro; "default sorts" left the intro because the page sets
-   none. Two library behaviours shape the copy (logged in SC-253): a group footer prints only the first aggregate defined for a
-   column, so the Count footer template never shows; and the caption aggregates' pill styling is scoped CSS that never matches the
-   spans built in GridControl.razor.cs, so they run together, which the page CSS works around through the .catalog wrapper.
-   2026-10-18: vocabulary written from GridControl.razor.cs (grouping parameters, AddGroup/RemoveGroup/ClearAllGroupsAsync, the public
-   group methods, ComputeAggregates, FormatAggregateValue, the caption and footer renderers), GridControl.AdvancedFeatures.cs,
-   GridColumn.cs, GridModels.cs (AggregateRow, AggregateColumn, GroupEventArgs), GridControlEvents.cs and GridEnums.cs; rows checked with
-   scratchpad/vocabcheck.py. Declared-but-unused members are named as such; library notes in SC-253.
-   2026-10-20 (meeting point 2): the unlisted Assembly and Vendor prices pages fold in here. Vendor prices repeated this page's
-   configuration (grouped by one column, average and count in captions and footers) on other data, so it is gone; Assembly becomes
-   the second example, because it shows the one thing the catalog does not: sums in the grid footer with no initial grouping. Both
-   old routes now open this page. *@
-@* 2026-10-25 (Baaria, SC-344): both examples run on the tour operator's data in Data/DemoData.cs (rate card lines, package cost
-   lines) instead of the earlier assembly and item catalog. The example anchors are now rate-card and package-costs;
-   nothing linked to the old ones. The .catalog wrapper class stays because the page CSS keys on it. *@
+@* 2026-10-17: on FeatureDemoLayout; no ShowGroupCount (the Count caption prints "(n items)"). SC-253: a group footer shows only
+   a column's first aggregate (the Count footer never shows); caption pill CSS misses GridControl's spans (.catalog works around it).
+   2026-10-18: vocabulary from GridControl.razor.cs, .AdvancedFeatures.cs, GridColumn.cs, GridModels.cs, GridControlEvents.cs,
+   GridEnums.cs; unused members marked (SC-253).
+   2026-10-20: Assembly and Vendor prices pages merged in (routes alias here); Vendor prices dropped (same setup), Assembly is
+   example 2 (footer sums). *@
+@* 2026-10-25 (SC-344): examples on Data/DemoData.cs; anchors rate-card, package-costs. .catalog stays: the page CSS keys on it. *@
 
-<PageTitle>Grouping &amp; totals — FlexCore Showcase</PageTitle>
+<PageTitle>Grouping and Aggregates in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Grouping &amp; totals" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Group rows by a column, with averages, counts and sums in the group captions, group footers and the grid footer, on a tour operator's rate card and the cost lines of one of its packages."
+                   Tagline="Group rows by any column and show sums, counts and averages per group."
                    SourcePath="Grid/GridControl.razor.cs;Grid/GridModels.cs;Grid/GridControlEvents.cs;Grid/GridEnums.cs">
     <Overview>
         <p>
-            <code>GroupColumns</code> opens the grid already grouped; with <code>AllowGrouping</code> the user regroups by dragging a header
-            into the bar above the grid. <code>AggregateRows</code> lists what to compute per group: each <code>AggregateColumn</code> names a
-            field, an <code>AggregateType</code> and a format, and its <code>GroupCaptionTemplate</code> and <code>GroupFooterTemplate</code>
-            decide where the value is printed and how; <code>ShowInFooter</code> prints the same values once more under the whole grid.
-            <code>ShowSearchBar</code> adds a search box to the grid toolbar.
+            Grouping lets users of a Blazor <code>GridControl</code> split a long list into groups by any column, with sums, counts and averages per group. Use it on rate cards, cost lines or orders where the question is how much per supplier or per season; users regroup by dragging a column header into the group bar. Turn on <code>AllowGrouping</code>, set <code>GroupColumns</code> to open the grid grouped, and list caption, group-footer and grid-footer totals in <code>AggregateRows</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="rate-card" Title="Rate card grouped by category" RazorCode="@Code.RateCard" CSharpCode="@Code.RateCardCs">
-            <Description><p>The operator's rate card: the services it buys at each destination it sells, from flights and transfers to rooms, tours, insurance and its own booking fees, each with the supplier, the unit the rate is quoted per, the rate and a Bookable flag. It opens grouped by <strong>Category</strong>; drag <strong>Destination</strong> into the bar to regroup. Each caption shows the average rate and the line count; each footer repeats the average. Sort <strong>Rate</strong> descending for the most expensive services, filter <strong>Bookable</strong> for the lines that cannot be sold at present, or type in the search box.</p></Description>
+            <Description><p>Drag Destination into the group bar to regroup a rate card that opens grouped by Category; each caption shows the average rate and line count.</p></Description>
             <Demo>
                 <div class="catalog">
                 <GridControl TValue="RateCardLine"
@@ -73,7 +59,7 @@
             </Demo>
         </DemoExample>
         <DemoExample Id="package-costs" Title="Package cost lines with sums in the footer, grouped on demand" RazorCode="@Code.PackageCosts" CSharpCode="@Code.PackageCostsCs">
-            <Description><p>Sixty cost lines for the Lisbon Explorer package: the fifteen services the operator pays its suppliers for, costed once per departure season for two travellers and seven nights, not grouped to start with. The grid footer sums <code>Qty</code> and <code>Total</code>; drag <strong>Cost group</strong>, <strong>Supplier</strong> or <strong>Season</strong> into the bar above the grid and every group gets the same sums in its footer, while the grid footer keeps the overall total. <strong>Rate basis</strong> is Contract where the rate comes from the supplier contract and only moves with the season, and Spot where it is bought afresh for each departure. <code>ShowInGroupFooter</code> and <code>ShowInFooter</code> are both on; there is no caption aggregate here.</p></Description>
+            <Description><p>Drag Cost group, Supplier or Season into the bar: every group gets Qty and Total sums in its footer while the grid footer keeps the overall total.</p></Description>
             <Demo>
                 <div class="catalog">
                 <GridControl TValue="PackageCostLine"
@@ -184,8 +170,7 @@
         }
     };
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed); each C# tab also carries its
-    // record from Data/DemoData.cs.
+    // Code tabs: generated verbatim copies of the Demo block and members above; each C# tab adds its record from Data/DemoData.cs.
     private static class Code
     {
         public const string PackageCosts = @"<div class=""catalog"">
@@ -302,7 +287,7 @@ public record RateCardLine(string Code, string Description, string Supplier, str
             new("GroupExpandIconStyle", "<code>PlusMinus</code> boxes or <code>Triangle</code> chevrons on the caption rows. The expand-icon template and glyph parameters override the preset.", "GroupExpandIconStyle", "GroupExpandIconStyle.PlusMinus"),
             new("GroupHeaderTextSelector", "Replaces the caption text. Receives the field, the key as text and the group's rows; the key itself, and so collapse state, is unchanged.", "Func&lt;string, string, IReadOnlyList&lt;TValue&gt;, string&gt;?", "null"),
             new("AggregateRows", "What to compute and where to print it; the two tables below.", "List&lt;AggregateRow&gt;?", "null"),
-            new("GroupedColumnColor / GroupItemTextColor / GroupTotalTextColor", "Optional CSS colours for the grouped values in caption rows and chips, the caption text, and the aggregate values. Empty inherits.", "string", "\"\""),
+            new("GroupedColumnColor / GroupItemTextColor / GroupTotalTextColor", "Optional CSS colors for the grouped values in caption rows and chips, the caption text, and the aggregate values. Empty inherits.", "string", "\"\""),
             new("ShowRowCountInFooter", "Prints the row count of the complete filtered result in the footer, not of the rendered window or page.", "bool", "false"),
             new("EnableGroupedRowWindowing", "Windows the rows of a grouped grid the way a flat grid is windowed. Off renders every row.", "bool", "true"),
             new("GroupFooterTemplate", "Declared, but <code>GridControl</code> never reads it.", "RenderFragment&lt;object&gt;?", "null"),
@@ -338,7 +323,7 @@ public record RateCardLine(string Code, string Description, string Supplier, str
         };
         public static readonly ApiRow[] Methods =
         {
-            new("GroupByColumnAsync(string field)", "Adds a group, with the events and the column's <code>AllowGrouping</code> honoured.", "Task"),
+            new("GroupByColumnAsync(string field)", "Adds a group, with the events and the column's <code>AllowGrouping</code> honored.", "Task"),
             new("UngroupColumnAsync(string field)", "Removes a group, with the events.", "Task"),
             new("ClearGroupingAsync()", "Removes every group without raising the events.", "Task"),
             new("ExpandAllGroupAsync()", "Expands every group and re-renders.", "Task"),

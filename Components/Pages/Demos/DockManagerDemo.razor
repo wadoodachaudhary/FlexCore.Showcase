@@ -4,62 +4,63 @@
 @using Fx.ControlKit.Docking
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-19: new page (Baaria approved the Control tour split; fifth page; the SC-032 idea of folding the dock manager into
-   Page layouts was dropped for a page of its own, the frame controls AppBar/Toolbar/GridLayout still go to Page layouts). The
-   tour's Docking tab moved here and was removed there. Documentation written from Docking/DockManagerControl.razor,
-   DockNodeView.razor, DockPanelActions.razor and DockModels.cs; rows checked with scratchpad/vocabcheck.py; behaviour sentences
-   read from OnParametersSet, PublishAsync, DockAsync, FloatAsync, UnpinAsync, CloseAsync, DockLayoutState.Validate and the two
-   child views. *@
+@* 2026-10-19: Control tour's Docking tab -> own page, not Page layouts (SC-032 moves only AppBar, Toolbar, GridLayout there). *@
 
-@* 2026-10-25 (SC-253 item 27): tab dragging does not start in the browser (DockNodeView.razor:15 renders draggable=""); the copy no longer
-   tells readers to drag and says so in the behaviour list. *@
+@* 2026-10-25 (SC-253 item 27): tab drag never starts (DockNodeView.razor:15 renders draggable=""); the copy notes this instead
+   of saying to drag.
+   2026-11-15: booking desk content; DockPanel table added from Docking/DockModels.cs; drag note re-checked (still draggable="",
+   DockNodeView.razor, FlexCore 0.2.50).
+   2026-11-15: example story moved to the Support desk theme.
+   2026-11-15: Reset layout refreshes the summary line (it kept the counts from before the reset); summary reworded so one group
+   does not read "1 groups"; the Razor tabs now include the Controls block, where the method calls are.
+   2026-11-16: independent review fixes.
+   2026-11-16: pre-deploy review fixes. *@
 
-<PageTitle>Dock manager — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Dock Manager — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Dock manager" Category="Components" CategoryHref="components" ControlName="DockManagerControl"
-                   Tagline="Tabbed panes the user can split, float, unpin and close, with the whole arrangement saved as one JSON document."
+                   Tagline="Let users split, float, unpin and close panes, and save the layout as JSON."
                    SourcePath="Docking/DockManagerControl.razor;Docking/DockNodeView.razor;Docking/DockPanelActions.razor;Docking/DockModels.cs">
     <Overview>
         <p>
-            <code>DockManagerControl</code> takes a list of <code>DockPanel</code>s, each a key, a title and a render fragment, and arranges them in
-            a tree of tab groups and two-pane splits. Each pane's Dock… menu moves it into any group as a tab, or beside that
-            group on its left, right, top or bottom. A pane can float as a non-modal window, unpin into a strip along the top
-            that opens as a drawer, or close into a "Closed panes" menu that brings it back. Splits are <code>SplitterControl</code>s and keep their
-            ratio. The arrangement is a <code>DockLayoutState</code>: the control reports it after every change, accepts one as its starting point, and
-            saves or restores it as JSON.
+            <code>DockManagerControl</code> is a Blazor dock manager: tabbed panes users can split, float, unpin and close, as in a desktop IDE. Use it for workspaces with several tools open at once, such as a ticket list, a conversation and a customer's details; the whole arrangement saves and restores as one JSON document you can store per user. Methods such as <code>FloatAsync</code> and <code>DockAsync</code> move panes from code.
         </p>
     </Overview>
 
     <Examples>
-        <DemoExample Id="workspace" Title="A four-pane workspace" RazorCode="@Code.Workspace" CSharpCode="@Code.WorkspaceCs">
-            <Description><p>Explorer on the left, Document and Output as tabs in the middle, Properties on the right, from a <code>State</code> built in code. Document cannot be closed and Output cannot float, so those buttons are missing on their action bars. Use Dock… to move a pane to another group or beside it, resize a split, float Properties, unpin Explorer and open it from the strip, close Output and bring it back from Closed panes. Save keeps the current layout as JSON, Restore applies it again, Reset hands the control a fresh starting state. The line below is fed by <code>StateChanged</code>.</p></Description>
+        <DemoExample Id="workspace" Title="A help desk workspace" RazorCode="@Code.Workspace" CSharpCode="@Code.WorkspaceCs">
+            <Description><p>Arrange the Loose Wire Help Desk workspace: use a pane's Dock… menu to move it, float Customer, unpin Tickets, close Notes and bring it back; Save and Restore round-trip the layout as JSON.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _json = _dock!.SaveLayout()">Save layout</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="() => _dock!.RestoreLayoutAsync(_json!)" Disabled="@(_json is null)">Restore layout</ButtonControl>
-                <ButtonControl CssClass="btn-sm" OnClick="() => _state = Workspace()">Reset layout</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick="() => { _state = Workspace(); _summary = Summarize(_state); }">Reset layout</ButtonControl>
             </Controls>
             <Demo>
-                <DockManagerControl @ref="_dock" Panels="@_panels" State="@_state" StateChanged="s => _summary = Summarize(s)" Height="460px" />
-                <p class="result">@_summary</p>
-                @if (_json is not null)
-                {
-                    <details class="json"><summary>Saved layout, @_json.Length characters of JSON</summary><pre>@_json</pre></details>
-                }
+                <div class="desk">
+                    <DockManagerControl @ref="_dock" Panels="@_panels" State="@_state" StateChanged="s => _summary = Summarize(s)" Height="460px" />
+                    <p class="result">@_summary</p>
+                    @if (_json is not null)
+                    {
+                        <details class="json"><summary>Saved layout, @_json.Length characters of JSON</summary><pre>@_json</pre></details>
+                    }
+                </div>
             </Demo>
         </DemoExample>
 
         <DemoExample Id="methods" Title="Driving it from code" RazorCode="@Code.Methods" CSharpCode="@Code.MethodsCs">
-            <Description><p>Three panes that start as one tab group, the default when no <code>State</code> is given. The buttons call the public methods: Float, Unpin, Close and a Dock that puts every pane back into the first group as a tab. Log is not closable, so closing it is ignored and the counts do not move. The group's id for <code>DockAsync</code> is read from the layout the control saves.</p></Description>
+            <Description><p>Ticket TKT-1043, Charged twice in October, is open in three panes. Use the buttons to float, unpin, close and re-dock them from code with <code>FloatAsync</code>, <code>UnpinAsync</code>, <code>CloseAsync</code> and <code>DockAsync</code>; Close Conversation does nothing, because that pane is not closable.</p></Description>
             <Controls>
-                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.FloatAsync("chart")'>Float Chart</ButtonControl>
-                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.UnpinAsync("log")'>Unpin Log</ButtonControl>
-                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.CloseAsync("notes")'>Close Notes</ButtonControl>
-                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.CloseAsync("log")'>Close Log</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.FloatAsync("reply")'>Float Reply</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.UnpinAsync("thread")'>Unpin Conversation</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.CloseAsync("calls")'>Close Call notes</ButtonControl>
+                <ButtonControl CssClass="btn-sm" OnClick='() => _tools!.CloseAsync("thread")'>Close Conversation</ButtonControl>
                 <ButtonControl CssClass="btn-sm" OnClick="DockAllAsync">Dock everything back</ButtonControl>
             </Controls>
             <Demo>
-                <DockManagerControl @ref="_tools" Panels="@_toolPanels" StateChanged="s => _toolSummary = Summarize(s)" Height="320px" />
-                <p class="result">@_toolSummary</p>
+                <div class="desk">
+                    <DockManagerControl @ref="_tools" Panels="@_toolPanels" StateChanged="s => _toolSummary = Summarize(s)" Height="320px" />
+                    <p class="result">@_toolSummary</p>
+                </div>
             </Demo>
         </DemoExample>
     </Examples>
@@ -68,6 +69,10 @@
         <DocSections>
             <DocSection Id="doc-dockmanagercontrol-parameters" Title="DockManagerControl parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
                 <ApiTable Kind="ApiKind.Parameters" Title="DockManagerControl parameters" Rows="Vocab.Params" />
+            </DocSection>
+            <DocSection Id="doc-dockpanel" Title="DockPanel" Count='@DocSection.Label(Vocab.Panel.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="DockPanel" Rows="Vocab.Panel" />
+                <p>Build one with <code>new(key, title, content, closable, floatable)</code>. The last two default to true, so set either one by name, as in <code>Closable: false</code>.</p>
             </DocSection>
             <DocSection Id="doc-dockmanagercontrol-events" Title="DockManagerControl events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
                 <ApiTable Kind="ApiKind.Events" Title="DockManagerControl events" Rows="Vocab.Events" />
@@ -106,8 +111,9 @@
                 <code>Validate</code> refuses a layout in which a panel key is unknown, missing or placed twice; a node that has both panels and
                 children or a child count other than 0 or 2; a ratio outside 5 to 95; a tree deeper than 30 levels or with a repeated node; an
                 active panel that is not in its group; or a floating position that is not finite. <code>State</code> is validated against the current
-                panel keys when it arrives, and so is the JSON given to <code>RestoreLayoutAsync</code>. When the panel list changes without a new
-                <code>State</code>, removed panels leave the layout and added ones join the first group.
+                panel keys when it arrives, and so is the JSON given to <code>RestoreLayoutAsync</code>. When <code>State</code> is null and the panel
+                list changes, removed panels leave the layout and added ones join the first group; a bound <code>State</code> is validated against
+                the new keys instead.
                 </p>
             </DocSection>
             <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
@@ -117,11 +123,14 @@
     </Vocabulary>
 
     <Accessibility>
-        <p>
-            Each group is a <code>tablist</code> of <code>tab</code> buttons with <code>aria-selected</code>, and its content a <code>tabpanel</code>
-            named after the pane. The unpinned strip is labelled "Unpinned panes", the drawer is a <code>section</code> labelled with the pane's title,
-            and floating panes are dialogs with the title as their header. The Dock… menu's buttons reach every position from the keyboard.
-        </p>
+        <ul>
+            <li>Each tab group is a <code>role="tablist"</code>. Every pane caption is a native button with <code>role="tab"</code> and <code>aria-selected</code>, "true" on the pane on show, so Tab reaches each caption and Enter or Space shows its pane.</li>
+            <li>The pane on show sits in a <code>role="tabpanel"</code> named by the pane's <code>Title</code> through <code>aria-label</code>.</li>
+            <li>The action bar above a pane holds native buttons. Dock… opens a panel (<code>aria-expanded</code> "true" while open) with a button for every position in every tab group, so any layout can be built from the keyboard; Float, Unpin or Pin, and Close follow it.</li>
+            <li>An unpinned pane's button carries <code>aria-expanded</code>, "true" while its drawer is open, and the drawer is a <code>section</code> named by the pane's title.</li>
+            <li>A floating pane is a non-modal dialog (<code>role="dialog"</code>) named by its header, the pane's title. Tab moves through its own controls; to put the pane back in the layout from the keyboard, use Dock… in its action bar. A closable pane also has a Close button and closes with Escape while focus is inside it.</li>
+            <li>Give each <code>DockPanel</code> a short, distinct <code>Title</code>: it names the tab, the tab panel, the drawer and the floating window.</li>
+        </ul>
     </Accessibility>
 
     <Related>
@@ -140,10 +149,10 @@
     private string? _json;
     private readonly IReadOnlyList<DockPanel> _panels =
     [
-        new("explorer", "Explorer", b => b.AddMarkupContent(0, "<ul><li>src/</li><li>tests/</li><li>docs/</li><li>README.md</li></ul>")),
-        new("document", "Document", b => b.AddMarkupContent(0, "<p>The document pane cannot be closed, so its action bar has no Close button.</p>"), Closable: false),
-        new("properties", "Properties", b => b.AddMarkupContent(0, "<dl><dt>Name</dt><dd>README.md</dd><dt>Size</dt><dd>2.1 KB</dd><dt>Modified</dt><dd>Today</dd></dl>")),
-        new("output", "Output", b => b.AddMarkupContent(0, "<pre>Build started…\nBuild succeeded.</pre><p>The output pane cannot float.</p>"), Floatable: false),
+        new("tickets", "Tickets", b => b.AddMarkupContent(0, "<ul><li>TKT-1042 Router keeps restarting</li><li>TKT-1043 Charged twice in October</li><li>TKT-1044 Cannot reset password</li><li>TKT-1045 Slow connection in the evenings</li></ul>")),
+        new("conversation", "Conversation", b => b.AddMarkupContent(0, "<p><strong>TKT-1042 Router keeps restarting</strong></p><p>Customer: the router has restarted every evening since Monday. Agent: please unplug it for 30 seconds and plug it back in. Customer: no change. Can a technician come on Saturday?</p><p>The conversation pane cannot be closed, so its action bar has no Close button.</p>"), Closable: false),
+        new("customer", "Customer", b => b.AddMarkupContent(0, "<dl><dt>Name</dt><dd>Albus Door</dd><dt>Channel</dt><dd>Phone</dd><dt>Status</dt><dd>Open, High priority</dd></dl>")),
+        new("notes", "Notes", b => b.AddMarkupContent(0, "<p>Prefers a callback in the morning. The router is still under warranty.</p><p>The notes pane cannot float.</p>"), Floatable: false),
     ];
 
     private static DockLayoutState Workspace() => new()
@@ -153,14 +162,14 @@
             Vertical = true, Ratio = 25,
             Children =
             [
-                new() { Panels = ["explorer"], ActivePanel = "explorer" },
+                new() { Panels = ["tickets"], ActivePanel = "tickets" },
                 new()
                 {
                     Vertical = true, Ratio = 70,
                     Children =
                     [
-                        new() { Panels = ["document", "output"], ActivePanel = "document" },
-                        new() { Panels = ["properties"], ActivePanel = "properties" },
+                        new() { Panels = ["conversation", "notes"], ActivePanel = "conversation" },
+                        new() { Panels = ["customer"], ActivePanel = "customer" },
                     ],
                 },
             ],
@@ -168,20 +177,20 @@
     };
 
     private static string Summarize(DockLayoutState s) =>
-        $"{s.Nodes().Count(n => n.Children.Count == 0)} groups, {s.Floating.Count} floating, {s.AutoHidden.Count} unpinned, {s.Closed.Count} closed.";
+        $"Groups: {s.Nodes().Count(n => n.Children.Count == 0)}, floating: {s.Floating.Count}, unpinned: {s.AutoHidden.Count}, closed: {s.Closed.Count}.";
 
     private DockManagerControl? _tools;
     private string _toolSummary = "No changes yet.";
     private readonly IReadOnlyList<DockPanel> _toolPanels =
     [
-        new("chart", "Chart", b => b.AddMarkupContent(0, "<p>A floatable pane.</p>")),
-        new("log", "Log", b => b.AddMarkupContent(0, "<p>Not closable: Close Log is ignored.</p>"), Closable: false),
-        new("notes", "Notes", b => b.AddMarkupContent(0, "<p>Closable and floatable.</p>")),
+        new("reply", "Reply", b => b.AddMarkupContent(0, "<p>To Hermione Ranger on TKT-1043: the duplicate $59 charge is refunded within five business days.</p><p>This pane can float.</p>")),
+        new("thread", "Conversation", b => b.AddMarkupContent(0, "<p>Customer: my October bill of $59 was charged to the same card twice on October 3.</p><p>This pane cannot be closed, so Close Conversation is ignored.</p>"), Closable: false),
+        new("calls", "Call notes", b => b.AddMarkupContent(0, "<p>The customer called to ask whether the $15 late fee is refunded too.</p><p>This pane can be closed and floated.</p>")),
     ];
 
     private async Task DockAllAsync()
     {
-        foreach (var key in new[] { "chart", "log", "notes" })
+        foreach (var key in new[] { "reply", "thread", "calls" })
         {
             var layout = DockLayoutState.FromJson(_tools!.SaveLayout());
             var group = layout.Nodes().First(n => n.Children.Count == 0).Id;
@@ -189,15 +198,21 @@
         }
     }
 
-    // Code tabs are verbatim copies of each Demo block and of the members behind it (scratchpad/gencode.py).
+    // Code tabs are verbatim copies of each example's Controls and Demo blocks and of the members behind them.
     private static class Code
     {
-        public const string Workspace = @"<DockManagerControl @ref=""_dock"" Panels=""@_panels"" State=""@_state"" StateChanged=""s => _summary = Summarize(s)"" Height=""460px"" />
-<p class=""result"">@_summary</p>
-@if (_json is not null)
-{
-    <details class=""json""><summary>Saved layout, @_json.Length characters of JSON</summary><pre>@_json</pre></details>
-}";
+        public const string Workspace = @"<ButtonControl CssClass=""btn-sm"" OnClick=""() => _json = _dock!.SaveLayout()"">Save layout</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""() => _dock!.RestoreLayoutAsync(_json!)"" Disabled=""@(_json is null)"">Restore layout</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""() => { _state = Workspace(); _summary = Summarize(_state); }"">Reset layout</ButtonControl>
+
+<div class=""desk"">
+    <DockManagerControl @ref=""_dock"" Panels=""@_panels"" State=""@_state"" StateChanged=""s => _summary = Summarize(s)"" Height=""460px"" />
+    <p class=""result"">@_summary</p>
+    @if (_json is not null)
+    {
+        <details class=""json""><summary>Saved layout, @_json.Length characters of JSON</summary><pre>@_json</pre></details>
+    }
+</div>";
         public const string WorkspaceCs = @"private DockManagerControl? _dock;
 
 private DockLayoutState _state = Workspace();
@@ -208,10 +223,10 @@ private string? _json;
 
 private readonly IReadOnlyList<DockPanel> _panels =
 [
-    new(""explorer"", ""Explorer"", b => b.AddMarkupContent(0, ""<ul><li>src/</li><li>tests/</li><li>docs/</li><li>README.md</li></ul>"")),
-    new(""document"", ""Document"", b => b.AddMarkupContent(0, ""<p>The document pane cannot be closed, so its action bar has no Close button.</p>""), Closable: false),
-    new(""properties"", ""Properties"", b => b.AddMarkupContent(0, ""<dl><dt>Name</dt><dd>README.md</dd><dt>Size</dt><dd>2.1 KB</dd><dt>Modified</dt><dd>Today</dd></dl>"")),
-    new(""output"", ""Output"", b => b.AddMarkupContent(0, ""<pre>Build started…\nBuild succeeded.</pre><p>The output pane cannot float.</p>""), Floatable: false),
+    new(""tickets"", ""Tickets"", b => b.AddMarkupContent(0, ""<ul><li>TKT-1042 Router keeps restarting</li><li>TKT-1043 Charged twice in October</li><li>TKT-1044 Cannot reset password</li><li>TKT-1045 Slow connection in the evenings</li></ul>"")),
+    new(""conversation"", ""Conversation"", b => b.AddMarkupContent(0, ""<p><strong>TKT-1042 Router keeps restarting</strong></p><p>Customer: the router has restarted every evening since Monday. Agent: please unplug it for 30 seconds and plug it back in. Customer: no change. Can a technician come on Saturday?</p><p>The conversation pane cannot be closed, so its action bar has no Close button.</p>""), Closable: false),
+    new(""customer"", ""Customer"", b => b.AddMarkupContent(0, ""<dl><dt>Name</dt><dd>Albus Door</dd><dt>Channel</dt><dd>Phone</dd><dt>Status</dt><dd>Open, High priority</dd></dl>"")),
+    new(""notes"", ""Notes"", b => b.AddMarkupContent(0, ""<p>Prefers a callback in the morning. The router is still under warranty.</p><p>The notes pane cannot float.</p>""), Floatable: false),
 ];
 
 private static DockLayoutState Workspace() => new()
@@ -221,14 +236,14 @@ private static DockLayoutState Workspace() => new()
         Vertical = true, Ratio = 25,
         Children =
         [
-            new() { Panels = [""explorer""], ActivePanel = ""explorer"" },
+            new() { Panels = [""tickets""], ActivePanel = ""tickets"" },
             new()
             {
                 Vertical = true, Ratio = 70,
                 Children =
                 [
-                    new() { Panels = [""document"", ""output""], ActivePanel = ""document"" },
-                    new() { Panels = [""properties""], ActivePanel = ""properties"" },
+                    new() { Panels = [""conversation"", ""notes""], ActivePanel = ""conversation"" },
+                    new() { Panels = [""customer""], ActivePanel = ""customer"" },
                 ],
             },
         ],
@@ -236,23 +251,31 @@ private static DockLayoutState Workspace() => new()
 };
 
 private static string Summarize(DockLayoutState s) =>
-    $""{s.Nodes().Count(n => n.Children.Count == 0)} groups, {s.Floating.Count} floating, {s.AutoHidden.Count} unpinned, {s.Closed.Count} closed."";";
-        public const string Methods = @"<DockManagerControl @ref=""_tools"" Panels=""@_toolPanels"" StateChanged=""s => _toolSummary = Summarize(s)"" Height=""320px"" />
-<p class=""result"">@_toolSummary</p>";
+    $""Groups: {s.Nodes().Count(n => n.Children.Count == 0)}, floating: {s.Floating.Count}, unpinned: {s.AutoHidden.Count}, closed: {s.Closed.Count}."";";
+        public const string Methods = @"<ButtonControl CssClass=""btn-sm"" OnClick='() => _tools!.FloatAsync(""reply"")'>Float Reply</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick='() => _tools!.UnpinAsync(""thread"")'>Unpin Conversation</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick='() => _tools!.CloseAsync(""calls"")'>Close Call notes</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick='() => _tools!.CloseAsync(""thread"")'>Close Conversation</ButtonControl>
+<ButtonControl CssClass=""btn-sm"" OnClick=""DockAllAsync"">Dock everything back</ButtonControl>
+
+<div class=""desk"">
+    <DockManagerControl @ref=""_tools"" Panels=""@_toolPanels"" StateChanged=""s => _toolSummary = Summarize(s)"" Height=""320px"" />
+    <p class=""result"">@_toolSummary</p>
+</div>";
         public const string MethodsCs = @"private DockManagerControl? _tools;
 
 private string _toolSummary = ""No changes yet."";
 
 private readonly IReadOnlyList<DockPanel> _toolPanels =
 [
-    new(""chart"", ""Chart"", b => b.AddMarkupContent(0, ""<p>A floatable pane.</p>"")),
-    new(""log"", ""Log"", b => b.AddMarkupContent(0, ""<p>Not closable: Close Log is ignored.</p>""), Closable: false),
-    new(""notes"", ""Notes"", b => b.AddMarkupContent(0, ""<p>Closable and floatable.</p>"")),
+    new(""reply"", ""Reply"", b => b.AddMarkupContent(0, ""<p>To Hermione Ranger on TKT-1043: the duplicate $59 charge is refunded within five business days.</p><p>This pane can float.</p>"")),
+    new(""thread"", ""Conversation"", b => b.AddMarkupContent(0, ""<p>Customer: my October bill of $59 was charged to the same card twice on October 3.</p><p>This pane cannot be closed, so Close Conversation is ignored.</p>""), Closable: false),
+    new(""calls"", ""Call notes"", b => b.AddMarkupContent(0, ""<p>The customer called to ask whether the $15 late fee is refunded too.</p><p>This pane can be closed and floated.</p>"")),
 ];
 
 private async Task DockAllAsync()
 {
-    foreach (var key in new[] { ""chart"", ""log"", ""notes"" })
+    foreach (var key in new[] { ""reply"", ""thread"", ""calls"" })
     {
         var layout = DockLayoutState.FromJson(_tools!.SaveLayout());
         var group = layout.Nodes().First(n => n.Children.Count == 0).Id;
@@ -261,16 +284,24 @@ private async Task DockAllAsync()
 }
 
 private static string Summarize(DockLayoutState s) =>
-    $""{s.Nodes().Count(n => n.Children.Count == 0)} groups, {s.Floating.Count} floating, {s.AutoHidden.Count} unpinned, {s.Closed.Count} closed."";";
+    $""Groups: {s.Nodes().Count(n => n.Children.Count == 0)}, floating: {s.Floating.Count}, unpinned: {s.AutoHidden.Count}, closed: {s.Closed.Count}."";";
     }
 
     private static class Vocab
     {
         public static readonly ApiRow[] Params =
         {
-            new("Panels", "The panes: unique, non-empty keys, a title, the content and the two permissions. Panes added later join the first group; removed ones leave the layout.", "IReadOnlyList&lt;DockPanel&gt;", "Array.Empty&lt;DockPanel&gt;()"),
+            new("Panels", "The panes: unique, non-empty keys, a title, the content and the two permissions. When <code>State</code> is null, panes added later join the first group and removed ones leave the layout; when <code>State</code> is set, pass a <code>State</code> that places every current key, or the control throws.", "IReadOnlyList&lt;DockPanel&gt;", "Array.Empty&lt;DockPanel&gt;()"),
             new("State", "The starting arrangement. A new instance is validated against the keys and copied; null gives one group with every pane, the first active.", "DockLayoutState?", "null"),
             new("Height", "Height of the manager.", "string", "\"500px\""),
+        };
+        public static readonly ApiRow[] Panel =
+        {
+            new("Key", "Unique, non-empty name of the pane; the methods and the saved layout refer to it.", "string"),
+            new("Title", "Text of the pane's tab, and of its window when floating.", "string"),
+            new("Content", "What the pane shows, as a <code>RenderFragment</code>: a Razor template, or a builder such as <code>b =&gt; b.AddMarkupContent(0, \"…\")</code> as in the examples.", "RenderFragment"),
+            new("Closable", "False hides Close, drops the close icon and Escape from its floating window, and makes <code>CloseAsync</code> do nothing.", "bool", "true"),
+            new("Floatable", "False hides Float and makes <code>FloatAsync</code> do nothing.", "bool", "true"),
         };
         public static readonly ApiRow[] Events =
         {
@@ -295,7 +326,7 @@ private static string Summarize(DockLayoutState s) =>
         public static readonly ApiRow[] StateMethods =
         {
             new("Clone()", "A deep copy, made through JSON.", "DockLayoutState"),
-            new("ToJson()", "Serialises the layout.", "string"),
+            new("ToJson()", "Serializes the layout.", "string"),
             new("FromJson(string json)", "Static; parses a layout and throws for null.", "DockLayoutState"),
             new("Nodes()", "Every node of the tree, root first.", "IEnumerable&lt;DockNode&gt;"),
             new("Validate(IEnumerable&lt;string&gt; keys)", "Throws unless the layout places exactly these keys once each and the tree is well formed; see the rules below.", "void"),

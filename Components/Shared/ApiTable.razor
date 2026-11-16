@@ -1,10 +1,8 @@
 @namespace FlexCore.Showcase.Components.Shared
 
-@* Vocabulary table (2026-10-12). 2026-10-18: Name, Type and Default render as markup, because rows are written with &lt; &gt;
-   for generics and Razor was encoding them again, so every generic type showed as literal "&lt;" text (SC-308). Title stays
-   encoded: it arrives through an attribute, which Razor has already decoded, so a Title of "X&lt;T&gt;" is the string "X<T>". Kind picks the columns; rows are records so every page renders the
-   same shape. Plain <table>: FlexCore has no static-table control and the grid is overkill here.
-   2026-10-20 (Baaria, Barcodes page): enum members get their own Values column set, and an empty Type or Default string draws no chip. *@
+@* Vocabulary table (2026-10-12). 2026-10-18 (SC-308): Name, Type, Default render as markup (rows write &lt; &gt;, Razor re-encoded
+   them); Title stays encoded: attributes arrive decoded ("X&lt;T&gt;" is "X<T>"). Plain <table>: no FlexCore static-table control.
+   2026-10-20: enum members get a Values column set; an empty Type or Default draws no chip. *@
 <div class="api-block" id="@Id">
     @if (!string.IsNullOrEmpty(Title) && Title != SectionTitle)
     {
@@ -31,11 +29,11 @@
                         }
                         @if (HasType)
                         {
-                            <td class="api-type">@if (!string.IsNullOrEmpty(r.Type)) { <code>@((MarkupString)r.Type)</code> }</td>
+                            <td class="api-type">@if (!string.IsNullOrEmpty(r.Type)) { <code>@((MarkupString)Breakable(r.Type))</code> }</td>
                         }
                         @if (HasDefault)
                         {
-                            <td class="api-default">@if (!string.IsNullOrEmpty(r.Default)) { <code>@((MarkupString)r.Default)</code> } else { <span class="api-none">—</span> }</td>
+                            <td class="api-default">@if (!string.IsNullOrEmpty(r.Default)) { <code>@((MarkupString)Breakable(r.Default))</code> } else { <span class="api-none">—</span> }</td>
                         }
                         <td class="api-desc">@((MarkupString)r.Description)</td>
                     </tr>
@@ -49,8 +47,8 @@
     [Parameter, EditorRequired] public ApiKind Kind { get; set; }
     [Parameter, EditorRequired] public IReadOnlyList<ApiRow> Rows { get; set; } = Array.Empty<ApiRow>();
     [Parameter] public string? Title { get; set; }
-    /// <summary>The enclosing DocSection's title (2026-10-25): a table named like its section drops its own heading, so the name is
-    /// not repeated under the header; a section holding several tables keeps each table's heading.</summary>
+    /// <summary>Enclosing DocSection's title (2026-10-25): a table named like its section drops its own heading; tables in a
+    /// multi-table section keep theirs.</summary>
     [CascadingParameter(Name = "DocSectionTitle")] public string? SectionTitle { get; set; }
     [Parameter] public string? Id { get; set; }
 
@@ -58,8 +56,8 @@
     private bool HasDefault => Kind is ApiKind.Parameters or ApiKind.Properties;
     private bool HasInputs => Kind is ApiKind.Methods;
 
-    // Methods (2026-10-18, Baaria's review): a long signature in the first column pushed the table off narrow screens, so the
-    // method shows as Name() and its parameters go to an Inputs column, one per line. "A(x) / B(y)" rows keep both names.
+    // Methods (2026-10-18): Name() in the first column, parameters one per line in Inputs, so long signatures no longer push the
+    // table off narrow screens. "A(x) / B(y)" rows keep both names.
     private string DisplayName(ApiRow r)
     {
         if (!HasInputs) return r.Name;
@@ -102,4 +100,7 @@
         ApiKind.Values       => new[] { "Value", "Description" },
         _                    => new[] { "Key", "Action" },
     };
+
+    /// <summary>Long generic types wrap only after "&lt;" and ","; DateTime stays whole.</summary>
+    private static string Breakable(string html) => html.Replace("&lt;", "&lt;<wbr>").Replace(",", ",<wbr>");
 }

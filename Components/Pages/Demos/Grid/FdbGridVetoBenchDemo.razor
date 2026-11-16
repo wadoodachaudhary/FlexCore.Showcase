@@ -4,34 +4,25 @@
 @using Fx.ControlKit.Grid
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-17: moved onto FeatureDemoLayout (row 7 of the Data Grid list). Changes, closing SC-146 to SC-150: the old internal names, "VB6",
-   "mission-critical ERP", "benchmark" and "severe risk surface" left the copy; the rows are lines of a
-   page-local class instead of ledger accounts with quantities (SC-150; Data.LedgerRow is left as is); a row becomes dirty
-   when a value is written (OnCellSave) rather than when an editor opens (OnCellEdit, which also fired for edits abandoned with
-   Escape); the doc table that named a non-existent RowSelectingEventArgs is gone and the code tabs are generated from the page
-   (SC-148, SC-149); the unused @ref and the explicit TextEditorTypingBehavior (its default) went; Save is a ButtonControl.
-   Parameter tables are a later pass (SC-278).
-   2026-10-24 (SC-278): Documentation tables written from Grid/GridControlEvents.cs, Grid/GridModels.cs, Grid/SelectionSettings.cs and
-   the raise sites in Grid/GridControl.razor.cs and Grid/GridControl.KeyboardSelection.cs; the selection rows are copied from
-   UserPermsBenchDemo.razor; every row checked with vocabcheck.py and the raise-site line numbers. *@
+@* 2026-10-17: on FeatureDemoLayout; closes SC-146 to SC-150. Rows a page-local class (SC-150); code tabs from the page (SC-148,
+   SC-149). Dirty on OnCellSave, not OnCellEdit (that also fires for Escape-abandoned edits). Tables added 2026-10-24 (SC-278).
+   2026-10-24 (SC-278): tables from Grid/GridControlEvents.cs, GridModels.cs, SelectionSettings.cs, GridControl.razor.cs,
+   GridControl.KeyboardSelection.cs; selection rows copied from UserPermsBenchDemo.razor. *@
 
-<PageTitle>Unsaved-row lock — FlexCore Showcase</PageTitle>
+<PageTitle>Unsaved-Row Lock in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Unsaved-row lock" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Veto the move to another row while the current one has unsaved changes."
+                   Tagline="Stop users leaving a row with unsaved changes until they save it."
                    SourcePath="Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/SelectionSettings.cs;Grid/GridControl.razor.cs;Grid/GridControl.KeyboardSelection.cs">
     <Overview>
         <p>
-            <code>RowSelecting</code> fires before the selection moves. Its <code>RowSelectEventArgs</code> carries the target row in
-            <code>Data</code> and a <code>Cancel</code> flag; set it and the move is refused, whether it came from a click or from the
-            keyboard. This page marks a row dirty when a cell value is written (<code>OnCellSave</code>) and refuses every move
-            away from it until Save is pressed; moves within the dirty row are still allowed.
+            <code>RowSelecting</code> lets a Blazor <code>GridControl</code> refuse to move the selection, so users cannot leave a row they have edited but not saved. Use it on order or booking screens where each row is saved on its own: set <code>Cancel</code> on the event's <code>RowSelectEventArgs</code> and a click or arrow key that would move away is refused. This page marks a row as changed when <code>OnCellSave</code> writes a value and unlocks it on Save.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="lock" Title="Leave a row only after saving it" RazorCode="@Code.Lock" CSharpCode="@Code.LockCs">
-            <Description><p>Double-click a Qty, Price or Notes cell, change it and press Enter. Now click another row, or press the Down arrow: the other row does not become selected and the line under the grid counts the refusal. Press Save and the lock lifts.</p></Description>
+            <Description><p>Edit a Qty, Price or Notes cell, then click another row or press Down: the move is refused and counted until you press Save.</p></Description>
             <Controls>
                 <ButtonControl CssClass="btn-sm" OnClick="Save" Disabled="@(!_dirty)">Save</ButtonControl>
             </Controls>
@@ -146,7 +137,7 @@
             new BookingLine { Code = "30", Description = "Sintra day tour, small group", Qty = 2, Price = 89.00m, Notes = "Vegetarian lunch for one" },
             new BookingLine { Code = "40", Description = "Fado dinner show", Qty = 2, Price = 75.00m, Notes = "Table near the stage" },
             new BookingLine { Code = "50", Description = "Lisbon to Porto train, first class", Qty = 2, Price = 48.50m, Notes = "Window seats requested" },
-            new BookingLine { Code = "60", Description = "Travel insurance, per traveller", Qty = 2, Price = 39.00m, Notes = "Policy sent with the itinerary" }
+            new BookingLine { Code = "60", Description = "Travel insurance, per traveler", Qty = 2, Price = 39.00m, Notes = "Policy sent with the itinerary" }
         ];
 
         _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<BookingLine>>(this, args =>
@@ -173,7 +164,7 @@
         _saveCount++;
     }
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed).
+    // Code tabs: generated verbatim copies of the Demo block and members above.
     private static class Code
     {
         public const string Lock = @"<GridControl TValue=""BookingLine""
@@ -241,7 +232,7 @@ protected override void OnInitialized()
         new BookingLine { Code = ""30"", Description = ""Sintra day tour, small group"", Qty = 2, Price = 89.00m, Notes = ""Vegetarian lunch for one"" },
         new BookingLine { Code = ""40"", Description = ""Fado dinner show"", Qty = 2, Price = 75.00m, Notes = ""Table near the stage"" },
         new BookingLine { Code = ""50"", Description = ""Lisbon to Porto train, first class"", Qty = 2, Price = 48.50m, Notes = ""Window seats requested"" },
-        new BookingLine { Code = ""60"", Description = ""Travel insurance, per traveller"", Qty = 2, Price = 39.00m, Notes = ""Policy sent with the itinerary"" }
+        new BookingLine { Code = ""60"", Description = ""Travel insurance, per traveler"", Qty = 2, Price = 39.00m, Notes = ""Policy sent with the itinerary"" }
     ];
 
     _events.OnCellSave = EventCallback.Factory.Create<CellSaveArgs<BookingLine>>(this, args =>
@@ -310,7 +301,7 @@ private void Save()
         public static readonly ApiRow[] Methods =
         {
             new("EndEditAsync()", "Commits the open batch editor through the same path as Enter, raising <code>OnCellSave</code>; a pending type-ahead is committed and an open row editor saved the same way. Returns without saving when the value fails validation.", "Task"),
-            new("BeginEditCellAsync(TValue row, string field)", "Pages to the row, selects the cell (through <code>RowSelecting</code> and <code>RowSelected</code>) and opens its batch editor as a click would, after <code>OnCellEdit</code>. Does nothing when that is cancelled, the column is not editable or edit mode is not <code>Batch</code>; a checkbox cell is selected but not toggled.", "Task"),
+            new("BeginEditCellAsync(TValue row, string field)", "Pages to the row, selects the cell (through <code>RowSelecting</code> and <code>RowSelected</code>) and opens its batch editor as a click would, after <code>OnCellEdit</code>. Does nothing when that is canceled, the column is not editable or edit mode is not <code>Batch</code>; a checkbox cell is selected but not toggled.", "Task"),
         };
     }
 }

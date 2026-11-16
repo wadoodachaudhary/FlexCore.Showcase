@@ -6,24 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
     <ResourcePreloader />
+    @* 2026-10-28: site font Inter (variable weight, optical size); app.css keeps the system stack as fallback. *@
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" />
     <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
     <link rel="stylesheet" href="@Assets["lib/bootstrap-icons/font/bootstrap-icons.min.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
+    @* Home page app window (the Quick Start project): quickstart/RazorSharpGetaways/wwwroot/getaways.css (2026-11-04) *@
+    <link rel="stylesheet" href="@Assets["getaways.css"]" />
     <link rel="stylesheet" href="@Assets["FlexCore.Showcase.styles.css"]" />
     <ImportMap />
-    @* 2026-10-26 (Baaria): the tab icon is the FlexCore mark from the top bar, not the Blazor default. SVG for browsers that take
-       it, a 32 px PNG rendered from it for the rest; @Assets fingerprints both so browsers drop the cached old icon. *@
+    @* 2026-10-26: tab icon is the top-bar FlexCore mark: SVG, 32 px PNG fallback; @Assets fingerprints both to bust the cached
+       old icon. *@
     <link rel="icon" type="image/png" sizes="32x32" href="@Assets["favicon.png"]" />
     <link rel="icon" type="image/svg+xml" sizes="any" href="@Assets["favicon.svg"]" />
-    @* InteractiveServer like <Routes>: a static HeadOutlet only takes the prerendered title, so <PageTitle> changes on in-app
-       navigation never reached the browser tab (2026-10-17, SC-303). *@
+    @* InteractiveServer like <Routes> (2026-10-17, SC-303): a static HeadOutlet keeps the prerendered title after navigation. *@
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
 <body>
-    @* InteractiveServer render mode globally — event handlers (clicks, drag,
-       Enter on cell editors, etc.) need a live SignalR circuit. Without this
-       the pages render statically and nothing reacts to input. *@
+    @* InteractiveServer globally: event handlers need a live SignalR circuit; without it pages render static. *@
     <Routes @rendermode="InteractiveServer" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
@@ -78,6 +81,19 @@
                 td.style.removeProperty('z-index');
                 td.style.removeProperty('position');
             }
+        };
+
+        // Class on while most of el is visible, off once it has left, so a CSS animation keyed on it replays on each scroll into
+        // view (home page finish flag, 2026-10-28).
+        window.fxToggleClassWhenVisible = function (el, cls) {
+            if (!el) return;
+            if (!('IntersectionObserver' in window)) { el.classList.add(cls); return; }
+            new IntersectionObserver(function (entries) {
+                entries.forEach(function (e) {
+                    if (e.intersectionRatio >= 0.6) e.target.classList.add(cls);
+                    else if (!e.isIntersecting) e.target.classList.remove(cls);
+                });
+            }, { threshold: [0, 0.6] }).observe(el);
         };
     </script>
 </body>

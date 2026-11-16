@@ -1,81 +1,38 @@
-/* 2026-10-12: Tabs & accordion page. No Bootstrap names (table, row) as class names in here. */
+/* Page classes avoid Bootstrap names (table, row). */
+/* App cards, as on the other component pages: white with a soft shadow, the status line in a footer band */
+.ta { max-width: 720px; padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 20px -12px rgba(15, 23, 42, 0.18); }
+.ta > .result, .ta > .strip-actions:last-child { margin: 16px -18px -16px; padding: 10px 18px; border-top: 1px solid #f1f5f9; border-radius: 0 0 10px 10px; background: #f8fafc; }
+.ta ::deep .fx-button.btn-sm { border-color: #cbd5e1; background: #fff; color: #334155; }
+.ta ::deep .fx-button.btn-sm:hover:not(:disabled) { border-color: #94a3b8; background: #f8fafc; }
+.leave-tabs { max-width: 600px; }
 .result { font-size: 13px; color: #475569; margin: 12px 0 0; }
-.m0 { margin: 0; }
-.summary { display: grid; grid-template-columns: 90px 1fr; gap: 4px 12px; margin: 0; font-size: 13px; }
+.summary { display: grid; grid-template-columns: 90px 1fr; gap: 4px 12px; margin: 0 0 10px; font-size: 13px; }
 .summary dt { color: #64748b; font-weight: 500; }
 .summary dd { margin: 0; color: #1e293b; }
-.lines { border-collapse: collapse; font-size: 13px; width: 100%; max-width: 420px; }
+.lines { border-collapse: collapse; font-size: 13px; width: 100%; max-width: 520px; }
 .lines th, .lines td { padding: 4px 8px; border-bottom: 1px solid #e2e8f0; text-align: left; }
 .lines th { color: #64748b; font-weight: 600; }
 .lines .num { text-align: right; font-variant-numeric: tabular-nums; }
-.strip-pane { border: 1px solid #e5e7eb; border-top: 0; padding: 12px 14px; font-size: 13px; color: #334155; min-height: 48px; background: #fff; }
-.strip-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.notes { margin: 0 0 10px; padding-left: 18px; font-size: 13px; color: #1e293b; }
+.strip-pane { font-size: 13px; color: #334155; min-height: 48px; }
+.strip-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
 .strip-actions .result { margin: 0; }
-.acc { max-width: 480px; }
+.acc { max-width: 560px; }
+/* a header written with HeaderContent is the page's markup: it fills the row so the arrow stays at the right */
+.acc-head { flex: 1; display: flex; align-items: center; gap: 8px; text-align: left; }
+.acc-head > .bi { color: var(--brand-button, #4f46e5); }
 
-/* 2026-10-26: outlined folder tabs in FlexCore colours for both tab examples. Each control sits in a .folder-tabs wrapper and the
-   rules reach the library's markup through ::deep, so tabs elsewhere on the site keep their own look. */
-.folder-tabs ::deep .fx-tab-headers,
-.folder-tabs ::deep .fx-tabstrip {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 0 0 0 4px;
-    overflow: visible;
-    background: transparent;
-    border-bottom: 1px solid #cbd5e1;
-}
-.folder-tabs ::deep .fx-tab-button,
-.folder-tabs ::deep .fx-tabstrip-tab {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: -1px;
-    padding: 7px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px 8px 0 0;
-    background: #f1f5f9;
-    color: #475569;
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: none;
-}
-.folder-tabs ::deep .fx-tab-button:not(.active):hover,
-.folder-tabs ::deep .fx-tabstrip-tab:not(.fx-tabstrip-tab-active):not(.fx-tabstrip-tab-disabled):hover {
-    background: #e2e8f0;
-    color: #0284c7;
-}
-.folder-tabs ::deep .fx-tab-button.active,
-.folder-tabs ::deep .fx-tabstrip-tab-active {
-    background: #ffffff;
-    border-bottom-color: #ffffff;
-    color: #0f172a;
-    font-weight: 600;
-    box-shadow: inset 0 2px 0 #0284c7;
-}
-.folder-tabs ::deep .fx-tabstrip-tab-active .fx-tabstrip-icon {
-    color: #0284c7;
-}
-.folder-tabs ::deep .fx-tabstrip-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    margin-left: 2px;
-    border-radius: 4px;
-    color: #94a3b8;
-    font-size: 15px;
-}
-.folder-tabs ::deep .fx-tabstrip-close:hover {
-    background: #e2e8f0;
-    color: #0f172a;
-}
-.folder-tabs ::deep .fx-tab-content,
-.folder-tabs .strip-pane {
-    border: 1px solid #cbd5e1;
-    border-top: 0;
-    border-radius: 0 0 8px 8px;
-    background: #ffffff;
-    padding: 14px 16px;
-}
+/* tab looks come from TabTheme; the page only joins the pane to the strip and lays out the Vertical
+   rail (the strip draws it 220 px wide, height: 100%). */
+.docs { display: flex; flex-direction: column; }
+.docs .strip-pane { border: 1px solid #cbd5e1; border-top: 0; border-radius: 0 0 8px 8px; background: #fff; padding: 14px 16px; }
+.docs-vertical { flex-direction: row; align-items: stretch; min-height: 240px; }
+.docs-vertical ::deep .fx-tabstrip { flex: 0 0 220px; }
+.docs-vertical .strip-pane { flex: 1; border-top: 1px solid #cbd5e1; border-left: 0; border-radius: 0 8px 8px 0; }
+/* a darker caption for the disabled tab, so it stays readable */
+.docs ::deep .fx-tabstrip-tab-disabled { color: #475569; opacity: 0.75; }
+
+/* the theme and layout pickers above the tabs: on a phone their buttons wrap instead of running past the screen */
+.pickers { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 560px) { .pickers ::deep .fx-button-group { flex-wrap: wrap; } }

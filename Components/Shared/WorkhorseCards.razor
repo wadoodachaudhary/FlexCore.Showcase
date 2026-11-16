@@ -1,0 +1,137 @@
+@namespace FlexCore.Showcase.Components.Shared
+
+@* The four big workhorse cards: Data Grid, Charts, Reports and Scheduler. Shared by the home page ("Everything you need to cross the
+   finish line") and the components page ("Start with the workhorses") since 2026-11-13, so both always show the same four.
+   Every line is checked: 100,000 rows (/demo/grid/row-selection-50k); 43 values in ChartType; CrystalXmlReportLoader, DrillDownFilter
+   and ReportDesignerCanvasControl in FlexCore/Reports; SchedulerView has Day, Week, Month, Timeline and Agenda, and Gantt is its own
+   control. The pictures are plain SVG, decoration only, in the logo's four colors. The components page passes Compact
+   (2026-11-13: "make the cards smaller and in one line"): four smaller cards in a row; the home page keeps the big two-by-two. *@
+<div class="workhorse-grid@(Compact ? " compact" : "")">
+    <a href="demo/grid" class="workhorse-card">
+        <div class="workhorse-art blue" aria-hidden="true">
+            <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                <rect x="20" y="14" width="200" height="16" rx="4" fill="#0284c7" opacity="0.85" />
+                @for (var i = 0; i < 5; i++)
+                {
+                    <rect x="20" y="@(36 + i * 15)" width="200" height="11" rx="3" fill="@(i == 2 ? "#7dd3fc" : "#ffffff")" />
+                    <rect x="26" y="@(39 + i * 15)" width="34" height="5" rx="2" fill="#38bdf8" opacity="0.7" />
+                    <rect x="72" y="@(39 + i * 15)" width="58" height="5" rx="2" fill="#cbd5e1" />
+                    <rect x="150" y="@(39 + i * 15)" width="36" height="5" rx="2" fill="#cbd5e1" />
+                }
+            </svg>
+        </div>
+        <div class="workhorse-body">
+            <h3 class="workhorse-name"><span class="workhorse-tile blue"><span class="bi bi-table"></span></span> Data Grid</h3>
+            @if (Compact)
+            {
+                <p class="workhorse-line">100,000 rows, <span class="nb">in-cell</span> editing, Excel export</p>
+            }
+            else
+            {
+                <p class="workhorse-desc">Scroll 100,000 rows, type straight into cells, then export the lot to Excel.</p>
+                <ul class="workhorse-chips">
+                    <li>Virtual scrolling</li><li>Frozen columns</li><li>Tree grid</li><li>Excel export</li>
+                </ul>
+                <span class="workhorse-link">Explore the grid &rarr;</span>
+            }
+        </div>
+    </a>
+
+    <a href="demo/charts" class="workhorse-card">
+        <div class="workhorse-art indigo" aria-hidden="true">
+            <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                <line x1="24" y1="104" x2="216" y2="104" stroke="#c7d2fe" stroke-width="2" />
+                @{ var bars = new[] { 38, 56, 44, 70, 62, 84 }; }
+                @for (var i = 0; i < bars.Length; i++)
+                {
+                    <rect x="@(34 + i * 30)" y="@(104 - bars[i])" width="18" height="@bars[i]" rx="3" fill="#818cf8" opacity="0.75" />
+                }
+                <polyline points="43,58 73,40 103,50 133,26 163,32 193,12" fill="none" stroke="#4338ca" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+        <div class="workhorse-body">
+            <h3 class="workhorse-name"><span class="workhorse-tile indigo"><span class="bi bi-pie-chart-fill"></span></span> Charts</h3>
+            @if (Compact)
+            {
+                <p class="workhorse-line">35+ chart types, drawn in SVG from C#</p>
+            }
+            else
+            {
+                <p class="workhorse-desc">35+ chart types drawn in SVG from C#, from sparklines and gauges to Sankey diagrams.</p>
+                <ul class="workhorse-chips">
+                    <li>Bar &amp; line</li><li>Pie &amp; donut</li><li>Gauges</li><li>Financial</li>
+                </ul>
+                <span class="workhorse-link">Explore the charts &rarr;</span>
+            }
+        </div>
+    </a>
+
+    <a href="demo/reports/package-costs" class="workhorse-card">
+        <div class="workhorse-art green" aria-hidden="true">
+            <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                <rect x="70" y="8" width="100" height="108" rx="6" fill="#ffffff" stroke="#6ee7b7" stroke-width="2" />
+                <rect x="82" y="20" width="52" height="7" rx="2" fill="#059669" />
+                @for (var i = 0; i < 4; i++)
+                {
+                    <rect x="82" y="@(40 + i * 14)" width="44" height="5" rx="2" fill="#cbd5e1" />
+                    <rect x="136" y="@(40 + i * 14)" width="22" height="5" rx="2" fill="#6ee7b7" />
+                }
+                <line x1="82" y1="98" x2="158" y2="98" stroke="#059669" stroke-width="2" />
+                <rect x="130" y="103" width="28" height="6" rx="2" fill="#059669" />
+            </svg>
+        </div>
+        <div class="workhorse-body">
+            <h3 class="workhorse-name"><span class="workhorse-tile green"><span class="bi bi-file-earmark-richtext"></span></span> Reports</h3>
+            @if (Compact)
+            {
+                <p class="workhorse-line">Parameters, <span class="nb">drill-down</span> and a report designer</p>
+            }
+            else
+            {
+                <p class="workhorse-desc">Bring your Crystal Reports across and run them in the browser, with parameters and drill-down.</p>
+                <ul class="workhorse-chips">
+                    <li>Crystal import</li><li>Parameters</li><li>Drill-down</li><li>Report designer</li>
+                </ul>
+                <span class="workhorse-link">Explore the reports &rarr;</span>
+            }
+        </div>
+    </a>
+
+    <a href="demo/scheduler" class="workhorse-card">
+        <div class="workhorse-art sky" aria-hidden="true">
+            <svg viewBox="0 0 240 120" preserveAspectRatio="xMidYMid meet">
+                <rect x="20" y="12" width="200" height="14" rx="4" fill="#0ea5e9" opacity="0.85" />
+                @for (var c = 0; c < 7; c++)
+                {
+                    <line x1="@(20 + c * 200 / 7)" y1="30" x2="@(20 + c * 200 / 7)" y2="110" stroke="#bae6fd" stroke-width="1" />
+                }
+                <rect x="24" y="36" width="50" height="14" rx="3" fill="#38bdf8" />
+                <rect x="82" y="56" width="78" height="14" rx="3" fill="#7dd3fc" />
+                <rect x="110" y="34" width="44" height="14" rx="3" fill="#0369a1" opacity="0.8" />
+                <rect x="168" y="76" width="46" height="14" rx="3" fill="#38bdf8" />
+                <rect x="40" y="90" width="64" height="14" rx="3" fill="#bae6fd" />
+            </svg>
+        </div>
+        <div class="workhorse-body">
+            <h3 class="workhorse-name"><span class="workhorse-tile sky"><span class="bi bi-calendar-week"></span></span> Scheduler</h3>
+            @if (Compact)
+            {
+                <p class="workhorse-line">Day, week, month, timeline and agenda views</p>
+            }
+            else
+            {
+                <p class="workhorse-desc">Day, week, month, timeline and agenda views, plus a Gantt chart for the long jobs.</p>
+                <ul class="workhorse-chips">
+                    <li>Day &amp; week</li><li>Month</li><li>Timeline</li><li>Gantt</li>
+                </ul>
+                <span class="workhorse-link">Explore the scheduler &rarr;</span>
+            }
+        </div>
+    </a>
+</div>
+
+@code {
+    /// <summary>Four smaller cards in one row (the components page) instead of the big two-by-two (the home page): mostly the drawing,
+    /// with a slim white strip under it holding the icon, the name and one short line; no description, tags or "Explore" link.</summary>
+    [Parameter] public bool Compact { get; set; }
+}

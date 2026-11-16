@@ -1,5 +1,5 @@
-// 2026-10-24: the chart documentation rows live in the ChartsVocab.*.cs partials next to this file (parameters, model classes,
-// chart types, CSS); the Charts page shows them all, other chart pages show a subset through TypesNamed.
+// 2026-10-24: chart documentation rows are in the ChartsVocab.*.cs partials (parameters, models, chart types, CSS); the Charts
+// page shows all, other chart pages a subset via TypesNamed.
 using FlexCore.Showcase.Components.Shared;
 
 namespace FlexCore.Showcase.Components.Pages.Demos.Charts;

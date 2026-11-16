@@ -1,34 +1,49 @@
 @page "/demo/security-code"
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-12: new page on FeatureDemoLayout; one example. Facts checked against SecurityCodeControl.razor(.css) and FlexControlBase.cs
-   (FlexCore 0.2.48). The control has no focus auto-advance and no paste handling: the page says so rather than implying it (tracker SC-253). *@
+@* 2026-10-12: new page on FeatureDemoLayout. Facts from SecurityCodeControl.razor(.css), FlexControlBase.cs (FlexCore 0.2.48).
+   The control has no focus auto-advance or paste handling; the page says so (SC-253).
+   2026-11-15: second example (booking reference, AlphaNumeric); text re-checked against FlexCore 0.2.50.
+   2026-11-15: example story moved to the HR tracking theme. *@
 
-<PageTitle>Security code — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor OTP Input (Security Code) — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Security code" Category="Components" ControlName="SecurityCodeControl"
-                   Tagline="One box per character for verification codes and PINs, with a callback when the last box is filled."
+                   Tagline="Collect verification codes, PINs and short references one character per box."
                    SourcePath="SecurityCodeControl.razor">
     <Overview>
         <p>
-            <code>SecurityCodeControl</code> renders <code>Length</code> single-character inputs and joins them into one string bound through
-            <code>Value</code>. <code>OnComplete</code> fires when every box holds a character. <code>Type="Numeric"</code> rejects anything
-            but digits and uses <code>type="tel"</code>, so phones show the number pad. Each box is an ordinary input: Tab or a click moves
-            between them, a character fills a box and Backspace clears it. The control does not move focus on its own and does not split a
-            pasted code across the boxes.
+            <code>SecurityCodeControl</code> is a Blazor one-time-code input: one box per character for verification codes and PINs, joined into one bound <code>Value</code>. Use it for two-step sign-in, confirming an email address or typing an employee id; <code>OnComplete</code> fires when the last box is filled, so you can check the code without a Submit button. <code>Length</code> sets the number of boxes, and <code>Type</code> allows digits only or letters too.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="verify" Title="Verification code" RazorCode="@Code.Verify" CSharpCode="@Code.VerifyCs">
-            <Description><p>Six digits, checked in <code>OnComplete</code>. Fill the boxes in order with Tab between them; the demo code is <code>492018</code>. Clear resets the bound value, which empties every box.</p></Description>
+            <Description><p>Type the six digits (the demo code is 492018), with Tab between boxes: <code>OnComplete</code> checks the code once every box is filled, and a match sets <code>Disabled</code> to lock the boxes.</p></Description>
             <Demo>
-                <p class="lead">We sent a code to +1 (425) ••• 0142. Enter it to continue.</p>
-                <div class="code-row">
-                    <SecurityCodeControl @bind-Value="_code" Length="6" OnComplete="Check" />
-                    <ButtonControl CssClass="btn-sm" OnClick="Clear">Clear</ButtonControl>
+                <div class="vc">
+                    <div class="vc-head"><span class="vc-icon bi bi-shield-lock" aria-hidden="true"></span><p class="vc-lead">We texted a code to Hermione Ranger's phone ending 0142. Enter it to confirm leave request LR-0107.</p></div>
+                    <div class="code-row">
+                        <SecurityCodeControl @bind-Value="_code" Length="6" Disabled="@(_accepted == true)" OnComplete="Check" />
+                        <ButtonControl CssClass="btn-sm" OnClick="NewCode">Send a new code</ButtonControl>
+                        <BadgeControl Text="@(_accepted == true ? "Confirmed" : "Awaiting code")" Variant="@(_accepted == true ? BadgeVariant.Success : BadgeVariant.Secondary)" />
+                    </div>
+                    <p class="result @(_accepted == true ? "ok" : _accepted == false ? "bad" : null)" role="status">@Status</p>
                 </div>
-                <p class="result @(_accepted == true ? "ok" : _accepted == false ? "bad" : null)">@Status</p>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="reference" Title="Letters and digits" RazorCode="@Code.Reference" CSharpCode="@Code.ReferenceCs">
+            <Description><p>Look up an employee by id: <code>Type</code> set to <code>AlphaNumeric</code> accepts letters as well as digits, and <code>Length</code> sets the number of boxes.</p></Description>
+            <Demo>
+                <div class="vc">
+                    <div class="vc-head"><span class="vc-icon bi bi-search" aria-hidden="true"></span><p class="vc-lead">Type an employee id without its hyphen: three letters and four digits, such as EMP0017, EMP0042 or EMP0051.</p></div>
+                    <div class="code-row">
+                        <SecurityCodeControl @bind-Value="_employeeId" @bind-Value:after="ResetFound" Length="7" Type="SecurityCodeControl.SecurityCodeType.AlphaNumeric" OnComplete="Find" />
+                        <ButtonControl CssClass="btn-sm" OnClick="ClearEmployeeId">Clear</ButtonControl>
+                    </div>
+                    <p class="result @(_found is null ? null : _found.StartsWith("No ") ? "bad" : "ok")" role="status">@(_found ?? $"{(_employeeId ?? "").Replace(" ", "").Length} of 7 characters entered")</p>
+                </div>
             </Demo>
         </DemoExample>
     </Examples>
@@ -37,6 +52,9 @@
         <DocSections>
             <DocSection Id="doc-securitycodecontrol-parameters" Title="SecurityCodeControl parameters" Count='@DocSection.Label(Vocab.Params.Length, "parameters")' Open="true">
                 <ApiTable Kind="ApiKind.Parameters" Title="SecurityCodeControl parameters" Rows="Vocab.Params" />
+            </DocSection>
+            <DocSection Id="doc-events" Title="Events" Count='@DocSection.Label(Vocab.Events.Length, "events")'>
+                <ApiTable Kind="ApiKind.Events" Title="Events" Rows="Vocab.Events" />
             </DocSection>
             <DocSection Id="doc-securitycodetype-nested-enum" Title="SecurityCodeType (nested enum)" Count='@DocSection.Label(Vocab.Types.Length, "values")'>
                 <ApiTable Kind="ApiKind.Values" Title="SecurityCodeType (nested enum)" Rows="Vocab.Types" />
@@ -51,10 +69,10 @@
     <Accessibility>
         <ApiTable Kind="ApiKind.Keyboard" Title="Keyboard" Rows="Vocab.Keys" />
         <ul>
-            <li>The boxes are plain inputs with <code>maxlength="1"</code> and no accessible name of their own. Put a visible instruction before the control, as above.</li>
-            <li>The host is a <code>&lt;div&gt;</code> without a role; unmatched attributes such as <code>id</code> or <code>data-*</code> land on it.</li>
-            <li>Numeric boxes are <code>type="tel"</code>, alphanumeric boxes <code>type="text"</code>. A non-digit typed into a numeric box is ignored.</li>
-            <li>Clearing a middle box leaves a gap in <code>Value</code> (a space), so <code>OnComplete</code> waits until that box is filled again.</li>
+            <li>Each box is a native <code>&lt;input&gt;</code> with <code>maxlength="1"</code> and its own Tab stop. <code>Numeric</code> boxes are <code>type="tel"</code>, so phones show a number pad; <code>AlphaNumeric</code> boxes are <code>type="text"</code>.</li>
+            <li>Unmatched attributes land on the host <code>&lt;div&gt;</code>. Pass <code>role="group"</code> and an <code>aria-label</code> such as "Verification code" to name the set, and keep a visible instruction before the boxes, as both examples do.</li>
+            <li>The focused box turns its border blue and shows a 3px ring. <code>Disabled</code> disables every box, so Tab skips the control.</li>
+            <li>Report the result in a <code>role="status"</code> element beside the boxes, as both examples do. After a wrong code, set <code>Value</code> to an empty string to clear every box for a fresh try.</li>
         </ul>
     </Accessibility>
 
@@ -67,23 +85,43 @@
 </FeatureDemoLayout>
 
 @code {
+    // Verification code
     private const string Expected = "492018";
     private string? _code = "";
     private bool? _accepted;
-
     private string Status => _accepted switch
     {
-        true => "Code accepted. Signing you in…",
-        false => "That code does not match. Clear and try again.",
+        true => "Code accepted. Leave request LR-0107 is confirmed, and the boxes are locked.",
+        false => "That code does not match. Type it again, or send a new code.",
         _ => $"{(_code ?? "").Replace(" ", "").Length} of 6 digits entered",
     };
-
-    private void Check(string code) => _accepted = code == Expected;
-
-    private void Clear()
+    private void Check(string code)
+    {
+        _accepted = code == Expected;
+        if (_accepted == false) _code = "";   // empty the boxes for a fresh try
+    }
+    private void NewCode()
     {
         _code = "";
         _accepted = null;
+    }
+
+    // Employee id
+    private static readonly Dictionary<string, string> Employees = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["EMP0017"] = "EMP-0017: Hermione Ranger, Reservations",
+        ["EMP0042"] = "EMP-0042: Luna Goodlove, Tour Operations",
+        ["EMP0051"] = "EMP-0051: Neville Longbutton, IT",
+    };
+    private string? _employeeId = "";
+    private string? _found;
+    private void ResetFound() => _found = null;   // an edited id no longer shows the last lookup
+    private void Find(string id) =>
+        _found = Employees.TryGetValue(id, out var employee) ? employee : $"No employee with id {id.ToUpperInvariant()}";
+    private void ClearEmployeeId()
+    {
+        _employeeId = "";
+        _found = null;
     }
 
     // Vocabulary rows, one per public member (0.2.48). Base-class parameters marked (base).
@@ -92,61 +130,93 @@
         public static readonly ApiRow[] Params =
         {
             new("Value", "The joined characters. Two-way with <code>@bind-Value</code>; a cleared middle box leaves a space.", "string?", "null"),
-            new("ValueChanged", "Fires after every keystroke that changes a box.", "EventCallback&lt;string?&gt;"),
-            new("Length", "Number of boxes.", "int", "6"),
-            new("Type", "<code>Numeric</code> accepts digits only and renders <code>type=\"tel\"</code>; <code>AlphaNumeric</code> accepts any character.", "SecurityCodeControl.SecurityCodeType", "Numeric"),
-            new("OnComplete", "Fires with the full code once every box is filled, after <code>ValueChanged</code>.", "EventCallback&lt;string&gt;"),
-            new("Disabled", "Disables every box and greys the host. The base <code>Enabled</code> is not read by this control.", "bool", "false"),
+                        new("Length", "Number of boxes.", "int", "6"),
+            new("Type", "<code>Numeric</code> takes digits only and renders <code>type=\"tel\"</code>; <code>AlphaNumeric</code> takes any character.", "SecurityCodeControl.SecurityCodeType", "Numeric"),
+                        new("Disabled", "Disables every box and grays the host. The base <code>Enabled</code> is not read by this control.", "bool", "false"),
             new("CssClass / Style (base)", "On the host element. The base <code>Visible</code> is not applied.", "string?", "null"),
-            new("(unmatched attributes)", "Forwarded to the host <code>&lt;div&gt;</code>, not to the boxes.", "Dictionary&lt;string,object&gt;"),
+            new("Id / Title / Tag / Data / Parent (base)", "Accepted but not rendered. A written <code>id</code> binds to <code>Id</code>, so it does not reach the host.", "", "null"),
+            new("(unmatched attributes)", "Written on the host <code>&lt;div&gt;</code>, not on the boxes, such as <code>data-*</code>.", "Dictionary&lt;string,object&gt;"),
+        };
+        public static readonly ApiRow[] Events =
+        {
+            new("ValueChanged", "After every keystroke that changes a box, with the joined characters.", "string?"),
+            new("OnComplete", "Once every box is filled, after <code>ValueChanged</code>, with the full code. Fires again if a box changes while the code is complete.", "string"),
         };
         public static readonly ApiRow[] Types =
         {
-            new("Numeric", "Digits 0–9; other characters are ignored."),
-            new("AlphaNumeric", "Any single character per box; no case folding."),
+            new("Numeric", "Decimal digits (the control tests <code>char.IsDigit</code>, so not only 0–9). Another character is left out of <code>Value</code>, though the box still shows it until it is replaced."),
+            new("AlphaNumeric", "Any single character per box, as typed: no case folding and no filtering."),
         };
         public static readonly ApiRow[] Css =
         {
-            new("fx-security-code-host · .disabled", "Inline flex row, 0.5rem gap; <code>disabled</code> greys the boxes and sets <code>cursor: not-allowed</code>."),
+            new("fx-security-code-host · .disabled", "Inline flex row, 0.5rem gap; <code>disabled</code> grays the boxes and sets <code>cursor: not-allowed</code>."),
             new("fx-security-code-cell", "Each box: 42×48px, bold 1.25rem text, 2px border; focus turns the border blue with a 3px ring."),
         };
         public static readonly ApiRow[] Keys =
         {
-            new("Tab / Shift+Tab", "Move to the next or previous box. The control does not move focus itself."),
-            new("Character", "Fills the box. In <code>Numeric</code> mode only digits are accepted."),
-            new("Backspace", "Clears the box; focus stays."),
-            new("Arrow keys", "Not handled; the caret moves inside the single-character box."),
+            new("Tab / Shift+Tab", "Move to the next or previous box."),
+            new("Character", "Fills the box. In <code>Numeric</code> mode only digits are added to <code>Value</code>."),
+            new("Backspace", "Clears the box's character; focus stays in the box."),
+            new("Paste", "Puts the first character of the pasted text in the box."),
         };
     }
 
     // Code tabs are verbatim
     private static class Code
     {
-        public const string Verify = @"<p class=""lead"">We sent a code to +1 (425) ••• 0142. Enter it to continue.</p>
-<div class=""code-row"">
-    <SecurityCodeControl @bind-Value=""_code"" Length=""6"" OnComplete=""Check"" />
-    <ButtonControl CssClass=""btn-sm"" OnClick=""Clear"">Clear</ButtonControl>
-</div>
-<p class=""result @(_accepted == true ? ""ok"" : _accepted == false ? ""bad"" : null)"">@Status</p>";
-        public const string VerifyCs = @"private const string Expected = ""492018"";
-
+        public const string Verify = @"<div class=""vc"">
+    <div class=""vc-head""><span class=""vc-icon bi bi-shield-lock"" aria-hidden=""true""></span><p class=""vc-lead"">We texted a code to Hermione Ranger's phone ending 0142. Enter it to confirm leave request LR-0107.</p></div>
+    <div class=""code-row"">
+        <SecurityCodeControl @bind-Value=""_code"" Length=""6"" Disabled=""@(_accepted == true)"" OnComplete=""Check"" />
+        <ButtonControl CssClass=""btn-sm"" OnClick=""NewCode"">Send a new code</ButtonControl>
+        <BadgeControl Text=""@(_accepted == true ? ""Confirmed"" : ""Awaiting code"")"" Variant=""@(_accepted == true ? BadgeVariant.Success : BadgeVariant.Secondary)"" />
+    </div>
+    <p class=""result @(_accepted == true ? ""ok"" : _accepted == false ? ""bad"" : null)"" role=""status"">@Status</p>
+</div>";
+        public const string VerifyCs = @"// Verification code
+private const string Expected = ""492018"";
 private string? _code = """";
-
 private bool? _accepted;
-
 private string Status => _accepted switch
 {
-    true => ""Code accepted. Signing you in…"",
-    false => ""That code does not match. Clear and try again."",
+    true => ""Code accepted. Leave request LR-0107 is confirmed, and the boxes are locked."",
+    false => ""That code does not match. Type it again, or send a new code."",
     _ => $""{(_code ?? """").Replace("" "", """").Length} of 6 digits entered"",
 };
-
-private void Check(string code) => _accepted = code == Expected;
-
-private void Clear()
+private void Check(string code)
+{
+    _accepted = code == Expected;
+    if (_accepted == false) _code = """";   // empty the boxes for a fresh try
+}
+private void NewCode()
 {
     _code = """";
     _accepted = null;
+}";
+        public const string Reference = @"<div class=""vc"">
+    <div class=""vc-head""><span class=""vc-icon bi bi-search"" aria-hidden=""true""></span><p class=""vc-lead"">Type an employee id without its hyphen: three letters and four digits, such as EMP0017, EMP0042 or EMP0051.</p></div>
+    <div class=""code-row"">
+        <SecurityCodeControl @bind-Value=""_employeeId"" @bind-Value:after=""ResetFound"" Length=""7"" Type=""SecurityCodeControl.SecurityCodeType.AlphaNumeric"" OnComplete=""Find"" />
+        <ButtonControl CssClass=""btn-sm"" OnClick=""ClearEmployeeId"">Clear</ButtonControl>
+    </div>
+    <p class=""result @(_found is null ? null : _found.StartsWith(""No "") ? ""bad"" : ""ok"")"" role=""status"">@(_found ?? $""{(_employeeId ?? """").Replace("" "", """").Length} of 7 characters entered"")</p>
+</div>";
+        public const string ReferenceCs = @"// Employee id
+private static readonly Dictionary<string, string> Employees = new(StringComparer.OrdinalIgnoreCase)
+{
+    [""EMP0017""] = ""EMP-0017: Hermione Ranger, Reservations"",
+    [""EMP0042""] = ""EMP-0042: Luna Goodlove, Tour Operations"",
+    [""EMP0051""] = ""EMP-0051: Neville Longbutton, IT"",
+};
+private string? _employeeId = """";
+private string? _found;
+private void ResetFound() => _found = null;   // an edited id no longer shows the last lookup
+private void Find(string id) =>
+    _found = Employees.TryGetValue(id, out var employee) ? employee : $""No employee with id {id.ToUpperInvariant()}"";
+private void ClearEmployeeId()
+{
+    _employeeId = """";
+    _found = null;
 }";
     }
 }

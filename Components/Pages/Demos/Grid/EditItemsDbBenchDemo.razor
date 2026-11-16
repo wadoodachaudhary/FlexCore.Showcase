@@ -6,40 +6,26 @@
 @using FlexCore.Showcase.Components.Shared
 @inject FlexCore.Showcase.Services.BenchDataStore BenchData
 
-@* 2026-10-17: moved onto FeatureDemoLayout (one-example-plus-code push, tracker section 6). Same grid, columns and data. Changes,
-   closing SC-135 to SC-140: the zoom buttons went (they scaled the wrapper with a CSS transform, which does not reflow, and nothing on
-   this page publishes --fx-zoom for ZoomService); "typing responsiveness metrics", "memory usage remains constant", "native desktop
-   ERPs" and the internal product name left the copy; the unused @ref went; EnableTypeSearch went (off-topic here, unexplained); the
-   counter now counts saves (OnCellSave) rather than edit starts (OnCellEdit) and names the last one. SelectAllOnEdit stays on the
-   two numeric columns but the copy no longer claims it: in the browser the editor opened with the caret at the end on both
-   double-click and Enter entry (SC-253 note). The data is BenchDataStore's
-   in-memory list (5,000 generated rows when the JSON file is absent) and the copy says so. Parameter tables are a later pass (SC-278).
-   2026-10-24 (SC-278): Documentation tables written from Grid/EditSettings.cs, Grid/GridEnums.cs, Grid/GridColumn.cs,
-   Grid/GridControlEvents.cs, Grid/GridModels.cs and the read and raise sites in Grid/GridControl.razor.cs, GridControl.razor,
-   GridControl.DeleteConfirmation.cs, GridControl.RowEditing.cs and GridControl.Validation.cs; rows checked with scratchpad/vocabcheck.py.
-   Members the library declares but never reads or raises (CellSaved, OnActionComplete, PreferCellEditOnDoubleClick, ValidationRules,
-   DefaultValue) are listed as such. The CellEditButtonArgs, CellValueTruncatedArgs and TypeAheadCommitArgs payloads are described in
-   the closing paragraph rather than in tables of their own, being off this page's topic. *@
-@* 2026-10-25 (Baaria, SC-344): the example runs on the operator's rate card (Data/BenchModels.cs RateCardItem, BenchDataStore.RateCard)
-   instead of the earlier estimating items. *@
+@* 2026-10-17: on FeatureDemoLayout; closes SC-135 to SC-140; tables added 2026-10-24 (SC-278). No zoom buttons: CSS transform
+   does not reflow and nothing here publishes --fx-zoom. SelectAllOnEdit is set but not claimed: the editor opened with the caret
+   at the end (SC-253). Data: BenchDataStore's in-memory list, 5,000 generated rows without the JSON file.
+   2026-10-24 (SC-278): tables from the SourcePath files; unused members marked; off-topic arg types in the closing paragraph. *@
+@* 2026-10-25 (SC-344): example uses the rate card (Data/BenchModels.cs RateCardItem, BenchDataStore.RateCard). *@
 
-<PageTitle>Batch editing — FlexCore Showcase</PageTitle>
+<PageTitle>Batch Editing in a Blazor Grid — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Batch editing" Category="Data Grid" CategoryHref="demo/grid" ControlName="GridControl"
-                   Tagline="Double-click a cell, type, press Enter: cell-by-cell editing on a 5,000-line rate card, written straight to the bound objects."
+                   Tagline="Let users edit a grid cell by cell, spreadsheet style, straight into your objects."
                    SourcePath="Grid/EditSettings.cs;Grid/GridEnums.cs;Grid/GridColumn.cs;Grid/GridControlEvents.cs;Grid/GridModels.cs;Grid/GridControl.razor.cs;Grid/GridControl.razor;Grid/GridControl.DeleteConfirmation.cs;Grid/GridControl.RowEditing.cs;Grid/GridControl.Validation.cs">
     <Overview>
         <p>
-            <code>EditSettings</code> turns editing on and picks the mode. In <code>EditMode.Batch</code> a double-click on an editable cell,
-            or Enter on the selected cell, opens an editor in that cell; Tab or Enter commits the value to the bound object and Escape
-            abandons it. There is no row editor and no save button. Columns opt in with <code>AllowEditing</code>. <code>GridControlEvents</code> reports what happens: <code>OnCellEdit</code> before a cell opens (set
-            <code>Cancel</code> to refuse) and <code>OnCellSave</code> when a value is written.
+            Batch editing turns a Blazor <code>GridControl</code> into a spreadsheet-style editor: users double-click a cell or press Enter, type, and commit with Enter or Tab. Use it for rate cards and price lists that are corrected line by line; each commit writes straight to the bound object and raises <code>OnCellSave</code>. Turn it on with <code>EditSettings</code> in <code>EditMode.Batch</code>, keep a column read-only with <code>AllowEditing="false"</code>, and refuse a cell in <code>OnCellEdit</code>.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="edit" Title="Edit rate card cells in place" RazorCode="@Code.Edit" CSharpCode="@Code.EditCs">
-            <Description><p>Five thousand generated rate card lines held in memory; each line is a service from one supplier at one destination, with the net rate the operator pays and the margin it adds. Code, Region and Destination are read-only; double-click any other cell, or select it and press Enter, to edit it. Enter commits and stays on the cell, Tab commits and moves the selection to the next editable cell, Escape abandons the edit. The line under the grid counts saves and names the last one.</p></Description>
+            <Description><p>Double-click any cell except Code, Region or Destination, type, and press Enter to commit or Escape to abandon; the line under the grid counts saves on a 5,000-line rate card.</p></Description>
             <Demo>
                 <GridControl TValue="RateCardItem"
                              DataSource="@_lines"
@@ -157,8 +143,7 @@
         });
     }
 
-    // Code tabs are verbatim copies of the Demo block and the members above (generated, not typed); the C# tab also carries
-    // RateCardItem from Data/BenchModels.cs.
+    // Code tabs: generated verbatim copies of the Demo block and members above; C# tab adds RateCardItem from Data/BenchModels.cs.
     private static class Code
     {
         public const string Edit = @"<GridControl TValue=""RateCardItem""
@@ -235,7 +220,7 @@ public sealed class RateCardItem
         {
             new("EditSettingsRef", "The settings object below. Null leaves every cell read-only: each way into an editor first checks <code>AllowEditing</code> on it.", "EditSettings?", "null"),
             new("EventsRef", "The object that holds the callbacks below; the grid has no separate parameters for the edit events.", "GridControlEvents&lt;TValue&gt;?", "null"),
-            new("BatchEditBehavior", "Picks one of the two batch behaviours in the table below.", "GridBatchEditBehavior", "GridBatchEditBehavior.MultiRow"),
+            new("BatchEditBehavior", "Picks one of the two batch behaviors in the table below.", "GridBatchEditBehavior", "GridBatchEditBehavior.MultiRow"),
             new("EditOnSingleClick", "A plain click on an editable batch cell opens its editor at once, instead of only selecting the cell.", "bool", "false"),
             new("CellEditablePredicate", "Per-row veto, called with the row and the field before a cell opens and again for each row a multi-row commit fans out to. A false answer leaves that cell read-only without raising <code>OnCellEdit</code>.", "Func&lt;TValue, string, bool&gt;?", "null"),
             new("NewItemFactory", "Builds the row for <code>AppendRow</code>, <code>InsertRow</code> and the Inline or Dialog add editor. Without it the grid calls <code>Activator.CreateInstance&lt;TValue&gt;()</code>.", "Func&lt;TValue&gt;?", "null"),

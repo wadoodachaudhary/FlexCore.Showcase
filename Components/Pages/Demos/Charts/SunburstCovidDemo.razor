@@ -5,33 +5,25 @@
 @using FlexCore.Showcase.Services
 @using System.Globalization
 @using FlexCore.Showcase.Components.Shared
-@* 2026-10-12: header moved onto FeatureDemoLayout; the metric switch and reset are FlexCore controls in the card
-   header; the filters, chart, side panels and dataset grid below are unchanged. The "Pure SVG • Zero JS" badge
-   was removed per the claims rule. Parameter table pending (SC-264). Code tabs 2026-10-17 (SC-277): Razor and C# are
-   verbatim excerpts covering the two FlexCore controls and the members they bind; the comment in each tab says what is left out.
-   2026-10-20: code tabs generated from this file (gencode, every member); the earlier tabs were hand-written excerpts. The Razor tab is the
-   whole example, 284 lines, because the example is the whole dashboard.
-   2026-10-24: Documentation tables (SC-264 closed) written from Charts/SunburstChartControl.razor, SunburstChartControl.razor.css and
-   SunburstModels.cs, with ChartControl.razor for the mapping paragraph; every row checked against its declaration and its read site by
-   vocabcheck.py plus grep. *@
+@* 2026-10-12 (SC-264): header on FeatureDemoLayout; "Pure SVG • Zero JS" badge removed (claims rule).
+   2026-10-17 (SC-277): code tabs of verbatim excerpts.
+   2026-10-20: code tabs generated from this file; the Razor tab is the whole dashboard.
+   2026-10-24: tables (SC-264 closed) from the SourcePath files; ChartControl.razor for the mapping paragraph. *@
 
-<PageTitle>Sunburst — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor Sunburst Chart — FlexCore</PageTitle>
 
 <FeatureDemoLayout Title="Sunburst" Category="Charts" CategoryHref="demo/charts" ControlName="SunburstChartControl"
-                   Tagline="A drill-down hierarchy chart on a real dataset: 210 countries in 6 continents."
+                   Tagline="Explore a hierarchy ring by ring: click to drill in, click the center to zoom out."
                    SourcePath="Charts/SunburstChartControl.razor;Charts/SunburstChartControl.razor.css;Charts/SunburstModels.cs;Charts/ChartControl.razor">
     <Overview>
         <p>
-            <code>SunburstChartControl</code> draws a <code>SunburstNode</code> tree as concentric rings. Click a ring segment to drill into it,
-            click the centre to zoom back out; a breadcrumb tracks the path and <code>OnNodeClick</code> / <code>OnNodeHover</code> report
-            the node. The dataset is 56,956,080 confirmed COVID-19 cases and 1,397,672 deaths, after
-            <a href="https://towardsdatascience.com/how-i-created-a-sunburst-chart-using-javascript-to-visualize-covid-19-data-4ef27b45af8a/" target="_blank" rel="noopener">an article on Towards Data Science</a>.
+            <code>SunburstChartControl</code> is a Blazor sunburst chart: a hierarchy drawn as concentric rings, where each segment's size shows its share of the parent. Use it for any breakdown with levels, such as sales by region and country: users click a segment to drill in and the center to zoom out. The data here is COVID-19 cases and deaths for 210 countries, after an article on Toward Data Science.
         </p>
     </Overview>
 
     <Examples>
         <DemoExample Id="covid" Title="Cases and deaths by continent and country" RazorCode="@Code.Covid" CSharpCode="@Code.CovidCs">
-            <Description><p>Switch the metric, filter a continent, search a country, or open the data table underneath. The chart, the stats and the leaderboard share one selection.</p></Description>
+            <Description><p>Switch the metric, filter a continent, search a country or open the data table underneath; the chart, stats and leaderboard share one selection.</p></Description>
             <Controls>
                 <ButtonGroupControl Items="_metricItems" Values="@(new[] { _useDeathsAsMetric ? "deaths" : "cases" })"
                                     ValuesChanged="@(v => SwitchMetric(v.Count > 0 && v[0] == "deaths"))"
@@ -50,39 +42,39 @@
                     All Continents
                 </button>
                 <button type="button" class="btn btn-sm @(_activeContinentFilter == "Asia" ? "text-white" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "Asia" ? "#4db6ac" : "");"
+                        style="background: @(_activeContinentFilter == "Asia" ? "#0284c7" : "");"
                         @onclick='() => FilterByContinent("Asia")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#63c6c1;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#0284c7;"></span>
                     Asia (15.9M)
                 </button>
                 <button type="button" class="btn btn-sm @(_activeContinentFilter == "North America" ? "text-white" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "North America" ? "#e53935" : "");"
+                        style="background: @(_activeContinentFilter == "North America" ? "#d97706" : "");"
                         @onclick='() => FilterByContinent("North America")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#e25b45;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#d97706;"></span>
                     North America (14.6M)
                 </button>
                 <button type="button" class="btn btn-sm @(_activeContinentFilter == "Europe" ? "text-white" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "Europe" ? "#8bc34a" : "");"
+                        style="background: @(_activeContinentFilter == "Europe" ? "#059669" : "");"
                         @onclick='() => FilterByContinent("Europe")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#adc965;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#059669;"></span>
                     Europe (13.5M)
                 </button>
                 <button type="button" class="btn btn-sm @(_activeContinentFilter == "South America" ? "text-white" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "South America" ? "#5c6bc0" : "");"
+                        style="background: @(_activeContinentFilter == "South America" ? "#c026d3" : "");"
                         @onclick='() => FilterByContinent("South America")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#7C79A2;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#c026d3;"></span>
                     South America (10.7M)
                 </button>
                 <button type="button" class="btn btn-sm @(_activeContinentFilter == "Africa" ? "text-white" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "Africa" ? "#f59e0b" : "");"
+                        style="background: @(_activeContinentFilter == "Africa" ? "#6366f1" : "");"
                         @onclick='() => FilterByContinent("Africa")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#FBAF0A;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#6366f1;"></span>
                     Africa (2.1M)
                 </button>
-                <button type="button" class="btn btn-sm @(_activeContinentFilter == "Oceania" ? "text-dark" : "btn-light border")"
-                        style="background: @(_activeContinentFilter == "Oceania" ? "#FFC1A6" : "");"
+                <button type="button" class="btn btn-sm @(_activeContinentFilter == "Oceania" ? "text-white" : "btn-light border")"
+                        style="background: @(_activeContinentFilter == "Oceania" ? "#e11d48" : "");"
                         @onclick='() => FilterByContinent("Oceania")'>
-                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#FFC1A6;"></span>
+                    <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:#e11d48;"></span>
                     Oceania (49.9K)
                 </button>
             </div>
@@ -120,7 +112,7 @@
                                           MetricName="@(_useDeathsAsMetric ? "Deaths" : "Cases")"
                                           SecondaryMetricName="@(_useDeathsAsMetric ? "Cases" : "Deaths")"
                                           CenterTitle="@(_useDeathsAsMetric ? "TOTAL DEATHS" : "TOTAL CASES")"
-                                          CenterColor="@(_useDeathsAsMetric ? "#e53935" : "#56abf6")"
+                                          CenterColor="@(_useDeathsAsMetric ? "#e11d48" : "#38bdf8")"
                                           ValueFormat="N0"
                                           EnableDrilldown="true"
                                           ShowBreadcrumb="true"
@@ -193,7 +185,7 @@
                         var pctWorld = (cases / CovidDataService.WorldTotalCases) * 100.0;
 
                         <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="d-inline-block rounded-circle" style="width:14px; height:14px; background: @(node.Color ?? "#56abf6");"></span>
+                            <span class="d-inline-block rounded-circle" style="width:14px; height:14px; background: @(node.Color ?? "#38bdf8");"></span>
                             <h5 class="mb-0 fw-bold">@node.Name</h5>
                             @if (node.CustomAttributes.TryGetValue("IsoCode", out var iso) && iso is string isoStr && !string.IsNullOrEmpty(isoStr))
                             {
@@ -340,7 +332,7 @@
                 <ul>
                 <li>The view box is 700 by 700 units with a drawing radius of 325. The hub takes <code>CenterRadiusRatio</code> of that radius; ring 1 takes one level's share of the rest, by the depth below the current root, and ring 2 takes what remains. Only those two rings are drawn; levels further down appear after a drill-down.</li>
                 <li>Segments run clockwise from 12 o'clock, each as wide as its share of its siblings' <code>TotalValue</code>; ring 2 splits its parent's span the same way among the grandchildren.</li>
-                <li>While a segment is hovered, segments that are neither its ancestors nor its descendants are dimmed and a tooltip follows the pointer, 16 px right and 20 px up, clamped at 10 to 850 px across and 10 to 750 px down. It lists the name, a regions badge when the node has children, the two totals, the share of the parent for depth 2 nodes, and the share of <code>RootNode</code>, always labelled % of World.</li>
+                <li>While a segment is hovered, segments that are neither its ancestors nor its descendants are dimmed and a tooltip follows the pointer, 16 px right and 20 px up, clamped at 10 to 850 px across and 10 to 750 px down. It lists the name, a regions badge when the node has children, the two totals, the share of the parent for depth 2 nodes, and the share of <code>RootNode</code>, always labeled % of World.</li>
                 <li>Some text is fixed in the markup: the breadcrumb root carries a globe before <code>RootNode.Name</code>; at the root the hub shows Across the World under the value while nothing is hovered, and below the root a Click to zoom out hint; the tooltip badge counts regions and its drill hint says Click continent to drill down.</li>
                 </ul>
             </DocSection>
@@ -363,8 +355,8 @@
                 <p>
                 <code>ChartControl</code> with <code>ChartType.Sunburst</code> renders this control. It builds the tree from its first series: a root
                 named after the chart <code>Title</code>, or Total, with <code>Value</code> 0; one child per distinct <code>ChartDataPoint.Category</code>,
-                or General when the category is empty, coloured from the series palette; and under each, one leaf per point with <code>Label</code>,
-                <code>Value</code>, <code>Value2 ?? 0</code> as the secondary value and <code>Color</code>, or the category colour darkened 8 percent.
+                or General when the category is empty, colored from the series palette; and under each, one leaf per point with <code>Label</code>,
+                <code>Value</code>, <code>Value2 ?? 0</code> as the secondary value and <code>Color</code>, or the category color darkened 8 percent.
                 It passes <code>RootNode</code>, <code>EnableDrilldown</code> and <code>ShowBreadcrumb</code> as true, and <code>Height</code> as its
                 own <code>Height</code>, 360px when that is null, which this control never reads. Nothing else is passed, so the hub says TOTAL CASES
                 and the tooltip says Total Cases and Total Deaths whatever the data is, and because every leaf gets a secondary value the Total
@@ -529,39 +521,39 @@
                     All Continents
                 </button>
                 <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""Asia"" ? ""text-white"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""Asia"" ? ""#4db6ac"" : """");""
+                        style=""background: @(_activeContinentFilter == ""Asia"" ? ""#0284c7"" : """");""
                         @onclick='() => FilterByContinent(""Asia"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#63c6c1;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#0284c7;""></span>
                     Asia (15.9M)
                 </button>
                 <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""North America"" ? ""text-white"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""North America"" ? ""#e53935"" : """");""
+                        style=""background: @(_activeContinentFilter == ""North America"" ? ""#d97706"" : """");""
                         @onclick='() => FilterByContinent(""North America"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#e25b45;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#d97706;""></span>
                     North America (14.6M)
                 </button>
                 <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""Europe"" ? ""text-white"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""Europe"" ? ""#8bc34a"" : """");""
+                        style=""background: @(_activeContinentFilter == ""Europe"" ? ""#059669"" : """");""
                         @onclick='() => FilterByContinent(""Europe"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#adc965;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#059669;""></span>
                     Europe (13.5M)
                 </button>
                 <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""South America"" ? ""text-white"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""South America"" ? ""#5c6bc0"" : """");""
+                        style=""background: @(_activeContinentFilter == ""South America"" ? ""#c026d3"" : """");""
                         @onclick='() => FilterByContinent(""South America"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#7C79A2;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#c026d3;""></span>
                     South America (10.7M)
                 </button>
                 <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""Africa"" ? ""text-white"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""Africa"" ? ""#f59e0b"" : """");""
+                        style=""background: @(_activeContinentFilter == ""Africa"" ? ""#6366f1"" : """");""
                         @onclick='() => FilterByContinent(""Africa"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#FBAF0A;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#6366f1;""></span>
                     Africa (2.1M)
                 </button>
-                <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""Oceania"" ? ""text-dark"" : ""btn-light border"")""
-                        style=""background: @(_activeContinentFilter == ""Oceania"" ? ""#FFC1A6"" : """");""
+                <button type=""button"" class=""btn btn-sm @(_activeContinentFilter == ""Oceania"" ? ""text-white"" : ""btn-light border"")""
+                        style=""background: @(_activeContinentFilter == ""Oceania"" ? ""#e11d48"" : """");""
                         @onclick='() => FilterByContinent(""Oceania"")'>
-                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#FFC1A6;""></span>
+                    <span class=""d-inline-block rounded-circle me-1"" style=""width:8px;height:8px;background:#e11d48;""></span>
                     Oceania (49.9K)
                 </button>
             </div>
@@ -599,7 +591,7 @@
                                           MetricName=""@(_useDeathsAsMetric ? ""Deaths"" : ""Cases"")""
                                           SecondaryMetricName=""@(_useDeathsAsMetric ? ""Cases"" : ""Deaths"")""
                                           CenterTitle=""@(_useDeathsAsMetric ? ""TOTAL DEATHS"" : ""TOTAL CASES"")""
-                                          CenterColor=""@(_useDeathsAsMetric ? ""#e53935"" : ""#56abf6"")""
+                                          CenterColor=""@(_useDeathsAsMetric ? ""#e11d48"" : ""#38bdf8"")""
                                           ValueFormat=""N0""
                                           EnableDrilldown=""true""
                                           ShowBreadcrumb=""true""
@@ -672,7 +664,7 @@
                         var pctWorld = (cases / CovidDataService.WorldTotalCases) * 100.0;
 
                         <div class=""d-flex align-items-center gap-2 mb-3"">
-                            <span class=""d-inline-block rounded-circle"" style=""width:14px; height:14px; background: @(node.Color ?? ""#56abf6"");""></span>
+                            <span class=""d-inline-block rounded-circle"" style=""width:14px; height:14px; background: @(node.Color ?? ""#38bdf8"");""></span>
                             <h5 class=""mb-0 fw-bold"">@node.Name</h5>
                             @if (node.CustomAttributes.TryGetValue(""IsoCode"", out var iso) && iso is string isoStr && !string.IsNullOrEmpty(isoStr))
                             {
@@ -948,12 +940,12 @@ private void HandleNodeHover(SunburstNode? node)
             new("Title", "Text in a <code>fx-sunburst-title</code> line above the breadcrumb; nothing is rendered when empty.", "string?", "null"),
             new("Width", "Inline width of the root element, capped at 100 percent; the drawing inside is capped again at 680 px square by <code>fx-sunburst-viewport</code>.", "string", "\"100%\""),
             new("Height", "Declared, but never read: the drawing is square and sized by its width. This page passes <code>620px</code> and it has no effect.", "string", "\"620px\""),
-            new("CenterRadiusRatio", "Radius of the centre hub as a share of the 325-unit drawing radius, clamped to 0.15 to 0.45; the rings share what is left.", "double", "0.28"),
+            new("CenterRadiusRatio", "Radius of the center hub as a share of the 325-unit drawing radius, clamped to 0.15 to 0.45; the rings share what is left.", "double", "0.28"),
             new("ValueFormat", "Numeric format of the hub value and of the two totals in the tooltip, in the current culture.", "string", "\"N0\""),
             new("MetricName", "Label of the first total in the tooltip, as <code>Total Cases:</code>. Used nowhere else.", "string", "\"Cases\""),
             new("SecondaryMetricName", "Label of the second total in the tooltip, shown only when the node has a <code>SecondaryValue</code> or its <code>TotalSecondaryValue</code> is above zero.", "string", "\"Deaths\""),
             new("CenterTitle", "Upper line of the hub while the view is at <code>RootNode</code>; after a drill-down the hub shows the current node's <code>Name</code> upper-cased instead.", "string", "\"TOTAL CASES\""),
-            new("CenterColor", "Fill of the hub when the current node, the root included, has no <code>Color</code>; a node with a colour wins. Hovering a hub that can zoom out darkens the fill 15 percent.", "string", "\"#56abf6\""),
+            new("CenterColor", "Fill of the hub when the current node, the root included, has no <code>Color</code>; a node with a color wins. Hovering a hub that can zoom out darkens the fill 15 percent.", "string", "\"#38bdf8\""),
             new("EnableDrilldown", "True: clicking a segment that has children makes it the current root, clicking the hub goes up one level, and the tooltip adds a drill hint. False: segment clicks still raise <code>OnNodeClick</code> and the hub does nothing. The breadcrumb buttons navigate either way.", "bool", "true"),
             new("ShowBreadcrumb", "Renders the pill above the drawing: a root button with <code>RootNode.Name</code>, or World, then one button per ancestor down to the current node. Each button jumps there, with or without <code>EnableDrilldown</code>.", "bool", "true"),
             new("ShowLabels", "Writes each node's <code>Name</code> along its segment, rotated to the mid angle and turned to stay readable on the left half. Segments under 0.045 radians get no label, 0.065 on ring 2; longer names are cut to about one character per 7.5 units of arc, three at least, with an ellipsis.", "bool", "true"),
@@ -967,11 +959,11 @@ private void HandleNodeHover(SunburstNode? node)
         };
         public static readonly ApiRow[] Node =
         {
-            new("Id", "Identity of the node: what <code>HighlightedNodeId</code> matches and how the hovered segment is recognised. A fresh GUID per node unless you set it, so a rebuilt tree has new ids.", "string", "Guid.NewGuid().ToString(\"N\")"),
+            new("Id", "Identity of the node: what <code>HighlightedNodeId</code> matches and how the hovered segment is recognized. A fresh GUID per node unless you set it, so a rebuilt tree has new ids.", "string", "Guid.NewGuid().ToString(\"N\")"),
             new("Name", "Segment label, tooltip title, breadcrumb button text, and the hub title after a drill-down.", "string", "string.Empty"),
             new("Value", "The node's own measure; see <code>TotalValue</code> for what the rings use.", "double", "0"),
             new("SecondaryValue", "Second measure; feeds <code>TotalSecondaryValue</code> and the second tooltip total.", "double?", "null"),
-            new("Color", "Segment fill, and the hub fill while the node is the current root. Null on ring 1 takes the next of eight palette colours; null on ring 2 takes one of five shades of the parent's colour, cycling by position.", "string?", "null"),
+            new("Color", "Segment fill, and the hub fill while the node is the current root. Null on ring 1 takes the next of eight palette colors; null on ring 2 takes one of five shades of the parent's color, cycling by position.", "string?", "null"),
             new("Description", "Declared, but the control never reads it.", "string?", "null"),
             new("Parent", "Set by <code>AddChild</code>, never by the control. Drives <code>Depth</code>, the breadcrumb path, the zoom-out target, the tooltip's share of parent and the dimming of unrelated segments; a tree built with <code>Children.Add</code> loses all of those.", "SunburstNode?", "null"),
             new("Children", "The next ring. Add through <code>AddChild</code> so <code>Parent</code> is set.", "List&lt;SunburstNode&gt;", "new()"),
@@ -989,13 +981,13 @@ private void HandleNodeHover(SunburstNode? node)
         };
         public static readonly ApiRow[] ColorHelper =
         {
-            new("AdjustLightness(string hex, double factor)", "A 7- or 4-character hex colour scaled towards black for a factor under 1 and towards white for a factor over 1; anything else comes back unchanged.", "string"),
-            new("Darken(string hex, double percent)", "<code>AdjustLightness(hex, 1 - percent)</code>. The hub uses 0.15 while hovered; <code>ChartControl</code> uses 0.08 for the leaf colours of its Sunburst type.", "string"),
+            new("AdjustLightness(string hex, double factor)", "A 7- or 4-character hex color scaled toward black for a factor under 1 and toward white for a factor over 1; anything else comes back unchanged.", "string"),
+            new("Darken(string hex, double percent)", "<code>AdjustLightness(hex, 1 - percent)</code>. The hub uses 0.15 while hovered; <code>ChartControl</code> uses 0.08 for the leaf colors of its Sunburst type.", "string"),
             new("Lighten(string hex, double percent)", "<code>AdjustLightness(hex, 1 + percent)</code>.", "string"),
         };
         public static readonly ApiRow[] Css =
         {
-            new("fx-sunburst-container", "The root element: a centred flex column with <code>user-select: none</code>; <code>CssClass</code> is added here and <code>Width</code> is its inline width. <code>fx-sunburst-title</code> is the optional title line."),
+            new("fx-sunburst-container", "The root element: a centered flex column with <code>user-select: none</code>; <code>CssClass</code> is added here and <code>Width</code> is its inline width. <code>fx-sunburst-title</code> is the optional title line."),
             new("fx-sunburst-breadcrumbs", "The breadcrumb pill; <code>fx-breadcrumb-btn</code> is each button, <code>active</code> marks the current node, <code>fx-breadcrumb-sep</code> the separators."),
             new("fx-sunburst-viewport", "The square drawing area, <code>max-width: 680px</code> with <code>aspect-ratio: 1 / 1</code>; it holds the <code>fx-sunburst-svg</code>, a 700 by 700 view box, and the tooltip."),
             new("fx-sunburst-slice", "Each ring segment; <code>hovered</code>, <code>highlighted</code> with a 3 px white stroke, and <code>dimmed</code> at opacity 0.35 come and go with the pointer and <code>HighlightedNodeId</code>."),

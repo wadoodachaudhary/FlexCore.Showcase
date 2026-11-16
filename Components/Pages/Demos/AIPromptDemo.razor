@@ -1,122 +1,63 @@
 @page "/demo/ai-prompt"
 @page "/demo/counterparts"
 @using Fx.ControlKit.AI
-@using FlexCore.Showcase.Data
 @using FlexCore.Showcase.Components.Shared
 
-@* 2026-10-25 (Baaria): this page replaces the Control tour; /demo/counterparts answers here, and the old file is
-   docs/retired-pages/CounterpartsDemo.razor.txt. *@
-@* 2026-10-25: new page on FeatureDemoLayout, replacing the Control tour (/demo/counterparts); two examples (prompt, app-bar). Facts checked against
-   AI/AIPromptControl.razor(.css), AI/AIPromptModels.cs, Editor/LlmResultCard.razor(.css), wwwroot/editor-control.js (fxClipboard), Layout/AppBarControl.razor(.css),
-   Layout/AppBarPosition.cs, ToolbarControl.razor(.css), ToolbarButtonControl.razor(.css), ToolbarSeparatorControl.razor(.css), TextBoxControl.razor (aria-label and
-   disabled on the prompt box) and FlexControlBase.cs in FlexCore 0.2.49 (main 58a62e0). The generator is a page stub; no model is called.
-   ToolbarButtonControl.HasDropdown only draws the arrow (no menu, no DropDownContent), so the Export panel in the second example is the page's own markup. *@
+@* 2026-10-25: replaces the Control tour; /demo/counterparts routes here; old file docs/retired-pages/CounterpartsDemo.razor.txt. *@
+@* 2026-10-25: on FeatureDemoLayout; checked against AI/AIPrompt*, Editor/LlmResultCard.razor*, editor-control.js,
+   TextBoxControl.razor, FlexControlBase.cs (FlexCore 0.2.49, main 58a62e0). Generator is a stub, no model called.
+   2026-11-14: the app bar and toolbar example and its tables moved to the Toolbar page (demo/toolbar); history aria-pressed
+   re-checked against AIPromptControl.razor in the working tree (FlexCore 0.2.50).
+   2026-11-15: second example drives the control from the page (GenerateAsync, CancelAsync, the error path, MaxHistory, FooterContent,
+   Enabled); rows brought in line.
+   2026-11-15: example story moved to the Support desk theme.
+   2026-11-16: independent review fixes. *@
 
-<PageTitle>AI prompt — FlexCore Showcase</PageTitle>
+<PageTitle>Blazor AI Prompt Component — FlexCore</PageTitle>
 
-<FeatureDemoLayout Title="AI prompt" Category="Components" ControlName="AIPromptControl · AppBarControl · ToolbarControl"
-                   Tagline="A prompt box with suggestions, command buttons, a response card and a history; your application supplies the model."
-                   SourcePath="AIPromptControl.razor; AIPromptModels.cs; LlmResultCard.razor; AppBarControl.razor; ToolbarControl.razor; ToolbarButtonControl.razor; ToolbarSeparatorControl.razor">
+<FeatureDemoLayout Title="AI prompt" Category="Components" ControlName="AIPromptControl"
+                   Tagline="Give users a prompt box with suggestions, commands and history; plug in any model."
+                   SourcePath="AI/AIPromptControl.razor; AI/AIPromptModels.cs; Editor/LlmResultCard.razor">
     <Overview>
         <p>
-            <code>AIPromptControl</code> is the screen side of a text-generation feature: a multi-line prompt, suggestion buttons that fill it, a Generate
-            button, one button per <code>AIPromptCommand</code>, and an <code>LlmResultCard</code> that shows the response with a button to use it. The
-            control calls no service. You pass a <code>Generate</code> delegate that receives an <code>AIPromptRequest</code> (the prompt, and the command
-            if one was clicked) with a <code>CancellationToken</code> and returns the response text; the control handles the busy state, cancelling, the
-            error message and a history of responses. Both examples on this page pass a stub that returns canned text.
-        </p>
-        <p>
-            The second example puts it on a desk screen: an <code>AppBarControl</code> for the title row, a <code>ToolbarControl</code> of
-            <code>ToolbarButtonControl</code>s and <code>ToolbarSeparatorControl</code>s for the commands, and the prompt in a side panel.
+            <code>AIPromptControl</code> is a Blazor prompt panel: users type or pick a prompt, generate an answer, run commands such as Shorten, and reuse the result. Use it to draft replies or summaries inside your app: it calls no service itself, and your <code>Generate</code> delegate turns the prompt and command into text, so any model plugs in. The examples use a stub that returns canned text, so no model is called.
         </p>
     </Overview>
 
     <Examples>
-        <DemoExample Id="prompt" Title="Prompt, suggestions and commands" RazorCode="@Code.Prompt" CSharpCode="@Code.PromptCs" CssCode="@Code.PromptCss">
-            <Description>
-                <p>
-                    A suggestion only fills the prompt; Generate sends it. Shorten, Expand and Friendlier tone send the same prompt with their
-                    <code>AIPromptCommand</code>, and the card's badge names the command. Use in draft raises <code>Apply</code> with the response on show,
-                    and the page copies its <code>Output</code> into the draft below. From the second response on, a row of history buttons brings back an
-                    earlier one; Dismiss hides the card and keeps the response in the history. The count under the control comes from <code>Generated</code>.
-                </p>
-                <p>
-                    No model is called. <code>Generate</code> is a page method, <code>StubGenerateAsync</code>, that waits 1.2 seconds on the request's token
-                    (so Cancel stops it), picks canned text by a word in the prompt and switches on the command's <code>Key</code>. It ignores
-                    <code>Instruction</code>, which a real provider would add to the prompt. An application connects its own provider through the same delegate.
-                </p>
-            </Description>
+        <DemoExample Id="prompt" Title="Prompt, suggestions and commands" RazorCode="@Code.Prompt" CSharpCode="@Code.PromptCs">
+            <Description><p>Click a suggestion, then Generate or one of the commands; Use in draft copies the response below, and the history buttons bring earlier ones back.</p></Description>
             <Demo>
                 <div class="ai">
+                    <p class="ai-request"><strong>Ticket TKT-1042</strong> Albus Door · Router keeps restarting · every evening since Monday · wants a technician visit on Saturday</p>
                     <AIPromptControl @bind-Prompt="_prompt" Suggestions="_suggestions" Commands="_commands" Generate="StubGenerateAsync"
-                                     Rows="3" Placeholder="Ask about a trip request…" ApplyLabel="Use in draft"
+                                     Rows="3" AriaLabel="Ask about TKT-1042" Placeholder="Ask about this ticket…" ApplyLabel="Use in draft"
                                      Apply="r => _draft = r.Output" Generated="r => _responses++" />
                     <p class="ai-note">Responses so far: @_responses</p>
-                    <div class="ai-label">Draft for the traveller</div>
-                    <TextBoxControl @bind-Value="_draft" Multiline="true" Rows="5" Width="100%" aria-label="Draft for the traveller"
+                    <div class="ai-label">Draft for ticket TKT-1042</div>
+                    <TextBoxControl @bind-Value="_draft" Multiline="true" Rows="5" Width="100%" aria-label="Draft for ticket TKT-1042"
                                     Placeholder="Use in draft puts the response here; edit it as you like." />
                 </div>
             </Demo>
         </DemoExample>
 
-        <DemoExample Id="app-bar" Title="From an app bar and toolbar" RazorCode="@Code.AppBar" CSharpCode="@Code.AppBarCs" CssCode="@Code.AppBarCss">
-            <Description>
-                <p>
-                    <code>AppBarControl</code> lays out its three slots in a header: an icon and the title, a subtitle, and a badge that follows the save state.
-                    Under it, a <code>ToolbarControl</code> holds <code>ToolbarButtonControl</code>s with Bootstrap icon classes in <code>IconCss</code> and
-                    captions in <code>Label</code>, with <code>ToolbarSeparatorControl</code>s between the groups. The buttons only report themselves in the
-                    status line; nothing is exported or printed. Save is <code>Disabled</code> until a new request, an edit to the notes or an added response.
-                </p>
-                <p>
-                    Export has <code>HasDropdown</code>, which draws the arrow and nothing else, so the page opens its own two-item panel under it; a pick,
-                    Export again or any other toolbar button closes it. AI assistant is a toggle through <code>Selected</code> and shows the prompt in a side
-                    panel (hidden, not removed, so its history survives); its Add to notes appends the response to the notes. The Captions checkbox is the
-                    toolbar's own (<code>ShowCaptionsToggle</code>), bound here through <code>ShowCaptions</code> and <code>ShowCaptionsChanged</code>; the
-                    switch above sets <code>Vertical</code> on every button. The library styles <code>Selected</code> only on <code>Large</code> buttons, so
-                    the page adds the pressed tint (CSS tab).
-                </p>
-            </Description>
-            <Controls>
-                <SwitchControl @bind-Checked="_vertical" Label="Vertical buttons" />
-            </Controls>
+        <DemoExample Id="host" Title="Driving the prompt from the page" RazorCode="@Code.Host" CSharpCode="@Code.HostCs">
+            <Description><p>Use the page's own buttons: they call <code>GenerateAsync</code> and <code>CancelAsync</code> on the control. The stub takes two and a half seconds, so Stop has time to work; turn on Billing system is down and the next request fails with the message in the card; turn on Ticket solved and <code>Enabled</code> locks the prompt, Generate and the commands, and the card's Add to the ticket button then does nothing. The history buttons show each response's time and prompt, not its command, so a shortened note is captioned like the full one.</p></Description>
             <Demo>
-                <div class="qd">
-                    <AppBarControl>
-                        <StartContent><SvgIconControl Name="document" Size="20px" /><strong>Quote desk</strong></StartContent>
-                        <ChildContent><span class="qd-sub">Lisbon desk · requests from the web form</span></ChildContent>
-                        <EndContent><BadgeControl Text="@(_dirty ? "Unsaved" : "Saved")" Variant="@(_dirty ? BadgeVariant.Warning : BadgeVariant.Success)" /></EndContent>
-                    </AppBarControl>
-                    <ToolbarControl ShowCaptions="_captions" ShowCaptionsChanged="SetCaptions">
-                        <ToolbarButtonControl Label="New request" IconCss="bi bi-file-earmark-plus" Vertical="_vertical" OnClick="NewRequest" />
-                        <ToolbarButtonControl Label="Save" IconCss="bi bi-save" Vertical="_vertical" Disabled="!_dirty" OnClick="Save" />
-                        <ToolbarSeparatorControl />
-                        <span class="qd-export">
-                            <ToolbarButtonControl Label="Export" IconCss="bi bi-box-arrow-up" Vertical="_vertical" HasDropdown="true"
-                                                  OnClick="() => _exportOpen = !_exportOpen" />
-                            @if (_exportOpen)
-                            {
-                                <div class="qd-menu">
-                                    <ButtonControl CssClass="qd-menu-item" OnClick='() => Act("Export › PDF quote")'>PDF quote</ButtonControl>
-                                    <ButtonControl CssClass="qd-menu-item" OnClick='() => Act("Export › CSV itinerary")'>CSV itinerary</ButtonControl>
-                                </div>
-                            }
-                        </span>
-                        <ToolbarButtonControl Label="Print" IconCss="bi bi-printer" Vertical="_vertical" OnClick='() => Act("Print")' />
-                        <ToolbarSeparatorControl />
-                        <ToolbarButtonControl Label="AI assistant" IconCss="bi bi-stars" Vertical="_vertical" Selected="_assistant" OnClick="ToggleAssistant" />
-                    </ToolbarControl>
-                    <p class="qd-status" role="status">Last action: @_last</p>
-                    <div class="qd-body">
-                        <div class="qd-notes">
-                            <div class="qd-label">Agent notes, request QD-@(_request)</div>
-                            <TextBoxControl @bind-Value="_notes" @bind-Value:after="MarkDirty" Multiline="true" Rows="8" Width="100%" aria-label="Agent notes" />
-                        </div>
-                        <aside class="qd-panel" hidden="@(!_assistant)" aria-label="AI assistant">
-                            <AIPromptControl @bind-Prompt="_deskPrompt" Suggestions="_suggestions" Commands="_commands" Generate="StubGenerateAsync"
-                                             Rows="3" ApplyLabel="Add to notes" Apply="AddToNotes" />
-                        </aside>
-                    </div>
+                <div class="demo-row">
+                    <ButtonControl CssClass="btn-primary btn-sm" Disabled="_solved" OnClick="() => _ai!.GenerateAsync()">Write the refund note</ButtonControl>
+                    <ButtonControl CssClass="btn-sm" Disabled="_solved" OnClick="() => _ai!.GenerateAsync(_hostCommands[0])">Shorten it</ButtonControl>
+                    <ButtonControl CssClass="btn-sm" OnClick="() => _ai!.CancelAsync()">Stop</ButtonControl>
+                    <SwitchControl @bind-Checked="_billingDown" Label="Billing system is down" />
+                    <SwitchControl @bind-Checked="_solved" Label="Ticket solved" />
                 </div>
+                <div class="ai">
+                    <AIPromptControl @ref="_ai" @bind-Prompt="_hostPrompt" Commands="_hostCommands" Generate="RefundNoteAsync" MaxHistory="3" Rows="2" AriaLabel="Refund note for TKT-1043"
+                                     Enabled="@(!_solved)" ApplyLabel="Add to the ticket" Apply="r => _refundNote = r.Output">
+                        <FooterContent><p class="ai-note">Keeps the last three responses. The answers are canned, so no model is called.</p></FooterContent>
+                    </AIPromptControl>
+                </div>
+                <p class="ai-note" role="status">Note on Hermione Ranger's ticket TKT-1043: @(_refundNote ?? "none yet")</p>
             </Demo>
         </DemoExample>
     </Examples>
@@ -143,8 +84,9 @@
                 <p>
                     <code>AIPromptControl</code> sets <code>OutputText</code>, <code>OriginalText</code>, <code>OperationLabel</code>, <code>IsBusy</code>,
                     <code>ErrorMessage</code>, <code>OnApply</code>, <code>OnDismiss</code> and <code>ApplyLabel</code>; the other parameters are for hosts that
-                    place the card (namespace <code>Fx.ControlKit.Editor</code>) themselves. While an error is shown there is no response, so the card has no
-                    Dismiss button; the next request clears the error.
+                    place the card (namespace <code>Fx.ControlKit.Editor</code>) themselves. After a failed request the card shows only the error, with no
+                    Dismiss button. Picking a response in the history row shows it under the error with the apply button and Dismiss, and Dismiss
+                    clears both. Otherwise the next request clears the error.
                 </p>
                 <p>
                     <code>ResultAction</code> is <code>(string Label, EventCallback OnClick, bool IsPrimary = false, bool Disabled = false, string? Title = null,
@@ -159,56 +101,28 @@
                 </p>
                 <p>
                     The stylesheet reads <code>--panel</code>, <code>--panel-2</code>, <code>--border</code>, <code>--ink</code>, <code>--muted</code>,
-                    <code>--accent</code>, <code>--accent-strong</code> and <code>--accent-2</code>, with warm built-in fallbacks; both examples set them on
-                    their wrapper (CSS tabs). The response body's background (<code>#fef7ef</code>), the error box and the echo banner have fixed colours; the
+                    <code>--accent</code>, <code>--accent-strong</code> and <code>--accent-2</code>, with warm built-in fallbacks; the examples set them on
+                    their wrapper. The response body's background (<code>#fef7ef</code>), the error box and the echo banner have fixed colors; the
                     examples override the body's by class.
                 </p>
-            </DocSection>
-            <DocSection Id="doc-appbarcontrol-parameters" Title="AppBarControl parameters" Count='@DocSection.Label(Vocab.AppBar.Length, "parameters")'>
-                <ApiTable Kind="ApiKind.Parameters" Title="AppBarControl parameters" Rows="Vocab.AppBar" />
-            </DocSection>
-            <DocSection Id="doc-appbarposition" Title="AppBarPosition" Count='@DocSection.Label(Vocab.Position.Length, "values")'>
-                <ApiTable Kind="ApiKind.Values" Title="AppBarPosition" Rows="Vocab.Position" />
-            </DocSection>
-            <DocSection Id="doc-toolbarcontrol-parameters" Title="ToolbarControl parameters" Count='@DocSection.Label(Vocab.Toolbar.Length, "parameters")'>
-                <ApiTable Kind="ApiKind.Parameters" Title="ToolbarControl parameters" Rows="Vocab.Toolbar" />
-                <p>
-                    With captions off the root gets <code>fx-toolbar--no-captions</code>: <code>Label</code> captions are hidden, buttons shrink to 30px high,
-                    and every <code>ToolbarButtonControl</code> shows its tooltip even with <code>ShowTooltip</code> false. Text passed as a button's
-                    <code>ChildContent</code> stays visible. For <code>CssClass</code> the stylesheet also defines <code>fx-toolbar--wrap</code> (the toolbar
-                    itself wraps), <code>fx-toolbar--scroll</code> (horizontal scrolling) and <code>fx-toolbar--large-tools</code> (white, unbordered, at least
-                    128px high, for <code>Large</code> buttons).
-                </p>
-            </DocSection>
-            <DocSection Id="doc-toolbarbuttoncontrol-parameters" Title="ToolbarButtonControl parameters" Count='@DocSection.Label(Vocab.Button.Length, "parameters")'>
-                <ApiTable Kind="ApiKind.Parameters" Title="ToolbarButtonControl parameters" Rows="Vocab.Button" />
-            </DocSection>
-            <DocSection Id="doc-toolbarseparatorcontrol-parameters" Title="ToolbarSeparatorControl parameters" Count='@DocSection.Label(Vocab.Separator.Length, "parameters")'>
-                <ApiTable Kind="ApiKind.Parameters" Title="ToolbarSeparatorControl parameters" Rows="Vocab.Separator" />
-                <p>A 1px line, 28px high (22px with captions off), with 4px either side.</p>
             </DocSection>
         </DocSections>
     </Vocabulary>
 
     <Accessibility>
         <ul>
-            <li><code>AIPromptControl</code> renders a <code>&lt;section&gt;</code> named by <code>AriaLabel</code>, and the prompt's text area carries the same <code>aria-label</code>; the placeholder is not its name.</li>
-            <li>Every action is a native button. Tab moves from the prompt through the suggestions to Generate, the commands and, while a request runs, Cancel. The inner toolbar has <code>role="toolbar"</code> but no arrow-key handling, so each button is its own Tab stop; the same is true of <code>ToolbarControl</code> used on its own.</li>
-            <li>Progress and results are not announced: the "Generating…" row and the response card have no live region. The only <code>role="status"</code> in the control is the message shown while <code>Generate</code> is null. The second example's status line is the page's own <code>role="status"</code>.</li>
-            <li>The history row's <code>aria-label="Response history"</code> sits on a plain <code>div</code> with no role, and each history button's pressed state is passed as a C# <code>bool</code>, which Blazor writes as an empty attribute on the current button and omits on the others, so no pressed state is exposed.</li>
-            <li>In the card, the copy and × buttons are named by their <code>title</code>; Original text is a native <code>&lt;details&gt;</code>. Variant tabs have <code>role="tab"</code> and <code>aria-selected</code> but no arrow keys (<code>AIPromptControl</code> does not use them).</li>
-            <li><code>ToolbarButtonControl</code> sets <code>aria-label</code> from <code>Title</code>, else <code>Label</code>, else <code>IconAlt</code>, so the name survives hidden captions; an <code>IconCss</code> icon is <code>aria-hidden</code>. <code>Selected</code> writes <code>aria-pressed="true"</code> and leaves the attribute out when false, so a toggle that is off reads as a plain button. <code>HasDropdown</code> adds no <code>aria-haspopup</code> or <code>aria-expanded</code>, and the control accepts no extra attributes to add them. Keyboard focus shows a dotted outline.</li>
-            <li><code>ToolbarSeparatorControl</code> is <code>role="separator"</code> with <code>aria-orientation="vertical"</code>. <code>ToolbarControl</code> accepts no <code>aria-label</code>, so two toolbars on one screen cannot be told apart by name; its Captions checkbox is a native checkbox inside its label.</li>
-            <li><code>AppBarControl</code> is a <code>&lt;header&gt;</code> (a banner landmark only when it is not inside <code>main</code>, <code>article</code>, <code>aside</code>, <code>nav</code> or <code>section</code>) wrapping a <code>ToolbarControl</code>, so its title and end items sit inside a <code>role="toolbar"</code>.</li>
+            <li><code>AIPromptControl</code> renders a <code>&lt;section&gt;</code> named by <code>AriaLabel</code> (default "AI prompt"), and the prompt's text area carries the same <code>aria-label</code>. Give each prompt on a page its own <code>AriaLabel</code>.</li>
+            <li>Every action is a native button, and Generate, the commands and Cancel sit in a <code>role="toolbar"</code>. Tab moves from the prompt through the suggestions to Generate, the commands and, while a request runs, Cancel; Enter or Space presses the focused button.</li>
+            <li>Each history button carries <code>aria-pressed</code>, "true" on the response on show and "false" on the others.</li>
+            <li>In the response card, the copy button is named by its <code>title</code>, the busy row reads "Generating…", and Original text is a native <code>&lt;details&gt;</code> that Enter or Space opens.</li>
+            <li>To tell screen reader users that a response has arrived, write a short message into a <code>role="status"</code> element of your own from the <code>Generated</code> callback.</li>
         </ul>
     </Accessibility>
 
     <Related>
         <ul>
-            <li>A button that opens its own panel, and plain buttons: <a href="demo/buttons#dropdown">Buttons</a>.</li>
-            <li>A pressed-state button outside a toolbar: <a href="demo/toggle-buttons">Toggle buttons</a>.</li>
-            <li>A default action with its alternatives in a real menu: <a href="demo/split-button">Split button</a>.</li>
-            <li><code>EditorControl</code>'s built-in toolbar (<code>ShowToolbar</code>) is a <code>ToolbarControl</code>: <a href="demo/rich-text-editor">Rich text editor</a>.</li>
+            <li>A row of command buttons under an app bar: <a href="demo/toolbar#app-bar">Toolbar</a>.</li>
+            <li>A long document with its own toolbar: <a href="demo/rich-text-editor">Rich text editor</a>.</li>
             <li><code>ChatControl</code>, <code>InlineAIPromptControl</code>, <code>PromptBoxControl</code>, <code>SmartPasteButtonControl</code> and <code>SpeechToTextButtonControl</code> are separate controls in <code>Fx.ControlKit.AI</code>, not covered here.</li>
         </ul>
     </Related>
@@ -216,14 +130,14 @@
 
 @code {
     // Prompt
-    private string _prompt = "Draft a three-day Lisbon itinerary for two";
+    private string _prompt = "Draft a reply with three steps to try";
     private string _draft = "";
     private int _responses;
     private readonly string[] _suggestions =
     {
-        "Draft a three-day Lisbon itinerary for two",
-        "Summarise this trip request for the agent",
-        "Write a polite reply declining the dates",
+        "Draft a reply with three steps to try",
+        "Summarize this ticket for the technician",
+        "Write a polite reply declining the Saturday visit",
     };
     private readonly AIPromptCommand[] _commands =
     {
@@ -233,33 +147,32 @@
     };
 
     // Stub provider: no model is called. An application passes its own provider to Generate.
-    private static readonly TravelData.Package Lisbon = TravelData.Packages.First(p => p.City == "Lisbon");
-    private static readonly string[] Itinerary =
+    private static readonly string[] Steps =
     {
-        "Day 1: arrive, check in near the old town and walk up to a viewpoint for sunset.",
-        "Day 2: tram through the old town in the morning, the riverside at Belém in the afternoon.",
-        "Day 3: day trip to Sintra, back in Lisbon for a farewell dinner.",
-        "Tip: book the Sintra tickets a day ahead.",
+        "Step 1: check that the power cable clicks firmly into the back of the router.",
+        "Step 2: plug it straight into a wall outlet, not an extension cord.",
+        "Step 3: leave space around it, because a router that overheats restarts itself.",
+        "Tip: write down the time of the next restart, so we can check it against the line log.",
     };
     private static readonly string[] Summary =
     {
-        "Lisbon, 12–15 May, two adults.",
-        "Wants a hotel within walking distance of the old town, and one day trip.",
-        "Open question: are the dates flexible? The form leaves it blank.",
-        $"Closest package: {Lisbon.Name} ({Lisbon.Nights} nights), shortened to three.",
+        "Albus Door's router has restarted every evening since Monday.",
+        "The ticket came in by phone to the Hardware queue, and the customer wants a technician visit on Saturday.",
+        "Open question: does the power light go out during a restart? The call notes do not say.",
+        "Line log: no outage in the customer's area this week.",
     };
     private static readonly string[] Decline =
     {
-        "Thank you for your request for Lisbon on 12–15 May.",
-        "We cannot confirm those dates: the hotels we work with are fully booked that week.",
-        "We can offer the same trip from 19 May, or another hotel on your dates.",
-        "If you reply by Friday, we will hold the 19 May option for you.",
+        "We are sorry, but we cannot send a technician this Saturday.",
+        "Every visit slot that day is taken.",
+        "We can offer next Monday between 8 AM and noon, or a call with a technician today.",
+        "If you reply by Friday, we will hold the Monday slot for you.",
     };
     private static async Task<string> StubGenerateAsync(AIPromptRequest request, CancellationToken token)
     {
         await Task.Delay(1200, token);   // Cancel stops the wait
         var prompt = request.Prompt.ToLowerInvariant();
-        var lines = prompt.Contains("itinerary") ? Itinerary
+        var lines = prompt.Contains("steps") ? Steps
             : prompt.Contains("summar") ? Summary
             : prompt.Contains("declin") ? Decline
             : null;
@@ -270,50 +183,30 @@
         {
             "shorten" => lines[0],
             "expand" => body + "\n" + lines[3],
-            "friendlier" => "Hello, and thank you for thinking of us!\n" + body + "\nWe would love to help you plan this.",
+            "friendlier" => lines == Summary
+                ? "Thanks for picking this one up!\n" + body
+                : "Hello, and thank you for bearing with us!\n" + body + "\nWe will stay on this until your connection is steady.",
             _ => body,
         };
     }
 
-    // App bar (the side panel reuses _suggestions, _commands and StubGenerateAsync from the first example)
-    private bool _captions = true, _vertical, _exportOpen, _assistant = true, _dirty;
-    private int _request = 1042;
-    private string _last = "none yet";
-    private string _deskPrompt = "Summarise this trip request for the agent";
-    private string _notes = "Phoned on Monday: two adults, 12–15 May, hotel within walking distance of the old town.";
-    private void Act(string action)
+    // Driving the prompt from the page: the buttons call the control's methods through @ref
+    private AIPromptControl? _ai;
+    private string _hostPrompt = "Write a refund note for the duplicate charge";
+    private bool _billingDown, _solved;
+    private string? _refundNote;
+    private readonly AIPromptCommand[] _hostCommands =
     {
-        _exportOpen = false;
-        _last = action;
-    }
-    private void NewRequest()
+        new("shorten", "Shorten", "Reduce the answer to one sentence."),
+    };
+    // Slow enough to stop; throws while the billing system is down, which the control shows as an error.
+    private async Task<string> RefundNoteAsync(AIPromptRequest request, CancellationToken token)
     {
-        Act("New request");
-        _request++;
-        _notes = "";
-        _dirty = true;
-    }
-    private void Save()
-    {
-        Act("Save");
-        _dirty = false;
-    }
-    private void ToggleAssistant()
-    {
-        _assistant = !_assistant;
-        Act(_assistant ? "AI assistant on" : "AI assistant off");
-    }
-    private void SetCaptions(bool on)
-    {
-        _captions = on;
-        Act(on ? "Captions on" : "Captions off");
-    }
-    private void MarkDirty() => _dirty = true;
-    private void AddToNotes(AIPromptResult result)
-    {
-        _notes = _notes.Length > 0 ? _notes + "\n\n" + result.Output : result.Output;
-        _dirty = true;
-        Act("Add to notes, from the AI assistant");
+        await Task.Delay(2500, token);
+        if (_billingDown) throw new InvalidOperationException("The billing system did not answer. Try again in a minute.");
+        return request.Command?.Key == "shorten"
+            ? "Charged $59 twice on October 3; the duplicate is refunded within five business days."
+            : "The October bill of $59 was charged to the same card twice on October 3.\nThe duplicate charge of $59 is refunded and reaches the card within five business days.";
     }
 
     // Vocabulary rows, one per public member (FlexCore 0.2.49). Base-class parameters marked (base).
@@ -330,25 +223,26 @@
             new("AriaLabel", "<code>aria-label</code> of the section and of the prompt box.", "string", "\"AI prompt\""),
             new("Placeholder", "Placeholder of the prompt box.", "string", "\"Enter a prompt…\""),
             new("ApplyLabel", "Caption of the card's apply button. The button is drawn whether or not <code>Apply</code> has a handler.", "string", "\"Use response\""),
-            new("FooterContent", "Rendered last inside the section, after the history row.", "RenderFragment?", "null"),
+            new("FooterContent", "Rendered last inside the section, after the history row, such as the second example's note.", "RenderFragment?", "null"),
             new("Enabled (base)", "False disables the prompt box, the suggestions, Generate and the commands, and makes the apply button do nothing. The history buttons and Dismiss still work.", "bool", "true"),
             new("Visible (base)", "False adds <code>display:none</code> to the section.", "bool", "true"),
             new("Id / CssClass / Style (base)", "On the <code>section.fx-ai-prompt</code>.", "string?", "null"),
+            new("Title / Tag / Data / Parent (base)", "Accepted but not rendered. A written <code>title</code> binds to <code>Title</code>, so it does not reach the section.", "", "null"),
             new("(unmatched attributes)", "Written on the section after its own attributes, so a <code>class</code> or <code>aria-label</code> given here replaces the control's own.", "Dictionary&lt;string,object&gt;"),
         };
         public static readonly ApiRow[] PromptEvents =
         {
             new("PromptChanged", "After every keystroke in the prompt box and after a suggestion click.", "string"),
-            new("Generated", "After a response has arrived and joined the front of <code>History</code> as the response on show. Not raised for a cancelled or failed request.", "AIPromptResult"),
+            new("Generated", "After a response has arrived and joined the front of <code>History</code> as the response on show. Not raised for a canceled or failed request.", "AIPromptResult"),
             new("Apply", "When the card's apply button is clicked, with the response on show: the newest, or the one picked in the history row. Ignored while busy or disabled.", "AIPromptResult"),
         };
         public static readonly ApiRow[] PromptMethods =
         {
             new("GenerateAsync(AIPromptCommand? command = null)", "What Generate (no command) and the command buttons call. Does nothing unless the control is enabled and idle, <code>Generate</code> is set and the prompt is not blank. Otherwise hides the current response, sets <code>IsBusy</code>, awaits <code>Generate</code>, and on success puts the result at the front of <code>History</code>, shows it and raises <code>Generated</code>. Any exception other than the cancellation sets <code>ErrorMessage</code> to its <code>Message</code>.", "Task"),
-            new("CancelAsync()", "Cancels the running request's token and clears <code>IsBusy</code> at once. A response that still arrives afterwards is dropped.", "Task"),
+            new("CancelAsync()", "Cancels the running request's token and clears <code>IsBusy</code> at once, as the second example's Stop does; it works even while the control is disabled. A response that still arrives afterward is dropped.", "Task"),
             new("Dispose()", "Cancels a running request.", "void"),
-            new("IsBusy", "Read-only. True from the start of a request until it finishes or is cancelled.", "bool"),
-            new("ErrorMessage", "Read-only. The last failure's message, or null; cleared when the next request starts.", "string?"),
+            new("IsBusy", "Read-only. True from the start of a request until it finishes or is canceled.", "bool"),
+            new("ErrorMessage", "Read-only. The message of the exception <code>Generate</code> threw, shown in the card's red box, or null; cleared when the next request starts, or by Dismiss. A canceled request sets none.", "string?"),
             new("History", "Read-only. The responses, newest first, at most <code>MaxHistory</code>.", "IReadOnlyList&lt;AIPromptResult&gt;"),
         };
         public static readonly ApiRow[] Request =
@@ -394,83 +288,30 @@
             new("EchoCompareTo", "Text to compare with <code>OutputText</code>. When the two start with the same text for at least <code>EchoMinChars</code> characters, a banner above the body counts the repeated and the new characters.", "string?", "null"),
             new("EchoMinChars", "Shortest shared start that shows the banner.", "int", "100"),
         };
-        public static readonly ApiRow[] AppBar =
-        {
-            new("Position", "Written as the header's CSS <code>position</code>; see the values below.", "AppBarPosition", "AppBarPosition.Static"),
-            new("Bottom", "Writes <code>bottom:0</code> instead of <code>top:0</code>, which matters for <code>Sticky</code> and <code>Fixed</code>.", "bool", "false"),
-            new("ZIndex", "<code>z-index</code> of the header.", "int", "100"),
-            new("StartContent", "Left group, items 8px apart.", "RenderFragment?", "null"),
-            new("ChildContent", "Middle group; takes the remaining width and centres its content.", "RenderFragment?", "null"),
-            new("EndContent", "Right group, items 8px apart.", "RenderFragment?", "null"),
-            new("Visible (base)", "False adds <code>display:none</code>. <code>Enabled</code> is not read.", "bool", "true"),
-            new("Id / CssClass / Style (base)", "On the <code>header.fx-app-bar</code>; <code>Style</code> comes after the position, offset and z-index.", "string?", "null"),
-            new("(unmatched attributes)", "Written on the header.", "Dictionary&lt;string,object&gt;"),
-        };
-        public static readonly ApiRow[] Position =
-        {
-            new("Static", "In the normal flow; the offset has no effect."),
-            new("Sticky", "Scrolls with the content until it reaches the top (or, with <code>Bottom</code>, the bottom) of its nearest scrolling ancestor, then stays there."),
-            new("Fixed", "Pinned to the top (or bottom) of the viewport across its full width. It takes no room in the flow, so leave space for it."),
-        };
-        public static readonly ApiRow[] Toolbar =
-        {
-            new("ChildContent", "The items, in a row that wraps when there is not enough room.", "RenderFragment?", "null"),
-            new("TrailingContent", "Right-hand area, after the Captions checkbox.", "RenderFragment?", "null"),
-            new("CssClass", "Added to <code>fx-toolbar</code>.", "string", "string.Empty"),
-            new("Role", "ARIA role of the root.", "string", "\"toolbar\""),
-            new("ShowCaptions", "Shows or hides the buttons' <code>Label</code> captions. Null lets the toolbar keep its own state, read from the preference service when there is one and true otherwise; a value wins over that state, so update it from <code>ShowCaptionsChanged</code>.", "bool?", "null"),
-            new("ShowCaptionsChanged", "Raised when the Captions checkbox is toggled.", "EventCallback&lt;bool&gt;"),
-            new("ShowCaptionsToggle", "Draws the Captions checkbox at the right.", "bool", "true"),
-            new("CaptionsToggleLabel", "Text beside the checkbox.", "string", "\"Captions\""),
-            new("PreferenceKey", "Name under which the captions setting is read at start (only when <code>ShowCaptions</code> is null) and written on every toggle, as <code><em>key</em>.Captions</code>; <code>Toolbar</code> when blank. The toolbar looks the service up by reflection, as a registered type named <code>Fx.ControlKit.IUserPreferencesService</code> with <code>GetBool</code> and <code>PutBool(string, string, bool)</code>; FlexCore ships no such interface, so without one the setting lasts as long as the component.", "string?", "null"),
-            new("EffectiveShowCaptions", "Read-only. <code>ShowCaptions</code> when set, else the toolbar's own state.", "bool"),
-        };
-        public static readonly ApiRow[] Button =
-        {
-            new("Label", "Caption, in a span that is hidden with the captions. Ignored on screen when <code>ChildContent</code> is set, but still used for the name.", "string", "string.Empty"),
-            new("IconCss", "Classes for an <code>aria-hidden</code> icon span before the caption, such as <code>bi bi-save</code>.", "string", "string.Empty"),
-            new("IconSrc", "Image address for an icon; wins over <code>IconCss</code>.", "string", "string.Empty"),
-            new("IconAlt", "Alt text of the <code>IconSrc</code> image; also the name when there is no <code>Title</code> or <code>Label</code>.", "string", "string.Empty"),
-            new("Title", "Tooltip and <code>aria-label</code>; when blank, <code>Label</code>, then <code>IconAlt</code>.", "string", "string.Empty"),
-            new("ShowTooltip", "False drops the <code>title</code> tooltip and keeps the <code>aria-label</code>. Ignored while the parent toolbar's captions are off.", "bool", "true"),
-            new("Vertical", "Icon above the caption, at least 56px wide.", "bool", "false"),
-            new("Large", "A tile at least 110 by 108px with a 56px icon and a 24px caption.", "bool", "false"),
-            new("Selected", "Adds <code>fx-toolbar-btn--selected</code> and <code>aria-pressed=\"true\"</code>. The library stylesheet styles it only on <code>Large</code> buttons.", "bool", "false"),
-            new("Disabled", "Native <code>disabled</code>, drawn at half opacity.", "bool", "false"),
-            new("HasDropdown", "Draws a small arrow after the caption. That is all: no menu opens, so the host renders and positions its own.", "bool", "false"),
-            new("Dropdown", "Same as <code>HasDropdown</code>.", "bool", "false"),
-            new("OnClick", "Raised on click.", "EventCallback"),
-            new("ChildContent", "Replaces the <code>Label</code> span.", "RenderFragment?", "null"),
-            new("Type", "The button's <code>type</code>.", "string", "\"button\""),
-            new("CssClass", "Added to <code>fx-toolbar-btn</code>. The control takes no other attributes.", "string", "string.Empty"),
-        };
-        public static readonly ApiRow[] Separator =
-        {
-            new("CssClass", "Added to <code>fx-toolbar-separator</code>.", "string", "string.Empty"),
-        };
     }
 
     // Code tabs are verbatim
     private static class Code
     {
         public const string Prompt = @"<div class=""ai"">
+    <p class=""ai-request""><strong>Ticket TKT-1042</strong> Albus Door · Router keeps restarting · every evening since Monday · wants a technician visit on Saturday</p>
     <AIPromptControl @bind-Prompt=""_prompt"" Suggestions=""_suggestions"" Commands=""_commands"" Generate=""StubGenerateAsync""
-                     Rows=""3"" Placeholder=""Ask about a trip request…"" ApplyLabel=""Use in draft""
+                     Rows=""3"" AriaLabel=""Ask about TKT-1042"" Placeholder=""Ask about this ticket…"" ApplyLabel=""Use in draft""
                      Apply=""r => _draft = r.Output"" Generated=""r => _responses++"" />
     <p class=""ai-note"">Responses so far: @_responses</p>
-    <div class=""ai-label"">Draft for the traveller</div>
-    <TextBoxControl @bind-Value=""_draft"" Multiline=""true"" Rows=""5"" Width=""100%"" aria-label=""Draft for the traveller""
+    <div class=""ai-label"">Draft for ticket TKT-1042</div>
+    <TextBoxControl @bind-Value=""_draft"" Multiline=""true"" Rows=""5"" Width=""100%"" aria-label=""Draft for ticket TKT-1042""
                     Placeholder=""Use in draft puts the response here; edit it as you like."" />
 </div>";
         public const string PromptCs = @"// Prompt
-private string _prompt = ""Draft a three-day Lisbon itinerary for two"";
+private string _prompt = ""Draft a reply with three steps to try"";
 private string _draft = """";
 private int _responses;
 private readonly string[] _suggestions =
 {
-    ""Draft a three-day Lisbon itinerary for two"",
-    ""Summarise this trip request for the agent"",
-    ""Write a polite reply declining the dates"",
+    ""Draft a reply with three steps to try"",
+    ""Summarize this ticket for the technician"",
+    ""Write a polite reply declining the Saturday visit"",
 };
 private readonly AIPromptCommand[] _commands =
 {
@@ -480,33 +321,32 @@ private readonly AIPromptCommand[] _commands =
 };
 
 // Stub provider: no model is called. An application passes its own provider to Generate.
-private static readonly TravelData.Package Lisbon = TravelData.Packages.First(p => p.City == ""Lisbon"");
-private static readonly string[] Itinerary =
+private static readonly string[] Steps =
 {
-    ""Day 1: arrive, check in near the old town and walk up to a viewpoint for sunset."",
-    ""Day 2: tram through the old town in the morning, the riverside at Belém in the afternoon."",
-    ""Day 3: day trip to Sintra, back in Lisbon for a farewell dinner."",
-    ""Tip: book the Sintra tickets a day ahead."",
+    ""Step 1: check that the power cable clicks firmly into the back of the router."",
+    ""Step 2: plug it straight into a wall outlet, not an extension cord."",
+    ""Step 3: leave space around it, because a router that overheats restarts itself."",
+    ""Tip: write down the time of the next restart, so we can check it against the line log."",
 };
 private static readonly string[] Summary =
 {
-    ""Lisbon, 12–15 May, two adults."",
-    ""Wants a hotel within walking distance of the old town, and one day trip."",
-    ""Open question: are the dates flexible? The form leaves it blank."",
-    $""Closest package: {Lisbon.Name} ({Lisbon.Nights} nights), shortened to three."",
+    ""Albus Door's router has restarted every evening since Monday."",
+    ""The ticket came in by phone to the Hardware queue, and the customer wants a technician visit on Saturday."",
+    ""Open question: does the power light go out during a restart? The call notes do not say."",
+    ""Line log: no outage in the customer's area this week."",
 };
 private static readonly string[] Decline =
 {
-    ""Thank you for your request for Lisbon on 12–15 May."",
-    ""We cannot confirm those dates: the hotels we work with are fully booked that week."",
-    ""We can offer the same trip from 19 May, or another hotel on your dates."",
-    ""If you reply by Friday, we will hold the 19 May option for you."",
+    ""We are sorry, but we cannot send a technician this Saturday."",
+    ""Every visit slot that day is taken."",
+    ""We can offer next Monday between 8 AM and noon, or a call with a technician today."",
+    ""If you reply by Friday, we will hold the Monday slot for you."",
 };
 private static async Task<string> StubGenerateAsync(AIPromptRequest request, CancellationToken token)
 {
     await Task.Delay(1200, token);   // Cancel stops the wait
     var prompt = request.Prompt.ToLowerInvariant();
-    var lines = prompt.Contains(""itinerary"") ? Itinerary
+    var lines = prompt.Contains(""steps"") ? Steps
         : prompt.Contains(""summar"") ? Summary
         : prompt.Contains(""declin"") ? Decline
         : null;
@@ -517,112 +357,43 @@ private static async Task<string> StubGenerateAsync(AIPromptRequest request, Can
     {
         ""shorten"" => lines[0],
         ""expand"" => body + ""\n"" + lines[3],
-        ""friendlier"" => ""Hello, and thank you for thinking of us!\n"" + body + ""\nWe would love to help you plan this."",
+        ""friendlier"" => lines == Summary
+            ? ""Thanks for picking this one up!\n"" + body
+            : ""Hello, and thank you for bearing with us!\n"" + body + ""\nWe will stay on this until your connection is steady."",
         _ => body,
     };
 }";
-        public const string PromptCss = @"/* Prompt */
-.ai-note { margin: 10px 0 0; font-size: 13px; color: #475569; }
-.ai-label { margin: 14px 0 4px; font-size: 12px; font-weight: 600; color: #475569; }
-
-/* Response card colours, both examples */
-.ai, .qd { --panel: #ffffff; --panel-2: #f1f5f9; --border: #cbd5e1; --ink: #1e293b; --muted: #475569; --accent: #2563eb; --accent-strong: #1d4ed8; --accent-2: #0f766e; }
-.ai ::deep .fx-result-output, .qd ::deep .fx-result-output { background: #f8fafc; }";
-
-        public const string AppBar = @"<div class=""qd"">
-    <AppBarControl>
-        <StartContent><SvgIconControl Name=""document"" Size=""20px"" /><strong>Quote desk</strong></StartContent>
-        <ChildContent><span class=""qd-sub"">Lisbon desk · requests from the web form</span></ChildContent>
-        <EndContent><BadgeControl Text=""@(_dirty ? ""Unsaved"" : ""Saved"")"" Variant=""@(_dirty ? BadgeVariant.Warning : BadgeVariant.Success)"" /></EndContent>
-    </AppBarControl>
-    <ToolbarControl ShowCaptions=""_captions"" ShowCaptionsChanged=""SetCaptions"">
-        <ToolbarButtonControl Label=""New request"" IconCss=""bi bi-file-earmark-plus"" Vertical=""_vertical"" OnClick=""NewRequest"" />
-        <ToolbarButtonControl Label=""Save"" IconCss=""bi bi-save"" Vertical=""_vertical"" Disabled=""!_dirty"" OnClick=""Save"" />
-        <ToolbarSeparatorControl />
-        <span class=""qd-export"">
-            <ToolbarButtonControl Label=""Export"" IconCss=""bi bi-box-arrow-up"" Vertical=""_vertical"" HasDropdown=""true""
-                                  OnClick=""() => _exportOpen = !_exportOpen"" />
-            @if (_exportOpen)
-            {
-                <div class=""qd-menu"">
-                    <ButtonControl CssClass=""qd-menu-item"" OnClick='() => Act(""Export › PDF quote"")'>PDF quote</ButtonControl>
-                    <ButtonControl CssClass=""qd-menu-item"" OnClick='() => Act(""Export › CSV itinerary"")'>CSV itinerary</ButtonControl>
-                </div>
-            }
-        </span>
-        <ToolbarButtonControl Label=""Print"" IconCss=""bi bi-printer"" Vertical=""_vertical"" OnClick='() => Act(""Print"")' />
-        <ToolbarSeparatorControl />
-        <ToolbarButtonControl Label=""AI assistant"" IconCss=""bi bi-stars"" Vertical=""_vertical"" Selected=""_assistant"" OnClick=""ToggleAssistant"" />
-    </ToolbarControl>
-    <p class=""qd-status"" role=""status"">Last action: @_last</p>
-    <div class=""qd-body"">
-        <div class=""qd-notes"">
-            <div class=""qd-label"">Agent notes, request QD-@(_request)</div>
-            <TextBoxControl @bind-Value=""_notes"" @bind-Value:after=""MarkDirty"" Multiline=""true"" Rows=""8"" Width=""100%"" aria-label=""Agent notes"" />
-        </div>
-        <aside class=""qd-panel"" hidden=""@(!_assistant)"" aria-label=""AI assistant"">
-            <AIPromptControl @bind-Prompt=""_deskPrompt"" Suggestions=""_suggestions"" Commands=""_commands"" Generate=""StubGenerateAsync""
-                             Rows=""3"" ApplyLabel=""Add to notes"" Apply=""AddToNotes"" />
-        </aside>
-    </div>
-</div>";
-        public const string AppBarCs = @"// App bar (the side panel reuses _suggestions, _commands and StubGenerateAsync from the first example)
-private bool _captions = true, _vertical, _exportOpen, _assistant = true, _dirty;
-private int _request = 1042;
-private string _last = ""none yet"";
-private string _deskPrompt = ""Summarise this trip request for the agent"";
-private string _notes = ""Phoned on Monday: two adults, 12–15 May, hotel within walking distance of the old town."";
-private void Act(string action)
+        public const string Host = @"<div class=""demo-row"">
+    <ButtonControl CssClass=""btn-primary btn-sm"" Disabled=""_solved"" OnClick=""() => _ai!.GenerateAsync()"">Write the refund note</ButtonControl>
+    <ButtonControl CssClass=""btn-sm"" Disabled=""_solved"" OnClick=""() => _ai!.GenerateAsync(_hostCommands[0])"">Shorten it</ButtonControl>
+    <ButtonControl CssClass=""btn-sm"" OnClick=""() => _ai!.CancelAsync()"">Stop</ButtonControl>
+    <SwitchControl @bind-Checked=""_billingDown"" Label=""Billing system is down"" />
+    <SwitchControl @bind-Checked=""_solved"" Label=""Ticket solved"" />
+</div>
+<div class=""ai"">
+    <AIPromptControl @ref=""_ai"" @bind-Prompt=""_hostPrompt"" Commands=""_hostCommands"" Generate=""RefundNoteAsync"" MaxHistory=""3"" Rows=""2"" AriaLabel=""Refund note for TKT-1043""
+                     Enabled=""@(!_solved)"" ApplyLabel=""Add to the ticket"" Apply=""r => _refundNote = r.Output"">
+        <FooterContent><p class=""ai-note"">Keeps the last three responses. The answers are canned, so no model is called.</p></FooterContent>
+    </AIPromptControl>
+</div>
+<p class=""ai-note"" role=""status"">Note on Hermione Ranger's ticket TKT-1043: @(_refundNote ?? ""none yet"")</p>";
+        public const string HostCs = @"// Driving the prompt from the page: the buttons call the control's methods through @ref
+private AIPromptControl? _ai;
+private string _hostPrompt = ""Write a refund note for the duplicate charge"";
+private bool _billingDown, _solved;
+private string? _refundNote;
+private readonly AIPromptCommand[] _hostCommands =
 {
-    _exportOpen = false;
-    _last = action;
-}
-private void NewRequest()
+    new(""shorten"", ""Shorten"", ""Reduce the answer to one sentence.""),
+};
+// Slow enough to stop; throws while the billing system is down, which the control shows as an error.
+private async Task<string> RefundNoteAsync(AIPromptRequest request, CancellationToken token)
 {
-    Act(""New request"");
-    _request++;
-    _notes = """";
-    _dirty = true;
-}
-private void Save()
-{
-    Act(""Save"");
-    _dirty = false;
-}
-private void ToggleAssistant()
-{
-    _assistant = !_assistant;
-    Act(_assistant ? ""AI assistant on"" : ""AI assistant off"");
-}
-private void SetCaptions(bool on)
-{
-    _captions = on;
-    Act(on ? ""Captions on"" : ""Captions off"");
-}
-private void MarkDirty() => _dirty = true;
-private void AddToNotes(AIPromptResult result)
-{
-    _notes = _notes.Length > 0 ? _notes + ""\n\n"" + result.Output : result.Output;
-    _dirty = true;
-    Act(""Add to notes, from the AI assistant"");
+    await Task.Delay(2500, token);
+    if (_billingDown) throw new InvalidOperationException(""The billing system did not answer. Try again in a minute."");
+    return request.Command?.Key == ""shorten""
+        ? ""Charged $59 twice on October 3; the duplicate is refunded within five business days.""
+        : ""The October bill of $59 was charged to the same card twice on October 3.\nThe duplicate charge of $59 is refunded and reaches the card within five business days."";
 }";
-        public const string AppBarCss = @"/* Response card colours, both examples */
-.ai, .qd { --panel: #ffffff; --panel-2: #f1f5f9; --border: #cbd5e1; --ink: #1e293b; --muted: #475569; --accent: #2563eb; --accent-strong: #1d4ed8; --accent-2: #0f766e; }
-.ai ::deep .fx-result-output, .qd ::deep .fx-result-output { background: #f8fafc; }
-
-/* App bar */
-.qd ::deep .fx-app-bar { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px 8px 0 0; }
-.qd ::deep .fx-app-bar-toolbar { min-height: 0; margin: 0; background: transparent; border: 0; }
-.qd-sub { font-size: 13px; color: #475569; }
-.qd ::deep .fx-toolbar-btn-icon { font-size: 16px; line-height: 18px; text-align: center; }
-.qd ::deep .fx-toolbar-btn--selected { background: #dbeafe; border-color: #93c5fd; }
-.qd-export { position: relative; display: inline-flex; }
-.qd-menu { position: absolute; top: 100%; left: 0; z-index: 5; display: flex; flex-direction: column; min-width: 160px; padding: 4px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12); }
-.qd-menu ::deep .qd-menu-item { text-align: left; background: transparent; border-color: transparent; }
-.qd-status { margin: 4px 0 12px; font-size: 13px; color: #475569; }
-.qd-body { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
-.qd-notes { flex: 1 1 320px; min-width: 0; }
-.qd-label { margin-bottom: 4px; font-size: 12px; font-weight: 600; color: #475569; }
-.qd-panel { flex: 0 1 380px; min-width: 280px; padding: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; }";
     }
 }

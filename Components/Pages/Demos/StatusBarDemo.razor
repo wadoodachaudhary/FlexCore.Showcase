@@ -1,0 +1,239 @@
+@page "/demo/status-bar"
+@using FlexCore.Showcase.Components.Shared
+
+@* 2026-11-14: new page for StatusBarControl. Facts from StatusBarControl.razor(.css) and StatusBarModels.cs (FlexCore 0.2.50).
+   2026-11-15: examples rebuilt (booking editor, proposal totals); text re-checked.
+   2026-11-15: example story moved to the Warehouse and logistics theme. *@
+
+<PageTitle>Blazor Status Bar — FlexCore</PageTitle>
+
+<FeatureDemoLayout Title="Status bar" Category="Components" ControlName="StatusBarControl"
+                   Tagline="Keep users informed at the foot of a window: connection, save state, counts and totals."
+                   SourcePath="StatusBarControl.razor; StatusBarModels.cs">
+    <Overview>
+        <p>
+            <code>StatusBarControl</code> is a Blazor status bar: a row of panels along the foot of a window that tells users where things stand. Use it on editors and data-entry screens for the connection, whether the work is saved, and how many rows are selected, in one 28px row along the bottom. Fill it from a <code>Panels</code> list of icon-and-text panels, add your own markup as <code>ChildContent</code> for live counts and totals, or use both.
+        </p>
+    </Overview>
+
+    <Examples>
+        <DemoExample Id="panels" Title="Panels from a list" RazorCode="@Code.Panels" CSharpCode="@Code.PanelsCs">
+            <Description><p>Type a note for the putaway team, press Save, then go offline (Save waits until you are back online): change a panel's <code>Text</code> or <code>IconCss</code> and the bar follows, <code>CssClass</code> tints the whole bar, the <code>Spring</code> panel fills the spare width, and the fixed-width ones show a <code>Tooltip</code> on hover.</p></Description>
+            <Demo>
+                <div class="sb-frame">
+                    <div class="sb-chrome" aria-hidden="true"><span></span><span></span><span></span></div>
+                    <div class="sb-body">
+                        <strong>Receiving PO-2291, Dock 2, Road freight</strong>
+                        <TextBoxControl Value="@_notes" ValueChanged="NotesChanged" UpdateOnInput="true" Width="100%" Placeholder="Notes for the putaway team" aria-label="Notes for the putaway team" />
+                        <div class="demo-row">
+                            <ButtonControl CssClass="btn-primary btn-sm" IconCss="bi bi-save" Disabled="@(!_dirty || !_online)" OnClick="Save">Save</ButtonControl>
+                            <ButtonControl CssClass="btn-sm" OnClick="ToggleOnline">@(_online ? "Go offline" : "Go online")</ButtonControl>
+                        </div>
+                    </div>
+                    <StatusBarControl Panels="_panels" CssClass="@(_online ? null : "sb-offline")" />
+                </div>
+            </Demo>
+        </DemoExample>
+
+        <DemoExample Id="content" Title="Live counts and totals" RazorCode="@Code.Content" CSharpCode="@Code.ContentCs">
+            <Description><p>Check the lines of PO-2291 that arrived: the count and the total are your own panels in <code>ChildContent</code>, which the bar renders after the panel from the list.</p></Description>
+            <Demo>
+                <div class="sb-frame">
+                    <div class="sb-chrome" aria-hidden="true"><span></span><span></span><span></span></div>
+                    <div class="sb-body sb-list">
+                        @foreach (var line in _lines)
+                        {
+                            <CheckBoxControl @bind-Checked="line.Received" Label="@($"{line.Name}, {line.Amount:C0}")" />
+                        }
+                    </div>
+                    <StatusBarControl Panels="_who">
+                        <div class="sb-panel sb-spring">
+                            <span><strong>@ReceivedLines.Count()</strong> of <strong>@_lines.Count</strong> lines received</span>
+                        </div>
+                        <div class="sb-panel">Total received: <strong>@ReceivedLines.Sum(l => l.Amount).ToString("C0")</strong></div>
+                    </StatusBarControl>
+                </div>
+            </Demo>
+        </DemoExample>
+    </Examples>
+
+    <Vocabulary>
+        <DocSections>
+            <DocSection Id="doc-parameters" Title="Parameters" Count='@DocSection.Label(Vocab.Parameters.Length, "parameters")' Open="true">
+                <ApiTable Kind="ApiKind.Parameters" Title="Parameters" Rows="Vocab.Parameters" />
+            </DocSection>
+            <DocSection Id="doc-statusbarpanel" Title="StatusBarPanel" Count='@DocSection.Label(Vocab.Panel.Length, "properties")'>
+                <ApiTable Kind="ApiKind.Properties" Title="StatusBarPanel" Rows="Vocab.Panel" />
+            </DocSection>
+            <DocSection Id="doc-css-classes" Title="CSS classes" Count='@DocSection.Label(Vocab.Css.Length, "classes")'>
+                <ApiTable Kind="ApiKind.CssClasses" Title="CSS classes" Rows="Vocab.Css" />
+            </DocSection>
+        </DocSections>
+    </Vocabulary>
+
+    <Accessibility>
+        <ul>
+            <li>The bar and its panels render as <code>&lt;div&gt;</code> elements outside the Tab order; screen readers read their text in page order.</li>
+            <li>To announce a change, such as a new count, put <code>role="status"</code> on a panel of your own in <code>ChildContent</code>.</li>
+            <li>A panel's <code>Tooltip</code> is written as its <code>title</code>; keep anything users must read in <code>Text</code>.</li>
+        </ul>
+    </Accessibility>
+
+    <Related>
+        <ul>
+            <li>The bars at the top of a window: <code>AppBarControl</code> and <code>ToolbarControl</code> on <a href="demo/toolbar">Toolbar</a>.</li>
+            <li>A whole window laid out with panels and a splitter: <a href="demo/layout#shell">Page layouts</a>.</li>
+        </ul>
+    </Related>
+</FeatureDemoLayout>
+
+@code {
+    // Panels
+    private bool _online = true, _dirty;
+    private int _saves;
+    private string? _notes = "Two cartons of headlamps arrived dented.";
+    private readonly List<StatusBarPanel> _panels = new()
+    {
+        new("Online", "bi bi-wifi", width: "92px") { Tooltip = "Connection to the warehouse system" },
+        new("No changes", spring: true),
+        new("4 lines", "bi bi-box-seam"),
+        new("USD", width: "48px") { Tooltip = "Order currency" },
+    };
+    private void NotesChanged(string? text)
+    {
+        _notes = text;
+        _dirty = true;
+        _panels[1].Text = "Unsaved changes";
+    }
+    private void Save()
+    {
+        _dirty = false;
+        _panels[1].Text = $"Saved {++_saves} time{(_saves == 1 ? "" : "s")}";
+    }
+    private void ToggleOnline()
+    {
+        _online = !_online;
+        _panels[0].Text = _online ? "Online" : "Offline";
+        _panels[0].IconCss = _online ? "bi bi-wifi" : "bi bi-wifi-off";
+    }
+
+    // Live content
+    private sealed class OrderLine
+    {
+        public string Name { get; init; } = "";
+        public decimal Amount { get; init; }
+        public bool Received { get; set; }
+    }
+    private readonly List<OrderLine> _lines = new()
+    {
+        new() { Name = "Headlamps", Amount = 1240, Received = true },
+        new() { Name = "Camping stoves", Amount = 2890 },
+        new() { Name = "Rain jackets", Amount = 6150, Received = true },
+        new() { Name = "Water bottles", Amount = 1980 },
+    };
+    private IEnumerable<OrderLine> ReceivedLines => _lines.Where(l => l.Received);
+    private readonly List<StatusBarPanel> _who = new() { new("Received by Albus Door", "bi bi-person", width: "190px") };
+
+    // Vocabulary rows, one per public member (0.2.50). The control does not inherit FlexControlBase.
+    private static class Vocab
+    {
+        public static readonly ApiRow[] Parameters =
+        {
+            new("Panels", "Panels drawn in order, each an icon and a line of text.", "List&lt;StatusBarPanel&gt;?", "null"),
+            new("ChildContent", "Your own markup, placed after the panels. It takes this page's styles, not the control's.", "RenderFragment?", "null"),
+            new("CssClass", "Appended after <code>fx-statusbar</code>. The control has no <code>Style</code> and accepts no other attributes.", "string?", "null"),
+        };
+        public static readonly ApiRow[] Panel =
+        {
+            new("Text", "The panel's text. Cut with an ellipsis when a <code>Width</code> or <code>Spring</code> panel is too narrow; other panels keep their full width and are clipped at the bar's edge.", "string?", "null"),
+            new("IconCss", "Classes for an icon before the text, such as <code>bi bi-wifi</code>.", "string?", "null"),
+            new("Tooltip", "Native <code>title</code> of the panel. Not a constructor argument; set it in an initializer.", "string?", "null"),
+            new("Width", "Fixed CSS width, for example <code>92px</code>. Ignored when <code>Spring</code> is true.", "string?", "null"),
+            new("Spring", "The panel takes all the spare width.", "bool", "false"),
+            new("ctor", "<code>new(text, iconCss, width, spring)</code>, all but text optional.", "", null),
+        };
+        public static readonly ApiRow[] Css =
+        {
+            new("fx-statusbar", "The bar: a 28px flex row with a gray fill and a top border."),
+            new("fx-statusbar-panel", "One panel: padded, with a right border except on the last."),
+            new("fx-statusbar-spring", "Added to a <code>Spring</code> panel; it grows to fill the row."),
+            new("fx-statusbar-icon · fx-statusbar-text", "The icon and the text inside a panel."),
+        };
+    }
+
+    // Code tabs are verbatim
+    private static class Code
+    {
+        public const string Panels = @"<div class=""sb-frame"">
+    <div class=""sb-chrome"" aria-hidden=""true""><span></span><span></span><span></span></div>
+    <div class=""sb-body"">
+        <strong>Receiving PO-2291, Dock 2, Road freight</strong>
+        <TextBoxControl Value=""@_notes"" ValueChanged=""NotesChanged"" UpdateOnInput=""true"" Width=""100%"" Placeholder=""Notes for the putaway team"" aria-label=""Notes for the putaway team"" />
+        <div class=""demo-row"">
+            <ButtonControl CssClass=""btn-primary btn-sm"" IconCss=""bi bi-save"" Disabled=""@(!_dirty || !_online)"" OnClick=""Save"">Save</ButtonControl>
+            <ButtonControl CssClass=""btn-sm"" OnClick=""ToggleOnline"">@(_online ? ""Go offline"" : ""Go online"")</ButtonControl>
+        </div>
+    </div>
+    <StatusBarControl Panels=""_panels"" CssClass=""@(_online ? null : ""sb-offline"")"" />
+</div>";
+        public const string PanelsCs = @"// Panels
+private bool _online = true, _dirty;
+private int _saves;
+private string? _notes = ""Two cartons of headlamps arrived dented."";
+private readonly List<StatusBarPanel> _panels = new()
+{
+    new(""Online"", ""bi bi-wifi"", width: ""92px"") { Tooltip = ""Connection to the warehouse system"" },
+    new(""No changes"", spring: true),
+    new(""4 lines"", ""bi bi-box-seam""),
+    new(""USD"", width: ""48px"") { Tooltip = ""Order currency"" },
+};
+private void NotesChanged(string? text)
+{
+    _notes = text;
+    _dirty = true;
+    _panels[1].Text = ""Unsaved changes"";
+}
+private void Save()
+{
+    _dirty = false;
+    _panels[1].Text = $""Saved {++_saves} time{(_saves == 1 ? """" : ""s"")}"";
+}
+private void ToggleOnline()
+{
+    _online = !_online;
+    _panels[0].Text = _online ? ""Online"" : ""Offline"";
+    _panels[0].IconCss = _online ? ""bi bi-wifi"" : ""bi bi-wifi-off"";
+}";
+        public const string Content = @"<div class=""sb-frame"">
+    <div class=""sb-chrome"" aria-hidden=""true""><span></span><span></span><span></span></div>
+    <div class=""sb-body sb-list"">
+        @foreach (var line in _lines)
+        {
+            <CheckBoxControl @bind-Checked=""line.Received"" Label=""@($""{line.Name}, {line.Amount:C0}"")"" />
+        }
+    </div>
+    <StatusBarControl Panels=""_who"">
+        <div class=""sb-panel sb-spring"">
+            <span><strong>@ReceivedLines.Count()</strong> of <strong>@_lines.Count</strong> lines received</span>
+        </div>
+        <div class=""sb-panel"">Total received: <strong>@ReceivedLines.Sum(l => l.Amount).ToString(""C0"")</strong></div>
+    </StatusBarControl>
+</div>";
+        public const string ContentCs = @"// Live content
+private sealed class OrderLine
+{
+    public string Name { get; init; } = """";
+    public decimal Amount { get; init; }
+    public bool Received { get; set; }
+}
+private readonly List<OrderLine> _lines = new()
+{
+    new() { Name = ""Headlamps"", Amount = 1240, Received = true },
+    new() { Name = ""Camping stoves"", Amount = 2890 },
+    new() { Name = ""Rain jackets"", Amount = 6150, Received = true },
+    new() { Name = ""Water bottles"", Amount = 1980 },
+};
+private IEnumerable<OrderLine> ReceivedLines => _lines.Where(l => l.Received);
+private readonly List<StatusBarPanel> _who = new() { new(""Received by Albus Door"", ""bi bi-person"", width: ""190px"") };";
+    }
+}

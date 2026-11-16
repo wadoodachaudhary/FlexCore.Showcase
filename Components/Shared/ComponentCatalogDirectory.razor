@@ -1,59 +1,85 @@
 @namespace FlexCore.Showcase.Components.Shared
 
+@if (ShowWorkhorses)
+{
+@* Laid out like the home page's pillars (2026-11-14): the heading sits in a green strip that straddles the top edge of an indigo
+   band, and the cards sit on the band. *@
 <section class="popular-components-section">
-    <h2 class="popular-title">Most Popular UI components</h2>
-    <div class="popular-cards-grid">
-        <a href="demo/grid" class="popular-card">
-            <div class="popular-icon-box pink">
-                <span class="bi bi-table"></span>
-            </div>
-            <span class="popular-name">Data Grid</span>
-        </a>
-
-        <a href="demo/charts" class="popular-card">
-            <div class="popular-icon-box purple">
-                <span class="bi bi-pie-chart-fill"></span>
-            </div>
-            <span class="popular-name">Charts</span>
-        </a>
-
-        <a href="demo/charts/sunburst" class="popular-card">
-            <div class="popular-icon-box teal">
-                <span class="bi bi-sun-fill"></span>
-            </div>
-            <span class="popular-name">Sunburst Chart</span>
-        </a>
-
-        <a href="demo/dialog" class="popular-card">
-            <div class="popular-icon-box indigo">
-                <span class="bi bi-window"></span>
-            </div>
-            <span class="popular-name">Dialogs</span>
-        </a>
-
-        <a href="demo/reports/package-costs" class="popular-card">
-            <div class="popular-icon-box coral">
-                <span class="bi bi-file-earmark-richtext"></span>
-            </div>
-            <span class="popular-name">Reports &amp; Writer</span>
-        </a>
-
-        <a href="demo/buttons" class="popular-card">
-            <div class="popular-icon-box green">
-                <span class="bi bi-hand-index-thumb"></span>
-            </div>
-            <span class="popular-name">Buttons</span>
-        </a>
+    <div class="workhorses-strip">
+    <div class="doodle-head popular-head" @ref="_workhorsesHead">
+        @* Two racehorses neck and neck in place of the 🐎 emoji (2026-11-13, the "ink and paper" pair), drawn like
+           the site's other doodles: one solid ink, one white with an ink line, and the front one wears a saddle cloth with the FlexCore
+           logo, the only color. Each is one gallop stride from Eadweard Muybridge's photographs The Horse in Motion (1878), traced to a
+           smooth outline with the jockey taken off; wwwroot/images/workhorses.svg holds the 15 frames of both horses and the CSS steps
+           through them. Each time the heading scrolls into view they run, with wind marks behind and the ground streaming back:
+           fxToggleClassWhenVisible (App.razor) adds is-playing. The marks are drawn in the sprite's frame units, the racers placed over them. *@
+        <div class="doodle horse-race" aria-hidden="true">
+            <svg class="race-marks" viewBox="-40 0 412 210">
+                <g class="race-wind" fill="none" stroke="#0f172a" stroke-width="4" stroke-linecap="round">
+                    <path d="M-22 62 q9 -4 18 0" /><path d="M-30 84 q11 -4 22 0" /><path d="M-20 106 q8 -3 16 0" />
+                </g>
+                @* the last squiggle waits past the right edge, so the ground can slide one step (96) and look the same *@
+                <g class="race-ground" fill="none" stroke="#0f172a" stroke-width="4" stroke-linecap="round">
+                    <path d="M20 205 q14 -5 28 0 t28 0" /><path d="M116 205 q14 -5 28 0 t28 0" /><path d="M212 205 q14 -5 28 0 t28 0" />
+                    <path d="M308 205 q14 -5 28 0 t28 0" /><path d="M404 205 q14 -5 28 0 t28 0" />
+                </g>
+            </svg>
+            @* back to front, so the white horse covers the ink one *@
+            <span class="racer racer-ink"></span>
+            <span class="racer racer-paper"></span>
+        </div>
+        <h2 class="popular-title">Start with the workhorses</h2>
+    </div>
+    </div>
+    <div class="brand-band">
+    @* Tagline under the green strip (2026-11-14), in the voice of the Telerik, Syncfusion and Radzen landing pages. "High-performance"
+       rests on GridControl's virtual scrolling of 100,000 rows (/demo/grid/row-selection-50k). *@
+    <p class="workhorses-tagline">The high-performance core of a business app: grids, charts, reports and scheduling that keep pace as your company grows.</p>
+    @* The same four cards as the home page (2026-11-13); they replaced six small tiles (Data Grid, Charts, Scheduler, Dialogs,
+       Report Writer, Forms). Compact: smaller and in one row here (2026-11-13). *@
+    <WorkhorseCards Compact="true" />
     </div>
 </section>
+}
 
-<!-- ── Complete Component Directory (Syncfusion Multi-Column) ─ -->
+@* Complete component directory, multi-column. *@
 <section class="catalog-directory-section" id="components">
     <div class="directory-header">
-        <h2 class="directory-title">Blazor UI &amp; Data Visualization Components</h2>
-        <p class="directory-subtitle">
-            The FlexCore Blazor components library is an enterprise-grade suite engineered for high-throughput applications and legacy desktop modernizations. It contains 70+ high-performance, lightweight, and responsive UI controls with <strong>no third-party JavaScript</strong>.
-        </p>
+        <div class="doodle-head directory-head-row" @ref="_toolboxHead">
+            @* Hand-drawn toolbox in place of the 🛠️ emoji (2026-10-28), drawn like the finish flag on the home page and placed left of the heading. Each
+               time the heading scrolls into view the lid flips open, a wrench, a screwdriver and a hammer pop out and wiggle, and
+               everything packs away again: fxToggleClassWhenVisible (App.razor) adds is-playing and the CSS does the rest. The tools
+               are drawn first so the box and lid cover them at rest. *@
+            <svg class="doodle toolbox-doodle" viewBox="0 0 170 150" aria-hidden="true">
+                <g class="tb-spark" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M40 22 l-8 -8" /><path d="M86 12 v-10" /><path d="M132 22 l8 -8" />
+                </g>
+                <g class="tb-tool tb-wrench">
+                    <rect x="50" y="88" width="8" height="46" rx="3" fill="#ffffff" stroke="#0f172a" stroke-width="2.5" />
+                    <path d="M45 76 v6 a9 9 0 0 0 18 0 v-6 h-5 v5 h-8 v-5 z" fill="#ffffff" stroke="#0f172a" stroke-width="2.5" stroke-linejoin="round" />
+                </g>
+                <g class="tb-tool tb-screwdriver">
+                    <path d="M91 100 V78" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+                    <path d="M88 78 L91 72 L94 78 Z" fill="#0f172a" />
+                    <rect x="84" y="100" width="14" height="34" rx="5" fill="#0284c7" stroke="#0f172a" stroke-width="2.5" />
+                </g>
+                <g class="tb-tool tb-hammer">
+                    <rect x="118" y="86" width="7" height="48" rx="3" fill="#ffffff" stroke="#0f172a" stroke-width="2.5" />
+                    <rect x="106" y="74" width="31" height="12" rx="2" fill="#0f172a" />
+                </g>
+                <path d="M24 82 L146 81 L144 136 L26 137 Z" fill="#ffffff" stroke="#0f172a" stroke-width="3" stroke-linejoin="round" />
+                <rect x="78" y="90" width="14" height="10" rx="2" fill="#0f172a" />
+                <g fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round">
+                    <path d="M118 128 l8 -8" /><path d="M126 128 l8 -8" /><path d="M134 128 l6 -6" />
+                </g>
+                <g class="tb-lid">
+                    <path d="M20 70 L148 69 L147 83 L21 84 Z" fill="#ffffff" stroke="#0f172a" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M66 69 C66 56 104 56 104 69" fill="none" stroke="#0f172a" stroke-width="3.5" stroke-linecap="round" />
+                </g>
+                <path d="M12 143 q12 -4 24 0 t24 0" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+            <h2 class="directory-title">The whole toolbox</h2>
+        </div>
 
         <div class="catalog-search-wrapper">
             <span class="bi bi-search catalog-search-icon"></span>
@@ -254,24 +280,38 @@
 </section>
 
 @code {
+    /// <summary>Shows the workhorses heading and the four shared WorkhorseCards above the directory. The home page turns it off:
+    /// it shows the same cards under its own finish-line heading.</summary>
+    [Parameter] public bool ShowWorkhorses { get; set; } = true;
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+    private ElementReference _workhorsesHead;
+    private ElementReference _toolboxHead;
     private string _searchTerm = "";
 
-    // Tier orders a category (Baaria, 2026-10-26): 1 is the category's lead control (Data Grid always first), 2 the core controls,
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        if (ShowWorkhorses) await JS.InvokeVoidAsync("fxToggleClassWhenVisible", _workhorsesHead, "is-playing");
+        await JS.InvokeVoidAsync("fxToggleClassWhenVisible", _toolboxHead, "is-playing");
+    }
+
+    // Tier orders a category (2026-10-26): 1 is the category's lead control (Data Grid always first), 2 the core controls,
     // 3 the specialist ones; within a tier, A to Z. FilterItems applies it, so the arrays may be written in any order.
     record DirectoryItem(string Icon, string Name, string Href, int Tier = 2);
 
     // Href rule (developer meeting, 2026-10-19): a control with its own page links to the page; a control that is one
     // example on a shared page links to that example's anchor (the DemoExample Id). Rows whose control has no demo
-    // yet keep their old target (Baaria, 2026-10-20).
+    // yet keep their old target (2026-10-20).
 
     private readonly DirectoryItem[] _dataManagement =
     [
-        // 2026-10-25 (Baaria, catalog audit SC-345): Picklist Dropdown (no such control) and Speed Dial (a second FAB row) removed; icons
+        // 2026-10-25 (catalog audit SC-345): Picklist Dropdown (no such control) and Speed Dial (a second FAB row) removed; icons
         // now fit their rows; Report Parameter Dialog lands on the report, whose toolbar Parameters button opens the dialog.
         // SC-347: TextBox, Numeric TextBox and TextArea point at Text inputs; DropDownList, DropDownGrid and ListBox at Lists & dropdowns;
         // Rich Text Editor and Format at the editor page; Diagram, Scheduler and Property Grid (Forms) at their new examples; Grid Layout,
         // Progress Bar and Carousel at the third examples on Page layouts, UI elements and Cards.
-        // 2026-10-26 (Baaria, SC-350): one row per component, named the way Syncfusion, Telerik, MudBlazor and Radzen name theirs. Grid
+        // 2026-10-26 (SC-350): one row per component, named the way Syncfusion, Telerik, MudBlazor and Radzen name theirs. Grid
         // features (live updates, batch editing, frozen columns, virtualization, master-detail, reordering…), sub-parts (report parameter
         // dialog, format control, card group, form item and group, LLM result card) and variants (pill buttons, the Financial & gauges
         // page) left the directory; none of the four lists those as components, and every one of those pages stays in the top menu. The
@@ -323,6 +363,7 @@
     private readonly DirectoryItem[] _buttonsActions =
     [
         new("button", "Button", "demo/buttons", Tier: 1),
+        new("chip", "Chip List", "demo/chips"),
         new("fab", "Floating Action Button", "demo/fab#menu"),
         new("split-button", "Split Button", "demo/split-button"),
         new("toggle-button", "Toggle Button", "demo/toggle-buttons")
@@ -348,7 +389,7 @@
         new("slider", "Slider & Range Slider", "demo/sliders"),
         new("switch", "Switch", "demo/checks#radio"),
         new("textarea", "TextArea", "demo/text-inputs#notes"),
-        new("palette", "Color Palette", "demo/pickers#palette", Tier: 3),
+        new("palette", "Color Palette", "demo/pickers#doc-colorpalettecontrol-parameters", Tier: 3),
         new("otp", "OTP Input", "demo/security-code", Tier: 3),
         new("rating", "Rating", "demo/checks#rating", Tier: 3)
     ];
@@ -371,10 +412,12 @@
     [
         new("tab", "Tabs", "demo/tabs-accordion#tabs", Tier: 1),
         new("accordion", "Accordion", "demo/tabs-accordion#accordion"),
-        new("appbar", "AppBar", "demo/ai-prompt#app-bar"),
+        new("appbar", "AppBar", "demo/toolbar#app-bar"),
         new("breadcrumb", "Breadcrumb", "demo/new-components#content"),
-        new("ribbon", "Ribbon", "?tab=ribbon#live-showcase"),   // the home hero, opened on its Ribbon tab (base href is the site root)
-        new("toolbar", "Toolbar", "demo/ai-prompt#app-bar"),
+        new("menubar", "Menu Bar", "demo/menu-bar"),
+        new("ribbon", "Ribbon", "demo/ribbon#tabs"),          // own page since 2026-10-29 (was the home window's Front Desk tab)
+        new("statusbar", "Status Bar", "demo/status-bar"),
+        new("toolbar", "Toolbar", "demo/toolbar"),             // own page since 2026-11-14 (was the AI prompt page's second example)
         new("carousel", "Carousel", "demo/cards#carousel", Tier: 3),
         new("stepper", "Stepper", "demo/pickers#steps", Tier: 3)
     ];
