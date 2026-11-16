@@ -46,6 +46,7 @@ public static class SiteNav
             new("Toolbar", "demo/toolbar"),                     // 2026-11-14: ToolbarControl family and AppBarControl
             new("Ribbon", "demo/ribbon"),                       // own page since 2026-10-29; was the home window's Front Desk tab
             new("Tree view", "demo/tree/treeview-explorer"),
+            new("Tree outline", "demo/tree/treeview-outline"),           // outline / checklist display mode (2026-11-16)
             new("Display", null),
             new("Cards", "demo/cards"),
             new("UI elements", "demo/new-components"),
